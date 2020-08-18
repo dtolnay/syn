@@ -775,12 +775,32 @@ ast_enum! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
-    #[derive(Eq, PartialEq, Hash)]
     pub enum Member {
         /// A named field like `self.x`.
         Named(Ident),
         /// An unnamed field like `self.0`.
         Unnamed(Index),
+    }
+}
+
+impl Eq for Member {}
+
+impl PartialEq for Member {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Member::Named(this), Member::Named(other)) => this == other,
+            (Member::Unnamed(this), Member::Unnamed(other)) => this == other,
+            _ => false,
+        }
+    }
+}
+
+impl Hash for Member {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        match self {
+            Member::Named(m) => m.hash(state),
+            Member::Unnamed(m) => m.hash(state),
+        }
     }
 }
 
@@ -977,6 +997,7 @@ pub(crate) mod parsing {
 
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
+    use std::cmp::Ordering;
 
     crate::custom_keyword!(raw);
 
@@ -985,10 +1006,8 @@ pub(crate) mod parsing {
     //
     // Struct literals are ambiguous in certain positions
     // https://github.com/rust-lang/rfcs/pull/92
-    #[derive(Copy, Clone)]
     pub struct AllowStruct(bool);
 
-    #[derive(Copy, Clone, PartialEq, PartialOrd)]
     enum Precedence {
         Any,
         Assign,
@@ -1126,6 +1145,36 @@ pub(crate) mod parsing {
         #[cfg(feature = "full")]
         pub fn parse_without_eager_brace(input: ParseStream) -> Result<Expr> {
             ambiguous_expr(input, AllowStruct(false))
+        }
+    }
+
+    impl Copy for AllowStruct {}
+
+    impl Clone for AllowStruct {
+        fn clone(&self) -> Self {
+            *self
+        }
+    }
+
+    impl Copy for Precedence {}
+
+    impl Clone for Precedence {
+        fn clone(&self) -> Self {
+            *self
+        }
+    }
+
+    impl PartialEq for Precedence {
+        fn eq(&self, other: &Self) -> bool {
+            *self as u8 == *other as u8
+        }
+    }
+
+    impl PartialOrd for Precedence {
+        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+            let this = *self as u8;
+            let other = *other as u8;
+            Some(this.cmp(&other))
         }
     }
 

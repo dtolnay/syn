@@ -12,10 +12,25 @@ use std::marker::PhantomData;
 use std::fmt::{self, Debug};
 
 ast_struct! {
-    #[derive(Default)]
-    #[cfg_attr(feature = "clone-impls", derive(Clone))]
     pub struct Reserved {
         _private: PhantomData<Span>,
+    }
+}
+
+impl Default for Reserved {
+    fn default() -> Self {
+        Reserved {
+            _private: PhantomData,
+        }
+    }
+}
+
+#[cfg(feature = "clone-impls")]
+impl Clone for Reserved {
+    fn clone(&self) -> Self {
+        Reserved {
+            _private: self._private,
+        }
     }
 }
 

@@ -20,7 +20,6 @@ use crate::lookahead;
 ///
 /// *This type is available only if Syn is built with the `"derive"` or `"full"`
 /// feature.*
-#[derive(Clone)]
 pub struct Lifetime {
     pub apostrophe: Span,
     pub ident: Ident,
@@ -68,6 +67,15 @@ impl Display for Lifetime {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         "'".fmt(formatter)?;
         self.ident.fmt(formatter)
+    }
+}
+
+impl Clone for Lifetime {
+    fn clone(&self) -> Self {
+        Lifetime {
+            apostrophe: self.apostrophe,
+            ident: self.ident.clone(),
+        }
     }
 }
 

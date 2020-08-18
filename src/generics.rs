@@ -1,5 +1,9 @@
 use super::*;
 use crate::punctuated::{Iter, IterMut, Punctuated};
+#[cfg(all(feature = "printing", feature = "extra-traits"))]
+use std::fmt::{self, Debug};
+#[cfg(all(feature = "printing", feature = "extra-traits"))]
+use std::hash::{Hash, Hasher};
 
 ast_struct! {
     /// Lifetimes and type parameters attached to a declaration of a function,
@@ -7,7 +11,6 @@ ast_struct! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
-    #[derive(Default)]
     pub struct Generics {
         pub lt_token: Option<Token![<]>,
         pub params: Punctuated<GenericParam, Token![,]>,
@@ -81,6 +84,17 @@ ast_struct! {
         pub ty: Type,
         pub eq_token: Option<Token![=]>,
         pub default: Option<Expr>,
+    }
+}
+
+impl Default for Generics {
+    fn default() -> Self {
+        Generics {
+            lt_token: None,
+            params: Punctuated::new(),
+            gt_token: None,
+            where_clause: None,
+        }
     }
 }
 
@@ -280,8 +294,6 @@ impl<'a> Iterator for ConstParamsMut<'a> {
 /// *This type is available only if Syn is built with the `"derive"` or `"full"`
 /// feature and the `"printing"` feature.*
 #[cfg(feature = "printing")]
-#[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
-#[cfg_attr(feature = "clone-impls", derive(Clone))]
 pub struct ImplGenerics<'a>(&'a Generics);
 
 /// Returned by `Generics::split_for_impl`.
@@ -289,8 +301,6 @@ pub struct ImplGenerics<'a>(&'a Generics);
 /// *This type is available only if Syn is built with the `"derive"` or `"full"`
 /// feature and the `"printing"` feature.*
 #[cfg(feature = "printing")]
-#[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
-#[cfg_attr(feature = "clone-impls", derive(Clone))]
 pub struct TypeGenerics<'a>(&'a Generics);
 
 /// Returned by `TypeGenerics::as_turbofish`.
@@ -298,8 +308,6 @@ pub struct TypeGenerics<'a>(&'a Generics);
 /// *This type is available only if Syn is built with the `"derive"` or `"full"`
 /// feature and the `"printing"` feature.*
 #[cfg(feature = "printing")]
-#[cfg_attr(feature = "extra-traits", derive(Debug, Eq, PartialEq, Hash))]
-#[cfg_attr(feature = "clone-impls", derive(Clone))]
 pub struct Turbofish<'a>(&'a Generics);
 
 #[cfg(feature = "printing")]
@@ -335,6 +343,52 @@ impl Generics {
 }
 
 #[cfg(feature = "printing")]
+macro_rules! generics_wrapper_impls {
+    ($ty:ident) => {
+        #[cfg(feature = "clone-impls")]
+        impl<'a> Clone for $ty<'a> {
+            fn clone(&self) -> Self {
+                $ty(self.0)
+            }
+        }
+
+        #[cfg(feature = "extra-traits")]
+        impl<'a> Debug for $ty<'a> {
+            fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter
+                    .debug_tuple(stringify!($ty))
+                    .field(self.0)
+                    .finish()
+            }
+        }
+
+        #[cfg(feature = "extra-traits")]
+        impl<'a> Eq for $ty<'a> {}
+
+        #[cfg(feature = "extra-traits")]
+        impl<'a> PartialEq for $ty<'a> {
+            fn eq(&self, other: &Self) -> bool {
+                self.0 == other.0
+            }
+        }
+
+        #[cfg(feature = "extra-traits")]
+        impl<'a> Hash for $ty<'a> {
+            fn hash<H: Hasher>(&self, state: &mut H) {
+                self.0.hash(state);
+            }
+        }
+    };
+}
+
+#[cfg(feature = "printing")]
+generics_wrapper_impls!(ImplGenerics);
+#[cfg(feature = "printing")]
+generics_wrapper_impls!(TypeGenerics);
+#[cfg(feature = "printing")]
+generics_wrapper_impls!(Turbofish);
+
+#[cfg(feature = "printing")]
 impl<'a> TypeGenerics<'a> {
     /// Turn a type's generics like `<X, Y>` into a turbofish like `::<X, Y>`.
     ///
@@ -350,12 +404,22 @@ ast_struct! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
-    #[derive(Default)]
     pub struct BoundLifetimes {
         pub for_token: Token![for],
         pub lt_token: Token![<],
         pub lifetimes: Punctuated<LifetimeDef, Token![,]>,
         pub gt_token: Token![>],
+    }
+}
+
+impl Default for BoundLifetimes {
+    fn default() -> Self {
+        BoundLifetimes {
+            for_token: Default::default(),
+            lt_token: Default::default(),
+            lifetimes: Punctuated::new(),
+            gt_token: Default::default(),
+        }
     }
 }
 

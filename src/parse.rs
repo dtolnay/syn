@@ -336,7 +336,6 @@ impl<'a> Debug for ParseBuffer<'a> {
 /// #     .unwrap();
 /// # assert_eq!(remainder.to_string(), "b c");
 /// ```
-#[derive(Copy, Clone)]
 pub struct StepCursor<'c, 'a> {
     scope: Span,
     // This field is covariant in 'c.
@@ -357,6 +356,14 @@ impl<'c, 'a> Deref for StepCursor<'c, 'a> {
 
     fn deref(&self) -> &Self::Target {
         &self.cursor
+    }
+}
+
+impl<'c, 'a> Copy for StepCursor<'c, 'a> {}
+
+impl<'c, 'a> Clone for StepCursor<'c, 'a> {
+    fn clone(&self) -> Self {
+        *self
     }
 }
 
@@ -393,7 +400,6 @@ pub(crate) fn new_parse_buffer(
     }
 }
 
-#[derive(Clone)]
 pub(crate) enum Unexpected {
     None,
     Some(Span),
@@ -403,6 +409,16 @@ pub(crate) enum Unexpected {
 impl Default for Unexpected {
     fn default() -> Self {
         Unexpected::None
+    }
+}
+
+impl Clone for Unexpected {
+    fn clone(&self) -> Self {
+        match self {
+            Unexpected::None => Unexpected::None,
+            Unexpected::Some(span) => Unexpected::Some(*span),
+            Unexpected::Chain(next) => Unexpected::Chain(next.clone()),
+        }
     }
 }
 

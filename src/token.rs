@@ -243,7 +243,6 @@ impl<T: CustomToken> Token for T {
 macro_rules! define_keywords {
     ($($token:tt pub struct $name:ident #[$doc:meta])*) => {
         $(
-            #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
             #[$doc]
             ///
             /// Don't try to remember the name of this type &mdash; use the
@@ -267,6 +266,16 @@ macro_rules! define_keywords {
                     $name {
                         span: Span::call_site(),
                     }
+                }
+            }
+
+            #[cfg(feature = "clone-impls")]
+            impl Copy for $name {}
+
+            #[cfg(feature = "clone-impls")]
+            impl Clone for $name {
+                fn clone(&self) -> Self {
+                    *self
                 }
             }
 
@@ -348,7 +357,6 @@ macro_rules! impl_deref_if_len_is_1 {
 macro_rules! define_punctuation_structs {
     ($($token:tt pub struct $name:ident/$len:tt #[$doc:meta])*) => {
         $(
-            #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
             #[repr(C)]
             #[$doc]
             ///
@@ -373,6 +381,16 @@ macro_rules! define_punctuation_structs {
                     $name {
                         spans: [Span::call_site(); $len],
                     }
+                }
+            }
+
+            #[cfg(feature = "clone-impls")]
+            impl Copy for $name {}
+
+            #[cfg(feature = "clone-impls")]
+            impl Clone for $name {
+                fn clone(&self) -> Self {
+                    *self
                 }
             }
 
@@ -446,7 +464,6 @@ macro_rules! define_punctuation {
 macro_rules! define_delimiters {
     ($($token:tt pub struct $name:ident #[$doc:meta])*) => {
         $(
-            #[cfg_attr(feature = "clone-impls", derive(Copy, Clone))]
             #[$doc]
             pub struct $name {
                 pub span: Span,
@@ -465,6 +482,16 @@ macro_rules! define_delimiters {
                     $name {
                         span: Span::call_site(),
                     }
+                }
+            }
+
+            #[cfg(feature = "clone-impls")]
+            impl Copy for $name {}
+
+            #[cfg(feature = "clone-impls")]
+            impl Clone for $name {
+                fn clone(&self) -> Self {
+                    *self
                 }
             }
 

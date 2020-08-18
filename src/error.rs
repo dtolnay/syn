@@ -81,7 +81,6 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// #     }
 /// # }
 /// ```
-#[derive(Clone)]
 pub struct Error {
     messages: Vec<ErrorMessage>,
 }
@@ -285,6 +284,14 @@ impl Debug for ErrorMessage {
 impl Display for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str(&self.messages[0].message)
+    }
+}
+
+impl Clone for Error {
+    fn clone(&self) -> Self {
+        Error {
+            messages: self.messages.clone(),
+        }
     }
 }
 

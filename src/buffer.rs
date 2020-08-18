@@ -134,7 +134,6 @@ impl TokenBuffer {
 /// stream, and have the same scope.
 ///
 /// *This type is available only if Syn is built with the `"parsing"` feature.*
-#[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Cursor<'a> {
     // The current entry which the `Cursor` is pointing at.
     ptr: *const Entry,
@@ -362,6 +361,24 @@ impl<'a> Cursor<'a> {
             }
             _ => Some(unsafe { self.bump() }),
         }
+    }
+}
+
+impl<'a> Copy for Cursor<'a> {}
+
+impl<'a> Clone for Cursor<'a> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<'a> Eq for Cursor<'a> {}
+
+impl<'a> PartialEq for Cursor<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        let Cursor { ptr, scope, marker } = self;
+        let _ = marker;
+        *ptr == other.ptr && *scope == other.scope
     }
 }
 

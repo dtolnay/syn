@@ -274,7 +274,9 @@
 // Ignored clippy_pedantic lints.
 #![allow(
     clippy::cast_possible_truncation,
+    clippy::default_trait_access,
     clippy::empty_enum,
+    clippy::expl_impl_clone_on_copy,
     clippy::if_not_else,
     clippy::items_after_statements,
     clippy::match_same_arms,

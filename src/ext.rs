@@ -129,7 +129,13 @@ mod private {
 
     impl Sealed for Ident {}
 
-    #[derive(Copy, Clone)]
     pub struct PeekFn;
     pub struct IdentAny;
+
+    impl Copy for PeekFn {}
+    impl Clone for PeekFn {
+        fn clone(&self) -> Self {
+            *self
+        }
+    }
 }
