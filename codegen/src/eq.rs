@@ -9,6 +9,7 @@ const DEBUG_SRC: &str = "../src/gen/eq.rs";
 fn always_eq(field_type: &Type) -> bool {
     match field_type {
         Type::Syn(node) => node == "Reserved",
+        Type::Ext(ty) => ty == "Span",
         Type::Token(_) | Type::Group(_) => true,
         Type::Box(inner) => always_eq(inner),
         Type::Tuple(inner) => inner.iter().all(always_eq),
@@ -115,7 +116,7 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
         impl Eq for #ident {}
     };
 
-    let manual_partial_eq = node.data == Data::Private || node.ident == "LitBool";
+    let manual_partial_eq = node.data == Data::Private;
     if manual_partial_eq {
         return eq;
     }

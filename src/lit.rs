@@ -623,7 +623,13 @@ lit_extra_traits!(LitByte, repr.token);
 lit_extra_traits!(LitChar, repr.token);
 lit_extra_traits!(LitInt, repr.token);
 lit_extra_traits!(LitFloat, repr.token);
-lit_extra_traits!(LitBool, value);
+
+#[cfg(feature = "parsing")]
+#[doc(hidden)]
+#[allow(non_snake_case)]
+pub fn LitBool(marker: lookahead::TokenMarker) -> LitBool {
+    match marker {}
+}
 
 ast_enum! {
     /// The style of a string literal, either plain quoted or a raw string like

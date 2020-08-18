@@ -1136,6 +1136,11 @@ impl PartialEq for Lit {
     }
 }
 impl Eq for LitBool {}
+impl PartialEq for LitBool {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
 impl Eq for LitByte {}
 impl Eq for LitByteStr {}
 impl Eq for LitChar {}

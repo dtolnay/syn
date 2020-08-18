@@ -9,6 +9,7 @@ const DEBUG_SRC: &str = "../src/gen/hash.rs";
 fn skip(field_type: &Type) -> bool {
     match field_type {
         Type::Syn(node) => node == "Reserved",
+        Type::Ext(ty) => ty == "Span",
         Type::Token(_) | Type::Group(_) => true,
         Type::Box(inner) => skip(inner),
         Type::Tuple(inner) => inner.iter().all(skip),
@@ -111,7 +112,6 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
 
 fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     let manual_hash = node.data == Data::Private
-        || node.ident == "LitBool"
         || node.ident == "Member"
         || node.ident == "Index"
         || node.ident == "Lifetime";

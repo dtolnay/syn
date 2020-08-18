@@ -1611,6 +1611,14 @@ impl Hash for Lit {
         }
     }
 }
+impl Hash for LitBool {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.value.hash(state);
+    }
+}
 #[cfg(feature = "full")]
 impl Hash for Local {
     fn hash<H>(&self, state: &mut H)
