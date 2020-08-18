@@ -8,17 +8,27 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "81e754c359c471f91263813c46c67955071716a7";
+const REVISION: &str = "792c645ca7d11a8d254df307d019c5bf01445c37";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
+    // TODO: type parameters after const parameters: struct S<const N: usize, T>
+    // https://github.com/dtolnay/syn/issues/886
+    "test/ui/const-generics/defaults/complex-unord-param.rs",
+    "test/ui/const-generics/defaults/needs-feature.rs",
+    "test/ui/const-generics/defaults/simple-defaults.rs",
+    "test/ui/const-generics/type-after-const-ok.rs",
+
+    // Compile-fail expr parameter in const generic position: f::<1 + 2>()
+    "test/ui/const-generics/const-expression-parameter.rs",
+
     // Deprecated anonymous parameter syntax in traits
     "test/ui/issues/issue-13105.rs",
     "test/ui/issues/issue-13775.rs",
     "test/ui/issues/issue-34074.rs",
     "test/ui/proc-macro/trait-fn-args-2015.rs",
 
-    // not actually test cases
+    // Not actually test cases
     "test/rustdoc-ui/test-compile-fail2.rs",
     "test/rustdoc-ui/test-compile-fail3.rs",
     "test/ui/include-single-expr-helper.rs",
