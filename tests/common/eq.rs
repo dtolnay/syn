@@ -297,7 +297,7 @@ spanless_eq_struct!(Mod; inner items inline);
 spanless_eq_struct!(MutTy; ty mutbl);
 spanless_eq_struct!(Param; attrs ty pat id span is_placeholder);
 spanless_eq_struct!(ParenthesizedArgs; span inputs output);
-spanless_eq_struct!(Pat; id kind span);
+spanless_eq_struct!(Pat; id kind span tokens);
 spanless_eq_struct!(Path; span segments);
 spanless_eq_struct!(PathSegment; ident id args);
 spanless_eq_struct!(PolyTraitRef; bound_generic_params trait_ref span);
