@@ -278,7 +278,7 @@ spanless_eq_struct!(Field; attrs id span ident expr is_shorthand is_placeholder)
 spanless_eq_struct!(FieldPat; ident pat is_shorthand attrs id span is_placeholder);
 spanless_eq_struct!(FnDecl; inputs output);
 spanless_eq_struct!(FnHeader; constness asyncness unsafety ext);
-spanless_eq_struct!(FnSig; header decl);
+spanless_eq_struct!(FnSig; header decl span);
 spanless_eq_struct!(ForeignMod; abi items);
 spanless_eq_struct!(GenericParam; id ident attrs bounds is_placeholder kind);
 spanless_eq_struct!(Generics; params where_clause span);
