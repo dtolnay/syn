@@ -1184,9 +1184,9 @@ mod printing {
             self.ident.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
-            if self.default.is_some() {
+            if let Some(default) = &self.default {
                 TokensOrDefault(&self.eq_token).to_tokens(tokens);
-                self.default.to_tokens(tokens);
+                default.to_tokens(tokens);
             }
         }
     }
