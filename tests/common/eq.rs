@@ -14,12 +14,13 @@ use rustc_ast::ast::{
     GenericParam, GenericParamKind, Generics, GlobalAsm, ImplPolarity, InlineAsm, InlineAsmOperand,
     InlineAsmOptions, InlineAsmRegOrRegClass, InlineAsmTemplatePiece, IntTy, IsAuto, Item,
     ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind, LlvmAsmDialect,
-    LlvmInlineAsm, LlvmInlineAsmOutput, Local, MacArgs, MacCall, MacDelimiter, MacStmtStyle,
-    MacroDef, Mod, Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatKind,
-    Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind,
-    StrLit, StrStyle, StructField, TraitBoundModifier, TraitObjectSyntax, TraitRef, Ty, TyKind,
-    UintTy, UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant, VariantData, VisibilityKind,
-    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
+    LlvmInlineAsm, LlvmInlineAsmOutput, Local, MacArgs, MacCall, MacCallStmt, MacDelimiter,
+    MacStmtStyle, MacroDef, Mod, Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs,
+    Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt,
+    StmtKind, StrLit, StrStyle, StructField, TraitBoundModifier, TraitObjectSyntax, TraitRef, Ty,
+    TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant, VariantData,
+    VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
+    WhereRegionPredicate,
 };
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, DelimToken, Token, TokenKind};
@@ -81,14 +82,6 @@ impl<T: SpanlessEq> SpanlessEq for Spanned<T> {
 impl<A: SpanlessEq, B: SpanlessEq> SpanlessEq for (A, B) {
     fn eq(&self, other: &Self) -> bool {
         SpanlessEq::eq(&self.0, &other.0) && SpanlessEq::eq(&self.1, &other.1)
-    }
-}
-
-impl<A: SpanlessEq, B: SpanlessEq, C: SpanlessEq> SpanlessEq for (A, B, C) {
-    fn eq(&self, other: &Self) -> bool {
-        SpanlessEq::eq(&self.0, &other.0)
-            && SpanlessEq::eq(&self.1, &other.1)
-            && SpanlessEq::eq(&self.2, &other.2)
     }
 }
 
@@ -292,6 +285,7 @@ spanless_eq_struct!(LlvmInlineAsm; asm asm_str_style outputs inputs clobbers vol
 spanless_eq_struct!(LlvmInlineAsmOutput; constraint expr is_rw is_indirect);
 spanless_eq_struct!(Local; pat ty init id span attrs);
 spanless_eq_struct!(MacCall; path args prior_type_ascription);
+spanless_eq_struct!(MacCallStmt; mac style attrs);
 spanless_eq_struct!(MacroDef; body macro_rules);
 spanless_eq_struct!(Mod; inner items inline);
 spanless_eq_struct!(MutTy; ty mutbl);
