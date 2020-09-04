@@ -40,7 +40,7 @@ fn test_comment() {
                         },
                     ],
                 },
-                tokens: TokenStream(`( dead_code )`),
+                tokens: TokenStream(`(dead_code)`),
             },
         ],
         items: [

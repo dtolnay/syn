@@ -265,7 +265,7 @@ fn test_fn_precedence_in_where_clause() {
     assert_eq!(predicate.bounds.len(), 2, "{:#?}", predicate.bounds);
 
     let first_bound = &predicate.bounds[0];
-    assert_eq!(quote!(#first_bound).to_string(), "FnOnce ( ) -> i32");
+    assert_eq!(quote!(#first_bound).to_string(), "FnOnce () -> i32");
 
     let second_bound = &predicate.bounds[1];
     assert_eq!(quote!(#second_bound).to_string(), "Send");

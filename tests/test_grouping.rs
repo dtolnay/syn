@@ -23,7 +23,7 @@ fn test_grouping() {
         TokenTree::Literal(Literal::i32_suffixed(4)),
     ]);
 
-    assert_eq!(tokens.to_string(), "1i32 +  2i32 + 3i32  * 4i32");
+    assert_eq!(tokens.to_string(), "1i32 + 2i32 + 3i32 * 4i32");
 
     snapshot!(tokens as Expr, @r###"
     Expr::Binary {
