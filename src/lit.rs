@@ -1431,7 +1431,11 @@ mod value {
                 }
                 b'e' | b'E' => {
                     if has_e {
-                        return None;
+                        if has_exponent {
+                            break;
+                        } else {
+                            return None;
+                        }
                     }
                     has_e = true;
                     bytes[write] = b'e';
