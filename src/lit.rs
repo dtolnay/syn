@@ -103,7 +103,7 @@ struct LitIntRepr {
 ast_struct! {
     /// A floating point literal: `1f64` or `1.0e10f64`.
     ///
-    /// Must be finite. May not be infinte or NaN.
+    /// Must be finite. May not be infinite or NaN.
     pub struct LitFloat {
         repr: Box<LitFloatRepr>,
     }
@@ -1470,10 +1470,12 @@ mod value {
 
     pub fn to_literal(repr: &str, digits: &str, suffix: &str) -> Option<Literal> {
         if repr.starts_with('-') {
+            let f64_parse_finite = || digits.parse().ok().filter(|x: &f64| x.is_finite());
+            let f32_parse_finite = || digits.parse().ok().filter(|x: &f32| x.is_finite());
             if suffix == "f64" {
-                digits.parse().ok().map(Literal::f64_suffixed)
+                f64_parse_finite().map(Literal::f64_suffixed)
             } else if suffix == "f32" {
-                digits.parse().ok().map(Literal::f32_suffixed)
+                f32_parse_finite().map(Literal::f32_suffixed)
             } else if suffix == "i64" {
                 digits.parse().ok().map(Literal::i64_suffixed)
             } else if suffix == "i32" {
@@ -1485,7 +1487,7 @@ mod value {
             } else if !suffix.is_empty() {
                 None
             } else if digits.contains('.') {
-                digits.parse().ok().map(Literal::f64_unsuffixed)
+                f64_parse_finite().map(Literal::f64_unsuffixed)
             } else {
                 digits.parse().ok().map(Literal::i64_unsuffixed)
             }
