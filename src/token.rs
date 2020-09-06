@@ -88,24 +88,6 @@
 //! [Printing]: https://docs.rs/quote/1.0/quote/trait.ToTokens.html
 //! [`Span`]: https://docs.rs/proc-macro2/1.0/proc_macro2/struct.Span.html
 
-#[cfg(feature = "extra-traits")]
-use std::cmp;
-#[cfg(feature = "extra-traits")]
-use std::fmt::{self, Debug};
-#[cfg(feature = "extra-traits")]
-use std::hash::{Hash, Hasher};
-use std::ops::{Deref, DerefMut};
-
-#[cfg(any(feature = "parsing", feature = "printing"))]
-use proc_macro2::Ident;
-use proc_macro2::Span;
-#[cfg(feature = "printing")]
-use proc_macro2::TokenStream;
-#[cfg(feature = "parsing")]
-use proc_macro2::{Delimiter, Literal, Punct, TokenTree};
-#[cfg(feature = "printing")]
-use quote::{ToTokens, TokenStreamExt};
-
 use self::private::WithSpan;
 #[cfg(feature = "parsing")]
 use crate::buffer::Cursor;
@@ -120,6 +102,22 @@ use crate::lookahead;
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream};
 use crate::span::IntoSpans;
+#[cfg(any(feature = "parsing", feature = "printing"))]
+use proc_macro2::Ident;
+use proc_macro2::Span;
+#[cfg(feature = "printing")]
+use proc_macro2::TokenStream;
+#[cfg(feature = "parsing")]
+use proc_macro2::{Delimiter, Literal, Punct, TokenTree};
+#[cfg(feature = "printing")]
+use quote::{ToTokens, TokenStreamExt};
+#[cfg(feature = "extra-traits")]
+use std::cmp;
+#[cfg(feature = "extra-traits")]
+use std::fmt::{self, Debug};
+#[cfg(feature = "extra-traits")]
+use std::hash::{Hash, Hasher};
+use std::ops::{Deref, DerefMut};
 
 /// Marker trait for types that represent single tokens.
 ///
@@ -865,12 +863,11 @@ export_token_macro![];
 #[doc(hidden)]
 #[cfg(feature = "parsing")]
 pub mod parsing {
-    use proc_macro2::{Spacing, Span};
-
     use crate::buffer::Cursor;
     use crate::error::{Error, Result};
     use crate::parse::ParseStream;
     use crate::span::FromSpans;
+    use proc_macro2::{Spacing, Span};
 
     pub fn keyword(input: ParseStream, token: &str) -> Result<Span> {
         input.step(|cursor| {

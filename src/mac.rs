@@ -168,7 +168,6 @@ pub fn parse_delimiter(input: ParseStream) -> Result<(MacroDelimiter, TokenStrea
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-
     use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for Macro {

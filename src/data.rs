@@ -236,7 +236,6 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-
     use crate::ext::IdentExt;
     use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
@@ -405,11 +404,9 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-
+    use crate::print::TokensOrDefault;
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
-
-    use crate::print::TokensOrDefault;
 
     impl ToTokens for Variant {
         fn to_tokens(&self, tokens: &mut TokenStream) {

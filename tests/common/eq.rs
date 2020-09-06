@@ -3,8 +3,6 @@ extern crate rustc_data_structures;
 extern crate rustc_span;
 extern crate rustc_target;
 
-use std::mem;
-
 use rustc_ast::ast::{
     AngleBracketedArg, AngleBracketedArgs, AnonConst, Arm, AssocItemKind, AssocTyConstraint,
     AssocTyConstraintKind, Async, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy,
@@ -30,6 +28,7 @@ use rustc_data_structures::thin_vec::ThinVec;
 use rustc_span::source_map::Spanned;
 use rustc_span::symbol::Ident;
 use rustc_span::{Span, Symbol, SyntaxContext};
+use std::mem;
 
 pub trait SpanlessEq {
     fn eq(&self, other: &Self) -> bool;

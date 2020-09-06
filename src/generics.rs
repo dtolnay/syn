@@ -563,7 +563,6 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-
     use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for Generics {
@@ -945,14 +944,12 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-
+    use crate::attr::FilterAttrs;
+    use crate::print::TokensOrDefault;
     use proc_macro2::TokenStream;
     #[cfg(feature = "full")]
     use proc_macro2::TokenTree;
     use quote::{ToTokens, TokenStreamExt};
-
-    use crate::attr::FilterAttrs;
-    use crate::print::TokensOrDefault;
 
     impl ToTokens for Generics {
         fn to_tokens(&self, tokens: &mut TokenStream) {

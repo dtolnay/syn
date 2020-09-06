@@ -1,23 +1,18 @@
-use proc_macro2::{Literal, Span};
-use std::fmt::{self, Display};
-use std::str::{self, FromStr};
-
-#[cfg(feature = "printing")]
-use proc_macro2::Ident;
-
-#[cfg(feature = "parsing")]
-use proc_macro2::TokenStream;
-
-use proc_macro2::TokenTree;
-
-#[cfg(feature = "extra-traits")]
-use std::hash::{Hash, Hasher};
-
 #[cfg(feature = "parsing")]
 use crate::lookahead;
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, Parser};
 use crate::{Error, Result};
+#[cfg(feature = "printing")]
+use proc_macro2::Ident;
+#[cfg(feature = "parsing")]
+use proc_macro2::TokenStream;
+use proc_macro2::TokenTree;
+use proc_macro2::{Literal, Span};
+use std::fmt::{self, Display};
+#[cfg(feature = "extra-traits")]
+use std::hash::{Hash, Hasher};
+use std::str::{self, FromStr};
 
 ast_enum_of_structs! {
     /// A Rust literal such as a string or integer or boolean.

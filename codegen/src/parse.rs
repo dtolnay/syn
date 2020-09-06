@@ -9,7 +9,6 @@ use syn::{
 };
 use syn_codegen as types;
 use thiserror::Error;
-
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -250,13 +249,11 @@ fn last_arg(params: &PathArguments) -> &syn::Type {
 
 mod parsing {
     use super::{AstItem, TokenLookup};
-
     use proc_macro2::{TokenStream, TokenTree};
     use quote::quote;
     use syn::parse::{ParseStream, Result};
     use syn::*;
     use syn_codegen as types;
-
     use std::collections::{BTreeMap, BTreeSet};
 
     fn peek_tag(input: ParseStream, tag: &str) -> bool {

@@ -1,8 +1,7 @@
-use proc_macro2::{Delimiter, Span};
-
 use crate::error::Result;
 use crate::parse::ParseBuffer;
 use crate::token;
+use proc_macro2::{Delimiter, Span};
 
 // Not public API.
 #[doc(hidden)]

@@ -46,7 +46,6 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-
     use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
     use proc_macro2::TokenStream;
@@ -274,7 +273,6 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 

@@ -79,7 +79,6 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-
     use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for File {

@@ -555,12 +555,10 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-
+    use crate::print::TokensOrDefault;
     use proc_macro2::TokenStream;
     use quote::ToTokens;
     use std::cmp;
-
-    use crate::print::TokensOrDefault;
 
     impl ToTokens for Path {
         fn to_tokens(&self, tokens: &mut TokenStream) {

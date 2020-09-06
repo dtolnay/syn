@@ -1,8 +1,7 @@
+use proc_macro2::{Ident, Span};
 use std::cmp::Ordering;
 use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
-
-use proc_macro2::{Ident, Span};
 
 #[cfg(feature = "parsing")]
 use crate::lookahead;
@@ -115,7 +114,6 @@ pub fn Lifetime(marker: lookahead::TokenMarker) -> Lifetime {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-
     use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for Lifetime {
@@ -132,7 +130,6 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-
     use proc_macro2::{Punct, Spacing, TokenStream};
     use quote::{ToTokens, TokenStreamExt};
 

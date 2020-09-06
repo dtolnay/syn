@@ -277,7 +277,6 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-
     use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseBuffer, ParseStream, Result};
     use crate::path;
@@ -710,11 +709,9 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-
+    use crate::attr::FilterAttrs;
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
-
-    use crate::attr::FilterAttrs;
 
     impl ToTokens for PatWild {
         fn to_tokens(&self, tokens: &mut TokenStream) {

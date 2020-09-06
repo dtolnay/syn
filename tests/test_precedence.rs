@@ -18,21 +18,19 @@ extern crate rustc_ast;
 extern crate rustc_data_structures;
 extern crate rustc_span;
 
+use crate::common::eq::SpanlessEq;
+use crate::common::parse;
 use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use regex::Regex;
 use rustc_ast::ast;
 use rustc_ast::ptr::P;
 use rustc_span::edition::Edition;
-use walkdir::{DirEntry, WalkDir};
-
 use std::fs::File;
 use std::io::Read;
 use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
-
-use common::eq::SpanlessEq;
-use common::parse;
+use walkdir::{DirEntry, WalkDir};
 
 #[macro_use]
 mod macros;

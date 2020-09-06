@@ -1,9 +1,7 @@
 use super::*;
 use crate::punctuated::Punctuated;
-
-use std::iter;
-
 use proc_macro2::TokenStream;
+use std::iter;
 
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseBuffer, ParseStream, Parser, Result};
@@ -494,7 +492,6 @@ where
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-
     use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
     #[cfg(feature = "full")]

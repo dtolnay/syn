@@ -1,7 +1,6 @@
 use anyhow::Result;
 use semver::Version;
 use serde::Deserialize;
-
 use std::fs;
 use std::path::Path;
 

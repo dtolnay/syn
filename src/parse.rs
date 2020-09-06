@@ -189,6 +189,17 @@
 #[path = "discouraged.rs"]
 pub mod discouraged;
 
+use crate::buffer::{Cursor, TokenBuffer};
+use crate::error;
+use crate::lookahead;
+#[cfg(all(
+    not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
+    feature = "proc-macro"
+))]
+use crate::proc_macro;
+use crate::punctuated::Punctuated;
+use crate::token::Token;
+use proc_macro2::{self, Delimiter, Group, Literal, Punct, Span, TokenStream, TokenTree};
 use std::cell::Cell;
 use std::fmt::{self, Debug, Display};
 use std::marker::PhantomData;
@@ -196,19 +207,6 @@ use std::mem;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::str::FromStr;
-
-#[cfg(all(
-    not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
-    feature = "proc-macro"
-))]
-use crate::proc_macro;
-use proc_macro2::{self, Delimiter, Group, Literal, Punct, Span, TokenStream, TokenTree};
-
-use crate::buffer::{Cursor, TokenBuffer};
-use crate::error;
-use crate::lookahead;
-use crate::punctuated::Punctuated;
-use crate::token::Token;
 
 pub use crate::error::{Error, Result};
 pub use crate::lookahead::{Lookahead1, Peek};

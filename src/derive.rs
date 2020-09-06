@@ -88,7 +88,6 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-
     use crate::parse::{Parse, ParseStream, Result};
 
     impl Parse for DeriveInput {
@@ -221,12 +220,10 @@ pub mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use super::*;
-
-    use proc_macro2::TokenStream;
-    use quote::ToTokens;
-
     use crate::attr::FilterAttrs;
     use crate::print::TokensOrDefault;
+    use proc_macro2::TokenStream;
+    use quote::ToTokens;
 
     impl ToTokens for DeriveInput {
         fn to_tokens(&self, tokens: &mut TokenStream) {

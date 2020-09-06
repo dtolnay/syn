@@ -1,17 +1,15 @@
-use std::fmt::{self, Debug, Display};
-use std::iter::FromIterator;
-use std::slice;
-use std::vec;
-
+#[cfg(feature = "parsing")]
+use crate::buffer::Cursor;
+use crate::thread::ThreadBound;
 use proc_macro2::{
     Delimiter, Group, Ident, LexError, Literal, Punct, Spacing, Span, TokenStream, TokenTree,
 };
 #[cfg(feature = "printing")]
 use quote::ToTokens;
-
-#[cfg(feature = "parsing")]
-use crate::buffer::Cursor;
-use crate::thread::ThreadBound;
+use std::fmt::{self, Debug, Display};
+use std::iter::FromIterator;
+use std::slice;
+use std::vec;
 
 /// The result of a Syn parser.
 pub type Result<T> = std::result::Result<T, Error>;

@@ -994,7 +994,6 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use super::*;
-
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
     use std::cmp::Ordering;
@@ -2589,14 +2588,12 @@ pub(crate) mod parsing {
 #[cfg(feature = "printing")]
 pub(crate) mod printing {
     use super::*;
-
-    use proc_macro2::{Literal, TokenStream};
-    use quote::{ToTokens, TokenStreamExt};
-
     #[cfg(feature = "full")]
     use crate::attr::FilterAttrs;
     #[cfg(feature = "full")]
     use crate::print::TokensOrDefault;
+    use proc_macro2::{Literal, TokenStream};
+    use quote::{ToTokens, TokenStreamExt};
 
     // If the given expression is a bare `ExprStruct`, wraps it in parenthesis
     // before appending it to `TokenStream`.

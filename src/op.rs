@@ -81,7 +81,6 @@ ast_enum! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-
     use crate::parse::{Parse, ParseStream, Result};
 
     fn parse_binop(input: ParseStream) -> Result<BinOp> {

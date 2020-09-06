@@ -9,6 +9,7 @@ extern crate rustc_parse as parse;
 extern crate rustc_session;
 extern crate rustc_span;
 
+use crate::common::eq::SpanlessEq;
 use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rustc_ast::ast;
@@ -16,14 +17,13 @@ use rustc_errors::PResult;
 use rustc_session::parse::ParseSess;
 use rustc_span::source_map::FilePathMapping;
 use rustc_span::FileName;
-use walkdir::{DirEntry, WalkDir};
-
 use std::fs::File;
 use std::io::Read;
 use std::panic;
 use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
+use walkdir::{DirEntry, WalkDir};
 
 #[macro_use]
 mod macros;
@@ -32,8 +32,6 @@ mod macros;
 mod common;
 
 mod repo;
-
-use common::eq::SpanlessEq;
 
 #[test]
 fn test_round_trip() {
