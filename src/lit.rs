@@ -103,7 +103,7 @@ struct LitIntRepr {
 ast_struct! {
     /// A floating point literal: `1f64` or `1.0e10f64`.
     ///
-    /// Must be finite. May not be infinte or NaN.
+    /// Must be finite. May not be infinite or NaN.
     pub struct LitFloat {
         repr: Box<LitFloatRepr>,
     }
@@ -1470,24 +1470,34 @@ mod value {
 
     pub fn to_literal(repr: &str, digits: &str, suffix: &str) -> Option<Literal> {
         if repr.starts_with('-') {
-            if suffix == "f64" {
-                digits.parse().ok().map(Literal::f64_suffixed)
-            } else if suffix == "f32" {
-                digits.parse().ok().map(Literal::f32_suffixed)
-            } else if suffix == "i64" {
-                digits.parse().ok().map(Literal::i64_suffixed)
-            } else if suffix == "i32" {
-                digits.parse().ok().map(Literal::i32_suffixed)
-            } else if suffix == "i16" {
-                digits.parse().ok().map(Literal::i16_suffixed)
-            } else if suffix == "i8" {
-                digits.parse().ok().map(Literal::i8_suffixed)
-            } else if !suffix.is_empty() {
-                None
-            } else if digits.contains('.') {
-                digits.parse().ok().map(Literal::f64_unsuffixed)
-            } else {
-                digits.parse().ok().map(Literal::i64_unsuffixed)
+            match suffix {
+                "f64" => digits
+                    .parse()
+                    .ok()
+                    .filter(|x: &f64| x.is_finite())
+                    .map(Literal::f64_suffixed),
+                "f32" => digits
+                    .parse()
+                    .ok()
+                    .filter(|x: &f32| x.is_finite())
+                    .map(Literal::f32_suffixed),
+                "i64" => digits.parse().ok().map(Literal::i64_suffixed),
+                "i32" => digits.parse().ok().map(Literal::i32_suffixed),
+                "i16" => digits.parse().ok().map(Literal::i16_suffixed),
+                "i8" => digits.parse().ok().map(Literal::i8_suffixed),
+                other_suffix => {
+                    if !other_suffix.is_empty() {
+                        None
+                    } else if digits.contains('.') {
+                        digits
+                            .parse()
+                            .ok()
+                            .filter(|x: &f64| x.is_finite())
+                            .map(Literal::f64_unsuffixed)
+                    } else {
+                        digits.parse().ok().map(Literal::i64_unsuffixed)
+                    }
+                }
             }
         } else {
             let stream = repr.parse::<TokenStream>().unwrap();
