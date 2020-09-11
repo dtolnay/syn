@@ -271,7 +271,7 @@ spanless_eq_struct!(FieldPat; ident pat is_shorthand attrs id span is_placeholde
 spanless_eq_struct!(FnDecl; inputs output);
 spanless_eq_struct!(FnHeader; constness asyncness unsafety ext);
 spanless_eq_struct!(FnSig; header decl span);
-spanless_eq_struct!(ForeignMod; abi items);
+spanless_eq_struct!(ForeignMod; unsafety abi items);
 spanless_eq_struct!(GenericParam; id ident attrs bounds is_placeholder kind);
 spanless_eq_struct!(Generics; params where_clause span);
 spanless_eq_struct!(GlobalAsm; asm);
@@ -286,7 +286,7 @@ spanless_eq_struct!(Local; pat ty init id span attrs);
 spanless_eq_struct!(MacCall; path args prior_type_ascription);
 spanless_eq_struct!(MacCallStmt; mac style attrs);
 spanless_eq_struct!(MacroDef; body macro_rules);
-spanless_eq_struct!(Mod; inner items inline);
+spanless_eq_struct!(Mod; inner unsafety items inline);
 spanless_eq_struct!(MutTy; ty mutbl);
 spanless_eq_struct!(Param; attrs ty pat id span is_placeholder);
 spanless_eq_struct!(ParenthesizedArgs; span inputs output);
