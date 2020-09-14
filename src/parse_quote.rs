@@ -6,7 +6,7 @@
 /// The return type can be any syntax tree node that implements the [`Parse`]
 /// trait.
 ///
-/// [`Parse`]: parse::Parse
+/// [`Parse`]: crate::parse::Parse
 ///
 /// ```
 /// use quote::quote;
@@ -58,7 +58,7 @@
 ///   `P` with optional trailing punctuation
 /// - [`Vec<Stmt>`] — parses the same as `Block::parse_within`
 ///
-/// [`Punctuated<T, P>`]: punctuated::Punctuated
+/// [`Punctuated<T, P>`]: crate::punctuated::Punctuated
 /// [`Vec<Stmt>`]: Block::parse_within
 ///
 /// # Panics

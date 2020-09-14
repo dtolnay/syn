@@ -26,8 +26,8 @@
 ///
 /// - Field access to its span — `let sp = whatever_token.span`
 ///
-/// [Peeking]: parse::ParseBuffer::peek
-/// [Parsing]: parse::ParseBuffer::parse
+/// [Peeking]: crate::parse::ParseBuffer::peek
+/// [Parsing]: crate::parse::ParseBuffer::parse
 /// [Printing]: quote::ToTokens
 /// [`Span`]: proc_macro2::Span
 ///

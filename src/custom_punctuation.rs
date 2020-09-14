@@ -22,8 +22,8 @@
 ///
 /// - Field access to its spans — `let spans = lrarrow.spans`
 ///
-/// [Peeking]: parse::ParseBuffer::peek
-/// [Parsing]: parse::ParseBuffer::parse
+/// [Peeking]: crate::parse::ParseBuffer::peek
+/// [Parsing]: crate::parse::ParseBuffer::parse
 /// [Printing]: quote::ToTokens
 /// [`Span`]: proc_macro2::Span
 ///
