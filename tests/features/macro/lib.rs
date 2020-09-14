@@ -23,8 +23,10 @@ pub fn check(_input: TokenStream) -> TokenStream {
         let _ = writeln!(stderr);
         let _ = stderr.set_color(yellow.clone().set_bold(true));
         let _ = write!(stderr, "NOTE");
-        let _ = stderr.set_color(&yellow);
-        let _ = writeln!(stderr, "{}", DEBUG_NOTE);
+        for line in DEBUG_NOTE.lines() {
+            let _ = stderr.set_color(&yellow);
+            let _ = writeln!(stderr, "{}", line);
+        }
         let _ = stderr.reset();
     }
 
@@ -33,8 +35,10 @@ pub fn check(_input: TokenStream) -> TokenStream {
         let _ = writeln!(stderr);
         let _ = stderr.set_color(red.clone().set_bold(true));
         let _ = write!(stderr, "ERROR");
-        let _ = stderr.set_color(&red);
-        let _ = writeln!(stderr, "{}", FEATURES_ERROR);
+        for line in FEATURES_ERROR.lines() {
+            let _ = stderr.set_color(&red);
+            let _ = writeln!(stderr, "{}", line);
+        }
         let _ = stderr.reset();
         process::exit(1);
     }
