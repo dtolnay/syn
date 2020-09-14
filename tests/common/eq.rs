@@ -17,7 +17,7 @@ use rustc_ast::ast::{
     Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt,
     StmtKind, StrLit, StrStyle, StructField, TraitBoundModifier, TraitObjectSyntax, TraitRef, Ty,
     TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant, VariantData,
-    VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
+    Visibility, VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
     WhereRegionPredicate,
 };
 use rustc_ast::ptr::P;
@@ -259,10 +259,10 @@ spanless_eq_struct!(AngleBracketedArgs; span args);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arm; attrs pat guard body span id is_placeholder);
 spanless_eq_struct!(AssocTyConstraint; id ident kind span);
-spanless_eq_struct!(AttrItem; path args);
+spanless_eq_struct!(AttrItem; path args tokens);
 spanless_eq_struct!(Attribute; kind id style span);
 spanless_eq_struct!(BareFnTy; unsafety ext generic_params decl);
-spanless_eq_struct!(Block; stmts id rules span);
+spanless_eq_struct!(Block; stmts id rules span tokens);
 spanless_eq_struct!(Crate; module attrs span proc_macros);
 spanless_eq_struct!(EnumDef; variants);
 spanless_eq_struct!(Expr; id kind span attrs !tokens);
@@ -291,18 +291,19 @@ spanless_eq_struct!(MutTy; ty mutbl);
 spanless_eq_struct!(Param; attrs ty pat id span is_placeholder);
 spanless_eq_struct!(ParenthesizedArgs; span inputs output);
 spanless_eq_struct!(Pat; id kind span tokens);
-spanless_eq_struct!(Path; span segments);
+spanless_eq_struct!(Path; span segments tokens);
 spanless_eq_struct!(PathSegment; ident id args);
 spanless_eq_struct!(PolyTraitRef; bound_generic_params trait_ref span);
 spanless_eq_struct!(QSelf; ty path_span position);
-spanless_eq_struct!(Stmt; id kind span);
+spanless_eq_struct!(Stmt; id kind span tokens);
 spanless_eq_struct!(StrLit; style symbol suffix span symbol_unescaped);
 spanless_eq_struct!(StructField; attrs id span vis ident ty is_placeholder);
 spanless_eq_struct!(Token; kind span);
 spanless_eq_struct!(TraitRef; path ref_id);
-spanless_eq_struct!(Ty; id kind span);
+spanless_eq_struct!(Ty; id kind span tokens);
 spanless_eq_struct!(UseTree; prefix kind span);
 spanless_eq_struct!(Variant; attrs id span vis ident data disr_expr is_placeholder);
+spanless_eq_struct!(Visibility; kind span tokens);
 spanless_eq_struct!(WhereBoundPredicate; span bound_generic_params bounded_ty bounds);
 spanless_eq_struct!(WhereClause; has_where_token predicates span);
 spanless_eq_struct!(WhereEqPredicate; id span lhs_ty rhs_ty);
