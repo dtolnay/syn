@@ -195,6 +195,7 @@ fn floats() {
     test_float("1.0__3e-12", 1.03e-12, "");
     test_float("1.03e+12", 1.03e12, "");
     test_float("9e99e99", 9e99, "e99");
+    test_float("1e_0", 1.0, "");
 }
 
 #[test]

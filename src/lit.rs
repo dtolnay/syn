@@ -1359,10 +1359,13 @@ mod value {
                 // NOTE: Looking at a floating point literal, we don't want to
                 // consider these integers.
                 b'.' if base == 10 => return None,
-                b'e' | b'E' if base == 10 => match byte(s, 1) {
-                    b'-' | b'+' | b'0'..=b'9' => return None,
-                    _ => break,
-                },
+                b'e' | b'E' if base == 10 => {
+                    let rest = s[1..].trim_start_matches('_');
+                    match byte(rest, 0) {
+                        b'-' | b'+' | b'0'..=b'9' => return None,
+                        _ => break,
+                    }
+                }
                 _ => break,
             };
 
