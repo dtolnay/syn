@@ -1431,6 +1431,14 @@ mod value {
                     bytes[write] = b'.';
                 }
                 b'e' | b'E' => {
+                    match bytes[read + 1..]
+                        .iter()
+                        .find(|b| **b != b'_')
+                        .unwrap_or(&b'\0')
+                    {
+                        b'-' | b'+' | b'0'..=b'9' => {}
+                        _ => break,
+                    }
                     if has_e {
                         if has_exponent {
                             break;
