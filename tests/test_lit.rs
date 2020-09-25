@@ -151,6 +151,7 @@ fn ints() {
 
     test_int("5", 5, "");
     test_int("5u32", 5, "u32");
+    test_int("0o0A", 0, "A");
     test_int("5_0", 50, "");
     test_int("5_____0_____", 50, "");
     test_int("0x7f", 127, "");
