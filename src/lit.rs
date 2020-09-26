@@ -1295,6 +1295,10 @@ mod value {
                 b'0'..=b'9' => b - b'0',
                 b'a'..=b'f' => 10 + b - b'a',
                 b'A'..=b'F' => 10 + b - b'A',
+                b'_' => {
+                    s = &s[1..];
+                    continue;
+                }
                 b'}' => break,
                 _ => panic!("unexpected non-hex character after \\u"),
             };
