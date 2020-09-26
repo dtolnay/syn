@@ -43,6 +43,7 @@ fn strings() {
     test_string("\"'\"", "'");
     test_string("\"\"", "");
     test_string("\"\\u{1F415}\"", "\u{1F415}");
+    test_string("\"\\u{1_2__3_}\"", "\u{123}");
     test_string(
         "\"contains\nnewlines\\\nescaped newlines\"",
         "contains\nnewlinesescaped newlines",
