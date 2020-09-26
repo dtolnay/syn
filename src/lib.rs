@@ -261,6 +261,7 @@
     clippy::inherent_to_string,
     clippy::large_enum_variant,
     clippy::manual_non_exhaustive,
+    clippy::manual_strip,
     clippy::match_like_matches_macro,
     clippy::match_on_vec_items,
     clippy::needless_doctest_main,
