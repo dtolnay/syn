@@ -1347,7 +1347,7 @@ mod value {
         };
 
         let mut value = BigInt::new();
-        loop {
+        'outer: loop {
             let b = byte(s, 0);
             let digit = match b {
                 b'0'..=b'9' => b - b'0',
@@ -1357,14 +1357,31 @@ mod value {
                     s = &s[1..];
                     continue;
                 }
-                // NOTE: Looking at a floating point literal, we don't want to
-                // consider these integers.
+                // If looking at a floating point literal, we don't want to
+                // consider it an integer.
                 b'.' if base == 10 => return None,
                 b'e' | b'E' if base == 10 => {
-                    let rest = s[1..].trim_start_matches('_');
-                    match byte(rest, 0) {
-                        b'-' | b'+' | b'0'..=b'9' => return None,
-                        _ => break,
+                    let mut rest = s[1..].bytes().enumerate();
+                    let mut has_exp = false;
+                    while let Some((i, b)) = rest.next() {
+                        match b {
+                            b'_' => {}
+                            b'-' | b'+' => return None,
+                            b'0'..=b'9' => has_exp = true,
+                            _ => {
+                                let suffix = &s[1 + i..];
+                                if has_exp && crate::ident::xid_ok(suffix) {
+                                    return None;
+                                } else {
+                                    break 'outer;
+                                }
+                            }
+                        }
+                    }
+                    if has_exp {
+                        return None;
+                    } else {
+                        break;
                     }
                 }
                 _ => break,
