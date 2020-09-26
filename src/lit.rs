@@ -1289,7 +1289,8 @@ mod value {
         s = &s[1..];
 
         let mut ch = 0;
-        for _ in 0..6 {
+        let mut digits = 0;
+        loop {
             let b = byte(s, 0);
             let digit = match b {
                 b'0'..=b'9' => b - b'0',
@@ -1302,8 +1303,12 @@ mod value {
                 b'}' => break,
                 _ => panic!("unexpected non-hex character after \\u"),
             };
+            if digits == 6 {
+                panic!("overlong unicode escape (must have at most 6 hex digits)");
+            }
             ch *= 0x10;
             ch += u32::from(digit);
+            digits += 1;
             s = &s[1..];
         }
         assert!(byte(s, 0) == b'}');
