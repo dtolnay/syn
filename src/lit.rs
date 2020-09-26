@@ -1361,9 +1361,8 @@ mod value {
                 // consider it an integer.
                 b'.' if base == 10 => return None,
                 b'e' | b'E' if base == 10 => {
-                    let mut rest = s[1..].bytes().enumerate();
                     let mut has_exp = false;
-                    while let Some((i, b)) = rest.next() {
+                    for (i, b) in s[1..].bytes().enumerate() {
                         match b {
                             b'_' => {}
                             b'-' | b'+' => return None,
