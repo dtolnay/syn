@@ -1300,6 +1300,7 @@ mod value {
                     s = &s[1..];
                     continue;
                 }
+                b'}' if digits == 0 => panic!("invalid empty unicode escape"),
                 b'}' => break,
                 _ => panic!("unexpected non-hex character after \\u"),
             };
