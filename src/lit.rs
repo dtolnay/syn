@@ -725,21 +725,19 @@ pub mod parsing {
         let mut repr = lit.to_string();
         repr.insert(0, '-');
 
-        if !(repr.ends_with("f32") || repr.ends_with("f64")) {
-            if let Some((digits, suffix)) = value::parse_lit_int(&repr) {
-                if let Some(mut token) = value::to_literal(&repr, &digits, &suffix) {
-                    token.set_span(span);
-                    return Some((
-                        Lit::Int(LitInt {
-                            repr: Box::new(LitIntRepr {
-                                token,
-                                digits,
-                                suffix,
-                            }),
+        if let Some((digits, suffix)) = value::parse_lit_int(&repr) {
+            if let Some(mut token) = value::to_literal(&repr, &digits, &suffix) {
+                token.set_span(span);
+                return Some((
+                    Lit::Int(LitInt {
+                        repr: Box::new(LitIntRepr {
+                            token,
+                            digits,
+                            suffix,
                         }),
-                        rest,
-                    ));
-                }
+                    }),
+                    rest,
+                ));
             }
         }
 
@@ -920,16 +918,14 @@ mod value {
                     });
                 }
                 b'0'..=b'9' | b'-' => {
-                    if !(repr.ends_with("f32") || repr.ends_with("f64")) {
-                        if let Some((digits, suffix)) = parse_lit_int(&repr) {
-                            return Lit::Int(LitInt {
-                                repr: Box::new(LitIntRepr {
-                                    token,
-                                    digits,
-                                    suffix,
-                                }),
-                            });
-                        }
+                    if let Some((digits, suffix)) = parse_lit_int(&repr) {
+                        return Lit::Int(LitInt {
+                            repr: Box::new(LitIntRepr {
+                                token,
+                                digits,
+                                suffix,
+                            }),
+                        });
                     }
                     if let Some((digits, suffix)) = parse_lit_float(&repr) {
                         return Lit::Float(LitFloat {
