@@ -1291,25 +1291,16 @@ mod value {
         let mut ch = 0;
         for _ in 0..6 {
             let b = byte(s, 0);
-            match b {
-                b'0'..=b'9' => {
-                    ch *= 0x10;
-                    ch += u32::from(b - b'0');
-                    s = &s[1..];
-                }
-                b'a'..=b'f' => {
-                    ch *= 0x10;
-                    ch += u32::from(10 + b - b'a');
-                    s = &s[1..];
-                }
-                b'A'..=b'F' => {
-                    ch *= 0x10;
-                    ch += u32::from(10 + b - b'A');
-                    s = &s[1..];
-                }
+            let digit = match b {
+                b'0'..=b'9' => b - b'0',
+                b'a'..=b'f' => 10 + b - b'a',
+                b'A'..=b'F' => 10 + b - b'A',
                 b'}' => break,
                 _ => panic!("unexpected non-hex character after \\u"),
-            }
+            };
+            ch *= 0x10;
+            ch += u32::from(digit);
+            s = &s[1..];
         }
         assert!(byte(s, 0) == b'}');
         s = &s[1..];
