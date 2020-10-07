@@ -40,7 +40,7 @@ impl<T: SpanlessEq> SpanlessEq for P<T> {
     }
 }
 
-impl<T: SpanlessEq> SpanlessEq for Lrc<T> {
+impl<T: ?Sized + SpanlessEq> SpanlessEq for Lrc<T> {
     fn eq(&self, other: &Self) -> bool {
         SpanlessEq::eq(&**self, &**other)
     }
@@ -56,9 +56,15 @@ impl<T: SpanlessEq> SpanlessEq for Option<T> {
     }
 }
 
-impl<T: SpanlessEq> SpanlessEq for Vec<T> {
+impl<T: SpanlessEq> SpanlessEq for [T] {
     fn eq(&self, other: &Self) -> bool {
         self.len() == other.len() && self.iter().zip(other).all(|(a, b)| SpanlessEq::eq(a, b))
+    }
+}
+
+impl<T: SpanlessEq> SpanlessEq for Vec<T> {
+    fn eq(&self, other: &Self) -> bool {
+        <[T] as SpanlessEq>::eq(self, other)
     }
 }
 
