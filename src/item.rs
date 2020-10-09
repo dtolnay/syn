@@ -1341,7 +1341,7 @@ pub mod parsing {
         let abi: Option<Abi> = input.parse()?;
         let fn_token: Token![fn] = input.parse()?;
         let ident: Ident = input.parse()?;
-        let generics: Generics = input.parse()?;
+        let mut generics: Generics = input.parse()?;
 
         let content;
         let paren_token = parenthesized!(content in input);
@@ -1349,7 +1349,7 @@ pub mod parsing {
         let variadic = pop_variadic(&mut inputs);
 
         let output: ReturnType = input.parse()?;
-        let where_clause: Option<WhereClause> = input.parse()?;
+        generics.where_clause = input.parse()?;
 
         Ok(Signature {
             constness,
@@ -1362,10 +1362,7 @@ pub mod parsing {
             inputs,
             output,
             variadic,
-            generics: Generics {
-                where_clause,
-                ..generics
-            },
+            generics,
         })
     }
 
@@ -2285,7 +2282,7 @@ pub mod parsing {
                         || input.peek3(Token![,])
                         || input.peek3(Token![>]))
                 || input.peek2(Token![const]));
-        let generics: Generics = if has_generics {
+        let mut generics: Generics = if has_generics {
             input.parse()?
         } else {
             Generics::default()
@@ -2312,7 +2309,7 @@ pub mod parsing {
         })();
 
         let self_ty: Type = input.parse()?;
-        let where_clause: Option<WhereClause> = input.parse()?;
+        generics.where_clause = input.parse()?;
 
         let content;
         let brace_token = braced!(content in input);
@@ -2331,10 +2328,7 @@ pub mod parsing {
                 defaultness,
                 unsafety,
                 impl_token,
-                generics: Generics {
-                    where_clause,
-                    ..generics
-                },
+                generics,
                 trait_,
                 self_ty: Box::new(self_ty),
                 brace_token,
