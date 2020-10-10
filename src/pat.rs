@@ -285,22 +285,20 @@ pub mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let begin = input.fork();
             let lookahead = input.lookahead1();
-            if lookahead.peek(Ident)
-                && ({
-                    input.peek2(Token![::])
-                        || input.peek2(Token![!])
-                        || input.peek2(token::Brace)
-                        || input.peek2(token::Paren)
-                        || input.peek2(Token![..])
-                            && !{
-                                let ahead = input.fork();
-                                ahead.parse::<Ident>()?;
-                                ahead.parse::<RangeLimits>()?;
-                                ahead.is_empty() || ahead.peek(Token![,])
-                            }
-                })
-                || input.peek(Token![self]) && input.peek2(Token![::])
-                || lookahead.peek(Token![::])
+            if {
+                let ahead = input.fork();
+                ahead.parse::<Option<Ident>>()?.is_some()
+                    && (ahead.peek(Token![::])
+                        || ahead.peek(Token![!])
+                        || ahead.peek(token::Brace)
+                        || ahead.peek(token::Paren)
+                        || ahead.peek(Token![..])
+                            && ahead.parse::<RangeLimits>().is_ok()
+                            && !(ahead.is_empty() || ahead.peek(Token![,])))
+            } || {
+                let ahead = input.fork();
+                ahead.parse::<Option<Token![self]>>()?.is_some() && ahead.peek(Token![::])
+            } || lookahead.peek(Token![::])
                 || lookahead.peek(Token![<])
                 || input.peek(Token![Self])
                 || input.peek(Token![super])
