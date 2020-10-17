@@ -759,8 +759,8 @@ pub mod parsing {
     impl Parse for LitStr {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();
-            match input.parse()? {
-                Lit::Str(lit) => Ok(lit),
+            match input.parse() {
+                Ok(Lit::Str(lit)) => Ok(lit),
                 _ => Err(head.error("expected string literal")),
             }
         }
@@ -769,8 +769,8 @@ pub mod parsing {
     impl Parse for LitByteStr {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();
-            match input.parse()? {
-                Lit::ByteStr(lit) => Ok(lit),
+            match input.parse() {
+                Ok(Lit::ByteStr(lit)) => Ok(lit),
                 _ => Err(head.error("expected byte string literal")),
             }
         }
@@ -779,8 +779,8 @@ pub mod parsing {
     impl Parse for LitByte {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();
-            match input.parse()? {
-                Lit::Byte(lit) => Ok(lit),
+            match input.parse() {
+                Ok(Lit::Byte(lit)) => Ok(lit),
                 _ => Err(head.error("expected byte literal")),
             }
         }
@@ -789,8 +789,8 @@ pub mod parsing {
     impl Parse for LitChar {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();
-            match input.parse()? {
-                Lit::Char(lit) => Ok(lit),
+            match input.parse() {
+                Ok(Lit::Char(lit)) => Ok(lit),
                 _ => Err(head.error("expected character literal")),
             }
         }
@@ -799,8 +799,8 @@ pub mod parsing {
     impl Parse for LitInt {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();
-            match input.parse()? {
-                Lit::Int(lit) => Ok(lit),
+            match input.parse() {
+                Ok(Lit::Int(lit)) => Ok(lit),
                 _ => Err(head.error("expected integer literal")),
             }
         }
@@ -809,8 +809,8 @@ pub mod parsing {
     impl Parse for LitFloat {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();
-            match input.parse()? {
-                Lit::Float(lit) => Ok(lit),
+            match input.parse() {
+                Ok(Lit::Float(lit)) => Ok(lit),
                 _ => Err(head.error("expected floating point literal")),
             }
         }
@@ -819,8 +819,8 @@ pub mod parsing {
     impl Parse for LitBool {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();
-            match input.parse()? {
-                Lit::Bool(lit) => Ok(lit),
+            match input.parse() {
+                Ok(Lit::Bool(lit)) => Ok(lit),
                 _ => Err(head.error("expected boolean literal")),
             }
         }
