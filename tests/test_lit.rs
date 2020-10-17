@@ -5,7 +5,7 @@ use proc_macro2::{Delimiter, Group, Literal, Span, TokenStream, TokenTree};
 use quote::ToTokens;
 use std::iter::FromIterator;
 use std::str::FromStr;
-use syn::{Lit, LitFloat, LitInt};
+use syn::{Lit, LitFloat, LitInt, LitStr};
 
 fn lit(s: &str) -> Lit {
     match TokenStream::from_str(s)
@@ -259,4 +259,13 @@ fn test_deep_group_empty() {
     ))]);
 
     snapshot!(tokens as Lit, @r#""hi""# );
+}
+
+#[test]
+fn test_error() {
+    let err = syn::parse_str::<LitStr>("...").unwrap_err();
+    assert_eq!("expected literal", err.to_string());
+
+    let err = syn::parse_str::<LitStr>("5").unwrap_err();
+    assert_eq!("expected string literal", err.to_string());
 }
