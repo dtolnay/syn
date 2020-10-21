@@ -578,7 +578,9 @@ pub mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Lit) && !(input.peek(LitBool) && input.peek2(Token![=])) {
                 input.parse().map(NestedMeta::Lit)
-            } else if input.peek(Ident::peek_any) {
+            } else if input.peek(Ident::peek_any)
+                || input.peek(Token![::]) && input.peek3(Ident::peek_any)
+            {
                 input.parse().map(NestedMeta::Meta)
             } else {
                 Err(input.error("expected identifier or literal"))
