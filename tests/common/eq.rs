@@ -22,7 +22,7 @@ use rustc_ast::ast::{
 };
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, DelimToken, Token, TokenKind};
-use rustc_ast::tokenstream::{DelimSpan, TokenStream, TokenTree};
+use rustc_ast::tokenstream::{DelimSpan, LazyTokenStream, TokenStream, TokenTree};
 use rustc_data_structures::sync::Lrc;
 use rustc_data_structures::thin_vec::ThinVec;
 use rustc_span::source_map::Spanned;
@@ -440,5 +440,13 @@ impl SpanlessEq for TokenStream {
                 return false;
             }
         }
+    }
+}
+
+impl SpanlessEq for LazyTokenStream {
+    fn eq(&self, other: &Self) -> bool {
+        let this = self.into_token_stream();
+        let other = other.into_token_stream();
+        SpanlessEq::eq(&this, &other)
     }
 }
