@@ -2,6 +2,9 @@ use crate::version;
 use anyhow::{bail, Result};
 use indexmap::IndexMap;
 use quote::quote;
+use std::collections::BTreeMap;
+use std::fs;
+use std::path::{Path, PathBuf};
 use syn::parse::{Error, Parser};
 use syn::{
     parse_quote, Attribute, Data, DataEnum, DataStruct, DeriveInput, Fields, GenericArgument,
@@ -9,9 +12,6 @@ use syn::{
 };
 use syn_codegen as types;
 use thiserror::Error;
-use std::collections::BTreeMap;
-use std::fs;
-use std::path::{Path, PathBuf};
 
 const SYN_CRATE_ROOT: &str = "../src/lib.rs";
 const TOKEN_SRC: &str = "../src/token.rs";
@@ -251,10 +251,10 @@ mod parsing {
     use super::{AstItem, TokenLookup};
     use proc_macro2::{TokenStream, TokenTree};
     use quote::quote;
+    use std::collections::{BTreeMap, BTreeSet};
     use syn::parse::{ParseStream, Result};
     use syn::*;
     use syn_codegen as types;
-    use std::collections::{BTreeMap, BTreeSet};
 
     fn peek_tag(input: ParseStream, tag: &str) -> bool {
         let ahead = input.fork();
