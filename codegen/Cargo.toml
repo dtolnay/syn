@@ -21,10 +21,6 @@ syn = { path = "..", features = ["derive", "parsing", "printing", "full"], defau
 thiserror = "1.0"
 toml = "0.5"
 
-# work around https://github.com/crossbeam-rs/crossbeam/issues/435
-# until https://github.com/BurntSushi/ripgrep/pull/1427 is released
-crossbeam-utils = "=0.6.5"
-
 [dependencies.rustfmt]
 package = "rustfmt_lib"
 git = "https://github.com/rust-lang-nursery/rustfmt"
