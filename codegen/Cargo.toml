@@ -8,7 +8,7 @@ publish = false # this is an internal crate which should never be published
 
 [dependencies]
 anyhow = "1.0"
-color-backtrace = "0.2"
+color-backtrace = "0.4"
 indexmap = { version = "1.0", features = ["serde-1"] }
 inflections = "1.1"
 proc-macro2 = { version = "1.0.20", features = ["span-locations"] }
@@ -19,7 +19,7 @@ serde_json = "1.0.38"
 syn-codegen = { path = "../json" }
 syn = { path = "..", features = ["derive", "parsing", "printing", "full"], default-features = false }
 thiserror = "1.0"
-toml = "0.4.10"
+toml = "0.5"
 
 # work around https://github.com/crossbeam-rs/crossbeam/issues/435
 # until https://github.com/BurntSushi/ripgrep/pull/1427 is released
