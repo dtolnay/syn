@@ -416,7 +416,7 @@ mod parsing {
                 tokens.insert("await".to_owned(), "Await".to_owned());
             } else {
                 let pattern;
-                parenthesized!(pattern in rules);
+                bracketed!(pattern in rules);
                 let token = pattern.parse::<TokenStream>()?.to_string();
                 rules.parse::<Token![=>]>()?;
                 let expansion;
