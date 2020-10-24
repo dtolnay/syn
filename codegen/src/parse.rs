@@ -253,7 +253,9 @@ mod parsing {
     use quote::quote;
     use std::collections::{BTreeMap, BTreeSet};
     use syn::parse::{ParseStream, Result};
-    use syn::*;
+    use syn::{
+        braced, bracketed, parenthesized, parse_quote, token, Attribute, Ident, LitStr, Path, Token,
+    };
     use syn_codegen as types;
 
     fn peek_tag(input: ParseStream, tag: &str) -> bool {
