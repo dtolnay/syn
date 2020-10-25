@@ -266,7 +266,7 @@ spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arm; attrs pat guard body span id is_placeholder);
 spanless_eq_struct!(AssocTyConstraint; id ident kind span);
 spanless_eq_struct!(AttrItem; path args tokens);
-spanless_eq_struct!(Attribute; kind id style span);
+spanless_eq_struct!(Attribute; kind id style span tokens);
 spanless_eq_struct!(BareFnTy; unsafety ext generic_params decl);
 spanless_eq_struct!(Block; stmts id rules span tokens);
 spanless_eq_struct!(Crate; module attrs span proc_macros);
