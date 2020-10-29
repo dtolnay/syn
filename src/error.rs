@@ -309,11 +309,7 @@ impl Clone for ErrorMessage {
     }
 }
 
-impl std::error::Error for Error {
-    fn description(&self) -> &str {
-        "parse error"
-    }
-}
+impl std::error::Error for Error {}
 
 impl From<LexError> for Error {
     fn from(err: LexError) -> Self {
