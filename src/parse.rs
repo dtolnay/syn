@@ -632,6 +632,16 @@ impl<'a> ParseBuffer<'a> {
     /// Looks at the third-next token in the parse stream.
     pub fn peek3<T: Peek>(&self, token: T) -> bool {
         let _ = token;
+        if let Some(group) = self.cursor().group(Delimiter::None) {
+            if group
+                .0
+                .skip()
+                .and_then(Cursor::skip)
+                .map_or(false, T::Token::peek)
+            {
+                return true;
+            }
+        }
         self.cursor()
             .skip()
             .and_then(Cursor::skip)
