@@ -621,6 +621,11 @@ impl<'a> ParseBuffer<'a> {
     /// ```
     pub fn peek2<T: Peek>(&self, token: T) -> bool {
         let _ = token;
+        if let Some(group) = self.cursor().group(Delimiter::None) {
+            if group.0.skip().map_or(false, T::Token::peek) {
+                return true;
+            }
+        }
         self.cursor().skip().map_or(false, T::Token::peek)
     }
 
