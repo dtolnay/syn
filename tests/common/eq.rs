@@ -445,8 +445,8 @@ impl SpanlessEq for TokenStream {
 
 impl SpanlessEq for LazyTokenStream {
     fn eq(&self, other: &Self) -> bool {
-        let this = self.into_token_stream();
-        let other = other.into_token_stream();
+        let this = self.create_token_stream();
+        let other = other.create_token_stream();
         SpanlessEq::eq(&this, &other)
     }
 }
