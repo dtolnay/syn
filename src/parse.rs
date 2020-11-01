@@ -620,13 +620,13 @@ impl<'a> ParseBuffer<'a> {
     /// }
     /// ```
     pub fn peek2<T: Peek>(&self, token: T) -> bool {
-        fn peek2(buffer: &ParseBuffer, f: fn(Cursor) -> bool) -> bool {
+        fn peek2(buffer: &ParseBuffer, peek: fn(Cursor) -> bool) -> bool {
             if let Some(group) = buffer.cursor().group(Delimiter::None) {
-                if group.0.skip().map_or(false, f) {
+                if group.0.skip().map_or(false, peek) {
                     return true;
                 }
             }
-            buffer.cursor().skip().map_or(false, f)
+            buffer.cursor().skip().map_or(false, peek)
         }
 
         let _ = token;
@@ -635,9 +635,9 @@ impl<'a> ParseBuffer<'a> {
 
     /// Looks at the third-next token in the parse stream.
     pub fn peek3<T: Peek>(&self, token: T) -> bool {
-        fn peek3(buffer: &ParseBuffer, f: fn(Cursor) -> bool) -> bool {
+        fn peek3(buffer: &ParseBuffer, peek: fn(Cursor) -> bool) -> bool {
             if let Some(group) = buffer.cursor().group(Delimiter::None) {
-                if group.0.skip().and_then(Cursor::skip).map_or(false, f) {
+                if group.0.skip().and_then(Cursor::skip).map_or(false, peek) {
                     return true;
                 }
             }
@@ -645,7 +645,7 @@ impl<'a> ParseBuffer<'a> {
                 .cursor()
                 .skip()
                 .and_then(Cursor::skip)
-                .map_or(false, f)
+                .map_or(false, peek)
         }
 
         let _ = token;
