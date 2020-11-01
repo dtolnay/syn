@@ -620,17 +620,36 @@ impl<'a> ParseBuffer<'a> {
     /// }
     /// ```
     pub fn peek2<T: Peek>(&self, token: T) -> bool {
+        fn peek2(buffer: &ParseBuffer, f: fn(Cursor) -> bool) -> bool {
+            if let Some(group) = buffer.cursor().group(Delimiter::None) {
+                if group.0.skip().map_or(false, f) {
+                    return true;
+                }
+            }
+            buffer.cursor().skip().map_or(false, f)
+        }
+
         let _ = token;
-        self.cursor().skip().map_or(false, T::Token::peek)
+        peek2(self, T::Token::peek)
     }
 
     /// Looks at the third-next token in the parse stream.
     pub fn peek3<T: Peek>(&self, token: T) -> bool {
+        fn peek3(buffer: &ParseBuffer, f: fn(Cursor) -> bool) -> bool {
+            if let Some(group) = buffer.cursor().group(Delimiter::None) {
+                if group.0.skip().and_then(Cursor::skip).map_or(false, f) {
+                    return true;
+                }
+            }
+            buffer
+                .cursor()
+                .skip()
+                .and_then(Cursor::skip)
+                .map_or(false, f)
+        }
+
         let _ = token;
-        self.cursor()
-            .skip()
-            .and_then(Cursor::skip)
-            .map_or(false, T::Token::peek)
+        peek3(self, T::Token::peek)
     }
 
     /// Parses zero or more occurrences of `T` separated by punctuation of type
