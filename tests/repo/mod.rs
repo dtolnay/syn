@@ -52,11 +52,7 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         panic!("unexpected path in Rust dist: {}", path_string);
     };
 
-    // TODO assert that parsing fails on the parse-fail cases
-    if path.starts_with("src/test/parse-fail")
-        || path.starts_with("src/test/compile-fail")
-        || path.starts_with("src/test/rustfix")
-    {
+    if path.starts_with("src/test/compile-fail") || path.starts_with("src/test/rustfix") {
         return false;
     }
 
