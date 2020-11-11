@@ -198,7 +198,7 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// This method operates on librustc objects.
 fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_ast::ast::{
-        Block, BorrowKind, Expr, ExprKind, Field, GenericArg, MacCall, Pat, Stmt, StmtKind, Ty,
+        Block, BorrowKind, Expr, ExprKind, Field, GenericArg, Pat, Stmt, StmtKind, Ty,
     };
     use rustc_ast::mut_visit::{noop_visit_generic_arg, MutVisitor};
     use rustc_data_structures::map_in_place::MapInPlace;
@@ -298,15 +298,6 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 
         fn visit_ty(&mut self, ty: &mut P<Ty>) {
             let _ = ty;
-        }
-
-        fn visit_mac(&mut self, mac: &mut MacCall) {
-            // By default when folding over macros, librustc panics. This is
-            // because it's usually not what you want, you want to run after
-            // macro expansion. We do want to do that (syn doesn't do macro
-            // expansion), so we implement visit_mac to just return the macro
-            // unchanged.
-            let _ = mac;
         }
     }
 
