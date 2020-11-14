@@ -198,7 +198,7 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// This method operates on librustc objects.
 fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_ast::ast::{
-        Block, BorrowKind, Expr, ExprKind, Field, GenericArg, Pat, Stmt, StmtKind, Ty,
+        Block, BorrowKind, Expr, ExprKind, Field, GenericArg, Pat, Stmt, StmtKind, StructRest, Ty,
     };
     use rustc_ast::mut_visit::{noop_visit_generic_arg, MutVisitor};
     use rustc_data_structures::map_in_place::MapInPlace;
@@ -237,13 +237,15 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     }
 
     fn noop_visit_expr<T: MutVisitor>(e: &mut Expr, vis: &mut T) {
-        use rustc_ast::mut_visit::{noop_visit_expr, visit_opt, visit_thin_attrs};
+        use rustc_ast::mut_visit::{noop_visit_expr, visit_thin_attrs};
         match &mut e.kind {
             ExprKind::AddrOf(BorrowKind::Raw, ..) => {}
             ExprKind::Struct(path, fields, expr) => {
                 vis.visit_path(path);
                 fields.flat_map_in_place(|field| flat_map_field(field, vis));
-                visit_opt(expr, |expr| vis.visit_expr(expr));
+                if let StructRest::Base(expr) = expr {
+                    vis.visit_expr(expr);
+                }
                 vis.visit_id(&mut e.id);
                 vis.visit_span(&mut e.span);
                 visit_thin_attrs(&mut e.attrs, vis);

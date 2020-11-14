@@ -15,10 +15,10 @@ use rustc_ast::ast::{
     LlvmInlineAsm, LlvmInlineAsmOutput, Local, MacArgs, MacCall, MacCallStmt, MacDelimiter,
     MacStmtStyle, MacroDef, Mod, Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs,
     Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt,
-    StmtKind, StrLit, StrStyle, StructField, TraitBoundModifier, TraitObjectSyntax, TraitRef, Ty,
-    TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant, VariantData,
-    Visibility, VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
-    WhereRegionPredicate,
+    StmtKind, StrLit, StrStyle, StructField, StructRest, TraitBoundModifier, TraitObjectSyntax,
+    TraitRef, Ty, TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant,
+    VariantData, Visibility, VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate,
+    WherePredicate, WhereRegionPredicate,
 };
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, DelimToken, Token, TokenKind};
@@ -353,6 +353,7 @@ spanless_eq_enum!(RangeEnd; Included(0) Excluded);
 spanless_eq_enum!(RangeLimits; HalfOpen Closed);
 spanless_eq_enum!(StmtKind; Local(0) Item(0) Expr(0) Semi(0) Empty MacCall(0));
 spanless_eq_enum!(StrStyle; Cooked Raw(0));
+spanless_eq_enum!(StructRest; Base(0) Rest(0) None);
 spanless_eq_enum!(TokenTree; Token(0) Delimited(0 1 2));
 spanless_eq_enum!(TraitBoundModifier; None Maybe MaybeConst MaybeConstMaybe);
 spanless_eq_enum!(TraitObjectSyntax; Dyn None);
