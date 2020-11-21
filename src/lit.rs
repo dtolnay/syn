@@ -173,6 +173,7 @@ impl LitStr {
     /// }
     /// ```
     #[cfg(feature = "parsing")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse<T: Parse>(&self) -> Result<T> {
         self.parse_with(T::parse)
     }
@@ -202,6 +203,7 @@ impl LitStr {
     /// # }
     /// ```
     #[cfg(feature = "parsing")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
         use proc_macro2::Group;
 

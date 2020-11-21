@@ -3,6 +3,7 @@ ast_enum! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum BinOp {
         /// The `+` operator (addition)
         Add(Token![+]),
@@ -68,6 +69,7 @@ ast_enum! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum UnOp {
         /// The `*` operator for dereferencing
         Deref(Token![*]),

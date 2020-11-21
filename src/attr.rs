@@ -144,6 +144,7 @@ ast_struct! {
     /// };
     /// assert_eq!(doc, attr);
     /// ```
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Attribute {
         pub pound_token: Token![#],
         pub style: AttrStyle,
@@ -160,6 +161,7 @@ impl Attribute {
     /// *This function is available only if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_meta(&self) -> Result<Meta> {
         fn clone_ident_segment(segment: &PathSegment) -> PathSegment {
             PathSegment {
@@ -207,6 +209,7 @@ impl Attribute {
     /// *This function is available only if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_args<T: Parse>(&self) -> Result<T> {
         self.parse_args_with(T::parse)
     }
@@ -216,6 +219,7 @@ impl Attribute {
     /// *This function is available only if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_args_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
         let parser = |input: ParseStream| {
             let args = enter_args(self, input)?;
@@ -229,6 +233,7 @@ impl Attribute {
     /// *This function is available only if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
         let mut attrs = Vec::new();
         while input.peek(Token![#]) {
@@ -242,6 +247,7 @@ impl Attribute {
     /// *This function is available only if Syn is built with the `"parsing"`
     /// feature.*
     #[cfg(feature = "parsing")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
         let mut attrs = Vec::new();
         while input.peek(Token![#]) && input.peek2(Token![!]) {
@@ -321,6 +327,7 @@ ast_enum! {
     /// - `#![feature(proc_macro)]`
     /// - `//! # Example`
     /// - `/*! Please file an issue */`
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum AttrStyle {
         Outer,
         Inner(Token![!]),
@@ -354,6 +361,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum Meta {
         Path(Path),
 
@@ -370,6 +378,7 @@ ast_struct! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct MetaList {
         pub path: Path,
         pub paren_token: token::Paren,
@@ -382,6 +391,7 @@ ast_struct! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct MetaNameValue {
         pub path: Path,
         pub eq_token: Token![=],
@@ -408,6 +418,7 @@ ast_enum_of_structs! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum NestedMeta {
         /// A structured meta item, like the `Copy` in `#[derive(Copy)]` which
         /// would be a nested `Meta::Path`.
@@ -453,6 +464,7 @@ ast_enum_of_structs! {
 /// #   "".parse().unwrap()
 /// }
 /// ```
+#[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub type AttributeArgs = Vec<NestedMeta>;
 
 pub trait FilterAttrs<'a> {
