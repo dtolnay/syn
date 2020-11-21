@@ -361,6 +361,7 @@ where
 }
 
 #[cfg(feature = "extra-traits")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl<T, P> Eq for Punctuated<T, P>
 where
     T: Eq,
@@ -369,6 +370,7 @@ where
 }
 
 #[cfg(feature = "extra-traits")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl<T, P> PartialEq for Punctuated<T, P>
 where
     T: PartialEq,
@@ -381,6 +383,7 @@ where
 }
 
 #[cfg(feature = "extra-traits")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl<T, P> Hash for Punctuated<T, P>
 where
     T: Hash,
@@ -394,6 +397,7 @@ where
 }
 
 #[cfg(feature = "extra-traits")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl<T: Debug, P: Debug> Debug for Punctuated<T, P> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut list = f.debug_list();

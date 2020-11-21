@@ -36,6 +36,7 @@ impl Clone for Reserved {
 }
 
 #[cfg(feature = "extra-traits")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Reserved {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.debug_struct("Reserved").finish()

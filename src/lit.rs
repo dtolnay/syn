@@ -513,6 +513,7 @@ mod debug_impls {
     use super::*;
     use std::fmt::{self, Debug};
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
     impl Debug for LitStr {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
@@ -522,6 +523,7 @@ mod debug_impls {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
     impl Debug for LitByteStr {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
@@ -531,6 +533,7 @@ mod debug_impls {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
     impl Debug for LitByte {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
@@ -540,6 +543,7 @@ mod debug_impls {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
     impl Debug for LitChar {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
@@ -549,6 +553,7 @@ mod debug_impls {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
     impl Debug for LitInt {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
@@ -558,6 +563,7 @@ mod debug_impls {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
     impl Debug for LitFloat {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
@@ -567,6 +573,7 @@ mod debug_impls {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
     impl Debug for LitBool {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter
@@ -625,6 +632,7 @@ macro_rules! lit_extra_traits {
         }
 
         #[cfg(feature = "extra-traits")]
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl PartialEq for $ty {
             fn eq(&self, other: &Self) -> bool {
                 self.repr.token.to_string() == other.repr.token.to_string()
@@ -632,6 +640,7 @@ macro_rules! lit_extra_traits {
         }
 
         #[cfg(feature = "extra-traits")]
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl Hash for $ty {
             fn hash<H>(&self, state: &mut H)
             where

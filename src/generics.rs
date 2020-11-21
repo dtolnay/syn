@@ -375,6 +375,7 @@ macro_rules! generics_wrapper_impls {
         }
 
         #[cfg(feature = "extra-traits")]
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl<'a> Debug for $ty<'a> {
             fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter
@@ -385,9 +386,11 @@ macro_rules! generics_wrapper_impls {
         }
 
         #[cfg(feature = "extra-traits")]
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl<'a> Eq for $ty<'a> {}
 
         #[cfg(feature = "extra-traits")]
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl<'a> PartialEq for $ty<'a> {
             fn eq(&self, other: &Self) -> bool {
                 self.0 == other.0
@@ -395,6 +398,7 @@ macro_rules! generics_wrapper_impls {
         }
 
         #[cfg(feature = "extra-traits")]
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl<'a> Hash for $ty<'a> {
             fn hash<H: Hasher>(&self, state: &mut H) {
                 self.0.hash(state);

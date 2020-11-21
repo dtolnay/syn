@@ -81,6 +81,7 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
 
     quote! {
         #cfg_features
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl Debug for #ident {
             fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 #body

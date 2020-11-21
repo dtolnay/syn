@@ -280,6 +280,7 @@ macro_rules! define_keywords {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl Debug for $name {
                 fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                     f.write_str(stringify!($name))
@@ -287,9 +288,11 @@ macro_rules! define_keywords {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl cmp::Eq for $name {}
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl PartialEq for $name {
                 fn eq(&self, _other: &$name) -> bool {
                     true
@@ -297,6 +300,7 @@ macro_rules! define_keywords {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl Hash for $name {
                 fn hash<H: Hasher>(&self, _state: &mut H) {}
             }
@@ -399,6 +403,7 @@ macro_rules! define_punctuation_structs {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl Debug for $name {
                 fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                     f.write_str(stringify!($name))
@@ -406,9 +411,11 @@ macro_rules! define_punctuation_structs {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl cmp::Eq for $name {}
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl PartialEq for $name {
                 fn eq(&self, _other: &$name) -> bool {
                     true
@@ -416,6 +423,7 @@ macro_rules! define_punctuation_structs {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl Hash for $name {
                 fn hash<H: Hasher>(&self, _state: &mut H) {}
             }
@@ -504,6 +512,7 @@ macro_rules! define_delimiters {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl Debug for $name {
                 fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                     f.write_str(stringify!($name))
@@ -511,9 +520,11 @@ macro_rules! define_delimiters {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl cmp::Eq for $name {}
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl PartialEq for $name {
                 fn eq(&self, _other: &$name) -> bool {
                     true
@@ -521,6 +532,7 @@ macro_rules! define_delimiters {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl Hash for $name {
                 fn hash<H: Hasher>(&self, _state: &mut H) {}
             }

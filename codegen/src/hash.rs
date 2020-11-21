@@ -131,6 +131,7 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
 
     quote! {
         #cfg_features
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl Hash for #ident {
             fn hash<H>(&self, #state: &mut H)
             where
