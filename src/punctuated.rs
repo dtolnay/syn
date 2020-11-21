@@ -361,7 +361,6 @@ where
 }
 
 #[cfg(feature = "extra-traits")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl<T, P> Eq for Punctuated<T, P>
 where
     T: Eq,

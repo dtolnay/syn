@@ -113,7 +113,8 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
 
     let eq = quote! {
         #cfg_features
-        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+        // https://github.com/rust-lang/rust/issues/79279
+        // #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl Eq for #ident {}
     };
 

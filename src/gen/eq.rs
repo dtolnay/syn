@@ -5,7 +5,6 @@
 use crate::tt::TokenStreamHelper;
 use crate::*;
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Abi {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -15,7 +14,6 @@ impl PartialEq for Abi {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for AngleBracketedGenericArguments {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -25,7 +23,6 @@ impl PartialEq for AngleBracketedGenericArguments {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Arm {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -39,7 +36,6 @@ impl PartialEq for Arm {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for AttrStyle {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -53,7 +49,6 @@ impl PartialEq for AttrStyle {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Attribute {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -65,7 +60,6 @@ impl PartialEq for Attribute {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for BareFnArg {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -75,7 +69,6 @@ impl PartialEq for BareFnArg {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for BinOp {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -115,7 +108,6 @@ impl PartialEq for BinOp {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Binding {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -125,7 +117,6 @@ impl PartialEq for Binding {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Block {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -135,7 +126,6 @@ impl PartialEq for Block {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for BoundLifetimes {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -145,7 +135,6 @@ impl PartialEq for BoundLifetimes {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ConstParam {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -159,7 +148,6 @@ impl PartialEq for ConstParam {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Constraint {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -169,7 +157,6 @@ impl PartialEq for Constraint {
     }
 }
 #[cfg(feature = "derive")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Data {}
 #[cfg(feature = "derive")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -184,7 +171,6 @@ impl PartialEq for Data {
     }
 }
 #[cfg(feature = "derive")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for DataEnum {}
 #[cfg(feature = "derive")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -194,7 +180,6 @@ impl PartialEq for DataEnum {
     }
 }
 #[cfg(feature = "derive")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for DataStruct {}
 #[cfg(feature = "derive")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -204,7 +189,6 @@ impl PartialEq for DataStruct {
     }
 }
 #[cfg(feature = "derive")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for DataUnion {}
 #[cfg(feature = "derive")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -214,7 +198,6 @@ impl PartialEq for DataUnion {
     }
 }
 #[cfg(feature = "derive")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for DeriveInput {}
 #[cfg(feature = "derive")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -228,7 +211,6 @@ impl PartialEq for DeriveInput {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Expr {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -312,7 +294,6 @@ impl PartialEq for Expr {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprArray {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -322,7 +303,6 @@ impl PartialEq for ExprArray {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprAssign {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -332,7 +312,6 @@ impl PartialEq for ExprAssign {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprAssignOp {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -345,7 +324,6 @@ impl PartialEq for ExprAssignOp {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprAsync {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -355,7 +333,6 @@ impl PartialEq for ExprAsync {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprAwait {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -365,7 +342,6 @@ impl PartialEq for ExprAwait {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprBinary {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -378,7 +354,6 @@ impl PartialEq for ExprBinary {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprBlock {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -388,7 +363,6 @@ impl PartialEq for ExprBlock {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprBox {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -398,7 +372,6 @@ impl PartialEq for ExprBox {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprBreak {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -408,7 +381,6 @@ impl PartialEq for ExprBreak {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprCall {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -418,7 +390,6 @@ impl PartialEq for ExprCall {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprCast {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -428,7 +399,6 @@ impl PartialEq for ExprCast {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprClosure {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -444,7 +414,6 @@ impl PartialEq for ExprClosure {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprContinue {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -454,7 +423,6 @@ impl PartialEq for ExprContinue {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprField {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -464,7 +432,6 @@ impl PartialEq for ExprField {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprForLoop {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -478,7 +445,6 @@ impl PartialEq for ExprForLoop {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprGroup {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -488,7 +454,6 @@ impl PartialEq for ExprGroup {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprIf {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -501,7 +466,6 @@ impl PartialEq for ExprIf {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprIndex {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -511,7 +475,6 @@ impl PartialEq for ExprIndex {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprLet {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -521,7 +484,6 @@ impl PartialEq for ExprLet {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprLit {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -531,7 +493,6 @@ impl PartialEq for ExprLit {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprLoop {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -541,7 +502,6 @@ impl PartialEq for ExprLoop {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprMacro {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -551,7 +511,6 @@ impl PartialEq for ExprMacro {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprMatch {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -561,7 +520,6 @@ impl PartialEq for ExprMatch {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprMethodCall {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -575,7 +533,6 @@ impl PartialEq for ExprMethodCall {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprParen {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -585,7 +542,6 @@ impl PartialEq for ExprParen {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprPath {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -595,7 +551,6 @@ impl PartialEq for ExprPath {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprRange {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -608,7 +563,6 @@ impl PartialEq for ExprRange {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprReference {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -618,7 +572,6 @@ impl PartialEq for ExprReference {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprRepeat {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -628,7 +581,6 @@ impl PartialEq for ExprRepeat {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprReturn {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -638,7 +590,6 @@ impl PartialEq for ExprReturn {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprStruct {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -652,7 +603,6 @@ impl PartialEq for ExprStruct {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprTry {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -662,7 +612,6 @@ impl PartialEq for ExprTry {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprTryBlock {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -672,7 +621,6 @@ impl PartialEq for ExprTryBlock {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprTuple {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -682,7 +630,6 @@ impl PartialEq for ExprTuple {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprType {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -692,7 +639,6 @@ impl PartialEq for ExprType {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprUnary {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -702,7 +648,6 @@ impl PartialEq for ExprUnary {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprUnsafe {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -712,7 +657,6 @@ impl PartialEq for ExprUnsafe {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprWhile {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -725,7 +669,6 @@ impl PartialEq for ExprWhile {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprYield {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -735,7 +678,6 @@ impl PartialEq for ExprYield {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Field {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -749,7 +691,6 @@ impl PartialEq for Field {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for FieldPat {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -762,7 +703,6 @@ impl PartialEq for FieldPat {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for FieldValue {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -775,7 +715,6 @@ impl PartialEq for FieldValue {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Fields {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -790,7 +729,6 @@ impl PartialEq for Fields {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for FieldsNamed {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -800,7 +738,6 @@ impl PartialEq for FieldsNamed {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for FieldsUnnamed {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -810,7 +747,6 @@ impl PartialEq for FieldsUnnamed {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for File {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -820,7 +756,6 @@ impl PartialEq for File {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for FnArg {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -834,7 +769,6 @@ impl PartialEq for FnArg {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ForeignItem {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -853,7 +787,6 @@ impl PartialEq for ForeignItem {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ForeignItemFn {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -863,7 +796,6 @@ impl PartialEq for ForeignItemFn {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ForeignItemMacro {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -873,7 +805,6 @@ impl PartialEq for ForeignItemMacro {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ForeignItemStatic {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -887,7 +818,6 @@ impl PartialEq for ForeignItemStatic {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ForeignItemType {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -897,7 +827,6 @@ impl PartialEq for ForeignItemType {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for GenericArgument {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -918,7 +847,6 @@ impl PartialEq for GenericArgument {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for GenericMethodArgument {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -936,7 +864,6 @@ impl PartialEq for GenericMethodArgument {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for GenericParam {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -951,7 +878,6 @@ impl PartialEq for GenericParam {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Generics {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -964,7 +890,6 @@ impl PartialEq for Generics {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ImplItem {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -983,7 +908,6 @@ impl PartialEq for ImplItem {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ImplItemConst {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -998,7 +922,6 @@ impl PartialEq for ImplItemConst {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ImplItemMacro {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1008,7 +931,6 @@ impl PartialEq for ImplItemMacro {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ImplItemMethod {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1022,7 +944,6 @@ impl PartialEq for ImplItemMethod {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ImplItemType {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1037,7 +958,6 @@ impl PartialEq for ImplItemType {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Item {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1068,7 +988,6 @@ impl PartialEq for Item {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemConst {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1082,7 +1001,6 @@ impl PartialEq for ItemConst {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemEnum {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1096,7 +1014,6 @@ impl PartialEq for ItemEnum {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemExternCrate {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1109,7 +1026,6 @@ impl PartialEq for ItemExternCrate {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemFn {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1122,7 +1038,6 @@ impl PartialEq for ItemFn {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemForeignMod {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1132,7 +1047,6 @@ impl PartialEq for ItemForeignMod {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemImpl {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1148,7 +1062,6 @@ impl PartialEq for ItemImpl {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemMacro {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1161,7 +1074,6 @@ impl PartialEq for ItemMacro {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemMacro2 {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1174,7 +1086,6 @@ impl PartialEq for ItemMacro2 {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemMod {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1188,7 +1099,6 @@ impl PartialEq for ItemMod {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemStatic {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1203,7 +1113,6 @@ impl PartialEq for ItemStatic {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemStruct {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1218,7 +1127,6 @@ impl PartialEq for ItemStruct {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemTrait {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1236,7 +1144,6 @@ impl PartialEq for ItemTrait {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemTraitAlias {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1250,7 +1157,6 @@ impl PartialEq for ItemTraitAlias {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemType {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1264,7 +1170,6 @@ impl PartialEq for ItemType {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemUnion {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1278,7 +1183,6 @@ impl PartialEq for ItemUnion {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ItemUse {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1291,7 +1195,6 @@ impl PartialEq for ItemUse {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Label {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1301,7 +1204,6 @@ impl PartialEq for Label {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for LifetimeDef {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1313,7 +1215,6 @@ impl PartialEq for LifetimeDef {
             && self.bounds == other.bounds
     }
 }
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Lit {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for Lit {
@@ -1333,7 +1234,6 @@ impl PartialEq for Lit {
         }
     }
 }
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for LitBool {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for LitBool {
@@ -1341,20 +1241,13 @@ impl PartialEq for LitBool {
         self.value == other.value
     }
 }
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for LitByte {}
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for LitByteStr {}
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for LitChar {}
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for LitFloat {}
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for LitInt {}
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for LitStr {}
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Local {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1364,7 +1257,6 @@ impl PartialEq for Local {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Macro {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1376,7 +1268,6 @@ impl PartialEq for Macro {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for MacroDelimiter {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1391,7 +1282,6 @@ impl PartialEq for MacroDelimiter {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Meta {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1406,7 +1296,6 @@ impl PartialEq for Meta {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for MetaList {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1416,7 +1305,6 @@ impl PartialEq for MetaList {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for MetaNameValue {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1426,7 +1314,6 @@ impl PartialEq for MetaNameValue {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for MethodTurbofish {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1436,7 +1323,6 @@ impl PartialEq for MethodTurbofish {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for NestedMeta {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1450,7 +1336,6 @@ impl PartialEq for NestedMeta {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ParenthesizedGenericArguments {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1460,7 +1345,6 @@ impl PartialEq for ParenthesizedGenericArguments {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Pat {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1490,7 +1374,6 @@ impl PartialEq for Pat {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatBox {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1500,7 +1383,6 @@ impl PartialEq for PatBox {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatIdent {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1514,7 +1396,6 @@ impl PartialEq for PatIdent {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatLit {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1524,7 +1405,6 @@ impl PartialEq for PatLit {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatMacro {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1534,7 +1414,6 @@ impl PartialEq for PatMacro {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatOr {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1546,7 +1425,6 @@ impl PartialEq for PatOr {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatPath {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1556,7 +1434,6 @@ impl PartialEq for PatPath {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatRange {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1569,7 +1446,6 @@ impl PartialEq for PatRange {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatReference {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1579,7 +1455,6 @@ impl PartialEq for PatReference {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatRest {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1589,7 +1464,6 @@ impl PartialEq for PatRest {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatSlice {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1599,7 +1473,6 @@ impl PartialEq for PatSlice {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatStruct {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1612,7 +1485,6 @@ impl PartialEq for PatStruct {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatTuple {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1622,7 +1494,6 @@ impl PartialEq for PatTuple {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatTupleStruct {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1632,7 +1503,6 @@ impl PartialEq for PatTupleStruct {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatType {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1642,7 +1512,6 @@ impl PartialEq for PatType {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatWild {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1652,7 +1521,6 @@ impl PartialEq for PatWild {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Path {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1662,7 +1530,6 @@ impl PartialEq for Path {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PathArguments {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1681,7 +1548,6 @@ impl PartialEq for PathArguments {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PathSegment {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1691,7 +1557,6 @@ impl PartialEq for PathSegment {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PredicateEq {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1701,7 +1566,6 @@ impl PartialEq for PredicateEq {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PredicateLifetime {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1711,7 +1575,6 @@ impl PartialEq for PredicateLifetime {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PredicateType {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1723,7 +1586,6 @@ impl PartialEq for PredicateType {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for QSelf {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1733,7 +1595,6 @@ impl PartialEq for QSelf {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for RangeLimits {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1747,7 +1608,6 @@ impl PartialEq for RangeLimits {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Receiver {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1759,7 +1619,6 @@ impl PartialEq for Receiver {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ReturnType {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1773,7 +1632,6 @@ impl PartialEq for ReturnType {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Signature {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1791,7 +1649,6 @@ impl PartialEq for Signature {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Stmt {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1807,7 +1664,6 @@ impl PartialEq for Stmt {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TraitBound {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1820,7 +1676,6 @@ impl PartialEq for TraitBound {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TraitBoundModifier {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1834,7 +1689,6 @@ impl PartialEq for TraitBoundModifier {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TraitItem {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1853,7 +1707,6 @@ impl PartialEq for TraitItem {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TraitItemConst {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1866,7 +1719,6 @@ impl PartialEq for TraitItemConst {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TraitItemMacro {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1876,7 +1728,6 @@ impl PartialEq for TraitItemMacro {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TraitItemMethod {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1889,7 +1740,6 @@ impl PartialEq for TraitItemMethod {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TraitItemType {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1904,7 +1754,6 @@ impl PartialEq for TraitItemType {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Type {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1933,7 +1782,6 @@ impl PartialEq for Type {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeArray {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1943,7 +1791,6 @@ impl PartialEq for TypeArray {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeBareFn {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1958,7 +1805,6 @@ impl PartialEq for TypeBareFn {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeGroup {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1968,7 +1814,6 @@ impl PartialEq for TypeGroup {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeImplTrait {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1978,7 +1823,6 @@ impl PartialEq for TypeImplTrait {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeInfer {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1988,7 +1832,6 @@ impl PartialEq for TypeInfer {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeMacro {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1998,7 +1841,6 @@ impl PartialEq for TypeMacro {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeNever {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2008,7 +1850,6 @@ impl PartialEq for TypeNever {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeParam {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2023,7 +1864,6 @@ impl PartialEq for TypeParam {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeParamBound {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2037,7 +1877,6 @@ impl PartialEq for TypeParamBound {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeParen {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2047,7 +1886,6 @@ impl PartialEq for TypeParen {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypePath {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2057,7 +1895,6 @@ impl PartialEq for TypePath {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypePtr {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2069,7 +1906,6 @@ impl PartialEq for TypePtr {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeReference {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2081,7 +1917,6 @@ impl PartialEq for TypeReference {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeSlice {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2091,7 +1926,6 @@ impl PartialEq for TypeSlice {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeTraitObject {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2101,7 +1935,6 @@ impl PartialEq for TypeTraitObject {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TypeTuple {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2111,7 +1944,6 @@ impl PartialEq for TypeTuple {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for UnOp {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2126,7 +1958,6 @@ impl PartialEq for UnOp {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for UseGlob {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2136,7 +1967,6 @@ impl PartialEq for UseGlob {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for UseGroup {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2146,7 +1976,6 @@ impl PartialEq for UseGroup {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for UseName {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2156,7 +1985,6 @@ impl PartialEq for UseName {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for UsePath {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2166,7 +1994,6 @@ impl PartialEq for UsePath {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for UseRename {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2176,7 +2003,6 @@ impl PartialEq for UseRename {
     }
 }
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for UseTree {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2193,7 +2019,6 @@ impl PartialEq for UseTree {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Variadic {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2203,7 +2028,6 @@ impl PartialEq for Variadic {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Variant {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2216,7 +2040,6 @@ impl PartialEq for Variant {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for VisCrate {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2226,7 +2049,6 @@ impl PartialEq for VisCrate {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for VisPublic {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2236,7 +2058,6 @@ impl PartialEq for VisPublic {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for VisRestricted {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2246,7 +2067,6 @@ impl PartialEq for VisRestricted {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Visibility {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2262,7 +2082,6 @@ impl PartialEq for Visibility {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for WhereClause {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2272,7 +2091,6 @@ impl PartialEq for WhereClause {
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for WherePredicate {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
