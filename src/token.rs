@@ -268,9 +268,11 @@ macro_rules! define_keywords {
             }
 
             #[cfg(feature = "clone-impls")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Copy for $name {}
 
             #[cfg(feature = "clone-impls")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Clone for $name {
                 fn clone(&self) -> Self {
                     *self
@@ -385,9 +387,11 @@ macro_rules! define_punctuation_structs {
             }
 
             #[cfg(feature = "clone-impls")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Copy for $name {}
 
             #[cfg(feature = "clone-impls")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Clone for $name {
                 fn clone(&self) -> Self {
                     *self
@@ -488,9 +492,11 @@ macro_rules! define_delimiters {
             }
 
             #[cfg(feature = "clone-impls")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Copy for $name {}
 
             #[cfg(feature = "clone-impls")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Clone for $name {
                 fn clone(&self) -> Self {
                     *self

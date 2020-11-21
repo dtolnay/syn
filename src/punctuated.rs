@@ -346,6 +346,7 @@ impl<T, P> Punctuated<T, P> {
 }
 
 #[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl<T, P> Clone for Punctuated<T, P>
 where
     T: Clone,
@@ -932,6 +933,7 @@ impl<T, P> Pair<T, P> {
 }
 
 #[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl<T, P> Clone for Pair<T, P>
 where
     T: Clone,

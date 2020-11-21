@@ -578,6 +578,7 @@ mod debug_impls {
 }
 
 #[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for LitRepr {
     fn clone(&self) -> Self {
         LitRepr {
@@ -588,6 +589,7 @@ impl Clone for LitRepr {
 }
 
 #[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for LitIntRepr {
     fn clone(&self) -> Self {
         LitIntRepr {
@@ -599,6 +601,7 @@ impl Clone for LitIntRepr {
 }
 
 #[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for LitFloatRepr {
     fn clone(&self) -> Self {
         LitFloatRepr {
@@ -612,6 +615,7 @@ impl Clone for LitFloatRepr {
 macro_rules! lit_extra_traits {
     ($ty:ident) => {
         #[cfg(feature = "clone-impls")]
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
         impl Clone for $ty {
             fn clone(&self) -> Self {
                 $ty {

@@ -26,6 +26,7 @@ impl Default for Reserved {
 }
 
 #[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for Reserved {
     fn clone(&self) -> Self {
         Reserved {

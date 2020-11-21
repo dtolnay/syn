@@ -367,6 +367,7 @@ impl Generics {
 macro_rules! generics_wrapper_impls {
     ($ty:ident) => {
         #[cfg(feature = "clone-impls")]
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
         impl<'a> Clone for $ty<'a> {
             fn clone(&self) -> Self {
                 $ty(self.0)
