@@ -16,9 +16,6 @@ use crate::lookahead;
 ///   the XID_Start property.
 /// - All following characters must be Unicode code points with the XID_Continue
 ///   property.
-///
-/// *This type is available only if Syn is built with the `"derive"` or `"full"`
-/// feature.*
 pub struct Lifetime {
     pub apostrophe: Span,
     pub ident: Ident,
