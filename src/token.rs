@@ -300,6 +300,7 @@ macro_rules! define_keywords {
             }
 
             #[cfg(feature = "printing")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
             impl ToTokens for $name {
                 fn to_tokens(&self, tokens: &mut TokenStream) {
                     printing::keyword($token, self.span, tokens);
@@ -427,6 +428,7 @@ macro_rules! define_punctuation {
             }
 
             #[cfg(feature = "printing")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
             impl ToTokens for $name {
                 fn to_tokens(&self, tokens: &mut TokenStream) {
                     printing::punct($token, &self.spans, tokens);
@@ -536,6 +538,7 @@ define_punctuation_structs! {
 }
 
 #[cfg(feature = "printing")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
 impl ToTokens for Underscore {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         tokens.append(Ident::new("_", self.span));
