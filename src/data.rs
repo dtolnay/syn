@@ -6,6 +6,7 @@ ast_struct! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Variant {
         /// Attributes tagged on the variant.
         pub attrs: Vec<Attribute>,
@@ -35,6 +36,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum Fields {
         /// Named fields of a struct or struct variant such as `Point { x: f64,
         /// y: f64 }`.
@@ -54,6 +56,7 @@ ast_struct! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct FieldsNamed {
         pub brace_token: token::Brace,
         pub named: Punctuated<Field, Token![,]>,
@@ -65,6 +68,7 @@ ast_struct! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct FieldsUnnamed {
         pub paren_token: token::Paren,
         pub unnamed: Punctuated<Field, Token![,]>,
@@ -149,6 +153,7 @@ ast_struct! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Field {
         /// Attributes tagged on the field.
         pub attrs: Vec<Attribute>,
@@ -183,6 +188,7 @@ ast_enum_of_structs! {
     //
     // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
     // blocked on https://github.com/rust-lang/rust/issues/62833
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum Visibility {
         /// A public visibility level: `pub`.
         Public(VisPublic),
@@ -204,6 +210,7 @@ ast_struct! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct VisPublic {
         pub pub_token: Token![pub],
     }
@@ -214,6 +221,7 @@ ast_struct! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct VisCrate {
         pub crate_token: Token![crate],
     }
@@ -225,6 +233,7 @@ ast_struct! {
     ///
     /// *This type is available only if Syn is built with the `"derive"` or
     /// `"full"` feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct VisRestricted {
         pub pub_token: Token![pub],
         pub paren_token: token::Paren,
@@ -291,6 +300,7 @@ pub mod parsing {
 
     impl Field {
         /// Parses a named (braced struct) field.
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
         pub fn parse_named(input: ParseStream) -> Result<Self> {
             Ok(Field {
                 attrs: input.call(Attribute::parse_outer)?,
@@ -302,6 +312,7 @@ pub mod parsing {
         }
 
         /// Parses an unnamed (tuple struct) field.
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
         pub fn parse_unnamed(input: ParseStream) -> Result<Self> {
             Ok(Field {
                 attrs: input.call(Attribute::parse_outer)?,
