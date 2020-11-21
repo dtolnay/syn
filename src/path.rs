@@ -218,12 +218,14 @@ pub mod parsing {
     use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Path {
         fn parse(input: ParseStream) -> Result<Self> {
             Self::parse_helper(input, false)
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for GenericArgument {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Lifetime) && !input.peek2(Token![+]) {
@@ -255,6 +257,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for AngleBracketedGenericArguments {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(AngleBracketedGenericArguments {
@@ -281,6 +284,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ParenthesizedGenericArguments {
         fn parse(input: ParseStream) -> Result<Self> {
             let content;
@@ -292,6 +296,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for PathSegment {
         fn parse(input: ParseStream) -> Result<Self> {
             Self::parse_helper(input, false)
@@ -324,6 +329,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Binding {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(Binding {
@@ -335,6 +341,7 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Constraint {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(Constraint {

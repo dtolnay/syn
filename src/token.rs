@@ -308,6 +308,7 @@ macro_rules! define_keywords {
             }
 
             #[cfg(feature = "parsing")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
             impl Parse for $name {
                 fn parse(input: ParseStream) -> Result<Self> {
                     Ok($name {
@@ -436,6 +437,7 @@ macro_rules! define_punctuation {
             }
 
             #[cfg(feature = "parsing")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
             impl Parse for $name {
                 fn parse(input: ParseStream) -> Result<Self> {
                     Ok($name {
@@ -546,6 +548,7 @@ impl ToTokens for Underscore {
 }
 
 #[cfg(feature = "parsing")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 impl Parse for Underscore {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| {

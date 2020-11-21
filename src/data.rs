@@ -249,6 +249,7 @@ pub mod parsing {
     use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Variant {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
@@ -278,6 +279,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for FieldsNamed {
         fn parse(input: ParseStream) -> Result<Self> {
             let content;
@@ -288,6 +290,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for FieldsUnnamed {
         fn parse(input: ParseStream) -> Result<Self> {
             let content;
@@ -324,6 +327,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Visibility {
         fn parse(input: ParseStream) -> Result<Self> {
             // Recognize an empty None-delimited group, as produced by a $:vis

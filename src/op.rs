@@ -127,6 +127,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for BinOp {
         #[cfg(not(feature = "full"))]
         fn parse(input: ParseStream) -> Result<Self> {
@@ -161,6 +162,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for UnOp {
         fn parse(input: ParseStream) -> Result<Self> {
             let lookahead = input.lookahead1();

@@ -687,6 +687,7 @@ pub mod parsing {
     use crate::parse::{Parse, ParseStream, Result};
     use proc_macro2::Punct;
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Lit {
         fn parse(input: ParseStream) -> Result<Self> {
             input.step(|cursor| {
@@ -758,6 +759,7 @@ pub mod parsing {
         ))
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for LitStr {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();
@@ -768,6 +770,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for LitByteStr {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();
@@ -778,6 +781,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for LitByte {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();
@@ -788,6 +792,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for LitChar {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();
@@ -798,6 +803,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for LitInt {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();
@@ -808,6 +814,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for LitFloat {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();
@@ -818,6 +825,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for LitBool {
         fn parse(input: ParseStream) -> Result<Self> {
             let head = input.fork();

@@ -565,6 +565,7 @@ pub mod parsing {
         })
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Meta {
         fn parse(input: ParseStream) -> Result<Self> {
             let path = input.call(parse_meta_path)?;
@@ -572,6 +573,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for MetaList {
         fn parse(input: ParseStream) -> Result<Self> {
             let path = input.call(parse_meta_path)?;
@@ -579,6 +581,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for MetaNameValue {
         fn parse(input: ParseStream) -> Result<Self> {
             let path = input.call(parse_meta_path)?;
@@ -586,6 +589,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for NestedMeta {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Lit) && !(input.peek(LitBool) && input.peek2(Token![=])) {

@@ -113,6 +113,7 @@ pub mod parsing {
     use super::*;
     use crate::parse::{Parse, ParseStream, Result};
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Lifetime {
         fn parse(input: ParseStream) -> Result<Self> {
             input.step(|cursor| {

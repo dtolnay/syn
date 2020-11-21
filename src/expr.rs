@@ -1102,6 +1102,7 @@ pub(crate) mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Expr {
         fn parse(input: ParseStream) -> Result<Self> {
             ambiguous_expr(input, AllowStruct(true))
@@ -1938,6 +1939,7 @@ pub(crate) mod parsing {
         Ok(expr)
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprLit {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(ExprLit {
@@ -1994,6 +1996,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprIf {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
@@ -2034,6 +2037,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprForLoop {
         fn parse(input: ParseStream) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
@@ -2063,6 +2067,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprLoop {
         fn parse(input: ParseStream) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
@@ -2084,6 +2089,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprMatch {
         fn parse(input: ParseStream) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
@@ -2117,6 +2123,7 @@ pub(crate) mod parsing {
         ) => {
             $(
                 #[cfg(all(feature = "full", feature = "printing"))]
+                #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
                 impl Parse for $expr_type {
                     fn parse(input: ParseStream) -> Result<Self> {
                         let mut expr: Expr = input.parse()?;
@@ -2293,6 +2300,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprWhile {
         fn parse(input: ParseStream) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
@@ -2316,6 +2324,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Label {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(Label {
@@ -2326,6 +2335,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Option<Label> {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Lifetime) {
@@ -2388,6 +2398,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for FieldValue {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
@@ -2512,6 +2523,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for RangeLimits {
         fn parse(input: ParseStream) -> Result<Self> {
             let lookahead = input.lookahead1();
@@ -2528,6 +2540,7 @@ pub(crate) mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprPath {
         fn parse(input: ParseStream) -> Result<Self> {
             #[cfg(not(feature = "full"))]
@@ -2541,6 +2554,7 @@ pub(crate) mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Member {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Ident) {
@@ -2554,6 +2568,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Arm {
         fn parse(input: ParseStream) -> Result<Arm> {
             let requires_comma;
@@ -2586,6 +2601,7 @@ pub(crate) mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Index {
         fn parse(input: ParseStream) -> Result<Self> {
             let lit: LitInt = input.parse()?;

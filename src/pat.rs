@@ -298,6 +298,7 @@ pub mod parsing {
     use crate::parse::{Parse, ParseBuffer, ParseStream, Result};
     use crate::path;
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Pat {
         fn parse(input: ParseStream) -> Result<Self> {
             let begin = input.fork();

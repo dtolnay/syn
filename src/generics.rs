@@ -595,6 +595,7 @@ pub mod parsing {
     use super::*;
     use crate::parse::{Parse, ParseStream, Result};
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Generics {
         fn parse(input: ParseStream) -> Result<Self> {
             if !input.peek(Token![<]) {
@@ -651,6 +652,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for GenericParam {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
@@ -677,6 +679,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for LifetimeDef {
         fn parse(input: ParseStream) -> Result<Self> {
             let has_colon;
@@ -714,6 +717,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for BoundLifetimes {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(BoundLifetimes {
@@ -735,6 +739,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Option<BoundLifetimes> {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Token![for]) {
@@ -745,6 +750,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeParam {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
@@ -798,6 +804,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeParamBound {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Lifetime) {
@@ -816,6 +823,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TraitBound {
         fn parse(input: ParseStream) -> Result<Self> {
             let modifier: TraitBoundModifier = input.parse()?;
@@ -836,6 +844,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TraitBoundModifier {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Token![?]) {
@@ -846,6 +855,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ConstParam {
         fn parse(input: ParseStream) -> Result<Self> {
             let mut default = None;
@@ -869,6 +879,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for WhereClause {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(WhereClause {
@@ -899,6 +910,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Option<WhereClause> {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Token![where]) {
@@ -909,6 +921,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for WherePredicate {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Lifetime) && input.peek2(Token![:]) {
