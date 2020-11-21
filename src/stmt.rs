@@ -133,6 +133,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Block {
         fn parse(input: ParseStream) -> Result<Self> {
             let content;
@@ -143,6 +144,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Stmt {
         fn parse(input: ParseStream) -> Result<Self> {
             parse_stmt(input, false)
@@ -280,6 +282,7 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for Block {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.brace_token.surround(tokens, |tokens| {
@@ -288,6 +291,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for Stmt {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             match self {
@@ -302,6 +306,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for Local {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             expr::printing::outer_attrs_to_tokens(&self.attrs, tokens);

@@ -218,12 +218,14 @@ pub mod parsing {
     use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Path {
         fn parse(input: ParseStream) -> Result<Self> {
             Self::parse_helper(input, false)
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for GenericArgument {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Lifetime) && !input.peek2(Token![+]) {
@@ -255,6 +257,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for AngleBracketedGenericArguments {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(AngleBracketedGenericArguments {
@@ -281,6 +284,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ParenthesizedGenericArguments {
         fn parse(input: ParseStream) -> Result<Self> {
             let content;
@@ -292,6 +296,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for PathSegment {
         fn parse(input: ParseStream) -> Result<Self> {
             Self::parse_helper(input, false)
@@ -324,6 +329,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Binding {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(Binding {
@@ -335,6 +341,7 @@ pub mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Constraint {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(Constraint {
@@ -572,6 +579,7 @@ mod printing {
     use quote::ToTokens;
     use std::cmp;
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for Path {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.leading_colon.to_tokens(tokens);
@@ -579,6 +587,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PathSegment {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.ident.to_tokens(tokens);
@@ -586,6 +595,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PathArguments {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             match self {
@@ -600,6 +610,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for GenericArgument {
         #[allow(clippy::match_same_arms)]
         fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -627,6 +638,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for AngleBracketedGenericArguments {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.colon2_token.to_tokens(tokens);
@@ -683,6 +695,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for Binding {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.ident.to_tokens(tokens);
@@ -691,6 +704,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for Constraint {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.ident.to_tokens(tokens);
@@ -699,6 +713,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ParenthesizedGenericArguments {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.paren_token.surround(tokens, |tokens| {

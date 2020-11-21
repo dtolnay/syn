@@ -268,9 +268,11 @@ macro_rules! define_keywords {
             }
 
             #[cfg(feature = "clone-impls")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Copy for $name {}
 
             #[cfg(feature = "clone-impls")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Clone for $name {
                 fn clone(&self) -> Self {
                     *self
@@ -278,6 +280,7 @@ macro_rules! define_keywords {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl Debug for $name {
                 fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                     f.write_str(stringify!($name))
@@ -288,6 +291,7 @@ macro_rules! define_keywords {
             impl cmp::Eq for $name {}
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl PartialEq for $name {
                 fn eq(&self, _other: &$name) -> bool {
                     true
@@ -295,11 +299,13 @@ macro_rules! define_keywords {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl Hash for $name {
                 fn hash<H: Hasher>(&self, _state: &mut H) {}
             }
 
             #[cfg(feature = "printing")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
             impl ToTokens for $name {
                 fn to_tokens(&self, tokens: &mut TokenStream) {
                     printing::keyword($token, self.span, tokens);
@@ -307,6 +313,7 @@ macro_rules! define_keywords {
             }
 
             #[cfg(feature = "parsing")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
             impl Parse for $name {
                 fn parse(input: ParseStream) -> Result<Self> {
                     Ok($name {
@@ -383,9 +390,11 @@ macro_rules! define_punctuation_structs {
             }
 
             #[cfg(feature = "clone-impls")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Copy for $name {}
 
             #[cfg(feature = "clone-impls")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Clone for $name {
                 fn clone(&self) -> Self {
                     *self
@@ -393,6 +402,7 @@ macro_rules! define_punctuation_structs {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl Debug for $name {
                 fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                     f.write_str(stringify!($name))
@@ -403,6 +413,7 @@ macro_rules! define_punctuation_structs {
             impl cmp::Eq for $name {}
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl PartialEq for $name {
                 fn eq(&self, _other: &$name) -> bool {
                     true
@@ -410,6 +421,7 @@ macro_rules! define_punctuation_structs {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl Hash for $name {
                 fn hash<H: Hasher>(&self, _state: &mut H) {}
             }
@@ -427,6 +439,7 @@ macro_rules! define_punctuation {
             }
 
             #[cfg(feature = "printing")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
             impl ToTokens for $name {
                 fn to_tokens(&self, tokens: &mut TokenStream) {
                     printing::punct($token, &self.spans, tokens);
@@ -434,6 +447,7 @@ macro_rules! define_punctuation {
             }
 
             #[cfg(feature = "parsing")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
             impl Parse for $name {
                 fn parse(input: ParseStream) -> Result<Self> {
                     Ok($name {
@@ -484,9 +498,11 @@ macro_rules! define_delimiters {
             }
 
             #[cfg(feature = "clone-impls")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Copy for $name {}
 
             #[cfg(feature = "clone-impls")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Clone for $name {
                 fn clone(&self) -> Self {
                     *self
@@ -494,6 +510,7 @@ macro_rules! define_delimiters {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl Debug for $name {
                 fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                     f.write_str(stringify!($name))
@@ -504,6 +521,7 @@ macro_rules! define_delimiters {
             impl cmp::Eq for $name {}
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl PartialEq for $name {
                 fn eq(&self, _other: &$name) -> bool {
                     true
@@ -511,6 +529,7 @@ macro_rules! define_delimiters {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl Hash for $name {
                 fn hash<H: Hasher>(&self, _state: &mut H) {}
             }
@@ -536,6 +555,7 @@ define_punctuation_structs! {
 }
 
 #[cfg(feature = "printing")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
 impl ToTokens for Underscore {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         tokens.append(Ident::new("_", self.span));
@@ -543,6 +563,7 @@ impl ToTokens for Underscore {
 }
 
 #[cfg(feature = "parsing")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 impl Parse for Underscore {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| {

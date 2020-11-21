@@ -565,6 +565,7 @@ pub mod parsing {
         })
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Meta {
         fn parse(input: ParseStream) -> Result<Self> {
             let path = input.call(parse_meta_path)?;
@@ -572,6 +573,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for MetaList {
         fn parse(input: ParseStream) -> Result<Self> {
             let path = input.call(parse_meta_path)?;
@@ -579,6 +581,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for MetaNameValue {
         fn parse(input: ParseStream) -> Result<Self> {
             let path = input.call(parse_meta_path)?;
@@ -586,6 +589,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for NestedMeta {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Lit) && !(input.peek(LitBool) && input.peek2(Token![=])) {
@@ -634,6 +638,7 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::ToTokens;
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.pound_token.to_tokens(tokens);
@@ -647,6 +652,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for MetaList {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.path.to_tokens(tokens);
@@ -656,6 +662,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for MetaNameValue {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.path.to_tokens(tokens);

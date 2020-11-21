@@ -1062,12 +1062,14 @@ impl<'a> ParseBuffer<'a> {
     }
 }
 
+#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 impl<T: Parse> Parse for Box<T> {
     fn parse(input: ParseStream) -> Result<Self> {
         input.parse().map(Box::new)
     }
 }
 
+#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 impl<T: Parse + Token> Parse for Option<T> {
     fn parse(input: ParseStream) -> Result<Self> {
         if T::peek(input.cursor()) {
@@ -1078,12 +1080,14 @@ impl<T: Parse + Token> Parse for Option<T> {
     }
 }
 
+#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 impl Parse for TokenStream {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| Ok((cursor.token_stream(), Cursor::empty())))
     }
 }
 
+#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 impl Parse for TokenTree {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| match cursor.token_tree() {
@@ -1093,6 +1097,7 @@ impl Parse for TokenTree {
     }
 }
 
+#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 impl Parse for Group {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| {
@@ -1108,6 +1113,7 @@ impl Parse for Group {
     }
 }
 
+#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 impl Parse for Punct {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| match cursor.punct() {
@@ -1117,6 +1123,7 @@ impl Parse for Punct {
     }
 }
 
+#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 impl Parse for Literal {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| match cursor.literal() {

@@ -367,6 +367,7 @@ impl Generics {
 macro_rules! generics_wrapper_impls {
     ($ty:ident) => {
         #[cfg(feature = "clone-impls")]
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
         impl<'a> Clone for $ty<'a> {
             fn clone(&self) -> Self {
                 $ty(self.0)
@@ -374,6 +375,7 @@ macro_rules! generics_wrapper_impls {
         }
 
         #[cfg(feature = "extra-traits")]
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl<'a> Debug for $ty<'a> {
             fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter
@@ -387,6 +389,7 @@ macro_rules! generics_wrapper_impls {
         impl<'a> Eq for $ty<'a> {}
 
         #[cfg(feature = "extra-traits")]
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl<'a> PartialEq for $ty<'a> {
             fn eq(&self, other: &Self) -> bool {
                 self.0 == other.0
@@ -394,6 +397,7 @@ macro_rules! generics_wrapper_impls {
         }
 
         #[cfg(feature = "extra-traits")]
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl<'a> Hash for $ty<'a> {
             fn hash<H: Hasher>(&self, state: &mut H) {
                 self.0.hash(state);
@@ -595,6 +599,7 @@ pub mod parsing {
     use super::*;
     use crate::parse::{Parse, ParseStream, Result};
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Generics {
         fn parse(input: ParseStream) -> Result<Self> {
             if !input.peek(Token![<]) {
@@ -651,6 +656,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for GenericParam {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
@@ -677,6 +683,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for LifetimeDef {
         fn parse(input: ParseStream) -> Result<Self> {
             let has_colon;
@@ -714,6 +721,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for BoundLifetimes {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(BoundLifetimes {
@@ -735,6 +743,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Option<BoundLifetimes> {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Token![for]) {
@@ -745,6 +754,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeParam {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
@@ -798,6 +808,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeParamBound {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Lifetime) {
@@ -816,6 +827,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TraitBound {
         fn parse(input: ParseStream) -> Result<Self> {
             let modifier: TraitBoundModifier = input.parse()?;
@@ -836,6 +848,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TraitBoundModifier {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Token![?]) {
@@ -846,6 +859,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ConstParam {
         fn parse(input: ParseStream) -> Result<Self> {
             let mut default = None;
@@ -869,6 +883,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for WhereClause {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(WhereClause {
@@ -899,6 +914,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Option<WhereClause> {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Token![where]) {
@@ -909,6 +925,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for WherePredicate {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Lifetime) && input.peek2(Token![:]) {
@@ -981,6 +998,7 @@ mod printing {
     use proc_macro2::TokenTree;
     use quote::{ToTokens, TokenStreamExt};
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for Generics {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             if self.params.is_empty() {
@@ -1130,6 +1148,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for BoundLifetimes {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.for_token.to_tokens(tokens);
@@ -1139,6 +1158,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for LifetimeDef {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -1150,6 +1170,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypeParam {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -1181,6 +1202,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TraitBound {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             let to_tokens = |tokens: &mut TokenStream| {
@@ -1195,6 +1217,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TraitBoundModifier {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             match self {
@@ -1204,6 +1227,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ConstParam {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -1218,6 +1242,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for WhereClause {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             if !self.predicates.is_empty() {
@@ -1227,6 +1252,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PredicateType {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.lifetimes.to_tokens(tokens);
@@ -1236,6 +1262,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PredicateLifetime {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.lifetime.to_tokens(tokens);
@@ -1244,6 +1271,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PredicateEq {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.lhs_ty.to_tokens(tokens);

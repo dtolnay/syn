@@ -82,8 +82,10 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     if copy {
         return quote! {
             #cfg_features
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Copy for #ident {}
             #cfg_features
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Clone for #ident {
                 fn clone(&self) -> Self {
                     *self
@@ -96,6 +98,7 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
 
     quote! {
         #cfg_features
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
         impl Clone for #ident {
             fn clone(&self) -> Self {
                 #body

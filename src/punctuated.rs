@@ -346,6 +346,7 @@ impl<T, P> Punctuated<T, P> {
 }
 
 #[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl<T, P> Clone for Punctuated<T, P>
 where
     T: Clone,
@@ -368,6 +369,7 @@ where
 }
 
 #[cfg(feature = "extra-traits")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl<T, P> PartialEq for Punctuated<T, P>
 where
     T: PartialEq,
@@ -380,6 +382,7 @@ where
 }
 
 #[cfg(feature = "extra-traits")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl<T, P> Hash for Punctuated<T, P>
 where
     T: Hash,
@@ -393,6 +396,7 @@ where
 }
 
 #[cfg(feature = "extra-traits")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl<T: Debug, P: Debug> Debug for Punctuated<T, P> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut list = f.debug_list();
@@ -932,6 +936,7 @@ impl<T, P> Pair<T, P> {
 }
 
 #[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl<T, P> Clone for Pair<T, P>
 where
     T: Clone,
@@ -979,6 +984,7 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl<T, P> ToTokens for Punctuated<T, P>
     where
         T: ToTokens,
@@ -989,6 +995,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl<T, P> ToTokens for Pair<T, P>
     where
         T: ToTokens,

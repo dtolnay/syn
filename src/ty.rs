@@ -323,6 +323,7 @@ pub mod parsing {
     use proc_macro2::{Punct, Spacing, TokenTree};
     use std::iter::FromIterator;
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Type {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_plus = true;
@@ -586,6 +587,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeSlice {
         fn parse(input: ParseStream) -> Result<Self> {
             let content;
@@ -596,6 +598,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeArray {
         fn parse(input: ParseStream) -> Result<Self> {
             let content;
@@ -608,6 +611,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypePtr {
         fn parse(input: ParseStream) -> Result<Self> {
             let star_token: Token![*] = input.parse()?;
@@ -630,6 +634,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeReference {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(TypeReference {
@@ -642,6 +647,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeBareFn {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_mut_self = false;
@@ -699,6 +705,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeNever {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(TypeNever {
@@ -707,6 +714,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeInfer {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(TypeInfer {
@@ -715,6 +723,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeTuple {
         fn parse(input: ParseStream) -> Result<Self> {
             let content;
@@ -743,6 +752,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeMacro {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(TypeMacro {
@@ -751,6 +761,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypePath {
         fn parse(input: ParseStream) -> Result<Self> {
             let (qself, mut path) = path::parsing::qpath(input, false)?;
@@ -783,12 +794,14 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ReturnType {
         fn parse(input: ParseStream) -> Result<Self> {
             Self::parse(input, true)
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeTraitObject {
         fn parse(input: ParseStream) -> Result<Self> {
             Self::parse(input, true)
@@ -841,6 +854,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeImplTrait {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(TypeImplTrait {
@@ -862,6 +876,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeGroup {
         fn parse(input: ParseStream) -> Result<Self> {
             let group = crate::group::parse_group(input)?;
@@ -872,6 +887,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeParen {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_plus = false;
@@ -889,6 +905,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for BareFnArg {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_mut_self = false;
@@ -960,6 +977,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Abi {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(Abi {
@@ -969,6 +987,7 @@ pub mod parsing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Option<Abi> {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Token![extern]) {
@@ -988,6 +1007,7 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypeSlice {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.bracket_token.surround(tokens, |tokens| {
@@ -996,6 +1016,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypeArray {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.bracket_token.surround(tokens, |tokens| {
@@ -1006,6 +1027,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypePtr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.star_token.to_tokens(tokens);
@@ -1019,6 +1041,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypeReference {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.and_token.to_tokens(tokens);
@@ -1028,6 +1051,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypeBareFn {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.lifetimes.to_tokens(tokens);
@@ -1048,12 +1072,14 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypeNever {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.bang_token.to_tokens(tokens);
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypeTuple {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.paren_token.surround(tokens, |tokens| {
@@ -1062,12 +1088,14 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypePath {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             private::print_path(tokens, &self.qself, &self.path);
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypeTraitObject {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.dyn_token.to_tokens(tokens);
@@ -1075,6 +1103,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypeImplTrait {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.impl_token.to_tokens(tokens);
@@ -1082,6 +1111,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypeGroup {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.group_token.surround(tokens, |tokens| {
@@ -1090,6 +1120,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypeParen {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.paren_token.surround(tokens, |tokens| {
@@ -1098,18 +1129,21 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypeInfer {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.underscore_token.to_tokens(tokens);
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypeMacro {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.mac.to_tokens(tokens);
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ReturnType {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             match self {
@@ -1122,6 +1156,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for BareFnArg {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -1133,6 +1168,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for Variadic {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -1140,6 +1176,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for Abi {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.extern_token.to_tokens(tokens);

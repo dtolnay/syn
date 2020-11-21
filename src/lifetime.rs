@@ -113,6 +113,7 @@ pub mod parsing {
     use super::*;
     use crate::parse::{Parse, ParseStream, Result};
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Lifetime {
         fn parse(input: ParseStream) -> Result<Self> {
             input.step(|cursor| {
@@ -130,6 +131,7 @@ mod printing {
     use proc_macro2::{Punct, Spacing, TokenStream};
     use quote::{ToTokens, TokenStreamExt};
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for Lifetime {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             let mut apostrophe = Punct::new('\'', Spacing::Joint);
