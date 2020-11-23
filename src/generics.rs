@@ -386,6 +386,7 @@ macro_rules! generics_wrapper_impls {
         }
 
         #[cfg(feature = "extra-traits")]
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl<'a> Eq for $ty<'a> {}
 
         #[cfg(feature = "extra-traits")]

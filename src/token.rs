@@ -288,6 +288,7 @@ macro_rules! define_keywords {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl cmp::Eq for $name {}
 
             #[cfg(feature = "extra-traits")]
@@ -410,6 +411,7 @@ macro_rules! define_punctuation_structs {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl cmp::Eq for $name {}
 
             #[cfg(feature = "extra-traits")]
@@ -518,6 +520,7 @@ macro_rules! define_delimiters {
             }
 
             #[cfg(feature = "extra-traits")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
             impl cmp::Eq for $name {}
 
             #[cfg(feature = "extra-traits")]
