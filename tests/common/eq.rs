@@ -138,7 +138,7 @@ macro_rules! spanless_eq_struct {
             fn eq(&self, other: &Self) -> bool {
                 let $name { $($field,)* $($ignore: _,)* } = self;
                 let $name { $($field: $other,)* $($ignore: _,)* } = other;
-                $(SpanlessEq::eq($field, $other))&&*
+                true $(&& SpanlessEq::eq($field, $other))*
             }
         }
     };
@@ -146,16 +146,16 @@ macro_rules! spanless_eq_struct {
     {
         $name:ident $(<$param:ident>)?;
         $([$field:ident $other:ident])*
+        $(![$ignore:ident])*
         $next:ident
-        $($rest:ident)*
-        $(!$ignore:ident)*
+        $($rest:tt)*
     } => {
         spanless_eq_struct! {
             $name $(<$param>)*;
             $([$field $other])*
             [$next other]
+            $(![$ignore])*
             $($rest)*
-            $(!$ignore)*
         }
     };
 
@@ -164,14 +164,14 @@ macro_rules! spanless_eq_struct {
         $([$field:ident $other:ident])*
         $(![$ignore:ident])*
         !$next:ident
-        $(!$rest:ident)*
+        $($rest:tt)*
     } => {
         spanless_eq_struct! {
             $name $(<$param>)*;
             $([$field $other])*
             $(![$ignore])*
             ![$next]
-            $(!$rest)*
+            $($rest)*
         }
     };
 }
@@ -179,7 +179,7 @@ macro_rules! spanless_eq_struct {
 macro_rules! spanless_eq_enum {
     {
         $name:ident;
-        $([$variant:ident $([$field:tt $this:ident $other:ident])*])*
+        $([$variant:ident $([$field:tt $this:ident $other:ident])* $(![$ignore:tt])*])*
     } => {
         impl SpanlessEq for $name {
             fn eq(&self, other: &Self) -> bool {
@@ -192,8 +192,8 @@ macro_rules! spanless_eq_enum {
                 match (self, other) {
                     $(
                         (
-                            $name::$variant { $($field: $this),* },
-                            $name::$variant { $($field: $other),* },
+                            $name::$variant { $($field: $this,)* $($ignore: _,)* },
+                            $name::$variant { $($field: $other,)* $($ignore: _,)* },
                         ) => {
                             true $(&& SpanlessEq::eq($this, $other))*
                         }
@@ -207,13 +207,27 @@ macro_rules! spanless_eq_enum {
     {
         $name:ident;
         $([$variant:ident $($fields:tt)*])*
-        $next:ident [$($named:tt)*] ( $i:tt $($field:tt)* )
+        $next:ident [$([$($named:tt)*])* $(![$ignore:tt])*] (!$i:tt $($field:tt)*)
         $($rest:tt)*
     } => {
         spanless_eq_enum! {
             $name;
             $([$variant $($fields)*])*
-            $next [$($named)* [$i this other]] ( $($field)* )
+            $next [$([$($named)*])* $(![$ignore])* ![$i]] ($($field)*)
+            $($rest)*
+        }
+    };
+
+    {
+        $name:ident;
+        $([$variant:ident $($fields:tt)*])*
+        $next:ident [$([$($named:tt)*])* $(![$ignore:tt])*] ($i:tt $($field:tt)*)
+        $($rest:tt)*
+    } => {
+        spanless_eq_enum! {
+            $name;
+            $([$variant $($fields)*])*
+            $next [$([$($named)*])* [$i this other] $(![$ignore])*] ($($field)*)
             $($rest)*
         }
     };
@@ -235,13 +249,13 @@ macro_rules! spanless_eq_enum {
     {
         $name:ident;
         $([$variant:ident $($fields:tt)*])*
-        $next:ident ( $($field:tt)* )
+        $next:ident ($($field:tt)*)
         $($rest:tt)*
     } => {
         spanless_eq_enum! {
             $name;
             $([$variant $($fields)*])*
-            $next [] ( $($field)* )
+            $next [] ($($field)*)
             $($rest)*
         }
     };
