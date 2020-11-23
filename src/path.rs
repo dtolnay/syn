@@ -681,9 +681,9 @@ mod printing {
                     GenericArgument::Binding(_) | GenericArgument::Constraint(_) => {
                         if !trailing_or_empty {
                             <Token![,]>::default().to_tokens(tokens);
-                            trailing_or_empty = true;
                         }
                         param.to_tokens(tokens);
+                        trailing_or_empty = param.punct().is_some();
                     }
                     GenericArgument::Lifetime(_)
                     | GenericArgument::Type(_)
