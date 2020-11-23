@@ -329,7 +329,6 @@ spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
 spanless_eq_enum!(AssocItemKind; Const(0 1 2) Fn(0 1 2 3) TyAlias(0 1 2 3) MacCall(0));
 spanless_eq_enum!(AssocTyConstraintKind; Equality(ty) Bound(bounds));
 spanless_eq_enum!(Async; Yes(span closure_id return_impl_trait_id) No);
-spanless_eq_enum!(AttrKind; Normal(0 1) DocComment(0 1));
 spanless_eq_enum!(AttrStyle; Outer Inner);
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
 spanless_eq_enum!(BindingMode; ByRef(0) ByValue(0));
@@ -578,5 +577,35 @@ impl SpanlessEq for LazyTokenStream {
         let this = self.create_token_stream();
         let other = other.create_token_stream();
         SpanlessEq::eq(&this, &other)
+    }
+}
+
+impl SpanlessEq for AttrKind {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (AttrKind::Normal(item, tokens), AttrKind::Normal(item2, tokens2)) => {
+                SpanlessEq::eq(item, item2) && SpanlessEq::eq(tokens, tokens2)
+            }
+            (AttrKind::DocComment(kind, symbol), AttrKind::DocComment(kind2, symbol2)) => {
+                SpanlessEq::eq(kind, kind2) && SpanlessEq::eq(symbol, symbol2)
+            }
+            (AttrKind::DocComment(_kind, symbol), AttrKind::Normal(item2, _tokens)) => {
+                let item = AttrItem {
+                    path: Path::from_ident(Ident::with_dummy_span(sym::doc)),
+                    args: MacArgs::Eq(
+                        DUMMY_SP,
+                        TokenStream::from(TokenTree::Token(Token::new(
+                            TokenKind::Literal(
+                                LitKind::Str(*symbol, StrStyle::Cooked).to_lit_token(),
+                            ),
+                            DUMMY_SP,
+                        ))),
+                    ),
+                    tokens: None,
+                };
+                SpanlessEq::eq(&item, item2)
+            }
+            (AttrKind::Normal(..), AttrKind::DocComment(..)) => SpanlessEq::eq(other, self),
+        }
     }
 }
