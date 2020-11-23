@@ -22,7 +22,7 @@ use rustc_ast::ast::{
 };
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, DelimToken, Token, TokenKind};
-use rustc_ast::tokenstream::{DelimSpan, LazyTokenStream, TokenStream, TokenTree};
+use rustc_ast::tokenstream::{self, DelimSpan, LazyTokenStream, TokenStream, TokenTree};
 use rustc_data_structures::sync::Lrc;
 use rustc_data_structures::thin_vec::ThinVec;
 use rustc_span::source_map::Spanned;
@@ -539,7 +539,9 @@ impl SpanlessEq for TokenStream {
             }
             if let (TokenTree::Token(this), TokenTree::Token(other)) = (this, other) {
                 if match (&this.kind, &other.kind) {
-                    (TokenKind::Literal(_), TokenKind::Literal(_)) => true,
+                    (TokenKind::Literal(this), TokenKind::Literal(other)) => {
+                        SpanlessEq::eq(this, other)
+                    }
                     (TokenKind::DocComment(_kind, style, symbol), TokenKind::Pound) => {
                         doc_comment(*style, *symbol, &mut other_trees)
                     }
@@ -592,6 +594,10 @@ fn doc_comment<'a>(
         })) => {}
         _ => return false,
     }
+    is_escaped_literal(trees, unescaped)
+}
+
+fn is_escaped_literal(mut trees: tokenstream::CursorRef, unescaped: Symbol) -> bool {
     match trees.next() {
         Some(TokenTree::Token(Token {
             kind:
@@ -610,12 +616,14 @@ fn doc_comment<'a>(
                 token: _,
                 kind: LitKind::Str(symbol, StrStyle::Cooked),
                 span: _,
-            }) if symbol == unescaped => {}
-            _ => return false,
+            }) => {
+                symbol.as_str().replace('\r', "") == unescaped.as_str().replace('\r', "")
+                    && trees.next().is_none()
+            }
+            _ => false,
         },
-        _ => return false,
+        _ => false,
     }
-    trees.next().is_none()
 }
 
 impl SpanlessEq for LazyTokenStream {
@@ -635,21 +643,18 @@ impl SpanlessEq for AttrKind {
             (AttrKind::DocComment(kind, symbol), AttrKind::DocComment(kind2, symbol2)) => {
                 SpanlessEq::eq(kind, kind2) && SpanlessEq::eq(symbol, symbol2)
             }
-            (AttrKind::DocComment(_kind, symbol), AttrKind::Normal(item2, _tokens)) => {
-                let item = AttrItem {
-                    path: Path::from_ident(Ident::with_dummy_span(sym::doc)),
-                    args: MacArgs::Eq(
-                        DUMMY_SP,
-                        TokenStream::from(TokenTree::Token(Token::new(
-                            TokenKind::Literal(
-                                LitKind::Str(*symbol, StrStyle::Cooked).to_lit_token(),
-                            ),
-                            DUMMY_SP,
-                        ))),
-                    ),
-                    tokens: None,
-                };
-                SpanlessEq::eq(&item, item2)
+            (AttrKind::DocComment(kind, unescaped), AttrKind::Normal(item2, _tokens)) => {
+                match kind {
+                    CommentKind::Line | CommentKind::Block => {}
+                }
+                let path = Path::from_ident(Ident::with_dummy_span(sym::doc));
+                SpanlessEq::eq(&path, &item2.path)
+                    && match &item2.args {
+                        MacArgs::Empty | MacArgs::Delimited(..) => false,
+                        MacArgs::Eq(_span, tokens) => {
+                            is_escaped_literal(tokens.trees_ref(), *unescaped)
+                        }
+                    }
             }
             (AttrKind::Normal(..), AttrKind::DocComment(..)) => SpanlessEq::eq(other, self),
         }
