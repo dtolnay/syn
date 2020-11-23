@@ -26,8 +26,8 @@ use rustc_ast::tokenstream::{DelimSpan, LazyTokenStream, TokenStream, TokenTree}
 use rustc_data_structures::sync::Lrc;
 use rustc_data_structures::thin_vec::ThinVec;
 use rustc_span::source_map::Spanned;
-use rustc_span::symbol::Ident;
-use rustc_span::{Span, Symbol, SyntaxContext};
+use rustc_span::symbol::{sym, Ident};
+use rustc_span::{Span, Symbol, SyntaxContext, DUMMY_SP};
 
 pub trait SpanlessEq {
     fn eq(&self, other: &Self) -> bool;
@@ -554,22 +554,99 @@ impl SpanlessEq for TokenKind {
 
 impl SpanlessEq for TokenStream {
     fn eq(&self, other: &Self) -> bool {
-        let mut this = self.trees_ref();
-        let mut other = other.trees_ref();
+        let mut this_trees = self.trees_ref();
+        let mut other_trees = other.trees_ref();
         loop {
-            let this = match this.next() {
-                None => return other.next().is_none(),
-                Some(val) => val,
+            let this = match this_trees.next() {
+                None => return other_trees.next().is_none(),
+                Some(tree) => tree,
             };
-            let other = match other.next() {
+            let other = match other_trees.next() {
                 None => return false,
-                Some(val) => val,
+                Some(tree) => tree,
             };
-            if !SpanlessEq::eq(this, other) {
-                return false;
+            if SpanlessEq::eq(this, other) {
+                continue;
             }
+            if let (TokenTree::Token(this), TokenTree::Token(other)) = (this, other) {
+                if match (&this.kind, &other.kind) {
+                    (TokenKind::Literal(_), TokenKind::Literal(_)) => true,
+                    (TokenKind::DocComment(_kind, style, symbol), TokenKind::Pound) => {
+                        doc_comment(*style, *symbol, &mut other_trees)
+                    }
+                    (TokenKind::Pound, TokenKind::DocComment(_kind, style, symbol)) => {
+                        doc_comment(*style, *symbol, &mut this_trees)
+                    }
+                    _ => false,
+                } {
+                    continue;
+                }
+            }
+            return false;
         }
     }
+}
+
+fn doc_comment<'a>(
+    style: AttrStyle,
+    unescaped: Symbol,
+    trees: &mut impl Iterator<Item = &'a TokenTree>,
+) -> bool {
+    if match style {
+        AttrStyle::Outer => false,
+        AttrStyle::Inner => true,
+    } {
+        match trees.next() {
+            Some(TokenTree::Token(Token {
+                kind: TokenKind::Not,
+                span: _,
+            })) => {}
+            _ => return false,
+        }
+    }
+    let stream = match trees.next() {
+        Some(TokenTree::Delimited(_span, DelimToken::Bracket, stream)) => stream,
+        _ => return false,
+    };
+    let mut trees = stream.trees_ref();
+    match trees.next() {
+        Some(TokenTree::Token(Token {
+            kind: TokenKind::Ident(symbol, false),
+            span: _,
+        })) if *symbol == sym::doc => {}
+        _ => return false,
+    }
+    match trees.next() {
+        Some(TokenTree::Token(Token {
+            kind: TokenKind::Eq,
+            span: _,
+        })) => {}
+        _ => return false,
+    }
+    match trees.next() {
+        Some(TokenTree::Token(Token {
+            kind:
+                TokenKind::Literal(
+                    lit
+                    @
+                    token::Lit {
+                        kind: token::LitKind::Str,
+                        symbol: _,
+                        suffix: None,
+                    },
+                ),
+            span: _,
+        })) => match Lit::from_lit_token(*lit, DUMMY_SP) {
+            Ok(Lit {
+                token: _,
+                kind: LitKind::Str(symbol, StrStyle::Cooked),
+                span: _,
+            }) if symbol == unescaped => {}
+            _ => return false,
+        },
+        _ => return false,
+    }
+    trees.next().is_none()
 }
 
 impl SpanlessEq for LazyTokenStream {
