@@ -76,8 +76,8 @@ fn test_round_trip() {
             let back = quote!(#krate).to_string();
             let edition = repo::edition(path).parse().unwrap();
 
-            let equal = panic::catch_unwind(|| {
-                rustc_span::with_session_globals(edition, || {
+            rustc_span::with_session_globals(edition, || {
+                let equal = match panic::catch_unwind(|| {
                     let sess = ParseSess::new(FilePathMapping::empty());
                     let before = match librustc_parse(content, &sess) {
                         Ok(before) => before,
@@ -90,12 +90,12 @@ fn test_round_trip() {
                                 errorf!("=== {}: ignore\n", path.display());
                             } else {
                                 errorf!(
-                                "=== {}: ignore - librustc failed to parse original content: {}\n",
-                                path.display(),
-                                diagnostic.message()
-                            );
+                                    "=== {}: ignore - librustc failed to parse original content: {}\n",
+                                    path.display(),
+                                    diagnostic.message(),
+                                );
                             }
-                            return true;
+                            return Err(true);
                         }
                     };
                     let after = match librustc_parse(back, &sess) {
@@ -103,11 +103,17 @@ fn test_round_trip() {
                         Err(mut diagnostic) => {
                             errorf!("=== {}: librustc failed to parse", path.display());
                             diagnostic.emit();
-                            return false;
+                            return Err(false);
                         }
                     };
-
-                    if SpanlessEq::eq(&before, &after) {
+                    Ok((before, after))
+                }) {
+                    Err(_) => {
+                        errorf!("=== {}: ignoring librustc panic\n", path.display());
+                        true
+                    }
+                    Ok(Err(equal)) => equal,
+                    Ok(Ok((before, after))) => if SpanlessEq::eq(&before, &after) {
                         errorf!(
                             "=== {}: pass in {}ms\n",
                             path.display(),
@@ -123,19 +129,15 @@ fn test_round_trip() {
                             after,
                         );
                         false
-                    }
-                })
-            });
-            match equal {
-                Err(_) => errorf!("=== {}: ignoring librustc panic\n", path.display()),
-                Ok(true) => {}
-                Ok(false) => {
+                    },
+                };
+                if !equal {
                     let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
                     if prev_failed + 1 >= abort_after {
                         process::exit(1);
                     }
                 }
-            }
+            });
         });
 
     let failed = failed.load(Ordering::SeqCst);
