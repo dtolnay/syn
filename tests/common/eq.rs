@@ -531,8 +531,8 @@ impl SpanlessEq for TokenKind {
 
 impl SpanlessEq for TokenStream {
     fn eq(&self, other: &Self) -> bool {
-        let mut this = self.clone().into_trees();
-        let mut other = other.clone().into_trees();
+        let mut this = self.trees_ref();
+        let mut other = other.trees_ref();
         loop {
             let this = match this.next() {
                 None => return other.next().is_none(),
@@ -542,7 +542,7 @@ impl SpanlessEq for TokenStream {
                 None => return false,
                 Some(val) => val,
             };
-            if !SpanlessEq::eq(&this, &other) {
+            if !SpanlessEq::eq(this, other) {
                 return false;
             }
         }
