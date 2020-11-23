@@ -90,7 +90,7 @@ impl<A: SpanlessEq, B: SpanlessEq> SpanlessEq for (A, B) {
 }
 
 macro_rules! spanless_eq_true {
-    ($name:ident) => {
+    ($name:ty) => {
         impl SpanlessEq for $name {
             fn eq(&self, _other: &Self) -> bool {
                 true
@@ -106,7 +106,7 @@ spanless_eq_true!(NodeId);
 spanless_eq_true!(SyntaxContext);
 
 macro_rules! spanless_eq_partial_eq {
-    ($name:ident) => {
+    ($name:ty) => {
         impl SpanlessEq for $name {
             fn eq(&self, other: &Self) -> bool {
                 PartialEq::eq(self, other)
@@ -126,6 +126,7 @@ spanless_eq_partial_eq!(Symbol);
 spanless_eq_partial_eq!(CommentKind);
 spanless_eq_partial_eq!(DelimToken);
 spanless_eq_partial_eq!(InlineAsmOptions);
+spanless_eq_partial_eq!(token::LitKind);
 
 macro_rules! spanless_eq_struct {
     {
@@ -325,6 +326,7 @@ spanless_eq_struct!(WhereBoundPredicate; span bound_generic_params bounded_ty bo
 spanless_eq_struct!(WhereClause; has_where_token predicates span);
 spanless_eq_struct!(WhereEqPredicate; id span lhs_ty rhs_ty);
 spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
+spanless_eq_struct!(token::Lit; kind symbol suffix);
 spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
 spanless_eq_enum!(AssocItemKind; Const(0 1 2) Fn(0 1 2 3) TyAlias(0 1 2 3) MacCall(0));
 spanless_eq_enum!(AssocTyConstraintKind; Equality(ty) Bound(bounds));
@@ -403,39 +405,6 @@ spanless_eq_enum!(TyKind; Slice(0) Array(0 1) Ptr(0) Rptr(0 1) BareFn(0) Never
 impl SpanlessEq for Ident {
     fn eq(&self, other: &Self) -> bool {
         self.as_str() == other.as_str()
-    }
-}
-
-// Give up on comparing literal symbols inside of macros because there are so
-// many equivalent representations of the same literal; they are tested
-// elsewhere
-impl SpanlessEq for token::Lit {
-    fn eq(&self, other: &Self) -> bool {
-        let token::Lit {
-            kind,
-            symbol: _,
-            suffix,
-        } = self;
-        let token::Lit {
-            kind: kind2,
-            symbol: _,
-            suffix: suffix2,
-        } = other;
-        kind == kind2 && suffix == suffix2
-        /*
-        && match kind {
-            token::LitKind::Bool => symbol == symbol2,
-            token::LitKind::Byte => symbol == symbol2,
-            token::LitKind::Char => symbol == symbol2,
-            token::LitKind::Integer => symbol == symbol2,
-            token::LitKind::Float => symbol == symbol2,
-            token::LitKind::Str => symbol == symbol2,
-            token::LitKind::StrRaw(_) => symbol == symbol2,
-            token::LitKind::ByteStr => symbol == symbol2,
-            token::LitKind::ByteStrRaw(_) => symbol == symbol2,
-            token::LitKind::Err => true,
-        }
-        */
     }
 }
 
