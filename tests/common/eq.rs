@@ -28,7 +28,6 @@ use rustc_data_structures::thin_vec::ThinVec;
 use rustc_span::source_map::Spanned;
 use rustc_span::symbol::Ident;
 use rustc_span::{Span, Symbol, SyntaxContext};
-use std::mem;
 
 pub trait SpanlessEq {
     fn eq(&self, other: &Self) -> bool;
@@ -408,11 +407,22 @@ impl SpanlessEq for Ident {
     }
 }
 
-// Give up on comparing literals inside of macros because there are so many
-// equivalent representations of the same literal; they are tested elsewhere
+// Give up on comparing literal symbols inside of macros because there are so
+// many equivalent representations of the same literal; they are tested
+// elsewhere
 impl SpanlessEq for token::Lit {
     fn eq(&self, other: &Self) -> bool {
-        mem::discriminant(self) == mem::discriminant(other)
+        let token::Lit {
+            kind,
+            symbol: _,
+            suffix,
+        } = self;
+        let token::Lit {
+            kind: kind2,
+            symbol: _,
+            suffix: suffix2,
+        } = other;
+        kind == kind2 && suffix == suffix2
     }
 }
 
