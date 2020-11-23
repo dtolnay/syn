@@ -12,11 +12,6 @@ const REVISION: &str = "9d78d1d02761b906038ba4d54c5f3427f920f5fb";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: const parameter before lifetime parameter (#920)
-    "src/test/ui/const-generics/argument_order.rs",
-    "src/test/ui/const-generics/const-param-before-other-params.rs",
-    "src/test/ui/const-generics/defaults/intermixed-lifetime.rs",
-
     // TODO: const block (#921)
     "src/test/ui/inline-const/const-expr-array-init.rs",
     "src/test/ui/inline-const/const-expr-basic.rs",
