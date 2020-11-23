@@ -322,7 +322,7 @@ spanless_eq_struct!(Token; kind span);
 spanless_eq_struct!(TraitRef; path ref_id);
 spanless_eq_struct!(Ty; id kind span tokens);
 spanless_eq_struct!(UseTree; prefix kind span);
-spanless_eq_struct!(Variant; attrs id span vis ident data disr_expr is_placeholder);
+spanless_eq_struct!(Variant; attrs id span !vis ident data disr_expr is_placeholder);
 spanless_eq_struct!(Visibility; kind span tokens);
 spanless_eq_struct!(WhereBoundPredicate; span bound_generic_params bounded_ty bounds);
 spanless_eq_struct!(WhereClause; has_where_token predicates span);
