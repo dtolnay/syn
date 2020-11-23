@@ -1187,6 +1187,9 @@ mod printing {
                                 (Some(TokenTree::Punct(ref q)), Some(TokenTree::Ident(ref c)))
                                     if q.as_char() == '?' && c == "const" =>
                                 {
+                                    if self.bounds.is_empty() {
+                                        TokensOrDefault(&self.colon_token).to_tokens(tokens);
+                                    }
                                     return default.to_tokens(tokens);
                                 }
                                 _ => {}
