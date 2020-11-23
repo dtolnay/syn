@@ -2843,6 +2843,7 @@ mod printing {
             }
             self.generics.where_clause.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
+                tokens.append_all(self.attrs.inner());
                 tokens.append_all(&self.items);
             });
         }
