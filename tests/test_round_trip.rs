@@ -17,8 +17,7 @@ use rustc_errors::PResult;
 use rustc_session::parse::ParseSess;
 use rustc_span::source_map::FilePathMapping;
 use rustc_span::FileName;
-use std::fs::File;
-use std::io::Read;
+use std::fs;
 use std::panic;
 use std::path::Path;
 use std::process;
@@ -66,9 +65,7 @@ fn test_round_trip() {
 }
 
 fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
-    let mut file = File::open(path).unwrap();
-    let mut content = String::new();
-    file.read_to_string(&mut content).unwrap();
+    let content = fs::read_to_string(path).unwrap();
 
     let start = Instant::now();
     let (krate, elapsed) = match syn::parse_file(&content) {

@@ -26,8 +26,7 @@ use regex::Regex;
 use rustc_ast::ast;
 use rustc_ast::ptr::P;
 use rustc_span::edition::Edition;
-use std::fs::File;
-use std::io::Read;
+use std::fs;
 use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use walkdir::{DirEntry, WalkDir};
@@ -107,9 +106,7 @@ fn test_rustc_precedence() {
                 return;
             }
 
-            let mut file = File::open(path).unwrap();
-            let mut content = String::new();
-            file.read_to_string(&mut content).unwrap();
+            let content = fs::read_to_string(path).unwrap();
             let content = edition_regex.replace_all(&content, "_$0");
 
             let (l_passed, l_failed) = match syn::parse_file(&content) {
