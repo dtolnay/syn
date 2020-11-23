@@ -129,28 +129,28 @@ spanless_eq_partial_eq!(InlineAsmOptions);
 
 macro_rules! spanless_eq_struct {
     {
-        $name:ident $(<$param:ident>)?;
+        $($name:ident)::+ $(<$param:ident>)?;
         $([$field:ident $other:ident])*
         $(![$ignore:ident])*
     } => {
-        impl $(<$param: SpanlessEq>)* SpanlessEq for $name $(<$param>)* {
+        impl $(<$param: SpanlessEq>)* SpanlessEq for $($name)::+ $(<$param>)* {
             fn eq(&self, other: &Self) -> bool {
-                let $name { $($field,)* $($ignore: _,)* } = self;
-                let $name { $($field: $other,)* $($ignore: _,)* } = other;
+                let $($name)::+ { $($field,)* $($ignore: _,)* } = self;
+                let $($name)::+ { $($field: $other,)* $($ignore: _,)* } = other;
                 true $(&& SpanlessEq::eq($field, $other))*
             }
         }
     };
 
     {
-        $name:ident $(<$param:ident>)?;
+        $($name:ident)::+ $(<$param:ident>)?;
         $([$field:ident $other:ident])*
         $(![$ignore:ident])*
         $next:ident
         $($rest:tt)*
     } => {
         spanless_eq_struct! {
-            $name $(<$param>)*;
+            $($name)::+ $(<$param>)*;
             $([$field $other])*
             [$next other]
             $(![$ignore])*
@@ -159,14 +159,14 @@ macro_rules! spanless_eq_struct {
     };
 
     {
-        $name:ident $(<$param:ident>)?;
+        $($name:ident)::+ $(<$param:ident>)?;
         $([$field:ident $other:ident])*
         $(![$ignore:ident])*
         !$next:ident
         $($rest:tt)*
     } => {
         spanless_eq_struct! {
-            $name $(<$param>)*;
+            $($name)::+ $(<$param>)*;
             $([$field $other])*
             $(![$ignore])*
             ![$next]
@@ -177,22 +177,22 @@ macro_rules! spanless_eq_struct {
 
 macro_rules! spanless_eq_enum {
     {
-        $name:ident;
-        $([$variant:ident $([$field:tt $this:ident $other:ident])* $(![$ignore:tt])*])*
+        $($name:ident)::+;
+        $([$($variant:ident)::+; $([$field:tt $this:ident $other:ident])* $(![$ignore:tt])*])*
     } => {
-        impl SpanlessEq for $name {
+        impl SpanlessEq for $($name)::+ {
             fn eq(&self, other: &Self) -> bool {
                 match self {
                     $(
-                        $name::$variant { .. } => {}
+                        $($variant)::+ { .. } => {}
                     )*
                 }
                 #[allow(unreachable_patterns)]
                 match (self, other) {
                     $(
                         (
-                            $name::$variant { $($field: $this,)* $($ignore: _,)* },
-                            $name::$variant { $($field: $other,)* $($ignore: _,)* },
+                            $($variant)::+ { $($field: $this,)* $($ignore: _,)* },
+                            $($variant)::+ { $($field: $other,)* $($ignore: _,)* },
                         ) => {
                             true $(&& SpanlessEq::eq($this, $other))*
                         }
@@ -204,71 +204,71 @@ macro_rules! spanless_eq_enum {
     };
 
     {
-        $name:ident;
-        $([$variant:ident $($fields:tt)*])*
+        $($name:ident)::+;
+        $([$($variant:ident)::+; $($fields:tt)*])*
         $next:ident [$([$($named:tt)*])* $(![$ignore:tt])*] (!$i:tt $($field:tt)*)
         $($rest:tt)*
     } => {
         spanless_eq_enum! {
-            $name;
-            $([$variant $($fields)*])*
+            $($name)::+;
+            $([$($variant)::+; $($fields)*])*
             $next [$([$($named)*])* $(![$ignore])* ![$i]] ($($field)*)
             $($rest)*
         }
     };
 
     {
-        $name:ident;
-        $([$variant:ident $($fields:tt)*])*
+        $($name:ident)::+;
+        $([$($variant:ident)::+; $($fields:tt)*])*
         $next:ident [$([$($named:tt)*])* $(![$ignore:tt])*] ($i:tt $($field:tt)*)
         $($rest:tt)*
     } => {
         spanless_eq_enum! {
-            $name;
-            $([$variant $($fields)*])*
+            $($name)::+;
+            $([$($variant)::+; $($fields)*])*
             $next [$([$($named)*])* [$i this other] $(![$ignore])*] ($($field)*)
             $($rest)*
         }
     };
 
     {
-        $name:ident;
-        $([$variant:ident $($fields:tt)*])*
+        $($name:ident)::+;
+        $([$($variant:ident)::+; $($fields:tt)*])*
         $next:ident [$($named:tt)*] ()
         $($rest:tt)*
     } => {
         spanless_eq_enum! {
-            $name;
-            $([$variant $($fields)*])*
-            [$next $($named)*]
+            $($name)::+;
+            $([$($variant)::+; $($fields)*])*
+            [$($name)::+::$next; $($named)*]
             $($rest)*
         }
     };
 
     {
-        $name:ident;
-        $([$variant:ident $($fields:tt)*])*
+        $($name:ident)::+;
+        $([$($variant:ident)::+; $($fields:tt)*])*
         $next:ident ($($field:tt)*)
         $($rest:tt)*
     } => {
         spanless_eq_enum! {
-            $name;
-            $([$variant $($fields)*])*
+            $($name)::+;
+            $([$($variant)::+; $($fields)*])*
             $next [] ($($field)*)
             $($rest)*
         }
     };
 
     {
-        $name:ident;
-        $([$variant:ident $($fields:tt)*])*
+        $($name:ident)::+;
+        $([$($variant:ident)::+; $($fields:tt)*])*
         $next:ident
         $($rest:tt)*
     } => {
         spanless_eq_enum! {
-            $name;
-            $([$variant $($fields)*])*
-            [$next]
+            $($name)::+;
+            $([$($variant)::+; $($fields)*])*
+            [$($name)::+::$next;]
             $($rest)*
         }
     };
@@ -423,6 +423,20 @@ impl SpanlessEq for token::Lit {
             suffix: suffix2,
         } = other;
         kind == kind2 && suffix == suffix2
+        /*
+        && match kind {
+            token::LitKind::Bool => symbol == symbol2,
+            token::LitKind::Byte => symbol == symbol2,
+            token::LitKind::Char => symbol == symbol2,
+            token::LitKind::Integer => symbol == symbol2,
+            token::LitKind::Float => symbol == symbol2,
+            token::LitKind::Str => symbol == symbol2,
+            token::LitKind::StrRaw(_) => symbol == symbol2,
+            token::LitKind::ByteStr => symbol == symbol2,
+            token::LitKind::ByteStrRaw(_) => symbol == symbol2,
+            token::LitKind::Err => true,
+        }
+        */
     }
 }
 
