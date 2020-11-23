@@ -20,6 +20,7 @@ use rustc_span::FileName;
 use std::fs::File;
 use std::io::Read;
 use std::panic;
+use std::path::Path;
 use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
@@ -53,97 +54,100 @@ fn test_round_trip() {
         .into_par_iter()
         .for_each(|entry| {
             let path = entry.path();
-            if path.is_dir() {
-                return;
+            if !path.is_dir() {
+                test(path, &failed, abort_after);
             }
-
-            let mut file = File::open(path).unwrap();
-            let mut content = String::new();
-            file.read_to_string(&mut content).unwrap();
-
-            let start = Instant::now();
-            let (krate, elapsed) = match syn::parse_file(&content) {
-                Ok(krate) => (krate, start.elapsed()),
-                Err(msg) => {
-                    errorf!("=== {}: syn failed to parse\n{:?}\n", path.display(), msg);
-                    let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
-                    if prev_failed + 1 >= abort_after {
-                        process::exit(1);
-                    }
-                    return;
-                }
-            };
-            let back = quote!(#krate).to_string();
-            let edition = repo::edition(path).parse().unwrap();
-
-            rustc_span::with_session_globals(edition, || {
-                let equal = match panic::catch_unwind(|| {
-                    let sess = ParseSess::new(FilePathMapping::empty());
-                    let before = match librustc_parse(content, &sess) {
-                        Ok(before) => before,
-                        Err(mut diagnostic) => {
-                            diagnostic.cancel();
-                            if diagnostic
-                                .message()
-                                .starts_with("file not found for module")
-                            {
-                                errorf!("=== {}: ignore\n", path.display());
-                            } else {
-                                errorf!(
-                                    "=== {}: ignore - librustc failed to parse original content: {}\n",
-                                    path.display(),
-                                    diagnostic.message(),
-                                );
-                            }
-                            return Err(true);
-                        }
-                    };
-                    let after = match librustc_parse(back, &sess) {
-                        Ok(after) => after,
-                        Err(mut diagnostic) => {
-                            errorf!("=== {}: librustc failed to parse", path.display());
-                            diagnostic.emit();
-                            return Err(false);
-                        }
-                    };
-                    Ok((before, after))
-                }) {
-                    Err(_) => {
-                        errorf!("=== {}: ignoring librustc panic\n", path.display());
-                        true
-                    }
-                    Ok(Err(equal)) => equal,
-                    Ok(Ok((before, after))) => if SpanlessEq::eq(&before, &after) {
-                        errorf!(
-                            "=== {}: pass in {}ms\n",
-                            path.display(),
-                            elapsed.as_secs() * 1000
-                                + u64::from(elapsed.subsec_nanos()) / 1_000_000
-                        );
-                        true
-                    } else {
-                        errorf!(
-                            "=== {}: FAIL\nbefore: {:#?}\nafter: {:#?}\n",
-                            path.display(),
-                            before,
-                            after,
-                        );
-                        false
-                    },
-                };
-                if !equal {
-                    let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
-                    if prev_failed + 1 >= abort_after {
-                        process::exit(1);
-                    }
-                }
-            });
         });
 
     let failed = failed.load(Ordering::SeqCst);
     if failed > 0 {
         panic!("{} failures", failed);
     }
+}
+
+fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
+    let mut file = File::open(path).unwrap();
+    let mut content = String::new();
+    file.read_to_string(&mut content).unwrap();
+
+    let start = Instant::now();
+    let (krate, elapsed) = match syn::parse_file(&content) {
+        Ok(krate) => (krate, start.elapsed()),
+        Err(msg) => {
+            errorf!("=== {}: syn failed to parse\n{:?}\n", path.display(), msg);
+            let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
+            if prev_failed + 1 >= abort_after {
+                process::exit(1);
+            }
+            return;
+        }
+    };
+    let back = quote!(#krate).to_string();
+    let edition = repo::edition(path).parse().unwrap();
+
+    rustc_span::with_session_globals(edition, || {
+        let equal = match panic::catch_unwind(|| {
+            let sess = ParseSess::new(FilePathMapping::empty());
+            let before = match librustc_parse(content, &sess) {
+                Ok(before) => before,
+                Err(mut diagnostic) => {
+                    diagnostic.cancel();
+                    if diagnostic
+                        .message()
+                        .starts_with("file not found for module")
+                    {
+                        errorf!("=== {}: ignore\n", path.display());
+                    } else {
+                        errorf!(
+                            "=== {}: ignore - librustc failed to parse original content: {}\n",
+                            path.display(),
+                            diagnostic.message(),
+                        );
+                    }
+                    return Err(true);
+                }
+            };
+            let after = match librustc_parse(back, &sess) {
+                Ok(after) => after,
+                Err(mut diagnostic) => {
+                    errorf!("=== {}: librustc failed to parse", path.display());
+                    diagnostic.emit();
+                    return Err(false);
+                }
+            };
+            Ok((before, after))
+        }) {
+            Err(_) => {
+                errorf!("=== {}: ignoring librustc panic\n", path.display());
+                true
+            }
+            Ok(Err(equal)) => equal,
+            Ok(Ok((before, after))) => {
+                if SpanlessEq::eq(&before, &after) {
+                    errorf!(
+                        "=== {}: pass in {}ms\n",
+                        path.display(),
+                        elapsed.as_secs() * 1000 + u64::from(elapsed.subsec_nanos()) / 1_000_000
+                    );
+                    true
+                } else {
+                    errorf!(
+                        "=== {}: FAIL\nbefore: {:#?}\nafter: {:#?}\n",
+                        path.display(),
+                        before,
+                        after,
+                    );
+                    false
+                }
+            }
+        };
+        if !equal {
+            let prev_failed = failed.fetch_add(1, Ordering::SeqCst);
+            if prev_failed + 1 >= abort_after {
+                process::exit(1);
+            }
+        }
+    });
 }
 
 fn librustc_parse(content: String, sess: &ParseSess) -> PResult<ast::Crate> {
