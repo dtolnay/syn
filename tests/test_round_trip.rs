@@ -12,7 +12,10 @@ extern crate rustc_span;
 use crate::common::eq::SpanlessEq;
 use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-use rustc_ast::ast;
+use rustc_ast::ast::{
+    AngleBracketedArg, AngleBracketedArgs, Crate, GenericArg, GenericParamKind, Generics,
+};
+use rustc_ast::mut_visit::{self, MutVisitor};
 use rustc_errors::PResult;
 use rustc_session::parse::ParseSess;
 use rustc_span::source_map::FilePathMapping;
@@ -119,7 +122,9 @@ fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
                 true
             }
             Ok(Err(equal)) => equal,
-            Ok(Ok((before, after))) => {
+            Ok(Ok((mut before, mut after))) => {
+                normalize(&mut before);
+                normalize(&mut after);
                 if SpanlessEq::eq(&before, &after) {
                     errorf!(
                         "=== {}: pass in {}ms\n",
@@ -147,9 +152,49 @@ fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
     });
 }
 
-fn librustc_parse(content: String, sess: &ParseSess) -> PResult<ast::Crate> {
+fn librustc_parse(content: String, sess: &ParseSess) -> PResult<Crate> {
     static COUNTER: AtomicUsize = AtomicUsize::new(0);
     let counter = COUNTER.fetch_add(1, Ordering::Relaxed);
     let name = FileName::Custom(format!("test_round_trip{}", counter));
     parse::parse_crate_from_source_str(name, content, sess)
+}
+
+fn normalize(krate: &mut Crate) {
+    struct NormalizeVisitor;
+
+    impl MutVisitor for NormalizeVisitor {
+        fn visit_angle_bracketed_parameter_data(&mut self, e: &mut AngleBracketedArgs) {
+            #[derive(Ord, PartialOrd, Eq, PartialEq)]
+            enum Group {
+                Lifetimes,
+                TypesAndConsts,
+                Constraints,
+            }
+            e.args.sort_by_key(|arg| match arg {
+                AngleBracketedArg::Arg(arg) => match arg {
+                    GenericArg::Lifetime(_) => Group::Lifetimes,
+                    GenericArg::Type(_) | GenericArg::Const(_) => Group::TypesAndConsts,
+                },
+                AngleBracketedArg::Constraint(_) => Group::Constraints,
+            });
+            mut_visit::noop_visit_angle_bracketed_parameter_data(e, self);
+        }
+
+        fn visit_generics(&mut self, e: &mut Generics) {
+            #[derive(Ord, PartialOrd, Eq, PartialEq)]
+            enum Group {
+                Lifetimes,
+                TypesAndConsts,
+            }
+            e.params.sort_by_key(|param| match param.kind {
+                GenericParamKind::Lifetime => Group::Lifetimes,
+                GenericParamKind::Type { .. } | GenericParamKind::Const { .. } => {
+                    Group::TypesAndConsts
+                }
+            });
+            mut_visit::noop_visit_generics(e, self);
+        }
+    }
+
+    NormalizeVisitor.visit_crate(krate);
 }

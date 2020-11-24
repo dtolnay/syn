@@ -274,6 +274,7 @@ macro_rules! spanless_eq_enum {
     };
 }
 
+spanless_eq_struct!(AngleBracketedArgs; span args);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arm; attrs pat guard body span id is_placeholder);
 spanless_eq_struct!(AssocTyConstraint; id ident kind span);
@@ -291,6 +292,7 @@ spanless_eq_struct!(FnHeader; constness asyncness unsafety ext);
 spanless_eq_struct!(FnSig; header decl span);
 spanless_eq_struct!(ForeignMod; unsafety abi items);
 spanless_eq_struct!(GenericParam; id ident attrs bounds is_placeholder kind);
+spanless_eq_struct!(Generics; params where_clause span);
 spanless_eq_struct!(GlobalAsm; asm);
 spanless_eq_struct!(InlineAsm; template operands options line_spans);
 spanless_eq_struct!(Item<K>; attrs id span vis ident kind !tokens);
@@ -439,98 +441,6 @@ impl SpanlessEq for Param {
                 || SpanlessEq::eq(attrs, attrs2)
                     && SpanlessEq::eq(ty, ty2)
                     && SpanlessEq::eq(pat, pat2))
-    }
-}
-
-impl SpanlessEq for AngleBracketedArgs {
-    fn eq(&self, other: &Self) -> bool {
-        #[derive(PartialEq)]
-        enum Group {
-            Lifetimes,
-            TypesAndConsts,
-            Constraints,
-        }
-        let group = |arg: &AngleBracketedArg| match arg {
-            AngleBracketedArg::Arg(arg) => match arg {
-                GenericArg::Lifetime(_) => Group::Lifetimes,
-                GenericArg::Type(_) | GenericArg::Const(_) => Group::TypesAndConsts,
-            },
-            AngleBracketedArg::Constraint(_) => Group::Constraints,
-        };
-        let AngleBracketedArgs { span: _, args } = self;
-        let AngleBracketedArgs {
-            span: _,
-            args: args2,
-        } = other;
-        spanless_eq_grouped(args, args2, group, Group::Lifetimes)
-            && spanless_eq_grouped(args, args2, group, Group::TypesAndConsts)
-            && spanless_eq_grouped(args, args2, group, Group::Constraints)
-    }
-}
-
-impl SpanlessEq for Generics {
-    fn eq(&self, other: &Self) -> bool {
-        #[derive(PartialEq)]
-        enum Group {
-            Lifetimes,
-            TypesAndConsts,
-        }
-        let group = |param: &GenericParam| match param.kind {
-            GenericParamKind::Lifetime => Group::Lifetimes,
-            GenericParamKind::Type { .. } | GenericParamKind::Const { .. } => Group::TypesAndConsts,
-        };
-        let Generics {
-            params,
-            where_clause,
-            span: _,
-        } = self;
-        let Generics {
-            params: params2,
-            where_clause: where_clause2,
-            span: _,
-        } = other;
-        SpanlessEq::eq(where_clause, where_clause2)
-            && spanless_eq_grouped(params, params2, group, Group::Lifetimes)
-            && spanless_eq_grouped(params, params2, group, Group::TypesAndConsts)
-    }
-}
-
-fn spanless_eq_grouped<'a, T, G>(
-    this: impl IntoIterator<Item = &'a T>,
-    other: impl IntoIterator<Item = &'a T>,
-    filter: fn(&'a T) -> G,
-    group: G,
-) -> bool
-where
-    T: SpanlessEq + 'a,
-    G: PartialEq,
-{
-    let filter = |item: &&'a T| filter(item) == group;
-    spanless_eq_iter(
-        this.into_iter().filter(filter),
-        other.into_iter().filter(filter),
-    )
-}
-
-fn spanless_eq_iter<'a, T>(
-    mut this: impl Iterator<Item = &'a T>,
-    mut other: impl Iterator<Item = &'a T>,
-) -> bool
-where
-    T: SpanlessEq + 'a,
-{
-    loop {
-        let this = match this.next() {
-            None => return other.next().is_none(),
-            Some(item) => item,
-        };
-        let other = match other.next() {
-            None => return false,
-            Some(item) => item,
-        };
-        if !SpanlessEq::eq(this, other) {
-            return false;
-        }
     }
 }
 
