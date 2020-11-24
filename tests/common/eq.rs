@@ -306,7 +306,6 @@ spanless_eq_struct!(MacCallStmt; mac style attrs);
 spanless_eq_struct!(MacroDef; body macro_rules);
 spanless_eq_struct!(Mod; inner unsafety items inline);
 spanless_eq_struct!(MutTy; ty mutbl);
-spanless_eq_struct!(Param; attrs ty pat id span is_placeholder);
 spanless_eq_struct!(ParenthesizedArgs; span inputs output);
 spanless_eq_struct!(Pat; id kind span tokens);
 spanless_eq_struct!(Path; span segments tokens);
@@ -413,6 +412,34 @@ impl SpanlessEq for RangeSyntax {
         match self {
             RangeSyntax::DotDotDot | RangeSyntax::DotDotEq => true,
         }
+    }
+}
+
+impl SpanlessEq for Param {
+    fn eq(&self, other: &Self) -> bool {
+        let Param {
+            attrs,
+            ty,
+            pat,
+            id,
+            span: _,
+            is_placeholder,
+        } = self;
+        let Param {
+            attrs: attrs2,
+            ty: ty2,
+            pat: pat2,
+            id: id2,
+            span: _,
+            is_placeholder: is_placeholder2,
+        } = other;
+        SpanlessEq::eq(id, id2)
+            && SpanlessEq::eq(is_placeholder, is_placeholder2)
+            && (matches!(ty.kind, TyKind::Err)
+                || matches!(ty2.kind, TyKind::Err)
+                || SpanlessEq::eq(attrs, attrs2)
+                    && SpanlessEq::eq(ty, ty2)
+                    && SpanlessEq::eq(pat, pat2))
     }
 }
 
