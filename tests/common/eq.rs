@@ -1,7 +1,6 @@
 extern crate rustc_ast;
 extern crate rustc_data_structures;
 extern crate rustc_span;
-extern crate rustc_target;
 
 use rustc_ast::ast::{
     AngleBracketedArg, AngleBracketedArgs, AnonConst, Arm, AssocItemKind, AssocTyConstraint,
