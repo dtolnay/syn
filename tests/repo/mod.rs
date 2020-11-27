@@ -12,10 +12,7 @@ const REVISION: &str = "9d78d1d02761b906038ba4d54c5f3427f920f5fb";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: const block (#921)
-    "src/test/ui/inline-const/const-expr-array-init.rs",
-    "src/test/ui/inline-const/const-expr-basic.rs",
-    "src/test/ui/inline-const/const-expr-reference.rs",
+    // TODO: const block in pattern position (#921)
     "src/test/ui/inline-const/const-match-pat-range.rs",
     "src/test/ui/inline-const/const-match-pat.rs",
 
