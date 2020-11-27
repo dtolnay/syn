@@ -12,9 +12,6 @@ const REVISION: &str = "9d78d1d02761b906038ba4d54c5f3427f920f5fb";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: const block in range patterns (#921)
-    "src/test/ui/inline-const/const-match-pat-range.rs",
-
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "src/test/ui/const-generics/closing-args-token.rs",
     "src/test/ui/const-generics/const-expression-parameter.rs",
