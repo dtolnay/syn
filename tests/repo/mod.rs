@@ -19,9 +19,6 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/inline-const/const-match-pat-range.rs",
     "src/test/ui/inline-const/const-match-pat.rs",
 
-    // TODO: unsafe modules (#919)
-    "src/test/ui/proc-macro/unsafe-mod.rs",
-
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "src/test/ui/const-generics/closing-args-token.rs",
     "src/test/ui/const-generics/const-expression-parameter.rs",
