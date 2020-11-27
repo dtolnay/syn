@@ -1022,6 +1022,11 @@ pub mod parsing {
                     input.parse::<Token![unsafe]>()?;
                     input.parse::<ItemForeignMod>()?;
                     Ok(Item::Verbatim(verbatim::between(begin, input)))
+                } else if lookahead.peek(Token![mod]) {
+                    input.parse::<Visibility>()?;
+                    input.parse::<Token![unsafe]>()?;
+                    input.parse::<ItemMod>()?;
+                    Ok(Item::Verbatim(verbatim::between(begin, input)))
                 } else {
                     Err(lookahead.error())
                 }
