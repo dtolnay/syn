@@ -12,14 +12,6 @@ const REVISION: &str = "72da5a9d85a522b11e80d0fdd1fd95247d442604";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO destructuring assignment (#933)
-    "src/test/ui/destructuring-assignment/drop-order.rs",
-    "src/test/ui/destructuring-assignment/nested_destructure.rs",
-    "src/test/ui/destructuring-assignment/slice_destructure.rs",
-    "src/test/ui/destructuring-assignment/struct_destructure.rs",
-    "src/test/ui/destructuring-assignment/tuple_destructure.rs",
-    "src/test/ui/destructuring-assignment/tuple_struct_destructure.rs",
-
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "src/test/ui/const-generics/closing-args-token.rs",
     "src/test/ui/const-generics/const-expression-parameter.rs",

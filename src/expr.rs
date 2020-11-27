@@ -1044,6 +1044,8 @@ pub(crate) mod parsing {
     use super::*;
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
+    #[cfg(feature = "full")]
+    use proc_macro2::TokenTree;
     use std::cmp::Ordering;
 
     crate::custom_keyword!(raw);
@@ -1724,6 +1726,10 @@ pub(crate) mod parsing {
             input.call(expr_block).map(Expr::Block)
         } else if input.peek(Token![..]) {
             expr_range(input, allow_struct).map(Expr::Range)
+        } else if input.peek(Token![_]) {
+            Ok(Expr::Verbatim(TokenStream::from(
+                input.parse::<TokenTree>()?,
+            )))
         } else if input.peek(Lifetime) {
             let the_label: Label = input.parse()?;
             let mut expr = if input.peek(Token![while]) {
@@ -2451,7 +2457,11 @@ pub(crate) mod parsing {
                     path,
                     fields,
                     dot2_token: Some(content.parse()?),
-                    rest: Some(Box::new(content.parse()?)),
+                    rest: if content.is_empty() {
+                        None
+                    } else {
+                        Some(Box::new(content.parse()?))
+                    },
                 });
             }
 
@@ -2672,8 +2682,6 @@ pub(crate) mod printing {
     use super::*;
     #[cfg(feature = "full")]
     use crate::attr::FilterAttrs;
-    #[cfg(feature = "full")]
-    use crate::print::TokensOrDefault;
     use proc_macro2::{Literal, TokenStream};
     use quote::{ToTokens, TokenStreamExt};
 
@@ -3181,10 +3189,12 @@ pub(crate) mod printing {
             self.brace_token.surround(tokens, |tokens| {
                 inner_attrs_to_tokens(&self.attrs, tokens);
                 self.fields.to_tokens(tokens);
-                if self.rest.is_some() {
-                    TokensOrDefault(&self.dot2_token).to_tokens(tokens);
-                    self.rest.to_tokens(tokens);
+                if let Some(dot2_token) = &self.dot2_token {
+                    dot2_token.to_tokens(tokens);
+                } else if self.rest.is_some() {
+                    Token![..](Span::call_site()).to_tokens(tokens);
                 }
+                self.rest.to_tokens(tokens);
             })
         }
     }
