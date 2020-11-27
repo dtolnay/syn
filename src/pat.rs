@@ -343,6 +343,8 @@ pub mod parsing {
                 input.call(pat_slice).map(Pat::Slice)
             } else if lookahead.peek(Token![..]) && !input.peek(Token![...]) {
                 pat_range_half_open(input, begin)
+            } else if lookahead.peek(Token![const]) {
+                input.call(pat_const).map(Pat::Verbatim)
             } else {
                 Err(lookahead.error())
             }
@@ -688,6 +690,18 @@ pub mod parsing {
             bracket_token,
             elems,
         })
+    }
+
+    fn pat_const(input: ParseStream) -> Result<TokenStream> {
+        let begin = input.fork();
+        input.parse::<Token![const]>()?;
+
+        let content;
+        braced!(content in input);
+        content.call(Attribute::parse_inner)?;
+        content.call(Block::parse_within)?;
+
+        Ok(verbatim::between(begin, input))
     }
 
     pub fn multi_pat(input: ParseStream) -> Result<Pat> {
