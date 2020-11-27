@@ -1017,6 +1017,11 @@ pub mod parsing {
                     } else {
                         Ok(Item::Verbatim(verbatim::between(begin, input)))
                     }
+                } else if lookahead.peek(Token![extern]) {
+                    input.parse::<Visibility>()?;
+                    input.parse::<Token![unsafe]>()?;
+                    input.parse::<ItemForeignMod>()?;
+                    Ok(Item::Verbatim(verbatim::between(begin, input)))
                 } else {
                     Err(lookahead.error())
                 }
