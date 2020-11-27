@@ -19,9 +19,6 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/inline-const/const-match-pat-range.rs",
     "src/test/ui/inline-const/const-match-pat.rs",
 
-    // TODO: unsafe extern blocks (#918)
-    "src/test/ui/proc-macro/unsafe-foreign-mod.rs",
-
     // TODO: unsafe modules (#919)
     "src/test/ui/proc-macro/unsafe-mod.rs",
 
