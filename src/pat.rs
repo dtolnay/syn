@@ -327,7 +327,8 @@ pub mod parsing {
                 input.call(pat_wild).map(Pat::Wild)
             } else if input.peek(Token![box]) {
                 input.call(pat_box).map(Pat::Box)
-            } else if input.peek(Token![-]) || lookahead.peek(Lit) {
+            } else if input.peek(Token![-]) || lookahead.peek(Lit) || lookahead.peek(Token![const])
+            {
                 pat_lit_or_range(input)
             } else if lookahead.peek(Token![ref])
                 || lookahead.peek(Token![mut])
@@ -655,6 +656,8 @@ pub mod parsing {
             || lookahead.peek(Token![crate])
         {
             Expr::Path(input.parse()?)
+        } else if lookahead.peek(Token![const]) {
+            Expr::Verbatim(input.call(expr::parsing::expr_const)?)
         } else {
             return Err(lookahead.error());
         };

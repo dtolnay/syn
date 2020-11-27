@@ -2490,7 +2490,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn expr_const(input: ParseStream) -> Result<TokenStream> {
+    pub(crate) fn expr_const(input: ParseStream) -> Result<TokenStream> {
         let begin = input.fork();
         input.parse::<Token![const]>()?;
 
