@@ -623,6 +623,8 @@ pub mod parsing {
             } else {
                 Ok(Pat::Verbatim(verbatim::between(begin, input)))
             }
+        } else if let Expr::Verbatim(verbatim) = *lo {
+            Ok(Pat::Verbatim(verbatim))
         } else {
             Ok(Pat::Lit(PatLit {
                 attrs: Vec::new(),
