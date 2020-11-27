@@ -1718,6 +1718,8 @@ pub(crate) mod parsing {
             input.call(expr_yield).map(Expr::Yield)
         } else if input.peek(Token![unsafe]) {
             input.call(expr_unsafe).map(Expr::Unsafe)
+        } else if input.peek(Token![const]) {
+            input.call(expr_const).map(Expr::Verbatim)
         } else if input.peek(token::Brace) {
             input.call(expr_block).map(Expr::Block)
         } else if input.peek(Token![..]) {
@@ -1912,6 +1914,8 @@ pub(crate) mod parsing {
             Expr::TryBlock(input.call(expr_try_block)?)
         } else if input.peek(Token![unsafe]) {
             Expr::Unsafe(input.call(expr_unsafe)?)
+        } else if input.peek(Token![const]) {
+            Expr::Verbatim(input.call(expr_const)?)
         } else if input.peek(token::Brace) {
             Expr::Block(input.call(expr_block)?)
         } else {
@@ -2483,6 +2487,19 @@ pub(crate) mod parsing {
             unsafe_token,
             block: Block { brace_token, stmts },
         })
+    }
+
+    #[cfg(feature = "full")]
+    fn expr_const(input: ParseStream) -> Result<TokenStream> {
+        let begin = input.fork();
+        input.parse::<Token![const]>()?;
+
+        let content;
+        braced!(content in input);
+        content.call(Attribute::parse_inner)?;
+        content.call(Block::parse_within)?;
+
+        Ok(verbatim::between(begin, input))
     }
 
     #[cfg(feature = "full")]

@@ -171,7 +171,7 @@ pub mod parsing {
             || input.peek(Token![extern])
             || input.peek(Token![use])
             || input.peek(Token![static]) && (input.peek2(Token![mut]) || input.peek2(Ident))
-            || input.peek(Token![const])
+            || input.peek(Token![const]) && !input.peek2(token::Brace)
             || input.peek(Token![unsafe]) && !input.peek2(token::Brace)
             || input.peek(Token![async])
                 && (input.peek2(Token![unsafe])
