@@ -2380,20 +2380,35 @@ pub mod parsing {
             input.parse::<Token![const]>()?;
         }
 
-        let trait_ = (|| -> Option<_> {
-            let ahead = input.fork();
-            let polarity: Option<Token![!]> = ahead.parse().ok()?;
-            let mut path: Path = ahead.parse().ok()?;
-            if path.segments.last().unwrap().arguments.is_empty() && ahead.peek(token::Paren) {
-                let parenthesized = PathArguments::Parenthesized(ahead.parse().ok()?);
-                path.segments.last_mut().unwrap().arguments = parenthesized;
-            }
-            let for_token: Token![for] = ahead.parse().ok()?;
-            input.advance_to(&ahead);
-            Some((polarity, path, for_token))
-        })();
+        let begin = input.fork();
+        let polarity = if input.peek(Token![!]) && !input.peek2(token::Brace) {
+            Some(input.parse::<Token![!]>()?)
+        } else {
+            None
+        };
 
-        let self_ty: Type = input.parse()?;
+        let first_ty: Type = input.parse()?;
+        let self_ty: Type;
+        let trait_;
+
+        let is_impl_for = input.peek(Token![for]);
+        if is_impl_for {
+            let for_token: Token![for] = input.parse()?;
+            if let Type::Path(TypePath { qself: None, path }) = first_ty {
+                trait_ = Some((polarity, path, for_token));
+            } else {
+                trait_ = None;
+            }
+            self_ty = input.parse()?;
+        } else {
+            trait_ = None;
+            self_ty = if polarity.is_none() {
+                first_ty
+            } else {
+                Type::Verbatim(verbatim::between(begin, input))
+            };
+        }
+
         generics.where_clause = input.parse()?;
 
         let content;
@@ -2405,7 +2420,7 @@ pub mod parsing {
             items.push(content.parse()?);
         }
 
-        if is_const_impl {
+        if is_const_impl || is_impl_for && trait_.is_none() {
             Ok(None)
         } else {
             Ok(Some(ItemImpl {
