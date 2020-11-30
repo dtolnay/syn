@@ -61,6 +61,7 @@ fn test_negative_impl() {
     "###);
 
     #[cfg(any())]
+    #[rustfmt::skip]
     impl !Trait {}
     let tokens = quote! {
         impl !Trait {}
@@ -105,6 +106,7 @@ fn test_negative_impl() {
     "###);
 
     #[cfg(any())]
+    #[rustfmt::skip]
     impl !! {}
     let tokens = quote! {
         impl !! {}
