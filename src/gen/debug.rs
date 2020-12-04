@@ -1599,6 +1599,7 @@ impl Debug for ItemForeignMod {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ItemForeignMod");
         formatter.field("attrs", &self.attrs);
+        formatter.field("unsafety", &self.unsafety);
         formatter.field("abi", &self.abi);
         formatter.field("brace_token", &self.brace_token);
         formatter.field("items", &self.items);

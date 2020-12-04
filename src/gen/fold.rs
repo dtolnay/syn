@@ -1955,6 +1955,7 @@ where
 {
     ItemForeignMod {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        unsafety: (node.unsafety).map(|it| Token![unsafe](tokens_helper(f, &it.span))),
         abi: f.fold_abi(node.abi),
         brace_token: Brace(tokens_helper(f, &node.brace_token.span)),
         items: FoldHelper::lift(node.items, |it| f.fold_foreign_item(it)),

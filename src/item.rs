@@ -150,6 +150,7 @@ ast_struct! {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemForeignMod {
         pub attrs: Vec<Attribute>,
+        pub unsafety: Option<Token![unsafe]>,
         pub abi: Abi,
         pub brace_token: token::Brace,
         pub items: Vec<ForeignItem>,
@@ -1620,6 +1621,7 @@ pub mod parsing {
     impl Parse for ItemForeignMod {
         fn parse(input: ParseStream) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
+            let unsafety = input.parse()?;
             let abi: Abi = input.parse()?;
 
             let content;
@@ -1632,6 +1634,7 @@ pub mod parsing {
 
             Ok(ItemForeignMod {
                 attrs: private::attrs(outer_attrs, inner_attrs),
+                unsafety,
                 abi,
                 brace_token,
                 items,
@@ -2775,6 +2778,7 @@ mod printing {
     impl ToTokens for ItemForeignMod {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
+            self.unsafety.to_tokens(tokens);
             self.abi.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
                 tokens.append_all(self.attrs.inner());

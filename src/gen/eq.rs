@@ -1128,7 +1128,7 @@ impl Eq for ItemForeignMod {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ItemForeignMod {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.abi == other.abi && self.items == other.items
+        self.attrs == other.attrs && self.unsafety == other.unsafety && self.abi == other.abi && self.items == other.items
     }
 }
 #[cfg(feature = "full")]

@@ -3027,6 +3027,18 @@ impl Debug for Lite<syn::ItemForeignMod> {
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
         }
+        if let Some(val) = &_val.unsafety {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Unsafe);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("unsafety", Print::ref_cast(val));
+        }
         formatter.field("abi", Lite(&_val.abi));
         if !_val.items.is_empty() {
             formatter.field("items", Lite(&_val.items));

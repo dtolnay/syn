@@ -1482,6 +1482,7 @@ impl Hash for ItemForeignMod {
         H: Hasher,
     {
         self.attrs.hash(state);
+        self.unsafety.hash(state);
         self.abi.hash(state);
         self.items.hash(state);
     }
