@@ -2017,6 +2017,7 @@ where
     ItemMod {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         vis: f.fold_visibility(node.vis),
+        unsafety: (node.unsafety).map(|it| Token![unsafe](tokens_helper(f, &it.span))),
         mod_token: Token![mod](tokens_helper(f, &node.mod_token.span)),
         ident: f.fold_ident(node.ident),
         content: (node.content).map(|it| {

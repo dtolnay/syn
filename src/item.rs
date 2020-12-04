@@ -214,6 +214,7 @@ ast_struct! {
     pub struct ItemMod {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        pub unsafety: Option<Token![unsafe]>,
         pub mod_token: Token![mod],
         pub ident: Ident,
         pub content: Option<(token::Brace, Vec<Item>)>,
@@ -1580,6 +1581,7 @@ pub mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
+            let unsafety = input.parse()?;
             let mod_token: Token![mod] = input.parse()?;
             let ident: Ident = input.parse()?;
 
@@ -1588,6 +1590,7 @@ pub mod parsing {
                 Ok(ItemMod {
                     attrs: outer_attrs,
                     vis,
+                    unsafety,
                     mod_token,
                     ident,
                     content: None,
@@ -1606,6 +1609,7 @@ pub mod parsing {
                 Ok(ItemMod {
                     attrs: private::attrs(outer_attrs, inner_attrs),
                     vis,
+                    unsafety,
                     mod_token,
                     ident,
                     content: Some((brace_token, items)),
@@ -2761,6 +2765,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
+            self.unsafety.to_tokens(tokens);
             self.mod_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             if let Some((brace, items)) = &self.content {

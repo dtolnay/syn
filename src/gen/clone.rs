@@ -1177,6 +1177,7 @@ impl Clone for ItemMod {
         ItemMod {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
+            unsafety: self.unsafety.clone(),
             mod_token: self.mod_token.clone(),
             ident: self.ident.clone(),
             content: self.content.clone(),

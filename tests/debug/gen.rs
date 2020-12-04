@@ -3183,6 +3183,18 @@ impl Debug for Lite<syn::ItemMod> {
             formatter.field("attrs", Lite(&_val.attrs));
         }
         formatter.field("vis", Lite(&_val.vis));
+        if let Some(val) = &_val.unsafety {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Unsafe);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("unsafety", Print::ref_cast(val));
+        }
         formatter.field("ident", Lite(&_val.ident));
         if let Some(val) = &_val.content {
             #[derive(RefCast)]

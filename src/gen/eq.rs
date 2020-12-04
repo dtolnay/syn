@@ -1182,6 +1182,7 @@ impl PartialEq for ItemMod {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs
             && self.vis == other.vis
+            && self.unsafety == other.unsafety
             && self.ident == other.ident
             && self.content == other.content
             && self.semi == other.semi

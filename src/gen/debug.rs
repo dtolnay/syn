@@ -1655,6 +1655,7 @@ impl Debug for ItemMod {
         let mut formatter = formatter.debug_struct("ItemMod");
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
+        formatter.field("unsafety", &self.unsafety);
         formatter.field("mod_token", &self.mod_token);
         formatter.field("ident", &self.ident);
         formatter.field("content", &self.content);

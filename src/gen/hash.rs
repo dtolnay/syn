@@ -1538,6 +1538,7 @@ impl Hash for ItemMod {
     {
         self.attrs.hash(state);
         self.vis.hash(state);
+        self.unsafety.hash(state);
         self.ident.hash(state);
         self.content.hash(state);
         self.semi.hash(state);
