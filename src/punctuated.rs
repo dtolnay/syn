@@ -13,7 +13,7 @@
 //! syntax tree node + punctuation, where every node in the sequence is followed
 //! by punctuation except for possibly the final one.
 //!
-//! [`Punctuated<T, P>`]: struct.Punctuated.html
+//! [`Punctuated<T, P>`]: Punctuated
 //!
 //! ```text
 //! a_function_call(arg1, arg2, arg3);

@@ -12,10 +12,7 @@ ast_enum_of_structs! {
     ///
     /// This type is a [syntax tree enum].
     ///
-    /// [syntax tree enum]: enum.Expr.html#syntax-tree-enums
-    //
-    // TODO: change syntax-tree-enum link to an intra rustdoc link, currently
-    // blocked on https://github.com/rust-lang/rust/issues/62833
+    /// [syntax tree enum]: Expr#syntax-tree-enums
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub enum Pat {
         /// A box pattern: `box v`.
