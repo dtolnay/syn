@@ -21,7 +21,7 @@ ast_enum_of_structs! {
     ///
     /// This type is a [syntax tree enum].
     ///
-    /// [syntax tree enum]: Expr#syntax-tree-enums
+    /// [syntax tree enum]: crate::Expr#syntax-tree-enums
     pub enum Lit {
         /// A UTF-8 string literal: `"foo"`.
         Str(LitStr),
