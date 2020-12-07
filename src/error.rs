@@ -23,7 +23,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// [`compile_error!`] in the generated code. This produces a better diagnostic
 /// message than simply panicking the macro.
 ///
-/// [`compile_error!`]: https://doc.rust-lang.org/std/macro.compile_error.html
+/// [`compile_error!`]: std::compile_error!
 ///
 /// When parsing macro input, the [`parse_macro_input!`] macro handles the
 /// conversion to `compile_error!` automatically.
@@ -189,7 +189,7 @@ impl Error {
     /// The [`parse_macro_input!`] macro provides a convenient way to invoke
     /// this method correctly in a procedural macro.
     ///
-    /// [`compile_error!`]: https://doc.rust-lang.org/std/macro.compile_error.html
+    /// [`compile_error!`]: std::compile_error!
     pub fn to_compile_error(&self) -> TokenStream {
         self.messages
             .iter()

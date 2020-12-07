@@ -4,13 +4,13 @@
 //! prefer to use the [`Token!`] macro instead. This is a type-macro that
 //! expands to the token type of the given token.
 //!
-//! [`Token!`]: ../macro.Token.html
+//! [`Token!`]: crate::Token
 //!
 //! # Example
 //!
 //! The [`ItemStatic`] syntax tree node is defined like this.
 //!
-//! [`ItemStatic`]: ../struct.ItemStatic.html
+//! [`ItemStatic`]: crate::ItemStatic
 //!
 //! ```
 //! # use syn::{Attribute, Expr, Ident, Token, Type, Visibility};
@@ -35,10 +35,10 @@
 //! method. Delimiter tokens are parsed using the [`parenthesized!`],
 //! [`bracketed!`] and [`braced!`] macros.
 //!
-//! [`ParseStream::parse`]: ../parse/struct.ParseBuffer.html#method.parse
-//! [`parenthesized!`]: ../macro.parenthesized.html
-//! [`bracketed!`]: ../macro.bracketed.html
-//! [`braced!`]: ../macro.braced.html
+//! [`ParseStream::parse`]: crate::parse::ParseBuffer::parse()
+//! [`parenthesized!`]: crate::parenthesized!
+//! [`bracketed!`]: crate::bracketed!
+//! [`braced!`]: crate::braced!
 //!
 //! ```
 //! use syn::{Attribute, Result};
@@ -83,8 +83,8 @@
 //!
 //! - Field access to its span — `let sp = the_token.span`
 //!
-//! [Peeking]: ../parse/struct.ParseBuffer.html#method.peek
-//! [Parsing]: ../parse/struct.ParseBuffer.html#method.parse
+//! [Peeking]: crate::parse::ParseBuffer::peek()
+//! [Parsing]: crate::parse::ParseBuffer::parse()
 //! [Printing]: https://docs.rs/quote/1.0/quote/trait.ToTokens.html
 //! [`Span`]: https://docs.rs/proc-macro2/1.0/proc_macro2/struct.Span.html
 

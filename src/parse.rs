@@ -6,9 +6,8 @@
 //! [`Cursor`] type. `Cursor` is a cheaply copyable cursor over a range of
 //! tokens in a token stream.
 //!
-//! [`ParseStream`]: type.ParseStream.html
-//! [`Result<T>`]: type.Result.html
-//! [`Cursor`]: ../buffer/index.html
+//! [`Result<T>`]: Result
+//! [`Cursor`]: crate::buffer::Cursor
 //!
 //! # Example
 //!
@@ -23,7 +22,7 @@
 //! procedural macro, they will receive a helpful compiler error message
 //! pointing out the exact token that triggered the failure to parse.
 //!
-//! [`parse_macro_input!`]: ../macro.parse_macro_input.html
+//! [`parse_macro_input!`]: crate::parse_macro_input!
 //!
 //! ```
 //! # extern crate proc_macro;
@@ -96,10 +95,9 @@
 //! obvious default way. These functions can return any syntax tree node that
 //! implements the [`Parse`] trait, which includes most types in Syn.
 //!
-//! [`syn::parse`]: ../fn.parse.html
-//! [`syn::parse2`]: ../fn.parse2.html
-//! [`syn::parse_str`]: ../fn.parse_str.html
-//! [`Parse`]: trait.Parse.html
+//! [`syn::parse`]: crate::parse()
+//! [`syn::parse2`]: crate::parse2()
+//! [`syn::parse_str`]: crate::parse_str()
 //!
 //! ```
 //! use syn::Type;
@@ -114,7 +112,7 @@
 //!
 //! The [`parse_quote!`] macro also uses this approach.
 //!
-//! [`parse_quote!`]: ../macro.parse_quote.html
+//! [`parse_quote!`]: crate::parse_quote!
 //!
 //! # The `Parser` trait
 //!
@@ -124,8 +122,8 @@
 //! may or may not allow trailing punctuation, and parsing it the wrong way
 //! would either reject valid input or accept invalid input.
 //!
-//! [`Attribute`]: ../struct.Attribute.html
-//! [`Punctuated`]: ../punctuated/index.html
+//! [`Attribute`]: crate::Attribute
+//! [`Punctuated`]: crate::punctuated
 //!
 //! The `Parse` trait is not implemented in these cases because there is no good
 //! behavior to consider the default.
@@ -150,7 +148,6 @@
 //! single `Parse` implementation, and those parser functions can be invoked
 //! through the [`Parser`] trait.
 //!
-//! [`Parser`]: trait.Parser.html
 //!
 //! ```
 //! # extern crate proc_macro;
@@ -248,7 +245,7 @@ pub type ParseStream<'a> = &'a ParseBuffer<'a>;
 /// - One of [the `syn::parse*` functions][syn-parse]; or
 /// - A method of the [`Parser`] trait.
 ///
-/// [syn-parse]: index.html#the-synparse-functions
+/// [syn-parse]: self#the-synparse-functions
 pub struct ParseBuffer<'a> {
     scope: Span,
     // Instead of Cell<Cursor<'a>> so that ParseBuffer<'a> is covariant in 'a.
