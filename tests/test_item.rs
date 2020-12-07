@@ -43,3 +43,44 @@ fn test_macro_variable_attr() {
     }
     "###);
 }
+
+#[test]
+fn test_macro_variable_impl() {
+    // mimics the token stream corresponding to `impl $trait for $ty {}`
+    let tokens = TokenStream::from_iter(vec![
+        TokenTree::Ident(Ident::new("impl", Span::call_site())),
+        TokenTree::Group(Group::new(Delimiter::None, quote!(Trait))),
+        TokenTree::Ident(Ident::new("for", Span::call_site())),
+        TokenTree::Group(Group::new(Delimiter::None, quote!(Type))),
+        TokenTree::Group(Group::new(Delimiter::Brace, TokenStream::new())),
+    ]);
+
+    snapshot!(tokens as Item, @r###"
+    Item::Impl {
+        generics: Generics,
+        trait_: Some((
+            None,
+            Path {
+                segments: [
+                    PathSegment {
+                        ident: "Trait",
+                        arguments: None,
+                    },
+                ],
+            },
+        )),
+        self_ty: Type::Group {
+            elem: Type::Path {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "Type",
+                            arguments: None,
+                        },
+                    ],
+                },
+            },
+        },
+    }
+    "###);
+}
