@@ -51,21 +51,29 @@ ast_struct! {
     ///     shebang: None,
     ///     attrs: [],
     ///     items: [
-    ///         ExternCrate(
-    ///             ItemExternCrate {
+    ///         Use(
+    ///             ItemUse {
     ///                 attrs: [],
     ///                 vis: Inherited,
-    ///                 extern_token: Extern,
-    ///                 crate_token: Crate,
-    ///                 ident: Ident {
-    ///                     term: Term(
-    ///                         "syn"
-    ///                     ),
-    ///                     span: Span
-    ///                 },
-    ///                 rename: None,
-    ///                 semi_token: Semi
-    ///             }
+    ///                 use_token: Use,
+    ///                 leading_colon: None,
+    ///                 tree: Path(
+    ///                     UsePath {
+    ///                         ident: Ident(
+    ///                             std,
+    ///                         ),
+    ///                         colon2_token: Colon2,
+    ///                         tree: Name(
+    ///                             UseName {
+    ///                                 ident: Ident(
+    ///                                     env,
+    ///                                 ),
+    ///                             },
+    ///                         ),
+    ///                     },
+    ///                 ),
+    ///                 semi_token: Semi,
+    ///             },
     ///         ),
     /// ...
     /// ```
