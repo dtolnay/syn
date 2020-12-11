@@ -544,16 +544,7 @@ fn doc_comment<'a>(
 fn is_escaped_literal(mut trees: tokenstream::CursorRef, unescaped: Symbol) -> bool {
     match match trees.next() {
         Some(TokenTree::Token(Token {
-            kind:
-                TokenKind::Literal(
-                    lit
-                    @
-                    token::Lit {
-                        kind: token::LitKind::Str,
-                        symbol: _,
-                        suffix: None,
-                    },
-                ),
+            kind: TokenKind::Literal(lit),
             span: _,
         })) => Lit::from_lit_token(*lit, DUMMY_SP),
         Some(TokenTree::Token(Token {
@@ -569,7 +560,12 @@ fn is_escaped_literal(mut trees: tokenstream::CursorRef, unescaped: Symbol) -> b
         _ => return false,
     } {
         Ok(Lit {
-            token: _,
+            token:
+                token::Lit {
+                    kind: token::LitKind::Str,
+                    symbol: _,
+                    suffix: None,
+                },
             kind: LitKind::Str(symbol, StrStyle::Cooked),
             span: _,
         }) => {
