@@ -20,7 +20,7 @@ use rustc_ast::ast::{
     WherePredicate, WhereRegionPredicate,
 };
 use rustc_ast::ptr::P;
-use rustc_ast::token::{self, CommentKind, DelimToken, Token, TokenKind};
+use rustc_ast::token::{self, CommentKind, DelimToken, Nonterminal, Token, TokenKind};
 use rustc_ast::tokenstream::{self, DelimSpan, LazyTokenStream, TokenStream, TokenTree};
 use rustc_data_structures::sync::Lrc;
 use rustc_data_structures::thin_vec::ThinVec;
@@ -452,6 +452,14 @@ impl SpanlessEq for TokenKind {
                 TokenKind::DotDotEq | TokenKind::DotDotDot => true,
                 _ => false,
             },
+            (TokenKind::Interpolated(this), TokenKind::Interpolated(other)) => {
+                match (this.as_ref(), other.as_ref()) {
+                    (Nonterminal::NtExpr(this), Nonterminal::NtExpr(other)) => {
+                        SpanlessEq::eq(this, other)
+                    }
+                    _ => this == other,
+                }
+            }
             _ => self == other,
         }
     }
