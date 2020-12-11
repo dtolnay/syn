@@ -542,7 +542,7 @@ fn doc_comment<'a>(
 }
 
 fn is_escaped_literal(mut trees: tokenstream::CursorRef, unescaped: Symbol) -> bool {
-    match trees.next() {
+    match match trees.next() {
         Some(TokenTree::Token(Token {
             kind:
                 TokenKind::Literal(
@@ -555,17 +555,27 @@ fn is_escaped_literal(mut trees: tokenstream::CursorRef, unescaped: Symbol) -> b
                     },
                 ),
             span: _,
-        })) => match Lit::from_lit_token(*lit, DUMMY_SP) {
-            Ok(Lit {
-                token: _,
-                kind: LitKind::Str(symbol, StrStyle::Cooked),
-                span: _,
-            }) => {
-                symbol.as_str().replace('\r', "") == unescaped.as_str().replace('\r', "")
-                    && trees.next().is_none()
-            }
-            _ => false,
+        })) => Lit::from_lit_token(*lit, DUMMY_SP),
+        Some(TokenTree::Token(Token {
+            kind: TokenKind::Interpolated(nonterminal),
+            span: _,
+        })) => match nonterminal.as_ref() {
+            Nonterminal::NtExpr(expr) => match &expr.kind {
+                ExprKind::Lit(lit) => Ok(lit.clone()),
+                _ => return false,
+            },
+            _ => return false,
         },
+        _ => return false,
+    } {
+        Ok(Lit {
+            token: _,
+            kind: LitKind::Str(symbol, StrStyle::Cooked),
+            span: _,
+        }) => {
+            symbol.as_str().replace('\r', "") == unescaped.as_str().replace('\r', "")
+                && trees.next().is_none()
+        }
         _ => false,
     }
 }
