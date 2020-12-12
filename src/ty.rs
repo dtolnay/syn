@@ -342,8 +342,17 @@ pub mod parsing {
     }
 
     fn ambig_ty(input: ParseStream, allow_plus: bool) -> Result<Type> {
-        if input.peek(token::Group) && !input.peek2(Token![::]) && !input.peek2(Token![<]) {
-            return input.parse().map(Type::Group);
+        if input.peek(token::Group) {
+            let forked = input.fork();
+            // Consume the group, and check for a `::` or `<` *after* it
+            // This ensure that we match `$ty<Arg>`, and not `$ty`
+            // where `$ty` is `SomeType<Arg>.
+            // We cannot use `peek2`, since it looks *inside* a `None`-delimited
+            // group
+            let _ = forked.parse().map(Type::Group);
+            if !forked.peek(Token![::]) && !forked.peek(Token![<]) {
+                return input.parse().map(Type::Group);
+            }
         }
 
         let begin = input.fork();
