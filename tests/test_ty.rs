@@ -70,27 +70,29 @@ fn test_group_angle_brackets() {
                     ident: "Option",
                     arguments: PathArguments::AngleBracketed {
                         args: [
-                            Type(Type::Path {
-                                path: Path {
-                                    segments: [
-                                        PathSegment {
-                                            ident: "Vec",
-                                            arguments: PathArguments::AngleBracketed {
-                                                args: [
-                                                    Type(Type::Path {
-                                                        path: Path {
-                                                            segments: [
-                                                                PathSegment {
-                                                                    ident: "u8",
-                                                                    arguments: None,
-                                                                },
-                                                            ],
-                                                        },
-                                                    }),
-                                                ],
+                            Type(Type::Group {
+                                elem: Type::Path {
+                                    path: Path {
+                                        segments: [
+                                            PathSegment {
+                                                ident: "Vec",
+                                                arguments: PathArguments::AngleBracketed {
+                                                    args: [
+                                                        Type(Type::Path {
+                                                            path: Path {
+                                                                segments: [
+                                                                    PathSegment {
+                                                                        ident: "u8",
+                                                                        arguments: None,
+                                                                    },
+                                                                ],
+                                                            },
+                                                        }),
+                                                    ],
+                                                },
                                             },
-                                        },
-                                    ],
+                                        ],
+                                    },
                                 },
                             }),
                         ],
