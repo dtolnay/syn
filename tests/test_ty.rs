@@ -103,3 +103,80 @@ fn test_group_angle_brackets() {
     }
     "###);
 }
+
+#[test]
+fn test_group_colons() {
+    // mimics the token stream corresponding to `$ty::Item`
+    let tokens = TokenStream::from_iter(vec![
+        TokenTree::Group(Group::new(Delimiter::None, quote! { Vec<u8> })),
+        TokenTree::Punct(Punct::new(':', Spacing::Joint)),
+        TokenTree::Punct(Punct::new(':', Spacing::Alone)),
+        TokenTree::Ident(Ident::new("Item", Span::call_site())),
+    ]);
+
+    snapshot!(tokens as Type, @r###"
+    Type::Path {
+        path: Path {
+            segments: [
+                PathSegment {
+                    ident: "Vec",
+                    arguments: PathArguments::AngleBracketed {
+                        args: [
+                            Type(Type::Path {
+                                path: Path {
+                                    segments: [
+                                        PathSegment {
+                                            ident: "u8",
+                                            arguments: None,
+                                        },
+                                    ],
+                                },
+                            }),
+                        ],
+                    },
+                },
+                PathSegment {
+                    ident: "Item",
+                    arguments: None,
+                },
+            ],
+        },
+    }
+    "###);
+
+    let tokens = TokenStream::from_iter(vec![
+        TokenTree::Group(Group::new(Delimiter::None, quote! { [T] })),
+        TokenTree::Punct(Punct::new(':', Spacing::Joint)),
+        TokenTree::Punct(Punct::new(':', Spacing::Alone)),
+        TokenTree::Ident(Ident::new("Element", Span::call_site())),
+    ]);
+
+    snapshot!(tokens as Type, @r###"
+    Type::Path {
+        qself: Some(QSelf {
+            ty: Type::Slice {
+                elem: Type::Path {
+                    path: Path {
+                        segments: [
+                            PathSegment {
+                                ident: "T",
+                                arguments: None,
+                            },
+                        ],
+                    },
+                },
+            },
+            position: 0,
+        }),
+        path: Path {
+            leading_colon: Some,
+            segments: [
+                PathSegment {
+                    ident: "Element",
+                    arguments: None,
+                },
+            ],
+        },
+    }
+    "###);
+}
