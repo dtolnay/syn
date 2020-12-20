@@ -342,11 +342,41 @@ pub mod parsing {
     }
 
     fn ambig_ty(input: ParseStream, allow_plus: bool) -> Result<Type> {
-        if input.peek(token::Group) && !input.peek2(Token![::]) && !input.peek2(Token![<]) {
-            return input.parse().map(Type::Group);
+        let begin = input.fork();
+
+        if input.peek(token::Group) {
+            let mut group: TypeGroup = input.parse()?;
+            if input.peek(Token![::]) && input.peek3(Ident::peek_any) {
+                if let Type::Path(mut ty) = *group.elem {
+                    Path::parse_rest(input, &mut ty.path, false)?;
+                    return Ok(Type::Path(ty));
+                } else {
+                    return Ok(Type::Path(TypePath {
+                        qself: Some(QSelf {
+                            lt_token: Token![<](group.group_token.span),
+                            position: 0,
+                            as_token: None,
+                            gt_token: Token![>](group.group_token.span),
+                            ty: group.elem,
+                        }),
+                        path: Path::parse_helper(input, false)?,
+                    }));
+                }
+            } else if input.peek(Token![<]) || input.peek(Token![::]) && input.peek3(Token![<]) {
+                if let Type::Path(mut ty) = *group.elem {
+                    let arguments = &mut ty.path.segments.last_mut().unwrap().arguments;
+                    if let PathArguments::None = arguments {
+                        *arguments = PathArguments::AngleBracketed(input.parse()?);
+                        Path::parse_rest(input, &mut ty.path, false)?;
+                        return Ok(Type::Path(ty));
+                    } else {
+                        group.elem = Box::new(Type::Path(ty));
+                    }
+                }
+            }
+            return Ok(Type::Group(group));
         }
 
-        let begin = input.fork();
         let mut lifetimes = None::<BoundLifetimes>;
         let mut lookahead = input.lookahead1();
         if lookahead.peek(Token![for]) {

@@ -499,22 +499,32 @@ pub mod parsing {
             }
         }
 
-        fn parse_helper(input: ParseStream, expr_style: bool) -> Result<Self> {
-            Ok(Path {
+        pub(crate) fn parse_helper(input: ParseStream, expr_style: bool) -> Result<Self> {
+            let mut path = Path {
                 leading_colon: input.parse()?,
                 segments: {
                     let mut segments = Punctuated::new();
                     let value = PathSegment::parse_helper(input, expr_style)?;
                     segments.push_value(value);
-                    while input.peek(Token![::]) {
-                        let punct: Token![::] = input.parse()?;
-                        segments.push_punct(punct);
-                        let value = PathSegment::parse_helper(input, expr_style)?;
-                        segments.push_value(value);
-                    }
                     segments
                 },
-            })
+            };
+            Path::parse_rest(input, &mut path, expr_style)?;
+            Ok(path)
+        }
+
+        pub(crate) fn parse_rest(
+            input: ParseStream,
+            path: &mut Self,
+            expr_style: bool,
+        ) -> Result<()> {
+            while input.peek(Token![::]) {
+                let punct: Token![::] = input.parse()?;
+                path.segments.push_punct(punct);
+                let value = PathSegment::parse_helper(input, expr_style)?;
+                path.segments.push_value(value);
+            }
+            Ok(())
         }
     }
 
