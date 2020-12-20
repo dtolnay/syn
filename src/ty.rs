@@ -362,7 +362,7 @@ pub mod parsing {
                         path: Path::parse_helper(input, false)?,
                     }));
                 }
-            } else if input.peek(Token![<]) {
+            } else if input.peek(Token![<]) || input.peek(Token![::]) && input.peek3(Token![<]) {
                 if let Type::Path(mut ty) = *group.elem {
                     let arguments = &mut ty.path.segments.last_mut().unwrap().arguments;
                     if let PathArguments::None = arguments {

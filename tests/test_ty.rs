@@ -50,6 +50,43 @@ fn test_macro_variable_type() {
         },
     }
     "###);
+
+    // mimics the token stream corresponding to `$ty::<T>`
+    let tokens = TokenStream::from_iter(vec![
+        TokenTree::Group(Group::new(Delimiter::None, quote! { ty })),
+        TokenTree::Punct(Punct::new(':', Spacing::Joint)),
+        TokenTree::Punct(Punct::new(':', Spacing::Alone)),
+        TokenTree::Punct(Punct::new('<', Spacing::Alone)),
+        TokenTree::Ident(Ident::new("T", Span::call_site())),
+        TokenTree::Punct(Punct::new('>', Spacing::Alone)),
+    ]);
+
+    snapshot!(tokens as Type, @r###"
+    Type::Path {
+        path: Path {
+            segments: [
+                PathSegment {
+                    ident: "ty",
+                    arguments: PathArguments::AngleBracketed {
+                        colon2_token: Some,
+                        args: [
+                            Type(Type::Path {
+                                path: Path {
+                                    segments: [
+                                        PathSegment {
+                                            ident: "T",
+                                            arguments: None,
+                                        },
+                                    ],
+                                },
+                            }),
+                        ],
+                    },
+                },
+            ],
+        },
+    }
+    "###);
 }
 
 #[test]
