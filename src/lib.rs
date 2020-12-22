@@ -286,6 +286,7 @@
     clippy::module_name_repetitions,
     clippy::must_use_candidate,
     clippy::option_if_let_else,
+    clippy::redundant_else,
     clippy::shadow_unrelated,
     clippy::similar_names,
     clippy::single_match_else,
