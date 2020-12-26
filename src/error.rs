@@ -197,6 +197,42 @@ impl Error {
             .collect()
     }
 
+    /// Render the error as an invocation of [`compile_error!`].
+    ///
+    /// [`compile_error!`]: std::compile_error!
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate proc_macro;
+    /// #
+    /// use proc_macro::TokenStream;
+    /// use syn::{parse_macro_input, DeriveInput, Error};
+    ///
+    /// # const _: &str = stringify! {
+    /// #[proc_macro_derive(MyTrait)]
+    /// # };
+    /// pub fn derive_my_trait(input: TokenStream) -> TokenStream {
+    ///     let input = parse_macro_input!(input as DeriveInput);
+    ///     my_trait::expand(input)
+    ///         .unwrap_or_else(Error::into_compile_error)
+    ///         .into()
+    /// }
+    ///
+    /// mod my_trait {
+    ///     use proc_macro2::TokenStream;
+    ///     use syn::{DeriveInput, Result};
+    ///
+    ///     pub(crate) fn expand(input: DeriveInput) -> Result<TokenStream> {
+    ///         /* ... */
+    ///         # unimplemented!()
+    ///     }
+    /// }
+    /// ```
+    pub fn into_compile_error(self) -> TokenStream {
+        self.to_compile_error()
+    }
+
     /// Add another error message to self such that when `to_compile_error()` is
     /// called, both errors will be emitted together.
     pub fn combine(&mut self, another: Error) {
