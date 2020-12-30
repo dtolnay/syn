@@ -252,7 +252,6 @@
 // Syn types in rustdoc of other crates get linked to here.
 #![doc(html_root_url = "https://docs.rs/syn/1.0.56")]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
-#![deny(clippy::all, clippy::pedantic)]
 // Ignored clippy lints.
 #![allow(
     clippy::blocks_in_if_conditions,

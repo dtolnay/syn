@@ -110,4 +110,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@clippy
-      - run: cargo clippy --all-features
+      - run: cargo clippy --all-features -- -Dclippy::pedantic
