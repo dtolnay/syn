@@ -205,7 +205,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 
     struct BracketsVisitor {
         failed: bool,
-    };
+    }
 
     fn flat_map_field<T: MutVisitor>(mut f: Field, vis: &mut T) -> Vec<Field> {
         if f.is_shorthand {
