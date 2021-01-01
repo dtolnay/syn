@@ -14,14 +14,21 @@ pub fn write<P: AsRef<Path>>(path: P, content: TokenStream) -> Result<()> {
     writeln!(formatted)?;
 
     let mut config = rustfmt::Config::default();
-    config.set().emit_mode(rustfmt::EmitMode::Stdout);
-    config.set().verbose(rustfmt::Verbosity::Quiet);
     config.set().format_macro_matchers(true);
     config.set().normalize_doc_attributes(true);
 
-    let mut session = rustfmt::Session::new(config, Some(&mut formatted));
-    session.format(rustfmt::Input::Text(content.to_string()))?;
-    drop(session);
+    let format_report = rustfmt::format(
+        rustfmt::Input::Text(content.to_string()),
+        &config,
+        rustfmt::OperationSetting {
+            recursive: false,
+            verbosity: rustfmt::emitter::Verbosity::Normal,
+        },
+    )?;
+
+    for (_filename, format_result) in format_report.format_result() {
+        write!(formatted, "{}", format_result.formatted_text())?;
+    }
 
     if path.as_ref().is_file() && fs::read(&path)? == formatted {
         return Ok(());
