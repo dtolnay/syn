@@ -284,7 +284,6 @@
     clippy::single_match_else,
     clippy::too_many_lines,
     clippy::unseparated_literal_suffix,
-    clippy::use_self,
     clippy::used_underscore_binding,
     clippy::wildcard_imports
 )]

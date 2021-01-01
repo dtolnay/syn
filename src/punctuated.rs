@@ -51,7 +51,7 @@ pub struct Punctuated<T, P> {
 impl<T, P> Punctuated<T, P> {
     /// Creates an empty punctuated sequence.
     #[cfg(not(syn_no_const_vec_new))]
-    pub const fn new() -> Punctuated<T, P> {
+    pub const fn new() -> Self {
         Punctuated {
             inner: Vec::new(),
             last: None,
@@ -60,7 +60,7 @@ impl<T, P> Punctuated<T, P> {
 
     /// Creates an empty punctuated sequence.
     #[cfg(syn_no_const_vec_new)]
-    pub fn new() -> Punctuated<T, P> {
+    pub fn new() -> Self {
         Punctuated {
             inner: Vec::new(),
             last: None,
