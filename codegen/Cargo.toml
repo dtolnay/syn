@@ -22,9 +22,9 @@ thiserror = "1.0"
 toml = "0.5"
 
 [dependencies.rustfmt]
-package = "rustfmt_lib"
-git = "https://github.com/rust-lang-nursery/rustfmt"
-rev = "99edc8826ee6d7a5d529e8749cdf4ac999dfd954"
+package = "rustfmt-nightly"
+git = "https://github.com/rust-lang/rustfmt"
+rev = "367a874d04abfb2269ff1ea1974f06640546b7c5"
 
 [workspace]
 # Prefer that `cargo clean` in syn's directory does not require a rebuild of

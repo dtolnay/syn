@@ -87,11 +87,14 @@ jobs:
   codegen:
     name: Codegen
     runs-on: ubuntu-latest
+    env:
+      CFG_RELEASE_CHANNEL: dev
+      CFG_RELEASE: 1.51.0
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly-2020-05-15
+          toolchain: nightly-2021-01-01
       - run: cd codegen && cargo run
       - run: git diff --exit-code
 
