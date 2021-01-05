@@ -252,7 +252,7 @@ mod parsing {
     use proc_macro2::{TokenStream, TokenTree};
     use quote::quote;
     use std::collections::{BTreeMap, BTreeSet};
-    use syn::parse::{ParseStream, Result};
+    use syn::parse::{ParseStream, Parser, Result};
     use syn::{
         braced, bracketed, parenthesized, parse_quote, token, Attribute, Ident, LitStr, Path, Token,
     };
@@ -475,6 +475,20 @@ mod parsing {
 
         Ok(types::Features { any: features })
     }
+
+    pub fn path_attr(attrs: &[Attribute]) -> Result<Option<LitStr>> {
+        for attr in attrs {
+            if attr.path.is_ident("path") {
+                fn parser(input: ParseStream) -> Result<LitStr> {
+                    input.parse::<Token![=]>()?;
+                    input.parse()
+                }
+                let filename = parser.parse2(attr.tokens.clone())?;
+                return Ok(Some(filename));
+            }
+        }
+        Ok(None)
+    }
 }
 
 fn clone_features(features: &[Attribute]) -> Vec<Attribute> {
@@ -565,7 +579,11 @@ fn do_load_file<P: AsRef<Path>>(
 
                 // Look up the submodule file, and recursively parse it.
                 // Only handles same-directory .rs file submodules for now.
-                let path = parent.join(&format!("{}.rs", item.ident));
+                let filename = match parsing::path_attr(&item.attrs)? {
+                    Some(filename) => filename.value(),
+                    None => format!("{}.rs", item.ident),
+                };
+                let path = parent.join(filename);
                 load_file(path, &features, lookup)?;
             }
             Item::Macro(item) => {
