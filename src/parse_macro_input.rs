@@ -108,17 +108,17 @@
 macro_rules! parse_macro_input {
     ($tokenstream:ident as $ty:ty) => {
         match $crate::parse_macro_input::parse::<$ty>($tokenstream) {
-            $crate::export::Ok(data) => data,
-            $crate::export::Err(err) => {
-                return $crate::export::TokenStream::from(err.to_compile_error());
+            $crate::__private::Ok(data) => data,
+            $crate::__private::Err(err) => {
+                return $crate::__private::TokenStream::from(err.to_compile_error());
             }
         }
     };
     ($tokenstream:ident with $parser:path) => {
         match $crate::parse::Parser::parse($parser, $tokenstream) {
-            $crate::export::Ok(data) => data,
-            $crate::export::Err(err) => {
-                return $crate::export::TokenStream::from(err.to_compile_error());
+            $crate::__private::Ok(data) => data,
+            $crate::__private::Err(err) => {
+                return $crate::__private::TokenStream::from(err.to_compile_error());
             }
         }
     };

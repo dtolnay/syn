@@ -788,7 +788,8 @@ pub use crate::gen::*;
 
 // Not public API.
 #[doc(hidden)]
-pub mod export;
+#[path = "export.rs"]
+pub mod __private;
 
 mod custom_keyword;
 mod custom_punctuation;
