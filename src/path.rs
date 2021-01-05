@@ -241,12 +241,15 @@ pub mod parsing {
                 if input.peek(Ident) && input.peek2(Token![:]) && !input.peek2(Token![::]) {
                     return Ok(GenericArgument::Constraint(input.parse()?));
                 }
+            }
 
-                if input.peek(Lit) {
-                    let lit = input.parse()?;
-                    return Ok(GenericArgument::Const(Expr::Lit(lit)));
-                }
+            if input.peek(Lit) {
+                let lit = input.parse()?;
+                return Ok(GenericArgument::Const(Expr::Lit(lit)));
+            }
 
+            #[cfg(feature = "full")]
+            {
                 if input.peek(token::Brace) {
                     let block = input.call(expr::parsing::expr_block)?;
                     return Ok(GenericArgument::Const(Expr::Block(block)));
