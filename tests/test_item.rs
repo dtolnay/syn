@@ -4,7 +4,7 @@ mod macros;
 use proc_macro2::{Delimiter, Group, Ident, Span, TokenStream, TokenTree};
 use quote::quote;
 use std::iter::FromIterator;
-use syn::Item;
+use syn::{Item, ItemTrait};
 
 #[test]
 fn test_macro_variable_attr() {
@@ -156,6 +156,88 @@ fn test_macro_variable_impl() {
                 },
             },
         },
+    }
+    "###);
+}
+
+#[test]
+fn test_supertraits() {
+    // Rustc parses all of the following.
+
+    #[rustfmt::skip]
+    let tokens = quote!(trait Trait where {});
+    snapshot!(tokens as ItemTrait, @r###"
+    ItemTrait {
+        vis: Inherited,
+        ident: "Trait",
+        generics: Generics {
+            where_clause: Some(WhereClause),
+        },
+    }
+    "###);
+
+    #[rustfmt::skip]
+    let tokens = quote!(trait Trait: where {});
+    snapshot!(tokens as ItemTrait, @r###"
+    ItemTrait {
+        vis: Inherited,
+        ident: "Trait",
+        generics: Generics {
+            where_clause: Some(WhereClause),
+        },
+        colon_token: Some,
+    }
+    "###);
+
+    #[rustfmt::skip]
+    let tokens = quote!(trait Trait: Sized where {});
+    snapshot!(tokens as ItemTrait, @r###"
+    ItemTrait {
+        vis: Inherited,
+        ident: "Trait",
+        generics: Generics {
+            where_clause: Some(WhereClause),
+        },
+        colon_token: Some,
+        supertraits: [
+            Trait(TraitBound {
+                modifier: None,
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "Sized",
+                            arguments: None,
+                        },
+                    ],
+                },
+            }),
+        ],
+    }
+    "###);
+
+    #[rustfmt::skip]
+    let tokens = quote!(trait Trait: Sized + where {});
+    snapshot!(tokens as ItemTrait, @r###"
+    ItemTrait {
+        vis: Inherited,
+        ident: "Trait",
+        generics: Generics {
+            where_clause: Some(WhereClause),
+        },
+        colon_token: Some,
+        supertraits: [
+            Trait(TraitBound {
+                modifier: None,
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "Sized",
+                            arguments: None,
+                        },
+                    ],
+                },
+            }),
+        ],
     }
     "###);
 }
