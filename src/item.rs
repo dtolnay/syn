@@ -2032,14 +2032,14 @@ pub mod parsing {
         let mut supertraits = Punctuated::new();
         if colon_token.is_some() {
             loop {
+                if input.peek(Token![where]) || input.peek(token::Brace) {
+                    break;
+                }
                 supertraits.push_value(input.parse()?);
                 if input.peek(Token![where]) || input.peek(token::Brace) {
                     break;
                 }
                 supertraits.push_punct(input.parse()?);
-                if input.peek(Token![where]) || input.peek(token::Brace) {
-                    break;
-                }
             }
         }
 
