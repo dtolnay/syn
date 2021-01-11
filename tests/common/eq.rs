@@ -21,7 +21,7 @@ use rustc_ast::ast::{
 };
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, DelimToken, Nonterminal, Token, TokenKind};
-use rustc_ast::tokenstream::{self, DelimSpan, LazyTokenStream, TokenStream, TokenTree};
+use rustc_ast::tokenstream::{DelimSpan, LazyTokenStream, TokenStream, TokenTree};
 use rustc_data_structures::sync::Lrc;
 use rustc_data_structures::thin_vec::ThinVec;
 use rustc_span::source_map::Spanned;
@@ -538,19 +538,24 @@ fn doc_comment<'a>(
         })) => {}
         _ => return false,
     }
-    is_escaped_literal(trees, unescaped)
+    match trees.next() {
+        Some(TokenTree::Token(token)) => {
+            is_escaped_literal(token, unescaped) && trees.next().is_none()
+        }
+        _ => false,
+    }
 }
 
-fn is_escaped_literal(mut trees: tokenstream::CursorRef, unescaped: Symbol) -> bool {
-    match match trees.next() {
-        Some(TokenTree::Token(Token {
+fn is_escaped_literal(token: &Token, unescaped: Symbol) -> bool {
+    match match token {
+        Token {
             kind: TokenKind::Literal(lit),
             span: _,
-        })) => Lit::from_lit_token(*lit, DUMMY_SP),
-        Some(TokenTree::Token(Token {
+        } => Lit::from_lit_token(*lit, DUMMY_SP),
+        Token {
             kind: TokenKind::Interpolated(nonterminal),
             span: _,
-        })) => match nonterminal.as_ref() {
+        } => match nonterminal.as_ref() {
             Nonterminal::NtExpr(expr) => match &expr.kind {
                 ExprKind::Lit(lit) => Ok(lit.clone()),
                 _ => return false,
@@ -568,10 +573,7 @@ fn is_escaped_literal(mut trees: tokenstream::CursorRef, unescaped: Symbol) -> b
                 },
             kind: LitKind::Str(symbol, StrStyle::Cooked),
             span: _,
-        }) => {
-            symbol.as_str().replace('\r', "") == unescaped.as_str().replace('\r', "")
-                && trees.next().is_none()
-        }
+        }) => symbol.as_str().replace('\r', "") == unescaped.as_str().replace('\r', ""),
         _ => false,
     }
 }
@@ -601,9 +603,7 @@ impl SpanlessEq for AttrKind {
                 SpanlessEq::eq(&path, &item2.path)
                     && match &item2.args {
                         MacArgs::Empty | MacArgs::Delimited(..) => false,
-                        MacArgs::Eq(_span, tokens) => {
-                            is_escaped_literal(tokens.trees_ref(), *unescaped)
-                        }
+                        MacArgs::Eq(_span, token) => is_escaped_literal(token, *unescaped),
                     }
             }
             (AttrKind::Normal(..), AttrKind::DocComment(..)) => SpanlessEq::eq(other, self),
