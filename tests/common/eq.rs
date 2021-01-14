@@ -307,7 +307,7 @@ spanless_eq_struct!(MacCallStmt; mac style attrs tokens);
 spanless_eq_struct!(MacroDef; body macro_rules);
 spanless_eq_struct!(Mod; inner unsafety items inline);
 spanless_eq_struct!(MutTy; ty mutbl);
-spanless_eq_struct!(ParenthesizedArgs; span inputs output);
+spanless_eq_struct!(ParenthesizedArgs; span inputs inputs_span output);
 spanless_eq_struct!(Pat; id kind span tokens);
 spanless_eq_struct!(Path; span segments tokens);
 spanless_eq_struct!(PathSegment; ident id args);
