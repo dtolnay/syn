@@ -435,9 +435,13 @@ pub mod parsing {
                         let mut elems = Punctuated::new();
                         elems.push_value(first);
                         elems.push_punct(content.parse()?);
-                        let rest: Punctuated<Type, Token![,]> =
-                            content.parse_terminated(Parse::parse)?;
-                        elems.extend(rest);
+                        while !content.is_empty() {
+                            elems.push_value(content.parse()?);
+                            if content.is_empty() {
+                                break;
+                            }
+                            elems.push_punct(content.parse()?);
+                        }
                         elems
                     },
                 }));
@@ -770,9 +774,13 @@ pub mod parsing {
                     let mut elems = Punctuated::new();
                     elems.push_value(first);
                     elems.push_punct(content.parse()?);
-                    let rest: Punctuated<Type, Token![,]> =
-                        content.parse_terminated(Parse::parse)?;
-                    elems.extend(rest);
+                    while !content.is_empty() {
+                        elems.push_value(content.parse()?);
+                        if content.is_empty() {
+                            break;
+                        }
+                        elems.push_punct(content.parse()?);
+                    }
                     elems
                 },
             })
