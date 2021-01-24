@@ -91,6 +91,10 @@ ast_enum_of_structs! {
         // a variant. You will be notified by a test failure when a variant is
         // added, so that you can add code to handle it, but your library will
         // continue to compile and work for downstream users in the interim.
+        //
+        // Once `deny(reachable)` is available in rustc, Pat will be
+        // reimplemented as a non_exhaustive enum.
+        // https://github.com/rust-lang/rust/issues/44109#issuecomment-521781237
         #[doc(hidden)]
         __TestExhaustive(crate::private),
     }
