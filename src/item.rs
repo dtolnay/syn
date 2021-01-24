@@ -71,8 +71,27 @@ ast_enum_of_structs! {
         /// Tokens forming an item not interpreted by Syn.
         Verbatim(TokenStream),
 
+        // The following is the only supported idiom for exhaustive matching of
+        // this enum.
+        //
+        //     match expr {
+        //         Item::Const(e) => {...}
+        //         Item::Enum(e) => {...}
+        //         ...
+        //         Item::Verbatim(e) => {...}
+        //
+        //         #[cfg(test)]
+        //         Item::TestExhaustive => unimplemented!(),
+        //         #[cfg(not(test))]
+        //         _ => { /* some sane fallback */ }
+        //     }
+        //
+        // This way we fail your tests but don't break your library when adding
+        // a variant. You will be notified by a test failure when a variant is
+        // added, so that you can add code to handle it, but your library will
+        // continue to compile and work for downstream users in the interim.
         #[doc(hidden)]
-        __Nonexhaustive,
+        TestExhaustive,
     }
 }
 
@@ -357,7 +376,7 @@ impl Item {
             | Item::Macro(ItemMacro { attrs, .. })
             | Item::Macro2(ItemMacro2 { attrs, .. }) => mem::replace(attrs, new),
             Item::Verbatim(_) => Vec::new(),
-            Item::__Nonexhaustive => unreachable!(),
+            Item::TestExhaustive => unreachable!(),
         }
     }
 }
@@ -553,8 +572,27 @@ ast_enum_of_structs! {
         /// Tokens in an `extern` block not interpreted by Syn.
         Verbatim(TokenStream),
 
+        // The following is the only supported idiom for exhaustive matching of
+        // this enum.
+        //
+        //     match expr {
+        //         ForeignItem::Fn(e) => {...}
+        //         ForeignItem::Static(e) => {...}
+        //         ...
+        //         ForeignItem::Verbatim(e) => {...}
+        //
+        //         #[cfg(test)]
+        //         ForeignItem::TestExhaustive => unimplemented!(),
+        //         #[cfg(not(test))]
+        //         _ => { /* some sane fallback */ }
+        //     }
+        //
+        // This way we fail your tests but don't break your library when adding
+        // a variant. You will be notified by a test failure when a variant is
+        // added, so that you can add code to handle it, but your library will
+        // continue to compile and work for downstream users in the interim.
         #[doc(hidden)]
-        __Nonexhaustive,
+        TestExhaustive,
     }
 }
 
@@ -641,8 +679,27 @@ ast_enum_of_structs! {
         /// Tokens within the definition of a trait not interpreted by Syn.
         Verbatim(TokenStream),
 
+        // The following is the only supported idiom for exhaustive matching of
+        // this enum.
+        //
+        //     match expr {
+        //         TraitItem::Const(e) => {...}
+        //         TraitItem::Method(e) => {...}
+        //         ...
+        //         TraitItem::Verbatim(e) => {...}
+        //
+        //         #[cfg(test)]
+        //         TraitItem::TestExhaustive => unimplemented!(),
+        //         #[cfg(not(test))]
+        //         _ => { /* some sane fallback */ }
+        //     }
+        //
+        // This way we fail your tests but don't break your library when adding
+        // a variant. You will be notified by a test failure when a variant is
+        // added, so that you can add code to handle it, but your library will
+        // continue to compile and work for downstream users in the interim.
         #[doc(hidden)]
-        __Nonexhaustive,
+        TestExhaustive,
     }
 }
 
@@ -731,8 +788,27 @@ ast_enum_of_structs! {
         /// Tokens within an impl block not interpreted by Syn.
         Verbatim(TokenStream),
 
+        // The following is the only supported idiom for exhaustive matching of
+        // this enum.
+        //
+        //     match expr {
+        //         ImplItem::Const(e) => {...}
+        //         ImplItem::Method(e) => {...}
+        //         ...
+        //         ImplItem::Verbatim(e) => {...}
+        //
+        //         #[cfg(test)]
+        //         ImplItem::TestExhaustive => unimplemented!(),
+        //         #[cfg(not(test))]
+        //         _ => { /* some sane fallback */ }
+        //     }
+        //
+        // This way we fail your tests but don't break your library when adding
+        // a variant. You will be notified by a test failure when a variant is
+        // added, so that you can add code to handle it, but your library will
+        // continue to compile and work for downstream users in the interim.
         #[doc(hidden)]
-        __Nonexhaustive,
+        TestExhaustive,
     }
 }
 
@@ -1695,7 +1771,7 @@ pub mod parsing {
                 ForeignItem::Type(item) => &mut item.attrs,
                 ForeignItem::Macro(item) => &mut item.attrs,
                 ForeignItem::Verbatim(_) => return Ok(item),
-                ForeignItem::__Nonexhaustive => unreachable!(),
+                ForeignItem::TestExhaustive => unreachable!(),
             };
             attrs.extend(item_attrs.drain(..));
             *item_attrs = attrs;
@@ -2173,7 +2249,7 @@ pub mod parsing {
                 TraitItem::Method(item) => &mut item.attrs,
                 TraitItem::Type(item) => &mut item.attrs,
                 TraitItem::Macro(item) => &mut item.attrs,
-                TraitItem::Verbatim(_) | TraitItem::__Nonexhaustive => unreachable!(),
+                TraitItem::Verbatim(_) | TraitItem::TestExhaustive => unreachable!(),
             };
             attrs.extend(item_attrs.drain(..));
             *item_attrs = attrs;
@@ -2504,7 +2580,7 @@ pub mod parsing {
                     ImplItem::Type(item) => &mut item.attrs,
                     ImplItem::Macro(item) => &mut item.attrs,
                     ImplItem::Verbatim(_) => return Ok(item),
-                    ImplItem::__Nonexhaustive => unreachable!(),
+                    ImplItem::TestExhaustive => unreachable!(),
                 };
                 attrs.extend(item_attrs.drain(..));
                 *item_attrs = attrs;

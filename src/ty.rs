@@ -63,8 +63,27 @@ ast_enum_of_structs! {
         /// Tokens in type position not interpreted by Syn.
         Verbatim(TokenStream),
 
+        // The following is the only supported idiom for exhaustive matching of
+        // this enum.
+        //
+        //     match expr {
+        //         Type::Array(e) => {...}
+        //         Type::BareFn(e) => {...}
+        //         ...
+        //         Type::Verbatim(e) => {...}
+        //
+        //         #[cfg(test)]
+        //         Type::TestExhaustive => unimplemented!(),
+        //         #[cfg(not(test))]
+        //         _ => { /* some sane fallback */ }
+        //     }
+        //
+        // This way we fail your tests but don't break your library when adding
+        // a variant. You will be notified by a test failure when a variant is
+        // added, so that you can add code to handle it, but your library will
+        // continue to compile and work for downstream users in the interim.
         #[doc(hidden)]
-        __Nonexhaustive,
+        TestExhaustive,
     }
 }
 
