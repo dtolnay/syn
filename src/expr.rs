@@ -224,8 +224,27 @@ ast_enum_of_structs! {
         /// A yield expression: `yield expr`.
         Yield(ExprYield),
 
+        // The following is the only supported idiom for exhaustive matching of
+        // this enum.
+        //
+        //     match expr {
+        //         Expr::Array(e) => {...}
+        //         Expr::Assign(e) => {...}
+        //         ...
+        //         Expr::Yield(e) => {...}
+        //
+        //         #[cfg(test)]
+        //         Expr::TestExhaustive => unimplemented!(),
+        //         #[cfg(not(test))]
+        //         _ => { /* some sane fallback */ }
+        //     }
+        //
+        // This way we fail your tests but don't break your library when adding
+        // a variant. You will be notified by a test failure when a variant is
+        // added, so that you can add code to handle it, but your library will
+        // continue to compile and work for downstream users in the interim.
         #[doc(hidden)]
-        __Nonexhaustive,
+        TestExhaustive,
     }
 }
 
@@ -804,7 +823,7 @@ impl Expr {
             | Expr::TryBlock(ExprTryBlock { attrs, .. })
             | Expr::Yield(ExprYield { attrs, .. }) => mem::replace(attrs, new),
             Expr::Verbatim(_) => Vec::new(),
-            Expr::__Nonexhaustive => unreachable!(),
+            Expr::TestExhaustive => unreachable!(),
         }
     }
 }
@@ -2303,7 +2322,7 @@ pub(crate) mod parsing {
                 Pat::Type(_) => unreachable!(),
                 Pat::Verbatim(_) => {}
                 Pat::Wild(pat) => pat.attrs = attrs,
-                Pat::__Nonexhaustive => unreachable!(),
+                Pat::TestExhaustive => unreachable!(),
             }
             Ok(pat)
         }
@@ -2654,7 +2673,7 @@ pub(crate) mod parsing {
         }
         for part in float_repr.split('.') {
             let index = crate::parse_str(part).map_err(|err| Error::new(float.span(), err))?;
-            let base = mem::replace(e, Expr::__Nonexhaustive);
+            let base = mem::replace(e, Expr::TestExhaustive);
             *e = Expr::Field(ExprField {
                 attrs: Vec::new(),
                 base: Box::new(base),

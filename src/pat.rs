@@ -72,8 +72,27 @@ ast_enum_of_structs! {
         /// A pattern that matches any value: `_`.
         Wild(PatWild),
 
+        // The following is the only supported idiom for exhaustive matching of
+        // this enum.
+        //
+        //     match expr {
+        //         Pat::Box(e) => {...}
+        //         Pat::Ident(e) => {...}
+        //         ...
+        //         Pat::Wild(e) => {...}
+        //
+        //         #[cfg(test)]
+        //         Pat::TestExhaustive => unimplemented!(),
+        //         #[cfg(not(test))]
+        //         _ => { /* some sane fallback */ }
+        //     }
+        //
+        // This way we fail your tests but don't break your library when adding
+        // a variant. You will be notified by a test failure when a variant is
+        // added, so that you can add code to handle it, but your library will
+        // continue to compile and work for downstream users in the interim.
         #[doc(hidden)]
-        __Nonexhaustive,
+        TestExhaustive,
     }
 }
 
