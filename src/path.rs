@@ -747,7 +747,7 @@ mod printing {
     }
 
     impl private {
-        pub fn print_path(tokens: &mut TokenStream, qself: &Option<QSelf>, path: &Path) {
+        pub(crate) fn print_path(tokens: &mut TokenStream, qself: &Option<QSelf>, path: &Path) {
             let qself = match qself {
                 Some(qself) => qself,
                 None => {

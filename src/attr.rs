@@ -530,7 +530,7 @@ pub mod parsing {
 
     #[cfg(feature = "full")]
     impl private {
-        pub fn attrs(outer: Vec<Attribute>, inner: Vec<Attribute>) -> Vec<Attribute> {
+        pub(crate) fn attrs(outer: Vec<Attribute>, inner: Vec<Attribute>) -> Vec<Attribute> {
             let mut attrs = outer;
             attrs.extend(inner);
             attrs

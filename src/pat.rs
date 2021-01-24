@@ -82,7 +82,7 @@ ast_enum_of_structs! {
         //         Pat::Wild(e) => {...}
         //
         //         #[cfg(test)]
-        //         Pat::__TestExhaustive => unimplemented!(),
+        //         Pat::__TestExhaustive(_) => unimplemented!(),
         //         #[cfg(not(test))]
         //         _ => { /* some sane fallback */ }
         //     }
@@ -92,7 +92,7 @@ ast_enum_of_structs! {
         // added, so that you can add code to handle it, but your library will
         // continue to compile and work for downstream users in the interim.
         #[doc(hidden)]
-        __TestExhaustive,
+        __TestExhaustive(crate::private),
     }
 }
 

@@ -252,6 +252,7 @@
 // Syn types in rustdoc of other crates get linked to here.
 #![doc(html_root_url = "https://docs.rs/syn/1.0.59")]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
+#![allow(non_camel_case_types)]
 // Ignored clippy lints.
 #![allow(
     clippy::doc_markdown,
@@ -813,10 +814,9 @@ mod verbatim;
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 mod print;
 
-////////////////////////////////////////////////////////////////////////////////
+use crate::__private::private;
 
-#[allow(dead_code, non_camel_case_types)]
-struct private;
+////////////////////////////////////////////////////////////////////////////////
 
 // https://github.com/rust-lang/rust/issues/62830
 #[cfg(feature = "parsing")]
