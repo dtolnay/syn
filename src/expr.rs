@@ -234,7 +234,7 @@ ast_enum_of_structs! {
         //         Expr::Yield(e) => {...}
         //
         //         #[cfg(test)]
-        //         Expr::TestExhaustive => unimplemented!(),
+        //         Expr::__TestExhaustive => unimplemented!(),
         //         #[cfg(not(test))]
         //         _ => { /* some sane fallback */ }
         //     }
@@ -244,7 +244,7 @@ ast_enum_of_structs! {
         // added, so that you can add code to handle it, but your library will
         // continue to compile and work for downstream users in the interim.
         #[doc(hidden)]
-        TestExhaustive,
+        __TestExhaustive,
     }
 }
 
@@ -823,7 +823,7 @@ impl Expr {
             | Expr::TryBlock(ExprTryBlock { attrs, .. })
             | Expr::Yield(ExprYield { attrs, .. }) => mem::replace(attrs, new),
             Expr::Verbatim(_) => Vec::new(),
-            Expr::TestExhaustive => unreachable!(),
+            Expr::__TestExhaustive => unreachable!(),
         }
     }
 }
@@ -2322,7 +2322,7 @@ pub(crate) mod parsing {
                 Pat::Type(_) => unreachable!(),
                 Pat::Verbatim(_) => {}
                 Pat::Wild(pat) => pat.attrs = attrs,
-                Pat::TestExhaustive => unreachable!(),
+                Pat::__TestExhaustive => unreachable!(),
             }
             Ok(pat)
         }
@@ -2673,7 +2673,7 @@ pub(crate) mod parsing {
         }
         for part in float_repr.split('.') {
             let index = crate::parse_str(part).map_err(|err| Error::new(float.span(), err))?;
-            let base = mem::replace(e, Expr::TestExhaustive);
+            let base = mem::replace(e, Expr::__TestExhaustive);
             *e = Expr::Field(ExprField {
                 attrs: Vec::new(),
                 base: Box::new(base),

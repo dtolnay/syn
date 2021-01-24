@@ -81,7 +81,7 @@ ast_enum_of_structs! {
         //         Item::Verbatim(e) => {...}
         //
         //         #[cfg(test)]
-        //         Item::TestExhaustive => unimplemented!(),
+        //         Item::__TestExhaustive => unimplemented!(),
         //         #[cfg(not(test))]
         //         _ => { /* some sane fallback */ }
         //     }
@@ -91,7 +91,7 @@ ast_enum_of_structs! {
         // added, so that you can add code to handle it, but your library will
         // continue to compile and work for downstream users in the interim.
         #[doc(hidden)]
-        TestExhaustive,
+        __TestExhaustive,
     }
 }
 
@@ -376,7 +376,7 @@ impl Item {
             | Item::Macro(ItemMacro { attrs, .. })
             | Item::Macro2(ItemMacro2 { attrs, .. }) => mem::replace(attrs, new),
             Item::Verbatim(_) => Vec::new(),
-            Item::TestExhaustive => unreachable!(),
+            Item::__TestExhaustive => unreachable!(),
         }
     }
 }
@@ -582,7 +582,7 @@ ast_enum_of_structs! {
         //         ForeignItem::Verbatim(e) => {...}
         //
         //         #[cfg(test)]
-        //         ForeignItem::TestExhaustive => unimplemented!(),
+        //         ForeignItem::__TestExhaustive => unimplemented!(),
         //         #[cfg(not(test))]
         //         _ => { /* some sane fallback */ }
         //     }
@@ -592,7 +592,7 @@ ast_enum_of_structs! {
         // added, so that you can add code to handle it, but your library will
         // continue to compile and work for downstream users in the interim.
         #[doc(hidden)]
-        TestExhaustive,
+        __TestExhaustive,
     }
 }
 
@@ -689,7 +689,7 @@ ast_enum_of_structs! {
         //         TraitItem::Verbatim(e) => {...}
         //
         //         #[cfg(test)]
-        //         TraitItem::TestExhaustive => unimplemented!(),
+        //         TraitItem::__TestExhaustive => unimplemented!(),
         //         #[cfg(not(test))]
         //         _ => { /* some sane fallback */ }
         //     }
@@ -699,7 +699,7 @@ ast_enum_of_structs! {
         // added, so that you can add code to handle it, but your library will
         // continue to compile and work for downstream users in the interim.
         #[doc(hidden)]
-        TestExhaustive,
+        __TestExhaustive,
     }
 }
 
@@ -798,7 +798,7 @@ ast_enum_of_structs! {
         //         ImplItem::Verbatim(e) => {...}
         //
         //         #[cfg(test)]
-        //         ImplItem::TestExhaustive => unimplemented!(),
+        //         ImplItem::__TestExhaustive => unimplemented!(),
         //         #[cfg(not(test))]
         //         _ => { /* some sane fallback */ }
         //     }
@@ -808,7 +808,7 @@ ast_enum_of_structs! {
         // added, so that you can add code to handle it, but your library will
         // continue to compile and work for downstream users in the interim.
         #[doc(hidden)]
-        TestExhaustive,
+        __TestExhaustive,
     }
 }
 
@@ -1771,7 +1771,7 @@ pub mod parsing {
                 ForeignItem::Type(item) => &mut item.attrs,
                 ForeignItem::Macro(item) => &mut item.attrs,
                 ForeignItem::Verbatim(_) => return Ok(item),
-                ForeignItem::TestExhaustive => unreachable!(),
+                ForeignItem::__TestExhaustive => unreachable!(),
             };
             attrs.extend(item_attrs.drain(..));
             *item_attrs = attrs;
@@ -2249,7 +2249,7 @@ pub mod parsing {
                 TraitItem::Method(item) => &mut item.attrs,
                 TraitItem::Type(item) => &mut item.attrs,
                 TraitItem::Macro(item) => &mut item.attrs,
-                TraitItem::Verbatim(_) | TraitItem::TestExhaustive => unreachable!(),
+                TraitItem::Verbatim(_) | TraitItem::__TestExhaustive => unreachable!(),
             };
             attrs.extend(item_attrs.drain(..));
             *item_attrs = attrs;
@@ -2580,7 +2580,7 @@ pub mod parsing {
                     ImplItem::Type(item) => &mut item.attrs,
                     ImplItem::Macro(item) => &mut item.attrs,
                     ImplItem::Verbatim(_) => return Ok(item),
-                    ImplItem::TestExhaustive => unreachable!(),
+                    ImplItem::__TestExhaustive => unreachable!(),
                 };
                 attrs.extend(item_attrs.drain(..));
                 *item_attrs = attrs;
