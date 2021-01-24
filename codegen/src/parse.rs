@@ -331,11 +331,12 @@ mod parsing {
 
     // A single variant of an ast_enum_of_structs!
     struct EosVariant {
+        attrs: Vec<Attribute>,
         name: Ident,
         member: Option<Path>,
     }
     fn eos_variant(input: ParseStream) -> Result<EosVariant> {
-        input.call(Attribute::parse_outer)?;
+        let attrs = input.call(Attribute::parse_outer)?;
         let variant: Ident = input.parse()?;
         let member = if input.peek(token::Paren) {
             let content;
@@ -347,6 +348,7 @@ mod parsing {
         };
         input.parse::<Token![,]>()?;
         Ok(EosVariant {
+            attrs,
             name: variant,
             member,
         })
@@ -371,10 +373,11 @@ mod parsing {
 
         let enum_item = {
             let variants = variants.iter().map(|v| {
-                let name = v.name.clone();
+                let attrs = &v.attrs;
+                let name = &v.name;
                 match v.member {
-                    Some(ref member) => quote!(#name(#member)),
-                    None => quote!(#name),
+                    Some(ref member) => quote!(#(#attrs)* #name(#member)),
+                    None => quote!(#(#attrs)* #name),
                 }
             });
             parse_quote! {
