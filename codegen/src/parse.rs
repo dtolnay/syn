@@ -17,7 +17,6 @@ const SYN_CRATE_ROOT: &str = "../src/lib.rs";
 const TOKEN_SRC: &str = "../src/token.rs";
 const IGNORED_MODS: &[&str] = &["fold", "visit", "visit_mut"];
 const EXTRA_TYPES: &[&str] = &["Lifetime"];
-const NONEXHAUSTIVE: &str = "__Nonexhaustive";
 
 // NOTE: BTreeMap is used here instead of HashMap to have deterministic output.
 type ItemLookup = BTreeMap<Ident, AstItem>;
@@ -63,7 +62,7 @@ fn introspect_item(item: &AstItem, items: &ItemLookup, tokens: &TokenLookup) -> 
             ident: item.ast.ident.to_string(),
             features,
             data: types::Data::Enum(introspect_enum(data, items, tokens)),
-            exhaustive: data.variants.iter().all(|v| v.ident != NONEXHAUSTIVE),
+            exhaustive: !data.variants.iter().any(|v| is_doc_hidden(&v.attrs)),
         },
         Data::Struct(ref data) => types::Node {
             ident: item.ast.ident.to_string(),
@@ -85,7 +84,7 @@ fn introspect_enum(item: &DataEnum, items: &ItemLookup, tokens: &TokenLookup) ->
     item.variants
         .iter()
         .filter_map(|variant| {
-            if variant.ident == NONEXHAUSTIVE {
+            if is_doc_hidden(&variant.attrs) {
                 return None;
             }
             let fields = match &variant.fields {
@@ -213,6 +212,20 @@ fn is_pub(vis: &Visibility) -> bool {
         Visibility::Public(_) => true,
         _ => false,
     }
+}
+
+fn is_doc_hidden(attrs: &[Attribute]) -> bool {
+    for attr in attrs {
+        if attr.path.is_ident("doc") {
+            if parsing::parse_doc_hidden_attr
+                .parse2(attr.tokens.clone())
+                .is_ok()
+            {
+                return true;
+            }
+        }
+    }
+    false
 }
 
 fn first_arg(params: &PathArguments) -> &syn::Type {
@@ -393,6 +406,7 @@ mod parsing {
     }
 
     mod kw {
+        syn::custom_keyword!(hidden);
         syn::custom_keyword!(macro_rules);
         syn::custom_keyword!(Token);
     }
@@ -491,6 +505,13 @@ mod parsing {
             }
         }
         Ok(None)
+    }
+
+    pub fn parse_doc_hidden_attr(input: ParseStream) -> Result<()> {
+        let content;
+        parenthesized!(content in input);
+        content.parse::<kw::hidden>()?;
+        Ok(())
     }
 }
 
