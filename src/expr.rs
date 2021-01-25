@@ -827,7 +827,11 @@ impl Expr {
             | Expr::TryBlock(ExprTryBlock { attrs, .. })
             | Expr::Yield(ExprYield { attrs, .. }) => mem::replace(attrs, new),
             Expr::Verbatim(_) => Vec::new(),
-            Expr::__TestExhaustive(_) => unreachable!(),
+
+            #[cfg(test)]
+            Expr::__TestExhaustive(_) => unimplemented!(),
+            #[cfg(not(test))]
+            _ => unreachable!(),
         }
     }
 }
@@ -2326,7 +2330,11 @@ pub(crate) mod parsing {
                 Pat::Type(_) => unreachable!(),
                 Pat::Verbatim(_) => {}
                 Pat::Wild(pat) => pat.attrs = attrs,
-                Pat::__TestExhaustive(_) => unreachable!(),
+
+                #[cfg(test)]
+                Pat::__TestExhaustive(_) => unimplemented!(),
+                #[cfg(not(test))]
+                _ => unreachable!(),
             }
             Ok(pat)
         }

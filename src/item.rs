@@ -380,7 +380,11 @@ impl Item {
             | Item::Macro(ItemMacro { attrs, .. })
             | Item::Macro2(ItemMacro2 { attrs, .. }) => mem::replace(attrs, new),
             Item::Verbatim(_) => Vec::new(),
-            Item::__TestExhaustive(_) => unreachable!(),
+
+            #[cfg(test)]
+            Item::__TestExhaustive(_) => unimplemented!(),
+            #[cfg(not(test))]
+            _ => unreachable!(),
         }
     }
 }
@@ -1787,7 +1791,11 @@ pub mod parsing {
                 ForeignItem::Type(item) => &mut item.attrs,
                 ForeignItem::Macro(item) => &mut item.attrs,
                 ForeignItem::Verbatim(_) => return Ok(item),
-                ForeignItem::__TestExhaustive(_) => unreachable!(),
+
+                #[cfg(test)]
+                ForeignItem::__TestExhaustive(_) => unimplemented!(),
+                #[cfg(not(test))]
+                _ => unreachable!(),
             };
             attrs.extend(item_attrs.drain(..));
             *item_attrs = attrs;
@@ -2265,7 +2273,12 @@ pub mod parsing {
                 TraitItem::Method(item) => &mut item.attrs,
                 TraitItem::Type(item) => &mut item.attrs,
                 TraitItem::Macro(item) => &mut item.attrs,
-                TraitItem::Verbatim(_) | TraitItem::__TestExhaustive(_) => unreachable!(),
+                TraitItem::Verbatim(_) => unreachable!(),
+
+                #[cfg(test)]
+                TraitItem::__TestExhaustive(_) => unimplemented!(),
+                #[cfg(not(test))]
+                _ => unreachable!(),
             };
             attrs.extend(item_attrs.drain(..));
             *item_attrs = attrs;
@@ -2596,7 +2609,11 @@ pub mod parsing {
                     ImplItem::Type(item) => &mut item.attrs,
                     ImplItem::Macro(item) => &mut item.attrs,
                     ImplItem::Verbatim(_) => return Ok(item),
-                    ImplItem::__TestExhaustive(_) => unreachable!(),
+
+                    #[cfg(test)]
+                    ImplItem::__TestExhaustive(_) => unimplemented!(),
+                    #[cfg(not(test))]
+                    _ => unreachable!(),
                 };
                 attrs.extend(item_attrs.drain(..));
                 *item_attrs = attrs;
