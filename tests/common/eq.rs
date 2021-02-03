@@ -32,6 +32,12 @@ pub trait SpanlessEq {
     fn eq(&self, other: &Self) -> bool;
 }
 
+impl<T: SpanlessEq> SpanlessEq for Box<T> {
+    fn eq(&self, other: &Self) -> bool {
+        SpanlessEq::eq(&**self, &**other)
+    }
+}
+
 impl<T: SpanlessEq> SpanlessEq for P<T> {
     fn eq(&self, other: &Self) -> bool {
         SpanlessEq::eq(&**self, &**other)
