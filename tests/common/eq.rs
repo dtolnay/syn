@@ -129,47 +129,47 @@ spanless_eq_partial_eq!(token::LitKind);
 
 macro_rules! spanless_eq_struct {
     {
-        $($name:ident)::+ $(<$param:ident>)?;
-        $([$field:ident $other:ident])*
-        $(![$ignore:ident])*
+        $($name:ident)::+ $(<$param:ident>)?
+        $([$field:tt $this:ident $other:ident])*
+        $(![$ignore:tt])*;
     } => {
         impl $(<$param: SpanlessEq>)* SpanlessEq for $($name)::+ $(<$param>)* {
             fn eq(&self, other: &Self) -> bool {
-                let $($name)::+ { $($field,)* $($ignore: _,)* } = self;
+                let $($name)::+ { $($field: $this,)* $($ignore: _,)* } = self;
                 let $($name)::+ { $($field: $other,)* $($ignore: _,)* } = other;
-                true $(&& SpanlessEq::eq($field, $other))*
+                true $(&& SpanlessEq::eq($this, $other))*
             }
         }
     };
 
     {
-        $($name:ident)::+ $(<$param:ident>)?;
-        $([$field:ident $other:ident])*
-        $(![$ignore:ident])*
-        $next:ident
+        $($name:ident)::+ $(<$param:ident>)?
+        $([$field:tt $this:ident $other:ident])*
+        $(![$ignore:tt])*;
+        !$next:tt
         $($rest:tt)*
     } => {
         spanless_eq_struct! {
-            $($name)::+ $(<$param>)*;
-            $([$field $other])*
-            [$next other]
+            $($name)::+ $(<$param>)*
+            $([$field $this $other])*
             $(![$ignore])*
+            ![$next];
             $($rest)*
         }
     };
 
     {
-        $($name:ident)::+ $(<$param:ident>)?;
-        $([$field:ident $other:ident])*
-        $(![$ignore:ident])*
-        !$next:ident
+        $($name:ident)::+ $(<$param:ident>)?
+        $([$field:tt $this:ident $other:ident])*
+        $(![$ignore:tt])*;
+        $next:tt
         $($rest:tt)*
     } => {
         spanless_eq_struct! {
-            $($name)::+ $(<$param>)*;
-            $([$field $other])*
-            $(![$ignore])*
-            ![$next]
+            $($name)::+ $(<$param>)*
+            $([$field $this $other])*
+            [$next this other]
+            $(![$ignore])*;
             $($rest)*
         }
     };
