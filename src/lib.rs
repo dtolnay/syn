@@ -260,6 +260,7 @@
     clippy::inherent_to_string,
     clippy::large_enum_variant,
     clippy::match_on_vec_items,
+    clippy::missing_panics_doc,
     clippy::needless_doctest_main,
     clippy::needless_pass_by_value,
     clippy::never_loop,
