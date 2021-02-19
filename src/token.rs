@@ -545,6 +545,14 @@ macro_rules! define_delimiters {
                 {
                     printing::delim($token, self.span, tokens, f);
                 }
+
+                #[cfg(feature = "printing")]
+                pub fn surround_tokens<T>(&self, tokens: &mut TokenStream, to_tokens: &T)
+                where
+                    T: ToTokens,
+                {
+                    printing::delim($token, self.span, tokens, |tokens| to_tokens.to_tokens(tokens));
+                }
             }
 
             #[cfg(feature = "parsing")]
