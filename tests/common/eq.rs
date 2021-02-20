@@ -8,11 +8,11 @@ use rustc_ast::ast::{
     BinOpKind, BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
     Defaultness, EnumDef, Expr, ExprKind, Extern, Field, FieldPat, FloatTy, FnDecl, FnHeader,
     FnKind, FnRetTy, FnSig, ForeignItemKind, ForeignMod, GenericArg, GenericArgs, GenericBound,
-    GenericParam, GenericParamKind, Generics, GlobalAsm, ImplKind, ImplPolarity, InlineAsm,
+    GenericParam, GenericParamKind, Generics, GlobalAsm, ImplKind, ImplPolarity, Inline, InlineAsm,
     InlineAsmOperand, InlineAsmOptions, InlineAsmRegOrRegClass, InlineAsmTemplatePiece, IntTy,
     IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind,
     LlvmAsmDialect, LlvmInlineAsm, LlvmInlineAsmOutput, Local, MacArgs, MacCall, MacCallStmt,
-    MacDelimiter, MacStmtStyle, MacroDef, Mod, Movability, MutTy, Mutability, NodeId, Param,
+    MacDelimiter, MacStmtStyle, MacroDef, ModKind, Movability, MutTy, Mutability, NodeId, Param,
     ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits,
     RangeSyntax, Stmt, StmtKind, StrLit, StrStyle, StructField, StructRest, TraitBoundModifier,
     TraitKind, TraitObjectSyntax, TraitRef, Ty, TyAliasKind, TyKind, UintTy, UnOp, Unsafe,
@@ -288,7 +288,7 @@ spanless_eq_struct!(AttrItem; path args tokens);
 spanless_eq_struct!(Attribute; kind id style span);
 spanless_eq_struct!(BareFnTy; unsafety ext generic_params decl);
 spanless_eq_struct!(Block; stmts id rules span tokens);
-spanless_eq_struct!(Crate; module attrs span proc_macros);
+spanless_eq_struct!(Crate; attrs items span proc_macros);
 spanless_eq_struct!(EnumDef; variants);
 spanless_eq_struct!(Expr; id kind span attrs !tokens);
 spanless_eq_struct!(Field; attrs id span ident expr is_shorthand is_placeholder);
@@ -313,7 +313,6 @@ spanless_eq_struct!(Local; pat ty init id span attrs !tokens);
 spanless_eq_struct!(MacCall; path args prior_type_ascription);
 spanless_eq_struct!(MacCallStmt; mac style attrs tokens);
 spanless_eq_struct!(MacroDef; body macro_rules);
-spanless_eq_struct!(Mod; inner unsafety items inline);
 spanless_eq_struct!(MutTy; ty mutbl);
 spanless_eq_struct!(ParenthesizedArgs; span inputs inputs_span output);
 spanless_eq_struct!(Pat; id kind span tokens);
@@ -359,6 +358,7 @@ spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0));
 spanless_eq_enum!(GenericBound; Trait(0 1) Outlives(0));
 spanless_eq_enum!(GenericParamKind; Lifetime Type(default) Const(ty kw_span default));
 spanless_eq_enum!(ImplPolarity; Positive Negative(0));
+spanless_eq_enum!(Inline; Yes No);
 spanless_eq_enum!(InlineAsmRegOrRegClass; Reg(0) RegClass(0));
 spanless_eq_enum!(InlineAsmTemplatePiece; String(0) Placeholder(operand_idx modifier span));
 spanless_eq_enum!(IntTy; Isize I8 I16 I32 I64 I128);
@@ -369,6 +369,7 @@ spanless_eq_enum!(LlvmAsmDialect; Att Intel);
 spanless_eq_enum!(MacArgs; Empty Delimited(0 1 2) Eq(0 1));
 spanless_eq_enum!(MacDelimiter; Parenthesis Bracket Brace);
 spanless_eq_enum!(MacStmtStyle; Semicolon Braces NoBraces);
+spanless_eq_enum!(ModKind; Loaded(0 1 2) Unloaded);
 spanless_eq_enum!(Movability; Static Movable);
 spanless_eq_enum!(Mutability; Mut Not);
 spanless_eq_enum!(RangeEnd; Included(0) Excluded);
@@ -399,7 +400,7 @@ spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
     InOut(reg late expr) SplitInOut(reg late in_expr out_expr) Const(expr)
     Sym(expr));
 spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1 2)
-    Fn(0) Mod(0) ForeignMod(0) GlobalAsm(0) TyAlias(0) Enum(0 1) Struct(0 1)
+    Fn(0) Mod(0 1) ForeignMod(0) GlobalAsm(0) TyAlias(0) Enum(0 1) Struct(0 1)
     Union(0 1) Trait(0) TraitAlias(0 1) Impl(0) MacCall(0) MacroDef(0));
 spanless_eq_enum!(LitKind; Str(0 1) ByteStr(0) Byte(0) Char(0) Int(0 1)
     Float(0 1) Bool(0) Err(0));
