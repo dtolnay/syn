@@ -1028,7 +1028,10 @@ pub mod printing {
 
     impl<'a> Drop for DelimGuard<'a> {
         fn drop(&mut self) {
-            let mut g = Group::new(self.delim, std::mem::take(&mut self.inner));
+            let mut g = Group::new(
+                self.delim,
+                std::mem::replace(&mut self.inner, Default::default()),
+            );
             g.set_span(self.span);
             self.tokens.append(g);
         }
