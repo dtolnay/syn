@@ -549,8 +549,7 @@ macro_rules! define_delimiters {
                 }
 
                 #[cfg(feature = "printing")]
-                #[doc(hidden)]
-                pub fn surround_tokens<T>(&self, tokens: &mut TokenStream, to_tokens: &T)
+                pub(crate) fn surround_tokens<T>(&self, tokens: &mut TokenStream, to_tokens: &T)
                 where
                     T: ToTokens,
                 {
