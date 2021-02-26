@@ -1501,11 +1501,11 @@ pub mod parsing {
                 abi,
                 fn_token,
                 ident,
+                generics,
                 paren_token,
                 inputs,
-                output,
                 variadic,
-                generics,
+                output,
             })
         }
     }
