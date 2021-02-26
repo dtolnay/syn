@@ -543,20 +543,20 @@ macro_rules! define_delimiters {
                 where
                     F: FnOnce(&mut TokenStream),
                 {
-                    f(&mut self.surround_in(tokens));
+                    let mut inner = TokenStream::new();
+                    f(&mut inner);
+                    printing::delim_append($token, self.span, tokens, inner);
                 }
 
                 #[cfg(feature = "printing")]
+                #[doc(hidden)]
                 pub fn surround_tokens<T>(&self, tokens: &mut TokenStream, to_tokens: &T)
                 where
                     T: ToTokens,
                 {
-                    to_tokens.to_tokens(&mut self.surround_in(tokens));
-                }
-
-                #[cfg(feature = "printing")]
-                fn surround_in<'a>(&self, tokens: &'a mut TokenStream) -> printing::DelimGuard<'a> {
-                    printing::delim_guard($token, self.span, tokens)
+                    let mut inner = TokenStream::new();
+                    to_tokens.to_tokens(&mut inner);
+                    printing::delim_append($token, self.span, tokens, inner);
                 }
             }
 
@@ -1006,38 +1006,7 @@ pub mod printing {
         tokens.append(Ident::new(s, span));
     }
 
-    pub struct DelimGuard<'a> {
-        tokens: &'a mut TokenStream,
-        inner: TokenStream,
-        delim: Delimiter,
-        span: Span,
-    }
-
-    impl std::ops::Deref for DelimGuard<'_> {
-        type Target = TokenStream;
-        fn deref(&self) -> &Self::Target {
-            &self.inner
-        }
-    }
-
-    impl std::ops::DerefMut for DelimGuard<'_> {
-        fn deref_mut(&mut self) -> &mut Self::Target {
-            &mut self.inner
-        }
-    }
-
-    impl<'a> Drop for DelimGuard<'a> {
-        fn drop(&mut self) {
-            let mut g = Group::new(
-                self.delim,
-                std::mem::replace(&mut self.inner, Default::default()),
-            );
-            g.set_span(self.span);
-            self.tokens.append(g);
-        }
-    }
-
-    pub fn delim_guard<'a>(s: &str, span: Span, tokens: &'a mut TokenStream) -> DelimGuard<'a> {
+    pub fn delim_append(s: &str, span: Span, tokens: &mut TokenStream, inner: TokenStream) {
         let delim = match s {
             "(" => Delimiter::Parenthesis,
             "[" => Delimiter::Bracket,
@@ -1045,11 +1014,8 @@ pub mod printing {
             " " => Delimiter::None,
             _ => panic!("unknown delimiter: {}", s),
         };
-        DelimGuard {
-            tokens,
-            inner: TokenStream::new(),
-            delim,
-            span,
-        }
+        let mut g = Group::new(delim, inner);
+        g.set_span(span);
+        tokens.append(g);
     }
 }
