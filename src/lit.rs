@@ -505,6 +505,24 @@ impl Display for LitFloat {
     }
 }
 
+impl LitBool {
+    pub fn new(value: bool, span: Span) -> Self {
+        LitBool { value, span }
+    }
+
+    pub fn value(&self) -> bool {
+        self.value
+    }
+
+    pub fn span(&self) -> Span {
+        self.span
+    }
+
+    pub fn set_span(&mut self, span: Span) {
+        self.span = span;
+    }
+}
+
 #[cfg(feature = "extra-traits")]
 mod debug_impls {
     use super::*;
