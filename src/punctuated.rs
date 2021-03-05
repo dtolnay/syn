@@ -162,7 +162,12 @@ impl<T, P> Punctuated<T, P> {
     /// Panics if the sequence does not already have a trailing punctuation when
     /// this method is called.
     pub fn push_value(&mut self, value: T) {
-        assert!(self.empty_or_trailing());
+        assert!(
+            self.empty_or_trailing(),
+            "Punctuated::push_value: Punctuated is not empty or \
+                does not have a trailing punctuation"
+        );
+
         self.last = Some(Box::new(value));
     }
 
@@ -174,7 +179,10 @@ impl<T, P> Punctuated<T, P> {
     ///
     /// Panics if the sequence is empty or already has a trailing punctuation.
     pub fn push_punct(&mut self, punctuation: P) {
-        assert!(self.last.is_some());
+        assert!(
+            self.last.is_some(),
+            "Punctuated::push_punct: Punctuated doesn't have any items"
+        );
         let last = self.last.take().unwrap();
         self.inner.push((*last, punctuation));
     }
@@ -228,7 +236,10 @@ impl<T, P> Punctuated<T, P> {
     where
         P: Default,
     {
-        assert!(index <= self.len());
+        assert!(
+            index <= self.len(),
+            "Punctuated::insert: index out of range"
+        );
 
         if index == self.len() {
             self.push(value);
@@ -454,7 +465,12 @@ impl<T, P> FromIterator<Pair<T, P>> for Punctuated<T, P> {
 
 impl<T, P> Extend<Pair<T, P>> for Punctuated<T, P> {
     fn extend<I: IntoIterator<Item = Pair<T, P>>>(&mut self, i: I) {
-        assert!(self.empty_or_trailing());
+        assert!(
+            self.empty_or_trailing(),
+            "Punctuated::extend: Punctuated is not empty or \
+                does not have a trailing punctuation"
+        );
+
         let mut nomore = false;
         for pair in i {
             if nomore {
