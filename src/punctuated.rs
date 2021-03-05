@@ -164,8 +164,7 @@ impl<T, P> Punctuated<T, P> {
     pub fn push_value(&mut self, value: T) {
         assert!(
             self.empty_or_trailing(),
-            "Punctuated::push_value: Punctuated is not empty or \
-                does not have a trailing punctuation",
+            "Punctuated::push_value: Punctuated is not empty or does not have a trailing punctuation",
         );
 
         self.last = Some(Box::new(value));
@@ -467,8 +466,7 @@ impl<T, P> Extend<Pair<T, P>> for Punctuated<T, P> {
     fn extend<I: IntoIterator<Item = Pair<T, P>>>(&mut self, i: I) {
         assert!(
             self.empty_or_trailing(),
-            "Punctuated::extend: Punctuated is not empty or \
-                does not have a trailing punctuation",
+            "Punctuated::extend: Punctuated is not empty or does not have a trailing punctuation",
         );
 
         let mut nomore = false;
