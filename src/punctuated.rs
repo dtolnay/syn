@@ -164,7 +164,7 @@ impl<T, P> Punctuated<T, P> {
     pub fn push_value(&mut self, value: T) {
         assert!(
             self.empty_or_trailing(),
-            "Punctuated::push_value: Punctuated is not empty or does not have a trailing punctuation",
+            "Punctuated::push_value: cannot push value if Punctuated is missing trailing punctuation",
         );
 
         self.last = Some(Box::new(value));
@@ -180,8 +180,9 @@ impl<T, P> Punctuated<T, P> {
     pub fn push_punct(&mut self, punctuation: P) {
         assert!(
             self.last.is_some(),
-            "Punctuated::push_punct: Punctuated doesn't have any items",
+            "Punctuated::push_punct: cannot push punctuation if Punctuated is empty or already has trailing punctuation",
         );
+
         let last = self.last.take().unwrap();
         self.inner.push((*last, punctuation));
     }
