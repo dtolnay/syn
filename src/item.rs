@@ -1179,14 +1179,14 @@ pub mod parsing {
             let mut bounds = Punctuated::new();
             if colon_token.is_some() {
                 loop {
+                    if input.peek(Token![where]) || input.peek(Token![=]) || input.peek(Token![;]) {
+                        break;
+                    }
                     bounds.push_value(input.parse::<TypeParamBound>()?);
                     if input.peek(Token![where]) || input.peek(Token![=]) || input.peek(Token![;]) {
                         break;
                     }
                     bounds.push_punct(input.parse::<Token![+]>()?);
-                    if input.peek(Token![where]) || input.peek(Token![=]) || input.peek(Token![;]) {
-                        break;
-                    }
                 }
             }
             generics.where_clause = input.parse()?;

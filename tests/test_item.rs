@@ -241,3 +241,28 @@ fn test_supertraits() {
     }
     "###);
 }
+
+#[test]
+fn test_type_empty_bounds() {
+    #[rustfmt::skip]
+    let tokens = quote! {
+        trait Foo {
+            type Bar: ;
+        }
+    };
+
+    snapshot!(tokens as ItemTrait, @r###"
+    ItemTrait {
+        vis: Inherited,
+        ident: "Foo",
+        generics: Generics,
+        items: [
+            TraitItem::Type {
+                ident: "Bar",
+                generics: Generics,
+                colon_token: Some,
+            },
+        ],
+    }
+    "###);
+}
