@@ -1168,7 +1168,6 @@ pub mod parsing {
         semi_token: Token![;],
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for FlexibleItemType {
         fn parse(input: ParseStream) -> Result<Self> {
             let vis: Visibility = input.parse()?;
