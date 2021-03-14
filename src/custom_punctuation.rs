@@ -169,6 +169,7 @@ macro_rules! impl_clone_for_custom_punctuation {
     ($ident:ident, $($tt:tt)+) => {
         impl $crate::__private::Copy for $ident {}
 
+        #[allow(clippy::expl_impl_clone_on_copy)]
         impl $crate::__private::Clone for $ident {
             fn clone(&self) -> Self {
                 *self
