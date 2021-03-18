@@ -195,19 +195,21 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// This method operates on librustc objects.
 fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_ast::ast::{
-        Block, BorrowKind, Expr, ExprKind, Field, GenericArg, Pat, Stmt, StmtKind, StructRest, Ty,
+        Block, BorrowKind, Expr, ExprField, ExprKind, GenericArg, Pat, Stmt, StmtKind, StructExpr,
+        StructRest, Ty,
     };
     use rustc_ast::mut_visit::{noop_visit_generic_arg, MutVisitor};
     use rustc_data_structures::map_in_place::MapInPlace;
     use rustc_data_structures::thin_vec::ThinVec;
     use rustc_span::DUMMY_SP;
     use std::mem;
+    use std::ops::DerefMut;
 
     struct BracketsVisitor {
         failed: bool,
     }
 
-    fn flat_map_field<T: MutVisitor>(mut f: Field, vis: &mut T) -> Vec<Field> {
+    fn flat_map_field<T: MutVisitor>(mut f: ExprField, vis: &mut T) -> Vec<ExprField> {
         if f.is_shorthand {
             noop_visit_expr(&mut f.expr, vis);
         } else {
@@ -237,11 +239,12 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
         use rustc_ast::mut_visit::{noop_visit_expr, visit_thin_attrs};
         match &mut e.kind {
             ExprKind::AddrOf(BorrowKind::Raw, ..) => {}
-            ExprKind::Struct(path, fields, expr) => {
+            ExprKind::Struct(expr) => {
+                let StructExpr { path, fields, rest } = expr.deref_mut();
                 vis.visit_path(path);
                 fields.flat_map_in_place(|field| flat_map_field(field, vis));
-                if let StructRest::Base(expr) = expr {
-                    vis.visit_expr(expr);
+                if let StructRest::Base(rest) = rest {
+                    vis.visit_expr(rest);
                 }
                 vis.visit_id(&mut e.id);
                 vis.visit_span(&mut e.span);

@@ -6,18 +6,19 @@ use rustc_ast::ast::{
     AngleBracketedArg, AngleBracketedArgs, AnonConst, Arm, AssocItemKind, AssocTyConstraint,
     AssocTyConstraintKind, Async, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy,
     BinOpKind, BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
-    Defaultness, EnumDef, Expr, ExprKind, Extern, Field, FieldPat, FloatTy, FnDecl, FnHeader,
+    Defaultness, EnumDef, Expr, ExprField, ExprKind, Extern, FieldDef, FloatTy, FnDecl, FnHeader,
     FnKind, FnRetTy, FnSig, ForeignItemKind, ForeignMod, GenericArg, GenericArgs, GenericBound,
     GenericParam, GenericParamKind, Generics, GlobalAsm, ImplKind, ImplPolarity, Inline, InlineAsm,
     InlineAsmOperand, InlineAsmOptions, InlineAsmRegOrRegClass, InlineAsmTemplatePiece, IntTy,
     IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind,
     LlvmAsmDialect, LlvmInlineAsm, LlvmInlineAsmOutput, Local, MacArgs, MacCall, MacCallStmt,
     MacDelimiter, MacStmtStyle, MacroDef, ModKind, Movability, MutTy, Mutability, NodeId, Param,
-    ParenthesizedArgs, Pat, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits,
-    RangeSyntax, Stmt, StmtKind, StrLit, StrStyle, StructField, StructRest, TraitBoundModifier,
-    TraitKind, TraitObjectSyntax, TraitRef, Ty, TyAliasKind, TyKind, UintTy, UnOp, Unsafe,
-    UnsafeSource, UseTree, UseTreeKind, Variant, VariantData, Visibility, VisibilityKind,
-    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
+    ParenthesizedArgs, Pat, PatField, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd,
+    RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit, StrStyle, StructExpr, StructRest,
+    TraitBoundModifier, TraitKind, TraitObjectSyntax, TraitRef, Ty, TyAliasKind, TyKind, UintTy,
+    UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant, VariantData, Visibility,
+    VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
+    WhereRegionPredicate,
 };
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, DelimToken, Nonterminal, Token, TokenKind};
@@ -291,8 +292,8 @@ spanless_eq_struct!(Block; stmts id rules span tokens);
 spanless_eq_struct!(Crate; attrs items span proc_macros);
 spanless_eq_struct!(EnumDef; variants);
 spanless_eq_struct!(Expr; id kind span attrs !tokens);
-spanless_eq_struct!(Field; attrs id span ident expr is_shorthand is_placeholder);
-spanless_eq_struct!(FieldPat; ident pat is_shorthand attrs id span is_placeholder);
+spanless_eq_struct!(ExprField; attrs id span ident expr is_shorthand is_placeholder);
+spanless_eq_struct!(FieldDef; attrs id span vis ident ty is_placeholder);
 spanless_eq_struct!(FnDecl; inputs output);
 spanless_eq_struct!(FnHeader; constness asyncness unsafety ext);
 spanless_eq_struct!(FnKind; 0 1 2 3);
@@ -316,13 +317,14 @@ spanless_eq_struct!(MacroDef; body macro_rules);
 spanless_eq_struct!(MutTy; ty mutbl);
 spanless_eq_struct!(ParenthesizedArgs; span inputs inputs_span output);
 spanless_eq_struct!(Pat; id kind span tokens);
+spanless_eq_struct!(PatField; ident pat is_shorthand attrs id span is_placeholder);
 spanless_eq_struct!(Path; span segments tokens);
 spanless_eq_struct!(PathSegment; ident id args);
 spanless_eq_struct!(PolyTraitRef; bound_generic_params trait_ref span);
 spanless_eq_struct!(QSelf; ty path_span position);
 spanless_eq_struct!(Stmt; id kind span);
 spanless_eq_struct!(StrLit; style symbol suffix span symbol_unescaped);
-spanless_eq_struct!(StructField; attrs id span vis ident ty is_placeholder);
+spanless_eq_struct!(StructExpr; path fields rest);
 spanless_eq_struct!(Token; kind span);
 spanless_eq_struct!(TraitKind; 0 1 2 3 4);
 spanless_eq_struct!(TraitRef; path ref_id);
@@ -394,8 +396,8 @@ spanless_eq_enum!(ExprKind; Box(0) Array(0) ConstBlock(0) Call(0 1)
     Closure(0 1 2 3 4 5) Block(0 1) Async(0 1 2) Await(0) TryBlock(0)
     Assign(0 1 2) AssignOp(0 1 2) Field(0 1) Index(0 1) Underscore Range(0 1 2)
     Path(0 1) AddrOf(0 1 2) Break(0 1) Continue(0) Ret(0) InlineAsm(0)
-    LlvmInlineAsm(0) MacCall(0) Struct(0 1 2) Repeat(0 1) Paren(0) Try(0)
-    Yield(0) Err);
+    LlvmInlineAsm(0) MacCall(0) Struct(0) Repeat(0 1) Paren(0) Try(0) Yield(0)
+    Err);
 spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
     InOut(reg late expr) SplitInOut(reg late in_expr out_expr) Const(expr)
     Sym(expr));
