@@ -24,7 +24,7 @@ toml = "0.5"
 [dependencies.rustfmt]
 package = "rustfmt-nightly"
 git = "https://github.com/rust-lang/rustfmt"
-rev = "367a874d04abfb2269ff1ea1974f06640546b7c5"
+rev = "509ac2e87f12a1bfae693109223db01b93c93897"
 
 [workspace]
 # Prefer that `cargo clean` in syn's directory does not require a rebuild of
