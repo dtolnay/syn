@@ -27,10 +27,6 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/const-generics/defaults/pretty-printing-ast.rs",
     "src/test/ui/const-generics/min_const_generics/type_and_const_defaults.rs",
 
-    // TODO: leading vert in or-pattern
-    // https://github.com/dtolnay/syn/issues/982
-    "src/test/ui/or-patterns/or-patterns-syntactic-pass.rs",
-
     // TODO: static with omitted type
     // https://github.com/dtolnay/syn/issues/983
     // TODO: placeholder type in type parameter position

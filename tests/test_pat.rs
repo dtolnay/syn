@@ -31,14 +31,14 @@ fn test_leading_vert() {
     syn::parse_str::<Item>("fn fun2(|| A: E) {}").unwrap_err();
 
     syn::parse_str::<Stmt>("let | () = ();").unwrap();
-    syn::parse_str::<Stmt>("let (| A): E;").unwrap_err();
+    syn::parse_str::<Stmt>("let (| A): E;").unwrap();
     syn::parse_str::<Stmt>("let (|| A): (E);").unwrap_err();
-    syn::parse_str::<Stmt>("let (| A,): (E,);").unwrap_err();
-    syn::parse_str::<Stmt>("let [| A]: [E; 1];").unwrap_err();
+    syn::parse_str::<Stmt>("let (| A,): (E,);").unwrap();
+    syn::parse_str::<Stmt>("let [| A]: [E; 1];").unwrap();
     syn::parse_str::<Stmt>("let [|| A]: [E; 1];").unwrap_err();
-    syn::parse_str::<Stmt>("let TS(| A): TS;").unwrap_err();
+    syn::parse_str::<Stmt>("let TS(| A): TS;").unwrap();
     syn::parse_str::<Stmt>("let TS(|| A): TS;").unwrap_err();
-    syn::parse_str::<Stmt>("let NS { f: | A }: NS;").unwrap_err();
+    syn::parse_str::<Stmt>("let NS { f: | A }: NS;").unwrap();
     syn::parse_str::<Stmt>("let NS { f: || A }: NS;").unwrap_err();
 }
 

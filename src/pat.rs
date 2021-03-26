@@ -523,7 +523,7 @@ pub mod parsing {
                 attrs,
                 member,
                 colon_token: input.parse()?,
-                pat: Box::new(multi_pat(input)?),
+                pat: Box::new(multi_pat_with_leading_vert(input)?),
             });
         }
 
@@ -602,7 +602,7 @@ pub mod parsing {
 
         let mut elems = Punctuated::new();
         while !content.is_empty() {
-            let value = multi_pat(&content)?;
+            let value = multi_pat_with_leading_vert(&content)?;
             elems.push_value(value);
             if content.is_empty() {
                 break;
@@ -701,7 +701,7 @@ pub mod parsing {
 
         let mut elems = Punctuated::new();
         while !content.is_empty() {
-            let value = multi_pat(&content)?;
+            let value = multi_pat_with_leading_vert(&content)?;
             elems.push_value(value);
             if content.is_empty() {
                 break;
