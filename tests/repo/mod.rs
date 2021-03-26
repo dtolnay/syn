@@ -27,10 +27,6 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/const-generics/defaults/pretty-printing-ast.rs",
     "src/test/ui/const-generics/min_const_generics/type_and_const_defaults.rs",
 
-    // TODO: static with omitted type
-    // https://github.com/dtolnay/syn/issues/983
-    "src/test/ui/typeck/typeck_type_placeholder_item.rs",
-
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "src/test/ui/const-generics/closing-args-token.rs",
     "src/test/ui/const-generics/const-expression-parameter.rs",

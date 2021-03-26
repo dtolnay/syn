@@ -1031,24 +1031,31 @@ pub mod parsing {
                 let static_token = input.parse()?;
                 let mutability = input.parse()?;
                 let ident = input.parse()?;
-                let colon_token = input.parse()?;
-                let ty = input.parse()?;
-                if input.peek(Token![;]) {
+                if input.peek(Token![=]) {
+                    input.parse::<Token![=]>()?;
+                    input.parse::<Expr>()?;
                     input.parse::<Token![;]>()?;
                     Ok(Item::Verbatim(verbatim::between(begin, input)))
                 } else {
-                    Ok(Item::Static(ItemStatic {
-                        attrs: Vec::new(),
-                        vis,
-                        static_token,
-                        mutability,
-                        ident,
-                        colon_token,
-                        ty,
-                        eq_token: input.parse()?,
-                        expr: input.parse()?,
-                        semi_token: input.parse()?,
-                    }))
+                    let colon_token = input.parse()?;
+                    let ty = input.parse()?;
+                    if input.peek(Token![;]) {
+                        input.parse::<Token![;]>()?;
+                        Ok(Item::Verbatim(verbatim::between(begin, input)))
+                    } else {
+                        Ok(Item::Static(ItemStatic {
+                            attrs: Vec::new(),
+                            vis,
+                            static_token,
+                            mutability,
+                            ident,
+                            colon_token,
+                            ty,
+                            eq_token: input.parse()?,
+                            expr: input.parse()?,
+                            semi_token: input.parse()?,
+                        }))
+                    }
                 }
             } else if lookahead.peek(Token![const]) {
                 ahead.parse::<Token![const]>()?;
