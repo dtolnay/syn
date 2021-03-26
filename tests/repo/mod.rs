@@ -8,10 +8,24 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "e708cbd91c9cae4426d69270248362b423324556";
+const REVISION: &str = "52e3dffa50cfffdcfa145c0cc0ba48b49abc0c07";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
+    // TODO
+    "src/test/pretty/gat-bounds.rs",
+    "src/test/ui/const-generics/defaults/auxiliary/const_defaulty.rs",
+    "src/test/ui/const-generics/defaults/const-default.rs",
+    "src/test/ui/const-generics/defaults/default-annotation.rs",
+    "src/test/ui/const-generics/defaults/external.rs",
+    "src/test/ui/const-generics/defaults/pretty-printing-ast.rs",
+    "src/test/ui/const-generics/min_const_generics/type_and_const_defaults.rs",
+    "src/test/ui/generic-associated-types/generic-associated-type-bounds.rs",
+    "src/test/ui/generic-associated-types/issue-80433-reduced.rs",
+    "src/test/ui/macros/pub-macro-rules.rs",
+    "src/test/ui/or-patterns/or-patterns-syntactic-pass.rs",
+    "src/test/ui/typeck/typeck_type_placeholder_item.rs",
+
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "src/test/ui/const-generics/closing-args-token.rs",
     "src/test/ui/const-generics/const-expression-parameter.rs",
