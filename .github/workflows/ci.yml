@@ -14,7 +14,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: rustc-dev
-      - run: cargo test --all-features --release
+      - run: cargo test --all-features --release --tests
 
   build:
     name: ${{matrix.name || format('Rust {0}', matrix.rust)}}
@@ -82,6 +82,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@nightly
+      - run: cargo test --all-features --doc
       - run: cargo doc --all-features
 
   codegen:
