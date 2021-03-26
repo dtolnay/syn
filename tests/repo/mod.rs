@@ -29,8 +29,6 @@ static EXCLUDE: &[&str] = &[
 
     // TODO: static with omitted type
     // https://github.com/dtolnay/syn/issues/983
-    // TODO: placeholder type in type parameter position
-    // https://github.com/dtolnay/syn/issues/984
     "src/test/ui/typeck/typeck_type_placeholder_item.rs",
 
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
