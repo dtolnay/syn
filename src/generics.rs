@@ -598,6 +598,7 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+    use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -631,6 +632,15 @@ pub mod parsing {
                     params.push_value(GenericParam::Const(ConstParam {
                         attrs,
                         ..input.parse()?
+                    }));
+                } else if input.peek(Token![_]) {
+                    params.push_value(GenericParam::Type(TypeParam {
+                        attrs,
+                        ident: input.call(Ident::parse_any)?,
+                        colon_token: None,
+                        bounds: Punctuated::new(),
+                        eq_token: None,
+                        default: None,
                     }));
                 } else {
                     return Err(lookahead.error());
