@@ -8,10 +8,39 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "e708cbd91c9cae4426d69270248362b423324556";
+const REVISION: &str = "52e3dffa50cfffdcfa145c0cc0ba48b49abc0c07";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
+    // TODO: generic associated type equality constraint
+    // https://github.com/dtolnay/syn/issues/979
+    "src/test/pretty/gat-bounds.rs",
+    "src/test/ui/generic-associated-types/generic-associated-type-bounds.rs",
+    "src/test/ui/generic-associated-types/issue-80433-reduced.rs",
+
+    // TODO: const generics parameter default value
+    // https://github.com/dtolnay/syn/issues/980
+    "src/test/ui/const-generics/defaults/auxiliary/const_defaulty.rs",
+    "src/test/ui/const-generics/defaults/const-default.rs",
+    "src/test/ui/const-generics/defaults/default-annotation.rs",
+    "src/test/ui/const-generics/defaults/external.rs",
+    "src/test/ui/const-generics/defaults/pretty-printing-ast.rs",
+    "src/test/ui/const-generics/min_const_generics/type_and_const_defaults.rs",
+
+    // TODO: pub macro_rules
+    // https://github.com/dtolnay/syn/issues/981
+    "src/test/ui/macros/pub-macro-rules.rs",
+
+    // TODO: leading vert in or-pattern
+    // https://github.com/dtolnay/syn/issues/982
+    "src/test/ui/or-patterns/or-patterns-syntactic-pass.rs",
+
+    // TODO: static with omitted type
+    // https://github.com/dtolnay/syn/issues/983
+    // TODO: placeholder type in type parameter position
+    // https://github.com/dtolnay/syn/issues/984
+    "src/test/ui/typeck/typeck_type_placeholder_item.rs",
+
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "src/test/ui/const-generics/closing-args-token.rs",
     "src/test/ui/const-generics/const-expression-parameter.rs",
