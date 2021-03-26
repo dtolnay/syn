@@ -27,10 +27,6 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/const-generics/defaults/pretty-printing-ast.rs",
     "src/test/ui/const-generics/min_const_generics/type_and_const_defaults.rs",
 
-    // TODO: pub macro_rules
-    // https://github.com/dtolnay/syn/issues/981
-    "src/test/ui/macros/pub-macro-rules.rs",
-
     // TODO: leading vert in or-pattern
     // https://github.com/dtolnay/syn/issues/982
     "src/test/ui/or-patterns/or-patterns-syntactic-pass.rs",

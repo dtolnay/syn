@@ -986,6 +986,7 @@ pub mod parsing {
     use std::iter::{self, FromIterator};
 
     crate::custom_keyword!(existential);
+    crate::custom_keyword!(macro_rules);
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Item {
@@ -1146,6 +1147,10 @@ pub mod parsing {
                     || lookahead.peek(Token![::]))
             {
                 input.parse().map(Item::Macro)
+            } else if ahead.peek(macro_rules) {
+                input.advance_to(&ahead);
+                input.parse::<ItemMacro>()?;
+                Ok(Item::Verbatim(verbatim::between(begin, input)))
             } else {
                 Err(lookahead.error())
             }?;
