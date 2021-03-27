@@ -267,7 +267,9 @@
     clippy::never_loop,
     clippy::too_many_arguments,
     clippy::trivially_copy_pass_by_ref,
-    clippy::unnecessary_unwrap
+    clippy::unnecessary_unwrap,
+    // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
+    clippy::wrong_self_convention
 )]
 // Ignored clippy_pedantic lints.
 #![allow(
