@@ -279,6 +279,8 @@
     clippy::expl_impl_clone_on_copy,
     clippy::if_not_else,
     clippy::match_same_arms,
+    // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6984
+    clippy::match_wildcard_for_single_variants,
     clippy::missing_errors_doc,
     clippy::module_name_repetitions,
     clippy::must_use_candidate,
