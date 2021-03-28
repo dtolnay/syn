@@ -1703,7 +1703,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![async])
             && (input.peek2(token::Brace) || input.peek2(Token![move]) && input.peek3(token::Brace))
         {
-            input.call(expr_async).map(Expr::Async)
+            input.parse().map(Expr::Async)
         } else if input.peek(Token![try]) && input.peek2(token::Brace) {
             input.call(expr_try_block).map(Expr::TryBlock)
         } else if input.peek(Token![|])
@@ -2231,7 +2231,6 @@ pub(crate) mod parsing {
         ExprRepeat, Repeat, "expected array literal constructed from one repeated element",
         ExprParen, Paren, "expected parenthesized expression",
         ExprTry, Try, "expected try expression",
-        ExprAsync, Async, "expected async block",
         ExprTryBlock, TryBlock, "expected try block",
         ExprYield, Yield, "expected yield expression",
     }
@@ -2317,13 +2316,16 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn expr_async(input: ParseStream) -> Result<ExprAsync> {
-        Ok(ExprAsync {
-            attrs: Vec::new(),
-            async_token: input.parse()?,
-            capture: input.parse()?,
-            block: input.parse()?,
-        })
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprAsync {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ExprAsync {
+                attrs: Vec::new(),
+                async_token: input.parse()?,
+                capture: input.parse()?,
+                block: input.parse()?,
+            })
+        }
     }
 
     #[cfg(feature = "full")]
