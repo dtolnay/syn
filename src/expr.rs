@@ -1931,6 +1931,33 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprArray {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let content;
+            let bracket_token = bracketed!(content in input);
+            let inner_attrs = content.call(Attribute::parse_inner)?;
+            let mut elems = Punctuated::new();
+
+            while !content.is_empty() {
+                let first: Expr = content.parse()?;
+                elems.push_value(first);
+                if content.is_empty() {
+                    break;
+                }
+                let punct = content.parse()?;
+                elems.push_punct(punct);
+            }
+
+            Ok(ExprArray {
+                attrs: inner_attrs,
+                bracket_token,
+                elems,
+            })
+        }
+    }
+
+    #[cfg(feature = "full")]
     pub(crate) fn expr_early(input: ParseStream) -> Result<Expr> {
         let mut attrs = input.call(expr_attrs)?;
         let mut expr = if input.peek(Token![if]) {
@@ -2179,7 +2206,6 @@ pub(crate) mod parsing {
 
     impl_by_parsing_expr! {
         ExprBox, Box, "expected box expression",
-        ExprArray, Array, "expected slice literal expression",
         ExprCall, Call, "expected function call expression",
         ExprMethodCall, MethodCall, "expected method call expression",
         ExprTuple, Tuple, "expected tuple expression",
