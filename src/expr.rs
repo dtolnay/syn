@@ -1969,6 +1969,21 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprRepeat {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let content;
+            Ok(ExprRepeat {
+                bracket_token: bracketed!(content in input),
+                attrs: content.call(Attribute::parse_inner)?,
+                expr: content.parse()?,
+                semi_token: content.parse()?,
+                len: content.parse()?,
+            })
+        }
+    }
+
+    #[cfg(feature = "full")]
     pub(crate) fn expr_early(input: ParseStream) -> Result<Expr> {
         let mut attrs = input.call(expr_attrs)?;
         let mut expr = if input.peek(Token![if]) {
@@ -2239,7 +2254,6 @@ pub(crate) mod parsing {
         ExprContinue, Continue, "expected continue expression",
         ExprReturn, Return, "expected return expression",
         ExprStruct, Struct, "expected struct literal expression",
-        ExprRepeat, Repeat, "expected array literal constructed from one repeated element",
         ExprTry, Try, "expected try expression",
         ExprTryBlock, TryBlock, "expected try block",
         ExprYield, Yield, "expected yield expression",
