@@ -241,31 +241,41 @@ pub mod parsing {
                 }
             }
 
-            if input.peek(Lit) {
-                let lit = input.parse()?;
-                return Ok(GenericArgument::Const(Expr::Lit(lit)));
-            }
-
-            if input.peek(token::Brace) {
-                #[cfg(feature = "full")]
-                {
-                    let block: ExprBlock = input.parse()?;
-                    return Ok(GenericArgument::Const(Expr::Block(block)));
-                }
-
-                #[cfg(not(feature = "full"))]
-                {
-                    let begin = input.fork();
-                    let content;
-                    braced!(content in input);
-                    content.parse::<Expr>()?;
-                    let verbatim = verbatim::between(begin, input);
-                    return Ok(GenericArgument::Const(Expr::Verbatim(verbatim)));
-                }
+            if input.peek(Lit) || input.peek(token::Brace) {
+                return const_argument(input).map(GenericArgument::Const);
             }
 
             input.parse().map(GenericArgument::Type)
         }
+    }
+
+    pub fn const_argument(input: ParseStream) -> Result<Expr> {
+        let lookahead = input.lookahead1();
+
+        if input.peek(Lit) {
+            let lit = input.parse()?;
+            return Ok(Expr::Lit(lit));
+        }
+
+        if input.peek(token::Brace) {
+            #[cfg(feature = "full")]
+            {
+                let block: ExprBlock = input.parse()?;
+                return Ok(Expr::Block(block));
+            }
+
+            #[cfg(not(feature = "full"))]
+            {
+                let begin = input.fork();
+                let content;
+                braced!(content in input);
+                content.parse::<Expr>()?;
+                let verbatim = verbatim::between(begin, input);
+                return Ok(Expr::Verbatim(verbatim));
+            }
+        }
+
+        Err(lookahead.error())
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
