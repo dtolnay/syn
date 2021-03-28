@@ -1845,6 +1845,17 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprMacro {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ExprMacro {
+                attrs: Vec::new(),
+                mac: input.parse()?,
+            })
+        }
+    }
+
+    #[cfg(feature = "full")]
     fn paren_or_tuple(input: ParseStream) -> Result<Expr> {
         let content;
         let paren_token = parenthesized!(content in input);
@@ -2225,7 +2236,6 @@ pub(crate) mod parsing {
         ExprBreak, Break, "expected break expression",
         ExprContinue, Continue, "expected continue expression",
         ExprReturn, Return, "expected return expression",
-        ExprMacro, Macro, "expected macro invocation expression",
         ExprStruct, Struct, "expected struct literal expression",
         ExprRepeat, Repeat, "expected array literal constructed from one repeated element",
         ExprParen, Paren, "expected parenthesized expression",
