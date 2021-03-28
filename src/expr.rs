@@ -2253,7 +2253,6 @@ pub(crate) mod parsing {
         ExprBreak, Break, "expected break expression",
         ExprContinue, Continue, "expected continue expression",
         ExprReturn, Return, "expected return expression",
-        ExprStruct, Struct, "expected struct literal expression",
         ExprTry, Try, "expected try expression",
         ExprTryBlock, TryBlock, "expected try block",
         ExprYield, Yield, "expected yield expression",
@@ -2517,6 +2516,16 @@ pub(crate) mod parsing {
                 colon_token,
                 expr: value,
             })
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprStruct {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let attrs = Vec::new();
+            let path: Path = input.parse()?;
+            expr_struct_helper(input, attrs, path)
         }
     }
 
