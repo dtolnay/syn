@@ -1750,7 +1750,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![const]) {
             input.call(expr_const).map(Expr::Verbatim)
         } else if input.peek(token::Brace) {
-            input.call(expr_block).map(Expr::Block)
+            input.parse().map(Expr::Block)
         } else if input.peek(Token![..]) {
             expr_range(input, allow_struct).map(Expr::Range)
         } else if input.peek(Token![_]) {
@@ -1766,7 +1766,7 @@ pub(crate) mod parsing {
             } else if input.peek(Token![loop]) {
                 Expr::Loop(input.parse()?)
             } else if input.peek(token::Brace) {
-                Expr::Block(input.call(expr_block)?)
+                Expr::Block(input.parse()?)
             } else {
                 return Err(input.error("expected loop or block expression"));
             };
@@ -1977,7 +1977,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![const]) {
             Expr::Verbatim(input.call(expr_const)?)
         } else if input.peek(token::Brace) {
-            Expr::Block(input.call(expr_block)?)
+            Expr::Block(input.parse()?)
         } else {
             let allow_struct = AllowStruct(true);
             let mut expr = unary_expr(input, allow_struct)?;
@@ -2041,7 +2041,7 @@ pub(crate) mod parsing {
         }
 
         if input.peek(token::Brace) {
-            let block = input.call(expr::parsing::expr_block)?;
+            let block: ExprBlock = input.parse()?;
             return Ok(GenericMethodArgument::Const(Expr::Block(block)));
         }
 
@@ -2216,7 +2216,6 @@ pub(crate) mod parsing {
         ExprLet, Let, "expected let guard",
         ExprClosure, Closure, "expected closure expression",
         ExprUnsafe, Unsafe, "expected unsafe block",
-        ExprBlock, Block, "expected blocked scope",
         ExprAssign, Assign, "expected assignment expression",
         ExprAssignOp, AssignOp, "expected compound assignment expression",
         ExprField, Field, "expected struct field access",
@@ -2572,19 +2571,22 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
-    pub fn expr_block(input: ParseStream) -> Result<ExprBlock> {
-        let label: Option<Label> = input.parse()?;
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprBlock {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let label: Option<Label> = input.parse()?;
 
-        let content;
-        let brace_token = braced!(content in input);
-        let inner_attrs = content.call(Attribute::parse_inner)?;
-        let stmts = content.call(Block::parse_within)?;
+            let content;
+            let brace_token = braced!(content in input);
+            let inner_attrs = content.call(Attribute::parse_inner)?;
+            let stmts = content.call(Block::parse_within)?;
 
-        Ok(ExprBlock {
-            attrs: inner_attrs,
-            label,
-            block: Block { brace_token, stmts },
-        })
+            Ok(ExprBlock {
+                attrs: inner_attrs,
+                label,
+                block: Block { brace_token, stmts },
+            })
+        }
     }
 
     #[cfg(feature = "full")]

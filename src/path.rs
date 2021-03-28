@@ -213,8 +213,6 @@ ast_struct! {
 pub mod parsing {
     use super::*;
 
-    #[cfg(feature = "full")]
-    use crate::expr;
     use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
 
@@ -251,7 +249,7 @@ pub mod parsing {
             if input.peek(token::Brace) {
                 #[cfg(feature = "full")]
                 {
-                    let block = input.call(expr::parsing::expr_block)?;
+                    let block: ExprBlock = input.parse()?;
                     return Ok(GenericArgument::Const(Expr::Block(block)));
                 }
 
