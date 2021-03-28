@@ -1705,7 +1705,7 @@ pub(crate) mod parsing {
         {
             input.parse().map(Expr::Async)
         } else if input.peek(Token![try]) && input.peek2(token::Brace) {
-            input.call(expr_try_block).map(Expr::TryBlock)
+            input.parse().map(Expr::TryBlock)
         } else if input.peek(Token![|])
             || input.peek(Token![async]) && (input.peek2(Token![|]) || input.peek2(Token![move]))
             || input.peek(Token![static])
@@ -1997,7 +1997,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![match]) {
             Expr::Match(input.parse()?)
         } else if input.peek(Token![try]) && input.peek2(token::Brace) {
-            Expr::TryBlock(input.call(expr_try_block)?)
+            Expr::TryBlock(input.parse()?)
         } else if input.peek(Token![unsafe]) {
             Expr::Unsafe(input.call(expr_unsafe)?)
         } else if input.peek(Token![const]) {
@@ -2254,17 +2254,19 @@ pub(crate) mod parsing {
         ExprContinue, Continue, "expected continue expression",
         ExprReturn, Return, "expected return expression",
         ExprTry, Try, "expected try expression",
-        ExprTryBlock, TryBlock, "expected try block",
         ExprYield, Yield, "expected yield expression",
     }
 
     #[cfg(feature = "full")]
-    fn expr_try_block(input: ParseStream) -> Result<ExprTryBlock> {
-        Ok(ExprTryBlock {
-            attrs: Vec::new(),
-            try_token: input.parse()?,
-            block: input.parse()?,
-        })
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprTryBlock {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ExprTryBlock {
+                attrs: Vec::new(),
+                try_token: input.parse()?,
+                block: input.parse()?,
+            })
+        }
     }
 
     #[cfg(feature = "full")]
