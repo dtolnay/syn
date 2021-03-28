@@ -1788,7 +1788,7 @@ pub(crate) mod parsing {
         if input.peek(Lit) {
             input.parse().map(Expr::Lit)
         } else if input.peek(token::Paren) {
-            input.call(expr_paren).map(Expr::Paren)
+            input.parse().map(Expr::Paren)
         } else if input.peek(Ident)
             || input.peek(Token![::])
             || input.peek(Token![<])
@@ -2034,14 +2034,16 @@ pub(crate) mod parsing {
         })
     }
 
-    #[cfg(not(feature = "full"))]
-    fn expr_paren(input: ParseStream) -> Result<ExprParen> {
-        let content;
-        Ok(ExprParen {
-            attrs: Vec::new(),
-            paren_token: parenthesized!(content in input),
-            expr: content.parse()?,
-        })
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprParen {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let content;
+            Ok(ExprParen {
+                attrs: Vec::new(),
+                paren_token: parenthesized!(content in input),
+                expr: content.parse()?,
+            })
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2238,7 +2240,6 @@ pub(crate) mod parsing {
         ExprReturn, Return, "expected return expression",
         ExprStruct, Struct, "expected struct literal expression",
         ExprRepeat, Repeat, "expected array literal constructed from one repeated element",
-        ExprParen, Paren, "expected parenthesized expression",
         ExprTry, Try, "expected try expression",
         ExprTryBlock, TryBlock, "expected try block",
         ExprYield, Yield, "expected yield expression",
