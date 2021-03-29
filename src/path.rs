@@ -264,21 +264,19 @@ pub mod parsing {
                         }
                     }
                     _ => false,
+                } && if input.peek(Token![=]) {
+                    input.parse::<Token![=]>()?;
+                    input.parse::<Type>()?;
+                    true
+                } else if input.peek(Token![:]) {
+                    input.parse::<Token![:]>()?;
+                    input.call(constraint_bounds)?;
+                    true
+                } else {
+                    false
                 } {
-                    if if input.peek(Token![=]) {
-                        input.parse::<Token![=]>()?;
-                        input.parse::<Type>()?;
-                        true
-                    } else if input.peek(Token![:]) {
-                        input.parse::<Token![:]>()?;
-                        input.call(constraint_bounds)?;
-                        true
-                    } else {
-                        false
-                    } {
-                        let verbatim = verbatim::between(begin, input);
-                        return Ok(GenericArgument::Type(Type::Verbatim(verbatim)));
-                    }
+                    let verbatim = verbatim::between(begin, input);
+                    return Ok(GenericArgument::Type(Type::Verbatim(verbatim)));
                 }
             }
 
