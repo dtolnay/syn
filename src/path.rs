@@ -245,7 +245,42 @@ pub mod parsing {
                 return const_argument(input).map(GenericArgument::Const);
             }
 
-            input.parse().map(GenericArgument::Type)
+            #[cfg(feature = "full")]
+            let begin = input.fork();
+
+            let argument: Type = input.parse()?;
+
+            #[cfg(feature = "full")]
+            {
+                if match &argument {
+                    Type::Path(argument)
+                        if argument.qself.is_none()
+                            && argument.path.leading_colon.is_none()
+                            && argument.path.segments.len() == 1 =>
+                    {
+                        match argument.path.segments[0].arguments {
+                            PathArguments::AngleBracketed(_) => true,
+                            _ => false,
+                        }
+                    }
+                    _ => false,
+                } && if input.peek(Token![=]) {
+                    input.parse::<Token![=]>()?;
+                    input.parse::<Type>()?;
+                    true
+                } else if input.peek(Token![:]) {
+                    input.parse::<Token![:]>()?;
+                    input.call(constraint_bounds)?;
+                    true
+                } else {
+                    false
+                } {
+                    let verbatim = verbatim::between(begin, input);
+                    return Ok(GenericArgument::Type(Type::Verbatim(verbatim)));
+                }
+            }
+
+            Ok(GenericArgument::Type(argument))
         }
     }
 
@@ -368,24 +403,27 @@ pub mod parsing {
             Ok(Constraint {
                 ident: input.parse()?,
                 colon_token: input.parse()?,
-                bounds: {
-                    let mut bounds = Punctuated::new();
-                    loop {
-                        if input.peek(Token![,]) || input.peek(Token![>]) {
-                            break;
-                        }
-                        let value = input.parse()?;
-                        bounds.push_value(value);
-                        if !input.peek(Token![+]) {
-                            break;
-                        }
-                        let punct = input.parse()?;
-                        bounds.push_punct(punct);
-                    }
-                    bounds
-                },
+                bounds: constraint_bounds(input)?,
             })
         }
+    }
+
+    #[cfg(feature = "full")]
+    fn constraint_bounds(input: ParseStream) -> Result<Punctuated<TypeParamBound, Token![+]>> {
+        let mut bounds = Punctuated::new();
+        loop {
+            if input.peek(Token![,]) || input.peek(Token![>]) {
+                break;
+            }
+            let value = input.parse()?;
+            bounds.push_value(value);
+            if !input.peek(Token![+]) {
+                break;
+            }
+            let punct = input.parse()?;
+            bounds.push_punct(punct);
+        }
+        Ok(bounds)
     }
 
     impl Path {

@@ -12,12 +12,6 @@ const REVISION: &str = "52e3dffa50cfffdcfa145c0cc0ba48b49abc0c07";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: generic associated type equality constraint
-    // https://github.com/dtolnay/syn/issues/979
-    "src/test/pretty/gat-bounds.rs",
-    "src/test/ui/generic-associated-types/generic-associated-type-bounds.rs",
-    "src/test/ui/generic-associated-types/issue-80433-reduced.rs",
-
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "src/test/ui/const-generics/closing-args-token.rs",
     "src/test/ui/const-generics/const-expression-parameter.rs",
