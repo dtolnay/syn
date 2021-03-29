@@ -880,7 +880,7 @@ pub mod parsing {
                 eq_token: {
                     if input.peek(Token![=]) {
                         let eq_token = input.parse()?;
-                        default = Some(input.parse::<Expr>()?);
+                        default = Some(path::parsing::const_argument(input)?);
                         Some(eq_token)
                     } else {
                         None

@@ -18,15 +18,6 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/generic-associated-types/generic-associated-type-bounds.rs",
     "src/test/ui/generic-associated-types/issue-80433-reduced.rs",
 
-    // TODO: const generics parameter default value
-    // https://github.com/dtolnay/syn/issues/980
-    "src/test/ui/const-generics/defaults/auxiliary/const_defaulty.rs",
-    "src/test/ui/const-generics/defaults/const-default.rs",
-    "src/test/ui/const-generics/defaults/default-annotation.rs",
-    "src/test/ui/const-generics/defaults/external.rs",
-    "src/test/ui/const-generics/defaults/pretty-printing-ast.rs",
-    "src/test/ui/const-generics/min_const_generics/type_and_const_defaults.rs",
-
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "src/test/ui/const-generics/closing-args-token.rs",
     "src/test/ui/const-generics/const-expression-parameter.rs",
