@@ -1746,7 +1746,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![yield]) {
             input.call(expr_yield).map(Expr::Yield)
         } else if input.peek(Token![unsafe]) {
-            input.call(expr_unsafe).map(Expr::Unsafe)
+            input.parse().map(Expr::Unsafe)
         } else if input.peek(Token![const]) {
             input.call(expr_const).map(Expr::Verbatim)
         } else if input.peek(token::Brace) {
@@ -1999,7 +1999,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![try]) && input.peek2(token::Brace) {
             Expr::TryBlock(input.parse()?)
         } else if input.peek(Token![unsafe]) {
-            Expr::Unsafe(input.call(expr_unsafe)?)
+            Expr::Unsafe(input.parse()?)
         } else if input.peek(Token![const]) {
             Expr::Verbatim(input.call(expr_const)?)
         } else if input.peek(token::Brace) {
@@ -2243,7 +2243,6 @@ pub(crate) mod parsing {
         ExprType, Type, "expected type ascription expression",
         ExprLet, Let, "expected let guard",
         ExprClosure, Closure, "expected closure expression",
-        ExprUnsafe, Unsafe, "expected unsafe block",
         ExprAssign, Assign, "expected assignment expression",
         ExprAssignOp, AssignOp, "expected compound assignment expression",
         ExprField, Field, "expected struct field access",
@@ -2578,19 +2577,22 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn expr_unsafe(input: ParseStream) -> Result<ExprUnsafe> {
-        let unsafe_token: Token![unsafe] = input.parse()?;
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprUnsafe {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let unsafe_token: Token![unsafe] = input.parse()?;
 
-        let content;
-        let brace_token = braced!(content in input);
-        let inner_attrs = content.call(Attribute::parse_inner)?;
-        let stmts = content.call(Block::parse_within)?;
+            let content;
+            let brace_token = braced!(content in input);
+            let inner_attrs = content.call(Attribute::parse_inner)?;
+            let stmts = content.call(Block::parse_within)?;
 
-        Ok(ExprUnsafe {
-            attrs: inner_attrs,
-            unsafe_token,
-            block: Block { brace_token, stmts },
-        })
+            Ok(ExprUnsafe {
+                attrs: inner_attrs,
+                unsafe_token,
+                block: Block { brace_token, stmts },
+            })
+        }
     }
 
     #[cfg(feature = "full")]
