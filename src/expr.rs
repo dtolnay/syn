@@ -2614,6 +2614,7 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprBlock {
         fn parse(input: ParseStream) -> Result<Self> {
+            let outer_attrs = input.call(Attribute::parse_outer)?;
             let label: Option<Label> = input.parse()?;
 
             let content;
@@ -2622,7 +2623,7 @@ pub(crate) mod parsing {
             let stmts = content.call(Block::parse_within)?;
 
             Ok(ExprBlock {
-                attrs: inner_attrs,
+                attrs: private::attrs(outer_attrs, inner_attrs),
                 label,
                 block: Block { brace_token, stmts },
             })
