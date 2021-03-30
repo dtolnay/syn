@@ -478,8 +478,8 @@ impl SpanlessEq for TokenKind {
 
 impl SpanlessEq for TokenStream {
     fn eq(&self, other: &Self) -> bool {
-        let mut this_trees = self.trees_ref();
-        let mut other_trees = other.trees_ref();
+        let mut this_trees = self.trees();
+        let mut other_trees = other.trees();
         loop {
             let this = match this_trees.next() {
                 None => return other_trees.next().is_none(),
@@ -489,7 +489,7 @@ impl SpanlessEq for TokenStream {
                 None => return false,
                 Some(tree) => tree,
             };
-            if SpanlessEq::eq(this, other) {
+            if SpanlessEq::eq(&this, &other) {
                 continue;
             }
             if let (TokenTree::Token(this), TokenTree::Token(other)) = (this, other) {
@@ -516,7 +516,7 @@ impl SpanlessEq for TokenStream {
 fn doc_comment<'a>(
     style: AttrStyle,
     unescaped: Symbol,
-    trees: &mut impl Iterator<Item = &'a TokenTree>,
+    trees: &mut impl Iterator<Item = TokenTree>,
 ) -> bool {
     if match style {
         AttrStyle::Outer => false,
@@ -534,12 +534,12 @@ fn doc_comment<'a>(
         Some(TokenTree::Delimited(_span, DelimToken::Bracket, stream)) => stream,
         _ => return false,
     };
-    let mut trees = stream.trees_ref();
+    let mut trees = stream.trees();
     match trees.next() {
         Some(TokenTree::Token(Token {
             kind: TokenKind::Ident(symbol, false),
             span: _,
-        })) if *symbol == sym::doc => {}
+        })) if symbol == sym::doc => {}
         _ => return false,
     }
     match trees.next() {
@@ -551,7 +551,7 @@ fn doc_comment<'a>(
     }
     match trees.next() {
         Some(TokenTree::Token(token)) => {
-            is_escaped_literal(token, unescaped) && trees.next().is_none()
+            is_escaped_literal(&token, unescaped) && trees.next().is_none()
         }
         _ => false,
     }
