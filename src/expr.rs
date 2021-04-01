@@ -1790,7 +1790,7 @@ pub(crate) mod parsing {
         if input.peek(Lit) {
             input.parse().map(Expr::Lit)
         } else if input.peek(token::Paren) {
-            input.parse().map(Expr::Paren)
+            input.call(expr_paren).map(Expr::Paren)
         } else if input.peek(Ident)
             || input.peek(Token![::])
             || input.peek(Token![<])
@@ -2051,16 +2051,21 @@ pub(crate) mod parsing {
         })
     }
 
+    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprParen {
         fn parse(input: ParseStream) -> Result<Self> {
-            let content;
-            Ok(ExprParen {
-                attrs: Vec::new(),
-                paren_token: parenthesized!(content in input),
-                expr: content.parse()?,
-            })
+            expr_paren(input)
         }
+    }
+
+    fn expr_paren(input: ParseStream) -> Result<ExprParen> {
+        let content;
+        Ok(ExprParen {
+            attrs: Vec::new(),
+            paren_token: parenthesized!(content in input),
+            expr: content.parse()?,
+        })
     }
 
     #[cfg(feature = "full")]
