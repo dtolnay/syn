@@ -1720,7 +1720,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![break]) {
             expr_break(input, allow_struct).map(Expr::Break)
         } else if input.peek(Token![continue]) {
-            input.call(expr_continue).map(Expr::Continue)
+            input.parse().map(Expr::Continue)
         } else if input.peek(Token![return]) {
             expr_ret(input, allow_struct).map(Expr::Return)
         } else if input.peek(token::Bracket) {
@@ -2246,7 +2246,6 @@ pub(crate) mod parsing {
         ExprField, Field, "expected struct field access",
         ExprIndex, Index, "expected indexing expression",
         ExprRange, Range, "expected range expression",
-        ExprContinue, Continue, "expected continue expression",
         ExprReturn, Return, "expected return expression",
         ExprTry, Try, "expected try expression",
         ExprYield, Yield, "expected yield expression",
@@ -2515,12 +2514,15 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn expr_continue(input: ParseStream) -> Result<ExprContinue> {
-        Ok(ExprContinue {
-            attrs: Vec::new(),
-            continue_token: input.parse()?,
-            label: input.parse()?,
-        })
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprContinue {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ExprContinue {
+                attrs: Vec::new(),
+                continue_token: input.parse()?,
+                label: input.parse()?,
+            })
+        }
     }
 
     #[cfg(feature = "full")]
