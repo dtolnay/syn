@@ -1726,7 +1726,7 @@ pub(crate) mod parsing {
         } else if input.peek(token::Bracket) {
             array_or_repeat(input)
         } else if input.peek(Token![let]) {
-            input.call(expr_let).map(Expr::Let)
+            input.parse().map(Expr::Let)
         } else if input.peek(Token![if]) {
             input.parse().map(Expr::If)
         } else if input.peek(Token![while]) {
@@ -2076,14 +2076,17 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn expr_let(input: ParseStream) -> Result<ExprLet> {
-        Ok(ExprLet {
-            attrs: Vec::new(),
-            let_token: input.parse()?,
-            pat: pat::parsing::multi_pat_with_leading_vert(input)?,
-            eq_token: input.parse()?,
-            expr: Box::new(input.call(Expr::parse_without_eager_brace)?),
-        })
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprLet {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ExprLet {
+                attrs: Vec::new(),
+                let_token: input.parse()?,
+                pat: pat::parsing::multi_pat_with_leading_vert(input)?,
+                eq_token: input.parse()?,
+                expr: Box::new(input.call(Expr::parse_without_eager_brace)?),
+            })
+        }
     }
 
     #[cfg(feature = "full")]
@@ -2238,7 +2241,6 @@ pub(crate) mod parsing {
         ExprBinary, Binary, "expected binary operation",
         ExprCast, Cast, "expected cast expression",
         ExprType, Type, "expected type ascription expression",
-        ExprLet, Let, "expected let guard",
         ExprClosure, Closure, "expected closure expression",
         ExprAssign, Assign, "expected assignment expression",
         ExprAssignOp, AssignOp, "expected compound assignment expression",
