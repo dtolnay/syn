@@ -1738,7 +1738,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![match]) {
             input.parse().map(Expr::Match)
         } else if input.peek(Token![yield]) {
-            input.call(expr_yield).map(Expr::Yield)
+            input.parse().map(Expr::Yield)
         } else if input.peek(Token![unsafe]) {
             input.parse().map(Expr::Unsafe)
         } else if input.peek(Token![const]) {
@@ -2247,7 +2247,6 @@ pub(crate) mod parsing {
         ExprIndex, Index, "expected indexing expression",
         ExprRange, Range, "expected range expression",
         ExprTry, Try, "expected try expression",
-        ExprYield, Yield, "expected yield expression",
     }
 
     #[cfg(feature = "full")]
@@ -2351,18 +2350,21 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn expr_yield(input: ParseStream) -> Result<ExprYield> {
-        Ok(ExprYield {
-            attrs: Vec::new(),
-            yield_token: input.parse()?,
-            expr: {
-                if !input.is_empty() && !input.peek(Token![,]) && !input.peek(Token![;]) {
-                    Some(input.parse()?)
-                } else {
-                    None
-                }
-            },
-        })
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprYield {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ExprYield {
+                attrs: Vec::new(),
+                yield_token: input.parse()?,
+                expr: {
+                    if !input.is_empty() && !input.peek(Token![,]) && !input.peek(Token![;]) {
+                        Some(input.parse()?)
+                    } else {
+                        None
+                    }
+                },
+            })
+        }
     }
 
     #[cfg(feature = "full")]
