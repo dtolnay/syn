@@ -2241,7 +2241,6 @@ pub(crate) mod parsing {
         ExprBinary, Binary, "expected binary operation",
         ExprCast, Cast, "expected cast expression",
         ExprType, Type, "expected type ascription expression",
-        ExprClosure, Closure, "expected closure expression",
         ExprAssign, Assign, "expected assignment expression",
         ExprAssignOp, AssignOp, "expected compound assignment expression",
         ExprField, Field, "expected struct field access",
@@ -2299,6 +2298,15 @@ pub(crate) mod parsing {
             op: input.parse()?,
             expr: Box::new(unary_expr(input, allow_struct)?),
         })
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprClosure {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let allow_struct = AllowStruct(true);
+            expr_closure(input, allow_struct)
+        }
     }
 
     #[cfg(feature = "full")]
