@@ -1496,11 +1496,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![box]) {
             expr_box(input, attrs, allow_struct).map(Expr::Box)
         } else if input.peek(Token![*]) || input.peek(Token![!]) || input.peek(Token![-]) {
-            Ok(Expr::Unary(ExprUnary {
-                attrs,
-                op: input.parse()?,
-                expr: Box::new(unary_expr(input, allow_struct)?),
-            }))
+            expr_unary(input, attrs, allow_struct).map(Expr::Unary)
         } else {
             trailer_expr(attrs, input, allow_struct)
         }
@@ -2240,7 +2236,6 @@ pub(crate) mod parsing {
         ExprMethodCall, MethodCall, "expected method call expression",
         ExprTuple, Tuple, "expected tuple expression",
         ExprBinary, Binary, "expected binary operation",
-        ExprUnary, Unary, "expected unary operation",
         ExprCast, Cast, "expected cast expression",
         ExprType, Type, "expected type ascription expression",
         ExprLet, Let, "expected let guard",
@@ -2277,6 +2272,29 @@ pub(crate) mod parsing {
         Ok(ExprBox {
             attrs,
             box_token: input.parse()?,
+            expr: Box::new(unary_expr(input, allow_struct)?),
+        })
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprUnary {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let attrs = Vec::new();
+            let allow_struct = AllowStruct(true);
+            expr_unary(input, attrs, allow_struct)
+        }
+    }
+
+    #[cfg(feature = "full")]
+    fn expr_unary(
+        input: ParseStream,
+        attrs: Vec<Attribute>,
+        allow_struct: AllowStruct,
+    ) -> Result<ExprUnary> {
+        Ok(ExprUnary {
+            attrs,
+            op: input.parse()?,
             expr: Box::new(unary_expr(input, allow_struct)?),
         })
     }
