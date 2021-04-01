@@ -349,7 +349,7 @@ impl std::error::Error for Error {}
 
 impl From<LexError> for Error {
     fn from(err: LexError) -> Self {
-        Error::new(Span::call_site(), format!("{:?}", err))
+        Error::new(err.span(), "lex error")
     }
 }
 
