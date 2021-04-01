@@ -2246,7 +2246,6 @@ pub(crate) mod parsing {
         ExprField, Field, "expected struct field access",
         ExprIndex, Index, "expected indexing expression",
         ExprRange, Range, "expected range expression",
-        ExprReturn, Return, "expected return expression",
         ExprTry, Try, "expected try expression",
         ExprYield, Yield, "expected yield expression",
     }
@@ -2327,6 +2326,15 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_struct = AllowStruct(true);
             expr_break(input, allow_struct)
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprReturn {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let allow_struct = AllowStruct(true);
+            expr_ret(input, allow_struct)
         }
     }
 
