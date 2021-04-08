@@ -399,7 +399,7 @@ spanless_eq_enum!(ExprKind; Box(0) Array(0) ConstBlock(0) Call(0 1)
     LlvmInlineAsm(0) MacCall(0) Struct(0) Repeat(0 1) Paren(0) Try(0) Yield(0)
     Err);
 spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
-    InOut(reg late expr) SplitInOut(reg late in_expr out_expr) Const(expr)
+    InOut(reg late expr) SplitInOut(reg late in_expr out_expr) Const(anon_const)
     Sym(expr));
 spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1 2)
     Fn(0) Mod(0 1) ForeignMod(0) GlobalAsm(0) TyAlias(0) Enum(0 1) Struct(0 1)
