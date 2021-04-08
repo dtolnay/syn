@@ -1,6 +1,6 @@
 [package]
 name = "syn"
-version = "1.0.68" # don't forget to update html_root_url and syn.json
+version = "1.0.69" # don't forget to update html_root_url and syn.json
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "Parser for Rust source code"
