@@ -41,6 +41,7 @@ unicode-xid = "0.2"
 
 [dev-dependencies]
 anyhow = "1.0"
+doc-comment = "0.3"
 flate2 = "1.0"
 insta = "1.0"
 rayon = "1.0"

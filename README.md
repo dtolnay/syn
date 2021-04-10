@@ -120,7 +120,7 @@ pub trait HeapSize {
 The derive macro allows users to write `#[derive(HeapSize)]` on data structures
 in their program.
 
-```rust
+```rust,ignore
 #[derive(HeapSize)]
 struct Demo<'a, T: ?Sized> {
     a: Box<T>,
@@ -138,7 +138,7 @@ The token-based procedural macro API provides great control over where the
 compiler's error messages are displayed in user code. Consider the error the
 user sees if one of their field types does not implement `HeapSize`.
 
-```rust
+```rust,ignore
 #[derive(HeapSize)]
 struct Broken {
     ok: String,
@@ -150,7 +150,7 @@ By tracking span information all the way through the expansion of a procedural
 macro as shown in the `heapsize` example, token-based macros in Syn are able to
 trigger errors that directly pinpoint the source of the problem.
 
-```
+```text
 error[E0277]: the trait bound `std::thread::Thread: HeapSize` is not satisfied
  --> src/main.rs:7:5
   |
@@ -171,7 +171,7 @@ Syn's parsing API.
 The example reimplements the popular `lazy_static` crate from crates.io as a
 procedural macro.
 
-```
+```rust,ignore
 lazy_static! {
     static ref USERNAME: Regex = Regex::new("^[a-z0-9_-]{3,16}$").unwrap();
 }
@@ -180,7 +180,7 @@ lazy_static! {
 The implementation shows how to trigger custom warnings and error messages on
 the macro input.
 
-```
+```text
 warning: come on, pick a more creative name
   --> src/main.rs:10:16
    |
