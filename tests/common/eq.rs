@@ -22,7 +22,10 @@ use rustc_ast::ast::{
 };
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, DelimToken, Nonterminal, Token, TokenKind};
-use rustc_ast::tokenstream::{DelimSpan, LazyTokenStream, TokenStream, TokenTree};
+use rustc_ast::tokenstream::{
+    AttrAnnotatedTokenStream, AttrAnnotatedTokenTree, AttributesData, DelimSpan, LazyTokenStream,
+    Spacing, TokenStream, TokenTree,
+};
 use rustc_data_structures::sync::Lrc;
 use rustc_data_structures::thin_vec::ThinVec;
 use rustc_span::source_map::Spanned;
@@ -110,6 +113,7 @@ spanless_eq_true!(DelimSpan);
 spanless_eq_true!(AttrId);
 spanless_eq_true!(NodeId);
 spanless_eq_true!(SyntaxContext);
+spanless_eq_true!(Spacing);
 
 macro_rules! spanless_eq_partial_eq {
     ($name:ty) => {
@@ -285,8 +289,10 @@ spanless_eq_struct!(AngleBracketedArgs; span args);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arm; attrs pat guard body span id is_placeholder);
 spanless_eq_struct!(AssocTyConstraint; id ident gen_args kind span);
+spanless_eq_struct!(AttrAnnotatedTokenStream; 0);
 spanless_eq_struct!(AttrItem; path args tokens);
 spanless_eq_struct!(Attribute; kind id style span);
+spanless_eq_struct!(AttributesData; attrs tokens);
 spanless_eq_struct!(BareFnTy; unsafety ext generic_params decl);
 spanless_eq_struct!(Block; stmts id rules span tokens);
 spanless_eq_struct!(Crate; attrs items span proc_macros);
@@ -342,6 +348,7 @@ spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
 spanless_eq_enum!(AssocItemKind; Const(0 1 2) Fn(0) TyAlias(0) MacCall(0));
 spanless_eq_enum!(AssocTyConstraintKind; Equality(ty) Bound(bounds));
 spanless_eq_enum!(Async; Yes(span closure_id return_impl_trait_id) No);
+spanless_eq_enum!(AttrAnnotatedTokenTree; Token(0) Delimited(0 1 2) Attributes(0));
 spanless_eq_enum!(AttrStyle; Outer Inner);
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
 spanless_eq_enum!(BindingMode; ByRef(0) ByValue(0));
