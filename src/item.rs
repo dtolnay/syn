@@ -1533,17 +1533,17 @@ pub mod parsing {
 
     fn parse_rest_of_fn(
         input: ParseStream,
-        outer_attrs: Vec<Attribute>,
+        mut attrs: Vec<Attribute>,
         vis: Visibility,
         sig: Signature,
     ) -> Result<ItemFn> {
         let content;
         let brace_token = braced!(content in input);
-        let inner_attrs = content.call(Attribute::parse_inner)?;
+        attr::parsing::parse_inner(&content, &mut attrs)?;
         let stmts = content.call(Block::parse_within)?;
 
         Ok(ItemFn {
-            attrs: private::attrs(outer_attrs, inner_attrs),
+            attrs,
             vis,
             sig,
             block: Box::new(Block { brace_token, stmts }),
@@ -1669,7 +1669,7 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ItemMod {
         fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
+            let mut attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
             let mod_token: Token![mod] = input.parse()?;
             let ident: Ident = input.parse()?;
@@ -1677,7 +1677,7 @@ pub mod parsing {
             let lookahead = input.lookahead1();
             if lookahead.peek(Token![;]) {
                 Ok(ItemMod {
-                    attrs: outer_attrs,
+                    attrs,
                     vis,
                     mod_token,
                     ident,
@@ -1687,7 +1687,7 @@ pub mod parsing {
             } else if lookahead.peek(token::Brace) {
                 let content;
                 let brace_token = braced!(content in input);
-                let inner_attrs = content.call(Attribute::parse_inner)?;
+                attr::parsing::parse_inner(&content, &mut attrs)?;
 
                 let mut items = Vec::new();
                 while !content.is_empty() {
@@ -1695,7 +1695,7 @@ pub mod parsing {
                 }
 
                 Ok(ItemMod {
-                    attrs: private::attrs(outer_attrs, inner_attrs),
+                    attrs,
                     vis,
                     mod_token,
                     ident,
@@ -1711,19 +1711,19 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ItemForeignMod {
         fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
+            let mut attrs = input.call(Attribute::parse_outer)?;
             let abi: Abi = input.parse()?;
 
             let content;
             let brace_token = braced!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
+            attr::parsing::parse_inner(&content, &mut attrs)?;
             let mut items = Vec::new();
             while !content.is_empty() {
                 items.push(content.parse()?);
             }
 
             Ok(ItemForeignMod {
-                attrs: private::attrs(outer_attrs, inner_attrs),
+                attrs,
                 abi,
                 brace_token,
                 items,
@@ -2130,7 +2130,7 @@ pub mod parsing {
 
     fn parse_rest_of_trait(
         input: ParseStream,
-        outer_attrs: Vec<Attribute>,
+        mut attrs: Vec<Attribute>,
         vis: Visibility,
         unsafety: Option<Token![unsafe]>,
         auto_token: Option<Token![auto]>,
@@ -2158,14 +2158,14 @@ pub mod parsing {
 
         let content;
         let brace_token = braced!(content in input);
-        let inner_attrs = content.call(Attribute::parse_inner)?;
+        attr::parsing::parse_inner(&content, &mut attrs)?;
         let mut items = Vec::new();
         while !content.is_empty() {
             items.push(content.parse()?);
         }
 
         Ok(ItemTrait {
-            attrs: private::attrs(outer_attrs, inner_attrs),
+            attrs,
             vis,
             unsafety,
             auto_token,
@@ -2330,25 +2330,25 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TraitItemMethod {
         fn parse(input: ParseStream) -> Result<Self> {
-            let outer_attrs = input.call(Attribute::parse_outer)?;
+            let mut attrs = input.call(Attribute::parse_outer)?;
             let sig: Signature = input.parse()?;
 
             let lookahead = input.lookahead1();
-            let (brace_token, inner_attrs, stmts, semi_token) = if lookahead.peek(token::Brace) {
+            let (brace_token, stmts, semi_token) = if lookahead.peek(token::Brace) {
                 let content;
                 let brace_token = braced!(content in input);
-                let inner_attrs = content.call(Attribute::parse_inner)?;
+                attr::parsing::parse_inner(&content, &mut attrs)?;
                 let stmts = content.call(Block::parse_within)?;
-                (Some(brace_token), inner_attrs, stmts, None)
+                (Some(brace_token), stmts, None)
             } else if lookahead.peek(Token![;]) {
                 let semi_token: Token![;] = input.parse()?;
-                (None, Vec::new(), Vec::new(), Some(semi_token))
+                (None, Vec::new(), Some(semi_token))
             } else {
                 return Err(lookahead.error());
             };
 
             Ok(TraitItemMethod {
-                attrs: private::attrs(outer_attrs, inner_attrs),
+                attrs,
                 sig,
                 default: brace_token.map(|brace_token| Block { brace_token, stmts }),
                 semi_token,
@@ -2455,7 +2455,7 @@ pub mod parsing {
     }
 
     fn parse_impl(input: ParseStream, allow_const_impl: bool) -> Result<Option<ItemImpl>> {
-        let outer_attrs = input.call(Attribute::parse_outer)?;
+        let mut attrs = input.call(Attribute::parse_outer)?;
         let defaultness: Option<Token![default]> = input.parse()?;
         let unsafety: Option<Token![unsafe]> = input.parse()?;
         let impl_token: Token![impl] = input.parse()?;
@@ -2525,7 +2525,7 @@ pub mod parsing {
 
         let content;
         let brace_token = braced!(content in input);
-        let inner_attrs = content.call(Attribute::parse_inner)?;
+        attr::parsing::parse_inner(&content, &mut attrs)?;
 
         let mut items = Vec::new();
         while !content.is_empty() {
@@ -2536,7 +2536,7 @@ pub mod parsing {
             Ok(None)
         } else {
             Ok(Some(ItemImpl {
-                attrs: private::attrs(outer_attrs, inner_attrs),
+                attrs,
                 defaultness,
                 unsafety,
                 impl_token,
