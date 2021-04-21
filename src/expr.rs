@@ -1322,6 +1322,7 @@ pub(crate) mod parsing {
                 let rhs = if input.is_empty()
                     || input.peek(Token![,])
                     || input.peek(Token![;])
+                    || input.peek(Token![.]) && !input.peek(Token![..])
                     || !allow_struct.0 && input.peek(token::Brace)
                 {
                     None
@@ -2725,6 +2726,7 @@ pub(crate) mod parsing {
                 if input.is_empty()
                     || input.peek(Token![,])
                     || input.peek(Token![;])
+                    || input.peek(Token![.]) && !input.peek(Token![..])
                     || !allow_struct.0 && input.peek(token::Brace)
                 {
                     None
