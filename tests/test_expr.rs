@@ -307,14 +307,14 @@ fn test_closure_vs_rangefull() {
     #[rustfmt::skip] // rustfmt bug: https://github.com/rust-lang/rustfmt/issues/4808
     let tokens = quote!(|| .. .method());
     snapshot!(tokens as Expr, @r###"
-    Expr::Closure {
-        output: Default,
-        body: Expr::MethodCall {
-            receiver: Expr::Range {
+    Expr::MethodCall {
+        receiver: Expr::Closure {
+            output: Default,
+            body: Expr::Range {
                 limits: HalfOpen,
             },
-            method: "method",
         },
+        method: "method",
     }
     "###);
 }
