@@ -501,8 +501,6 @@ pub mod parsing {
     use super::*;
     use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
-    #[cfg(feature = "full")]
-    use crate::private;
 
     pub fn parse_inner(input: ParseStream, attrs: &mut Vec<Attribute>) -> Result<()> {
         while input.peek(Token![#]) && input.peek2(Token![!]) {
@@ -531,15 +529,6 @@ pub mod parsing {
             path: content.call(Path::parse_mod_style)?,
             tokens: content.parse()?,
         })
-    }
-
-    #[cfg(feature = "full")]
-    impl private {
-        pub(crate) fn attrs(outer: Vec<Attribute>, inner: Vec<Attribute>) -> Vec<Attribute> {
-            let mut attrs = outer;
-            attrs.extend(inner);
-            attrs
-        }
     }
 
     // Like Path::parse_mod_style but accepts keywords in the path.
