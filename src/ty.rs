@@ -341,7 +341,6 @@ pub mod parsing {
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
     use proc_macro2::{Punct, Spacing, TokenTree};
-    use std::iter::FromIterator;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Type {
@@ -1009,12 +1008,14 @@ pub mod parsing {
                     TokenTree::Punct(Punct::new('.', Spacing::Joint)),
                     TokenTree::Punct(Punct::new('.', Spacing::Alone)),
                 ];
-                let tokens = TokenStream::from_iter(args.into_iter().zip(&dot3.spans).map(
-                    |(mut arg, span)| {
+                let tokens: TokenStream = args
+                    .into_iter()
+                    .zip(&dot3.spans)
+                    .map(|(mut arg, span)| {
                         arg.set_span(*span);
                         arg
-                    },
-                ));
+                    })
+                    .collect();
                 Type::Verbatim(tokens)
             } else if allow_mut_self && input.peek(Token![mut]) && input.peek2(Token![self]) {
                 has_mut_self = true;
