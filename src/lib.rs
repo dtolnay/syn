@@ -274,6 +274,8 @@
 // Ignored clippy_pedantic lints.
 #![allow(
     clippy::cast_possible_truncation,
+    // clippy bug: https://github.com/rust-lang/rust-clippy/issues/7127
+    clippy::cloned_instead_of_copied,
     clippy::default_trait_access,
     clippy::empty_enum,
     clippy::expl_impl_clone_on_copy,
