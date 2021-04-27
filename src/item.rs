@@ -2458,6 +2458,7 @@ pub mod parsing {
 
     fn parse_impl(input: ParseStream, allow_verbatim_impl: bool) -> Result<Option<ItemImpl>> {
         let mut attrs = input.call(Attribute::parse_outer)?;
+        let has_visibility = allow_verbatim_impl && input.parse::<Visibility>()?.is_some();
         let defaultness: Option<Token![default]> = input.parse()?;
         let unsafety: Option<Token![unsafe]> = input.parse()?;
         let impl_token: Token![impl] = input.parse()?;
@@ -2541,7 +2542,7 @@ pub mod parsing {
             items.push(content.parse()?);
         }
 
-        if is_const_impl || is_impl_for && trait_.is_none() {
+        if has_visibility || is_const_impl || is_impl_for && trait_.is_none() {
             Ok(None)
         } else {
             Ok(Some(ItemImpl {
