@@ -1100,8 +1100,8 @@ pub mod parsing {
                 {
                     input.parse().map(Item::Trait)
                 } else if lookahead.peek(Token![impl]) {
-                    let allow_const_impl = true;
-                    if let Some(item) = parse_impl(input, allow_const_impl)? {
+                    let allow_verbatim_impl = true;
+                    if let Some(item) = parse_impl(input, allow_verbatim_impl)? {
                         Ok(Item::Impl(item))
                     } else {
                         Ok(Item::Verbatim(verbatim::between(begin, input)))
@@ -1138,8 +1138,8 @@ pub mod parsing {
             } else if lookahead.peek(Token![impl])
                 || lookahead.peek(Token![default]) && !ahead.peek2(Token![!])
             {
-                let allow_const_impl = true;
-                if let Some(item) = parse_impl(input, allow_const_impl)? {
+                let allow_verbatim_impl = true;
+                if let Some(item) = parse_impl(input, allow_verbatim_impl)? {
                     Ok(Item::Impl(item))
                 } else {
                     Ok(Item::Verbatim(verbatim::between(begin, input)))
@@ -2451,12 +2451,12 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ItemImpl {
         fn parse(input: ParseStream) -> Result<Self> {
-            let allow_const_impl = false;
-            parse_impl(input, allow_const_impl).map(Option::unwrap)
+            let allow_verbatim_impl = false;
+            parse_impl(input, allow_verbatim_impl).map(Option::unwrap)
         }
     }
 
-    fn parse_impl(input: ParseStream, allow_const_impl: bool) -> Result<Option<ItemImpl>> {
+    fn parse_impl(input: ParseStream, allow_verbatim_impl: bool) -> Result<Option<ItemImpl>> {
         let mut attrs = input.call(Attribute::parse_outer)?;
         let defaultness: Option<Token![default]> = input.parse()?;
         let unsafety: Option<Token![unsafe]> = input.parse()?;
@@ -2476,7 +2476,7 @@ pub mod parsing {
             Generics::default()
         };
 
-        let is_const_impl = allow_const_impl
+        let is_const_impl = allow_verbatim_impl
             && (input.peek(Token![const]) || input.peek(Token![?]) && input.peek2(Token![const]));
         if is_const_impl {
             input.parse::<Option<Token![?]>>()?;
@@ -2510,6 +2510,8 @@ pub mod parsing {
                 } else {
                     unreachable!()
                 }
+            } else if !allow_verbatim_impl {
+                return Err(Error::new_spanned(first_ty_ref, "expected trait path"));
             } else {
                 trait_ = None;
             }
