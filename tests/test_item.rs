@@ -266,3 +266,12 @@ fn test_type_empty_bounds() {
     }
     "###);
 }
+
+#[test]
+fn test_impl_visibility() {
+    let tokens = quote! {
+        pub default unsafe impl union {}
+    };
+
+    snapshot!(tokens as Item, @"Verbatim(`pub default unsafe impl union { }`)");
+}
