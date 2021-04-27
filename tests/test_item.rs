@@ -275,3 +275,27 @@ fn test_impl_visibility() {
 
     snapshot!(tokens as Item, @"Verbatim(`pub default unsafe impl union { }`)");
 }
+
+#[test]
+fn test_impl_type_parameter_defaults() {
+    #[cfg(any())]
+    impl<T = ()> () {}
+    let tokens = quote! {
+        impl<T = ()> () {}
+    };
+    snapshot!(tokens as Item, @r###"
+    Item::Impl {
+        generics: Generics {
+            lt_token: Some,
+            params: [
+                Type(TypeParam {
+                    ident: "T",
+                    eq_token: Some,
+                    default: Some(Type::Tuple),
+                }),
+            ],
+            gt_token: Some,
+        },
+        self_ty: Type::Tuple,
+    }"###);
+}
