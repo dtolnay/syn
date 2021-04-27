@@ -2490,6 +2490,8 @@ pub mod parsing {
             None
         };
 
+        #[cfg(not(feature = "printing"))]
+        let first_ty_span = input.span();
         let mut first_ty: Type = input.parse()?;
         let self_ty: Type;
         let trait_;
@@ -2511,7 +2513,10 @@ pub mod parsing {
                     unreachable!()
                 }
             } else if !allow_verbatim_impl {
+                #[cfg(feature = "printing")]
                 return Err(Error::new_spanned(first_ty_ref, "expected trait path"));
+                #[cfg(not(feature = "printing"))]
+                return Err(Error::new(first_ty_span, "expected trait path"));
             } else {
                 trait_ = None;
             }
