@@ -8,10 +8,15 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "52e3dffa50cfffdcfa145c0cc0ba48b49abc0c07";
+const REVISION: &str = "716394d6581b60c75cfdd88b8e5b876f2db88b62";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
+    // FIXME
+    "src/test/ui/const-generics/defaults/const-param-as-default-value.rs",
+    "src/test/ui/const-generics/defaults/pretty-printing-ast.rs",
+    "src/test/ui/proc-macro/issue-81555.rs",
+
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "src/test/ui/const-generics/closing-args-token.rs",
     "src/test/ui/const-generics/const-expression-parameter.rs",
