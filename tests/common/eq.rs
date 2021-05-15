@@ -8,7 +8,7 @@ use rustc_ast::ast::{
     BinOpKind, BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
     Defaultness, EnumDef, Expr, ExprField, ExprKind, Extern, FieldDef, FloatTy, FnDecl, FnHeader,
     FnKind, FnRetTy, FnSig, ForeignItemKind, ForeignMod, GenericArg, GenericArgs, GenericBound,
-    GenericParam, GenericParamKind, Generics, GlobalAsm, ImplKind, ImplPolarity, Inline, InlineAsm,
+    GenericParam, GenericParamKind, Generics, ImplKind, ImplPolarity, Inline, InlineAsm,
     InlineAsmOperand, InlineAsmOptions, InlineAsmRegOrRegClass, InlineAsmTemplatePiece, IntTy,
     IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind,
     LlvmAsmDialect, LlvmInlineAsm, LlvmInlineAsmOutput, Local, MacArgs, MacCall, MacCallStmt,
@@ -307,7 +307,6 @@ spanless_eq_struct!(FnSig; header decl span);
 spanless_eq_struct!(ForeignMod; unsafety abi items);
 spanless_eq_struct!(GenericParam; id ident attrs bounds is_placeholder kind);
 spanless_eq_struct!(Generics; params where_clause span);
-spanless_eq_struct!(GlobalAsm; asm);
 spanless_eq_struct!(ImplKind; unsafety polarity defaultness constness generics of_trait self_ty items);
 spanless_eq_struct!(InlineAsm; template operands options line_spans);
 spanless_eq_struct!(Item<K>; attrs id span vis ident kind !tokens);
