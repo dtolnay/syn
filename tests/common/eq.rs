@@ -416,8 +416,9 @@ spanless_eq_enum!(PatKind; Wild Ident(0 1 2) Struct(0 1 2) TupleStruct(0 1)
     Or(0) Path(0 1) Tuple(0) Box(0) Ref(0 1) Lit(0) Range(0 1 2) Slice(0) Rest
     Paren(0) MacCall(0));
 spanless_eq_enum!(TyKind; Slice(0) Array(0 1) Ptr(0) Rptr(0 1) BareFn(0) Never
-    Tup(0) Path(0 1) TraitObject(0 1) ImplTrait(0 1) Paren(0) Typeof(0) Infer
-    ImplicitSelf MacCall(0) Err CVarArgs);
+    Tup(0) AnonymousStruct(0 1) AnonymousUnion(0 1) Path(0 1) TraitObject(0 1)
+    ImplTrait(0 1) Paren(0) Typeof(0) Infer ImplicitSelf MacCall(0) Err
+    CVarArgs);
 
 impl SpanlessEq for Ident {
     fn eq(&self, other: &Self) -> bool {
