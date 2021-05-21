@@ -22,11 +22,11 @@ use std::env;
 use std::ffi::OsStr;
 use std::fmt::{self, Display};
 use std::fs;
-use std::io::{self, Write};
+use std::io;
 use std::path::{Path, PathBuf};
-use std::process;
 use colored::Colorize;
 
+#[derive(Debug)]
 enum Error {
     IncorrectUsage,
     ReadFile(io::Error),
@@ -53,14 +53,7 @@ impl Display for Error {
     }
 }
 
-fn main() {
-    if let Err(error) = try_main() {
-        let _ = writeln!(io::stderr(), "{}", error);
-        process::exit(1);
-    }
-}
-
-fn try_main() -> Result<(), Error> {
+fn main() -> Result<(), Error> {
     let mut args = env::args_os();
     let _ = args.next(); // executable name
 
