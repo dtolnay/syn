@@ -1,6 +1,6 @@
 [package]
 name = "syn-codegen"
-version = "0.2.0" # also update html_root_url
+version = "0.3.0" # also update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -11,7 +11,7 @@ categories = ["development-tools::procedural-macro-helpers"]
 
 [dependencies]
 indexmap = { version = "1.0", features = ["serde-1"] }
-semver = { version = "0.11", features = ["serde"] }
+semver = { version = "1.0", features = ["serde"] }
 serde = { version = "1.0.88", features = ["derive"] }
 
 [dev-dependencies]
