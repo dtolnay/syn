@@ -15,6 +15,8 @@ pub use proc_macro2::{Span, TokenStream as TokenStream2};
 
 pub use crate::span::IntoSpans;
 
+pub use crate::error::{BailSpan, BailSpanFallback};
+
 #[cfg(all(
     not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
     feature = "proc-macro"

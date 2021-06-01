@@ -293,6 +293,61 @@ pub fn new2<T: Display>(start: Span, end: Span, message: T) -> Error {
     }
 }
 
+/// Bail out of the current function with an error.
+///
+/// The first argument to this macro is the span the error will have. This can
+/// either be a [`Span`] or, if the `printing` feature is enabled, any type
+/// implementing [`ToTokens`]. The rest of the arguments are a format string.
+///
+/// # Examples
+///
+/// ```
+/// use syn::ItemEnum;
+/// use syn::parse::{self, ParseStream, Parse, bail};
+///
+/// fn parse_binary_enum(input: ParseStream<'_>) -> parse::Result<ItemEnum> {
+///     let item = input.parse()?;
+///
+///     match item.variants.len() {
+///         0 => bail!(item, "Enum has no variants, it must have 2"),
+///         1 => bail!(item, "Enum has only one variant, it must have 2"),
+///         2 => {}
+///         n => bail!(item, "Enum has {} variants, it must have 2", n),
+///     }
+///
+///     Ok(())
+/// }
+/// ```
+#[macro_export]
+macro_rules! bail {
+    ($span:expr, $($tt:tt)*) => {{
+        use $crate::__private::BailSpanFallback as _;
+        return $crate::__private::Err(
+            $crate::__private::BailSpan($span)
+                // We can't be hygienic here because Rust 1.31 (the MSRV) doesn't support publicly
+                // re-exporting macros like `format_args!`.
+                .into_error(format_args!($($tt)*))
+        )
+    }};
+}
+
+pub struct BailSpan<T>(pub T);
+
+#[cfg(feature = "printing")]
+impl<T: ToTokens> BailSpan<T> {
+    pub fn into_error(self, message: impl Display) -> Error {
+        Error::new_spanned(self.0, message)
+    }
+}
+pub trait BailSpanFallback {
+    fn into_error(self, message: impl Display) -> Error;
+}
+impl BailSpanFallback for BailSpan<Span> {
+    fn into_error(self, message: impl Display) -> Error {
+        Error::new(self.0, message)
+    }
+}
+
 impl Debug for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         if self.messages.len() == 1 {

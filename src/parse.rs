@@ -205,6 +205,7 @@ use std::ops::Deref;
 use std::rc::Rc;
 use std::str::FromStr;
 
+pub use crate::bail;
 pub use crate::error::{Error, Result};
 pub use crate::lookahead::{Lookahead1, Peek};
 
