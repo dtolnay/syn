@@ -2232,7 +2232,7 @@ pub(crate) mod parsing {
                             match expr {
                                 Expr::$variant(inner) => return Ok(inner),
                                 Expr::Group(next) => expr = *next.expr,
-                                _ => return Err(Error::new_spanned(expr, $msg)),
+                                _ => bail!(expr, $msg),
                             }
                         }
                     }

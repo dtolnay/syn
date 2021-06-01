@@ -1606,16 +1606,13 @@ pub mod parsing {
                 let mut arg: FnArg = input.parse()?;
                 match &mut arg {
                     FnArg::Receiver(receiver) if has_receiver => {
-                        return Err(Error::new(
+                        bail!(
                             receiver.self_token.span,
-                            "unexpected second method receiver",
-                        ));
+                            "unexpected second method receiver"
+                        );
                     }
                     FnArg::Receiver(receiver) if !args.is_empty() => {
-                        return Err(Error::new(
-                            receiver.self_token.span,
-                            "unexpected method receiver",
-                        ));
+                        bail!(receiver.self_token.span, "unexpected method receiver");
                     }
                     FnArg::Receiver(receiver) => {
                         has_receiver = true;
@@ -2516,9 +2513,9 @@ pub mod parsing {
                 }
             } else if !allow_verbatim_impl {
                 #[cfg(feature = "printing")]
-                return Err(Error::new_spanned(first_ty_ref, "expected trait path"));
+                bail!(first_ty_ref, "expected trait path");
                 #[cfg(not(feature = "printing"))]
-                return Err(Error::new(first_ty_span, "expected trait path"));
+                bail!(first_ty_span, "expected trait path");
             } else {
                 trait_ = None;
             }
