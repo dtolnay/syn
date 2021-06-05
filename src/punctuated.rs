@@ -1017,7 +1017,7 @@ mod printing {
         P: ToTokens,
     {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.pairs())
+            tokens.append_all(self.pairs());
         }
     }
 

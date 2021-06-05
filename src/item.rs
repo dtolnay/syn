@@ -2512,7 +2512,7 @@ pub mod parsing {
                 if let Type::Path(TypePath { qself: None, path }) = first_ty {
                     trait_ = Some((polarity, path, for_token));
                 } else {
-                    unreachable!()
+                    unreachable!();
                 }
             } else if !allow_verbatim_impl {
                 #[cfg(feature = "printing")]

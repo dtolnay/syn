@@ -108,7 +108,7 @@ impl Ord for Lifetime {
 
 impl Hash for Lifetime {
     fn hash<H: Hasher>(&self, h: &mut H) {
-        self.ident.hash(h)
+        self.ident.hash(h);
     }
 }
 

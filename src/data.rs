@@ -475,7 +475,7 @@ mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for VisPublic {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.pub_token.to_tokens(tokens)
+            self.pub_token.to_tokens(tokens);
         }
     }
 

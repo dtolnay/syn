@@ -236,7 +236,7 @@ impl Error {
     /// Add another error message to self such that when `to_compile_error()` is
     /// called, both errors will be emitted together.
     pub fn combine(&mut self, another: Error) {
-        self.messages.extend(another.messages)
+        self.messages.extend(another.messages);
     }
 }
 

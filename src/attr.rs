@@ -649,7 +649,7 @@ mod printing {
             self.path.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
                 self.nested.to_tokens(tokens);
-            })
+            });
         }
     }
 

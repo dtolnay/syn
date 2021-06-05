@@ -238,7 +238,7 @@ impl LitStr {
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.repr.token.set_span(span)
+        self.repr.token.set_span(span);
     }
 
     pub fn suffix(&self) -> &str {
@@ -269,7 +269,7 @@ impl LitByteStr {
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.repr.token.set_span(span)
+        self.repr.token.set_span(span);
     }
 
     pub fn suffix(&self) -> &str {
@@ -300,7 +300,7 @@ impl LitByte {
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.repr.token.set_span(span)
+        self.repr.token.set_span(span);
     }
 
     pub fn suffix(&self) -> &str {
@@ -331,7 +331,7 @@ impl LitChar {
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.repr.token.set_span(span)
+        self.repr.token.set_span(span);
     }
 
     pub fn suffix(&self) -> &str {
@@ -406,7 +406,7 @@ impl LitInt {
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.repr.token.set_span(span)
+        self.repr.token.set_span(span);
     }
 }
 
@@ -478,7 +478,7 @@ impl LitFloat {
     }
 
     pub fn set_span(&mut self, span: Span) {
-        self.repr.token.set_span(span)
+        self.repr.token.set_span(span);
     }
 }
 
