@@ -1437,7 +1437,7 @@ mod value {
         }
 
         let suffix = s;
-        if suffix.is_empty() || crate::ident::xid_ok(&suffix) {
+        if suffix.is_empty() || crate::ident::xid_ok(suffix) {
             let mut repr = value.to_string();
             if negative {
                 repr.insert(0, '-');
