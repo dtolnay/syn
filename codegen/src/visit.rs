@@ -41,7 +41,7 @@ fn visit(
             let name = name.ref_tokens();
             Some(quote! {
                 for it in #name {
-                    #val
+                    #val;
                 }
             })
         }
@@ -65,7 +65,7 @@ fn visit(
             let name = name.owned_tokens();
             Some(quote! {
                 if let Some(it) = &#name {
-                    #val
+                    #val;
                 }
             })
         }
@@ -91,13 +91,13 @@ fn visit(
                 quote!(spans)
             };
             Some(quote! {
-                tokens_helper(v, &#name.#spans)
+                tokens_helper(v, &#name.#spans);
             })
         }
         Type::Group(_) => {
             let name = name.tokens();
             Some(quote! {
-                tokens_helper(v, &#name.span)
+                tokens_helper(v, &#name.span);
             })
         }
         Type::Syn(t) => {
@@ -210,7 +210,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
 
     traits.extend(quote! {
         fn #visit_fn(&mut self, i: &#ast_lifetime #ty) {
-            #visit_fn(self, i)
+            #visit_fn(self, i);
         }
     });
 
