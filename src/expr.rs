@@ -851,6 +851,24 @@ ast_enum! {
     }
 }
 
+impl From<Ident> for Member {
+    fn from(ident: Ident) -> Member {
+        Member::Named(ident)
+    }
+}
+
+impl From<Index> for Member {
+    fn from(index: Index) -> Member {
+        Member::Unnamed(index)
+    }
+}
+
+impl From<usize> for Member {
+    fn from(index: usize) -> Member {
+        Member::Unnamed(Index::from(index))
+    }
+}
+
 impl Eq for Member {}
 
 impl PartialEq for Member {
