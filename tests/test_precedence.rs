@@ -240,7 +240,12 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
         match &mut e.kind {
             ExprKind::AddrOf(BorrowKind::Raw, ..) => {}
             ExprKind::Struct(expr) => {
-                let StructExpr { path, fields, rest } = expr.deref_mut();
+                let StructExpr {
+                    qself,
+                    path,
+                    fields,
+                    rest,
+                } = expr.deref_mut();
                 vis.visit_path(path);
                 fields.flat_map_in_place(|field| flat_map_field(field, vis));
                 if let StructRest::Base(rest) = rest {
