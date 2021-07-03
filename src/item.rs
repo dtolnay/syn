@@ -1808,7 +1808,7 @@ pub mod parsing {
                 #[cfg(not(test))]
                 _ => unreachable!(),
             };
-            attrs.extend(item_attrs.drain(..));
+            attrs.append(item_attrs);
             *item_attrs = attrs;
 
             Ok(item)
@@ -2293,7 +2293,7 @@ pub mod parsing {
                 #[cfg(not(test))]
                 _ => unreachable!(),
             };
-            attrs.extend(item_attrs.drain(..));
+            attrs.append(item_attrs);
             *item_attrs = attrs;
             Ok(item)
         }
@@ -2637,7 +2637,7 @@ pub mod parsing {
                     #[cfg(not(test))]
                     _ => unreachable!(),
                 };
-                attrs.extend(item_attrs.drain(..));
+                attrs.append(item_attrs);
                 *item_attrs = attrs;
             }
 
