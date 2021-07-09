@@ -151,7 +151,7 @@ fn test_expressions(edition: Edition, exprs: Vec<syn::Expr>) -> (usize, usize) {
     let mut passed = 0;
     let mut failed = 0;
 
-    rustc_span::with_session_globals(edition, || {
+    rustc_span::create_session_if_not_set_then(edition, |_| {
         for expr in exprs {
             let raw = quote!(#expr).to_string();
 
@@ -246,6 +246,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
                     fields,
                     rest,
                 } = expr.deref_mut();
+                vis.visit_qself(qself);
                 vis.visit_path(path);
                 fields.flat_map_in_place(|field| flat_map_field(field, vis));
                 if let StructRest::Base(rest) = rest {

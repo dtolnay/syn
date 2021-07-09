@@ -85,7 +85,7 @@ fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
     let back = quote!(#krate).to_string();
     let edition = repo::edition(path).parse().unwrap();
 
-    rustc_span::with_session_globals(edition, || {
+    rustc_span::create_session_if_not_set_then(edition, |_| {
         let equal = match panic::catch_unwind(|| {
             let sess = ParseSess::new(FilePathMapping::empty());
             let before = match librustc_parse(content, &sess) {

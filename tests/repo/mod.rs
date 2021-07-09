@@ -26,6 +26,9 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/issues/issue-34074.rs",
     "src/test/ui/proc-macro/trait-fn-args-2015.rs",
 
+    // Excessive nesting
+    "src/test/ui/issues/issue-74564-if-expr-stack-overflow.rs",
+
     // Not actually test cases
     "src/test/rustdoc-ui/test-compile-fail2.rs",
     "src/test/rustdoc-ui/test-compile-fail3.rs",
