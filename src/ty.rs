@@ -412,6 +412,7 @@ pub mod parsing {
                 && !lookahead.peek(Token![self])
                 && !lookahead.peek(Token![Self])
                 && !lookahead.peek(Token![crate])
+                || input.peek(Token![dyn])
             {
                 return Err(lookahead.error());
             }
@@ -540,15 +541,7 @@ pub mod parsing {
             || lookahead.peek(Token![<])
         {
             if input.peek(Token![dyn]) {
-                let mut trait_object: TypeTraitObject = input.parse()?;
-                if lifetimes.is_some() {
-                    match trait_object.bounds.iter_mut().next().unwrap() {
-                        TypeParamBound::Trait(trait_bound) => {
-                            trait_bound.lifetimes = lifetimes;
-                        }
-                        TypeParamBound::Lifetime(_) => unreachable!(),
-                    }
-                }
+                let trait_object: TypeTraitObject = input.parse()?;
                 return Ok(Type::TraitObject(trait_object));
             }
 
