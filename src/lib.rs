@@ -255,6 +255,7 @@
 #![allow(non_camel_case_types)]
 // Ignored clippy lints.
 #![allow(
+    clippy::collapsible_match, // https://github.com/rust-lang/rust-clippy/issues/7575
     clippy::doc_markdown,
     clippy::eval_order_dependence,
     clippy::inherent_to_string,
