@@ -2687,7 +2687,7 @@ pub mod parsing {
                 punct.set_span(semi.span);
                 let tokens = TokenStream::from_iter(vec![TokenTree::Punct(punct)]);
                 Block {
-                    brace_token: Brace::default(),
+                    brace_token: Brace { span: semi.span },
                     stmts: vec![Stmt::Item(Item::Verbatim(tokens))],
                 }
             } else {
