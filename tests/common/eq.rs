@@ -36,7 +36,7 @@ pub trait SpanlessEq {
     fn eq(&self, other: &Self) -> bool;
 }
 
-impl<T: SpanlessEq> SpanlessEq for Box<T> {
+impl<T: ?Sized + SpanlessEq> SpanlessEq for Box<T> {
     fn eq(&self, other: &Self) -> bool {
         SpanlessEq::eq(&**self, &**other)
     }
@@ -95,6 +95,14 @@ impl<T: SpanlessEq> SpanlessEq for Spanned<T> {
 impl<A: SpanlessEq, B: SpanlessEq> SpanlessEq for (A, B) {
     fn eq(&self, other: &Self) -> bool {
         SpanlessEq::eq(&self.0, &other.0) && SpanlessEq::eq(&self.1, &other.1)
+    }
+}
+
+impl<A: SpanlessEq, B: SpanlessEq, C: SpanlessEq> SpanlessEq for (A, B, C) {
+    fn eq(&self, other: &Self) -> bool {
+        SpanlessEq::eq(&self.0, &other.0)
+            && SpanlessEq::eq(&self.1, &other.1)
+            && SpanlessEq::eq(&self.2, &other.2)
     }
 }
 
@@ -308,7 +316,7 @@ spanless_eq_struct!(ForeignMod; unsafety abi items);
 spanless_eq_struct!(GenericParam; id ident attrs bounds is_placeholder kind);
 spanless_eq_struct!(Generics; params where_clause span);
 spanless_eq_struct!(ImplKind; unsafety polarity defaultness constness generics of_trait self_ty items);
-spanless_eq_struct!(InlineAsm; template operands clobber_abi options line_spans);
+spanless_eq_struct!(InlineAsm; template template_strs operands clobber_abi options line_spans);
 spanless_eq_struct!(Item<K>; attrs id span vis ident kind !tokens);
 spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
