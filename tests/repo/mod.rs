@@ -18,6 +18,8 @@ static EXCLUDE: &[&str] = &[
 
     // TODO: unnamed fields, anonymous structs/unions
     // struct S { _: union { i: i32 } }
+    // https://github.com/dtolnay/syn/issues/1048
+    // https://github.com/dtolnay/syn/issues/1049
     "src/test/pretty/anonymous-types.rs",
 
     // TODO: destructuring assignment of tuple variant
@@ -27,11 +29,13 @@ static EXCLUDE: &[&str] = &[
 
     // TODO: let else
     // let Some(1) = Some(2) else { return };
+    // https://github.com/dtolnay/syn/issues/1050
     "src/test/ui/let-else/let-else-run-pass.rs",
     "src/tools/rustfmt/tests/source/let_else.rs",
     "src/tools/rustfmt/tests/target/let_else.rs",
 
     // TODO: ~const
+    // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/call-generic-in-impl.rs",
     "src/test/ui/rfc-2632-const-trait-impl/call-generic-method-chain.rs",
     "src/test/ui/rfc-2632-const-trait-impl/call-generic-method-dup-bound.rs",
