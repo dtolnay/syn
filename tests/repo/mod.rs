@@ -22,13 +22,6 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/associated-types/associated-type-destructuring-assignment.rs",
     "src/test/ui/associated-types/associated-type-struct-construction.rs",
 
-    // TODO: let else
-    // let Some(1) = Some(2) else { return };
-    // https://github.com/dtolnay/syn/issues/1050
-    "src/test/ui/let-else/let-else-run-pass.rs",
-    "src/tools/rustfmt/tests/source/let_else.rs",
-    "src/tools/rustfmt/tests/target/let_else.rs",
-
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",

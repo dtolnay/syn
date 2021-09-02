@@ -165,7 +165,7 @@ pub mod parsing {
         }
 
         if input.peek(Token![let]) {
-            stmt_local(input, attrs).map(Stmt::Local)
+            stmt_local(input, attrs)
         } else if input.peek(Token![pub])
             || input.peek(Token![crate]) && !input.peek2(Token![::])
             || input.peek(Token![extern])
@@ -219,35 +219,51 @@ pub mod parsing {
         })))
     }
 
-    fn stmt_local(input: ParseStream, attrs: Vec<Attribute>) -> Result<Local> {
-        Ok(Local {
+    fn stmt_local(input: ParseStream, attrs: Vec<Attribute>) -> Result<Stmt> {
+        let begin = input.fork();
+
+        let let_token: Token![let] = input.parse()?;
+
+        let mut pat: Pat = pat::parsing::multi_pat_with_leading_vert(input)?;
+        if input.peek(Token![:]) {
+            let colon_token: Token![:] = input.parse()?;
+            let ty: Type = input.parse()?;
+            pat = Pat::Type(PatType {
+                attrs: Vec::new(),
+                pat: Box::new(pat),
+                colon_token,
+                ty: Box::new(ty),
+            });
+        }
+
+        let init = if input.peek(Token![=]) {
+            let eq_token: Token![=] = input.parse()?;
+            let init: Expr = input.parse()?;
+
+            if input.peek(Token![else]) {
+                input.parse::<Token![else]>()?;
+                let content;
+                braced!(content in input);
+                content.call(Block::parse_within)?;
+                let verbatim = Expr::Verbatim(verbatim::between(begin, input));
+                let semi_token: Token![;] = input.parse()?;
+                return Ok(Stmt::Semi(verbatim, semi_token));
+            }
+
+            Some((eq_token, Box::new(init)))
+        } else {
+            None
+        };
+
+        let semi_token: Token![;] = input.parse()?;
+
+        Ok(Stmt::Local(Local {
             attrs,
-            let_token: input.parse()?,
-            pat: {
-                let mut pat: Pat = pat::parsing::multi_pat_with_leading_vert(input)?;
-                if input.peek(Token![:]) {
-                    let colon_token: Token![:] = input.parse()?;
-                    let ty: Type = input.parse()?;
-                    pat = Pat::Type(PatType {
-                        attrs: Vec::new(),
-                        pat: Box::new(pat),
-                        colon_token,
-                        ty: Box::new(ty),
-                    });
-                }
-                pat
-            },
-            init: {
-                if input.peek(Token![=]) {
-                    let eq_token: Token![=] = input.parse()?;
-                    let init: Expr = input.parse()?;
-                    Some((eq_token, Box::new(init)))
-                } else {
-                    None
-                }
-            },
-            semi_token: input.parse()?,
-        })
+            let_token,
+            pat,
+            init,
+            semi_token,
+        }))
     }
 
     fn stmt_expr(
