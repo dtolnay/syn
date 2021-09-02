@@ -36,12 +36,7 @@ static EXCLUDE: &[&str] = &[
 
     // TODO: ~const
     // https://github.com/dtolnay/syn/issues/1051
-    "src/test/ui/rfc-2632-const-trait-impl/call-generic-in-impl.rs",
-    "src/test/ui/rfc-2632-const-trait-impl/call-generic-method-chain.rs",
-    "src/test/ui/rfc-2632-const-trait-impl/call-generic-method-dup-bound.rs",
-    "src/test/ui/rfc-2632-const-trait-impl/call-generic-method-pass.rs",
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
-    "src/test/ui/rfc-2632-const-trait-impl/tilde-const-syntax.rs",
     "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-run.rs",
     "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-self-referential.rs",
 
