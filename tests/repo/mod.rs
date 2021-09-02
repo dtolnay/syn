@@ -12,11 +12,6 @@ const REVISION: &str = "50171c310cd15e1b2d3723766ce64e2e4d6696fc";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: anonymous structs/unions
-    // type A = struct { field: u8 };
-    // https://github.com/dtolnay/syn/issues/1049
-    "src/test/pretty/anonymous-types.rs",
-
     // TODO: destructuring assignment of tuple variant
     // let <E>::V {} = E::V();
     "src/test/ui/associated-types/associated-type-destructuring-assignment.rs",

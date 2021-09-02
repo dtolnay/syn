@@ -532,6 +532,14 @@ pub mod parsing {
             } else {
                 Ok(Type::Verbatim(verbatim::between(begin, input)))
             }
+        } else if cfg!(feature = "full")
+            && (lookahead.peek(Token![struct])
+                || lookahead.peek(Token![union]) && input.peek2(token::Brace))
+        {
+            input.call(Ident::parse_any)?;
+            let mut attrs = Vec::new();
+            data::parsing::parse_braced(input, &mut attrs)?;
+            Ok(Type::Verbatim(verbatim::between(begin, input)))
         } else if lookahead.peek(Ident)
             || input.peek(Token![super])
             || input.peek(Token![self])
