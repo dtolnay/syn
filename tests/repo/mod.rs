@@ -8,17 +8,53 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "716394d6581b60c75cfdd88b8e5b876f2db88b62";
+const REVISION: &str = "50171c310cd15e1b2d3723766ce64e2e4d6696fc";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
+    // TODO: to be categorized
+    "src/test/debuginfo/function-names.rs",
+    "src/test/pretty/anonymous-types.rs",
+    "src/test/ui/associated-types/associated-type-destructuring-assignment.rs",
+    "src/test/ui/associated-types/associated-type-struct-construction.rs",
+    "src/test/ui/let-else/let-else-run-pass.rs",
+    "src/test/ui/rfc-2632-const-trait-impl/call-generic-in-impl.rs",
+    "src/test/ui/rfc-2632-const-trait-impl/call-generic-method-chain.rs",
+    "src/test/ui/rfc-2632-const-trait-impl/call-generic-method-dup-bound.rs",
+    "src/test/ui/rfc-2632-const-trait-impl/call-generic-method-pass.rs",
+    "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
+    "src/test/ui/rfc-2632-const-trait-impl/tilde-const-syntax.rs",
+    "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-run.rs",
+    "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-self-referential.rs",
+    "src/tools/rustfmt/tests/coverage/target/comments.rs",
+    "src/tools/rustfmt/tests/parser/issue-4126/invalid.rs",
+    "src/tools/rustfmt/tests/parser/issue_4418.rs",
+    "src/tools/rustfmt/tests/parser/unclosed-delims/issue_4466.rs",
+    "src/tools/rustfmt/tests/source/attrib.rs",
+    "src/tools/rustfmt/tests/source/configs/disable_all_formatting/true.rs",
+    "src/tools/rustfmt/tests/source/configs/spaces_around_ranges/false.rs",
+    "src/tools/rustfmt/tests/source/configs/spaces_around_ranges/true.rs",
+    "src/tools/rustfmt/tests/source/issue-3639.rs",
+    "src/tools/rustfmt/tests/source/let_else.rs",
+    "src/tools/rustfmt/tests/source/match.rs",
+    "src/tools/rustfmt/tests/source/trait.rs",
+    "src/tools/rustfmt/tests/source/type.rs",
+    "src/tools/rustfmt/tests/target/attrib-block-expr.rs",
+    "src/tools/rustfmt/tests/target/attrib.rs",
+    "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/false.rs",
+    "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/true.rs",
+    "src/tools/rustfmt/tests/target/let_else.rs",
+    "src/tools/rustfmt/tests/target/match.rs",
+    "src/tools/rustfmt/tests/target/trait.rs",
+    "src/tools/rustfmt/tests/target/type.rs",
+
     // Rustc loses some attributes
     // https://github.com/rust-lang/rust/issues/84879
     "src/test/ui/proc-macro/issue-81555.rs",
 
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
-    "src/test/ui/const-generics/closing-args-token.rs",
-    "src/test/ui/const-generics/const-expression-parameter.rs",
+    "src/test/ui/const-generics/early/closing-args-token.rs",
+    "src/test/ui/const-generics/early/const-expression-parameter.rs",
 
     // Deprecated anonymous parameter syntax in traits
     "src/test/ui/issues/issue-13105.rs",
