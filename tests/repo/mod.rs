@@ -42,9 +42,6 @@ static EXCLUDE: &[&str] = &[
     "src/tools/rustfmt/tests/source/attrib.rs",
     "src/tools/rustfmt/tests/target/attrib.rs",
 
-    // TODO: losing empty where-clause
-    "src/tools/rustfmt/tests/source/issue-3639.rs",
-
     // TODO: doc comment on match arm
     "src/tools/rustfmt/tests/source/match.rs",
     "src/tools/rustfmt/tests/target/match.rs",
