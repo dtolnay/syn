@@ -12,9 +12,8 @@ const REVISION: &str = "50171c310cd15e1b2d3723766ce64e2e4d6696fc";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: unnamed fields, anonymous structs/unions
-    // struct S { _: union { i: i32 } }
-    // https://github.com/dtolnay/syn/issues/1048
+    // TODO: anonymous structs/unions
+    // type A = struct { field: u8 };
     // https://github.com/dtolnay/syn/issues/1049
     "src/test/pretty/anonymous-types.rs",
 
