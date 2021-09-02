@@ -34,14 +34,12 @@ static EXCLUDE: &[&str] = &[
     "src/tools/rustfmt/tests/source/let_else.rs",
     "src/tools/rustfmt/tests/target/let_else.rs",
 
-    // TODO: ~const
+    // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
-    "src/test/ui/rfc-2632-const-trait-impl/call-generic-in-impl.rs",
-    "src/test/ui/rfc-2632-const-trait-impl/call-generic-method-chain.rs",
-    "src/test/ui/rfc-2632-const-trait-impl/call-generic-method-dup-bound.rs",
-    "src/test/ui/rfc-2632-const-trait-impl/call-generic-method-pass.rs",
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
-    "src/test/ui/rfc-2632-const-trait-impl/tilde-const-syntax.rs",
+
+    // TODO: ~const in where-clause
+    // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-run.rs",
     "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-self-referential.rs",
 

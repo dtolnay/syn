@@ -770,8 +770,8 @@ pub mod parsing {
                     if input.peek(Token![,]) || input.peek(Token![>]) || input.peek(Token![=]) {
                         break;
                     }
-                    if input.peek(Token![?]) && input.peek2(Token![const]) {
-                        input.parse::<Token![?]>()?;
+                    if input.peek(Token![~]) && input.peek2(Token![const]) {
+                        input.parse::<Token![~]>()?;
                         input.parse::<Token![const]>()?;
                         is_maybe_const = true;
                     }
@@ -1188,7 +1188,7 @@ mod printing {
                             let mut iter = default.clone().into_iter().peekable();
                             while let Some(token) = iter.next() {
                                 if let TokenTree::Punct(q) = token {
-                                    if q.as_char() == '?' {
+                                    if q.as_char() == '~' {
                                         if let Some(TokenTree::Ident(c)) = iter.peek() {
                                             if c == "const" {
                                                 if self.bounds.is_empty() {
