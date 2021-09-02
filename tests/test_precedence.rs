@@ -286,8 +286,12 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 
         fn visit_generic_arg(&mut self, arg: &mut GenericArg) {
             match arg {
-                // Don't wrap const generic arg as that's invalid syntax.
-                GenericArg::Const(arg) => noop_visit_expr(&mut arg.value, self),
+                // Don't wrap unbraced const generic arg as that's invalid syntax.
+                GenericArg::Const(anon_const) => {
+                    if let ExprKind::Block(..) = &mut anon_const.value.kind {
+                        noop_visit_expr(&mut anon_const.value, self);
+                    }
+                }
                 _ => noop_visit_generic_arg(arg, self),
             }
         }
@@ -346,8 +350,11 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
 
         fn fold_generic_argument(&mut self, arg: GenericArgument) -> GenericArgument {
             match arg {
-                // Don't wrap const generic arg as that's invalid syntax.
-                GenericArgument::Const(a) => GenericArgument::Const(fold_expr(self, a)),
+                GenericArgument::Const(arg) => GenericArgument::Const(match arg {
+                    Expr::Block(_) => fold_expr(self, arg),
+                    // Don't wrap unbraced const generic arg as that's invalid syntax.
+                    _ => arg,
+                }),
                 _ => fold_generic_argument(self, arg),
             }
         }
@@ -357,8 +364,11 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
             arg: GenericMethodArgument,
         ) -> GenericMethodArgument {
             match arg {
-                // Don't wrap const generic arg as that's invalid syntax.
-                GenericMethodArgument::Const(a) => GenericMethodArgument::Const(fold_expr(self, a)),
+                GenericMethodArgument::Const(arg) => GenericMethodArgument::Const(match arg {
+                    Expr::Block(_) => fold_expr(self, arg),
+                    // Don't wrap unbraced const generic arg as that's invalid syntax.
+                    _ => arg,
+                }),
                 _ => fold_generic_method_argument(self, arg),
             }
         }
