@@ -14,6 +14,7 @@ use quote::quote;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rustc_ast::ast::{
     AngleBracketedArg, AngleBracketedArgs, Crate, GenericArg, GenericParamKind, Generics,
+    WhereClause,
 };
 use rustc_ast::mut_visit::{self, MutVisitor};
 use rustc_errors::PResult;
@@ -193,6 +194,12 @@ fn normalize(krate: &mut Crate) {
                 }
             });
             mut_visit::noop_visit_generics(e, self);
+        }
+
+        fn visit_where_clause(&mut self, e: &mut WhereClause) {
+            if e.predicates.is_empty() {
+                e.has_where_token = false;
+            }
         }
     }
 
