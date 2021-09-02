@@ -408,7 +408,7 @@ fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
     impl Fold for CollectExprs {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
             match expr {
-                Expr::Verbatim(tokens) if tokens.is_empty() => {}
+                Expr::Verbatim(_) => {}
                 _ => self.0.push(expr),
             }
 
