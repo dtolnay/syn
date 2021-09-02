@@ -12,12 +12,30 @@ const REVISION: &str = "50171c310cd15e1b2d3723766ce64e2e4d6696fc";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: to be categorized
+    // TODO: negative literal in const generic arg
+    // f::<-1>()
     "src/test/debuginfo/function-names.rs",
+
+    // TODO: unnamed fields, anonymous structs/unions
+    // struct S { _: union { i: i32 } }
+    // https://github.com/dtolnay/syn/issues/1048
+    // https://github.com/dtolnay/syn/issues/1049
     "src/test/pretty/anonymous-types.rs",
+
+    // TODO: destructuring assignment of tuple variant
+    // let <E>::V {} = E::V();
     "src/test/ui/associated-types/associated-type-destructuring-assignment.rs",
     "src/test/ui/associated-types/associated-type-struct-construction.rs",
+
+    // TODO: let else
+    // let Some(1) = Some(2) else { return };
+    // https://github.com/dtolnay/syn/issues/1050
     "src/test/ui/let-else/let-else-run-pass.rs",
+    "src/tools/rustfmt/tests/source/let_else.rs",
+    "src/tools/rustfmt/tests/target/let_else.rs",
+
+    // TODO: ~const
+    // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/call-generic-in-impl.rs",
     "src/test/ui/rfc-2632-const-trait-impl/call-generic-method-chain.rs",
     "src/test/ui/rfc-2632-const-trait-impl/call-generic-method-dup-bound.rs",
@@ -26,27 +44,20 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/rfc-2632-const-trait-impl/tilde-const-syntax.rs",
     "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-run.rs",
     "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-self-referential.rs",
-    "src/tools/rustfmt/tests/coverage/target/comments.rs",
-    "src/tools/rustfmt/tests/parser/issue-4126/invalid.rs",
-    "src/tools/rustfmt/tests/parser/issue_4418.rs",
-    "src/tools/rustfmt/tests/parser/unclosed-delims/issue_4466.rs",
+
+    // TODO: precedence of attribute on assignment stmt
     "src/tools/rustfmt/tests/source/attrib.rs",
-    "src/tools/rustfmt/tests/source/configs/disable_all_formatting/true.rs",
-    "src/tools/rustfmt/tests/source/configs/spaces_around_ranges/false.rs",
-    "src/tools/rustfmt/tests/source/configs/spaces_around_ranges/true.rs",
-    "src/tools/rustfmt/tests/source/issue-3639.rs",
-    "src/tools/rustfmt/tests/source/let_else.rs",
-    "src/tools/rustfmt/tests/source/match.rs",
-    "src/tools/rustfmt/tests/source/trait.rs",
-    "src/tools/rustfmt/tests/source/type.rs",
-    "src/tools/rustfmt/tests/target/attrib-block-expr.rs",
     "src/tools/rustfmt/tests/target/attrib.rs",
-    "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/false.rs",
-    "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/true.rs",
-    "src/tools/rustfmt/tests/target/let_else.rs",
+
+    // TODO: losing empty where-clause
+    "src/tools/rustfmt/tests/source/issue-3639.rs",
+
+    // TODO: doc comment on match arm
+    "src/tools/rustfmt/tests/source/match.rs",
     "src/tools/rustfmt/tests/target/match.rs",
-    "src/tools/rustfmt/tests/target/trait.rs",
-    "src/tools/rustfmt/tests/target/type.rs",
+
+    // TODO: inner attribute inside block
+    "src/tools/rustfmt/tests/target/attrib-block-expr.rs",
 
     // Rustc loses some attributes
     // https://github.com/rust-lang/rust/issues/84879
@@ -61,9 +72,24 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/issues/issue-13775.rs",
     "src/test/ui/issues/issue-34074.rs",
     "src/test/ui/proc-macro/trait-fn-args-2015.rs",
+    "src/tools/rustfmt/tests/source/trait.rs",
+    "src/tools/rustfmt/tests/target/trait.rs",
 
     // Excessive nesting
     "src/test/ui/issues/issue-74564-if-expr-stack-overflow.rs",
+
+    // Testing rustfmt on invalid syntax
+    "src/tools/rustfmt/tests/coverage/target/comments.rs",
+    "src/tools/rustfmt/tests/parser/issue-4126/invalid.rs",
+    "src/tools/rustfmt/tests/parser/issue_4418.rs",
+    "src/tools/rustfmt/tests/parser/unclosed-delims/issue_4466.rs",
+    "src/tools/rustfmt/tests/source/configs/disable_all_formatting/true.rs",
+    "src/tools/rustfmt/tests/source/configs/spaces_around_ranges/false.rs",
+    "src/tools/rustfmt/tests/source/configs/spaces_around_ranges/true.rs",
+    "src/tools/rustfmt/tests/source/type.rs",
+    "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/false.rs",
+    "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/true.rs",
+    "src/tools/rustfmt/tests/target/type.rs",
 
     // Not actually test cases
     "src/test/rustdoc-ui/test-compile-fail2.rs",
