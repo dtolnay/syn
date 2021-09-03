@@ -274,8 +274,13 @@ pub mod parsing {
         let mut e = expr::parsing::expr_early(input)?;
 
         let mut attr_target = &mut e;
-        while let Expr::Binary(e) = attr_target {
-            attr_target = &mut e.left;
+        loop {
+            attr_target = match attr_target {
+                Expr::Assign(e) => &mut e.left,
+                Expr::AssignOp(e) => &mut e.left,
+                Expr::Binary(e) => &mut e.left,
+                _ => break,
+            };
         }
         attrs.extend(attr_target.replace_attrs(Vec::new()));
         attr_target.replace_attrs(attrs);
