@@ -26,10 +26,6 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-run.rs",
     "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-self-referential.rs",
 
-    // TODO: precedence of attribute on assignment stmt
-    "src/tools/rustfmt/tests/source/attrib.rs",
-    "src/tools/rustfmt/tests/target/attrib.rs",
-
     // TODO: doc comment on match arm
     "src/tools/rustfmt/tests/source/match.rs",
     "src/tools/rustfmt/tests/target/match.rs",
