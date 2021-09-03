@@ -17,10 +17,6 @@ static EXCLUDE: &[&str] = &[
     // https://github.com/dtolnay/syn/issues/1049
     "src/test/pretty/anonymous-types.rs",
 
-    // TODO: qualified braced variant in pattern position
-    // let <E>::V {} = e;
-    "src/test/ui/associated-types/associated-type-struct-construction.rs",
-
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
