@@ -195,10 +195,10 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// This method operates on librustc objects.
 fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_ast::ast::{
-        Block, BorrowKind, Expr, ExprField, ExprKind, GenericArg, Pat, Stmt, StmtKind, StructExpr,
-        StructRest, Ty,
+        Block, BorrowKind, Expr, ExprField, ExprKind, GenericArg, Local, LocalKind, Pat, Stmt,
+        StmtKind, StructExpr, StructRest, Ty,
     };
-    use rustc_ast::mut_visit::{noop_visit_generic_arg, MutVisitor};
+    use rustc_ast::mut_visit::{noop_visit_generic_arg, noop_visit_local, MutVisitor};
     use rustc_data_structures::map_in_place::MapInPlace;
     use rustc_data_structures::thin_vec::ThinVec;
     use rustc_span::DUMMY_SP;
@@ -304,6 +304,13 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
             self.visit_span(&mut block.span);
         }
 
+        fn visit_local(&mut self, local: &mut P<Local>) {
+            match local.kind {
+                LocalKind::InitElse(..) => {}
+                _ => noop_visit_local(local, self),
+            }
+        }
+
         // We don't want to look at expressions that might appear in patterns or
         // types yet. We'll look into comparing those in the future. For now
         // focus on expressions appearing in other places.
@@ -377,7 +384,13 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
             match stmt {
                 // Don't wrap toplevel expressions in statements.
                 Stmt::Expr(e) => Stmt::Expr(fold_expr(self, e)),
-                Stmt::Semi(e, semi) => Stmt::Semi(fold_expr(self, e), semi),
+                Stmt::Semi(e, semi) => {
+                    if let Expr::Verbatim(_) = e {
+                        Stmt::Semi(e, semi)
+                    } else {
+                        Stmt::Semi(fold_expr(self, e), semi)
+                    }
+                }
                 s => s,
             }
         }
