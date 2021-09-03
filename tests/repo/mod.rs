@@ -17,9 +17,12 @@ static EXCLUDE: &[&str] = &[
     // https://github.com/dtolnay/syn/issues/1049
     "src/test/pretty/anonymous-types.rs",
 
-    // TODO: destructuring assignment of tuple variant
-    // let <E>::V {} = E::V();
+    // TODO: qualified braced variant in expression position
+    // let _ = <E>::V {};
     "src/test/ui/associated-types/associated-type-destructuring-assignment.rs",
+
+    // TODO: qualified braced variant in pattern position
+    // let <E>::V {} = e;
     "src/test/ui/associated-types/associated-type-struct-construction.rs",
 
     // TODO: impl ~const T {}
