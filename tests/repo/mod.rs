@@ -33,10 +33,6 @@ static EXCLUDE: &[&str] = &[
     // TODO: inner attribute inside block
     "src/tools/rustfmt/tests/target/attrib-block-expr.rs",
 
-    // Rustc loses some attributes
-    // https://github.com/rust-lang/rust/issues/84879
-    "src/test/ui/proc-macro/issue-81555.rs",
-
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "src/test/ui/const-generics/early/closing-args-token.rs",
     "src/test/ui/const-generics/early/const-expression-parameter.rs",
