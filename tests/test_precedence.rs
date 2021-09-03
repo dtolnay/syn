@@ -195,8 +195,8 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// This method operates on librustc objects.
 fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_ast::ast::{
-        Block, BorrowKind, Expr, ExprField, ExprKind, GenericArg, Local, LocalKind, Pat, Stmt,
-        StmtKind, StructExpr, StructRest, Ty,
+        Attribute, Block, BorrowKind, Expr, ExprField, ExprKind, GenericArg, Local, LocalKind, Pat,
+        Stmt, StmtKind, StructExpr, StructRest, Ty,
     };
     use rustc_ast::mut_visit::{noop_visit_generic_arg, noop_visit_local, MutVisitor};
     use rustc_data_structures::map_in_place::MapInPlace;
@@ -320,6 +320,10 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 
         fn visit_ty(&mut self, ty: &mut P<Ty>) {
             let _ = ty;
+        }
+
+        fn visit_attribute(&mut self, attr: &mut Attribute) {
+            let _ = attr;
         }
     }
 

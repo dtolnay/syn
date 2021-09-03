@@ -26,13 +26,6 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-run.rs",
     "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-self-referential.rs",
 
-    // TODO: doc comment on match arm
-    "src/tools/rustfmt/tests/source/match.rs",
-    "src/tools/rustfmt/tests/target/match.rs",
-
-    // TODO: inner attribute inside block
-    "src/tools/rustfmt/tests/target/attrib-block-expr.rs",
-
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "src/test/ui/const-generics/early/closing-args-token.rs",
     "src/test/ui/const-generics/early/const-expression-parameter.rs",
