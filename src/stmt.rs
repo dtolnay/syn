@@ -180,7 +180,6 @@ pub mod parsing {
             || input.peek(Token![fn])
             || input.peek(Token![mod])
             || input.peek(Token![type])
-            || input.peek(item::parsing::existential) && input.peek2(Token![type])
             || input.peek(Token![struct])
             || input.peek(Token![enum])
             || input.peek(Token![union]) && input.peek2(Ident)
