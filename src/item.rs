@@ -985,7 +985,6 @@ pub mod parsing {
     use proc_macro2::{Delimiter, Group, Punct, Spacing, TokenTree};
     use std::iter::{self, FromIterator};
 
-    crate::custom_keyword!(existential);
     crate::custom_keyword!(macro_rules);
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -1123,8 +1122,6 @@ pub mod parsing {
                 input.parse().map(Item::Mod)
             } else if lookahead.peek(Token![type]) {
                 parse_item_type(begin, input)
-            } else if lookahead.peek(existential) {
-                input.call(item_existential).map(Item::Verbatim)
             } else if lookahead.peek(Token![struct]) {
                 input.parse().map(Item::Struct)
             } else if lookahead.peek(Token![enum]) {
@@ -1959,53 +1956,6 @@ pub mod parsing {
         }
     }
 
-    #[cfg(not(feature = "printing"))]
-    fn item_existential(input: ParseStream) -> Result<TokenStream> {
-        Err(input.error("existential type is not supported"))
-    }
-
-    #[cfg(feature = "printing")]
-    fn item_existential(input: ParseStream) -> Result<TokenStream> {
-        use crate::attr::FilterAttrs;
-        use quote::{ToTokens, TokenStreamExt};
-
-        let attrs = input.call(Attribute::parse_outer)?;
-        let vis: Visibility = input.parse()?;
-        let existential_token: existential = input.parse()?;
-        let type_token: Token![type] = input.parse()?;
-        let ident: Ident = input.parse()?;
-
-        let mut generics: Generics = input.parse()?;
-        generics.where_clause = input.parse()?;
-
-        let colon_token: Token![:] = input.parse()?;
-
-        let mut bounds = Punctuated::new();
-        while !input.peek(Token![;]) {
-            if !bounds.is_empty() {
-                bounds.push_punct(input.parse::<Token![+]>()?);
-            }
-            bounds.push_value(input.parse::<TypeParamBound>()?);
-        }
-
-        let semi_token: Token![;] = input.parse()?;
-
-        let mut tokens = TokenStream::new();
-        tokens.append_all(attrs.outer());
-        vis.to_tokens(&mut tokens);
-        existential_token.to_tokens(&mut tokens);
-        type_token.to_tokens(&mut tokens);
-        ident.to_tokens(&mut tokens);
-        generics.to_tokens(&mut tokens);
-        generics.where_clause.to_tokens(&mut tokens);
-        if !bounds.is_empty() {
-            colon_token.to_tokens(&mut tokens);
-            bounds.to_tokens(&mut tokens);
-        }
-        semi_token.to_tokens(&mut tokens);
-        Ok(tokens)
-    }
-
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ItemStruct {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -2609,8 +2559,6 @@ pub mod parsing {
                 }
             } else if lookahead.peek(Token![type]) {
                 parse_impl_item_type(begin, input)
-            } else if vis.is_inherited() && defaultness.is_none() && lookahead.peek(existential) {
-                input.call(item_existential).map(ImplItem::Verbatim)
             } else if vis.is_inherited()
                 && defaultness.is_none()
                 && (lookahead.peek(Ident)
