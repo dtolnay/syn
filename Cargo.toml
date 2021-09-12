@@ -70,4 +70,4 @@ rustdoc-args = ["--cfg", "doc_cfg"]
 features = ["full", "visit", "visit-mut", "fold", "extra-traits"]
 
 [workspace]
-members = ["dev", "json", "tests/features"]
+members = ["dev", "json", "tests/crates", "tests/features"]
