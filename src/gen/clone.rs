@@ -273,6 +273,7 @@ impl Clone for Expr {
             Expr::While(v0) => Expr::While(v0.clone()),
             #[cfg(feature = "full")]
             Expr::Yield(v0) => Expr::Yield(v0.clone()),
+            #[cfg(any(syn_no_non_exhaustive, not(feature = "full")))]
             _ => unreachable!(),
         }
     }
@@ -845,6 +846,7 @@ impl Clone for ForeignItem {
             ForeignItem::Type(v0) => ForeignItem::Type(v0.clone()),
             ForeignItem::Macro(v0) => ForeignItem::Macro(v0.clone()),
             ForeignItem::Verbatim(v0) => ForeignItem::Verbatim(v0.clone()),
+            #[cfg(syn_no_non_exhaustive)]
             _ => unreachable!(),
         }
     }
@@ -957,6 +959,7 @@ impl Clone for ImplItem {
             ImplItem::Type(v0) => ImplItem::Type(v0.clone()),
             ImplItem::Macro(v0) => ImplItem::Macro(v0.clone()),
             ImplItem::Verbatim(v0) => ImplItem::Verbatim(v0.clone()),
+            #[cfg(syn_no_non_exhaustive)]
             _ => unreachable!(),
         }
     }
@@ -1052,6 +1055,7 @@ impl Clone for Item {
             Item::Union(v0) => Item::Union(v0.clone()),
             Item::Use(v0) => Item::Use(v0.clone()),
             Item::Verbatim(v0) => Item::Verbatim(v0.clone()),
+            #[cfg(syn_no_non_exhaustive)]
             _ => unreachable!(),
         }
     }
@@ -1474,6 +1478,7 @@ impl Clone for Pat {
             Pat::Type(v0) => Pat::Type(v0.clone()),
             Pat::Verbatim(v0) => Pat::Verbatim(v0.clone()),
             Pat::Wild(v0) => Pat::Wild(v0.clone()),
+            #[cfg(syn_no_non_exhaustive)]
             _ => unreachable!(),
         }
     }
@@ -1821,6 +1826,7 @@ impl Clone for TraitItem {
             TraitItem::Type(v0) => TraitItem::Type(v0.clone()),
             TraitItem::Macro(v0) => TraitItem::Macro(v0.clone()),
             TraitItem::Verbatim(v0) => TraitItem::Verbatim(v0.clone()),
+            #[cfg(syn_no_non_exhaustive)]
             _ => unreachable!(),
         }
     }
@@ -1899,6 +1905,7 @@ impl Clone for Type {
             Type::TraitObject(v0) => Type::TraitObject(v0.clone()),
             Type::Tuple(v0) => Type::Tuple(v0.clone()),
             Type::Verbatim(v0) => Type::Verbatim(v0.clone()),
+            #[cfg(syn_no_non_exhaustive)]
             _ => unreachable!(),
         }
     }
