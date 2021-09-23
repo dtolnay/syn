@@ -12,10 +12,6 @@ const REVISION: &str = "ac2d9fc509e36d1b32513744adf58c34bcc4f43c";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: dot after curly braced macro call: macro!{...}.field
-    // https://github.com/dtolnay/syn/issues/1068
-    "src/test/ui/parser/macro-braces-dot-question.rs",
-
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
