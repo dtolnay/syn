@@ -8,14 +8,13 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "50171c310cd15e1b2d3723766ce64e2e4d6696fc";
+const REVISION: &str = "ac2d9fc509e36d1b32513744adf58c34bcc4f43c";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: anonymous structs/unions
-    // type A = struct { field: u8 };
-    // https://github.com/dtolnay/syn/issues/1049
-    "src/test/pretty/anonymous-types.rs",
+    // TODO: dot after curly braced macro call: macro!{...}.field
+    // https://github.com/dtolnay/syn/issues/1068
+    "src/test/ui/parser/macro-braces-dot-question.rs",
 
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
@@ -23,6 +22,8 @@ static EXCLUDE: &[&str] = &[
 
     // TODO: ~const in where-clause
     // https://github.com/dtolnay/syn/issues/1051
+    "library/alloc/src/borrow.rs",
+    "src/test/ui/rfc-2632-const-trait-impl/inherent-impl-const-bounds.rs",
     "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-run.rs",
     "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-self-referential.rs",
 
