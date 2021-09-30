@@ -528,7 +528,7 @@ impl SpanlessEq for TokenStream {
     }
 }
 
-fn doc_comment<'a>(
+fn doc_comment(
     style: AttrStyle,
     unescaped: Symbol,
     trees: &mut impl Iterator<Item = TokenTree>,
