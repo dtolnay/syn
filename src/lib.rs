@@ -258,6 +258,7 @@
     clippy::collapsible_match, // https://github.com/rust-lang/rust-clippy/issues/7575
     clippy::doc_markdown,
     clippy::eval_order_dependence,
+    clippy::if_then_panic,
     clippy::inherent_to_string,
     clippy::large_enum_variant,
     clippy::manual_map, // https://github.com/rust-lang/rust-clippy/issues/6795
