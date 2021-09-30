@@ -5,8 +5,7 @@
     clippy::explicit_deref_methods,
     clippy::if_then_panic,
     clippy::match_wildcard_for_single_variants,
-    clippy::too_many_lines,
-    clippy::wildcard_imports
+    clippy::too_many_lines
 )]
 
 //! The tests in this module do the following:
@@ -347,8 +346,8 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 /// reveal the precedence of the parsed expressions, and produce a stringified
 /// form of the resulting expression.
 fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
-    use syn::fold::*;
-    use syn::*;
+    use syn::fold::{fold_expr, fold_generic_argument, fold_generic_method_argument, Fold};
+    use syn::{token, Expr, ExprParen, GenericArgument, GenericMethodArgument, Pat, Stmt, Type};
 
     struct ParenthesizeEveryExpr;
     impl Fold for ParenthesizeEveryExpr {
@@ -424,9 +423,9 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
 
 /// Walk through a crate collecting all expressions we can find in it.
 fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
-    use syn::fold::*;
+    use syn::fold::Fold;
     use syn::punctuated::Punctuated;
-    use syn::*;
+    use syn::{token, Expr, ExprTuple};
 
     struct CollectExprs(Vec<Expr>);
     impl Fold for CollectExprs {
