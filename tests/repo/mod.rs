@@ -1,4 +1,4 @@
-#![allow(clippy::if_then_panic, clippy::map_unwrap_or)]
+#![allow(clippy::if_then_panic)]
 
 mod progress;
 
@@ -70,7 +70,7 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
     if path.is_dir() {
         return true; // otherwise walkdir does not visit the files
     }
-    if path.extension().map(|e| e != "rs").unwrap_or(true) {
+    if path.extension().map_or(true, |e| e != "rs") {
         return false;
     }
 
