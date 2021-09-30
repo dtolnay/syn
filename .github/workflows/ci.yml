@@ -114,7 +114,7 @@ jobs:
     if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v2
-      - uses: dtolnay/rust-toolchain@clippy
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          components: rustc-dev
+          components: clippy,rustc-dev
       - run: cargo clippy --all-features --tests -- -Dclippy::all -Dclippy::pedantic
