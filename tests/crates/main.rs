@@ -10,6 +10,8 @@
 //        | jq '"https://static.crates.io/crates/" + .name + "/" + .name + "-" + .vers + ".crate"' -r \
 //        | xargs -P10 -n100 wget -nc
 
+#![allow(clippy::let_underscore_drop)]
+
 use anyhow::{ensure, Result};
 use flate2::read::GzDecoder;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};

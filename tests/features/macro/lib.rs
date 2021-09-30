@@ -1,3 +1,5 @@
+#![allow(clippy::let_underscore_drop, clippy::toplevel_ref_arg)]
+
 use proc_macro::TokenStream;
 use std::io::Write;
 use std::process;

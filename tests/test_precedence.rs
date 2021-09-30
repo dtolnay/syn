@@ -1,6 +1,13 @@
 #![cfg(not(syn_disable_nightly_tests))]
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
+#![allow(
+    clippy::explicit_deref_methods,
+    clippy::if_then_panic,
+    clippy::match_wildcard_for_single_variants,
+    clippy::too_many_lines,
+    clippy::wildcard_imports
+)]
 
 //! The tests in this module do the following:
 //!

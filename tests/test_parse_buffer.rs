@@ -1,3 +1,5 @@
+#![allow(clippy::needless_borrow, clippy::non_ascii_literal)]
+
 use proc_macro2::{Delimiter, Group, Punct, Spacing, TokenStream, TokenTree};
 use std::iter::FromIterator;
 use syn::parse::{discouraged::Speculative, Parse, ParseStream, Parser, Result};

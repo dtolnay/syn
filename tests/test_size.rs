@@ -1,4 +1,5 @@
 #![cfg(target_pointer_width = "64")]
+#![allow(clippy::wildcard_imports)]
 
 use std::mem;
 use syn::*;

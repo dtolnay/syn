@@ -1,3 +1,5 @@
+#![allow(clippy::if_then_panic, clippy::map_unwrap_or)]
+
 mod progress;
 
 use self::progress::Progress;
