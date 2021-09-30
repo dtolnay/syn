@@ -115,4 +115,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@clippy
+        with:
+          components: rustc-dev
       - run: cargo clippy --all-features --tests -- -Dclippy::all -Dclippy::pedantic
