@@ -19,6 +19,7 @@ include = [
     "/tests/**",
 ]
 edition = "2018"
+rust-version = "1.31"
 
 [features]
 default = ["derive", "parsing", "printing", "clone-impls", "proc-macro"]
