@@ -541,7 +541,7 @@ pub mod parsing {
             || lookahead.peek(Token![<])
         {
             if input.peek(Token![dyn]) {
-                let trait_object: TypeTraitObject = input.parse()?;
+                let trait_object = TypeTraitObject::parse(input, allow_plus)?;
                 return Ok(Type::TraitObject(trait_object));
             }
 
@@ -628,7 +628,7 @@ pub mod parsing {
         } else if lookahead.peek(Token![!]) && !input.peek(Token![=]) {
             input.parse().map(Type::Never)
         } else if lookahead.peek(Token![impl]) {
-            input.parse().map(Type::ImplTrait)
+            TypeImplTrait::parse(input, allow_plus).map(Type::ImplTrait)
         } else if lookahead.peek(Token![_]) {
             input.parse().map(Type::Infer)
         } else if lookahead.peek(Lifetime) {
