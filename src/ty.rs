@@ -832,8 +832,7 @@ pub mod parsing {
             Self::parse(input, allow_plus)
         }
 
-        #[doc(hidden)]
-        pub fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
+        pub(crate) fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
             if input.peek(Token![->]) {
                 let arrow = input.parse()?;
                 let ty = ambig_ty(input, allow_plus)?;
@@ -874,8 +873,7 @@ pub mod parsing {
         }
 
         // Only allow multiple trait references if allow_plus is true.
-        #[doc(hidden)]
-        pub fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
+        pub(crate) fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
             Ok(TypeTraitObject {
                 dyn_token: input.parse()?,
                 bounds: {
