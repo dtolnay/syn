@@ -306,4 +306,24 @@ fn test_trailing_plus() {
         ],
     }
     "###);
+
+    let tokens = quote!(dyn Trait +);
+    snapshot!(tokens as Type, @r###"
+    Type::TraitObject {
+        dyn_token: Some,
+        bounds: [
+            Trait(TraitBound {
+                modifier: None,
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "Trait",
+                            arguments: None,
+                        },
+                    ],
+                },
+            }),
+        ],
+    }
+    "###);
 }
