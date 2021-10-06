@@ -832,6 +832,7 @@ pub mod parsing {
     }
 
     impl ReturnType {
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
         pub fn without_plus(input: ParseStream) -> Result<Self> {
             let allow_plus = false;
             Self::parse(input, allow_plus)
@@ -872,6 +873,7 @@ pub mod parsing {
     }
 
     impl TypeTraitObject {
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
         pub fn without_plus(input: ParseStream) -> Result<Self> {
             let allow_plus = false;
             Self::parse(input, allow_plus)
