@@ -586,7 +586,12 @@ pub mod parsing {
                 if allow_plus {
                     while input.peek(Token![+]) {
                         bounds.push_punct(input.parse()?);
-                        if input.peek(Token![>]) {
+                        if !(input.peek(Ident::peek_any)
+                            || input.peek(Token![::])
+                            || input.peek(Token![?])
+                            || input.peek(Lifetime)
+                            || input.peek(token::Paren))
+                        {
                             break;
                         }
                         bounds.push_value(input.parse()?);

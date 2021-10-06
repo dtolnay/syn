@@ -328,4 +328,24 @@ fn test_trailing_plus() {
         ],
     }
     "###);
+
+    #[rustfmt::skip]
+    let tokens = quote!(Trait +);
+    snapshot!(tokens as Type, @r###"
+    Type::TraitObject {
+        bounds: [
+            Trait(TraitBound {
+                modifier: None,
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "Trait",
+                            arguments: None,
+                        },
+                    ],
+                },
+            }),
+        ],
+    }
+    "###);
 }
