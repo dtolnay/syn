@@ -18,13 +18,6 @@ static EXCLUDE: &[&str] = &[
     // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
 
-    // TODO: ~const in where-clause
-    // https://github.com/dtolnay/syn/issues/1051
-    "library/alloc/src/borrow.rs",
-    "src/test/ui/rfc-2632-const-trait-impl/inherent-impl-const-bounds.rs",
-    "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-run.rs",
-    "src/test/ui/rfc-2632-const-trait-impl/trait-where-clause-self-referential.rs",
-
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "src/test/ui/const-generics/early/closing-args-token.rs",
     "src/test/ui/const-generics/early/const-expression-parameter.rs",
