@@ -285,3 +285,25 @@ fn test_trait_object() {
     syn::parse_str::<Type>("for<'a> dyn Trait<'a>").unwrap_err();
     syn::parse_str::<Type>("dyn for<'a> 'a + Trait").unwrap_err();
 }
+
+#[test]
+fn test_trailing_plus() {
+    let tokens = quote!(impl Trait +);
+    snapshot!(tokens as Type, @r###"
+    Type::ImplTrait {
+        bounds: [
+            Trait(TraitBound {
+                modifier: None,
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "Trait",
+                            arguments: None,
+                        },
+                    ],
+                },
+            }),
+        ],
+    }
+    "###);
+}
