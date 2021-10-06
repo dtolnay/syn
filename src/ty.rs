@@ -885,30 +885,35 @@ pub mod parsing {
         pub(crate) fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
             Ok(TypeTraitObject {
                 dyn_token: input.parse()?,
-                bounds: {
-                    let mut bounds = Punctuated::new();
-                    loop {
-                        bounds.push_value(input.parse()?);
-                        if !(allow_plus && input.peek(Token![+])) {
-                            break;
-                        }
-                        bounds.push_punct(input.parse()?);
-                        if !(input.peek(Ident::peek_any)
-                            || input.peek(Token![::])
-                            || input.peek(Token![?])
-                            || input.peek(Lifetime)
-                            || input.peek(token::Paren))
-                        {
-                            break;
-                        }
-                    }
-                    // Just lifetimes like `'a + 'b` is not a TraitObject.
-                    if !at_least_one_type(&bounds) {
-                        return Err(input.error("expected at least one type"));
-                    }
-                    bounds
-                },
+                bounds: Self::parse_bounds(input, allow_plus)?,
             })
+        }
+
+        fn parse_bounds(
+            input: ParseStream,
+            allow_plus: bool,
+        ) -> Result<Punctuated<TypeParamBound, Token![+]>> {
+            let mut bounds = Punctuated::new();
+            loop {
+                bounds.push_value(input.parse()?);
+                if !(allow_plus && input.peek(Token![+])) {
+                    break;
+                }
+                bounds.push_punct(input.parse()?);
+                if !(input.peek(Ident::peek_any)
+                    || input.peek(Token![::])
+                    || input.peek(Token![?])
+                    || input.peek(Lifetime)
+                    || input.peek(token::Paren))
+                {
+                    break;
+                }
+            }
+            // Just lifetimes like `'a + 'b` is not a TraitObject.
+            if !at_least_one_type(&bounds) {
+                return Err(input.error("expected at least one type"));
+            }
+            Ok(bounds)
         }
     }
 
@@ -930,29 +935,7 @@ pub mod parsing {
         pub(crate) fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
             Ok(TypeImplTrait {
                 impl_token: input.parse()?,
-                bounds: {
-                    let mut bounds = Punctuated::new();
-                    loop {
-                        bounds.push_value(input.parse()?);
-                        if !(allow_plus && input.peek(Token![+])) {
-                            break;
-                        }
-                        bounds.push_punct(input.parse()?);
-                        if !(input.peek(Ident::peek_any)
-                            || input.peek(Token![::])
-                            || input.peek(Token![?])
-                            || input.peek(Lifetime)
-                            || input.peek(token::Paren))
-                        {
-                            break;
-                        }
-                    }
-                    // Just lifetimes like `impl 'a` is not an ImplTrait.
-                    if !at_least_one_type(&bounds) {
-                        return Err(input.error("expected at least one type"));
-                    }
-                    bounds
-                },
+                bounds: TypeTraitObject::parse_bounds(input, allow_plus)?,
             })
         }
     }
