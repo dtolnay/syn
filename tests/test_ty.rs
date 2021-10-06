@@ -288,6 +288,7 @@ fn test_trait_object() {
 
 #[test]
 fn test_trailing_plus() {
+    #[rustfmt::skip]
     let tokens = quote!(impl Trait +);
     snapshot!(tokens as Type, @r###"
     Type::ImplTrait {
@@ -307,6 +308,7 @@ fn test_trailing_plus() {
     }
     "###);
 
+    #[rustfmt::skip]
     let tokens = quote!(dyn Trait +);
     snapshot!(tokens as Type, @r###"
     Type::TraitObject {
