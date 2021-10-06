@@ -852,14 +852,16 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ReturnType {
         fn parse(input: ParseStream) -> Result<Self> {
-            Self::parse(input, true)
+            let allow_plus = true;
+            Self::parse(input, allow_plus)
         }
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeTraitObject {
         fn parse(input: ParseStream) -> Result<Self> {
-            Self::parse(input, true)
+            let allow_plus = true;
+            Self::parse(input, allow_plus)
         }
     }
 
