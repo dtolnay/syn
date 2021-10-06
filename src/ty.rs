@@ -887,24 +887,20 @@ pub mod parsing {
                 dyn_token: input.parse()?,
                 bounds: {
                     let mut bounds = Punctuated::new();
-                    if allow_plus {
-                        loop {
-                            bounds.push_value(input.parse()?);
-                            if !input.peek(Token![+]) {
-                                break;
-                            }
-                            bounds.push_punct(input.parse()?);
-                            if !(input.peek(Ident::peek_any)
-                                || input.peek(Token![::])
-                                || input.peek(Token![?])
-                                || input.peek(Lifetime)
-                                || input.peek(token::Paren))
-                            {
-                                break;
-                            }
-                        }
-                    } else {
+                    loop {
                         bounds.push_value(input.parse()?);
+                        if !(allow_plus && input.peek(Token![+])) {
+                            break;
+                        }
+                        bounds.push_punct(input.parse()?);
+                        if !(input.peek(Ident::peek_any)
+                            || input.peek(Token![::])
+                            || input.peek(Token![?])
+                            || input.peek(Lifetime)
+                            || input.peek(token::Paren))
+                        {
+                            break;
+                        }
                     }
                     // Just lifetimes like `'a + 'b` is not a TraitObject.
                     if !at_least_one_type(&bounds) {
