@@ -919,6 +919,19 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeImplTrait {
         fn parse(input: ParseStream) -> Result<Self> {
+            let allow_plus = true;
+            Self::parse(input, allow_plus)
+        }
+    }
+
+    impl TypeImplTrait {
+        #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+        pub fn without_plus(input: ParseStream) -> Result<Self> {
+            let allow_plus = false;
+            Self::parse(input, allow_plus)
+        }
+
+        pub(crate) fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
             Ok(TypeImplTrait {
                 impl_token: input.parse()?,
                 // NOTE: rust-lang/rust#34511 includes discussion about whether
@@ -927,7 +940,7 @@ pub mod parsing {
                     let mut bounds = Punctuated::new();
                     loop {
                         bounds.push_value(input.parse()?);
-                        if !input.peek(Token![+]) {
+                        if !(allow_plus && input.peek(Token![+])) {
                             break;
                         }
                         bounds.push_punct(input.parse()?);
