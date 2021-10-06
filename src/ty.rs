@@ -885,7 +885,7 @@ pub mod parsing {
                                 break;
                             }
                             bounds.push_punct(input.parse()?);
-                            if input.peek(Token![>]) {
+                            if input.peek(Token![>]) || input.is_empty() {
                                 break;
                             }
                         }
