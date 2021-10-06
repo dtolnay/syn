@@ -949,6 +949,10 @@ pub mod parsing {
                             break;
                         }
                     }
+                    // Just lifetimes like `impl 'a` is not an ImplTrait.
+                    if !at_least_one_type(&bounds) {
+                        return Err(input.error("expected at least one type"));
+                    }
                     bounds
                 },
             })
