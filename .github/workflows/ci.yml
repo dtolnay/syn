@@ -118,3 +118,11 @@ jobs:
         with:
           components: clippy,rustc-dev
       - run: cargo clippy --all-features --tests -- -Dclippy::all -Dclippy::pedantic
+
+  outdated:
+    name: Outdated
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    steps:
+      - uses: actions/checkout@v2
+      - run: cargo outdated --exit-code 1
