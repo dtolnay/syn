@@ -824,6 +824,7 @@ mod verbatim;
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 mod print;
 
+#[cfg(any(feature = "full", feature = "derive"))]
 use crate::__private::private;
 
 ////////////////////////////////////////////////////////////////////////////////
