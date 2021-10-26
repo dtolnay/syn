@@ -216,12 +216,6 @@ fn negative() {
 }
 
 #[test]
-fn negative_overflow() {
-    assert!(syn::parse_str::<LitFloat>("-1.0e99f64").is_ok());
-    assert!(syn::parse_str::<LitFloat>("-1.0e999f64").is_err());
-}
-
-#[test]
 fn suffix() {
     fn get_suffix(token: &str) -> String {
         let lit = syn::parse_str::<Lit>(token).unwrap();
