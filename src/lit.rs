@@ -1539,6 +1539,7 @@ mod value {
         }
     }
 
+    #[allow(clippy::unnecessary_wraps)]
     pub fn to_literal(repr: &str, digits: &str, suffix: &str) -> Option<Literal> {
         #[cfg(syn_no_negative_literal_parse)]
         {
