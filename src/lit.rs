@@ -1540,30 +1540,34 @@ mod value {
     }
 
     pub fn to_literal(repr: &str, digits: &str, suffix: &str) -> Option<Literal> {
-        if repr.starts_with('-') {
-            let f64_parse_finite = || digits.parse().ok().filter(|x: &f64| x.is_finite());
-            let f32_parse_finite = || digits.parse().ok().filter(|x: &f32| x.is_finite());
-            if suffix == "f64" {
-                f64_parse_finite().map(Literal::f64_suffixed)
-            } else if suffix == "f32" {
-                f32_parse_finite().map(Literal::f32_suffixed)
-            } else if suffix == "i64" {
-                digits.parse().ok().map(Literal::i64_suffixed)
-            } else if suffix == "i32" {
-                digits.parse().ok().map(Literal::i32_suffixed)
-            } else if suffix == "i16" {
-                digits.parse().ok().map(Literal::i16_suffixed)
-            } else if suffix == "i8" {
-                digits.parse().ok().map(Literal::i8_suffixed)
-            } else if !suffix.is_empty() {
-                None
-            } else if digits.contains('.') {
-                f64_parse_finite().map(Literal::f64_unsuffixed)
-            } else {
-                digits.parse().ok().map(Literal::i64_unsuffixed)
+        #[cfg(syn_no_negative_literal_parse)]
+        {
+            if repr.starts_with('-') {
+                let f64_parse_finite = || digits.parse().ok().filter(|x: &f64| x.is_finite());
+                let f32_parse_finite = || digits.parse().ok().filter(|x: &f32| x.is_finite());
+                return if suffix == "f64" {
+                    f64_parse_finite().map(Literal::f64_suffixed)
+                } else if suffix == "f32" {
+                    f32_parse_finite().map(Literal::f32_suffixed)
+                } else if suffix == "i64" {
+                    digits.parse().ok().map(Literal::i64_suffixed)
+                } else if suffix == "i32" {
+                    digits.parse().ok().map(Literal::i32_suffixed)
+                } else if suffix == "i16" {
+                    digits.parse().ok().map(Literal::i16_suffixed)
+                } else if suffix == "i8" {
+                    digits.parse().ok().map(Literal::i8_suffixed)
+                } else if !suffix.is_empty() {
+                    None
+                } else if digits.contains('.') {
+                    f64_parse_finite().map(Literal::f64_unsuffixed)
+                } else {
+                    digits.parse().ok().map(Literal::i64_unsuffixed)
+                };
             }
-        } else {
-            Some(repr.parse::<Literal>().unwrap())
         }
+        let _ = digits;
+        let _ = suffix;
+        Some(repr.parse::<Literal>().unwrap())
     }
 }
