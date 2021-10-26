@@ -925,7 +925,6 @@ mod printing {
 mod value {
     use super::*;
     use crate::bigint::BigInt;
-    use proc_macro2::TokenStream;
     use std::char;
     use std::ops::{Index, RangeFrom};
 
@@ -1564,11 +1563,7 @@ mod value {
                 digits.parse().ok().map(Literal::i64_unsuffixed)
             }
         } else {
-            let stream = repr.parse::<TokenStream>().unwrap();
-            match stream.into_iter().next().unwrap() {
-                TokenTree::Literal(l) => Some(l),
-                _ => unreachable!(),
-            }
+            Some(repr.parse::<Literal>().unwrap())
         }
     }
 }
