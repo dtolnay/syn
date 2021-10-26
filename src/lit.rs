@@ -1543,6 +1543,7 @@ mod value {
     pub fn to_literal(repr: &str, digits: &str, suffix: &str) -> Option<Literal> {
         #[cfg(syn_no_negative_literal_parse)]
         {
+            // Rustc older than https://github.com/rust-lang/rust/pull/87262.
             if repr.starts_with('-') {
                 let f64_parse_finite = || digits.parse().ok().filter(|x: &f64| x.is_finite());
                 let f32_parse_finite = || digits.parse().ok().filter(|x: &f32| x.is_finite());
