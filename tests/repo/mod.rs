@@ -1,4 +1,4 @@
-#![allow(clippy::if_then_panic)]
+#![allow(clippy::manual_assert)]
 
 mod progress;
 

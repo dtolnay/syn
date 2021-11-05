@@ -3,7 +3,7 @@
 #![feature(rustc_private)]
 #![allow(
     clippy::explicit_deref_methods,
-    clippy::if_then_panic,
+    clippy::manual_assert,
     clippy::match_wildcard_for_single_variants,
     clippy::too_many_lines
 )]

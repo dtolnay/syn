@@ -1,7 +1,7 @@
 #![cfg(not(syn_disable_nightly_tests))]
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
-#![allow(clippy::if_then_panic)]
+#![allow(clippy::manual_assert)]
 
 extern crate rustc_ast;
 extern crate rustc_errors;
