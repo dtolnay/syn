@@ -6,18 +6,18 @@ use rustc_ast::ast::{
     AngleBracketedArg, AngleBracketedArgs, AnonConst, Arm, AssocItemKind, AssocTyConstraint,
     AssocTyConstraintKind, Async, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy,
     BinOpKind, BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
-    Defaultness, EnumDef, Expr, ExprField, ExprKind, Extern, FieldDef, FloatTy, FnDecl, FnHeader,
-    FnKind, FnRetTy, FnSig, ForeignItemKind, ForeignMod, GenericArg, GenericArgs, GenericBound,
-    GenericParam, GenericParamKind, Generics, ImplKind, ImplPolarity, Inline, InlineAsm,
+    Defaultness, EnumDef, Expr, ExprField, ExprKind, Extern, FieldDef, FloatTy, Fn, FnDecl,
+    FnHeader, FnRetTy, FnSig, ForeignItemKind, ForeignMod, GenericArg, GenericArgs, GenericBound,
+    GenericParam, GenericParamKind, Generics, Impl, ImplPolarity, Inline, InlineAsm,
     InlineAsmOperand, InlineAsmOptions, InlineAsmRegOrRegClass, InlineAsmTemplatePiece, IntTy,
     IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind,
     LlvmAsmDialect, LlvmInlineAsm, LlvmInlineAsmOutput, Local, LocalKind, MacArgs, MacCall,
     MacCallStmt, MacDelimiter, MacStmtStyle, MacroDef, ModKind, Movability, MutTy, Mutability,
     NodeId, Param, ParenthesizedArgs, Pat, PatField, PatKind, Path, PathSegment, PolyTraitRef,
     QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit, StrStyle, StructExpr,
-    StructRest, TraitBoundModifier, TraitKind, TraitObjectSyntax, TraitRef, Ty, TyAliasKind,
-    TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant, VariantData,
-    Visibility, VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
+    StructRest, Trait, TraitBoundModifier, TraitObjectSyntax, TraitRef, Ty, TyAlias, TyKind,
+    UintTy, UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant, VariantData, Visibility,
+    VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
     WhereRegionPredicate,
 };
 use rustc_ast::ptr::P;
@@ -310,12 +310,12 @@ spanless_eq_struct!(ExprField; attrs id span ident expr is_shorthand is_placehol
 spanless_eq_struct!(FieldDef; attrs id span vis ident ty is_placeholder);
 spanless_eq_struct!(FnDecl; inputs output);
 spanless_eq_struct!(FnHeader; constness asyncness unsafety ext);
-spanless_eq_struct!(FnKind; 0 1 2 3);
+spanless_eq_struct!(Fn; defaultness generics sig body);
 spanless_eq_struct!(FnSig; header decl span);
 spanless_eq_struct!(ForeignMod; unsafety abi items);
 spanless_eq_struct!(GenericParam; id ident attrs bounds is_placeholder kind);
 spanless_eq_struct!(Generics; params where_clause span);
-spanless_eq_struct!(ImplKind; unsafety polarity defaultness constness generics of_trait self_ty items);
+spanless_eq_struct!(Impl; defaultness unsafety generics constness polarity of_trait self_ty items);
 spanless_eq_struct!(InlineAsm; template template_strs operands clobber_abi options line_spans);
 spanless_eq_struct!(Item<K>; attrs id span vis ident kind !tokens);
 spanless_eq_struct!(Label; ident);
@@ -339,10 +339,10 @@ spanless_eq_struct!(Stmt; id kind span);
 spanless_eq_struct!(StrLit; style symbol suffix span symbol_unescaped);
 spanless_eq_struct!(StructExpr; qself path fields rest);
 spanless_eq_struct!(Token; kind span);
-spanless_eq_struct!(TraitKind; 0 1 2 3 4);
+spanless_eq_struct!(Trait; unsafety is_auto generics bounds items);
 spanless_eq_struct!(TraitRef; path ref_id);
 spanless_eq_struct!(Ty; id kind span tokens);
-spanless_eq_struct!(TyAliasKind; 0 1 2 3);
+spanless_eq_struct!(TyAlias; defaultness generics bounds ty);
 spanless_eq_struct!(UseTree; prefix kind span);
 spanless_eq_struct!(Variant; attrs id span !vis ident data disr_expr is_placeholder);
 spanless_eq_struct!(Visibility; kind span tokens);
