@@ -614,6 +614,57 @@ impl<'a, T, P> Clone for Pairs<'a, T, P> {
     }
 }
 
+// Iterator::cloned is not usable on this type
+impl<'a, T: Clone, P: Clone> Pairs<'a, T, P> {
+    pub fn cloned(self) -> ClonedPairs<Self> {
+        ClonedPairs(self)
+    }
+}
+
+/// An iterator that clones the contents of an underlying iterator
+///
+/// This struct is created by [`Pairs::cloned`].
+pub struct ClonedPairs<I>(I);
+
+impl<'a, I, T: 'a, P: 'a> Iterator for ClonedPairs<I>
+where
+    I: Iterator<Item = Pair<&'a T, &'a P>>,
+    T: Clone,
+    P: Clone,
+{
+    type Item = Pair<T, P>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next().map(|pair| pair.cloned())
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.0.size_hint()
+    }
+}
+
+impl<'a, I, T: 'a, P: 'a> DoubleEndedIterator for ClonedPairs<I>
+where
+    I: DoubleEndedIterator<Item = Pair<&'a T, &'a P>>,
+    T: Clone,
+    P: Clone,
+{
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.0.next_back().map(|pair| pair.cloned())
+    }
+}
+
+impl<'a, I, T: 'a, P: 'a> ExactSizeIterator for ClonedPairs<I>
+where
+    I: ExactSizeIterator<Item = Pair<&'a T, &'a P>>,
+    T: Clone,
+    P: Clone,
+{
+    fn len(&self) -> usize {
+        self.0.len()
+    }
+}
+
 /// An iterator over mutably borrowed pairs of type `Pair<&mut T, &mut P>`.
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
@@ -1011,6 +1062,36 @@ where
         match self {
             Pair::Punctuated(t, p) => Pair::Punctuated(t.clone(), p.clone()),
             Pair::End(t) => Pair::End(t.clone()),
+        }
+    }
+}
+
+#[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl<'a, T: 'a, P: 'a> Pair<&'a T, &'a P>
+where
+    T: Clone,
+    P: Clone,
+{
+    fn cloned(&self) -> Pair<T, P> {
+        match self {
+            Pair::Punctuated(t, p) => Pair::Punctuated((*t).clone(), (*p).clone()),
+            Pair::End(t) => Pair::End((*t).clone()),
+        }
+    }
+}
+
+#[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl<'a, T: 'a, P: 'a> Pair<&'a mut T, &'a mut P>
+where
+    T: Clone,
+    P: Clone,
+{
+    pub fn cloned(&self) -> Pair<T, P> {
+        match self {
+            Pair::Punctuated(t, p) => Pair::Punctuated((*t).clone(), (*p).clone()),
+            Pair::End(t) => Pair::End((*t).clone()),
         }
     }
 }
