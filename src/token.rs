@@ -246,7 +246,7 @@ macro_rules! define_keywords {
             /// Don't try to remember the name of this type &mdash; use the
             /// [`Token!`] macro instead.
             ///
-            /// [`Token!`]: crate::token
+            /// [`Token!`]: crate::Token
             pub struct $name {
                 pub span: Span,
             }
@@ -369,7 +369,7 @@ macro_rules! define_punctuation_structs {
             /// Don't try to remember the name of this type &mdash; use the
             /// [`Token!`] macro instead.
             ///
-            /// [`Token!`]: crate::token
+            /// [`Token!`]: crate::Token
             pub struct $name {
                 pub spans: [Span; $len],
             }
