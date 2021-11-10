@@ -444,6 +444,17 @@ where
     }
 }
 
+impl<'a, T: Clone + 'a, P> Extend<&'a T> for Punctuated<T, P>
+where
+    P: Default,
+{
+    fn extend<I: IntoIterator<Item = &'a T>>(&mut self, i: I) {
+        for value in i {
+            self.push(value.clone());
+        }
+    }
+}
+
 impl<T, P> Extend<T> for Punctuated<T, P>
 where
     P: Default,
@@ -481,6 +492,32 @@ where
                 Pair::Punctuated(a, b) => self.inner.push((a, b)),
                 Pair::End(a) => {
                     self.last = Some(Box::new(a));
+                    nomore = true;
+                }
+            }
+        }
+    }
+}
+
+impl<'a, T, P> Extend<Pair<&'a T, &'a P>> for Punctuated<T, P>
+where
+    T: Clone + 'a,
+    P: Clone + Default + 'a,
+{
+    fn extend<I: IntoIterator<Item = Pair<&'a T, &'a P>>>(&mut self, i: I) {
+        if !self.empty_or_trailing() {
+            self.push_punct(Default::default());
+        }
+
+        let mut nomore = false;
+        for pair in i {
+            if nomore {
+                panic!("Punctuated extended with items after a Pair::End");
+            }
+            match pair {
+                Pair::Punctuated(a, b) => self.inner.push((a.clone(), b.clone())),
+                Pair::End(a) => {
+                    self.last = Some(Box::new(a.clone()));
                     nomore = true;
                 }
             }
