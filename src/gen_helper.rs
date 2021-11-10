@@ -21,7 +21,7 @@ pub mod fold {
         }
     }
 
-    impl<T, U> FoldHelper for Punctuated<T, U> {
+    impl<T, U: Default> FoldHelper for Punctuated<T, U> {
         type Item = T;
         fn lift<F>(self, mut f: F) -> Self
         where

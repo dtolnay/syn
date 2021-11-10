@@ -455,7 +455,7 @@ where
     }
 }
 
-impl<T, P> FromIterator<Pair<T, P>> for Punctuated<T, P> {
+impl<T, P: Default> FromIterator<Pair<T, P>> for Punctuated<T, P> {
     fn from_iter<I: IntoIterator<Item = Pair<T, P>>>(i: I) -> Self {
         let mut ret = Punctuated::new();
         ret.extend(i);
@@ -463,12 +463,14 @@ impl<T, P> FromIterator<Pair<T, P>> for Punctuated<T, P> {
     }
 }
 
-impl<T, P> Extend<Pair<T, P>> for Punctuated<T, P> {
+impl<T, P> Extend<Pair<T, P>> for Punctuated<T, P>
+where
+    P: Default,
+{
     fn extend<I: IntoIterator<Item = Pair<T, P>>>(&mut self, i: I) {
-        assert!(
-            self.empty_or_trailing(),
-            "Punctuated::extend: Punctuated is not empty or does not have a trailing punctuation",
-        );
+        if !self.empty_or_trailing() {
+            self.push_punct(Default::default());
+        }
 
         let mut nomore = false;
         for pair in i {
