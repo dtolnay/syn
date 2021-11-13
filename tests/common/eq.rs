@@ -316,7 +316,7 @@ spanless_eq_struct!(ForeignMod; unsafety abi items);
 spanless_eq_struct!(GenericParam; id ident attrs bounds is_placeholder kind);
 spanless_eq_struct!(Generics; params where_clause span);
 spanless_eq_struct!(Impl; defaultness unsafety generics constness polarity of_trait self_ty items);
-spanless_eq_struct!(InlineAsm; template template_strs operands clobber_abi options line_spans);
+spanless_eq_struct!(InlineAsm; template template_strs operands clobber_abis options line_spans);
 spanless_eq_struct!(Item<K>; attrs id span vis ident kind !tokens);
 spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
