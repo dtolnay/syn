@@ -47,8 +47,8 @@ pub struct TokenBuffer {
 impl Drop for TokenBuffer {
     fn drop(&mut self) {
         unsafe {
-            let slice = slice::from_raw_parts(self.ptr, self.len);
-            let _ = Box::from_raw(slice as *const [Entry] as *mut [Entry]);
+            let slice = slice::from_raw_parts_mut(self.ptr as *mut Entry, self.len);
+            let _ = Box::from_raw(slice);
         }
     }
 }
