@@ -54,8 +54,8 @@ impl Drop for TokenBuffer {
 }
 
 impl TokenBuffer {
-    // NOTE: DO NOT MUTATE THE `Vec` RETURNED FROM THIS FUNCTION ONCE IT
-    // RETURNS, THE ADDRESS OF ITS BACKING MEMORY MUST REMAIN STABLE.
+    // NOTE: Do not mutate the Vec returned from this function once it returns;
+    // the address of its backing memory must remain stable.
     fn inner_new(stream: TokenStream, up: *const Entry) -> TokenBuffer {
         // Build up the entries list, recording the locations of any Groups
         // in the list to be processed later.
