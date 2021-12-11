@@ -16,6 +16,7 @@ use crate::Lifetime;
 use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::marker::PhantomData;
 use std::ptr;
+use std::slice;
 
 /// Internal type which is used instead of `TokenTree` to represent a token tree
 /// within a `TokenBuffer`.
@@ -36,10 +37,20 @@ enum Entry {
 ///
 /// *This type is available only if Syn is built with the `"parsing"` feature.*
 pub struct TokenBuffer {
-    // NOTE: Do not derive clone on this - there are raw pointers inside which
-    // will be messed up. Moving the `TokenBuffer` itself is safe as the actual
-    // backing slices won't be moved.
-    data: Box<[Entry]>,
+    // NOTE: Do not implement clone on this - there are raw pointers inside
+    // these entries which will be messed up. Moving the `TokenBuffer` itself is
+    // safe as the data pointed to won't be moved.
+    ptr: *const Entry,
+    len: usize,
+}
+
+impl Drop for TokenBuffer {
+    fn drop(&mut self) {
+        unsafe {
+            let slice = slice::from_raw_parts(self.ptr, self.len);
+            let _ = Box::from_raw(slice as *const [Entry] as *mut [Entry]);
+        }
+    }
 }
 
 impl TokenBuffer {
@@ -90,7 +101,12 @@ impl TokenBuffer {
             entries[idx] = Entry::Group(group, inner);
         }
 
-        TokenBuffer { data: entries }
+        let len = entries.len();
+        let ptr = Box::into_raw(entries);
+        TokenBuffer {
+            ptr: ptr as *const Entry,
+            len,
+        }
     }
 
     /// Creates a `TokenBuffer` containing all the tokens from the input
@@ -115,7 +131,7 @@ impl TokenBuffer {
     /// Creates a cursor referencing the first token in the buffer and able to
     /// traverse until the end of the buffer.
     pub fn begin(&self) -> Cursor {
-        unsafe { Cursor::create(&self.data[0], &self.data[self.data.len() - 1]) }
+        unsafe { Cursor::create(self.ptr, self.ptr.add(self.len - 1)) }
     }
 }
 
@@ -210,7 +226,7 @@ impl<'a> Cursor<'a> {
                 // situations where we should immediately exit the span after
                 // entering it are handled correctly.
                 unsafe {
-                    *self = Cursor::create(&buf.data[0], self.scope);
+                    *self = Cursor::create(buf.ptr, self.scope);
                 }
             } else {
                 break;

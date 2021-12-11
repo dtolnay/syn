@@ -261,6 +261,7 @@
     clippy::eval_order_dependence,
     clippy::inherent_to_string,
     clippy::large_enum_variant,
+    clippy::let_underscore_drop,
     clippy::manual_assert,
     clippy::manual_map, // https://github.com/rust-lang/rust-clippy/issues/6795
     clippy::match_on_vec_items,
