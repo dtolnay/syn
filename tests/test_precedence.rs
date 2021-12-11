@@ -1,4 +1,5 @@
 #![cfg(not(syn_disable_nightly_tests))]
+#![cfg(not(miri))]
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
 #![allow(
