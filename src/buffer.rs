@@ -93,7 +93,7 @@ impl TokenBuffer {
             // We know that this index refers to one of the temporary
             // `End(null)` entries, and we know that the last entry is
             // `End(up)`, so the next index is also valid.
-            let seq_up = &entries[idx + 1] as *const Entry;
+            let seq_up = unsafe { entries.as_ptr().add(idx + 1) };
 
             // The end entry stored at the end of this Entry::Group should
             // point to the Entry which follows the Group in the list.
