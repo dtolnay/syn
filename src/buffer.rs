@@ -337,9 +337,7 @@ impl<'a> Cursor<'a> {
             Entry::Literal(lit) => lit.clone().into(),
             Entry::Ident(ident) => ident.clone().into(),
             Entry::Punct(op) => op.clone().into(),
-            Entry::End(..) => {
-                return None;
-            }
+            Entry::End(..) => return None,
         };
 
         Some((tree, unsafe { self.bump() }))
