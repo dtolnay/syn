@@ -60,7 +60,7 @@ impl TokenBuffer {
         // Build up the entries list, recording the locations of any Groups
         // in the list to be processed later.
         let mut entries = Vec::new();
-        let mut seqs = Vec::new();
+        let mut groups = Vec::new();
         for tt in stream {
             match tt {
                 TokenTree::Ident(sym) => {
@@ -75,7 +75,7 @@ impl TokenBuffer {
                 TokenTree::Group(g) => {
                     // Record the index of the interesting entry, and store an
                     // `End(null)` there temporarily.
-                    seqs.push((entries.len(), g));
+                    groups.push((entries.len(), g));
                     entries.push(Entry::End(ptr::null()));
                 }
             }
@@ -89,15 +89,15 @@ impl TokenBuffer {
         // constant address after this point, as we are going to store a raw
         // pointer into it.
         let mut entries = entries.into_boxed_slice();
-        for (idx, group) in seqs {
+        for (idx, group) in groups {
             // We know that this index refers to one of the temporary
             // `End(null)` entries, and we know that the last entry is
             // `End(up)`, so the next index is also valid.
-            let seq_up = unsafe { entries.as_ptr().add(idx + 1) };
+            let group_up = unsafe { entries.as_ptr().add(idx + 1) };
 
             // The end entry stored at the end of this Entry::Group should
             // point to the Entry which follows the Group in the list.
-            let inner = Self::inner_new(group.stream(), seq_up);
+            let inner = Self::inner_new(group.stream(), group_up);
             entries[idx] = Entry::Group(group, inner);
         }
 
