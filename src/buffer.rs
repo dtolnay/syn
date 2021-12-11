@@ -74,7 +74,7 @@ impl TokenBuffer {
                 }
                 TokenTree::Group(g) => {
                     // Record the index of the interesting entry, and store an
-                    // `End(null)` there temporarially.
+                    // `End(null)` there temporarily.
                     seqs.push((entries.len(), g));
                     entries.push(Entry::End(ptr::null()));
                 }
