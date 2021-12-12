@@ -127,7 +127,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: clippy,rustc-dev
-      - run: cargo clippy --all-features --tests -- -Dclippy::all -Dclippy::pedantic
+      - run: cargo clippy --all-features --tests --benches -- -Dclippy::all -Dclippy::pedantic
 
   outdated:
     name: Outdated
