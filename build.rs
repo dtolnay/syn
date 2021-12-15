@@ -11,6 +11,10 @@ fn main() {
         None => return,
     };
 
+    if compiler.minor < 34 {
+        println!("cargo:rustc-cfg=syn_no_atomic_u64");
+    }
+
     if compiler.minor < 36 {
         println!("cargo:rustc-cfg=syn_omit_await_from_token_macro");
     }
