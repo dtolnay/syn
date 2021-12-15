@@ -1,6 +1,6 @@
 use std::fmt::{self, Debug};
-use std::num::NonZeroUsize;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::num::NonZeroU64;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 /// ThreadBound is a Sync-maker and Send-maker that allows accessing a value
 /// of type T only from the original thread on which the ThreadBound was
@@ -42,22 +42,16 @@ impl<T: Debug> Debug for ThreadBound<T> {
 }
 
 #[derive(Copy, Clone, PartialEq)]
-struct ThreadId(NonZeroUsize);
+struct ThreadId(NonZeroU64);
 
 impl ThreadId {
     fn current() -> Self {
-        static NEXT_THREAD_ID: AtomicUsize = AtomicUsize::new(1);
+        static NEXT_THREAD_ID: AtomicU64 = AtomicU64::new(1);
 
         thread_local! {
             static THIS_THREAD_ID: ThreadId = {
-                let mut current = NEXT_THREAD_ID.load(Ordering::Relaxed);
-                loop {
-                    let next = current.checked_add(1).expect("ThreadId overflow");
-                    match NEXT_THREAD_ID.compare_exchange_weak(current, next, Ordering::Relaxed, Ordering::Relaxed) {
-                        Ok(current) => break ThreadId(unsafe { NonZeroUsize::new_unchecked(current) }),
-                        Err(update) => current = update,
-                    }
-                }
+                let current = NEXT_THREAD_ID.fetch_add(1, Ordering::Relaxed);
+                ThreadId(unsafe { NonZeroU64::new_unchecked(current) })
             };
         }
 
