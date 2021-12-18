@@ -269,6 +269,7 @@
     clippy::needless_doctest_main,
     clippy::needless_pass_by_value,
     clippy::never_loop,
+    clippy::return_self_not_must_use,
     clippy::too_many_arguments,
     clippy::trivially_copy_pass_by_ref,
     clippy::unnecessary_unwrap,
