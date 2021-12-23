@@ -14,9 +14,6 @@ const REVISION: &str = "e100ec5bc7cd768ec17d75448b29c9ab4a39272b";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: attributes on let-else stmt
-    "src/test/ui/let-else/let-else-allow-unused.rs",
-
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
