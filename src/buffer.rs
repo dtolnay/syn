@@ -110,7 +110,7 @@ impl TokenBuffer {
     }
 
     /// Creates a `TokenBuffer` containing all the tokens from the input
-    /// `TokenStream`.
+    /// `proc_macro::TokenStream`.
     ///
     /// *This method is available only if Syn is built with both the `"parsing"` and
     /// `"proc-macro"` features.*
@@ -123,7 +123,7 @@ impl TokenBuffer {
     }
 
     /// Creates a `TokenBuffer` containing all the tokens from the input
-    /// `TokenStream`.
+    /// `proc_macro2::TokenStream`.
     pub fn new2(stream: TokenStream) -> TokenBuffer {
         Self::inner_new(stream, ptr::null())
     }
