@@ -77,6 +77,38 @@ macro_rules! parse_quote {
     };
 }
 
+/// This macro is [`parse_quote!`] + [`quote_spanned!`][quote::quote_spanned].
+///
+/// Please refer to each of their documentation.
+///
+/// # Example
+///
+/// ```
+/// use quote::{quote, quote_spanned};
+/// use syn::spanned::Spanned;
+/// use syn::{parse_quote_spanned, ReturnType, Signature};
+///
+/// // Changes `fn()` to `fn() -> Pin<Box<dyn Future<Output = ()>>>`,
+/// // and `fn() -> T` to `fn() -> Pin<Box<dyn Future<Output = T>>>`,
+/// // without introducing any call_site() spans.
+/// fn make_ret_pinned_future(sig: &mut Signature) {
+///     let ret = match &sig.output {
+///         ReturnType::Default => quote_spanned!(sig.paren_token.span=> ()),
+///         ReturnType::Type(_, ret) => quote!(#ret),
+///     };
+///     sig.output = parse_quote_spanned! {ret.span()=>
+///         -> ::std::pin::Pin<::std::boxed::Box<dyn ::std::future::Future<Output = #ret>>>
+///     };
+/// }
+/// ```
+#[cfg_attr(doc_cfg, doc(cfg(all(feature = "parsing", feature = "printing"))))]
+#[macro_export]
+macro_rules! parse_quote_spanned {
+    ($span:expr=> $($tt:tt)*) => {
+        $crate::parse_quote::parse($crate::__private::quote::quote_spanned!($span=> $($tt)*))
+    };
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Can parse any type that implements Parse.
 
