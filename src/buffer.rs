@@ -270,7 +270,7 @@ impl<'a> Cursor<'a> {
         }
     }
 
-    /// If the cursor is pointing at an `Punct`, returns it along with a cursor
+    /// If the cursor is pointing at a `Punct`, returns it along with a cursor
     /// pointing at the next `TokenTree`.
     pub fn punct(mut self) -> Option<(Punct, Cursor<'a>)> {
         self.ignore_none();
