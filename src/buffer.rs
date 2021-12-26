@@ -118,13 +118,13 @@ impl TokenBuffer {
         not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
         feature = "proc-macro"
     ))]
-    pub fn new(stream: pm::TokenStream) -> TokenBuffer {
+    pub fn new(stream: pm::TokenStream) -> Self {
         Self::new2(stream.into())
     }
 
     /// Creates a `TokenBuffer` containing all the tokens from the input
     /// `proc_macro2::TokenStream`.
-    pub fn new2(stream: TokenStream) -> TokenBuffer {
+    pub fn new2(stream: TokenStream) -> Self {
         Self::inner_new(stream, ptr::null())
     }
 
