@@ -5,10 +5,9 @@ use crate::parse::{Parse, Parser};
 use crate::{Error, Result};
 #[cfg(feature = "printing")]
 use proc_macro2::Ident;
-#[cfg(feature = "parsing")]
-use proc_macro2::TokenStream;
-use proc_macro2::TokenTree;
 use proc_macro2::{Literal, Span};
+#[cfg(feature = "parsing")]
+use proc_macro2::{TokenStream, TokenTree};
 use std::fmt::{self, Display};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
