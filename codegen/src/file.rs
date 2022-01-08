@@ -13,18 +13,9 @@ pub fn write<P: AsRef<Path>>(path: P, content: TokenStream) -> Result<()> {
     writeln!(formatted, "// It is not intended for manual editing.")?;
     writeln!(formatted)?;
 
-    let mut config = rustfmt::Config::default();
-    config.set().format_macro_matchers(true);
-    config.set().normalize_doc_attributes(true);
-    config.set().reorder_imports(false);
-    config.set().skip_children(true);
-    config.set().emit_mode(rustfmt::EmitMode::Stdout);
-    config.set().verbose(rustfmt::Verbosity::Quiet);
-
-    let mut session = rustfmt::Session::new(config, Some(&mut formatted));
-    let format_report = session.format(rustfmt::Input::Text(content.to_string()))?;
-    assert!(!format_report.has_warnings());
-    drop(session);
+    let syntax_tree: syn::File = syn::parse2(content).unwrap();
+    let pretty = prettyplease::unparse(&syntax_tree);
+    write!(formatted, "{}", pretty)?;
 
     if path.as_ref().is_file() && fs::read(&path)? == formatted {
         return Ok(());
