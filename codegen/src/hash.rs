@@ -152,9 +152,9 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     file::write(
         DEBUG_SRC,
         quote! {
-            use crate::*;
             #[cfg(any(feature = "derive", feature = "full"))]
             use crate::tt::TokenStreamHelper;
+            use crate::*;
             use std::hash::{Hash, Hasher};
 
             #impls

@@ -3,12 +3,12 @@
 
 #![allow(unreachable_code, unused_variables)]
 #![allow(clippy::match_wildcard_for_single_variants)]
-use crate::*;
-#[cfg(any(feature = "full", feature = "derive"))]
-use crate::token::{Brace, Bracket, Paren, Group};
-use proc_macro2::Span;
 #[cfg(any(feature = "full", feature = "derive"))]
 use crate::gen::helper::fold::*;
+#[cfg(any(feature = "full", feature = "derive"))]
+use crate::token::{Brace, Bracket, Group, Paren};
+use crate::*;
+use proc_macro2::Span;
 #[cfg(feature = "full")]
 macro_rules! full {
     ($e:expr) => {
