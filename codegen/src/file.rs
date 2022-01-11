@@ -16,6 +16,7 @@ pub fn write<P: AsRef<Path>>(path: P, content: TokenStream) -> Result<()> {
     let mut config = rustfmt::Config::default();
     config.set().format_macro_matchers(true);
     config.set().normalize_doc_attributes(true);
+    config.set().reorder_imports(false);
 
     let format_report = rustfmt::format(
         rustfmt::Input::Text(content.to_string()),
