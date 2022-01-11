@@ -32,21 +32,21 @@ fn visit(
             let operand = quote!(it);
             let val = visit(t, features, defs, &operand)?;
             Some(quote! {
-                FoldHelper::lift(#name, |it| { #val })
+                FoldHelper::lift(#name, |it| #val)
             })
         }
         Type::Punctuated(p) => {
             let operand = quote!(it);
             let val = visit(&p.element, features, defs, &operand)?;
             Some(quote! {
-                FoldHelper::lift(#name, |it| { #val })
+                FoldHelper::lift(#name, |it| #val)
             })
         }
         Type::Option(t) => {
             let it = quote!(it);
             let val = visit(t, features, defs, &it)?;
             Some(quote! {
-                (#name).map(|it| { #val })
+                (#name).map(|it| #val)
             })
         }
         Type::Tuple(t) => {
