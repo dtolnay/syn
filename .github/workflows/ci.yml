@@ -91,15 +91,9 @@ jobs:
   codegen:
     name: Codegen
     runs-on: ubuntu-latest
-    env:
-      CFG_RELEASE_CHANNEL: dev
-      CFG_RELEASE: dev
     steps:
       - uses: actions/checkout@v2
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: nightly-2021-12-29
-          components: rustc-dev
+      - uses: dtolnay/rust-toolchain@stable
       - run: cd codegen && cargo run
       - run: git diff --exit-code
 

@@ -2520,8 +2520,7 @@ impl Hash for TypeInfer {
     fn hash<H>(&self, _state: &mut H)
     where
         H: Hasher,
-    {
-    }
+    {}
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2539,8 +2538,7 @@ impl Hash for TypeNever {
     fn hash<H>(&self, _state: &mut H)
     where
         H: Hasher,
-    {
-    }
+    {}
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2678,8 +2676,7 @@ impl Hash for UseGlob {
     fn hash<H>(&self, _state: &mut H)
     where
         H: Hasher,
-    {
-    }
+    {}
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2783,8 +2780,7 @@ impl Hash for VisCrate {
     fn hash<H>(&self, _state: &mut H)
     where
         H: Hasher,
-    {
-    }
+    {}
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2792,8 +2788,7 @@ impl Hash for VisPublic {
     fn hash<H>(&self, _state: &mut H)
     where
         H: Hasher,
-    {
-    }
+    {}
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
