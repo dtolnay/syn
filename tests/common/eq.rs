@@ -14,8 +14,8 @@ use rustc_ast::ast::{
     LocalKind, MacArgs, MacCall, MacCallStmt, MacDelimiter, MacStmtStyle, MacroDef, ModKind,
     Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatField, PatKind, Path,
     PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit,
-    StrStyle, StructExpr, StructRest, Trait, TraitBoundModifier, TraitObjectSyntax, TraitRef, Ty,
-    TyAlias, TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant,
+    StrStyle, StructExpr, StructRest, Term, Trait, TraitBoundModifier, TraitObjectSyntax, TraitRef,
+    Ty, TyAlias, TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant,
     VariantData, Visibility, VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate,
     WherePredicate, WhereRegionPredicate,
 };
@@ -350,7 +350,7 @@ spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_struct!(token::Lit; kind symbol suffix);
 spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
 spanless_eq_enum!(AssocItemKind; Const(0 1 2) Fn(0) TyAlias(0) MacCall(0));
-spanless_eq_enum!(AssocConstraintKind; Equality(ty) ConstEquality(c) Bound(bounds));
+spanless_eq_enum!(AssocConstraintKind; Equality(term) Bound(bounds));
 spanless_eq_enum!(Async; Yes(span closure_id return_impl_trait_id) No);
 spanless_eq_enum!(AttrAnnotatedTokenTree; Token(0) Delimited(0 1 2) Attributes(0));
 spanless_eq_enum!(AttrStyle; Outer Inner);
@@ -390,6 +390,7 @@ spanless_eq_enum!(RangeLimits; HalfOpen Closed);
 spanless_eq_enum!(StmtKind; Local(0) Item(0) Expr(0) Semi(0) Empty MacCall(0));
 spanless_eq_enum!(StrStyle; Cooked Raw(0));
 spanless_eq_enum!(StructRest; Base(0) Rest(0) None);
+spanless_eq_enum!(Term; Ty(0) Const(0));
 spanless_eq_enum!(TokenTree; Token(0) Delimited(0 1 2));
 spanless_eq_enum!(TraitBoundModifier; None Maybe MaybeConst MaybeConstMaybe);
 spanless_eq_enum!(TraitObjectSyntax; Dyn None);
