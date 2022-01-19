@@ -3,9 +3,9 @@ extern crate rustc_data_structures;
 extern crate rustc_span;
 
 use rustc_ast::ast::{
-    AngleBracketedArg, AngleBracketedArgs, AnonConst, Arm, AssocItemKind, AssocTyConstraint,
-    AssocTyConstraintKind, Async, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy,
-    BinOpKind, BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
+    AngleBracketedArg, AngleBracketedArgs, AnonConst, Arm, AssocConstraint, AssocConstraintKind,
+    AssocItemKind, Async, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy, BinOpKind,
+    BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
     Defaultness, EnumDef, Expr, ExprField, ExprKind, Extern, FieldDef, FloatTy, Fn, FnDecl,
     FnHeader, FnRetTy, FnSig, ForeignItemKind, ForeignMod, GenericArg, GenericArgs, GenericBound,
     GenericParam, GenericParamKind, Generics, Impl, ImplPolarity, Inline, InlineAsm,
@@ -295,7 +295,7 @@ macro_rules! spanless_eq_enum {
 spanless_eq_struct!(AngleBracketedArgs; span args);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arm; attrs pat guard body span id is_placeholder);
-spanless_eq_struct!(AssocTyConstraint; id ident gen_args kind span);
+spanless_eq_struct!(AssocConstraint; id ident gen_args kind span);
 spanless_eq_struct!(AttrAnnotatedTokenStream; 0);
 spanless_eq_struct!(AttrItem; path args tokens);
 spanless_eq_struct!(Attribute; kind id style span);
@@ -350,7 +350,7 @@ spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_struct!(token::Lit; kind symbol suffix);
 spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
 spanless_eq_enum!(AssocItemKind; Const(0 1 2) Fn(0) TyAlias(0) MacCall(0));
-spanless_eq_enum!(AssocTyConstraintKind; Equality(ty) Bound(bounds));
+spanless_eq_enum!(AssocConstraintKind; Equality(ty) ConstEquality(c) Bound(bounds));
 spanless_eq_enum!(Async; Yes(span closure_id return_impl_trait_id) No);
 spanless_eq_enum!(AttrAnnotatedTokenTree; Token(0) Delimited(0 1 2) Attributes(0));
 spanless_eq_enum!(AttrStyle; Outer Inner);
