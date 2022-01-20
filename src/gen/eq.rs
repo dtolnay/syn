@@ -422,8 +422,8 @@ impl Eq for ExprClosure {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprClosure {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.asyncness == other.asyncness
-            && self.movability == other.movability && self.capture == other.capture
+        self.attrs == other.attrs && self.movability == other.movability
+            && self.asyncness == other.asyncness && self.capture == other.capture
             && self.inputs == other.inputs && self.output == other.output
             && self.body == other.body
     }

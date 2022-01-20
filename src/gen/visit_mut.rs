@@ -1374,10 +1374,10 @@ where
     for it in &mut node.attrs {
         v.visit_attribute_mut(it);
     }
-    if let Some(it) = &mut node.asyncness {
+    if let Some(it) = &mut node.movability {
         tokens_helper(v, &mut it.span);
     }
-    if let Some(it) = &mut node.movability {
+    if let Some(it) = &mut node.asyncness {
         tokens_helper(v, &mut it.span);
     }
     if let Some(it) = &mut node.capture {

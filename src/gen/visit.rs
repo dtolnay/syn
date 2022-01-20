@@ -1373,10 +1373,10 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
-    if let Some(it) = &node.asyncness {
+    if let Some(it) = &node.movability {
         tokens_helper(v, &it.span);
     }
-    if let Some(it) = &node.movability {
+    if let Some(it) = &node.asyncness {
         tokens_helper(v, &it.span);
     }
     if let Some(it) = &node.capture {

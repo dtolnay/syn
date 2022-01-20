@@ -1269,9 +1269,9 @@ where
 {
     ExprClosure {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        asyncness: (node.asyncness).map(|it| Token![async](tokens_helper(f, &it.span))),
         movability: (node.movability)
             .map(|it| Token![static](tokens_helper(f, &it.span))),
+        asyncness: (node.asyncness).map(|it| Token![async](tokens_helper(f, &it.span))),
         capture: (node.capture).map(|it| Token![move](tokens_helper(f, &it.span))),
         or1_token: Token![|](tokens_helper(f, &node.or1_token.spans)),
         inputs: FoldHelper::lift(node.inputs, |it| f.fold_pat(it)),

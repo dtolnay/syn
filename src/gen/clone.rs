@@ -412,8 +412,8 @@ impl Clone for ExprClosure {
     fn clone(&self) -> Self {
         ExprClosure {
             attrs: self.attrs.clone(),
-            asyncness: self.asyncness.clone(),
             movability: self.movability.clone(),
+            asyncness: self.asyncness.clone(),
             capture: self.capture.clone(),
             or1_token: self.or1_token.clone(),
             inputs: self.inputs.clone(),

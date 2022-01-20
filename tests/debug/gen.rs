@@ -591,18 +591,6 @@ impl Debug for Lite<syn::Expr> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
-                if let Some(val) = &_val.asyncness {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Async);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("asyncness", Print::ref_cast(val));
-                }
                 if let Some(val) = &_val.movability {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -614,6 +602,18 @@ impl Debug for Lite<syn::Expr> {
                         }
                     }
                     formatter.field("movability", Print::ref_cast(val));
+                }
+                if let Some(val) = &_val.asyncness {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::token::Async);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("asyncness", Print::ref_cast(val));
                 }
                 if let Some(val) = &_val.capture {
                     #[derive(RefCast)]
@@ -1294,18 +1294,6 @@ impl Debug for Lite<syn::ExprClosure> {
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
         }
-        if let Some(val) = &_val.asyncness {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Async);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("asyncness", Print::ref_cast(val));
-        }
         if let Some(val) = &_val.movability {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1317,6 +1305,18 @@ impl Debug for Lite<syn::ExprClosure> {
                 }
             }
             formatter.field("movability", Print::ref_cast(val));
+        }
+        if let Some(val) = &_val.asyncness {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Async);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("asyncness", Print::ref_cast(val));
         }
         if let Some(val) = &_val.capture {
             #[derive(RefCast)]
