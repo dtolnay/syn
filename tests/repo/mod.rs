@@ -14,14 +14,6 @@ const REVISION: &str = "5e57faa78aa7661c6000204591558f6665f11abc";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: let chains
-    "src/test/ui/expr/if/attrs/let-chains-attr.rs",
-    "src/test/ui/mir/mir_let_chains_drop_order.rs",
-    "src/test/ui/rfc-2497-if-let-chains/ast-lowering-does-not-wrap-let-chains.rs",
-    "src/test/ui/rfc-2497-if-let-chains/irrefutable-lets.rs",
-    "src/test/ui/rfc-2497-if-let-chains/issue-90722.rs",
-    "src/test/ui/rfc-2497-if-let-chains/then-else-blocks.rs",
-
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",

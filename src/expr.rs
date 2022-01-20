@@ -2112,7 +2112,11 @@ pub(crate) mod parsing {
                 let_token: input.parse()?,
                 pat: pat::parsing::multi_pat_with_leading_vert(input)?,
                 eq_token: input.parse()?,
-                expr: Box::new(input.call(Expr::parse_without_eager_brace)?),
+                expr: Box::new({
+                    let allow_struct = AllowStruct(false);
+                    let lhs = unary_expr(input, allow_struct)?;
+                    parse_expr(input, lhs, allow_struct, Precedence::Compare)?
+                }),
             })
         }
     }
