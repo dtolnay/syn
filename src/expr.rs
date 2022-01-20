@@ -403,8 +403,8 @@ ast_struct! {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprClosure #full {
         pub attrs: Vec<Attribute>,
-        pub asyncness: Option<Token![async]>,
         pub movability: Option<Token![static]>,
+        pub asyncness: Option<Token![async]>,
         pub capture: Option<Token![move]>,
         pub or1_token: Token![|],
         pub inputs: Punctuated<Pat, Token![,]>,
@@ -2397,12 +2397,8 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     fn expr_closure(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprClosure> {
+        let movability: Option<Token![static]> = input.parse()?;
         let asyncness: Option<Token![async]> = input.parse()?;
-        let movability: Option<Token![static]> = if asyncness.is_none() {
-            input.parse()?
-        } else {
-            None
-        };
         let capture: Option<Token![move]> = input.parse()?;
         let or1_token: Token![|] = input.parse()?;
 
@@ -2440,8 +2436,8 @@ pub(crate) mod parsing {
 
         Ok(ExprClosure {
             attrs: Vec::new(),
-            asyncness,
             movability,
+            asyncness,
             capture,
             or1_token,
             inputs,
@@ -3223,8 +3219,8 @@ pub(crate) mod printing {
     impl ToTokens for ExprClosure {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.asyncness.to_tokens(tokens);
             self.movability.to_tokens(tokens);
+            self.asyncness.to_tokens(tokens);
             self.capture.to_tokens(tokens);
             self.or1_token.to_tokens(tokens);
             self.inputs.to_tokens(tokens);
