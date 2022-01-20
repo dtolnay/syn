@@ -22,10 +22,6 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/rfc-2497-if-let-chains/issue-90722.rs",
     "src/test/ui/rfc-2497-if-let-chains/then-else-blocks.rs",
 
-    // TODO: static async closure keyword order
-    "src/tools/rustfmt/tests/source/async_block.rs",
-    "src/tools/rustfmt/tests/target/async_block.rs",
-
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",

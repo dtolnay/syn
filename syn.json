@@ -1087,14 +1087,14 @@
             "syn": "Attribute"
           }
         },
-        "asyncness": {
-          "option": {
-            "token": "Async"
-          }
-        },
         "movability": {
           "option": {
             "token": "Static"
+          }
+        },
+        "asyncness": {
+          "option": {
+            "token": "Async"
           }
         },
         "capture": {
