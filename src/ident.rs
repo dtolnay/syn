@@ -27,7 +27,7 @@ fn accept_as_ident(ident: &Ident) -> bool {
         // and https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md
         // and https://github.com/rust-lang/rfcs/blob/master/text/2388-try-expr.md
         "abstract" | "as" | "async" | "await" | "become" | "box" | "break" |
-        "const" | "continue" | "crate" | "do" | "else" | "enum" | "extern" |
+        "const" | "continue" | "crate" | "do" | "dyn" | "else" | "enum" | "extern" |
         "false" | "final" | "fn" | "for" | "if" | "impl" | "in" | "let" |
         "loop" | "macro" | "match" | "mod" | "move" | "mut" | "override" |
         "priv" | "pub" | "ref" | "return" | "Self" | "self" | "static" |
