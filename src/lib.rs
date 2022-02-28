@@ -843,7 +843,7 @@ mod rustdoc_workaround {
 ////////////////////////////////////////////////////////////////////////////////
 
 mod error;
-pub use crate::error::{Error, Result};
+pub use crate::error::{Error, Result, ResultIterCombineSynErrors};
 
 /// Parse tokens of source code into the chosen syntax tree node.
 ///

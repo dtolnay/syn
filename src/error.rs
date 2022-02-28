@@ -411,3 +411,89 @@ impl Extend<Error> for Error {
         }
     }
 }
+
+/// Combines `syn::Error`s in an `std::iter::Iterator` into one `syn::Error`
+///
+/// ```
+/// use quote::{quote, ToTokens};
+/// use syn::{ExprArray, Ident, LitStr, Result, Token};
+/// use syn::parse::{ParseStream, Parser};
+/// use syn::{Error, ResultIterCombineSynErrors};
+///
+/// // Parses input that looks like `ident = ExprArray,`, returns `(Ident, ExprArray)`.
+/// fn my_parser(input: ParseStream) -> Result<(Ident, ExprArray)> {
+///     let ident = input.parse()?;
+///     input.parse::<Token![=]>()?;
+///     let t = input.parse()?;
+///
+///     if !input.is_empty() {
+///         input.parse::<Token![,]>()?;
+///     }
+///
+///     if !input.is_empty() {
+///         Err(Error::new(input.span(), "expected end of input"))
+///     } else {
+///         Ok((ident, t))
+///     }
+/// }
+///
+/// # fn main() {
+/// let input = vec! [
+///     quote! { zero = [0, 1, 2], extra },
+///     quote! { one = (3, 4, 5), },
+///     quote! { two = [,,] },
+/// ];
+///
+/// let error = input.into_iter()
+///     .map(|input| my_parser.parse2(input))
+///     .collect_syn_error::<Vec<_>>()
+///     .unwrap_err();
+///
+/// assert_eq!(
+///     error.to_compile_error().to_string(),
+///     "\
+///         compile_error ! { \"expected end of input\" } \
+///         compile_error ! { \"expected square brackets\" } \
+///         compile_error ! { \"expected expression\" }\
+///     ",
+/// );
+/// # }
+pub trait ResultIterCombineSynErrors<T, I>
+where
+    I: std::iter::Iterator<Item = Result<T>>,
+{
+    fn collect_syn_error<B: FromIterator<T>>(self) -> Result<B>
+    where
+        B: Default;
+}
+
+impl<T, I> ResultIterCombineSynErrors<T, I> for I
+where
+    I: std::iter::Iterator<Item = Result<T>>,
+{
+    fn collect_syn_error<B: FromIterator<T>>(self) -> Result<B>
+    where
+        B: Default,
+    {
+        let res_vec = self
+            .fold::<Result<Vec<T>>, _>(
+                Ok(Vec::new()),
+                |accum, res| {
+                    match (accum, res) {
+                        (Err(mut accum_err), Err(res_err)) => {
+                            accum_err.combine(res_err);
+                            Err(accum_err)
+                        },
+                        (Err(accum_err), Ok(_)) => Err(accum_err),
+                        (Ok(_), Err(res_err)) => Err(res_err),
+                        (Ok(mut accum_val), Ok(res_val)) => {
+                            accum_val.push(res_val);
+                            Ok(accum_val)
+                        }
+                    }
+                }
+            );
+
+        res_vec.map(|vec| B::from_iter(vec))
+    }
+}
