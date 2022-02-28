@@ -93,8 +93,7 @@ fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
             let sess = ParseSess::new(FilePathMapping::empty());
             let before = match librustc_parse(content, &sess) {
                 Ok(before) => before,
-                Err(mut diagnostic) => {
-                    diagnostic.cancel();
+                Err(diagnostic) => {
                     if diagnostic
                         .message()
                         .starts_with("file not found for module")
@@ -107,6 +106,7 @@ fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
                             diagnostic.message(),
                         );
                     }
+                    diagnostic.cancel();
                     return Err(true);
                 }
             };

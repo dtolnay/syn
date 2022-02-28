@@ -64,7 +64,7 @@ mod librustc_parse {
             let emitter = Box::new(SilentEmitter);
             let handler = Handler::with_emitter(false, None, emitter);
             let sess = ParseSess::with_span_handler(handler, cm);
-            if let Err(mut diagnostic) = rustc_parse::parse_crate_from_source_str(
+            if let Err(diagnostic) = rustc_parse::parse_crate_from_source_str(
                 FileName::Custom("bench".to_owned()),
                 content.to_owned(),
                 &sess,
