@@ -15,9 +15,9 @@ use rustc_ast::ast::{
     Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatField, PatKind, Path,
     PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit,
     StrStyle, StructExpr, StructRest, Term, Trait, TraitBoundModifier, TraitObjectSyntax, TraitRef,
-    Ty, TyAlias, TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant,
-    VariantData, Visibility, VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate,
-    WherePredicate, WhereRegionPredicate,
+    Ty, TyAlias, TyAliasWhereClause, TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree,
+    UseTreeKind, Variant, VariantData, Visibility, VisibilityKind, WhereBoundPredicate,
+    WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, DelimToken, Nonterminal, Token, TokenKind};
@@ -339,7 +339,8 @@ spanless_eq_struct!(Token; kind span);
 spanless_eq_struct!(Trait; unsafety is_auto generics bounds items);
 spanless_eq_struct!(TraitRef; path ref_id);
 spanless_eq_struct!(Ty; id kind span tokens);
-spanless_eq_struct!(TyAlias; defaultness generics bounds ty);
+spanless_eq_struct!(TyAlias; defaultness generics where_clauses where_predicates_split bounds ty);
+spanless_eq_struct!(TyAliasWhereClause; 0 1);
 spanless_eq_struct!(UseTree; prefix kind span);
 spanless_eq_struct!(Variant; attrs id span !vis ident data disr_expr is_placeholder);
 spanless_eq_struct!(Visibility; kind span tokens);
