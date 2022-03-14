@@ -654,7 +654,7 @@ pub mod parsing {
     fn pat_lit_expr(input: ParseStream) -> Result<Option<Box<Expr>>> {
         if input.is_empty()
             || input.peek(Token![|])
-            || input.peek(Token![=>])
+            || input.peek(Token![=])
             || input.peek(Token![:]) && !input.peek(Token![::])
             || input.peek(Token![,])
             || input.peek(Token![;])
