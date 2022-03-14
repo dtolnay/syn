@@ -1177,14 +1177,25 @@ pub mod parsing {
         semi_token: Token![;],
     }
 
-    impl Parse for FlexibleItemType {
-        fn parse(input: ParseStream) -> Result<Self> {
+    enum WhereClauseLocation {
+        // type Ty<T> where T: 'static = T;
+        BeforeEq,
+        // type Ty<T> = T where T: 'static;
+        #[allow(dead_code)]
+        AfterEq,
+        // TODO: goes away once the migration period on rust-lang/rust#89122 is over
+        Both,
+    }
+
+    impl FlexibleItemType {
+        fn parse(input: ParseStream, where_clause_location: WhereClauseLocation) -> Result<Self> {
             let vis: Visibility = input.parse()?;
             let defaultness: Option<Token![default]> = input.parse()?;
             let type_token: Token![type] = input.parse()?;
             let ident: Ident = input.parse()?;
             let mut generics: Generics = input.parse()?;
             let colon_token: Option<Token![:]> = input.parse()?;
+
             let mut bounds = Punctuated::new();
             if colon_token.is_some() {
                 loop {
@@ -1198,12 +1209,26 @@ pub mod parsing {
                     bounds.push_punct(input.parse::<Token![+]>()?);
                 }
             }
-            generics.where_clause = input.parse()?;
+
+            if let WhereClauseLocation::BeforeEq | WhereClauseLocation::Both = where_clause_location
+            {
+                generics.where_clause = input.parse()?;
+            }
+
             let ty = if let Some(eq_token) = input.parse()? {
                 Some((eq_token, input.parse::<Type>()?))
             } else {
                 None
             };
+
+            if generics.where_clause.is_none() {
+                if let WhereClauseLocation::AfterEq | WhereClauseLocation::Both =
+                    where_clause_location
+                {
+                    generics.where_clause = input.parse()?;
+                }
+            }
+
             let semi_token: Token![;] = input.parse()?;
 
             Ok(FlexibleItemType {
@@ -1868,7 +1893,7 @@ pub mod parsing {
             bounds: _,
             ty,
             semi_token,
-        } = input.parse()?;
+        } = FlexibleItemType::parse(input, WhereClauseLocation::BeforeEq)?;
 
         if defaultness.is_some()
             || generics.lt_token.is_some()
@@ -1937,7 +1962,7 @@ pub mod parsing {
             bounds: _,
             ty,
             semi_token,
-        } = input.parse()?;
+        } = FlexibleItemType::parse(input, WhereClauseLocation::BeforeEq)?;
 
         if defaultness.is_some() || colon_token.is_some() || ty.is_none() {
             Ok(Item::Verbatim(verbatim::between(begin, input)))
@@ -2328,7 +2353,6 @@ pub mod parsing {
                 }
             }
 
-            generics.where_clause = input.parse()?;
             let default = if input.peek(Token![=]) {
                 let eq_token: Token![=] = input.parse()?;
                 let default: Type = input.parse()?;
@@ -2336,6 +2360,8 @@ pub mod parsing {
             } else {
                 None
             };
+
+            generics.where_clause = input.parse()?;
             let semi_token: Token![;] = input.parse()?;
 
             Ok(TraitItemType {
@@ -2362,7 +2388,7 @@ pub mod parsing {
             bounds,
             ty,
             semi_token,
-        } = input.parse()?;
+        } = FlexibleItemType::parse(input, WhereClauseLocation::Both)?;
 
         if defaultness.is_some() || vis.is_some() {
             Ok(TraitItem::Verbatim(verbatim::between(begin, input)))
@@ -2661,20 +2687,26 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ImplItemType {
         fn parse(input: ParseStream) -> Result<Self> {
+            let attrs = input.call(Attribute::parse_outer)?;
+            let vis: Visibility = input.parse()?;
+            let defaultness: Option<Token![default]> = input.parse()?;
+            let type_token: Token![type] = input.parse()?;
+            let ident: Ident = input.parse()?;
+            let mut generics: Generics = input.parse()?;
+            let eq_token: Token![=] = input.parse()?;
+            let ty: Type = input.parse()?;
+            generics.where_clause = input.parse()?;
+            let semi_token: Token![;] = input.parse()?;
             Ok(ImplItemType {
-                attrs: input.call(Attribute::parse_outer)?,
-                vis: input.parse()?,
-                defaultness: input.parse()?,
-                type_token: input.parse()?,
-                ident: input.parse()?,
-                generics: {
-                    let mut generics: Generics = input.parse()?;
-                    generics.where_clause = input.parse()?;
-                    generics
-                },
-                eq_token: input.parse()?,
-                ty: input.parse()?,
-                semi_token: input.parse()?,
+                attrs,
+                vis,
+                defaultness,
+                type_token,
+                ident,
+                generics,
+                eq_token,
+                ty,
+                semi_token,
             })
         }
     }
@@ -2690,7 +2722,7 @@ pub mod parsing {
             bounds: _,
             ty,
             semi_token,
-        } = input.parse()?;
+        } = FlexibleItemType::parse(input, WhereClauseLocation::Both)?;
 
         if colon_token.is_some() || ty.is_none() {
             Ok(ImplItem::Verbatim(verbatim::between(begin, input)))
@@ -3106,11 +3138,11 @@ mod printing {
                 TokensOrDefault(&self.colon_token).to_tokens(tokens);
                 self.bounds.to_tokens(tokens);
             }
-            self.generics.where_clause.to_tokens(tokens);
             if let Some((eq_token, default)) = &self.default {
                 eq_token.to_tokens(tokens);
                 default.to_tokens(tokens);
             }
+            self.generics.where_clause.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }
@@ -3171,9 +3203,9 @@ mod printing {
             self.type_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);
-            self.generics.where_clause.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }
