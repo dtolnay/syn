@@ -14,8 +14,12 @@ const REVISION: &str = "e95b10ba4ac4564ed25f7eef143e3182c33b3902";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO
+    // TODO: trait bound with associated constant constraint:
+    // where T: Trait<N = 3usize>
     "src/test/ui/associated-consts/assoc-const.rs",
+
+    // TODO: trailing where-clause on impl associated type:
+    // impl<T> Trait for Ty<T> { type Assoc<'a> = T where T: 'a; }
     "src/test/ui/generic-associated-types/collections.rs",
     "src/test/ui/generic-associated-types/construct_with_other_type.rs",
     "src/test/ui/generic-associated-types/impl_bounds_ok.rs",
@@ -25,6 +29,9 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/generic-associated-types/issue-92280.rs",
     "src/test/ui/generic-associated-types/iterable.rs",
     "src/test/ui/generic-associated-types/streaming_iterator.rs",
+
+    // TODO: negative literal const generic:
+    // impl Signed<-152> {…}
     "src/test/ui/symbol-names/const-generics-demangling.rs",
 
     // TODO: impl ~const T {}
