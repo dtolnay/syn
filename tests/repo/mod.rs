@@ -16,10 +16,12 @@ const REVISION: &str = "e95b10ba4ac4564ed25f7eef143e3182c33b3902";
 static EXCLUDE: &[&str] = &[
     // TODO: trait bound with associated constant constraint:
     // where T: Trait<N = 3usize>
+    // https://github.com/dtolnay/syn/issues/1138
     "src/test/ui/associated-consts/assoc-const.rs",
 
     // TODO: trailing where-clause on impl associated type:
     // impl<T> Trait for Ty<T> { type Assoc<'a> = T where T: 'a; }
+    // https://github.com/dtolnay/syn/issues/1071
     "src/test/ui/generic-associated-types/collections.rs",
     "src/test/ui/generic-associated-types/construct_with_other_type.rs",
     "src/test/ui/generic-associated-types/impl_bounds_ok.rs",
