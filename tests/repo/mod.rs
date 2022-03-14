@@ -30,10 +30,6 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/generic-associated-types/iterable.rs",
     "src/test/ui/generic-associated-types/streaming_iterator.rs",
 
-    // TODO: negative literal const generic:
-    // impl Signed<-152> {…}
-    "src/test/ui/symbol-names/const-generics-demangling.rs",
-
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
