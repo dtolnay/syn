@@ -14,19 +14,6 @@ const REVISION: &str = "e95b10ba4ac4564ed25f7eef143e3182c33b3902";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
-    // TODO: trailing where-clause on impl associated type:
-    // impl<T> Trait for Ty<T> { type Assoc<'a> = T where T: 'a; }
-    // https://github.com/dtolnay/syn/issues/1071
-    "src/test/ui/generic-associated-types/collections.rs",
-    "src/test/ui/generic-associated-types/construct_with_other_type.rs",
-    "src/test/ui/generic-associated-types/impl_bounds_ok.rs",
-    "src/test/ui/generic-associated-types/issue-76826.rs",
-    "src/test/ui/generic-associated-types/issue-88287.rs",
-    "src/test/ui/generic-associated-types/issue-91139.rs",
-    "src/test/ui/generic-associated-types/issue-92280.rs",
-    "src/test/ui/generic-associated-types/iterable.rs",
-    "src/test/ui/generic-associated-types/streaming_iterator.rs",
-
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
