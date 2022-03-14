@@ -321,6 +321,6 @@ fn test_closure_vs_rangefull() {
 
 #[test]
 fn test_postfix_operator_after_cast() {
-    syn::parse_str::<Expr>("|| &x as T[0]").unwrap(); // FIXME
-    syn::parse_str::<Expr>("|| () as ()()").unwrap(); // FIXME
+    syn::parse_str::<Expr>("|| &x as T[0]").unwrap_err();
+    syn::parse_str::<Expr>("|| () as ()()").unwrap_err();
 }

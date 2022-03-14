@@ -1365,6 +1365,7 @@ pub(crate) mod parsing {
             } else if Precedence::Cast >= base && input.peek(Token![as]) {
                 let as_token: Token![as] = input.parse()?;
                 let ty = input.call(Type::without_plus)?;
+                check_cast(input)?;
                 lhs = Expr::Cast(ExprCast {
                     attrs: Vec::new(),
                     expr: Box::new(lhs),
@@ -1374,6 +1375,7 @@ pub(crate) mod parsing {
             } else if Precedence::Cast >= base && input.peek(Token![:]) && !input.peek(Token![::]) {
                 let colon_token: Token![:] = input.parse()?;
                 let ty = input.call(Type::without_plus)?;
+                check_cast(input)?;
                 lhs = Expr::Type(ExprType {
                     attrs: Vec::new(),
                     expr: Box::new(lhs),
@@ -1421,6 +1423,7 @@ pub(crate) mod parsing {
             } else if Precedence::Cast >= base && input.peek(Token![as]) {
                 let as_token: Token![as] = input.parse()?;
                 let ty = input.call(Type::without_plus)?;
+                check_cast(input)?;
                 lhs = Expr::Cast(ExprCast {
                     attrs: Vec::new(),
                     expr: Box::new(lhs),
@@ -2895,6 +2898,28 @@ pub(crate) mod parsing {
                 Member::Unnamed(_) => false,
             }
         }
+    }
+
+    fn check_cast(input: ParseStream) -> Result<()> {
+        let kind = if input.peek(Token![.]) && !input.peek(Token![..]) {
+            if input.peek2(token::Await) {
+                "`.await`"
+            } else if input.peek2(Ident) && (input.peek3(token::Paren) || input.peek3(Token![::])) {
+                "a method call"
+            } else {
+                "a field access"
+            }
+        } else if input.peek(Token![?]) {
+            "`?`"
+        } else if input.peek(token::Bracket) {
+            "indexing"
+        } else if input.peek(token::Paren) {
+            "a function call"
+        } else {
+            return Ok(());
+        };
+        let msg = format!("casts cannot be followed by {}", kind);
+        Err(input.error(msg))
     }
 }
 
