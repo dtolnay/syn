@@ -1731,6 +1731,12 @@ pub(crate) mod parsing {
             || input.peek(Token![move])
         {
             expr_closure(input, allow_struct).map(Expr::Closure)
+        } else if input.peek(Token![for]) && input.peek2(Token![<]) && input.peek3(Lifetime) {
+            let begin = input.fork();
+            input.parse::<BoundLifetimes>()?;
+            expr_closure(input, allow_struct)?;
+            let verbatim = verbatim::between(begin, input);
+            Ok(Expr::Verbatim(verbatim))
         } else if input.peek(Ident)
             || input.peek(Token![::])
             || input.peek(Token![<])
