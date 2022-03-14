@@ -1210,9 +1210,11 @@ pub mod parsing {
                 }
             }
 
-            if let WhereClauseLocation::BeforeEq | WhereClauseLocation::Both = where_clause_location
-            {
-                generics.where_clause = input.parse()?;
+            match where_clause_location {
+                WhereClauseLocation::BeforeEq | WhereClauseLocation::Both => {
+                    generics.where_clause = input.parse()?;
+                }
+                _ => {}
             }
 
             let ty = if let Some(eq_token) = input.parse()? {
@@ -1221,12 +1223,13 @@ pub mod parsing {
                 None
             };
 
-            if generics.where_clause.is_none() {
-                if let WhereClauseLocation::AfterEq | WhereClauseLocation::Both =
-                    where_clause_location
+            match where_clause_location {
+                WhereClauseLocation::AfterEq | WhereClauseLocation::Both
+                    if generics.where_clause.is_none() =>
                 {
                     generics.where_clause = input.parse()?;
                 }
+                _ => {}
             }
 
             let semi_token: Token![;] = input.parse()?;
