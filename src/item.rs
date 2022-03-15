@@ -1024,7 +1024,23 @@ pub mod parsing {
                     Err(lookahead.error())
                 }
             } else if lookahead.peek(Token![use]) {
-                input.parse().map(Item::Use)
+                // See https://github.com/dtolnay/syn/issues/1143: let's fall back to a
+                // `Item::Verbatim` in case of "extraneous" stuff inside a braced use,
+                // such as leading `::` in some path (not necessarily in the first one).
+                let item_use = &input.fork();
+                match item_use.parse().map(Item::Use) {
+                    Err(_) if ahead.peek2(token::Brace) && ahead.peek3(Token![;]) => {
+                        input.advance_to(&ahead);
+                        input.parse::<Token![use]>()?;
+                        input.parse::<Group>()?;
+                        input.parse::<Token![;]>()?;
+                        Ok(Item::Verbatim(verbatim::between(begin, input)))
+                    }
+                    result => {
+                        input.advance_to(item_use);
+                        result
+                    }
+                }
             } else if lookahead.peek(Token![static]) {
                 let vis = input.parse()?;
                 let static_token = input.parse()?;
