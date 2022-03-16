@@ -740,7 +740,10 @@ pub mod parsing {
                         break;
                     }
 
-                    inputs.push_punct(args.parse()?);
+                    let comma = args.parse()?;
+                    if !has_mut_self {
+                        inputs.push_punct(comma);
+                    }
                 }
 
                 inputs
