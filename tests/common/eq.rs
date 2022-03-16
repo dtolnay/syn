@@ -12,12 +12,12 @@ use rustc_ast::ast::{
     InlineAsmOperand, InlineAsmOptions, InlineAsmRegOrRegClass, InlineAsmTemplatePiece, IntTy,
     IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind, Local,
     LocalKind, MacArgs, MacCall, MacCallStmt, MacDelimiter, MacStmtStyle, MacroDef, ModKind,
-    Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatField, PatKind, Path,
-    PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit,
-    StrStyle, StructExpr, StructRest, Term, Trait, TraitBoundModifier, TraitObjectSyntax, TraitRef,
-    Ty, TyAlias, TyAliasWhereClause, TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree,
-    UseTreeKind, Variant, VariantData, Visibility, VisibilityKind, WhereBoundPredicate,
-    WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
+    ModSpans, Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatField,
+    PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt,
+    StmtKind, StrLit, StrStyle, StructExpr, StructRest, Term, Trait, TraitBoundModifier,
+    TraitObjectSyntax, TraitRef, Ty, TyAlias, TyAliasWhereClause, TyKind, UintTy, UnOp, Unsafe,
+    UnsafeSource, UseTree, UseTreeKind, Variant, VariantData, Visibility, VisibilityKind,
+    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, DelimToken, Nonterminal, Token, TokenKind};
@@ -302,7 +302,7 @@ spanless_eq_struct!(Attribute; kind id style span);
 spanless_eq_struct!(AttributesData; attrs tokens);
 spanless_eq_struct!(BareFnTy; unsafety ext generic_params decl);
 spanless_eq_struct!(Block; stmts id rules span tokens could_be_bare_literal);
-spanless_eq_struct!(Crate; attrs items span id is_placeholder);
+spanless_eq_struct!(Crate; attrs items spans id is_placeholder);
 spanless_eq_struct!(EnumDef; variants);
 spanless_eq_struct!(Expr; id kind span attrs !tokens);
 spanless_eq_struct!(ExprField; attrs id span ident expr is_shorthand is_placeholder);
@@ -324,6 +324,7 @@ spanless_eq_struct!(Local; pat ty kind id span attrs !tokens);
 spanless_eq_struct!(MacCall; path args prior_type_ascription);
 spanless_eq_struct!(MacCallStmt; mac style attrs tokens);
 spanless_eq_struct!(MacroDef; body macro_rules);
+spanless_eq_struct!(ModSpans; !inner_span !inject_use_span);
 spanless_eq_struct!(MutTy; ty mutbl);
 spanless_eq_struct!(ParenthesizedArgs; span inputs inputs_span output);
 spanless_eq_struct!(Pat; id kind span tokens);
