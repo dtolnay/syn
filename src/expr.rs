@@ -1863,8 +1863,7 @@ pub(crate) mod parsing {
         }
 
         if allow_struct.0 && input.peek(token::Brace) {
-            let outer_attrs = Vec::new();
-            let expr_struct = expr_struct_helper(input, outer_attrs, expr.path)?;
+            let expr_struct = expr_struct_helper(input, expr.path)?;
             if expr.qself.is_some() {
                 Ok(Expr::Verbatim(verbatim::between(begin, input)))
             } else {
@@ -1890,10 +1889,9 @@ pub(crate) mod parsing {
     fn paren_or_tuple(input: ParseStream) -> Result<Expr> {
         let content;
         let paren_token = parenthesized!(content in input);
-        let inner_attrs = content.call(Attribute::parse_inner)?;
         if content.is_empty() {
             return Ok(Expr::Tuple(ExprTuple {
-                attrs: inner_attrs,
+                attrs: Vec::new(),
                 paren_token,
                 elems: Punctuated::new(),
             }));
@@ -1902,7 +1900,7 @@ pub(crate) mod parsing {
         let first: Expr = content.parse()?;
         if content.is_empty() {
             return Ok(Expr::Paren(ExprParen {
-                attrs: inner_attrs,
+                attrs: Vec::new(),
                 paren_token,
                 expr: Box::new(first),
             }));
@@ -1920,7 +1918,7 @@ pub(crate) mod parsing {
             elems.push_value(value);
         }
         Ok(Expr::Tuple(ExprTuple {
-            attrs: inner_attrs,
+            attrs: Vec::new(),
             paren_token,
             elems,
         }))
@@ -1930,10 +1928,9 @@ pub(crate) mod parsing {
     fn array_or_repeat(input: ParseStream) -> Result<Expr> {
         let content;
         let bracket_token = bracketed!(content in input);
-        let inner_attrs = content.call(Attribute::parse_inner)?;
         if content.is_empty() {
             return Ok(Expr::Array(ExprArray {
-                attrs: inner_attrs,
+                attrs: Vec::new(),
                 bracket_token,
                 elems: Punctuated::new(),
             }));
@@ -1953,7 +1950,7 @@ pub(crate) mod parsing {
                 elems.push_value(value);
             }
             Ok(Expr::Array(ExprArray {
-                attrs: inner_attrs,
+                attrs: Vec::new(),
                 bracket_token,
                 elems,
             }))
@@ -1961,7 +1958,7 @@ pub(crate) mod parsing {
             let semi_token: Token![;] = content.parse()?;
             let len: Expr = content.parse()?;
             Ok(Expr::Repeat(ExprRepeat {
-                attrs: inner_attrs,
+                attrs: Vec::new(),
                 bracket_token,
                 expr: Box::new(first),
                 semi_token,
@@ -1978,7 +1975,6 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let content;
             let bracket_token = bracketed!(content in input);
-            let inner_attrs = content.call(Attribute::parse_inner)?;
             let mut elems = Punctuated::new();
 
             while !content.is_empty() {
@@ -1992,7 +1988,7 @@ pub(crate) mod parsing {
             }
 
             Ok(ExprArray {
-                attrs: inner_attrs,
+                attrs: Vec::new(),
                 bracket_token,
                 elems,
             })
@@ -2006,7 +2002,7 @@ pub(crate) mod parsing {
             let content;
             Ok(ExprRepeat {
                 bracket_token: bracketed!(content in input),
-                attrs: content.call(Attribute::parse_inner)?,
+                attrs: Vec::new(),
                 expr: content.parse()?,
                 semi_token: content.parse()?,
                 len: content.parse()?,
@@ -2648,27 +2644,21 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprStruct {
         fn parse(input: ParseStream) -> Result<Self> {
-            let attrs = Vec::new();
             let path: Path = input.parse()?;
-            expr_struct_helper(input, attrs, path)
+            expr_struct_helper(input, path)
         }
     }
 
     #[cfg(feature = "full")]
-    fn expr_struct_helper(
-        input: ParseStream,
-        mut attrs: Vec<Attribute>,
-        path: Path,
-    ) -> Result<ExprStruct> {
+    fn expr_struct_helper(input: ParseStream, path: Path) -> Result<ExprStruct> {
         let content;
         let brace_token = braced!(content in input);
-        attr::parsing::parse_inner(&content, &mut attrs)?;
 
         let mut fields = Punctuated::new();
         while !content.is_empty() {
             if content.peek(Token![..]) {
                 return Ok(ExprStruct {
-                    attrs,
+                    attrs: Vec::new(),
                     brace_token,
                     path,
                     fields,
@@ -2690,7 +2680,7 @@ pub(crate) mod parsing {
         }
 
         Ok(ExprStruct {
-            attrs,
+            attrs: Vec::new(),
             brace_token,
             path,
             fields,
@@ -2957,9 +2947,6 @@ pub(crate) mod printing {
     #[cfg(not(feature = "full"))]
     pub(crate) fn outer_attrs_to_tokens(_attrs: &[Attribute], _tokens: &mut TokenStream) {}
 
-    #[cfg(not(feature = "full"))]
-    fn inner_attrs_to_tokens(_attrs: &[Attribute], _tokens: &mut TokenStream) {}
-
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprBox {
@@ -2976,7 +2963,6 @@ pub(crate) mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.bracket_token.surround(tokens, |tokens| {
-                inner_attrs_to_tokens(&self.attrs, tokens);
                 self.elems.to_tokens(tokens);
             });
         }
@@ -3036,7 +3022,6 @@ pub(crate) mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.paren_token.surround(tokens, |tokens| {
-                inner_attrs_to_tokens(&self.attrs, tokens);
                 self.elems.to_tokens(tokens);
                 // If we only have one argument, we need a trailing comma to
                 // distinguish ExprTuple from ExprParen.
@@ -3433,7 +3418,6 @@ pub(crate) mod printing {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.path.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
-                inner_attrs_to_tokens(&self.attrs, tokens);
                 self.fields.to_tokens(tokens);
                 if let Some(dot2_token) = &self.dot2_token {
                     dot2_token.to_tokens(tokens);
@@ -3451,7 +3435,6 @@ pub(crate) mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.bracket_token.surround(tokens, |tokens| {
-                inner_attrs_to_tokens(&self.attrs, tokens);
                 self.expr.to_tokens(tokens);
                 self.semi_token.to_tokens(tokens);
                 self.len.to_tokens(tokens);
@@ -3475,7 +3458,6 @@ pub(crate) mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.paren_token.surround(tokens, |tokens| {
-                inner_attrs_to_tokens(&self.attrs, tokens);
                 self.expr.to_tokens(tokens);
             });
         }

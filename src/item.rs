@@ -1987,13 +1987,12 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ItemStruct {
         fn parse(input: ParseStream) -> Result<Self> {
-            let mut attrs = input.call(Attribute::parse_outer)?;
+            let attrs = input.call(Attribute::parse_outer)?;
             let vis = input.parse::<Visibility>()?;
             let struct_token = input.parse::<Token![struct]>()?;
             let ident = input.parse::<Ident>()?;
             let generics = input.parse::<Generics>()?;
-            let (where_clause, fields, semi_token) =
-                derive::parsing::data_struct(input, &mut attrs)?;
+            let (where_clause, fields, semi_token) = derive::parsing::data_struct(input)?;
             Ok(ItemStruct {
                 attrs,
                 vis,
@@ -2012,13 +2011,12 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ItemEnum {
         fn parse(input: ParseStream) -> Result<Self> {
-            let mut attrs = input.call(Attribute::parse_outer)?;
+            let attrs = input.call(Attribute::parse_outer)?;
             let vis = input.parse::<Visibility>()?;
             let enum_token = input.parse::<Token![enum]>()?;
             let ident = input.parse::<Ident>()?;
             let generics = input.parse::<Generics>()?;
-            let (where_clause, brace_token, variants) =
-                derive::parsing::data_enum(input, &mut attrs)?;
+            let (where_clause, brace_token, variants) = derive::parsing::data_enum(input)?;
             Ok(ItemEnum {
                 attrs,
                 vis,
@@ -2037,12 +2035,12 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ItemUnion {
         fn parse(input: ParseStream) -> Result<Self> {
-            let mut attrs = input.call(Attribute::parse_outer)?;
+            let attrs = input.call(Attribute::parse_outer)?;
             let vis = input.parse::<Visibility>()?;
             let union_token = input.parse::<Token![union]>()?;
             let ident = input.parse::<Ident>()?;
             let generics = input.parse::<Generics>()?;
-            let (where_clause, fields) = derive::parsing::data_union(input, &mut attrs)?;
+            let (where_clause, fields) = derive::parsing::data_union(input)?;
             Ok(ItemUnion {
                 attrs,
                 vis,
