@@ -775,6 +775,68 @@ mod gen {
     ///     // Output: (((a)()) + (((b)((1))) * ((c).d)))
     /// }
     /// ```
+    ///
+    /// This fold publicize the given main function.
+    ///
+    /// ```
+    /// // [dependencies]
+    /// // quote = "1.0"
+    /// // syn = { version = "1.0", features = ["fold", "full"] }
+    /// // proc-macro2 = "1.0"
+    /// 
+    /// use proc_macro2::Span;
+    /// use quote::quote;
+    /// use syn::fold::{fold_expr, Fold};
+    /// use syn::{token, Expr, ExprParen};
+    /// use syn::{token::Pub, VisPublic, Visibility};
+    /// use syn::{File as SynFile, ItemFn, Item};
+    ///
+    /// struct PublicizeMainFn;
+    /// impl Fold for PublicizeMainFn {
+    ///     fn fold_file(&mut self, file: SynFile) -> SynFile {
+    ///         SynFile {
+    ///             items: file
+    ///                 .items
+    ///                 .iter()
+    ///                 .map(|item| match item {
+    ///                     Item::Fn(item_fn) => self.fold_item_fn(item_fn.to_owned()).into(),
+    ///                     _ => item.to_owned(),
+    ///                 })
+    ///                 .collect(),
+    ///             ..file
+    ///         }
+    ///     }
+    ///     fn fold_item_fn(&mut self, item_fn: ItemFn) -> ItemFn {
+    ///         match item_fn.sig.ident.to_string().as_str() {
+    ///             "main" => ItemFn {
+    ///                 vis: Visibility::Public(VisPublic {
+    ///                     pub_token: Pub {
+    ///                         span: Span::call_site(),
+    ///                     },
+    ///                 }),
+    ///                 ..item_fn
+    ///             },
+    ///             _ => item_fn,
+    ///         }
+    ///     }
+    /// }
+    ///
+    /// fn main() {
+    ///     const SRC_CODE: &str = r#"
+    ///       fn main() {
+    ///           println!("print from pub main");
+    ///       }
+    ///       "#;
+    ///     let ast: SynFile = syn::parse_str(SRC_CODE).unwrap();
+    ///     let modified_main_fn = PublicizeMainFn.fold_file(ast);
+    ///     let modified_main_fn: String = quote! {#modified_main_fn}.to_string();
+    ///     println!("{}", modified_main_fn);
+    ///     // Output
+    ///     // pub fn main() {
+    ///     //    println!("print from pub main");
+    ///     // }
+    /// }
+    /// ```
     #[cfg(feature = "fold")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "fold")))]
     #[rustfmt::skip]
