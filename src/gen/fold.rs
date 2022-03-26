@@ -18,7 +18,7 @@ macro_rules! full {
 #[cfg(all(feature = "derive", not(feature = "full")))]
 macro_rules! full {
     ($e:expr) => {
-        unreachable ! ()
+        unreachable!()
     };
 }
 /// Syntax tree traversal to transform the nodes of an owned syntax tree.

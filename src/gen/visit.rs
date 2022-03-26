@@ -17,7 +17,7 @@ macro_rules! full {
 #[cfg(all(feature = "derive", not(feature = "full")))]
 macro_rules! full {
     ($e:expr) => {
-        unreachable ! ()
+        unreachable!()
     };
 }
 macro_rules! skip {
