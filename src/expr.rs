@@ -87,6 +87,7 @@ ast_enum_of_structs! {
     /// see names getting repeated in your code, like accessing
     /// `receiver.receiver` or `pat.pat` or `cond.cond`.
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[cfg_attr(not(syn_no_non_exhaustive), non_exhaustive)]
     pub enum Expr {
         /// A slice literal expression: `[a, b, c, d]`.
         Array(ExprArray),
@@ -224,8 +225,9 @@ ast_enum_of_structs! {
         /// A yield expression: `yield expr`.
         Yield(ExprYield),
 
-        // The following is the only supported idiom for exhaustive matching of
-        // this enum.
+        // Not public API.
+        //
+        // For testing exhaustiveness in downstream code, use the following idiom:
         //
         //     match expr {
         //         Expr::Array(expr) => {...}
@@ -233,9 +235,7 @@ ast_enum_of_structs! {
         //         ...
         //         Expr::Yield(expr) => {...}
         //
-        //         #[cfg(test)]
-        //         Expr::__TestExhaustive(_) => unimplemented!(),
-        //         #[cfg(not(test))]
+        //         #[cfg_attr(test, deny(non_exhaustive_omitted_patterns))]
         //         _ => { /* some sane fallback */ }
         //     }
         //
@@ -243,12 +243,9 @@ ast_enum_of_structs! {
         // a variant. You will be notified by a test failure when a variant is
         // added, so that you can add code to handle it, but your library will
         // continue to compile and work for downstream users in the interim.
-        //
-        // Once `deny(reachable)` is available in rustc, Expr will be
-        // reimplemented as a non_exhaustive enum.
-        // https://github.com/rust-lang/rust/issues/44109#issuecomment-521781237
+        #[cfg(syn_no_non_exhaustive)]
         #[doc(hidden)]
-        __TestExhaustive(crate::private),
+        __NonExhaustive,
     }
 }
 
@@ -838,9 +835,7 @@ impl Expr {
             | Expr::Yield(ExprYield { attrs, .. }) => mem::replace(attrs, new),
             Expr::Verbatim(_) => Vec::new(),
 
-            #[cfg(test)]
-            Expr::__TestExhaustive(_) => unimplemented!(),
-            #[cfg(not(test))]
+            #[cfg(syn_no_non_exhaustive)]
             _ => unreachable!(),
         }
     }
@@ -2510,9 +2505,7 @@ pub(crate) mod parsing {
                 Pat::Verbatim(_) => {}
                 Pat::Wild(pat) => pat.attrs = attrs,
 
-                #[cfg(test)]
-                Pat::__TestExhaustive(_) => unimplemented!(),
-                #[cfg(not(test))]
+                #[cfg(syn_no_non_exhaustive)]
                 _ => unreachable!(),
             }
             Ok(pat)

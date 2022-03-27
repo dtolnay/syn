@@ -76,7 +76,8 @@ macro_rules! ast_enum_of_structs_impl {
     (
         $pub:ident $enum:ident $name:ident {
             $(
-                $(#[$variant_attr:meta])*
+                $(#[cfg $cfg_attr:tt])*
+                $(#[doc $($doc_attr:tt)*])*
                 $variant:ident $( ($($member:ident)::+) )*,
             )*
         }
@@ -95,7 +96,13 @@ macro_rules! ast_enum_of_structs_impl {
             $($remaining)*
             ()
             tokens
-            $name { $($variant $($($member)::+)*,)* }
+            $name {
+                $(
+                    $(#[cfg $cfg_attr])*
+                    $(#[doc $($doc_attr)*])*
+                    $variant $($($member)::+)*,
+                )*
+            }
         }
     };
 }
@@ -103,9 +110,6 @@ macro_rules! ast_enum_of_structs_impl {
 macro_rules! ast_enum_from_struct {
     // No From<TokenStream> for verbatim variants.
     ($name:ident::Verbatim, $member:ident) => {};
-
-    // No From<TokenStream> for private variants.
-    ($name:ident::$variant:ident, crate::private) => {};
 
     ($name:ident::$variant:ident, $member:ident) => {
         impl From<$member> for $name {
@@ -120,23 +124,30 @@ macro_rules! ast_enum_from_struct {
 macro_rules! generate_to_tokens {
     (do_not_generate_to_tokens $($foo:tt)*) => ();
 
-    (($($arms:tt)*) $tokens:ident $name:ident { $variant:ident, $($next:tt)*}) => {
+    (
+        ($($arms:tt)*) $tokens:ident $name:ident {
+            $(#[cfg $cfg_attr:tt])*
+            $(#[doc $($doc_attr:tt)*])*
+            $variant:ident,
+            $($next:tt)*
+        }
+    ) => {
         generate_to_tokens!(
-            ($($arms)* $name::$variant => {})
+            ($($arms)* $(#[cfg $cfg_attr])* $name::$variant => {})
             $tokens $name { $($next)* }
         );
     };
 
-    (($($arms:tt)*) $tokens:ident $name:ident { $variant:ident $member:ident, $($next:tt)*}) => {
+    (
+        ($($arms:tt)*) $tokens:ident $name:ident {
+            $(#[cfg $cfg_attr:tt])*
+            $(#[doc $($doc_attr:tt)*])*
+            $variant:ident $member:ident,
+            $($next:tt)*
+        }
+    ) => {
         generate_to_tokens!(
-            ($($arms)* $name::$variant(_e) => _e.to_tokens($tokens),)
-            $tokens $name { $($next)* }
-        );
-    };
-
-    (($($arms:tt)*) $tokens:ident $name:ident { $variant:ident crate::private, $($next:tt)*}) => {
-        generate_to_tokens!(
-            ($($arms)* $name::$variant(_) => unreachable!(),)
+            ($($arms)* $(#[cfg $cfg_attr])* $name::$variant(_e) => _e.to_tokens($tokens),)
             $tokens $name { $($next)* }
         );
     };

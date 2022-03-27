@@ -42,8 +42,16 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
             });
             let nonexhaustive = if node.exhaustive {
                 None
+            } else if node.ident == "Expr" {
+                Some(quote! {
+                    #[cfg(any(syn_no_non_exhaustive, not(feature = "full")))]
+                    _ => unreachable!(),
+                })
             } else {
-                Some(quote!(_ => unreachable!()))
+                Some(quote! {
+                    #[cfg(syn_no_non_exhaustive)]
+                    _ => unreachable!(),
+                })
             };
             quote! {
                 match self {
