@@ -784,7 +784,7 @@ ast_struct! {
 }
 
 impl Expr {
-    #[cfg(not(syn_no_const_vec_new))]
+    #[cfg(all(feature = "parsing", not(syn_no_const_vec_new)))]
     const DUMMY: Self = Expr::Path(ExprPath {
         attrs: Vec::new(),
         qself: None,
