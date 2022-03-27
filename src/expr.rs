@@ -228,10 +228,10 @@ ast_enum_of_structs! {
         // this enum.
         //
         //     match expr {
-        //         Expr::Array(e) => {...}
-        //         Expr::Assign(e) => {...}
+        //         Expr::Array(expr) => {...}
+        //         Expr::Assign(expr) => {...}
         //         ...
-        //         Expr::Yield(e) => {...}
+        //         Expr::Yield(expr) => {...}
         //
         //         #[cfg(test)]
         //         Expr::__TestExhaustive(_) => unimplemented!(),

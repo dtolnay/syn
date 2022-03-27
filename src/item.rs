@@ -74,11 +74,11 @@ ast_enum_of_structs! {
         // The following is the only supported idiom for exhaustive matching of
         // this enum.
         //
-        //     match expr {
-        //         Item::Const(e) => {...}
-        //         Item::Enum(e) => {...}
+        //     match item {
+        //         Item::Const(item) => {...}
+        //         Item::Enum(item) => {...}
         //         ...
-        //         Item::Verbatim(e) => {...}
+        //         Item::Verbatim(item) => {...}
         //
         //         #[cfg(test)]
         //         Item::__TestExhaustive(_) => unimplemented!(),
@@ -583,11 +583,11 @@ ast_enum_of_structs! {
         // The following is the only supported idiom for exhaustive matching of
         // this enum.
         //
-        //     match expr {
-        //         ForeignItem::Fn(e) => {...}
-        //         ForeignItem::Static(e) => {...}
+        //     match item {
+        //         ForeignItem::Fn(item) => {...}
+        //         ForeignItem::Static(item) => {...}
         //         ...
-        //         ForeignItem::Verbatim(e) => {...}
+        //         ForeignItem::Verbatim(item) => {...}
         //
         //         #[cfg(test)]
         //         ForeignItem::__TestExhaustive(_) => unimplemented!(),
@@ -694,11 +694,11 @@ ast_enum_of_structs! {
         // The following is the only supported idiom for exhaustive matching of
         // this enum.
         //
-        //     match expr {
-        //         TraitItem::Const(e) => {...}
-        //         TraitItem::Method(e) => {...}
+        //     match item {
+        //         TraitItem::Const(item) => {...}
+        //         TraitItem::Method(item) => {...}
         //         ...
-        //         TraitItem::Verbatim(e) => {...}
+        //         TraitItem::Verbatim(item) => {...}
         //
         //         #[cfg(test)]
         //         TraitItem::__TestExhaustive(_) => unimplemented!(),
@@ -807,11 +807,11 @@ ast_enum_of_structs! {
         // The following is the only supported idiom for exhaustive matching of
         // this enum.
         //
-        //     match expr {
-        //         ImplItem::Const(e) => {...}
-        //         ImplItem::Method(e) => {...}
+        //     match item {
+        //         ImplItem::Const(item) => {...}
+        //         ImplItem::Method(item) => {...}
         //         ...
-        //         ImplItem::Verbatim(e) => {...}
+        //         ImplItem::Verbatim(item) => {...}
         //
         //         #[cfg(test)]
         //         ImplItem::__TestExhaustive(_) => unimplemented!(),

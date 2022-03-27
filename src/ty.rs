@@ -66,11 +66,11 @@ ast_enum_of_structs! {
         // The following is the only supported idiom for exhaustive matching of
         // this enum.
         //
-        //     match expr {
-        //         Type::Array(e) => {...}
-        //         Type::BareFn(e) => {...}
+        //     match ty {
+        //         Type::Array(ty) => {...}
+        //         Type::BareFn(ty) => {...}
         //         ...
-        //         Type::Verbatim(e) => {...}
+        //         Type::Verbatim(ty) => {...}
         //
         //         #[cfg(test)]
         //         Type::__TestExhaustive(_) => unimplemented!(),

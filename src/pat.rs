@@ -75,11 +75,11 @@ ast_enum_of_structs! {
         // The following is the only supported idiom for exhaustive matching of
         // this enum.
         //
-        //     match expr {
-        //         Pat::Box(e) => {...}
-        //         Pat::Ident(e) => {...}
+        //     match pat {
+        //         Pat::Box(pat) => {...}
+        //         Pat::Ident(pat) => {...}
         //         ...
-        //         Pat::Wild(e) => {...}
+        //         Pat::Wild(pat) => {...}
         //
         //         #[cfg(test)]
         //         Pat::__TestExhaustive(_) => unimplemented!(),
