@@ -2868,7 +2868,14 @@ pub(crate) mod parsing {
         }
         for part in float_repr.split('.') {
             let index = crate::parse_str(part).map_err(|err| Error::new(float.span(), err))?;
-            let meaningless_placeholder = Expr::Verbatim(TokenStream::new());
+            let meaningless_placeholder = Expr::Path(ExprPath {
+                attrs: Vec::new(),
+                qself: None,
+                path: Path {
+                    leading_colon: None,
+                    segments: Punctuated::new(),
+                },
+            });
             let base = mem::replace(e, meaningless_placeholder);
             *e = Expr::Field(ExprField {
                 attrs: Vec::new(),
