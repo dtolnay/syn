@@ -684,7 +684,7 @@ pub mod parsing {
 }
 
 #[cfg(feature = "printing")]
-mod printing {
+pub(crate) mod printing {
     use super::*;
     use crate::print::TokensOrDefault;
     use proc_macro2::TokenStream;
@@ -835,39 +835,37 @@ mod printing {
         }
     }
 
-    impl private {
-        pub(crate) fn print_path(tokens: &mut TokenStream, qself: &Option<QSelf>, path: &Path) {
-            let qself = match qself {
-                Some(qself) => qself,
-                None => {
-                    path.to_tokens(tokens);
-                    return;
-                }
-            };
-            qself.lt_token.to_tokens(tokens);
-            qself.ty.to_tokens(tokens);
+    pub(crate) fn print_path(tokens: &mut TokenStream, qself: &Option<QSelf>, path: &Path) {
+        let qself = match qself {
+            Some(qself) => qself,
+            None => {
+                path.to_tokens(tokens);
+                return;
+            }
+        };
+        qself.lt_token.to_tokens(tokens);
+        qself.ty.to_tokens(tokens);
 
-            let pos = cmp::min(qself.position, path.segments.len());
-            let mut segments = path.segments.pairs();
-            if pos > 0 {
-                TokensOrDefault(&qself.as_token).to_tokens(tokens);
-                path.leading_colon.to_tokens(tokens);
-                for (i, segment) in segments.by_ref().take(pos).enumerate() {
-                    if i + 1 == pos {
-                        segment.value().to_tokens(tokens);
-                        qself.gt_token.to_tokens(tokens);
-                        segment.punct().to_tokens(tokens);
-                    } else {
-                        segment.to_tokens(tokens);
-                    }
+        let pos = cmp::min(qself.position, path.segments.len());
+        let mut segments = path.segments.pairs();
+        if pos > 0 {
+            TokensOrDefault(&qself.as_token).to_tokens(tokens);
+            path.leading_colon.to_tokens(tokens);
+            for (i, segment) in segments.by_ref().take(pos).enumerate() {
+                if i + 1 == pos {
+                    segment.value().to_tokens(tokens);
+                    qself.gt_token.to_tokens(tokens);
+                    segment.punct().to_tokens(tokens);
+                } else {
+                    segment.to_tokens(tokens);
                 }
-            } else {
-                qself.gt_token.to_tokens(tokens);
-                path.leading_colon.to_tokens(tokens);
             }
-            for segment in segments {
-                segment.to_tokens(tokens);
-            }
+        } else {
+            qself.gt_token.to_tokens(tokens);
+            path.leading_colon.to_tokens(tokens);
+        }
+        for segment in segments {
+            segment.to_tokens(tokens);
         }
     }
 }

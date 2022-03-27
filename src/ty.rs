@@ -1163,7 +1163,7 @@ mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for TypePath {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            private::print_path(tokens, &self.qself, &self.path);
+            path::printing::print_path(tokens, &self.qself, &self.path);
         }
     }
 

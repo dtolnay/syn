@@ -827,7 +827,7 @@ mod printing {
     impl ToTokens for PatPath {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
-            private::print_path(tokens, &self.qself, &self.path);
+            path::printing::print_path(tokens, &self.qself, &self.path);
         }
     }
 
