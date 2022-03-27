@@ -784,6 +784,16 @@ ast_struct! {
 }
 
 impl Expr {
+    #[cfg(not(syn_no_const_vec_new))]
+    const DUMMY: Self = Expr::Path(ExprPath {
+        attrs: Vec::new(),
+        qself: None,
+        path: Path {
+            leading_colon: None,
+            segments: Punctuated::new(),
+        },
+    });
+
     #[cfg(all(feature = "parsing", feature = "full"))]
     pub(crate) fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
         match self {
@@ -2868,15 +2878,10 @@ pub(crate) mod parsing {
         }
         for part in float_repr.split('.') {
             let index = crate::parse_str(part).map_err(|err| Error::new(float.span(), err))?;
-            let meaningless_placeholder = Expr::Path(ExprPath {
-                attrs: Vec::new(),
-                qself: None,
-                path: Path {
-                    leading_colon: None,
-                    segments: Punctuated::new(),
-                },
-            });
-            let base = mem::replace(e, meaningless_placeholder);
+            #[cfg(not(syn_no_const_vec_new))]
+            let base = mem::replace(e, Expr::DUMMY);
+            #[cfg(syn_no_const_vec_new)]
+            let base = mem::replace(e, Expr::Verbatim(TokenStream::new()));
             *e = Expr::Field(ExprField {
                 attrs: Vec::new(),
                 base: Box::new(base),
