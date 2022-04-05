@@ -878,10 +878,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.lo.to_tokens(tokens);
-            match &self.limits {
-                RangeLimits::HalfOpen(t) => t.to_tokens(tokens),
-                RangeLimits::Closed(t) => t.to_tokens(tokens),
-            }
+            self.limits.to_tokens(tokens);
             self.hi.to_tokens(tokens);
         }
     }
