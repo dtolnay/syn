@@ -1612,7 +1612,7 @@ pub(crate) mod parsing {
                                 if input.peek(Token![>]) {
                                     break;
                                 }
-                                let value = input.call(generic_method_argument)?;
+                                let value: GenericMethodArgument = input.parse()?;
                                 args.push_value(value);
                                 if input.peek(Token![>]) {
                                     break;
@@ -2099,18 +2099,21 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn generic_method_argument(input: ParseStream) -> Result<GenericMethodArgument> {
-        if input.peek(Lit) {
-            let lit = input.parse()?;
-            return Ok(GenericMethodArgument::Const(Expr::Lit(lit)));
-        }
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for GenericMethodArgument {
+        fn parse(input: ParseStream) -> Result<Self> {
+            if input.peek(Lit) {
+                let lit = input.parse()?;
+                return Ok(GenericMethodArgument::Const(Expr::Lit(lit)));
+            }
 
-        if input.peek(token::Brace) {
-            let block: ExprBlock = input.parse()?;
-            return Ok(GenericMethodArgument::Const(Expr::Block(block)));
-        }
+            if input.peek(token::Brace) {
+                let block: ExprBlock = input.parse()?;
+                return Ok(GenericMethodArgument::Const(Expr::Block(block)));
+            }
 
-        input.parse().map(GenericMethodArgument::Type)
+            input.parse().map(GenericMethodArgument::Type)
+        }
     }
 
     #[cfg(feature = "full")]
