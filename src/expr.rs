@@ -3346,14 +3346,22 @@ pub(crate) mod printing {
 
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for RangeLimits {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                RangeLimits::HalfOpen(t) => t.to_tokens(tokens),
+                RangeLimits::Closed(t) => t.to_tokens(tokens),
+            }
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprRange {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.from.to_tokens(tokens);
-            match &self.limits {
-                RangeLimits::HalfOpen(t) => t.to_tokens(tokens),
-                RangeLimits::Closed(t) => t.to_tokens(tokens),
-            }
+            self.limits.to_tokens(tokens);
             self.to.to_tokens(tokens);
         }
     }
