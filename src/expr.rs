@@ -2277,18 +2277,18 @@ pub(crate) mod parsing {
     }
 
     impl_by_parsing_expr! {
-        ExprCall, Call, "expected function call expression",
-        ExprMethodCall, MethodCall, "expected method call expression",
-        ExprTuple, Tuple, "expected tuple expression",
-        ExprBinary, Binary, "expected binary operation",
-        ExprCast, Cast, "expected cast expression",
-        ExprType, Type, "expected type ascription expression",
         ExprAssign, Assign, "expected assignment expression",
         ExprAssignOp, AssignOp, "expected compound assignment expression",
+        ExprBinary, Binary, "expected binary operation",
+        ExprCall, Call, "expected function call expression",
+        ExprCast, Cast, "expected cast expression",
         ExprField, Field, "expected struct field access",
         ExprIndex, Index, "expected indexing expression",
+        ExprMethodCall, MethodCall, "expected method call expression",
         ExprRange, Range, "expected range expression",
         ExprTry, Try, "expected try expression",
+        ExprTuple, Tuple, "expected tuple expression",
+        ExprType, Type, "expected type ascription expression",
     }
 
     #[cfg(feature = "full")]
