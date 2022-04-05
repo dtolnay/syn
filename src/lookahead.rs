@@ -18,6 +18,9 @@ use std::cell::RefCell;
 /// [`ParseStream::peek`]: crate::parse::ParseBuffer::peek
 /// [`ParseStream::lookahead1`]: crate::parse::ParseBuffer::lookahead1
 ///
+/// Please be aware that advancing the source stream with parse() will not advance 
+/// the lookahead object.
+///
 /// # Example
 ///
 /// ```
@@ -136,7 +139,7 @@ impl<'a> Lookahead1<'a> {
 /// Types that can be parsed by looking at just one token.
 ///
 /// Use [`ParseStream::peek`] to peek one of these types in a parse stream
-/// without consuming it from the stream.
+/// without consuming it from the stream. 
 ///
 /// This trait is sealed and cannot be implemented for types outside of Syn.
 ///
