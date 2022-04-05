@@ -1603,27 +1603,7 @@ pub(crate) mod parsing {
 
                 let member: Member = input.parse()?;
                 let turbofish = if member.is_named() && input.peek(Token![::]) {
-                    Some(MethodTurbofish {
-                        colon2_token: input.parse()?,
-                        lt_token: input.parse()?,
-                        args: {
-                            let mut args = Punctuated::new();
-                            loop {
-                                if input.peek(Token![>]) {
-                                    break;
-                                }
-                                let value: GenericMethodArgument = input.parse()?;
-                                args.push_value(value);
-                                if input.peek(Token![>]) {
-                                    break;
-                                }
-                                let punct = input.parse()?;
-                                args.push_punct(punct);
-                            }
-                            args
-                        },
-                        gt_token: input.parse()?,
-                    })
+                    Some(input.parse::<MethodTurbofish>()?)
                 } else {
                     None
                 };
@@ -2113,6 +2093,34 @@ pub(crate) mod parsing {
             }
 
             input.parse().map(GenericMethodArgument::Type)
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for MethodTurbofish {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(MethodTurbofish {
+                colon2_token: input.parse()?,
+                lt_token: input.parse()?,
+                args: {
+                    let mut args = Punctuated::new();
+                    loop {
+                        if input.peek(Token![>]) {
+                            break;
+                        }
+                        let value: GenericMethodArgument = input.parse()?;
+                        args.push_value(value);
+                        if input.peek(Token![>]) {
+                            break;
+                        }
+                        let punct = input.parse()?;
+                        args.push_punct(punct);
+                    }
+                    args
+                },
+                gt_token: input.parse()?,
+            })
         }
     }
 
