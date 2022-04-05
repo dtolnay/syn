@@ -2279,6 +2279,7 @@ pub(crate) mod parsing {
     impl_by_parsing_expr! {
         ExprAssign, Assign, "expected assignment expression",
         ExprAssignOp, AssignOp, "expected compound assignment expression",
+        ExprAwait, Await, "expected await expression",
         ExprBinary, Binary, "expected binary operation",
         ExprCall, Call, "expected function call expression",
         ExprCast, Cast, "expected cast expression",
