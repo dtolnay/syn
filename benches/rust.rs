@@ -38,12 +38,14 @@ mod syn_parse {
 #[cfg(not(syn_only))]
 mod librustc_parse {
     extern crate rustc_data_structures;
+    extern crate rustc_error_messages;
     extern crate rustc_errors;
     extern crate rustc_parse;
     extern crate rustc_session;
     extern crate rustc_span;
 
     use rustc_data_structures::sync::Lrc;
+    use rustc_error_messages::FluentBundle;
     use rustc_errors::{emitter::Emitter, Diagnostic, Handler};
     use rustc_session::parse::ParseSess;
     use rustc_span::source_map::{FilePathMapping, SourceMap};
@@ -56,6 +58,12 @@ mod librustc_parse {
             fn emit_diagnostic(&mut self, _diag: &Diagnostic) {}
             fn source_map(&self) -> Option<&Lrc<SourceMap>> {
                 None
+            }
+            fn fluent_bundle(&self) -> Option<&Lrc<FluentBundle>> {
+                None
+            }
+            fn fallback_fluent_bundle(&self) -> &Lrc<FluentBundle> {
+                panic!("silent emitter attempted to translate a diagnostic");
             }
         }
 
