@@ -5,6 +5,8 @@
 #![allow(clippy::manual_assert)]
 
 extern crate rustc_ast;
+extern crate rustc_data_structures;
+extern crate rustc_error_messages;
 extern crate rustc_errors;
 extern crate rustc_expand;
 extern crate rustc_parse as parse;
@@ -19,7 +21,9 @@ use rustc_ast::ast::{
     WhereClause,
 };
 use rustc_ast::mut_visit::{self, MutVisitor};
-use rustc_errors::PResult;
+use rustc_data_structures::sync::Lrc;
+use rustc_error_messages::{DiagnosticMessage, FluentArgs, FluentBundle};
+use rustc_errors::{Diagnostic, PResult};
 use rustc_session::parse::ParseSess;
 use rustc_span::source_map::FilePathMapping;
 use rustc_span::FileName;
@@ -97,7 +101,7 @@ fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
                     errorf!(
                         "=== {}: ignore - librustc failed to parse original content: {}\n",
                         path.display(),
-                        diagnostic.message(),
+                        translate_message(&diagnostic),
                     );
                     diagnostic.cancel();
                     return Err(true);
@@ -153,6 +157,41 @@ fn librustc_parse(content: String, sess: &ParseSess) -> PResult<Crate> {
     let counter = COUNTER.fetch_add(1, Ordering::Relaxed);
     let name = FileName::Custom(format!("test_round_trip{}", counter));
     parse::parse_crate_from_source_str(name, content, sess)
+}
+
+fn translate_message(diagnostic: &Diagnostic) -> String {
+    thread_local! {
+        static FLUENT_BUNDLE: Lrc<FluentBundle> = {
+            let with_directionality_markers = false;
+            rustc_error_messages::fallback_fluent_bundle(with_directionality_markers).unwrap()
+        };
+    }
+
+    let message = &diagnostic.message[0].0;
+    let args = diagnostic.args().iter().cloned().collect::<FluentArgs>();
+
+    let (identifier, attr) = match message {
+        DiagnosticMessage::Str(msg) => return msg.clone(),
+        DiagnosticMessage::FluentIdentifier(identifier, attr) => (identifier, attr),
+    };
+
+    FLUENT_BUNDLE.with(|fluent_bundle| {
+        let message = fluent_bundle
+            .get_message(identifier)
+            .expect("missing diagnostic in fluent bundle");
+        let value = match attr {
+            Some(attr) => message
+                .get_attribute(attr)
+                .expect("missing attribute in fluent message")
+                .value(),
+            None => message.value().expect("missing value in fluent message"),
+        };
+
+        let mut err = Vec::new();
+        let translated = fluent_bundle.format_pattern(value, Some(&args), &mut err);
+        assert!(err.is_empty());
+        translated.into_owned()
+    })
 }
 
 fn normalize(krate: &mut Crate) {
