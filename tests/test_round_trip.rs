@@ -94,18 +94,11 @@ fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
             let before = match librustc_parse(content, &sess) {
                 Ok(before) => before,
                 Err(diagnostic) => {
-                    if diagnostic
-                        .message()
-                        .starts_with("file not found for module")
-                    {
-                        errorf!("=== {}: ignore\n", path.display());
-                    } else {
-                        errorf!(
-                            "=== {}: ignore - librustc failed to parse original content: {}\n",
-                            path.display(),
-                            diagnostic.message(),
-                        );
-                    }
+                    errorf!(
+                        "=== {}: ignore - librustc failed to parse original content: {}\n",
+                        path.display(),
+                        diagnostic.message(),
+                    );
                     diagnostic.cancel();
                     return Err(true);
                 }
