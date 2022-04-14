@@ -21,8 +21,7 @@ use rustc_ast::ast::{
     WhereClause,
 };
 use rustc_ast::mut_visit::{self, MutVisitor};
-use rustc_data_structures::sync::Lrc;
-use rustc_error_messages::{DiagnosticMessage, FluentArgs, FluentBundle};
+use rustc_error_messages::{DiagnosticMessage, FluentArgs, LazyFallbackBundle};
 use rustc_errors::{Diagnostic, PResult};
 use rustc_session::parse::ParseSess;
 use rustc_span::source_map::FilePathMapping;
@@ -161,9 +160,10 @@ fn librustc_parse(content: String, sess: &ParseSess) -> PResult<Crate> {
 
 fn translate_message(diagnostic: &Diagnostic) -> String {
     thread_local! {
-        static FLUENT_BUNDLE: Lrc<FluentBundle> = {
+        static FLUENT_BUNDLE: LazyFallbackBundle = {
+            let resources = rustc_error_messages::DEFAULT_LOCALE_RESOURCES;
             let with_directionality_markers = false;
-            rustc_error_messages::fallback_fluent_bundle(with_directionality_markers).unwrap()
+            rustc_error_messages::fallback_fluent_bundle(resources, with_directionality_markers)
         };
     }
 

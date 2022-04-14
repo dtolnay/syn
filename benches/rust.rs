@@ -62,7 +62,7 @@ mod librustc_parse {
             fn fluent_bundle(&self) -> Option<&Lrc<FluentBundle>> {
                 None
             }
-            fn fallback_fluent_bundle(&self) -> &Lrc<FluentBundle> {
+            fn fallback_fluent_bundle(&self) -> &FluentBundle {
                 panic!("silent emitter attempted to translate a diagnostic");
             }
         }
