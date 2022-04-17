@@ -9,15 +9,16 @@ use rustc_ast::ast::{
     Defaultness, EnumDef, Expr, ExprField, ExprKind, Extern, FieldDef, FloatTy, Fn, FnDecl,
     FnHeader, FnRetTy, FnSig, ForeignItemKind, ForeignMod, GenericArg, GenericArgs, GenericBound,
     GenericParam, GenericParamKind, Generics, Impl, ImplPolarity, Inline, InlineAsm,
-    InlineAsmOperand, InlineAsmOptions, InlineAsmRegOrRegClass, InlineAsmTemplatePiece, IntTy,
-    IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind, Local,
-    LocalKind, MacArgs, MacCall, MacCallStmt, MacDelimiter, MacStmtStyle, MacroDef, ModKind,
-    ModSpans, Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatField,
-    PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt,
-    StmtKind, StrLit, StrStyle, StructExpr, StructRest, Term, Trait, TraitBoundModifier,
-    TraitObjectSyntax, TraitRef, Ty, TyAlias, TyAliasWhereClause, TyKind, UintTy, UnOp, Unsafe,
-    UnsafeSource, UseTree, UseTreeKind, Variant, VariantData, Visibility, VisibilityKind,
-    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
+    InlineAsmOperand, InlineAsmOptions, InlineAsmRegOrRegClass, InlineAsmSym,
+    InlineAsmTemplatePiece, IntTy, IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType,
+    LitIntType, LitKind, Local, LocalKind, MacArgs, MacCall, MacCallStmt, MacDelimiter,
+    MacStmtStyle, MacroDef, ModKind, ModSpans, Movability, MutTy, Mutability, NodeId, Param,
+    ParenthesizedArgs, Pat, PatField, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd,
+    RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit, StrStyle, StructExpr, StructRest, Term,
+    Trait, TraitBoundModifier, TraitObjectSyntax, TraitRef, Ty, TyAlias, TyAliasWhereClause,
+    TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant, VariantData,
+    Visibility, VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
+    WhereRegionPredicate,
 };
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, DelimToken, Nonterminal, Token, TokenKind};
@@ -316,6 +317,7 @@ spanless_eq_struct!(GenericParam; id ident attrs bounds is_placeholder kind);
 spanless_eq_struct!(Generics; params where_clause span);
 spanless_eq_struct!(Impl; defaultness unsafety generics constness polarity of_trait self_ty items);
 spanless_eq_struct!(InlineAsm; template template_strs operands clobber_abis options line_spans);
+spanless_eq_struct!(InlineAsmSym; id qself path);
 spanless_eq_struct!(Item<K>; attrs id span vis ident kind !tokens);
 spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
@@ -413,7 +415,7 @@ spanless_eq_enum!(ExprKind; Box(0) Array(0) ConstBlock(0) Call(0 1)
     MacCall(0) Struct(0) Repeat(0 1) Paren(0) Try(0) Yield(0) Err);
 spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
     InOut(reg late expr) SplitInOut(reg late in_expr out_expr) Const(anon_const)
-    Sym(expr));
+    Sym(sym));
 spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1 2)
     Fn(0) Mod(0 1) ForeignMod(0) GlobalAsm(0) TyAlias(0) Enum(0 1) Struct(0 1)
     Union(0 1) Trait(0) TraitAlias(0 1) Impl(0) MacCall(0) MacroDef(0));
