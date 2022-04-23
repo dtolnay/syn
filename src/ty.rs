@@ -54,7 +54,7 @@ ast_enum_of_structs! {
         /// A dynamically sized slice type: `[T]`.
         Slice(TypeSlice),
 
-        /// A trait object type `Bound1 + Bound2 + Bound3` where `Bound` is a
+        /// A trait object type `dyn Bound1 + Bound2 + Bound3` where `Bound` is a
         /// trait or a lifetime.
         TraitObject(TypeTraitObject),
 
@@ -244,7 +244,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A trait object type `Bound1 + Bound2 + Bound3` where `Bound` is a
+    /// A trait object type `dyn Bound1 + Bound2 + Bound3` where `Bound` is a
     /// trait or a lifetime.
     ///
     /// *This type is available only if Syn is built with the `"derive"` or
