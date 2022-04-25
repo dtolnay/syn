@@ -494,8 +494,13 @@ impl Hash for Expr {
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Yield(v0) => {
+            Expr::Yeet(v0) => {
                 state.write_u8(39u8);
+                v0.hash(state);
+            }
+            #[cfg(feature = "full")]
+            Expr::Yield(v0) => {
+                state.write_u8(40u8);
                 v0.hash(state);
             }
             #[cfg(any(syn_no_non_exhaustive, not(feature = "full")))]
@@ -959,6 +964,17 @@ impl Hash for ExprWhile {
         self.label.hash(state);
         self.cond.hash(state);
         self.body.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for ExprYeet {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.attrs.hash(state);
+        self.expr.hash(state);
     }
 }
 #[cfg(feature = "full")]

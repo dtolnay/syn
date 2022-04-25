@@ -257,6 +257,10 @@ pub trait Fold {
         fold_expr_while(self, i)
     }
     #[cfg(feature = "full")]
+    fn fold_expr_yeet(&mut self, i: ExprYeet) -> ExprYeet {
+        fold_expr_yeet(self, i)
+    }
+    #[cfg(feature = "full")]
     fn fold_expr_yield(&mut self, i: ExprYield) -> ExprYield {
         fold_expr_yield(self, i)
     }
@@ -1129,6 +1133,7 @@ where
         Expr::Unsafe(_binding_0) => Expr::Unsafe(full!(f.fold_expr_unsafe(_binding_0))),
         Expr::Verbatim(_binding_0) => Expr::Verbatim(_binding_0),
         Expr::While(_binding_0) => Expr::While(full!(f.fold_expr_while(_binding_0))),
+        Expr::Yeet(_binding_0) => Expr::Yeet(full!(f.fold_expr_yeet(_binding_0))),
         Expr::Yield(_binding_0) => Expr::Yield(full!(f.fold_expr_yield(_binding_0))),
         #[cfg(syn_no_non_exhaustive)]
         _ => unreachable!(),
@@ -1595,6 +1600,17 @@ where
         while_token: Token![while](tokens_helper(f, &node.while_token.span)),
         cond: Box::new(f.fold_expr(*node.cond)),
         body: f.fold_block(node.body),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_expr_yeet<F>(f: &mut F, node: ExprYeet) -> ExprYeet
+where
+    F: Fold + ?Sized,
+{
+    ExprYeet {
+        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        yeet_token: Token![yeet](tokens_helper(f, &node.yeet_token.span)),
+        expr: (node.expr).map(|it| Box::new(f.fold_expr(*it))),
     }
 }
 #[cfg(feature = "full")]

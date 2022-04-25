@@ -296,6 +296,8 @@ impl PartialEq for Expr {
             #[cfg(feature = "full")]
             (Expr::While(self0), Expr::While(other0)) => self0 == other0,
             #[cfg(feature = "full")]
+            (Expr::Yeet(self0), Expr::Yeet(other0)) => self0 == other0,
+            #[cfg(feature = "full")]
             (Expr::Yield(self0), Expr::Yield(other0)) => self0 == other0,
             _ => false,
         }
@@ -697,6 +699,16 @@ impl PartialEq for ExprWhile {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.label == other.label && self.cond == other.cond
             && self.body == other.body
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for ExprYeet {}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for ExprYeet {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs && self.expr == other.expr
     }
 }
 #[cfg(feature = "full")]

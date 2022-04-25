@@ -222,6 +222,9 @@ ast_enum_of_structs! {
         /// A while loop: `while expr { ... }`.
         While(ExprWhile),
 
+        /// A `yeet`, with an optional value to be yote.
+        Yeet(ExprYeet),
+
         /// A yield expression: `yield expr`.
         Yield(ExprYield),
 
@@ -769,6 +772,18 @@ ast_struct! {
 }
 
 ast_struct! {
+    /// A `yeet`, with an optional value to be yote.
+    ///
+    /// *This type is available only if Syn is built with the `"full"` feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    pub struct ExprYeet #full {
+        pub attrs: Vec<Attribute>,
+        pub yeet_token: Token![yeet],
+        pub expr: Option<Box<Expr>>,
+    }
+}
+
+ast_struct! {
     /// A yield expression: `yield expr`.
     ///
     /// *This type is available only if Syn is built with the `"full"` feature.*
@@ -832,6 +847,7 @@ impl Expr {
             | Expr::Async(ExprAsync { attrs, .. })
             | Expr::Await(ExprAwait { attrs, .. })
             | Expr::TryBlock(ExprTryBlock { attrs, .. })
+            | Expr::Yeet(ExprYeet { attrs, .. })
             | Expr::Yield(ExprYield { attrs, .. }) => mem::replace(attrs, new),
             Expr::Verbatim(_) => Vec::new(),
 
@@ -1742,6 +1758,8 @@ pub(crate) mod parsing {
             input.parse().map(Expr::Continue)
         } else if input.peek(Token![return]) {
             expr_ret(input, allow_struct).map(Expr::Return)
+        } else if input.peek(Token![yeet]) {
+            expr_yeet(input, allow_struct).map(Expr::Yeet)
         } else if input.peek(token::Bracket) {
             array_or_repeat(input)
         } else if input.peek(Token![let]) {
@@ -2393,6 +2411,15 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprYeet {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let allow_struct = AllowStruct(true);
+            expr_yeet(input, allow_struct)
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprTryBlock {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(ExprTryBlock {
@@ -2618,6 +2645,27 @@ pub(crate) mod parsing {
                     // conditions. For example:
                     //
                     // if return { println!("A") } {} // Prints "A"
+                    let expr = ambiguous_expr(input, allow_struct)?;
+                    Some(Box::new(expr))
+                }
+            },
+        })
+    }
+
+    #[cfg(feature = "full")]
+    fn expr_yeet(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprYeet> {
+        Ok(ExprYeet {
+            attrs: Vec::new(),
+            yeet_token: input.parse()?,
+            expr: {
+                if input.is_empty() || input.peek(Token![,]) || input.peek(Token![;]) {
+                    None
+                } else {
+                    // NOTE: yeet is greedy and eats blocks after it even when in a
+                    // position where structs are not allowed, such as in if statement
+                    // conditions. For example:
+                    //
+                    // if yeet { println!("A") } {} // Prints "A"
                     let expr = ambiguous_expr(input, allow_struct)?;
                     Some(Box::new(expr))
                 }
@@ -3424,6 +3472,16 @@ pub(crate) mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.return_token.to_tokens(tokens);
+            self.expr.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprYeet {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.yeet_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
         }
     }

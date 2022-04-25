@@ -1069,6 +1069,29 @@ impl Debug for Lite<syn::Expr> {
                 formatter.field("body", Lite(&_val.body));
                 formatter.finish()
             }
+            syn::Expr::Yeet(_val) => {
+                let mut formatter = formatter.debug_struct("Expr::Yeet");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                if let Some(val) = &_val.expr {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(Box<syn::Expr>);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            let _val = &self.0;
+                            formatter.write_str("(")?;
+                            Debug::fmt(Lite(_val), formatter)?;
+                            formatter.write_str(")")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("expr", Print::ref_cast(val));
+                }
+                formatter.finish()
+            }
             syn::Expr::Yield(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Yield");
                 if !_val.attrs.is_empty() {
@@ -1841,6 +1864,32 @@ impl Debug for Lite<syn::ExprWhile> {
         }
         formatter.field("cond", Lite(&_val.cond));
         formatter.field("body", Lite(&_val.body));
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::ExprYeet> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("ExprYeet");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if let Some(val) = &_val.expr {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(Box<syn::Expr>);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("expr", Print::ref_cast(val));
+        }
         formatter.finish()
     }
 }

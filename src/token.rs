@@ -701,6 +701,7 @@ define_keywords! {
     "virtual"     pub struct Virtual      /// `virtual`
     "where"       pub struct Where        /// `where`
     "while"       pub struct While        /// `while`
+    "yeet"        pub struct Yeet         /// `yeet`
     "yield"       pub struct Yield        /// `yield`
 }
 
@@ -807,6 +808,7 @@ macro_rules! export_token_macro {
             [pub]         => { $crate::token::Pub };
             [ref]         => { $crate::token::Ref };
             [return]      => { $crate::token::Return };
+            [yeet]        => { $crate::token::Yeet };
             [Self]        => { $crate::token::SelfType };
             [self]        => { $crate::token::SelfValue };
             [static]      => { $crate::token::Static };

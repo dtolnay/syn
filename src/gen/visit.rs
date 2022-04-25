@@ -259,6 +259,10 @@ pub trait Visit<'ast> {
         visit_expr_while(self, i);
     }
     #[cfg(feature = "full")]
+    fn visit_expr_yeet(&mut self, i: &'ast ExprYeet) {
+        visit_expr_yeet(self, i);
+    }
+    #[cfg(feature = "full")]
     fn visit_expr_yield(&mut self, i: &'ast ExprYield) {
         visit_expr_yield(self, i);
     }
@@ -1210,6 +1214,9 @@ where
         Expr::While(_binding_0) => {
             full!(v.visit_expr_while(_binding_0));
         }
+        Expr::Yeet(_binding_0) => {
+            full!(v.visit_expr_yeet(_binding_0));
+        }
         Expr::Yield(_binding_0) => {
             full!(v.visit_expr_yield(_binding_0));
         }
@@ -1752,6 +1759,19 @@ where
     tokens_helper(v, &node.while_token.span);
     v.visit_expr(&*node.cond);
     v.visit_block(&node.body);
+}
+#[cfg(feature = "full")]
+pub fn visit_expr_yeet<'ast, V>(v: &mut V, node: &'ast ExprYeet)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    tokens_helper(v, &node.yeet_token.span);
+    if let Some(it) = &node.expr {
+        v.visit_expr(&**it);
+    }
 }
 #[cfg(feature = "full")]
 pub fn visit_expr_yield<'ast, V>(v: &mut V, node: &'ast ExprYield)

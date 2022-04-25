@@ -272,6 +272,8 @@ impl Clone for Expr {
             #[cfg(feature = "full")]
             Expr::While(v0) => Expr::While(v0.clone()),
             #[cfg(feature = "full")]
+            Expr::Yeet(v0) => Expr::Yeet(v0.clone()),
+            #[cfg(feature = "full")]
             Expr::Yield(v0) => Expr::Yield(v0.clone()),
             #[cfg(any(syn_no_non_exhaustive, not(feature = "full")))]
             _ => unreachable!(),
@@ -733,6 +735,17 @@ impl Clone for ExprWhile {
             while_token: self.while_token.clone(),
             cond: self.cond.clone(),
             body: self.body.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for ExprYeet {
+    fn clone(&self) -> Self {
+        ExprYeet {
+            attrs: self.attrs.clone(),
+            yeet_token: self.yeet_token.clone(),
+            expr: self.expr.clone(),
         }
     }
 }

@@ -582,6 +582,12 @@ impl Debug for Expr {
                 formatter.finish()
             }
             #[cfg(feature = "full")]
+            Expr::Yeet(v0) => {
+                let mut formatter = formatter.debug_tuple("Yeet");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            #[cfg(feature = "full")]
             Expr::Yield(v0) => {
                 let mut formatter = formatter.debug_tuple("Yield");
                 formatter.field(v0);
@@ -1047,6 +1053,17 @@ impl Debug for ExprWhile {
         formatter.field("while_token", &self.while_token);
         formatter.field("cond", &self.cond);
         formatter.field("body", &self.body);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for ExprYeet {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ExprYeet");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("yeet_token", &self.yeet_token);
+        formatter.field("expr", &self.expr);
         formatter.finish()
     }
 }

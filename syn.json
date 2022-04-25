@@ -766,6 +766,11 @@
             "syn": "ExprWhile"
           }
         ],
+        "Yeet": [
+          {
+            "syn": "ExprYeet"
+          }
+        ],
         "Yield": [
           {
             "syn": "ExprYield"
@@ -1849,6 +1854,31 @@
         },
         "body": {
           "syn": "Block"
+        }
+      }
+    },
+    {
+      "ident": "ExprYeet",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "yeet_token": {
+          "token": "Yeet"
+        },
+        "expr": {
+          "option": {
+            "box": {
+              "syn": "Expr"
+            }
+          }
         }
       }
     },
@@ -5587,6 +5617,7 @@
     "Virtual": "virtual",
     "Where": "where",
     "While": "while",
+    "Yeet": "yeet",
     "Yield": "yield"
   }
 }

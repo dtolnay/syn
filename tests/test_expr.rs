@@ -1,7 +1,7 @@
 #[macro_use]
 mod macros;
 
-use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree, Literal};
 use quote::quote;
 use std::iter::FromIterator;
 use syn::{Expr, ExprRange};
@@ -323,4 +323,36 @@ fn test_closure_vs_rangefull() {
 fn test_postfix_operator_after_cast() {
     syn::parse_str::<Expr>("|| &x as T[0]").unwrap_err();
     syn::parse_str::<Expr>("|| () as ()()").unwrap_err();
+}
+
+#[test]
+fn test_try_yeet() {
+    // mimics the token stream corresponding to `try { yeet 5; }`
+    let tokens = TokenStream::from_iter(vec![
+        TokenTree::Ident(Ident::new("try", Span::call_site())),
+        TokenTree::Group(Group::new(
+            Delimiter::Brace,
+            TokenStream::from_iter(vec![
+                TokenTree::Ident(Ident::new("yeet", Span::call_site())),
+                TokenTree::Literal(Literal::i64_unsuffixed(5)),
+                TokenTree::Punct(Punct::new(';', Spacing::Alone)),
+            ]),
+        )),
+    ]);
+
+    snapshot!(tokens as Expr, @r###"
+    Expr::TryBlock {
+        block: Block {
+            stmts: [
+                Semi(
+                    Expr::Yeet {
+                        expr: Some(Expr::Lit {
+                            lit: 5,
+                        }),
+                    },
+                ),
+            ],
+        },
+    }
+    "###);
 }

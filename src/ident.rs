@@ -30,7 +30,7 @@ fn accept_as_ident(ident: &Ident) -> bool {
         "mod" | "move" | "mut" | "override" | "priv" | "pub" | "ref" |
         "return" | "Self" | "self" | "static" | "struct" | "super" | "trait" |
         "true" | "type" | "typeof" | "unsafe" | "unsized" | "use" | "virtual" |
-        "where" | "while" | "yield" => false,
+        "where" | "while" | "yeet" | "yield" => false,
         _ => true,
     }
 }
