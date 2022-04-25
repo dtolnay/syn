@@ -1609,6 +1609,7 @@ where
 {
     ExprYeet {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        do_token: Token![do](tokens_helper(f, &node.do_token.span)),
         yeet_token: Token![yeet](tokens_helper(f, &node.yeet_token.span)),
         expr: (node.expr).map(|it| Box::new(f.fold_expr(*it))),
     }

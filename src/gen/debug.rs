@@ -1062,6 +1062,7 @@ impl Debug for ExprYeet {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprYeet");
         formatter.field("attrs", &self.attrs);
+        formatter.field("do_token", &self.do_token);
         formatter.field("yeet_token", &self.yeet_token);
         formatter.field("expr", &self.expr);
         formatter.finish()

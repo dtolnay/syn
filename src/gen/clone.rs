@@ -744,6 +744,7 @@ impl Clone for ExprYeet {
     fn clone(&self) -> Self {
         ExprYeet {
             attrs: self.attrs.clone(),
+            do_token: self.do_token.clone(),
             yeet_token: self.yeet_token.clone(),
             expr: self.expr.clone(),
         }

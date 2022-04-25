@@ -772,12 +772,13 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A `yeet`, with an optional value to be yote.
+    /// A `do yeet`, with an optional value to be yote.
     ///
     /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprYeet #full {
         pub attrs: Vec<Attribute>,
+        pub do_token: Token![do],
         pub yeet_token: Token![yeet],
         pub expr: Option<Box<Expr>>,
     }
@@ -1758,7 +1759,7 @@ pub(crate) mod parsing {
             input.parse().map(Expr::Continue)
         } else if input.peek(Token![return]) {
             expr_ret(input, allow_struct).map(Expr::Return)
-        } else if input.peek(Token![yeet]) {
+        } else if input.peek(Token![do]) && input.peek2(Token![yeet]) {
             expr_yeet(input, allow_struct).map(Expr::Yeet)
         } else if input.peek(token::Bracket) {
             array_or_repeat(input)
@@ -2656,6 +2657,7 @@ pub(crate) mod parsing {
     fn expr_yeet(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprYeet> {
         Ok(ExprYeet {
             attrs: Vec::new(),
+            do_token: input.parse()?,
             yeet_token: input.parse()?,
             expr: {
                 if input.is_empty() || input.peek(Token![,]) || input.peek(Token![;]) {
@@ -3481,6 +3483,7 @@ pub(crate) mod printing {
     impl ToTokens for ExprYeet {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
+            self.do_token.to_tokens(tokens);
             self.yeet_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
         }

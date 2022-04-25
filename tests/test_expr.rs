@@ -327,12 +327,13 @@ fn test_postfix_operator_after_cast() {
 
 #[test]
 fn test_try_yeet() {
-    // mimics the token stream corresponding to `try { yeet 5; }`
+    // mimics the token stream corresponding to `try { do yeet 5; }`
     let tokens = TokenStream::from_iter(vec![
         TokenTree::Ident(Ident::new("try", Span::call_site())),
         TokenTree::Group(Group::new(
             Delimiter::Brace,
             TokenStream::from_iter(vec![
+                TokenTree::Ident(Ident::new("do", Span::call_site())),
                 TokenTree::Ident(Ident::new("yeet", Span::call_site())),
                 TokenTree::Literal(Literal::i64_unsuffixed(5)),
                 TokenTree::Punct(Punct::new(';', Spacing::Alone)),

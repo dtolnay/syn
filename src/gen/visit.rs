@@ -1768,6 +1768,7 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
+    tokens_helper(v, &node.do_token.span);
     tokens_helper(v, &node.yeet_token.span);
     if let Some(it) = &node.expr {
         v.visit_expr(&**it);

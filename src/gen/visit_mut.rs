@@ -1769,6 +1769,7 @@ where
     for it in &mut node.attrs {
         v.visit_attribute_mut(it);
     }
+    tokens_helper(v, &mut node.do_token.span);
     tokens_helper(v, &mut node.yeet_token.span);
     if let Some(it) = &mut node.expr {
         v.visit_expr_mut(&mut **it);
