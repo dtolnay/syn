@@ -90,9 +90,9 @@ impl TokenBuffer {
         // pointer into it.
         let entries = entries.into_boxed_slice();
         let len = entries.len();
-        // Convert our boxed slice into a pointer to the first element early,
-        // to avoid invalidating pointers into this slice when we move the Box
-        // see https://github.com/rust-lang/unsafe-code-guidelines/issues/326
+        // Convert boxed slice into a pointer to the first element early, to
+        // avoid invalidating pointers into this slice when we move the Box.
+        // See https://github.com/rust-lang/unsafe-code-guidelines/issues/326
         let entries = Box::into_raw(entries) as *mut Entry;
         for (idx, group) in groups {
             // We know that this index refers to one of the temporary
