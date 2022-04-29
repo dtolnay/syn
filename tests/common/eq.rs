@@ -21,7 +21,7 @@ use rustc_ast::ast::{
     WhereRegionPredicate,
 };
 use rustc_ast::ptr::P;
-use rustc_ast::token::{self, CommentKind, DelimToken, Nonterminal, Token, TokenKind};
+use rustc_ast::token::{self, CommentKind, Delimiter, Nonterminal, Token, TokenKind};
 use rustc_ast::tokenstream::{
     AttrAnnotatedTokenStream, AttrAnnotatedTokenTree, AttributesData, DelimSpan, LazyTokenStream,
     Spacing, TokenStream, TokenTree,
@@ -142,7 +142,7 @@ spanless_eq_partial_eq!(char);
 spanless_eq_partial_eq!(String);
 spanless_eq_partial_eq!(Symbol);
 spanless_eq_partial_eq!(CommentKind);
-spanless_eq_partial_eq!(DelimToken);
+spanless_eq_partial_eq!(Delimiter);
 spanless_eq_partial_eq!(InlineAsmOptions);
 spanless_eq_partial_eq!(token::LitKind);
 
@@ -546,7 +546,7 @@ fn doc_comment(
         }
     }
     let stream = match trees.next() {
-        Some(TokenTree::Delimited(_span, DelimToken::Bracket, stream)) => stream,
+        Some(TokenTree::Delimited(_span, Delimiter::Bracket, stream)) => stream,
         _ => return false,
     };
     let mut trees = stream.trees();
