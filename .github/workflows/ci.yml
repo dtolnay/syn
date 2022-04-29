@@ -6,7 +6,7 @@ on:
   schedule: [cron: "40 1 * * *"]
 
 env:
-  RUSTFLAGS: '-Dwarnings'
+  RUSTFLAGS: -Dwarnings
 
 jobs:
   test:
@@ -114,7 +114,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@miri
       - run: cargo miri test --all-features
         env:
-          MIRIFLAGS: '-Zmiri-tag-raw-pointers'
+          MIRIFLAGS: -Zmiri-tag-raw-pointers
 
   clippy:
     name: Clippy
