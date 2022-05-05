@@ -11,7 +11,7 @@ use rustc_ast::ast::{
     GenericParam, GenericParamKind, Generics, Impl, ImplPolarity, Inline, InlineAsm,
     InlineAsmOperand, InlineAsmOptions, InlineAsmRegOrRegClass, InlineAsmSym,
     InlineAsmTemplatePiece, IntTy, IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType,
-    LitIntType, LitKind, Local, LocalKind, MacArgs, MacCall, MacCallStmt, MacDelimiter,
+    LitIntType, LitKind, Local, LocalKind, MacArgs, MacArgsEq, MacCall, MacCallStmt, MacDelimiter,
     MacStmtStyle, MacroDef, ModKind, ModSpans, Movability, MutTy, Mutability, NodeId, Param,
     ParenthesizedArgs, Pat, PatField, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd,
     RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit, StrStyle, StructExpr, StructRest, Term,
@@ -384,6 +384,7 @@ spanless_eq_enum!(LitFloatType; Suffixed(0) Unsuffixed);
 spanless_eq_enum!(LitIntType; Signed(0) Unsigned(0) Unsuffixed);
 spanless_eq_enum!(LocalKind; Decl Init(0) InitElse(0 1));
 spanless_eq_enum!(MacArgs; Empty Delimited(0 1 2) Eq(0 1));
+spanless_eq_enum!(MacArgsEq; Ast(0) Hir(0));
 spanless_eq_enum!(MacDelimiter; Parenthesis Bracket Brace);
 spanless_eq_enum!(MacStmtStyle; Semicolon Braces NoBraces);
 spanless_eq_enum!(ModKind; Loaded(0 1 2) Unloaded);
@@ -566,31 +567,48 @@ fn doc_comment(
     }
     match trees.next() {
         Some(TokenTree::Token(token)) => {
-            is_escaped_literal(&token, unescaped) && trees.next().is_none()
+            is_escaped_literal_token(&token, unescaped) && trees.next().is_none()
         }
         _ => false,
     }
 }
 
-fn is_escaped_literal(token: &Token, unescaped: Symbol) -> bool {
-    match match token {
+fn is_escaped_literal_token(token: &Token, unescaped: Symbol) -> bool {
+    match token {
         Token {
             kind: TokenKind::Literal(lit),
             span: _,
-        } => Lit::from_lit_token(*lit, DUMMY_SP),
+        } => match Lit::from_lit_token(*lit, DUMMY_SP) {
+            Ok(lit) => is_escaped_literal(&lit, unescaped),
+            Err(_) => false,
+        },
         Token {
             kind: TokenKind::Interpolated(nonterminal),
             span: _,
         } => match nonterminal.as_ref() {
             Nonterminal::NtExpr(expr) => match &expr.kind {
-                ExprKind::Lit(lit) => Ok(lit.clone()),
-                _ => return false,
+                ExprKind::Lit(lit) => is_escaped_literal(lit, unescaped),
+                _ => false,
             },
-            _ => return false,
+            _ => false,
         },
-        _ => return false,
-    } {
-        Ok(Lit {
+        _ => false,
+    }
+}
+
+fn is_escaped_literal_macro_arg(arg: &MacArgsEq, unescaped: Symbol) -> bool {
+    match arg {
+        MacArgsEq::Ast(expr) => match &expr.kind {
+            ExprKind::Lit(lit) => is_escaped_literal(lit, unescaped),
+            _ => false,
+        },
+        MacArgsEq::Hir(lit) => is_escaped_literal(lit, unescaped),
+    }
+}
+
+fn is_escaped_literal(lit: &Lit, unescaped: Symbol) -> bool {
+    match lit {
+        Lit {
             token:
                 token::Lit {
                     kind: token::LitKind::Str,
@@ -599,7 +617,7 @@ fn is_escaped_literal(token: &Token, unescaped: Symbol) -> bool {
                 },
             kind: LitKind::Str(symbol, StrStyle::Cooked),
             span: _,
-        }) => symbol.as_str().replace('\r', "") == unescaped.as_str().replace('\r', ""),
+        } => symbol.as_str().replace('\r', "") == unescaped.as_str().replace('\r', ""),
         _ => false,
     }
 }
@@ -629,7 +647,9 @@ impl SpanlessEq for AttrKind {
                 SpanlessEq::eq(&path, &item2.path)
                     && match &item2.args {
                         MacArgs::Empty | MacArgs::Delimited(..) => false,
-                        MacArgs::Eq(_span, token) => is_escaped_literal(token, *unescaped),
+                        MacArgs::Eq(_span, token) => {
+                            is_escaped_literal_macro_arg(token, *unescaped)
+                        }
                     }
             }
             (AttrKind::Normal(..), AttrKind::DocComment(..)) => SpanlessEq::eq(other, self),
