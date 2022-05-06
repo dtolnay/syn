@@ -114,7 +114,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@miri
       - run: cargo miri test --all-features
         env:
-          MIRIFLAGS: -Zmiri-tag-raw-pointers
+          MIRIFLAGS: -Zmiri-strict-provenance
 
   clippy:
     name: Clippy
