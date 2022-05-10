@@ -1217,7 +1217,6 @@ where
         }
     }
 
-    #[doc(hidden)]
     #[cfg(any(feature = "full", feature = "derive"))]
     fn __parse_scoped(self, scope: Span, tokens: TokenStream) -> Result<Self::Output> {
         let buf = TokenBuffer::new2(tokens);
@@ -1233,7 +1232,6 @@ where
         }
     }
 
-    #[doc(hidden)]
     #[cfg(any(feature = "full", feature = "derive"))]
     fn __parse_stream(self, input: ParseStream) -> Result<Self::Output> {
         self(input)
