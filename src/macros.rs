@@ -173,7 +173,6 @@ macro_rules! strip_attrs_pub {
 }
 
 macro_rules! check_keyword_matches {
-    (struct struct) => {};
     (enum enum) => {};
     (pub pub) => {};
 }
