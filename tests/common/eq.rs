@@ -1,3 +1,5 @@
+#![allow(unused_macro_rules)]
+
 extern crate rustc_ast;
 extern crate rustc_data_structures;
 extern crate rustc_span;

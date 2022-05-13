@@ -1,4 +1,4 @@
-#![allow(unused_macros)]
+#![allow(unused_macros, unused_macro_rules)]
 
 #[path = "../debug/mod.rs"]
 pub mod debug;
