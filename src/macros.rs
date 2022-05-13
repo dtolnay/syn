@@ -1,3 +1,5 @@
+#[allow(unknown_lints)]
+#[cfg_attr(not(any(feature = "full", feature = "derive")), allow(unused_macro_rules))]
 macro_rules! ast_struct {
     (
         [$($attrs_pub:tt)*]
