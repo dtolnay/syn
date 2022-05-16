@@ -310,7 +310,6 @@
 ))]
 extern crate proc_macro;
 extern crate proc_macro2;
-extern crate unicode_xid;
 
 #[cfg(feature = "printing")]
 extern crate quote;
