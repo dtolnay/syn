@@ -569,7 +569,7 @@ fn doc_comment<'a>(
     }
     match trees.next() {
         Some(TokenTree::Token(token)) => {
-            is_escaped_literal_token(&token, unescaped) && trees.next().is_none()
+            is_escaped_literal_token(token, unescaped) && trees.next().is_none()
         }
         _ => false,
     }
