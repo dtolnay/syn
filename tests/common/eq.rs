@@ -507,7 +507,7 @@ impl SpanlessEq for TokenStream {
                 None => return false,
                 Some(tree) => tree,
             };
-            if SpanlessEq::eq(&this, &other) {
+            if SpanlessEq::eq(this, other) {
                 continue;
             }
             if let (TokenTree::Token(this), TokenTree::Token(other)) = (this, other) {
@@ -531,10 +531,10 @@ impl SpanlessEq for TokenStream {
     }
 }
 
-fn doc_comment(
+fn doc_comment<'a>(
     style: AttrStyle,
     unescaped: Symbol,
-    trees: &mut impl Iterator<Item = TokenTree>,
+    trees: &mut impl Iterator<Item = &'a TokenTree>,
 ) -> bool {
     if match style {
         AttrStyle::Outer => false,
@@ -557,7 +557,7 @@ fn doc_comment(
         Some(TokenTree::Token(Token {
             kind: TokenKind::Ident(symbol, false),
             span: _,
-        })) if symbol == sym::doc => {}
+        })) if *symbol == sym::doc => {}
         _ => return false,
     }
     match trees.next() {
