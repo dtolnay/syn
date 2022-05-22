@@ -258,7 +258,6 @@
     clippy::cast_lossless,
     clippy::collapsible_match, // https://github.com/rust-lang/rust-clippy/issues/7575
     clippy::doc_markdown,
-    clippy::eval_order_dependence,
     clippy::inherent_to_string,
     clippy::large_enum_variant,
     clippy::let_underscore_drop,
@@ -266,6 +265,7 @@
     clippy::manual_map, // https://github.com/rust-lang/rust-clippy/issues/6795
     clippy::match_on_vec_items,
     clippy::missing_panics_doc,
+    clippy::mixed_read_write_in_expression,
     clippy::needless_doctest_main,
     clippy::needless_pass_by_value,
     clippy::never_loop,
