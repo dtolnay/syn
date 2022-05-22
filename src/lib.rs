@@ -253,40 +253,35 @@
 #![doc(html_root_url = "https://docs.rs/syn/1.0.95")]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(non_camel_case_types)]
-// Ignored clippy lints.
 #![allow(
     clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::default_trait_access,
     clippy::doc_markdown,
+    clippy::expl_impl_clone_on_copy,
+    clippy::if_not_else,
     clippy::inherent_to_string,
     clippy::large_enum_variant,
     clippy::let_underscore_drop,
     clippy::manual_assert,
     clippy::match_on_vec_items,
+    clippy::match_same_arms,
+    clippy::match_wildcard_for_single_variants, // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6984
+    clippy::missing_errors_doc,
     clippy::missing_panics_doc,
+    clippy::module_name_repetitions,
+    clippy::must_use_candidate,
     clippy::needless_doctest_main,
     clippy::needless_pass_by_value,
     clippy::never_loop,
-    clippy::return_self_not_must_use,
-    clippy::too_many_arguments,
-    clippy::trivially_copy_pass_by_ref,
-    clippy::unnecessary_unwrap
-)]
-// Ignored clippy_pedantic lints.
-#![allow(
-    clippy::cast_possible_truncation,
-    clippy::default_trait_access,
-    clippy::expl_impl_clone_on_copy,
-    clippy::if_not_else,
-    clippy::match_same_arms,
-    // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6984
-    clippy::match_wildcard_for_single_variants,
-    clippy::missing_errors_doc,
-    clippy::module_name_repetitions,
-    clippy::must_use_candidate,
     clippy::redundant_else,
+    clippy::return_self_not_must_use,
     clippy::similar_names,
     clippy::single_match_else,
+    clippy::too_many_arguments,
     clippy::too_many_lines,
+    clippy::trivially_copy_pass_by_ref,
+    clippy::unnecessary_unwrap,
     clippy::used_underscore_binding,
     clippy::wildcard_imports
 )]
