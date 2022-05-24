@@ -10,10 +10,18 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "e95b10ba4ac4564ed25f7eef143e3182c33b3902";
+const REVISION: &str = "ee160f2f5e73b6f5954bc33f059c316d9e8582c4";
 
 #[rustfmt::skip]
 static EXCLUDE: &[&str] = &[
+    // TODO
+    "src/test/pretty/stmt_expr_attributes.rs",
+    "src/test/pretty/yeet-expr.rs",
+    "src/test/run-make/translation/basic-translation.rs",
+    "src/test/ui/try-trait/yeet-for-option.rs",
+    "src/test/ui/try-trait/yeet-for-result.rs",
+    "src/test/ui/type-alias-impl-trait/generic_type_does_not_live_long_enough.rs",
+
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
