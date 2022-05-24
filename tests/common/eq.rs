@@ -7,20 +7,19 @@ extern crate rustc_span;
 use rustc_ast::ast::{
     AngleBracketedArg, AngleBracketedArgs, AnonConst, Arm, AssocConstraint, AssocConstraintKind,
     AssocItemKind, Async, AttrId, AttrItem, AttrKind, AttrStyle, Attribute, BareFnTy, BinOpKind,
-    BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, CrateSugar,
-    Defaultness, EnumDef, Expr, ExprField, ExprKind, Extern, FieldDef, FloatTy, Fn, FnDecl,
-    FnHeader, FnRetTy, FnSig, ForeignItemKind, ForeignMod, GenericArg, GenericArgs, GenericBound,
-    GenericParam, GenericParamKind, Generics, Impl, ImplPolarity, Inline, InlineAsm,
-    InlineAsmOperand, InlineAsmOptions, InlineAsmRegOrRegClass, InlineAsmSym,
-    InlineAsmTemplatePiece, IntTy, IsAuto, Item, ItemKind, Label, Lifetime, Lit, LitFloatType,
-    LitIntType, LitKind, Local, LocalKind, MacArgs, MacArgsEq, MacCall, MacCallStmt, MacDelimiter,
-    MacStmtStyle, MacroDef, ModKind, ModSpans, Movability, MutTy, Mutability, NodeId, Param,
-    ParenthesizedArgs, Pat, PatField, PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd,
-    RangeLimits, RangeSyntax, Stmt, StmtKind, StrLit, StrStyle, StructExpr, StructRest, Term,
-    Trait, TraitBoundModifier, TraitObjectSyntax, TraitRef, Ty, TyAlias, TyAliasWhereClause,
-    TyKind, UintTy, UnOp, Unsafe, UnsafeSource, UseTree, UseTreeKind, Variant, VariantData,
-    Visibility, VisibilityKind, WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate,
-    WhereRegionPredicate,
+    BindingMode, Block, BlockCheckMode, BorrowKind, CaptureBy, Const, Crate, Defaultness, EnumDef,
+    Expr, ExprField, ExprKind, Extern, FieldDef, FloatTy, Fn, FnDecl, FnHeader, FnRetTy, FnSig,
+    ForeignItemKind, ForeignMod, GenericArg, GenericArgs, GenericBound, GenericParam,
+    GenericParamKind, Generics, Impl, ImplPolarity, Inline, InlineAsm, InlineAsmOperand,
+    InlineAsmOptions, InlineAsmRegOrRegClass, InlineAsmSym, InlineAsmTemplatePiece, IntTy, IsAuto,
+    Item, ItemKind, Label, Lifetime, Lit, LitFloatType, LitIntType, LitKind, Local, LocalKind,
+    MacArgs, MacArgsEq, MacCall, MacCallStmt, MacDelimiter, MacStmtStyle, MacroDef, ModKind,
+    ModSpans, Movability, MutTy, Mutability, NodeId, Param, ParenthesizedArgs, Pat, PatField,
+    PatKind, Path, PathSegment, PolyTraitRef, QSelf, RangeEnd, RangeLimits, RangeSyntax, Stmt,
+    StmtKind, StrLit, StrStyle, StructExpr, StructRest, Term, Trait, TraitBoundModifier,
+    TraitObjectSyntax, TraitRef, Ty, TyAlias, TyAliasWhereClause, TyKind, UintTy, UnOp, Unsafe,
+    UnsafeSource, UseTree, UseTreeKind, Variant, VariantData, Visibility, VisibilityKind,
+    WhereBoundPredicate, WhereClause, WhereEqPredicate, WherePredicate, WhereRegionPredicate,
 };
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, Delimiter, Nonterminal, Token, TokenKind};
@@ -366,7 +365,6 @@ spanless_eq_enum!(BlockCheckMode; Default Unsafe(0));
 spanless_eq_enum!(BorrowKind; Ref Raw);
 spanless_eq_enum!(CaptureBy; Value Ref);
 spanless_eq_enum!(Const; Yes(0) No);
-spanless_eq_enum!(CrateSugar; PubCrate JustCrate);
 spanless_eq_enum!(Defaultness; Default(0) Final);
 spanless_eq_enum!(Extern; None Implicit Explicit(0));
 spanless_eq_enum!(FloatTy; F32 F64);
@@ -407,7 +405,7 @@ spanless_eq_enum!(Unsafe; Yes(0) No);
 spanless_eq_enum!(UnsafeSource; CompilerGenerated UserProvided);
 spanless_eq_enum!(UseTreeKind; Simple(0 1 2) Nested(0) Glob);
 spanless_eq_enum!(VariantData; Struct(0 1) Tuple(0 1) Unit(0));
-spanless_eq_enum!(VisibilityKind; Public Crate(0) Restricted(path id) Inherited);
+spanless_eq_enum!(VisibilityKind; Public Restricted(path id) Inherited);
 spanless_eq_enum!(WherePredicate; BoundPredicate(0) RegionPredicate(0) EqPredicate(0));
 spanless_eq_enum!(ExprKind; Box(0) Array(0) ConstBlock(0) Call(0 1)
     MethodCall(0 1 2) Tup(0) Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1) Type(0 1)
