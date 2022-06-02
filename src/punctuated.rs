@@ -945,6 +945,15 @@ impl<T, P> Pair<T, P> {
         }
     }
 
+    /// Mutably borrows the punctuation from this punctuated pair, unless the
+    /// pair is the final one and there is no trailing punctuation.
+    pub fn punct_mut(&mut self) -> Option<&mut P> {
+        match self {
+            Pair::Punctuated(_, p) => Some(p),
+            Pair::End(_) => None,
+        }
+    }
+
     /// Creates a punctuated pair out of a syntax tree node and an optional
     /// following punctuation.
     pub fn new(t: T, p: Option<P>) -> Self {
