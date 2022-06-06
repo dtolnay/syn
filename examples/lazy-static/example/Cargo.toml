@@ -7,4 +7,4 @@ publish = false
 
 [dependencies]
 lazy_static = { path = "../lazy-static" }
-regex = "0.2"
+regex = "1"
