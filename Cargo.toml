@@ -72,4 +72,17 @@ rustdoc-args = ["--cfg", "doc_cfg"]
 features = ["full", "visit", "visit-mut", "fold", "extra-traits"]
 
 [workspace]
-members = ["dev", "json", "tests/crates", "tests/features"]
+members = [
+    "dev",
+    "examples/dump-syntax",
+    "examples/heapsize/example",
+    "examples/heapsize/heapsize",
+    "examples/heapsize/heapsize_derive",
+    "examples/lazy-static/example",
+    "examples/lazy-static/lazy-static",
+    "examples/trace-var/example",
+    "examples/trace-var/trace-var",
+    "json",
+    "tests/crates",
+    "tests/features",
+]
