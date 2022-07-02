@@ -259,6 +259,7 @@
     clippy::default_trait_access,
     clippy::doc_markdown,
     clippy::expl_impl_clone_on_copy,
+    clippy::explicit_auto_deref,
     clippy::if_not_else,
     clippy::inherent_to_string,
     clippy::large_enum_variant,
