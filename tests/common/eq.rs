@@ -24,6 +24,7 @@ use rustc_ast::ast::Block;
 use rustc_ast::ast::BlockCheckMode;
 use rustc_ast::ast::BorrowKind;
 use rustc_ast::ast::CaptureBy;
+use rustc_ast::ast::ClosureBinder;
 use rustc_ast::ast::Const;
 use rustc_ast::ast::Crate;
 use rustc_ast::ast::Defaultness;
@@ -145,7 +146,7 @@ impl<T: ?Sized + SpanlessEq> SpanlessEq for Box<T> {
     }
 }
 
-impl<T: SpanlessEq> SpanlessEq for P<T> {
+impl<T: ?Sized + SpanlessEq> SpanlessEq for P<T> {
     fn eq(&self, other: &Self) -> bool {
         SpanlessEq::eq(&**self, &**other)
     }
@@ -466,6 +467,7 @@ spanless_eq_enum!(BindingMode; ByRef(0) ByValue(0));
 spanless_eq_enum!(BlockCheckMode; Default Unsafe(0));
 spanless_eq_enum!(BorrowKind; Ref Raw);
 spanless_eq_enum!(CaptureBy; Value Ref);
+spanless_eq_enum!(ClosureBinder; NotPresent For(span generic_params));
 spanless_eq_enum!(Const; Yes(0) No);
 spanless_eq_enum!(Defaultness; Default(0) Final);
 spanless_eq_enum!(Extern; None Implicit(0) Explicit(0 1));
@@ -512,7 +514,7 @@ spanless_eq_enum!(WherePredicate; BoundPredicate(0) RegionPredicate(0) EqPredica
 spanless_eq_enum!(ExprKind; Box(0) Array(0) ConstBlock(0) Call(0 1)
     MethodCall(0 1 2) Tup(0) Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1) Type(0 1)
     Let(0 1 2) If(0 1 2) While(0 1 2) ForLoop(0 1 2 3) Loop(0 1) Match(0 1)
-    Closure(0 1 2 3 4 5) Block(0 1) Async(0 1 2) Await(0) TryBlock(0)
+    Closure(0 1 2 3 4 5 6) Block(0 1) Async(0 1 2) Await(0) TryBlock(0)
     Assign(0 1 2) AssignOp(0 1 2) Field(0 1) Index(0 1) Underscore Range(0 1 2)
     Path(0 1) AddrOf(0 1 2) Break(0 1) Continue(0) Ret(0) InlineAsm(0)
     MacCall(0) Struct(0) Repeat(0 1) Paren(0) Try(0) Yield(0) Yeet(0) Err);
