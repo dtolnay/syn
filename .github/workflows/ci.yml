@@ -45,9 +45,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
+          targets: ${{matrix.target}}
           components: ${{matrix.components}}
-      - if: matrix.target
-        run: rustup target add ${{matrix.target}}
       - run: cargo check ${{env.target}} --no-default-features
       - run: cargo check ${{env.target}}
       - run: cargo check ${{env.target}} --features full
