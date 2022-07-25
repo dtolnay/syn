@@ -2,7 +2,11 @@
 
 #![feature(rustc_private, test)]
 #![recursion_limit = "1024"]
-#![allow(clippy::missing_panics_doc, clippy::must_use_candidate)]
+#![allow(
+    clippy::items_after_statements,
+    clippy::missing_panics_doc,
+    clippy::must_use_candidate
+)]
 
 extern crate test;
 
@@ -15,9 +19,10 @@ mod common;
 #[path = "../tests/repo/mod.rs"]
 pub mod repo;
 
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use std::fs;
 use std::str::FromStr;
+use syn::parse::{ParseStream, Parser};
 use test::Bencher;
 
 const FILE: &str = "tests/rust/library/core/src/str/mod.rs";
@@ -32,6 +37,15 @@ fn get_tokens() -> TokenStream {
 fn baseline(b: &mut Bencher) {
     let tokens = get_tokens();
     b.iter(|| drop(tokens.clone()));
+}
+
+#[bench]
+fn create_token_buffer(b: &mut Bencher) {
+    let tokens = get_tokens();
+    fn immediate_fail(_input: ParseStream) -> syn::Result<()> {
+        Err(syn::Error::new(Span::call_site(), ""))
+    }
+    b.iter(|| immediate_fail.parse2(tokens.clone()));
 }
 
 #[bench]
