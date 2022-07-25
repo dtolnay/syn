@@ -14,6 +14,7 @@
 use crate::proc_macro as pm;
 use crate::Lifetime;
 use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
+use std::cmp;
 use std::marker::PhantomData;
 use std::ptr;
 use std::slice;
@@ -144,8 +145,9 @@ impl TokenBuffer {
 /// An empty `Cursor` can be created directly, or one may create a `TokenBuffer`
 /// object and get a cursor to its first token with `begin()`.
 ///
-/// Two cursors are equal if they have the same location in the same input
-/// stream, and have the same scope.
+/// Two cursors can only be compared if they have the same scope in the same
+/// input stream, and are ordered based on location in the stream. The two
+/// cursors are equal if they have the same location in the input stream.
 ///
 /// *This type is available only if Syn is built with the `"parsing"` feature.*
 pub struct Cursor<'a> {
@@ -374,6 +376,25 @@ impl<'a> Cursor<'a> {
             _ => Some(unsafe { self.bump() }),
         }
     }
+
+    /// Find the `Entry` which ends the currently entered `Group`.
+    ///
+    /// This may be an `End` of a transparently entered `None`-delimited group,
+    /// or it may be the `scope` end.
+    fn find_group_end(self) -> *const Entry {
+        unsafe { offset_entry_ptr_to_end(self.ptr) }
+    }
+
+    /// Walk up one transparent `None`-delimited group, if this cursor is in one.
+    fn exit_one_group(self) -> Option<Cursor<'a>> {
+        let end = self.find_group_end();
+        let up = unsafe { Cursor::create(end, self.scope) };
+        if up.eof() {
+            None
+        } else {
+            Some(up)
+        }
+    }
 }
 
 impl<'a> Copy for Cursor<'a> {}
@@ -394,6 +415,109 @@ impl<'a> PartialEq for Cursor<'a> {
     }
 }
 
+/// Comparison of `Cursor`s is not as cheap as other cursor operations. This is
+/// because it requires walking the token stream to handle `None`-delimited groups.
+impl<'a> PartialOrd for Cursor<'a> {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        // If we don't have the same scope end, the cursors are incomparable.
+        if self.scope != other.scope {
+            return None;
+        }
+        let scope = self.scope;
+
+        // If we have the same pointer, the cursors are equal.
+        if self.ptr == other.ptr {
+            return Some(cmp::Ordering::Equal);
+        }
+
+        let self_end = self.find_group_end();
+        let other_end = other.find_group_end();
+
+        // If both cursors find the same end, they're in the same group.
+        if self_end == other_end {
+            return self.ptr.partial_cmp(&other.ptr);
+        }
+
+        // Extract panicking point to only generate one panic info.
+        let panic = || -> ! { unreachable!("cursors should have been compared") };
+
+        // If self found the scope end, walk other up to the base group.
+        if self_end == scope {
+            let mut other_base = unsafe { Cursor::create(other_end, scope) };
+            // Note that `create` may bring other_base to eof already.
+            while !(self.ptr..self_end).contains(&other_base.ptr) {
+                other_base = other_base.exit_one_group().unwrap_or_else(|| panic());
+            }
+            return self.ptr.partial_cmp(&other_base.ptr);
+        }
+
+        // If other found the scope end, walk self up to the base group.
+        if other_end == scope {
+            let mut self_base = unsafe { Cursor::create(self_end, scope) };
+            // Note that `create` may bring self_base to eof already.
+            while !(other.ptr..other_end).contains(&self_base.ptr) {
+                self_base = self_base.exit_one_group().unwrap_or_else(|| panic());
+            }
+            return self_base.ptr.partial_cmp(&self.ptr);
+        }
+
+        // Otherwise, the cursors are in different subgroups, and we have no
+        // idea which is before the other. The approach we take is to trace the
+        // pointer ranges traversed to get self to eof, then walk other toward
+        // eof until it enters a range traversed by self. `None`-delimited
+        // groups are not super common, so this is probably not a big deal.
+
+        let mut crossed_ranges = vec![self.ptr..self_end];
+        {
+            let mut ptr = self_end;
+            unsafe {
+                while ptr != scope {
+                    let up = if let Entry::End(up) = *ptr {
+                        if up.is_null() {
+                            panic();
+                        }
+                        up
+                    } else {
+                        panic();
+                    };
+
+                    let end = offset_entry_ptr_to_end(up);
+                    crossed_ranges.push(up..end);
+                    ptr = end;
+                }
+            }
+        }
+
+        let mut ptr = other_end;
+        unsafe {
+            loop {
+                // Go up a group.
+                ptr = if let Entry::End(up) = *ptr {
+                    if up.is_null() {
+                        panic();
+                    }
+                    up
+                } else {
+                    panic();
+                };
+
+                // If the raised pointer is in a range traversed by self, self < other.
+                if crossed_ranges.iter().any(|range| range.contains(&ptr)) {
+                    return Some(cmp::Ordering::Less);
+                }
+
+                // Go to the end of the group.
+                ptr = offset_entry_ptr_to_end(ptr);
+
+                // If the end pointer is an end traversed by self, self > other.
+                if crossed_ranges.iter().any(|range| range.end == ptr) {
+                    return Some(cmp::Ordering::Greater);
+                }
+            }
+        }
+    }
+}
+
 pub(crate) fn same_scope(a: Cursor, b: Cursor) -> bool {
     a.scope == b.scope
 }
@@ -409,5 +533,14 @@ pub(crate) fn close_span_of_group(cursor: Cursor) -> Span {
     match cursor.entry() {
         Entry::Group(group, _) => group.span_close(),
         _ => cursor.span(),
+    }
+}
+
+unsafe fn offset_entry_ptr_to_end(mut ptr: *const Entry) -> *const Entry {
+    loop {
+        match *ptr {
+            Entry::End(_) => break ptr,
+            _ => ptr = ptr.offset(1),
+        }
     }
 }
