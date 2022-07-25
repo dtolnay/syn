@@ -59,9 +59,10 @@ impl TokenBuffer {
     fn inner_new(stream: TokenStream, up: *const Entry) -> TokenBuffer {
         // Build up the entries list, recording the locations of any Groups
         // in the list to be processed later.
-        let mut entries = Vec::new();
+        let iterator = stream.into_iter();
+        let mut entries = Vec::with_capacity(iterator.size_hint().0 + 1);
         let mut groups = Vec::new();
-        for tt in stream {
+        for tt in iterator {
             match tt {
                 TokenTree::Ident(ident) => {
                     entries.push(Entry::Ident(ident));
