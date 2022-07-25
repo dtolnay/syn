@@ -103,7 +103,10 @@ impl TokenBuffer {
             // The end entry stored at the end of this Entry::Group should
             // point to the Entry which follows the Group in the list.
             let inner = Self::inner_new(group.stream(), group_up);
-            unsafe { *entries.add(idx) = Entry::Group(group, inner) };
+
+            // No need to drop the Entry already at that position, because we
+            // know it is the `Entry::End` variant and does not require drop.
+            unsafe { entries.add(idx).write(Entry::Group(group, inner)) };
         }
 
         TokenBuffer { ptr: entries, len }
