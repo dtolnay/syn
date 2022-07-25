@@ -256,6 +256,7 @@
 #![allow(
     clippy::cast_lossless,
     clippy::cast_possible_truncation,
+    clippy::cast_ptr_alignment,
     clippy::default_trait_access,
     clippy::doc_markdown,
     clippy::expl_impl_clone_on_copy,
