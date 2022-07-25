@@ -63,19 +63,19 @@ impl TokenBuffer {
         let mut groups = Vec::new();
         for tt in stream {
             match tt {
-                TokenTree::Ident(sym) => {
-                    entries.push(Entry::Ident(sym));
+                TokenTree::Ident(ident) => {
+                    entries.push(Entry::Ident(ident));
                 }
-                TokenTree::Punct(op) => {
-                    entries.push(Entry::Punct(op));
+                TokenTree::Punct(punct) => {
+                    entries.push(Entry::Punct(punct));
                 }
-                TokenTree::Literal(l) => {
-                    entries.push(Entry::Literal(l));
+                TokenTree::Literal(literal) => {
+                    entries.push(Entry::Literal(literal));
                 }
-                TokenTree::Group(g) => {
+                TokenTree::Group(group) => {
                     // Record the index of the interesting entry, and store an
                     // `End(null)` there temporarily.
-                    groups.push((entries.len(), g));
+                    groups.push((entries.len(), group));
                     entries.push(Entry::End(ptr::null()));
                 }
             }
@@ -278,7 +278,9 @@ impl<'a> Cursor<'a> {
     pub fn punct(mut self) -> Option<(Punct, Cursor<'a>)> {
         self.ignore_none();
         match self.entry() {
-            Entry::Punct(op) if op.as_char() != '\'' => Some((op.clone(), unsafe { self.bump() })),
+            Entry::Punct(punct) if punct.as_char() != '\'' => {
+                Some((punct.clone(), unsafe { self.bump() }))
+            }
             _ => None,
         }
     }
@@ -288,7 +290,7 @@ impl<'a> Cursor<'a> {
     pub fn literal(mut self) -> Option<(Literal, Cursor<'a>)> {
         self.ignore_none();
         match self.entry() {
-            Entry::Literal(lit) => Some((lit.clone(), unsafe { self.bump() })),
+            Entry::Literal(literal) => Some((literal.clone(), unsafe { self.bump() })),
             _ => None,
         }
     }
@@ -298,12 +300,12 @@ impl<'a> Cursor<'a> {
     pub fn lifetime(mut self) -> Option<(Lifetime, Cursor<'a>)> {
         self.ignore_none();
         match self.entry() {
-            Entry::Punct(op) if op.as_char() == '\'' && op.spacing() == Spacing::Joint => {
+            Entry::Punct(punct) if punct.as_char() == '\'' && punct.spacing() == Spacing::Joint => {
                 let next = unsafe { self.bump() };
                 match next.ident() {
                     Some((ident, rest)) => {
                         let lifetime = Lifetime {
-                            apostrophe: op.span(),
+                            apostrophe: punct.span(),
                             ident,
                         };
                         Some((lifetime, rest))
@@ -337,9 +339,9 @@ impl<'a> Cursor<'a> {
     pub fn token_tree(self) -> Option<(TokenTree, Cursor<'a>)> {
         let tree = match self.entry() {
             Entry::Group(group, _) => group.clone().into(),
-            Entry::Literal(lit) => lit.clone().into(),
+            Entry::Literal(literal) => literal.clone().into(),
             Entry::Ident(ident) => ident.clone().into(),
-            Entry::Punct(op) => op.clone().into(),
+            Entry::Punct(punct) => punct.clone().into(),
             Entry::End(..) => return None,
         };
 
@@ -351,9 +353,9 @@ impl<'a> Cursor<'a> {
     pub fn span(self) -> Span {
         match self.entry() {
             Entry::Group(group, _) => group.span(),
-            Entry::Literal(l) => l.span(),
-            Entry::Ident(t) => t.span(),
-            Entry::Punct(o) => o.span(),
+            Entry::Literal(literal) => literal.span(),
+            Entry::Ident(ident) => ident.span(),
+            Entry::Punct(punct) => punct.span(),
             Entry::End(..) => Span::call_site(),
         }
     }
@@ -367,7 +369,7 @@ impl<'a> Cursor<'a> {
             Entry::End(..) => None,
 
             // Treat lifetimes as a single tt for the purposes of 'skip'.
-            Entry::Punct(op) if op.as_char() == '\'' && op.spacing() == Spacing::Joint => {
+            Entry::Punct(punct) if punct.as_char() == '\'' && punct.spacing() == Spacing::Joint => {
                 let next = unsafe { self.bump() };
                 match next.entry() {
                     Entry::Ident(_) => Some(unsafe { next.bump() }),
