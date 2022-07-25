@@ -14,7 +14,9 @@
 use crate::proc_macro as pm;
 use crate::Lifetime;
 use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
+use std::hint;
 use std::marker::PhantomData;
+use std::mem;
 use std::ptr;
 use std::slice;
 
@@ -57,11 +59,9 @@ impl TokenBuffer {
     // NOTE: Do not mutate the Vec returned from this function once it returns;
     // the address of its backing memory must remain stable.
     fn inner_new(stream: TokenStream, up: *const Entry) -> TokenBuffer {
-        // Build up the entries list, recording the locations of any Groups
-        // in the list to be processed later.
         let iterator = stream.into_iter();
         let mut entries = Vec::with_capacity(iterator.size_hint().0 + 1);
-        let mut groups = Vec::new();
+        let mut next_index_after_last_group = 0;
         for tt in iterator {
             match tt {
                 TokenTree::Ident(ident) => {
@@ -74,13 +74,24 @@ impl TokenBuffer {
                     entries.push(Entry::Literal(literal));
                 }
                 TokenTree::Group(group) => {
-                    // Record the index of the interesting entry, and store an
-                    // `End(null)` there temporarily.
-                    groups.push((entries.len(), group));
-                    entries.push(Entry::End(ptr::null()));
+                    // We cannot fill in a real `End` pointer until `entries` is
+                    // finished growing and getting potentially reallocated.
+                    // Instead, we temporarily coopt the spot where the end
+                    // pointer would go, and use it to string together an
+                    // intrusive linked list of all the Entry::Group entries in
+                    // the vector. Later after `entries` is done growing, we'll
+                    // traverse the linked list and fill in all the end
+                    // pointers with a correct value.
+                    let group_up =
+                        ptr::null::<u8>().wrapping_add(next_index_after_last_group) as *const Entry;
+
+                    let inner = Self::inner_new(group.stream(), group_up);
+                    entries.push(Entry::Group(group, inner));
+                    next_index_after_last_group = entries.len();
                 }
             }
         }
+
         // Add an `End` entry to the end with a reference to the enclosing token
         // stream which was passed in.
         entries.push(Entry::End(up));
@@ -91,23 +102,36 @@ impl TokenBuffer {
         // pointer into it.
         let entries = entries.into_boxed_slice();
         let len = entries.len();
+
         // Convert boxed slice into a pointer to the first element early, to
         // avoid invalidating pointers into this slice when we move the Box.
         // See https://github.com/rust-lang/unsafe-code-guidelines/issues/326
         let entries = Box::into_raw(entries) as *mut Entry;
-        for (idx, group) in groups {
-            // We know that this index refers to one of the temporary
-            // `End(null)` entries, and we know that the last entry is
-            // `End(up)`, so the next index is also valid.
-            let group_up = unsafe { entries.add(idx + 1) };
 
-            // The end entry stored at the end of this Entry::Group should
-            // point to the Entry which follows the Group in the list.
-            let inner = Self::inner_new(group.stream(), group_up);
+        // Traverse intrusive linked list of Entry::Group entries and fill in
+        // correct End pointers.
+        while let Some(idx) = next_index_after_last_group.checked_sub(1) {
+            // We know that idx refers to one of the Entry::Group entries, and
+            // that the very last entry is an Entry::End, so the next index
+            // after any group entry is a valid index.
+            let group_up = unsafe { entries.add(next_index_after_last_group) };
 
-            // No need to drop the Entry already at that position, because we
-            // know it is the `Entry::End` variant and does not require drop.
-            unsafe { entries.add(idx).write(Entry::Group(group, inner)) };
+            // Linked list only takes us to entries which are of type Group.
+            let token_buffer = match unsafe { &*entries.add(idx) } {
+                Entry::Group(_group, token_buffer) => token_buffer,
+                _ => unsafe { hint::unreachable_unchecked() },
+            };
+
+            // Last entry in any TokenBuffer is of type End.
+            let buffer_ptr = token_buffer.ptr as *mut Entry;
+            let last_entry = unsafe { &mut *buffer_ptr.add(token_buffer.len - 1) };
+            let end_ptr_slot = match last_entry {
+                Entry::End(end_ptr_slot) => end_ptr_slot,
+                _ => unsafe { hint::unreachable_unchecked() },
+            };
+
+            // Step to next element in linked list.
+            next_index_after_last_group = mem::replace(end_ptr_slot, group_up) as usize;
         }
 
         TokenBuffer { ptr: entries, len }
