@@ -22,10 +22,20 @@ use test::Bencher;
 
 const FILE: &str = "tests/rust/library/core/src/str/mod.rs";
 
-#[bench]
-fn parse_file(b: &mut Bencher) {
+fn get_tokens() -> TokenStream {
     repo::clone_rust();
     let content = fs::read_to_string(FILE).unwrap();
-    let tokens = TokenStream::from_str(&content).unwrap();
+    TokenStream::from_str(&content).unwrap()
+}
+
+#[bench]
+fn baseline(b: &mut Bencher) {
+    let tokens = get_tokens();
+    b.iter(|| drop(tokens.clone()));
+}
+
+#[bench]
+fn parse_file(b: &mut Bencher) {
+    let tokens = get_tokens();
     b.iter(|| syn::parse2::<syn::File>(tokens.clone()));
 }
