@@ -500,7 +500,7 @@ spanless_eq_enum!(StmtKind; Local(0) Item(0) Expr(0) Semi(0) Empty MacCall(0));
 spanless_eq_enum!(StrStyle; Cooked Raw(0));
 spanless_eq_enum!(StructRest; Base(0) Rest(0) None);
 spanless_eq_enum!(Term; Ty(0) Const(0));
-spanless_eq_enum!(TokenTree; Token(0) Delimited(0 1 2));
+spanless_eq_enum!(TokenTree; Token(0 1) Delimited(0 1 2));
 spanless_eq_enum!(TraitBoundModifier; None Maybe MaybeConst MaybeConstMaybe);
 spanless_eq_enum!(TraitObjectSyntax; Dyn None);
 spanless_eq_enum!(UintTy; Usize U8 U16 U32 U64 U128);
@@ -612,7 +612,7 @@ impl SpanlessEq for TokenStream {
             if SpanlessEq::eq(this, other) {
                 continue;
             }
-            if let (TokenTree::Token(this), TokenTree::Token(other)) = (this, other) {
+            if let (TokenTree::Token(this, _), TokenTree::Token(other, _)) = (this, other) {
                 if match (&this.kind, &other.kind) {
                     (TokenKind::Literal(this), TokenKind::Literal(other)) => {
                         SpanlessEq::eq(this, other)
@@ -643,10 +643,13 @@ fn doc_comment<'a>(
         AttrStyle::Inner => true,
     } {
         match trees.next() {
-            Some(TokenTree::Token(Token {
-                kind: TokenKind::Not,
-                span: _,
-            })) => {}
+            Some(TokenTree::Token(
+                Token {
+                    kind: TokenKind::Not,
+                    span: _,
+                },
+                _spacing,
+            )) => {}
             _ => return false,
         }
     }
@@ -656,21 +659,27 @@ fn doc_comment<'a>(
     };
     let mut trees = stream.trees();
     match trees.next() {
-        Some(TokenTree::Token(Token {
-            kind: TokenKind::Ident(symbol, false),
-            span: _,
-        })) if *symbol == sym::doc => {}
+        Some(TokenTree::Token(
+            Token {
+                kind: TokenKind::Ident(symbol, false),
+                span: _,
+            },
+            _spacing,
+        )) if *symbol == sym::doc => {}
         _ => return false,
     }
     match trees.next() {
-        Some(TokenTree::Token(Token {
-            kind: TokenKind::Eq,
-            span: _,
-        })) => {}
+        Some(TokenTree::Token(
+            Token {
+                kind: TokenKind::Eq,
+                span: _,
+            },
+            _spacing,
+        )) => {}
         _ => return false,
     }
     match trees.next() {
-        Some(TokenTree::Token(token)) => {
+        Some(TokenTree::Token(token, _spacing)) => {
             is_escaped_literal_token(token, unescaped) && trees.next().is_none()
         }
         _ => false,
