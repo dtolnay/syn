@@ -2,12 +2,12 @@
 name = "syn-codegen"
 version = "0.3.0" # also update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>"]
+categories = ["development-tools::procedural-macro-helpers"]
+description = "Syntax tree describing Syn's syntax tree"
+documentation = "https://docs.rs/syn-codegen"
 edition = "2018"
 license = "MIT OR Apache-2.0"
-description = "Syntax tree describing Syn's syntax tree"
 repository = "https://github.com/dtolnay/syn"
-documentation = "https://docs.rs/syn-codegen"
-categories = ["development-tools::procedural-macro-helpers"]
 
 [dependencies]
 indexmap = { version = "1.0", features = ["serde-1"] }

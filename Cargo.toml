@@ -2,12 +2,10 @@
 name = "syn"
 version = "1.0.98" # don't forget to update html_root_url and syn.json
 authors = ["David Tolnay <dtolnay@gmail.com>"]
-license = "MIT OR Apache-2.0"
-description = "Parser for Rust source code"
-repository = "https://github.com/dtolnay/syn"
-documentation = "https://docs.rs/syn"
 categories = ["development-tools::procedural-macro-helpers"]
-readme = "README.md"
+description = "Parser for Rust source code"
+documentation = "https://docs.rs/syn"
+edition = "2018"
 include = [
     "/benches/**",
     "/build.rs",
@@ -18,7 +16,9 @@ include = [
     "/src/**",
     "/tests/**",
 ]
-edition = "2018"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/dtolnay/syn"
 rust-version = "1.31"
 
 [features]
