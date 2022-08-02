@@ -6,6 +6,7 @@ categories = ["development-tools::procedural-macro-helpers"]
 description = "Syntax tree describing Syn's syntax tree"
 documentation = "https://docs.rs/syn-codegen"
 edition = "2018"
+keywords = ["syn"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/dtolnay/syn"
 

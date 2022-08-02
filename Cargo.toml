@@ -16,6 +16,7 @@ include = [
     "/src/**",
     "/tests/**",
 ]
+keywords = ["macros", "syn"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/dtolnay/syn"
