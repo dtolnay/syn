@@ -509,7 +509,7 @@ spanless_eq_enum!(Unsafe; Yes(0) No);
 spanless_eq_enum!(UnsafeSource; CompilerGenerated UserProvided);
 spanless_eq_enum!(UseTreeKind; Simple(0 1 2) Nested(0) Glob);
 spanless_eq_enum!(VariantData; Struct(0 1) Tuple(0 1) Unit(0));
-spanless_eq_enum!(VisibilityKind; Public Restricted(path id) Inherited);
+spanless_eq_enum!(VisibilityKind; Public Restricted(path id shorthand) Inherited);
 spanless_eq_enum!(WherePredicate; BoundPredicate(0) RegionPredicate(0) EqPredicate(0));
 spanless_eq_enum!(ExprKind; Box(0) Array(0) ConstBlock(0) Call(0 1)
     MethodCall(0 1 2 3) Tup(0) Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1)
