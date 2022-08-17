@@ -82,6 +82,7 @@ use rustc_ast::ast::Movability;
 use rustc_ast::ast::MutTy;
 use rustc_ast::ast::Mutability;
 use rustc_ast::ast::NodeId;
+use rustc_ast::ast::NormalAttr;
 use rustc_ast::ast::Param;
 use rustc_ast::ast::ParenthesizedArgs;
 use rustc_ast::ast::Pat;
@@ -432,6 +433,7 @@ spanless_eq_struct!(MacCallStmt; mac style attrs tokens);
 spanless_eq_struct!(MacroDef; body macro_rules);
 spanless_eq_struct!(ModSpans; !inner_span !inject_use_span);
 spanless_eq_struct!(MutTy; ty mutbl);
+spanless_eq_struct!(NormalAttr; item tokens);
 spanless_eq_struct!(ParenthesizedArgs; span inputs inputs_span output);
 spanless_eq_struct!(Pat; id kind span tokens);
 spanless_eq_struct!(PatField; ident pat is_shorthand attrs id span is_placeholder);
@@ -453,7 +455,7 @@ spanless_eq_struct!(Variant; attrs id span !vis ident data disr_expr is_placehol
 spanless_eq_struct!(Visibility; kind span tokens);
 spanless_eq_struct!(WhereBoundPredicate; span bound_generic_params bounded_ty bounds);
 spanless_eq_struct!(WhereClause; has_where_token predicates span);
-spanless_eq_struct!(WhereEqPredicate; id span lhs_ty rhs_ty);
+spanless_eq_struct!(WhereEqPredicate; span lhs_ty rhs_ty);
 spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_struct!(token::Lit; kind symbol suffix);
 spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
@@ -747,26 +749,26 @@ impl SpanlessEq for LazyTokenStream {
 impl SpanlessEq for AttrKind {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (AttrKind::Normal(item, tokens), AttrKind::Normal(item2, tokens2)) => {
-                SpanlessEq::eq(item, item2) && SpanlessEq::eq(tokens, tokens2)
+            (AttrKind::Normal(normal), AttrKind::Normal(normal2)) => {
+                SpanlessEq::eq(normal, normal2)
             }
             (AttrKind::DocComment(kind, symbol), AttrKind::DocComment(kind2, symbol2)) => {
                 SpanlessEq::eq(kind, kind2) && SpanlessEq::eq(symbol, symbol2)
             }
-            (AttrKind::DocComment(kind, unescaped), AttrKind::Normal(item2, _tokens)) => {
+            (AttrKind::DocComment(kind, unescaped), AttrKind::Normal(normal2)) => {
                 match kind {
                     CommentKind::Line | CommentKind::Block => {}
                 }
                 let path = Path::from_ident(Ident::with_dummy_span(sym::doc));
-                SpanlessEq::eq(&path, &item2.path)
-                    && match &item2.args {
+                SpanlessEq::eq(&path, &normal2.item.path)
+                    && match &normal2.item.args {
                         MacArgs::Empty | MacArgs::Delimited(..) => false,
                         MacArgs::Eq(_span, token) => {
                             is_escaped_literal_macro_arg(token, *unescaped)
                         }
                     }
             }
-            (AttrKind::Normal(..), AttrKind::DocComment(..)) => SpanlessEq::eq(other, self),
+            (AttrKind::Normal(_), AttrKind::DocComment(..)) => SpanlessEq::eq(other, self),
         }
     }
 }
