@@ -426,7 +426,7 @@ spanless_eq_struct!(InlineAsmSym; id qself path);
 spanless_eq_struct!(Item<K>; attrs id span vis ident kind !tokens);
 spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
-spanless_eq_struct!(Lit; token kind span);
+spanless_eq_struct!(Lit; token_lit kind span);
 spanless_eq_struct!(Local; pat ty kind id span attrs !tokens);
 spanless_eq_struct!(MacCall; path args prior_type_ascription);
 spanless_eq_struct!(MacCallStmt; mac style attrs tokens);
@@ -694,7 +694,7 @@ fn is_escaped_literal_token(token: &Token, unescaped: Symbol) -> bool {
         Token {
             kind: TokenKind::Literal(lit),
             span: _,
-        } => match Lit::from_lit_token(*lit, DUMMY_SP) {
+        } => match Lit::from_token_lit(*lit, DUMMY_SP) {
             Ok(lit) => is_escaped_literal(&lit, unescaped),
             Err(_) => false,
         },
@@ -725,7 +725,7 @@ fn is_escaped_literal_macro_arg(arg: &MacArgsEq, unescaped: Symbol) -> bool {
 fn is_escaped_literal(lit: &Lit, unescaped: Symbol) -> bool {
     match lit {
         Lit {
-            token:
+            token_lit:
                 token::Lit {
                     kind: token::LitKind::Str,
                     symbol: _,
