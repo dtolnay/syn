@@ -322,15 +322,15 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
         // types yet. We'll look into comparing those in the future. For now
         // focus on expressions appearing in other places.
         fn visit_pat(&mut self, pat: &mut P<Pat>) {
-            let _ = pat;
+            _ = pat;
         }
 
         fn visit_ty(&mut self, ty: &mut P<Ty>) {
-            let _ = ty;
+            _ = ty;
         }
 
         fn visit_attribute(&mut self, attr: &mut Attribute) {
-            let _ = attr;
+            _ = attr;
         }
     }
 

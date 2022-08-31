@@ -91,7 +91,7 @@ mod librustc_parse {
 #[cfg(not(syn_only))]
 mod read_from_disk {
     pub fn bench(content: &str) -> Result<(), ()> {
-        let _ = content;
+        _ = content;
         Ok(())
     }
 }

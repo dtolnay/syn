@@ -78,7 +78,7 @@ fn parse(path: &Path, oversize_count: &AtomicUsize) -> Result<()> {
         if entry.read_to_string(&mut contents).is_err() {
             break;
         }
-        let _ = syn::parse_file(&contents);
+        _ = syn::parse_file(&contents);
     }
     Ok(())
 }

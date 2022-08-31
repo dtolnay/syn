@@ -22,26 +22,26 @@ pub fn check(_input: TokenStream) -> TokenStream {
 
     if cfg!(debug_assertions) {
         let yellow = ColorSpec::new().set_fg(Some(Color::Yellow)).clone();
-        let _ = writeln!(stderr);
-        let _ = stderr.set_color(yellow.clone().set_bold(true));
-        let _ = write!(stderr, "NOTE");
+        _ = writeln!(stderr);
+        _ = stderr.set_color(yellow.clone().set_bold(true));
+        _ = write!(stderr, "NOTE");
         for line in DEBUG_NOTE.lines() {
-            let _ = stderr.set_color(&yellow);
-            let _ = writeln!(stderr, "{}", line);
+            _ = stderr.set_color(&yellow);
+            _ = writeln!(stderr, "{}", line);
         }
-        let _ = stderr.reset();
+        _ = stderr.reset();
     }
 
     if cfg!(not(feature = "all-features")) {
         let red = ColorSpec::new().set_fg(Some(Color::Red)).clone();
-        let _ = writeln!(stderr);
-        let _ = stderr.set_color(red.clone().set_bold(true));
-        let _ = write!(stderr, "ERROR");
+        _ = writeln!(stderr);
+        _ = stderr.set_color(red.clone().set_bold(true));
+        _ = write!(stderr, "ERROR");
         for line in FEATURES_ERROR.lines() {
-            let _ = stderr.set_color(&red);
-            let _ = writeln!(stderr, "{}", line);
+            _ = stderr.set_color(&red);
+            _ = writeln!(stderr, "{}", line);
         }
-        let _ = stderr.reset();
+        _ = stderr.reset();
         process::exit(1);
     }
 

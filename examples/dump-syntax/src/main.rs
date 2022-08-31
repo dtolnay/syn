@@ -55,14 +55,14 @@ impl Display for Error {
 
 fn main() {
     if let Err(error) = try_main() {
-        let _ = writeln!(io::stderr(), "{}", error);
+        _ = writeln!(io::stderr(), "{}", error);
         process::exit(1);
     }
 }
 
 fn try_main() -> Result<(), Error> {
     let mut args = env::args_os();
-    let _ = args.next(); // executable name
+    _ = args.next(); // executable name
 
     let filepath = match (args.next(), args.next()) {
         (Some(arg), None) => PathBuf::from(arg),
