@@ -24,6 +24,7 @@
 extern crate rustc_ast;
 extern crate rustc_data_structures;
 extern crate rustc_span;
+extern crate thin_vec;
 
 use crate::common::eq::SpanlessEq;
 use crate::common::parse;
@@ -207,10 +208,10 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     };
     use rustc_ast::mut_visit::{noop_visit_generic_arg, noop_visit_local, MutVisitor};
     use rustc_data_structures::map_in_place::MapInPlace;
-    use rustc_data_structures::thin_vec::ThinVec;
     use rustc_span::DUMMY_SP;
     use std::mem;
     use std::ops::DerefMut;
+    use thin_vec::ThinVec;
 
     struct BracketsVisitor {
         failed: bool,

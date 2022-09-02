@@ -3,6 +3,7 @@
 extern crate rustc_ast;
 extern crate rustc_data_structures;
 extern crate rustc_span;
+extern crate thin_vec;
 
 use rustc_ast::ast::AngleBracketedArg;
 use rustc_ast::ast::AngleBracketedArgs;
@@ -132,10 +133,10 @@ use rustc_ast::tokenstream::{
     Spacing, TokenStream, TokenTree,
 };
 use rustc_data_structures::sync::Lrc;
-use rustc_data_structures::thin_vec::ThinVec;
 use rustc_span::source_map::Spanned;
 use rustc_span::symbol::{sym, Ident};
 use rustc_span::{Span, Symbol, SyntaxContext, DUMMY_SP};
+use thin_vec::ThinVec;
 
 pub trait SpanlessEq {
     fn eq(&self, other: &Self) -> bool;
