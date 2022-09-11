@@ -254,6 +254,7 @@
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(non_camel_case_types)]
 #![allow(
+    clippy::bool_to_int_with_if,
     clippy::cast_lossless,
     clippy::cast_possible_truncation,
     clippy::cast_ptr_alignment,
