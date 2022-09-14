@@ -130,8 +130,8 @@ use rustc_ast::ast::WhereRegionPredicate;
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, Delimiter, Nonterminal, Token, TokenKind};
 use rustc_ast::tokenstream::{
-    AttrAnnotatedTokenStream, AttrAnnotatedTokenTree, AttributesData, DelimSpan, LazyTokenStream,
-    Spacing, TokenStream, TokenTree,
+    AttrTokenStream, AttrTokenTree, AttributesData, DelimSpan, LazyAttrTokenStream, Spacing,
+    TokenStream, TokenTree,
 };
 use rustc_data_structures::sync::Lrc;
 use rustc_span::source_map::Spanned;
@@ -404,8 +404,8 @@ spanless_eq_struct!(AngleBracketedArgs; span args);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arm; attrs pat guard body span id is_placeholder);
 spanless_eq_struct!(AssocConstraint; id ident gen_args kind span);
-spanless_eq_struct!(AttrAnnotatedTokenStream; 0);
 spanless_eq_struct!(AttrItem; path args tokens);
+spanless_eq_struct!(AttrTokenStream; 0);
 spanless_eq_struct!(Attribute; kind id style span);
 spanless_eq_struct!(AttributesData; attrs tokens);
 spanless_eq_struct!(BareFnTy; unsafety ext generic_params decl decl_span);
@@ -465,8 +465,8 @@ spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
 spanless_eq_enum!(AssocItemKind; Const(0 1 2) Fn(0) TyAlias(0) MacCall(0));
 spanless_eq_enum!(AssocConstraintKind; Equality(term) Bound(bounds));
 spanless_eq_enum!(Async; Yes(span closure_id return_impl_trait_id) No);
-spanless_eq_enum!(AttrAnnotatedTokenTree; Token(0) Delimited(0 1 2) Attributes(0));
 spanless_eq_enum!(AttrStyle; Outer Inner);
+spanless_eq_enum!(AttrTokenTree; Token(0 1) Delimited(0 1 2) Attributes(0));
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
 spanless_eq_enum!(BlockCheckMode; Default Unsafe(0));
 spanless_eq_enum!(BorrowKind; Ref Raw);
@@ -741,10 +741,10 @@ fn is_escaped_literal(lit: &Lit, unescaped: Symbol) -> bool {
     }
 }
 
-impl SpanlessEq for LazyTokenStream {
+impl SpanlessEq for LazyAttrTokenStream {
     fn eq(&self, other: &Self) -> bool {
-        let this = self.create_token_stream();
-        let other = other.create_token_stream();
+        let this = self.to_attr_token_stream();
+        let other = other.to_attr_token_stream();
         SpanlessEq::eq(&this, &other)
     }
 }
