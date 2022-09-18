@@ -13,7 +13,7 @@ use walkdir::DirEntry;
 const REVISION: &str = "ee160f2f5e73b6f5954bc33f059c316d9e8582c4";
 
 #[rustfmt::skip]
-static EXCLUDE: &[&str] = &[
+static EXCLUDE_FILES: &[&str] = &[
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
@@ -84,38 +84,41 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/parser/issues/auxiliary/issue-21146-inc.rs",
 ];
 
+#[rustfmt::skip]
+static EXCLUDE_DIRS: &[&str] = &[];
+
 pub fn base_dir_filter(entry: &DirEntry) -> bool {
     let path = entry.path();
-    if path.is_dir() {
-        return true; // otherwise walkdir does not visit the files
-    }
-    if path.extension().map_or(true, |e| e != "rs") {
-        return false;
-    }
 
     let mut path_string = path.to_string_lossy();
     if cfg!(windows) {
         path_string = path_string.replace('\\', "/").into();
     }
-    let path = if let Some(path) = path_string.strip_prefix("tests/rust/") {
+    let path_string = if path_string == "tests/rust" {
+        return true;
+    } else if let Some(path) = path_string.strip_prefix("tests/rust/") {
         path
     } else {
         panic!("unexpected path in Rust dist: {}", path_string);
     };
 
-    if path.starts_with("src/test/compile-fail") || path.starts_with("src/test/rustfix") {
+    if path.is_dir() {
+        return !EXCLUDE_DIRS.contains(&path_string);
+    }
+
+    if path.extension().map_or(true, |e| e != "rs") {
         return false;
     }
 
-    if path.starts_with("src/test/ui") {
-        let stderr_path = entry.path().with_extension("stderr");
+    if path_string.starts_with("src/test/ui") {
+        let stderr_path = path.with_extension("stderr");
         if stderr_path.exists() {
             // Expected to fail in some way
             return false;
         }
     }
 
-    !EXCLUDE.contains(&path)
+    !EXCLUDE_FILES.contains(&path_string)
 }
 
 #[allow(dead_code)]
@@ -137,10 +140,17 @@ pub fn clone_rust() {
     }
     let mut missing = String::new();
     let test_src = Path::new("tests/rust");
-    for exclude in EXCLUDE {
-        if !test_src.join(exclude).exists() {
+    for exclude in EXCLUDE_FILES {
+        if !test_src.join(exclude).is_file() {
             missing += "\ntests/rust/";
             missing += exclude;
+        }
+    }
+    for exclude in EXCLUDE_DIRS {
+        if !test_src.join(exclude).is_dir() {
+            missing += "\ntests/rust/";
+            missing += exclude;
+            missing += "/";
         }
     }
     if !missing.is_empty() {
