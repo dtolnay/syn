@@ -1727,7 +1727,10 @@ pub(crate) mod parsing {
             || input.peek(Token![move])
         {
             expr_closure(input, allow_struct).map(Expr::Closure)
-        } else if input.peek(Token![for]) && input.peek2(Token![<]) && input.peek3(Lifetime) {
+        } else if input.peek(Token![for])
+            && input.peek2(Token![<])
+            && (input.peek3(Lifetime) || input.peek3(Token![>]))
+        {
             let begin = input.fork();
             input.parse::<BoundLifetimes>()?;
             expr_closure(input, allow_struct)?;
@@ -2010,7 +2013,9 @@ pub(crate) mod parsing {
             Expr::If(input.parse()?)
         } else if input.peek(Token![while]) {
             Expr::While(input.parse()?)
-        } else if input.peek(Token![for]) {
+        } else if input.peek(Token![for])
+            && !(input.peek2(Token![<]) && (input.peek3(Lifetime) || input.peek3(Token![>])))
+        {
             Expr::ForLoop(input.parse()?)
         } else if input.peek(Token![loop]) {
             Expr::Loop(input.parse()?)
