@@ -825,15 +825,27 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypePath {
         fn parse(input: ParseStream) -> Result<Self> {
-            let (qself, mut path) = path::parsing::qpath(input, false)?;
+            let expr_style = false;
+            let (qself, mut path) = path::parsing::qpath(input, expr_style)?;
 
             if path.segments.last().unwrap().arguments.is_empty()
                 && (input.peek(token::Paren) || input.peek(Token![::]) && input.peek3(token::Paren))
             {
                 input.parse::<Option<Token![::]>>()?;
                 let args: ParenthesizedGenericArguments = input.parse()?;
+                let allow_associated_type = match &args.output {
+                    ReturnType::Default => true,
+                    ReturnType::Type(_, ty) => match **ty {
+                        // TODO: probably some of the other kinds allow this too.
+                        Type::Paren(_) => true,
+                        _ => false,
+                    },
+                };
                 let parenthesized = PathArguments::Parenthesized(args);
                 path.segments.last_mut().unwrap().arguments = parenthesized;
+                if allow_associated_type {
+                    Path::parse_rest(input, &mut path, expr_style)?;
+                }
             }
 
             Ok(TypePath { qself, path })
