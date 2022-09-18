@@ -14,9 +14,6 @@ const REVISION: &str = "98ad6a5519651af36e246c0335c964dd52c554ba";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: Struct { #[attr] .. } in pattern position
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0102_record_pat_field_list.rs",
-
     // TODO: static async closures, for<> move closures
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0106_lambda_expr.rs",
 
