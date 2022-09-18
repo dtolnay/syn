@@ -833,14 +833,15 @@ pub mod parsing {
             {
                 input.parse::<Option<Token![::]>>()?;
                 let args: ParenthesizedGenericArguments = input.parse()?;
-                let allow_associated_type = match &args.output {
-                    ReturnType::Default => true,
-                    ReturnType::Type(_, ty) => match **ty {
-                        // TODO: probably some of the other kinds allow this too.
-                        Type::Paren(_) => true,
-                        _ => false,
-                    },
-                };
+                let allow_associated_type = cfg!(feature = "full")
+                    && match &args.output {
+                        ReturnType::Default => true,
+                        ReturnType::Type(_, ty) => match **ty {
+                            // TODO: probably some of the other kinds allow this too.
+                            Type::Paren(_) => true,
+                            _ => false,
+                        },
+                    };
                 let parenthesized = PathArguments::Parenthesized(args);
                 path.segments.last_mut().unwrap().arguments = parenthesized;
                 if allow_associated_type {
