@@ -10,10 +10,39 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "ee160f2f5e73b6f5954bc33f059c316d9e8582c4";
+const REVISION: &str = "98ad6a5519651af36e246c0335c964dd52c554ba";
 
 #[rustfmt::skip]
-static EXCLUDE: &[&str] = &[
+static EXCLUDE_FILES: &[&str] = &[
+    // TODO: for<> closures with empty lifetime list
+    "src/tools/rustfmt/tests/source/closure.rs",
+    "src/tools/rustfmt/tests/target/closure.rs",
+
+    // TODO: dyn*
+    "src/test/ui/dyn-star/const.rs",
+    "src/test/ui/dyn-star/drop.rs",
+    "src/test/ui/dyn-star/make-dyn-star.rs",
+    "src/test/ui/dyn-star/method.rs",
+    "src/test/ui/dyn-star/syntax.rs",
+
+    // TODO: Struct { #[attr] .. } in pattern position
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0102_record_pat_field_list.rs",
+
+    // TODO: static async closures, for<> move closures
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0106_lambda_expr.rs",
+
+    // TODO: generic associated type constraint inside trait bound
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0138_associated_type_bounds.rs",
+
+    // TODO: negative literal for const generic parameter default value
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0200_const_param_default_literal.rs",
+
+    // TODO: associated type of a path with parenthesized generic arguments
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0202_typepathfn_with_coloncolon.rs",
+
+    // TODO: trailing comma after variadic in extern fn signature
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0063_variadic_fun.rs",
+
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
@@ -33,6 +62,21 @@ static EXCLUDE: &[&str] = &[
     "src/tools/rustfmt/tests/source/trait.rs",
     "src/tools/rustfmt/tests/target/trait.rs",
 
+    // Various extensions to Rust syntax made up by rust-analyzer
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0012_type_item_where_clause.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0040_crate_keyword_vis.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0131_existential_type.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0179_use_tree_abs_star.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0188_const_param_default_path.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0015_use_tree.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0029_range_forms.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0051_parameter_attrs.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0055_dot_dot_dot.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0068_item_modifiers.rs",
+    "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0031_block_inner_attrs.rs",
+    "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0045_ambiguous_trait_object.rs",
+    "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0046_mutable_const_item.rs",
+
     // Placeholder syntax for "throw expressions"
     "src/test/pretty/yeet-expr.rs",
     "src/test/ui/try-trait/yeet-for-option.rs",
@@ -41,7 +85,9 @@ static EXCLUDE: &[&str] = &[
     // Excessive nesting
     "src/test/ui/issues/issue-74564-if-expr-stack-overflow.rs",
 
-    // Testing rustfmt on invalid syntax
+    // Testing tools on invalid syntax
+    "src/test/run-make/translation/test.rs",
+    "src/test/ui/generics/issue-94432-garbage-ice.rs",
     "src/tools/rustfmt/tests/coverage/target/comments.rs",
     "src/tools/rustfmt/tests/parser/issue-4126/invalid.rs",
     "src/tools/rustfmt/tests/parser/issue_4418.rs",
@@ -54,8 +100,8 @@ static EXCLUDE: &[&str] = &[
     "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/true.rs",
     "src/tools/rustfmt/tests/target/type.rs",
 
-    // Testing compiler diagnostic localization on invalid syntax
-    "src/test/run-make/translation/basic-translation.rs",
+    // Generated file containing a top-level expression, used with `include!`
+    "compiler/rustc_codegen_gcc/src/intrinsic/archs.rs",
 
     // Clippy lint lists represented as expressions
     "src/tools/clippy/clippy_lints/src/lib.deprecated.rs",
@@ -73,9 +119,6 @@ static EXCLUDE: &[&str] = &[
     "src/tools/clippy/clippy_lints/src/lib.register_suspicious.rs",
 
     // Not actually test cases
-    "src/test/rustdoc-ui/test-compile-fail2.rs",
-    "src/test/rustdoc-ui/test-compile-fail3.rs",
-    "src/test/ui/json-bom-plus-crlf-multifile-aux.rs",
     "src/test/ui/lint/expansion-time-include.rs",
     "src/test/ui/macros/auxiliary/macro-comma-support.rs",
     "src/test/ui/macros/auxiliary/macro-include-items-expr.rs",
@@ -84,38 +127,52 @@ static EXCLUDE: &[&str] = &[
     "src/test/ui/parser/issues/auxiliary/issue-21146-inc.rs",
 ];
 
+#[rustfmt::skip]
+static EXCLUDE_DIRS: &[&str] = &[
+    // Inputs that intentionally do not parse
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/err",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/err",
+
+    // Inputs that lex but do not necessarily parse
+    "src/tools/rust-analyzer/crates/parser/test_data/lexer",
+
+    // Inputs that used to crash rust-analyzer, but aren't necessarily supposed to parse
+    "src/tools/rust-analyzer/crates/syntax/test_data/parser/fuzz-failures",
+    "src/tools/rust-analyzer/crates/syntax/test_data/reparse/fuzz-failures",
+];
+
 pub fn base_dir_filter(entry: &DirEntry) -> bool {
     let path = entry.path();
-    if path.is_dir() {
-        return true; // otherwise walkdir does not visit the files
-    }
-    if path.extension().map_or(true, |e| e != "rs") {
-        return false;
-    }
 
     let mut path_string = path.to_string_lossy();
     if cfg!(windows) {
         path_string = path_string.replace('\\', "/").into();
     }
-    let path = if let Some(path) = path_string.strip_prefix("tests/rust/") {
+    let path_string = if path_string == "tests/rust" {
+        return true;
+    } else if let Some(path) = path_string.strip_prefix("tests/rust/") {
         path
     } else {
         panic!("unexpected path in Rust dist: {}", path_string);
     };
 
-    if path.starts_with("src/test/compile-fail") || path.starts_with("src/test/rustfix") {
+    if path.is_dir() {
+        return !EXCLUDE_DIRS.contains(&path_string);
+    }
+
+    if path.extension().map_or(true, |e| e != "rs") {
         return false;
     }
 
-    if path.starts_with("src/test/ui") {
-        let stderr_path = entry.path().with_extension("stderr");
+    if path_string.starts_with("src/test/ui") || path_string.starts_with("src/test/rustdoc-ui") {
+        let stderr_path = path.with_extension("stderr");
         if stderr_path.exists() {
             // Expected to fail in some way
             return false;
         }
     }
 
-    !EXCLUDE.contains(&path)
+    !EXCLUDE_FILES.contains(&path_string)
 }
 
 #[allow(dead_code)]
@@ -137,10 +194,17 @@ pub fn clone_rust() {
     }
     let mut missing = String::new();
     let test_src = Path::new("tests/rust");
-    for exclude in EXCLUDE {
-        if !test_src.join(exclude).exists() {
+    for exclude in EXCLUDE_FILES {
+        if !test_src.join(exclude).is_file() {
             missing += "\ntests/rust/";
             missing += exclude;
+        }
+    }
+    for exclude in EXCLUDE_DIRS {
+        if !test_src.join(exclude).is_dir() {
+            missing += "\ntests/rust/";
+            missing += exclude;
+            missing += "/";
         }
     }
     if !missing.is_empty() {
