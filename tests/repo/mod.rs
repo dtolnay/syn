@@ -10,7 +10,7 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "ee160f2f5e73b6f5954bc33f059c316d9e8582c4";
+const REVISION: &str = "98ad6a5519651af36e246c0335c964dd52c554ba";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
@@ -54,9 +54,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/true.rs",
     "src/tools/rustfmt/tests/target/type.rs",
 
-    // Testing compiler diagnostic localization on invalid syntax
-    "src/test/run-make/translation/basic-translation.rs",
-
     // Clippy lint lists represented as expressions
     "src/tools/clippy/clippy_lints/src/lib.deprecated.rs",
     "src/tools/clippy/clippy_lints/src/lib.register_all.rs",
@@ -75,7 +72,6 @@ static EXCLUDE_FILES: &[&str] = &[
     // Not actually test cases
     "src/test/rustdoc-ui/test-compile-fail2.rs",
     "src/test/rustdoc-ui/test-compile-fail3.rs",
-    "src/test/ui/json-bom-plus-crlf-multifile-aux.rs",
     "src/test/ui/lint/expansion-time-include.rs",
     "src/test/ui/macros/auxiliary/macro-comma-support.rs",
     "src/test/ui/macros/auxiliary/macro-include-items-expr.rs",
