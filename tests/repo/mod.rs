@@ -14,37 +14,34 @@ const REVISION: &str = "98ad6a5519651af36e246c0335c964dd52c554ba";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO
-    "compiler/rustc_codegen_gcc/src/intrinsic/archs.rs",
-    "src/test/run-make/translation/test.rs",
-    "src/test/rustdoc-ui/issue-79467.rs",
+    // TODO: for<> closures with empty lifetime list
+    "src/tools/rustfmt/tests/source/closure.rs",
+    "src/tools/rustfmt/tests/target/closure.rs",
+
+    // TODO: dyn*
     "src/test/ui/dyn-star/const.rs",
     "src/test/ui/dyn-star/drop.rs",
     "src/test/ui/dyn-star/make-dyn-star.rs",
     "src/test/ui/dyn-star/method.rs",
     "src/test/ui/dyn-star/syntax.rs",
-    "src/test/ui/generics/issue-94432-garbage-ice.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0012_type_item_where_clause.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0040_crate_keyword_vis.rs",
+
+    // TODO: Struct { #[attr] .. } in pattern position
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0102_record_pat_field_list.rs",
+
+    // TODO: static async closures, for<> move closures
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0106_lambda_expr.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0131_existential_type.rs",
+
+    // TODO: generic associated type constraint inside trait bound
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0138_associated_type_bounds.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0179_use_tree_abs_star.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0188_const_param_default_path.rs",
+
+    // TODO: negative literal for const generic parameter default value
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0200_const_param_default_literal.rs",
+
+    // TODO: associated type of a path with parenthesized generic arguments
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0202_typepathfn_with_coloncolon.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0015_use_tree.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0029_range_forms.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0051_parameter_attrs.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0055_dot_dot_dot.rs",
+
+    // TODO: trailing comma after variadic in extern fn signature
     "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0063_variadic_fun.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0068_item_modifiers.rs",
-    "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0031_block_inner_attrs.rs",
-    "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0045_ambiguous_trait_object.rs",
-    "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0046_mutable_const_item.rs",
-    "src/tools/rustfmt/tests/source/closure.rs",
-    "src/tools/rustfmt/tests/target/closure.rs",
 
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
@@ -65,6 +62,21 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/source/trait.rs",
     "src/tools/rustfmt/tests/target/trait.rs",
 
+    // Various extensions to Rust syntax made up by rust-analyzer
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0012_type_item_where_clause.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0040_crate_keyword_vis.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0131_existential_type.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0179_use_tree_abs_star.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0188_const_param_default_path.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0015_use_tree.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0029_range_forms.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0051_parameter_attrs.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0055_dot_dot_dot.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0068_item_modifiers.rs",
+    "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0031_block_inner_attrs.rs",
+    "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0045_ambiguous_trait_object.rs",
+    "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0046_mutable_const_item.rs",
+
     // Placeholder syntax for "throw expressions"
     "src/test/pretty/yeet-expr.rs",
     "src/test/ui/try-trait/yeet-for-option.rs",
@@ -73,7 +85,9 @@ static EXCLUDE_FILES: &[&str] = &[
     // Excessive nesting
     "src/test/ui/issues/issue-74564-if-expr-stack-overflow.rs",
 
-    // Testing rustfmt on invalid syntax
+    // Testing tools on invalid syntax
+    "src/test/run-make/translation/test.rs",
+    "src/test/ui/generics/issue-94432-garbage-ice.rs",
     "src/tools/rustfmt/tests/coverage/target/comments.rs",
     "src/tools/rustfmt/tests/parser/issue-4126/invalid.rs",
     "src/tools/rustfmt/tests/parser/issue_4418.rs",
@@ -85,6 +99,9 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/false.rs",
     "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/true.rs",
     "src/tools/rustfmt/tests/target/type.rs",
+
+    // Generated file containing a top-level expression, used with `include!`
+    "compiler/rustc_codegen_gcc/src/intrinsic/archs.rs",
 
     // Clippy lint lists represented as expressions
     "src/tools/clippy/clippy_lints/src/lib.deprecated.rs",
@@ -102,8 +119,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/clippy/clippy_lints/src/lib.register_suspicious.rs",
 
     // Not actually test cases
-    "src/test/rustdoc-ui/test-compile-fail2.rs",
-    "src/test/rustdoc-ui/test-compile-fail3.rs",
     "src/test/ui/lint/expansion-time-include.rs",
     "src/test/ui/macros/auxiliary/macro-comma-support.rs",
     "src/test/ui/macros/auxiliary/macro-include-items-expr.rs",
@@ -149,7 +164,7 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         return false;
     }
 
-    if path_string.starts_with("src/test/ui") {
+    if path_string.starts_with("src/test/ui") || path_string.starts_with("src/test/rustdoc-ui") {
         let stderr_path = path.with_extension("stderr");
         if stderr_path.exists() {
             // Expected to fail in some way
