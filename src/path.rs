@@ -756,11 +756,8 @@ pub(crate) mod printing {
             self.colon2_token.to_tokens(tokens);
             self.lt_token.to_tokens(tokens);
 
-            // Print lifetimes before types and consts, all before bindings,
-            // regardless of their order in self.args.
-            //
-            // TODO: ordering rules for const arguments vs type arguments have
-            // not been settled yet. https://github.com/rust-lang/rust/issues/44580
+            // Print lifetimes before types/consts/bindings, regardless of their
+            // order in self.args.
             let mut trailing_or_empty = true;
             for param in self.args.pairs() {
                 match **param.value() {
@@ -776,30 +773,17 @@ pub(crate) mod printing {
             }
             for param in self.args.pairs() {
                 match **param.value() {
-                    GenericArgument::Type(_) | GenericArgument::Const(_) => {
-                        if !trailing_or_empty {
-                            <Token![,]>::default().to_tokens(tokens);
-                        }
-                        param.to_tokens(tokens);
-                        trailing_or_empty = param.punct().is_some();
-                    }
-                    GenericArgument::Lifetime(_)
+                    GenericArgument::Type(_)
                     | GenericArgument::Binding(_)
-                    | GenericArgument::Constraint(_) => {}
-                }
-            }
-            for param in self.args.pairs() {
-                match **param.value() {
-                    GenericArgument::Binding(_) | GenericArgument::Constraint(_) => {
+                    | GenericArgument::Constraint(_)
+                    | GenericArgument::Const(_) => {
                         if !trailing_or_empty {
                             <Token![,]>::default().to_tokens(tokens);
                         }
                         param.to_tokens(tokens);
                         trailing_or_empty = param.punct().is_some();
                     }
-                    GenericArgument::Lifetime(_)
-                    | GenericArgument::Type(_)
-                    | GenericArgument::Const(_) => {}
+                    GenericArgument::Lifetime(_) => {}
                 }
             }
 
