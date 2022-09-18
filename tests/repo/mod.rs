@@ -14,10 +14,6 @@ const REVISION: &str = "98ad6a5519651af36e246c0335c964dd52c554ba";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: for<> closures with empty lifetime list
-    "src/tools/rustfmt/tests/source/closure.rs",
-    "src/tools/rustfmt/tests/target/closure.rs",
-
     // TODO: dyn*
     "src/test/ui/dyn-star/const.rs",
     "src/test/ui/dyn-star/drop.rs",
