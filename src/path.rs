@@ -109,16 +109,16 @@ ast_enum! {
         Lifetime(Lifetime),
         /// A type argument.
         Type(Type),
-        /// A binding (equality constraint) on an associated type: the `Item =
-        /// u8` in `Iterator<Item = u8>`.
-        Binding(Binding),
-        /// An associated type bound: `Iterator<Item: Display>`.
-        Constraint(Constraint),
         /// A const expression. Must be inside of a block.
         ///
         /// NOTE: Identity expressions are represented as Type arguments, as
         /// they are indistinguishable syntactically.
         Const(Expr),
+        /// A binding (equality constraint) on an associated type: the `Item =
+        /// u8` in `Iterator<Item = u8>`.
+        Binding(Binding),
+        /// An associated type bound: `Iterator<Item: Display>`.
+        Constraint(Constraint),
     }
 }
 
@@ -729,8 +729,6 @@ pub(crate) mod printing {
             match self {
                 GenericArgument::Lifetime(lt) => lt.to_tokens(tokens),
                 GenericArgument::Type(ty) => ty.to_tokens(tokens),
-                GenericArgument::Binding(tb) => tb.to_tokens(tokens),
-                GenericArgument::Constraint(tc) => tc.to_tokens(tokens),
                 GenericArgument::Const(e) => match *e {
                     Expr::Lit(_) => e.to_tokens(tokens),
 
@@ -746,6 +744,8 @@ pub(crate) mod printing {
                         e.to_tokens(tokens);
                     }),
                 },
+                GenericArgument::Binding(tb) => tb.to_tokens(tokens),
+                GenericArgument::Constraint(tc) => tc.to_tokens(tokens),
             }
         }
     }
@@ -766,17 +766,17 @@ pub(crate) mod printing {
                         trailing_or_empty = param.punct().is_some();
                     }
                     GenericArgument::Type(_)
+                    | GenericArgument::Const(_)
                     | GenericArgument::Binding(_)
-                    | GenericArgument::Constraint(_)
-                    | GenericArgument::Const(_) => {}
+                    | GenericArgument::Constraint(_) => {}
                 }
             }
             for param in self.args.pairs() {
                 match **param.value() {
                     GenericArgument::Type(_)
+                    | GenericArgument::Const(_)
                     | GenericArgument::Binding(_)
-                    | GenericArgument::Constraint(_)
-                    | GenericArgument::Const(_) => {
+                    | GenericArgument::Constraint(_) => {
                         if !trailing_or_empty {
                             <Token![,]>::default().to_tokens(tokens);
                         }

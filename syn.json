@@ -2243,6 +2243,11 @@
             "syn": "Type"
           }
         ],
+        "Const": [
+          {
+            "syn": "Expr"
+          }
+        ],
         "Binding": [
           {
             "syn": "Binding"
@@ -2251,11 +2256,6 @@
         "Constraint": [
           {
             "syn": "Constraint"
-          }
-        ],
-        "Const": [
-          {
-            "syn": "Expr"
           }
         ]
       }
