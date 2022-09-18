@@ -537,9 +537,15 @@ pub mod parsing {
             || lookahead.peek(Token![::])
             || lookahead.peek(Token![<])
         {
-            if input.peek(Token![dyn]) {
-                let trait_object = TypeTraitObject::parse(input, allow_plus)?;
-                return Ok(Type::TraitObject(trait_object));
+            let dyn_token: Option<Token![dyn]> = input.parse()?;
+            if dyn_token.is_some() {
+                let star_token: Option<Token![*]> = input.parse()?;
+                let bounds = TypeTraitObject::parse_bounds(input, allow_plus)?;
+                return Ok(if star_token.is_some() {
+                    Type::Verbatim(verbatim::between(begin, input))
+                } else {
+                    Type::TraitObject(TypeTraitObject { dyn_token, bounds })
+                });
             }
 
             let ty: TypePath = input.parse()?;
