@@ -14,9 +14,6 @@ const REVISION: &str = "98ad6a5519651af36e246c0335c964dd52c554ba";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: trailing comma after variadic in extern fn signature
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0063_variadic_fun.rs",
-
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
     "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
