@@ -828,7 +828,7 @@ pub mod parsing {
             let expr_style = false;
             let (qself, mut path) = path::parsing::qpath(input, expr_style)?;
 
-            if path.segments.last().unwrap().arguments.is_empty()
+            while path.segments.last().unwrap().arguments.is_empty()
                 && (input.peek(token::Paren) || input.peek(Token![::]) && input.peek3(token::Paren))
             {
                 input.parse::<Option<Token![::]>>()?;
