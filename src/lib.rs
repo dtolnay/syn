@@ -813,14 +813,6 @@ mod print;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// https://github.com/rust-lang/rust/issues/62830
-#[cfg(feature = "parsing")]
-mod rustdoc_workaround {
-    pub use crate::parse::{self as parse_module};
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 mod error;
 pub use crate::error::{Error, Result};
 
