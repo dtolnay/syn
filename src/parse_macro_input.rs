@@ -4,7 +4,7 @@
 /// Refer to the [`parse` module] documentation for more details about parsing
 /// in Syn.
 ///
-/// [`parse` module]: parse/index.html
+/// [`parse` module]: mod@crate::parse
 ///
 /// <br>
 ///
@@ -51,7 +51,7 @@
 /// This macro can also be used with the [`Parser` trait] for types that have
 /// multiple ways that they can be parsed.
 ///
-/// [`Parser` trait]: parse/trait.Parser.html
+/// [`Parser` trait]: crate::parse::Parser
 ///
 /// ```
 /// # extern crate proc_macro;
@@ -103,9 +103,6 @@
 /// #     proc_macro::TokenStream::new()
 /// # }
 /// ```
-//
-// TODO: change the parse module link to an intra rustdoc link, currently
-// blocked on https://github.com/rust-lang/rust/issues/62830
 #[macro_export]
 #[cfg_attr(doc_cfg, doc(cfg(all(feature = "parsing", feature = "proc-macro"))))]
 macro_rules! parse_macro_input {
