@@ -108,6 +108,15 @@ jobs:
       - run: cargo update -Z minimal-versions
       - run: cargo check --all-features
 
+  fuzz:
+    name: Fuzz
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/install@cargo-fuzz
+      - run: cargo fuzz build -O
+
   miri:
     name: Miri
     runs-on: ubuntu-latest
