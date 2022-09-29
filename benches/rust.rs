@@ -1,7 +1,7 @@
-// $ cargo bench --features full --bench rust
+// $ cargo bench --features full,test --bench rust
 //
 // Syn only, useful for profiling:
-// $ RUSTFLAGS='--cfg syn_only' cargo build --release --features full --bench rust
+// $ RUSTFLAGS='--cfg syn_only' cargo build --release --features full,test --bench rust
 
 #![cfg_attr(not(syn_only), feature(rustc_private))]
 #![recursion_limit = "1024"]
