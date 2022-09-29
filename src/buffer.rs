@@ -261,16 +261,12 @@ impl<'a> Cursor<'a> {
         match self.entry() {
             Entry::Punct(punct) if punct.as_char() == '\'' && punct.spacing() == Spacing::Joint => {
                 let next = unsafe { self.bump_ignore_group() };
-                match next.ident() {
-                    Some((ident, rest)) => {
-                        let lifetime = Lifetime {
-                            apostrophe: punct.span(),
-                            ident,
-                        };
-                        Some((lifetime, rest))
-                    }
-                    None => None,
-                }
+                let (ident, rest) = next.ident()?;
+                let lifetime = Lifetime {
+                    apostrophe: punct.span(),
+                    ident,
+                };
+                Some((lifetime, rest))
             }
             _ => None,
         }
