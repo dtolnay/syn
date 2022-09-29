@@ -36,7 +36,7 @@ proc-macro = ["proc-macro2/proc-macro", "quote/proc-macro"]
 test = ["syn-test-suite/all-features"]
 
 [dependencies]
-proc-macro2 = { version = "1.0.39", default-features = false }
+proc-macro2 = { version = "1.0.46", default-features = false }
 quote = { version = "1.0", optional = true, default-features = false }
 unicode-ident = "1.0"
 
