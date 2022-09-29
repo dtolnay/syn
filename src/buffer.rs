@@ -187,7 +187,7 @@ impl<'a> Cursor<'a> {
     /// point at the first token after the group.
     unsafe fn bump_over_group(self) -> Cursor<'a> {
         match self.entry() {
-            &Entry::Group(_, end_offset) => Cursor::create(self.ptr.add(end_offset), self.scope),
+            Entry::Group(_, end_offset) => Cursor::create(self.ptr.add(*end_offset), self.scope),
             _ => self.bump_ignore_group(),
         }
     }
@@ -196,8 +196,8 @@ impl<'a> Cursor<'a> {
     /// if the cursor is not currently looking at an `Entry::Group`.
     unsafe fn bump_into_group(self) -> Cursor<'a> {
         match self.entry() {
-            &Entry::Group(_, end_offset) => {
-                Cursor::create(self.ptr.add(1), self.ptr.add(end_offset))
+            Entry::Group(_, end_offset) => {
+                Cursor::create(self.ptr.add(1), self.ptr.add(*end_offset))
             }
             _ => hint::unreachable_unchecked(),
         }
@@ -237,7 +237,8 @@ impl<'a> Cursor<'a> {
 
         if let Entry::Group(group, _) = self.entry() {
             if group.delimiter() == delim {
-                let (into, over) = unsafe { (self.bump_into_group(), self.bump_over_group()) };
+                let into = unsafe { self.bump_into_group() };
+                let over = unsafe { self.bump_over_group() };
                 return Some((into, group.span(), over));
             }
         }
