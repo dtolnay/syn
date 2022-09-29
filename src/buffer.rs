@@ -178,19 +178,6 @@ impl<'a> Cursor<'a> {
         Cursor::create(self.ptr.offset(1), self.scope)
     }
 
-    /// Bump the cursor to point at the next token after the current one. This
-    /// is undefined behavior if the cursor is currently looking at an
-    /// `Entry::End`.
-    ///
-    /// If the cursor is looking at an `Entry::Group`, the bumped cursor will
-    /// point at the first token after the group.
-    unsafe fn bump_over_group(self) -> Cursor<'a> {
-        match self.entry() {
-            Entry::Group(_, end_offset) => Cursor::create(self.ptr.add(*end_offset), self.scope),
-            _ => self.bump_ignore_group(),
-        }
-    }
-
     /// While the cursor is looking at a `None`-delimited group, move it to look
     /// at the first token inside instead. If the group is empty, this will move
     /// the cursor past the `None`-delimited group.
@@ -309,15 +296,16 @@ impl<'a> Cursor<'a> {
     /// This method does not treat `None`-delimited groups as transparent, and
     /// will return a `Group(None, ..)` if the cursor is looking at one.
     pub fn token_tree(self) -> Option<(TokenTree, Cursor<'a>)> {
-        let tree = match self.entry() {
-            Entry::Group(group, _) => group.clone().into(),
-            Entry::Literal(literal) => literal.clone().into(),
-            Entry::Ident(ident) => ident.clone().into(),
-            Entry::Punct(punct) => punct.clone().into(),
+        let (tree, len) = match self.entry() {
+            Entry::Group(group, end_offset) => (group.clone().into(), *end_offset),
+            Entry::Literal(literal) => (literal.clone().into(), 1),
+            Entry::Ident(ident) => (ident.clone().into(), 1),
+            Entry::Punct(punct) => (punct.clone().into(), 1),
             Entry::End => return None,
         };
 
-        Some((tree, unsafe { self.bump_over_group() }))
+        let rest = unsafe { Cursor::create(self.ptr.add(len), self.scope) };
+        Some((tree, rest))
     }
 
     /// Returns the `Span` of the current token, or `Span::call_site()` if this
@@ -337,19 +325,22 @@ impl<'a> Cursor<'a> {
     ///
     /// This method treats `'lifetimes` as a single token.
     pub(crate) fn skip(self) -> Option<Cursor<'a>> {
-        match self.entry() {
-            Entry::End => None,
+        let len = match self.entry() {
+            Entry::End => return None,
 
             // Treat lifetimes as a single tt for the purposes of 'skip'.
             Entry::Punct(punct) if punct.as_char() == '\'' && punct.spacing() == Spacing::Joint => {
-                let next = unsafe { self.bump_ignore_group() };
-                match next.entry() {
-                    Entry::Ident(_) => Some(unsafe { next.bump_ignore_group() }),
-                    _ => Some(next),
+                match unsafe { &*self.ptr.add(1) } {
+                    Entry::Ident(_) => 2,
+                    _ => 1,
                 }
             }
-            _ => Some(unsafe { self.bump_over_group() }),
-        }
+
+            Entry::Group(_, end_offset) => *end_offset,
+            _ => 1,
+        };
+
+        Some(unsafe { Cursor::create(self.ptr.add(len), self.scope) })
     }
 }
 
