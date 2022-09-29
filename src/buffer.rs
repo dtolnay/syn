@@ -40,7 +40,7 @@ pub struct TokenBuffer {
 }
 
 impl TokenBuffer {
-    fn new_inner(entries: &mut Vec<Entry>, stream: TokenStream) {
+    fn recursive_new(entries: &mut Vec<Entry>, stream: TokenStream) {
         for tt in stream {
             match tt {
                 TokenTree::Ident(ident) => entries.push(Entry::Ident(ident)),
@@ -49,7 +49,7 @@ impl TokenBuffer {
                 TokenTree::Group(group) => {
                     let group_start_index = entries.len();
                     entries.push(Entry::End); // we replace this below
-                    Self::new_inner(entries, group.stream());
+                    Self::recursive_new(entries, group.stream());
                     let group_end_index = entries.len();
                     entries.push(Entry::End);
                     let group_end_offset = group_end_index - group_start_index;
@@ -76,7 +76,7 @@ impl TokenBuffer {
     /// `proc_macro2::TokenStream`.
     pub fn new2(stream: TokenStream) -> Self {
         let mut entries = Vec::new();
-        Self::new_inner(&mut entries, stream);
+        Self::recursive_new(&mut entries, stream);
         entries.push(Entry::End);
         Self {
             entries: entries.into_boxed_slice(),
