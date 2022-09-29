@@ -39,11 +39,6 @@ pub struct TokenBuffer {
     entries: Box<[Entry]>,
 }
 
-// Keep the explicit impl for backwards compatibility.
-impl Drop for TokenBuffer {
-    fn drop(&mut self) {}
-}
-
 impl TokenBuffer {
     fn new_inner(entries: &mut Vec<Entry>, stream: TokenStream) {
         for tt in stream {
