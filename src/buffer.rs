@@ -14,7 +14,6 @@
 use crate::proc_macro as pm;
 use crate::Lifetime;
 use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
-use std::hint;
 use std::marker::PhantomData;
 
 /// Internal type which is used instead of `TokenTree` to represent a token tree
@@ -192,17 +191,6 @@ impl<'a> Cursor<'a> {
         }
     }
 
-    /// Bump the cursor to enter the current group. This is undefined behavior
-    /// if the cursor is not currently looking at an `Entry::Group`.
-    unsafe fn bump_into_group(self) -> Cursor<'a> {
-        match self.entry() {
-            Entry::Group(_, end_offset) => {
-                Cursor::create(self.ptr.add(1), self.ptr.add(*end_offset))
-            }
-            _ => hint::unreachable_unchecked(),
-        }
-    }
-
     /// While the cursor is looking at a `None`-delimited group, move it to look
     /// at the first token inside instead. If the group is empty, this will move
     /// the cursor past the `None`-delimited group.
@@ -235,11 +223,12 @@ impl<'a> Cursor<'a> {
             self.ignore_none();
         }
 
-        if let Entry::Group(group, _) = self.entry() {
+        if let Entry::Group(group, end_offset) = self.entry() {
             if group.delimiter() == delim {
-                let into = unsafe { self.bump_into_group() };
-                let over = unsafe { self.bump_over_group() };
-                return Some((into, group.span(), over));
+                let end_of_group = unsafe { self.ptr.add(*end_offset) };
+                let inside_of_group = unsafe { Cursor::create(self.ptr.add(1), end_of_group) };
+                let after_group = unsafe { Cursor::create(end_of_group, self.scope) };
+                return Some((inside_of_group, group.span(), after_group));
             }
         }
 
