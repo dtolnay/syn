@@ -343,7 +343,8 @@ pub mod parsing {
     impl Parse for Type {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_plus = true;
-            ambig_ty(input, allow_plus)
+            let allow_group_generic = true;
+            ambig_ty(input, allow_plus, allow_group_generic)
         }
     }
 
@@ -356,11 +357,16 @@ pub mod parsing {
         #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
         pub fn without_plus(input: ParseStream) -> Result<Self> {
             let allow_plus = false;
-            ambig_ty(input, allow_plus)
+            let allow_group_generic = true;
+            ambig_ty(input, allow_plus, allow_group_generic)
         }
     }
 
-    fn ambig_ty(input: ParseStream, allow_plus: bool) -> Result<Type> {
+    pub(crate) fn ambig_ty(
+        input: ParseStream,
+        allow_plus: bool,
+        allow_group_generic: bool,
+    ) -> Result<Type> {
         let begin = input.fork();
 
         if input.peek(token::Group) {
@@ -381,7 +387,9 @@ pub mod parsing {
                         path: Path::parse_helper(input, false)?,
                     }));
                 }
-            } else if input.peek(Token![<]) || input.peek(Token![::]) && input.peek3(Token![<]) {
+            } else if input.peek(Token![<]) && allow_group_generic
+                || input.peek(Token![::]) && input.peek3(Token![<])
+            {
                 if let Type::Path(mut ty) = *group.elem {
                     let arguments = &mut ty.path.segments.last_mut().unwrap().arguments;
                     if let PathArguments::None = arguments {
@@ -863,7 +871,8 @@ pub mod parsing {
         pub(crate) fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
             if input.peek(Token![->]) {
                 let arrow = input.parse()?;
-                let ty = ambig_ty(input, allow_plus)?;
+                let allow_group_generic = true;
+                let ty = ambig_ty(input, allow_plus, allow_group_generic)?;
                 Ok(ReturnType::Type(arrow, Box::new(ty)))
             } else {
                 Ok(ReturnType::Default)
@@ -986,7 +995,10 @@ pub mod parsing {
             let content;
             Ok(TypeParen {
                 paren_token: parenthesized!(content in input),
-                elem: Box::new(ambig_ty(&content, allow_plus)?),
+                elem: Box::new({
+                    let allow_group_generic = true;
+                    ambig_ty(&content, allow_plus, allow_group_generic)?
+                }),
             })
         }
     }
