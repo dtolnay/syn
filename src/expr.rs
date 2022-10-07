@@ -1371,7 +1371,9 @@ pub(crate) mod parsing {
                 });
             } else if Precedence::Cast >= base && input.peek(Token![as]) {
                 let as_token: Token![as] = input.parse()?;
-                let ty = input.call(Type::without_plus)?;
+                let allow_plus = false;
+                let allow_group_generic = false;
+                let ty = ty::parsing::ambig_ty(input, allow_plus, allow_group_generic)?;
                 check_cast(input)?;
                 lhs = Expr::Cast(ExprCast {
                     attrs: Vec::new(),
@@ -1381,7 +1383,9 @@ pub(crate) mod parsing {
                 });
             } else if Precedence::Cast >= base && input.peek(Token![:]) && !input.peek(Token![::]) {
                 let colon_token: Token![:] = input.parse()?;
-                let ty = input.call(Type::without_plus)?;
+                let allow_plus = false;
+                let allow_group_generic = false;
+                let ty = ty::parsing::ambig_ty(input, allow_plus, allow_group_generic)?;
                 check_cast(input)?;
                 lhs = Expr::Type(ExprType {
                     attrs: Vec::new(),
@@ -1429,7 +1433,9 @@ pub(crate) mod parsing {
                 });
             } else if Precedence::Cast >= base && input.peek(Token![as]) {
                 let as_token: Token![as] = input.parse()?;
-                let ty = input.call(Type::without_plus)?;
+                let allow_plus = false;
+                let allow_group_generic = false;
+                let ty = ty::parsing::ambig_ty(input, allow_plus, allow_group_generic)?;
                 check_cast(input)?;
                 lhs = Expr::Cast(ExprCast {
                     attrs: Vec::new(),
