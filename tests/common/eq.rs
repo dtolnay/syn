@@ -462,7 +462,7 @@ spanless_eq_struct!(WhereEqPredicate; span lhs_ty rhs_ty);
 spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_struct!(token::Lit; kind symbol suffix);
 spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
-spanless_eq_enum!(AssocItemKind; Const(0 1 2) Fn(0) TyAlias(0) MacCall(0));
+spanless_eq_enum!(AssocItemKind; Const(0 1 2) Fn(0) Type(0) MacCall(0));
 spanless_eq_enum!(AssocConstraintKind; Equality(term) Bound(bounds));
 spanless_eq_enum!(Async; Yes(span closure_id return_impl_trait_id) No);
 spanless_eq_enum!(AttrStyle; Outer Inner);
