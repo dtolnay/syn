@@ -1866,6 +1866,17 @@ impl Debug for Local {
         formatter.finish()
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for LocalInitializer {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("LocalInitializer");
+        formatter.field("eq_token", &self.eq_token);
+        formatter.field("expr", &self.expr);
+        formatter.field("else_block", &self.else_block);
+        formatter.finish()
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Macro {

@@ -30,7 +30,7 @@ ast_enum! {
 }
 
 ast_struct! {
-    /// A local `let` binding: `let x: u64 = s.parse()?`.
+    /// A local `let` binding: `let x: u64 = s.parse()?` (including let-else construction).
     ///
     /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
@@ -38,8 +38,23 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub let_token: Token![let],
         pub pat: Pat,
-        pub init: Option<(Token![=], Box<Expr>)>,
+        pub init: Option<LocalInitializer>,
         pub semi_token: Token![;],
+    }
+}
+
+ast_struct! {
+    /// An initializer of local `let` binding (with optional diverging else-block)
+    ///
+    /// `LocalInitializer` represents `= s.parse()?` in `let x: u64 = s.parse()?`
+    /// and `= r else { return }` in `let Ok(x) = r else { return }`.
+    ///
+    /// *This type is available only if Syn is built with the `"full"` feature.*
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    pub struct LocalInitializer {
+        pub eq_token: Token![=],
+        pub expr: Box<Expr>,
+        pub else_block: Option<(Token![else], Box<ExprBlock>)>,
     }
 }
 
@@ -47,7 +62,7 @@ ast_struct! {
 pub mod parsing {
     use super::*;
     use crate::parse::discouraged::Speculative;
-    use crate::parse::{Parse, ParseBuffer, ParseStream, Result};
+    use crate::parse::{Parse, ParseStream, Result};
     use proc_macro2::TokenStream;
 
     struct AllowNoSemi(bool);
@@ -152,7 +167,6 @@ pub mod parsing {
     }
 
     fn parse_stmt(input: ParseStream, allow_nosemi: AllowNoSemi) -> Result<Stmt> {
-        let begin = input.fork();
         let mut attrs = input.call(Attribute::parse_outer)?;
 
         // brace-style macros; paren and bracket macros get parsed as
@@ -170,7 +184,7 @@ pub mod parsing {
         }
 
         if input.peek(Token![let]) {
-            stmt_local(input, attrs, begin)
+            stmt_local(input, attrs)
         } else if input.peek(Token![pub])
             || input.peek(Token![crate]) && !input.peek2(Token![::])
             || input.peek(Token![extern])
@@ -227,7 +241,7 @@ pub mod parsing {
         })))
     }
 
-    fn stmt_local(input: ParseStream, attrs: Vec<Attribute>, begin: ParseBuffer) -> Result<Stmt> {
+    fn stmt_local(input: ParseStream, attrs: Vec<Attribute>) -> Result<Stmt> {
         let let_token: Token![let] = input.parse()?;
 
         let mut pat = Pat::parse_single(input)?;
@@ -246,17 +260,19 @@ pub mod parsing {
             let eq_token: Token![=] = input.parse()?;
             let init: Expr = input.parse()?;
 
-            if input.peek(Token![else]) {
-                input.parse::<Token![else]>()?;
-                let content;
-                braced!(content in input);
-                content.call(Block::parse_within)?;
-                let verbatim = Expr::Verbatim(verbatim::between(begin, input));
-                let semi_token: Token![;] = input.parse()?;
-                return Ok(Stmt::Expr(verbatim, Some(semi_token)));
-            }
+            let else_block = if input.peek(Token![else]) {
+                let else_token = input.parse::<Token![else]>()?;
+                let expr_block = input.parse::<ExprBlock>()?;
+                Some((else_token, Box::new(expr_block)))
+            } else {
+                None
+            };
 
-            Some((eq_token, Box::new(init)))
+            Some(LocalInitializer {
+                eq_token,
+                expr: Box::new(init),
+                else_block,
+            })
         } else {
             None
         };
@@ -338,11 +354,21 @@ mod printing {
             expr::printing::outer_attrs_to_tokens(&self.attrs, tokens);
             self.let_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
-            if let Some((eq_token, init)) = &self.init {
-                eq_token.to_tokens(tokens);
+            if let Some(init) = &self.init {
                 init.to_tokens(tokens);
             }
             self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    impl ToTokens for LocalInitializer {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            self.eq_token.to_tokens(tokens);
+            self.expr.to_tokens(tokens);
+            if let Some((else_token, expr_block)) = &self.else_block {
+                else_token.to_tokens(tokens);
+                expr_block.to_tokens(tokens);
+            }
         }
     }
 }

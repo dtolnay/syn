@@ -15,7 +15,9 @@ fn test_raw_operator() {
     snapshot!(stmt, @r###"
     Local(Local {
         pat: Pat::Wild,
-        init: Some(Verbatim(`& raw const x`)),
+        init: Some(LocalInitializer {
+            expr: Verbatim(`& raw const x`),
+        }),
     })
     "###);
 }
@@ -27,15 +29,17 @@ fn test_raw_variable() {
     snapshot!(stmt, @r###"
     Local(Local {
         pat: Pat::Wild,
-        init: Some(Expr::Reference {
-            expr: Expr::Path {
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "raw",
-                            arguments: None,
-                        },
-                    ],
+        init: Some(LocalInitializer {
+            expr: Expr::Reference {
+                expr: Expr::Path {
+                    path: Path {
+                        segments: [
+                            PathSegment {
+                                ident: "raw",
+                                arguments: None,
+                            },
+                        ],
+                    },
                 },
             },
         }),
@@ -85,8 +89,65 @@ fn test_let_dot_dot() {
     snapshot!(tokens as Stmt, @r###"
     Local(Local {
         pat: Pat::Rest,
-        init: Some(Expr::Lit {
-            lit: 10,
+        init: Some(LocalInitializer {
+            expr: Expr::Lit {
+                lit: 10,
+            },
+        }),
+    })
+    "###);
+}
+
+#[test]
+fn test_let_else() {
+    let tokens = quote! {
+        let Some(x) = None else { return 0; };
+    };
+
+    snapshot!(tokens as Stmt, @r###"
+    Local(Local {
+        pat: Pat::TupleStruct {
+            path: Path {
+                segments: [
+                    PathSegment {
+                        ident: "Some",
+                        arguments: None,
+                    },
+                ],
+            },
+            pat: PatTuple {
+                elems: [
+                    Pat::Ident {
+                        ident: "x",
+                    },
+                ],
+            },
+        },
+        init: Some(LocalInitializer {
+            expr: Expr::Path {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "None",
+                            arguments: None,
+                        },
+                    ],
+                },
+            },
+            else_block: Some(ExprBlock {
+                block: Block {
+                    stmts: [
+                        Expr(
+                            Expr::Return {
+                                expr: Some(Expr::Lit {
+                                    lit: 0,
+                                }),
+                            },
+                            Some,
+                        ),
+                    ],
+                },
+            }),
         }),
     })
     "###);

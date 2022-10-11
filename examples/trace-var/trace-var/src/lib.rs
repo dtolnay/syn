@@ -84,7 +84,7 @@ impl Args {
     ///     let VAR = { let VAR = INIT; println!("VAR = {:?}", VAR); VAR };
     fn let_and_print(&mut self, local: Local) -> Stmt {
         let Local { pat, init, .. } = local;
-        let init = self.fold_expr(*init.unwrap().1);
+        let init = self.fold_expr(*init.unwrap().expr);
         let ident = match pat {
             Pat::Ident(ref p) => &p.ident,
             _ => unreachable!(),

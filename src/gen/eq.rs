@@ -1287,6 +1287,16 @@ impl PartialEq for Local {
         self.attrs == other.attrs && self.pat == other.pat && self.init == other.init
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for LocalInitializer {}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for LocalInitializer {
+    fn eq(&self, other: &Self) -> bool {
+        self.expr == other.expr && self.else_block == other.else_block
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Macro {}

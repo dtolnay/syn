@@ -465,6 +465,10 @@ pub trait Fold {
     fn fold_local(&mut self, i: Local) -> Local {
         fold_local(self, i)
     }
+    #[cfg(feature = "full")]
+    fn fold_local_initializer(&mut self, i: LocalInitializer) -> LocalInitializer {
+        fold_local_initializer(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_macro(&mut self, i: Macro) -> Macro {
         fold_macro(self, i)
@@ -2348,12 +2352,23 @@ where
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         let_token: Token![let](tokens_helper(f, &node.let_token.span)),
         pat: f.fold_pat(node.pat),
-        init: (node.init)
-            .map(|it| (
-                Token![=](tokens_helper(f, &(it).0.spans)),
-                Box::new(f.fold_expr(*(it).1)),
-            )),
+        init: (node.init).map(|it| f.fold_local_initializer(it)),
         semi_token: Token![;](tokens_helper(f, &node.semi_token.spans)),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_local_initializer<F>(f: &mut F, node: LocalInitializer) -> LocalInitializer
+where
+    F: Fold + ?Sized,
+{
+    LocalInitializer {
+        eq_token: Token![=](tokens_helper(f, &node.eq_token.spans)),
+        expr: Box::new(f.fold_expr(*node.expr)),
+        else_block: (node.else_block)
+            .map(|it| (
+                Token![else](tokens_helper(f, &(it).0.span)),
+                Box::new(f.fold_expr_block(*(it).1)),
+            )),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

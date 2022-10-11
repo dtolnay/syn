@@ -3417,20 +3417,43 @@
         },
         "init": {
           "option": {
-            "tuple": [
-              {
-                "token": "Eq"
-              },
-              {
-                "box": {
-                  "syn": "Expr"
-                }
-              }
-            ]
+            "syn": "LocalInitializer"
           }
         },
         "semi_token": {
           "token": "Semi"
+        }
+      }
+    },
+    {
+      "ident": "LocalInitializer",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "eq_token": {
+          "token": "Eq"
+        },
+        "expr": {
+          "box": {
+            "syn": "Expr"
+          }
+        },
+        "else_block": {
+          "option": {
+            "tuple": [
+              {
+                "token": "Else"
+              },
+              {
+                "box": {
+                  "syn": "ExprBlock"
+                }
+              }
+            ]
+          }
         }
       }
     },

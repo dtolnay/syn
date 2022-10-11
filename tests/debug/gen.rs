@@ -3501,7 +3501,31 @@ impl Debug for Lite<syn::Local> {
         if let Some(val) = &_val.init {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print((syn::token::Eq, Box<syn::Expr>));
+            struct Print(syn::LocalInitializer);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("init", Print::ref_cast(val));
+        }
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::LocalInitializer> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("LocalInitializer");
+        formatter.field("expr", Lite(&_val.expr));
+        if let Some(val) = &_val.else_block {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print((syn::token::Else, Box<syn::ExprBlock>));
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some")?;
@@ -3512,7 +3536,7 @@ impl Debug for Lite<syn::Local> {
                     Ok(())
                 }
             }
-            formatter.field("init", Print::ref_cast(val));
+            formatter.field("else_block", Print::ref_cast(val));
         }
         formatter.finish()
     }
