@@ -14,7 +14,7 @@
 use crate::proc_macro as pm;
 use crate::Lifetime;
 use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
-use std::marker::PhantomData;
+use std::{cmp::Ordering, marker::PhantomData};
 
 /// Internal type which is used instead of `TokenTree` to represent a token tree
 /// within a `TokenBuffer`.
@@ -348,8 +348,16 @@ impl<'a> Eq for Cursor<'a> {}
 impl<'a> PartialEq for Cursor<'a> {
     fn eq(&self, other: &Self) -> bool {
         let Cursor { ptr, scope, marker } = self;
-        let _ = marker;
-        *ptr == other.ptr && *scope == other.scope
+        let _ = (scope, marker);
+        *ptr == other.ptr
+    }
+}
+
+impl<'a> PartialOrd for Cursor<'a> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        let Cursor { ptr, scope, marker } = self;
+        let _ = (scope, marker);
+        ptr.partial_cmp(&other.ptr)
     }
 }
 
