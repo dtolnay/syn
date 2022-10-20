@@ -26,7 +26,8 @@ enum Entry {
     Ident(Ident),
     Punct(Punct),
     Literal(Literal),
-    End,
+    // End entries contain the offset (negative) to the start of the buffer.
+    End(isize),
 }
 
 /// A buffer that can be efficiently traversed multiple times, unlike
@@ -49,10 +50,10 @@ impl TokenBuffer {
                 TokenTree::Literal(literal) => entries.push(Entry::Literal(literal)),
                 TokenTree::Group(group) => {
                     let group_start_index = entries.len();
-                    entries.push(Entry::End); // we replace this below
+                    entries.push(Entry::End(0)); // we replace this below
                     Self::recursive_new(entries, group.stream());
                     let group_end_index = entries.len();
-                    entries.push(Entry::End);
+                    entries.push(Entry::End(-(group_end_index as isize)));
                     let group_end_offset = group_end_index - group_start_index;
                     entries[group_start_index] = Entry::Group(group, group_end_offset);
                 }
@@ -78,7 +79,7 @@ impl TokenBuffer {
     pub fn new2(stream: TokenStream) -> Self {
         let mut entries = Vec::new();
         Self::recursive_new(&mut entries, stream);
-        entries.push(Entry::End);
+        entries.push(Entry::End(-(entries.len() as isize)));
         Self {
             entries: entries.into_boxed_slice(),
         }
@@ -128,7 +129,7 @@ impl<'a> Cursor<'a> {
         // object in global storage.
         struct UnsafeSyncEntry(Entry);
         unsafe impl Sync for UnsafeSyncEntry {}
-        static EMPTY_ENTRY: UnsafeSyncEntry = UnsafeSyncEntry(Entry::End);
+        static EMPTY_ENTRY: UnsafeSyncEntry = UnsafeSyncEntry(Entry::End(0));
 
         Cursor {
             ptr: &EMPTY_ENTRY.0,
@@ -145,7 +146,7 @@ impl<'a> Cursor<'a> {
         // past it, unless `ptr == scope`, which means that we're at the edge of
         // our cursor's scope. We should only have `ptr != scope` at the exit
         // from None-delimited groups entered with `ignore_none`.
-        while let Entry::End = *ptr {
+        while let Entry::End(_) = *ptr {
             if ptr == scope {
                 break;
             }
@@ -293,7 +294,7 @@ impl<'a> Cursor<'a> {
             Entry::Literal(literal) => (literal.clone().into(), 1),
             Entry::Ident(ident) => (ident.clone().into(), 1),
             Entry::Punct(punct) => (punct.clone().into(), 1),
-            Entry::End => return None,
+            Entry::End(_) => return None,
         };
 
         let rest = unsafe { Cursor::create(self.ptr.add(len), self.scope) };
@@ -308,7 +309,7 @@ impl<'a> Cursor<'a> {
             Entry::Literal(literal) => literal.span(),
             Entry::Ident(ident) => ident.span(),
             Entry::Punct(punct) => punct.span(),
-            Entry::End => Span::call_site(),
+            Entry::End(_) => Span::call_site(),
         }
     }
 
@@ -318,7 +319,7 @@ impl<'a> Cursor<'a> {
     /// This method treats `'lifetimes` as a single token.
     pub(crate) fn skip(self) -> Option<Cursor<'a>> {
         let len = match self.entry() {
-            Entry::End => return None,
+            Entry::End(_) => return None,
 
             // Treat lifetimes as a single tt for the purposes of 'skip'.
             Entry::Punct(punct) if punct.as_char() == '\'' && punct.spacing() == Spacing::Joint => {
@@ -354,12 +355,32 @@ impl<'a> PartialEq for Cursor<'a> {
 
 impl<'a> PartialOrd for Cursor<'a> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.ptr.partial_cmp(&other.ptr)
+        if same_buffer(*self, *other) {
+            Some(self.ptr.cmp(&other.ptr))
+        } else {
+            None
+        }
     }
 }
 
 pub(crate) fn same_scope(a: Cursor, b: Cursor) -> bool {
     a.scope == b.scope
+}
+
+pub(crate) fn same_buffer(a: Cursor, b: Cursor) -> bool {
+    unsafe {
+        match (&*a.scope, &*b.scope) {
+            (Entry::End(a_offset), Entry::End(b_offset)) => {
+                a.scope.offset(*a_offset) == b.scope.offset(*b_offset)
+            }
+            _ => unreachable!(),
+        }
+    }
+}
+
+#[cfg(any(feature = "full", feature = "derive"))]
+pub(crate) fn cmp_assuming_same_buffer(a: Cursor, b: Cursor) -> Ordering {
+    a.ptr.cmp(&b.ptr)
 }
 
 pub(crate) fn open_span_of_group(cursor: Cursor) -> Span {

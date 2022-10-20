@@ -257,6 +257,7 @@
     clippy::bool_to_int_with_if,
     clippy::cast_lossless,
     clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
     clippy::cast_ptr_alignment,
     clippy::default_trait_access,
     clippy::doc_markdown,
