@@ -5,10 +5,10 @@ use quote::quote;
 fn main() {
     // Okay. Rustc allows top-level `static` with no value syntactically, but
     // not semantically. Syn parses as Item::Verbatim.
-    let tokens = quote!(
+    let tokens = quote! {
         pub static FOO: usize;
         pub static BAR: usize;
-    );
+    };
     let file = syn::parse2::<syn::File>(tokens).unwrap();
     println!("{:#?}", file);
 
@@ -21,7 +21,7 @@ fn main() {
     let file = syn::parse2::<syn::File>(tokens).unwrap();
     println!("{:#?}", file);
 
-    // Parser crash.
+    // Formerly parser crash.
     let inner = Group::new(
         Delimiter::None,
         quote!(static FOO: usize; pub static BAR: usize),
