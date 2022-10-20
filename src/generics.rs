@@ -1300,10 +1300,8 @@ mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for WhereClause {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            if !self.predicates.is_empty() {
-                self.where_token.to_tokens(tokens);
-                self.predicates.to_tokens(tokens);
-            }
+            self.where_token.to_tokens(tokens);
+            self.predicates.to_tokens(tokens);
         }
     }
 
