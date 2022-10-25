@@ -188,7 +188,7 @@ fn download_and_unpack() -> Result<()> {
         "https://github.com/rust-lang/rust/archive/{}.tar.gz",
         REVISION
     );
-    let response = reqwest::blocking::get(&url)?.error_for_status()?;
+    let response = reqwest::blocking::get(url)?.error_for_status()?;
     let progress = Progress::new(response);
     let decoder = GzDecoder::new(progress);
     let mut archive = Archive::new(decoder);
