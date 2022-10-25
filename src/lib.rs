@@ -265,6 +265,7 @@
     clippy::explicit_auto_deref,
     clippy::if_not_else,
     clippy::inherent_to_string,
+    clippy::items_after_statements,
     clippy::large_enum_variant,
     clippy::let_underscore_drop,
     clippy::manual_assert,
