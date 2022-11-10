@@ -34,6 +34,16 @@ fn pairs() {
 }
 
 #[test]
+fn pairs_map() {
+    let p: Punctuated<i32, Token![,]> = punctuated!(2, 3, 4);
+    let v: Punctuated<f32, Token![,]> = p
+        .into_pairs()
+        .map(|pair| pair.map(|i: i32| i as f32))
+        .collect();
+    assert_eq!(v, punctuated!(2.0, 3.0, 4.0));
+}
+
+#[test]
 fn iter() {
     let mut p: Punctuated<_, Token![,]> = punctuated!(2, 3, 4);
 

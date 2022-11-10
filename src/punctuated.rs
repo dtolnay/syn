@@ -987,6 +987,17 @@ impl<T, P> Pair<T, P> {
             Pair::End(t) => (t, None),
         }
     }
+
+    /// Maps a `Pair<T, P>` to a `Pair<U, P>`
+    pub fn map<U, F>(self, f: F) -> Pair<U, P>
+    where
+        F: FnOnce(T) -> U,
+    {
+        match self {
+            Pair::Punctuated(t, p) => Pair::Punctuated(f(t), p),
+            Pair::End(t) => Pair::End(f(t)),
+        }
+    }
 }
 
 #[cfg(feature = "clone-impls")]
