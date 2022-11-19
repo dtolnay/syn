@@ -26,6 +26,7 @@ use rustc_ast::ast::BlockCheckMode;
 use rustc_ast::ast::BorrowKind;
 use rustc_ast::ast::ByRef;
 use rustc_ast::ast::CaptureBy;
+use rustc_ast::ast::Closure;
 use rustc_ast::ast::ClosureBinder;
 use rustc_ast::ast::Const;
 use rustc_ast::ast::Crate;
@@ -78,6 +79,7 @@ use rustc_ast::ast::MacCallStmt;
 use rustc_ast::ast::MacDelimiter;
 use rustc_ast::ast::MacStmtStyle;
 use rustc_ast::ast::MacroDef;
+use rustc_ast::ast::MethodCall;
 use rustc_ast::ast::ModKind;
 use rustc_ast::ast::ModSpans;
 use rustc_ast::ast::Movability;
@@ -411,6 +413,7 @@ spanless_eq_struct!(AttributesData; attrs tokens);
 spanless_eq_struct!(BareFnTy; unsafety ext generic_params decl decl_span);
 spanless_eq_struct!(BindingAnnotation; 0 1);
 spanless_eq_struct!(Block; stmts id rules span tokens could_be_bare_literal);
+spanless_eq_struct!(Closure; binder capture_clause asyncness movability fn_decl body !fn_decl_span);
 spanless_eq_struct!(Crate; attrs items spans id is_placeholder);
 spanless_eq_struct!(EnumDef; variants);
 spanless_eq_struct!(Expr; id kind span attrs !tokens);
@@ -434,6 +437,7 @@ spanless_eq_struct!(Local; pat ty kind id span attrs !tokens);
 spanless_eq_struct!(MacCall; path args prior_type_ascription);
 spanless_eq_struct!(MacCallStmt; mac style attrs tokens);
 spanless_eq_struct!(MacroDef; body macro_rules);
+spanless_eq_struct!(MethodCall; seg receiver args !span);
 spanless_eq_struct!(ModSpans; !inner_span !inject_use_span);
 spanless_eq_struct!(MutTy; ty mutbl);
 spanless_eq_struct!(NormalAttr; item tokens);
@@ -517,13 +521,13 @@ spanless_eq_enum!(VariantData; Struct(0 1) Tuple(0 1) Unit(0));
 spanless_eq_enum!(VisibilityKind; Public Restricted(path id shorthand) Inherited);
 spanless_eq_enum!(WherePredicate; BoundPredicate(0) RegionPredicate(0) EqPredicate(0));
 spanless_eq_enum!(ExprKind; Box(0) Array(0) ConstBlock(0) Call(0 1)
-    MethodCall(0 1 2 3) Tup(0) Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1)
-    Type(0 1) Let(0 1 2) If(0 1 2) While(0 1 2) ForLoop(0 1 2 3) Loop(0 1)
-    Match(0 1) Closure(0 1 2 3 4 5 6) Block(0 1) Async(0 1 2) Await(0)
-    TryBlock(0) Assign(0 1 2) AssignOp(0 1 2) Field(0 1) Index(0 1) Underscore
-    Range(0 1 2) Path(0 1) AddrOf(0 1 2) Break(0 1) Continue(0) Ret(0)
-    InlineAsm(0) MacCall(0) Struct(0) Repeat(0 1) Paren(0) Try(0) Yield(0)
-    Yeet(0) IncludedBytes(0) Err);
+    MethodCall(0) Tup(0) Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1) Type(0 1)
+    Let(0 1 2) If(0 1 2) While(0 1 2) ForLoop(0 1 2 3) Loop(0 1) Match(0 1)
+    Closure(0) Block(0 1) Async(0 1 2) Await(0) TryBlock(0) Assign(0 1 2)
+    AssignOp(0 1 2) Field(0 1) Index(0 1) Underscore Range(0 1 2) Path(0 1)
+    AddrOf(0 1 2) Break(0 1) Continue(0) Ret(0) InlineAsm(0) MacCall(0)
+    Struct(0) Repeat(0 1) Paren(0) Try(0) Yield(0) Yeet(0) IncludedBytes(0)
+    Err);
 spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
     InOut(reg late expr) SplitInOut(reg late in_expr out_expr) Const(anon_const)
     Sym(sym));
