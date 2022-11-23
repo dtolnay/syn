@@ -19,6 +19,7 @@ const FEATURES_ERROR: &str = ":  use --all-features
 #[proc_macro]
 pub fn check(_input: TokenStream) -> TokenStream {
     let ref mut stderr = StandardStream::stderr(ColorChoice::Auto);
+    let mut needs_newline = true;
 
     if cfg!(debug_assertions) {
         let yellow = ColorSpec::new().set_fg(Some(Color::Yellow)).clone();
@@ -30,11 +31,15 @@ pub fn check(_input: TokenStream) -> TokenStream {
             _ = writeln!(stderr, "{}", line);
         }
         _ = stderr.reset();
+        _ = writeln!(stderr);
+        needs_newline = false;
     }
 
     if cfg!(not(feature = "all-features")) {
         let red = ColorSpec::new().set_fg(Some(Color::Red)).clone();
-        _ = writeln!(stderr);
+        if needs_newline {
+            _ = writeln!(stderr);
+        }
         _ = stderr.set_color(red.clone().set_bold(true));
         _ = write!(stderr, "ERROR");
         for line in FEATURES_ERROR.lines() {
@@ -42,6 +47,7 @@ pub fn check(_input: TokenStream) -> TokenStream {
             _ = writeln!(stderr, "{}", line);
         }
         _ = stderr.reset();
+        _ = writeln!(stderr);
         process::exit(1);
     }
 
