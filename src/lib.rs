@@ -267,7 +267,6 @@
     clippy::inherent_to_string,
     clippy::items_after_statements,
     clippy::large_enum_variant,
-    clippy::let_underscore_drop,
     clippy::manual_assert,
     clippy::match_on_vec_items,
     clippy::match_same_arms,
