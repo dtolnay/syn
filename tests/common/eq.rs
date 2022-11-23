@@ -13,6 +13,8 @@ use rustc_ast::ast::AssocConstraint;
 use rustc_ast::ast::AssocConstraintKind;
 use rustc_ast::ast::AssocItemKind;
 use rustc_ast::ast::Async;
+use rustc_ast::ast::AttrArgs;
+use rustc_ast::ast::AttrArgsEq;
 use rustc_ast::ast::AttrId;
 use rustc_ast::ast::AttrItem;
 use rustc_ast::ast::AttrKind;
@@ -31,6 +33,7 @@ use rustc_ast::ast::ClosureBinder;
 use rustc_ast::ast::Const;
 use rustc_ast::ast::Crate;
 use rustc_ast::ast::Defaultness;
+use rustc_ast::ast::DelimArgs;
 use rustc_ast::ast::EnumDef;
 use rustc_ast::ast::Expr;
 use rustc_ast::ast::ExprField;
@@ -72,8 +75,6 @@ use rustc_ast::ast::LitIntType;
 use rustc_ast::ast::LitKind;
 use rustc_ast::ast::Local;
 use rustc_ast::ast::LocalKind;
-use rustc_ast::ast::MacArgs;
-use rustc_ast::ast::MacArgsEq;
 use rustc_ast::ast::MacCall;
 use rustc_ast::ast::MacCallStmt;
 use rustc_ast::ast::MacDelimiter;
@@ -415,6 +416,7 @@ spanless_eq_struct!(BindingAnnotation; 0 1);
 spanless_eq_struct!(Block; stmts id rules span tokens could_be_bare_literal);
 spanless_eq_struct!(Closure; binder capture_clause asyncness movability fn_decl body !fn_decl_span);
 spanless_eq_struct!(Crate; attrs items spans id is_placeholder);
+spanless_eq_struct!(DelimArgs; dspan delim tokens);
 spanless_eq_struct!(EnumDef; variants);
 spanless_eq_struct!(Expr; id kind span attrs !tokens);
 spanless_eq_struct!(ExprField; attrs id span ident expr is_shorthand is_placeholder);
@@ -469,6 +471,8 @@ spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
 spanless_eq_enum!(AssocItemKind; Const(0 1 2) Fn(0) Type(0) MacCall(0));
 spanless_eq_enum!(AssocConstraintKind; Equality(term) Bound(bounds));
 spanless_eq_enum!(Async; Yes(span closure_id return_impl_trait_id) No);
+spanless_eq_enum!(AttrArgs; Empty Delimited(0) Eq(0 1));
+spanless_eq_enum!(AttrArgsEq; Ast(0) Hir(0));
 spanless_eq_enum!(AttrStyle; Outer Inner);
 spanless_eq_enum!(AttrTokenTree; Token(0 1) Delimited(0 1 2) Attributes(0));
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
@@ -496,8 +500,6 @@ spanless_eq_enum!(IsAuto; Yes No);
 spanless_eq_enum!(LitFloatType; Suffixed(0) Unsuffixed);
 spanless_eq_enum!(LitIntType; Signed(0) Unsigned(0) Unsuffixed);
 spanless_eq_enum!(LocalKind; Decl Init(0) InitElse(0 1));
-spanless_eq_enum!(MacArgs; Empty Delimited(0 1 2) Eq(0 1));
-spanless_eq_enum!(MacArgsEq; Ast(0) Hir(0));
 spanless_eq_enum!(MacDelimiter; Parenthesis Bracket Brace);
 spanless_eq_enum!(MacStmtStyle; Semicolon Braces NoBraces);
 spanless_eq_enum!(ModKind; Loaded(0 1 2) Unloaded);
@@ -719,13 +721,13 @@ fn is_escaped_literal_token(token: &Token, unescaped: Symbol) -> bool {
     }
 }
 
-fn is_escaped_literal_macro_arg(arg: &MacArgsEq, unescaped: Symbol) -> bool {
+fn is_escaped_literal_macro_arg(arg: &AttrArgsEq, unescaped: Symbol) -> bool {
     match arg {
-        MacArgsEq::Ast(expr) => match &expr.kind {
+        AttrArgsEq::Ast(expr) => match &expr.kind {
             ExprKind::Lit(lit) => is_escaped_literal_token_lit(lit, unescaped),
             _ => false,
         },
-        MacArgsEq::Hir(lit) => is_escaped_literal_ast_lit(lit, unescaped),
+        AttrArgsEq::Hir(lit) => is_escaped_literal_ast_lit(lit, unescaped),
     }
 }
 
@@ -792,8 +794,8 @@ impl SpanlessEq for AttrKind {
                 let path = Path::from_ident(Ident::with_dummy_span(sym::doc));
                 SpanlessEq::eq(&path, &normal2.item.path)
                     && match &normal2.item.args {
-                        MacArgs::Empty | MacArgs::Delimited(..) => false,
-                        MacArgs::Eq(_span, token) => {
+                        AttrArgs::Empty | AttrArgs::Delimited(_) => false,
+                        AttrArgs::Eq(_span, token) => {
                             is_escaped_literal_macro_arg(token, *unescaped)
                         }
                     }
