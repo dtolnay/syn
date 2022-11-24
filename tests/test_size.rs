@@ -5,7 +5,7 @@ use syn::{Expr, Item, Lit, Pat, Type};
 
 #[test]
 fn test_expr_size() {
-    assert_eq!(mem::size_of::<Expr>(), 264);
+    assert_eq!(mem::size_of::<Expr>(), 272);
 }
 
 #[test]
@@ -15,7 +15,7 @@ fn test_item_size() {
 
 #[test]
 fn test_type_size() {
-    assert_eq!(mem::size_of::<Type>(), 280);
+    assert_eq!(mem::size_of::<Type>(), 288);
 }
 
 #[test]
