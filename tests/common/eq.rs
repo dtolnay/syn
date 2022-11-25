@@ -524,7 +524,7 @@ spanless_eq_enum!(VisibilityKind; Public Restricted(path id shorthand) Inherited
 spanless_eq_enum!(WherePredicate; BoundPredicate(0) RegionPredicate(0) EqPredicate(0));
 spanless_eq_enum!(ExprKind; Box(0) Array(0) ConstBlock(0) Call(0 1)
     MethodCall(0) Tup(0) Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1) Type(0 1)
-    Let(0 1 2) If(0 1 2) While(0 1 2) ForLoop(0 1 2 3) Loop(0 1) Match(0 1)
+    Let(0 1 2) If(0 1 2) While(0 1 2) ForLoop(0 1 2 3) Loop(0 1 2) Match(0 1)
     Closure(0) Block(0 1) Async(0 1 2) Await(0) TryBlock(0) Assign(0 1 2)
     AssignOp(0 1 2) Field(0 1) Index(0 1) Underscore Range(0 1 2) Path(0 1)
     AddrOf(0 1 2) Break(0 1) Continue(0) Ret(0) InlineAsm(0) MacCall(0)
