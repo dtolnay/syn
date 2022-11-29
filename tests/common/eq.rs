@@ -69,7 +69,6 @@ use rustc_ast::ast::Item;
 use rustc_ast::ast::ItemKind;
 use rustc_ast::ast::Label;
 use rustc_ast::ast::Lifetime;
-use rustc_ast::ast::Lit;
 use rustc_ast::ast::LitFloatType;
 use rustc_ast::ast::LitIntType;
 use rustc_ast::ast::LitKind;
@@ -80,6 +79,7 @@ use rustc_ast::ast::MacCallStmt;
 use rustc_ast::ast::MacDelimiter;
 use rustc_ast::ast::MacStmtStyle;
 use rustc_ast::ast::MacroDef;
+use rustc_ast::ast::MetaItemLit;
 use rustc_ast::ast::MethodCall;
 use rustc_ast::ast::ModKind;
 use rustc_ast::ast::ModSpans;
@@ -434,11 +434,11 @@ spanless_eq_struct!(InlineAsmSym; id qself path);
 spanless_eq_struct!(Item<K>; attrs id span vis ident kind !tokens);
 spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
-spanless_eq_struct!(Lit; token_lit kind span);
 spanless_eq_struct!(Local; pat ty kind id span attrs !tokens);
 spanless_eq_struct!(MacCall; path args prior_type_ascription);
 spanless_eq_struct!(MacCallStmt; mac style attrs tokens);
 spanless_eq_struct!(MacroDef; body macro_rules);
+spanless_eq_struct!(MetaItemLit; token_lit kind span);
 spanless_eq_struct!(MethodCall; seg receiver args !span);
 spanless_eq_struct!(ModSpans; !inner_span !inject_use_span);
 spanless_eq_struct!(MutTy; ty mutbl);
@@ -703,7 +703,7 @@ fn is_escaped_literal_token(token: &Token, unescaped: Symbol) -> bool {
         Token {
             kind: TokenKind::Literal(lit),
             span: _,
-        } => match Lit::from_token_lit(*lit, DUMMY_SP) {
+        } => match MetaItemLit::from_token_lit(*lit, DUMMY_SP) {
             Ok(lit) => is_escaped_literal_ast_lit(&lit, unescaped),
             Err(_) => false,
         },
@@ -731,9 +731,9 @@ fn is_escaped_literal_macro_arg(arg: &AttrArgsEq, unescaped: Symbol) -> bool {
     }
 }
 
-fn is_escaped_literal_ast_lit(lit: &Lit, unescaped: Symbol) -> bool {
+fn is_escaped_literal_ast_lit(lit: &MetaItemLit, unescaped: Symbol) -> bool {
     match lit {
-        Lit {
+        MetaItemLit {
             token_lit:
                 token::Lit {
                     kind: token::LitKind::Str,
