@@ -704,7 +704,7 @@ fn is_escaped_literal_token(token: &Token, unescaped: Symbol) -> bool {
             kind: TokenKind::Literal(lit),
             span: _,
         } => match MetaItemLit::from_token_lit(*lit, DUMMY_SP) {
-            Ok(lit) => is_escaped_literal_ast_lit(&lit, unescaped),
+            Ok(lit) => is_escaped_literal_meta_item_lit(&lit, unescaped),
             Err(_) => false,
         },
         Token {
@@ -712,7 +712,7 @@ fn is_escaped_literal_token(token: &Token, unescaped: Symbol) -> bool {
             span: _,
         } => match nonterminal.as_ref() {
             Nonterminal::NtExpr(expr) => match &expr.kind {
-                ExprKind::Lit(lit) => is_escaped_literal_token_lit(lit, unescaped),
+                ExprKind::Lit(lit) => is_escaped_lit(lit, unescaped),
                 _ => false,
             },
             _ => false,
@@ -721,17 +721,17 @@ fn is_escaped_literal_token(token: &Token, unescaped: Symbol) -> bool {
     }
 }
 
-fn is_escaped_literal_macro_arg(arg: &AttrArgsEq, unescaped: Symbol) -> bool {
-    match arg {
+fn is_escaped_literal_attr_args(value: &AttrArgsEq, unescaped: Symbol) -> bool {
+    match value {
         AttrArgsEq::Ast(expr) => match &expr.kind {
-            ExprKind::Lit(lit) => is_escaped_literal_token_lit(lit, unescaped),
+            ExprKind::Lit(lit) => is_escaped_lit(lit, unescaped),
             _ => false,
         },
-        AttrArgsEq::Hir(lit) => is_escaped_literal_ast_lit(lit, unescaped),
+        AttrArgsEq::Hir(lit) => is_escaped_literal_meta_item_lit(lit, unescaped),
     }
 }
 
-fn is_escaped_literal_ast_lit(lit: &MetaItemLit, unescaped: Symbol) -> bool {
+fn is_escaped_literal_meta_item_lit(lit: &MetaItemLit, unescaped: Symbol) -> bool {
     match lit {
         MetaItemLit {
             token_lit:
@@ -742,26 +742,26 @@ fn is_escaped_literal_ast_lit(lit: &MetaItemLit, unescaped: Symbol) -> bool {
                 },
             kind,
             span: _,
-        } => is_escaped_literal_lit_kind(kind, unescaped),
+        } => is_escaped_lit_kind(kind, unescaped),
         _ => false,
     }
 }
 
-fn is_escaped_literal_token_lit(lit: &Lit, unescaped: Symbol) -> bool {
+fn is_escaped_lit(lit: &Lit, unescaped: Symbol) -> bool {
     match lit {
         Lit {
             kind: token::LitKind::Str,
             symbol: _,
             suffix: None,
         } => match LitKind::from_token_lit(*lit) {
-            Ok(lit_kind) => is_escaped_literal_lit_kind(&lit_kind, unescaped),
+            Ok(lit_kind) => is_escaped_lit_kind(&lit_kind, unescaped),
             _ => false,
         },
         _ => false,
     }
 }
 
-fn is_escaped_literal_lit_kind(kind: &LitKind, unescaped: Symbol) -> bool {
+fn is_escaped_lit_kind(kind: &LitKind, unescaped: Symbol) -> bool {
     match kind {
         LitKind::Str(symbol, StrStyle::Cooked) => {
             symbol.as_str().replace('\r', "") == unescaped.as_str().replace('\r', "")
@@ -795,8 +795,8 @@ impl SpanlessEq for AttrKind {
                 SpanlessEq::eq(&path, &normal2.item.path)
                     && match &normal2.item.args {
                         AttrArgs::Empty | AttrArgs::Delimited(_) => false,
-                        AttrArgs::Eq(_span, token) => {
-                            is_escaped_literal_macro_arg(token, *unescaped)
+                        AttrArgs::Eq(_span, value) => {
+                            is_escaped_literal_attr_args(value, *unescaped)
                         }
                     }
             }
