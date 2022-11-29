@@ -131,7 +131,7 @@ use rustc_ast::ast::WhereEqPredicate;
 use rustc_ast::ast::WherePredicate;
 use rustc_ast::ast::WhereRegionPredicate;
 use rustc_ast::ptr::P;
-use rustc_ast::token::{self, CommentKind, Delimiter, Nonterminal, Token, TokenKind};
+use rustc_ast::token::{self, CommentKind, Delimiter, Lit, Nonterminal, Token, TokenKind};
 use rustc_ast::tokenstream::{
     AttrTokenStream, AttrTokenTree, AttributesData, DelimSpan, LazyAttrTokenStream, Spacing,
     TokenStream, TokenTree,
@@ -434,6 +434,7 @@ spanless_eq_struct!(InlineAsmSym; id qself path);
 spanless_eq_struct!(Item<K>; attrs id span vis ident kind !tokens);
 spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
+spanless_eq_struct!(Lit; kind symbol suffix);
 spanless_eq_struct!(Local; pat ty kind id span attrs !tokens);
 spanless_eq_struct!(MacCall; path args prior_type_ascription);
 spanless_eq_struct!(MacCallStmt; mac style attrs tokens);
@@ -466,7 +467,6 @@ spanless_eq_struct!(WhereBoundPredicate; span bound_generic_params bounded_ty bo
 spanless_eq_struct!(WhereClause; has_where_token predicates span);
 spanless_eq_struct!(WhereEqPredicate; span lhs_ty rhs_ty);
 spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
-spanless_eq_struct!(token::Lit; kind symbol suffix);
 spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
 spanless_eq_enum!(AssocItemKind; Const(0 1 2) Fn(0) Type(0) MacCall(0));
 spanless_eq_enum!(AssocConstraintKind; Equality(term) Bound(bounds));
@@ -735,7 +735,7 @@ fn is_escaped_literal_ast_lit(lit: &MetaItemLit, unescaped: Symbol) -> bool {
     match lit {
         MetaItemLit {
             token_lit:
-                token::Lit {
+                Lit {
                     kind: token::LitKind::Str,
                     symbol: _,
                     suffix: None,
@@ -747,9 +747,9 @@ fn is_escaped_literal_ast_lit(lit: &MetaItemLit, unescaped: Symbol) -> bool {
     }
 }
 
-fn is_escaped_literal_token_lit(lit: &token::Lit, unescaped: Symbol) -> bool {
+fn is_escaped_literal_token_lit(lit: &Lit, unescaped: Symbol) -> bool {
     match lit {
-        token::Lit {
+        Lit {
             kind: token::LitKind::Str,
             symbol: _,
             suffix: None,
