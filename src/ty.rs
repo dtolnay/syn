@@ -924,22 +924,7 @@ pub mod parsing {
             input: ParseStream,
             allow_plus: bool,
         ) -> Result<Punctuated<TypeParamBound, Token![+]>> {
-            let mut bounds = Punctuated::new();
-            loop {
-                bounds.push_value(input.parse()?);
-                if !(allow_plus && input.peek(Token![+])) {
-                    break;
-                }
-                bounds.push_punct(input.parse()?);
-                if !(input.peek(Ident::peek_any)
-                    || input.peek(Token![::])
-                    || input.peek(Token![?])
-                    || input.peek(Lifetime)
-                    || input.peek(token::Paren))
-                {
-                    break;
-                }
-            }
+            let bounds = TypeParamBound::parse_multiple(input, allow_plus)?;
             // Just lifetimes like `'a + 'b` is not a TraitObject.
             if !at_least_one_type(&bounds) {
                 return Err(input.error("expected at least one type"));
