@@ -925,24 +925,20 @@ pub mod parsing {
         ) -> Result<Punctuated<TypeParamBound, Token![+]>> {
             let bounds = TypeParamBound::parse_multiple(input, allow_plus)?;
             let mut last_lifetime_span = None;
-            let mut at_least_one_trait = false;
             for bound in &bounds {
                 match bound {
-                    TypeParamBound::Trait(_) => {
-                        at_least_one_trait = true;
-                        break;
-                    }
+                    TypeParamBound::Trait(_) => return Ok(bounds),
                     TypeParamBound::Lifetime(lifetime) => {
                         last_lifetime_span = Some(lifetime.ident.span());
                     }
                 }
             }
             // Just lifetimes like `'a + 'b` is not a TraitObject.
-            if !at_least_one_trait {
-                let msg = "at least one trait is required for an object type";
-                return Err(error::new2(dyn_span, last_lifetime_span.unwrap(), msg));
-            }
-            Ok(bounds)
+            Err(error::new2(
+                dyn_span,
+                last_lifetime_span.unwrap(),
+                "at least one trait is required for an object type",
+            ))
         }
     }
 
@@ -965,27 +961,19 @@ pub mod parsing {
             let impl_token: Token![impl] = input.parse()?;
             let bounds = TypeParamBound::parse_multiple(input, allow_plus)?;
             let mut last_lifetime_span = None;
-            let mut at_least_one_trait = false;
             for bound in &bounds {
                 match bound {
-                    TypeParamBound::Trait(_) => {
-                        at_least_one_trait = true;
-                        break;
-                    }
+                    TypeParamBound::Trait(_) => return Ok(TypeImplTrait { impl_token, bounds }),
                     TypeParamBound::Lifetime(lifetime) => {
                         last_lifetime_span = Some(lifetime.ident.span());
                     }
                 }
             }
-            if !at_least_one_trait {
-                let msg = "at least one trait must be specified";
-                return Err(error::new2(
-                    impl_token.span,
-                    last_lifetime_span.unwrap(),
-                    msg,
-                ));
-            }
-            Ok(TypeImplTrait { impl_token, bounds })
+            Err(error::new2(
+                impl_token.span,
+                last_lifetime_span.unwrap(),
+                "at least one trait must be specified",
+            ))
         }
     }
 
