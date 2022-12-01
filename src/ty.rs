@@ -337,7 +337,7 @@ pub mod parsing {
     use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
-    use proc_macro2::{Punct, Spacing, TokenTree};
+    use proc_macro2::{Punct, Spacing, Span, TokenTree};
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Type {
@@ -546,13 +546,17 @@ pub mod parsing {
             || lookahead.peek(Token![<])
         {
             let dyn_token: Option<Token![dyn]> = input.parse()?;
-            if dyn_token.is_some() {
+            if let Some(dyn_token) = dyn_token {
+                let dyn_span = dyn_token.span;
                 let star_token: Option<Token![*]> = input.parse()?;
-                let bounds = TypeTraitObject::parse_bounds(input, allow_plus)?;
+                let bounds = TypeTraitObject::parse_bounds(dyn_span, input, allow_plus)?;
                 return Ok(if star_token.is_some() {
                     Type::Verbatim(verbatim::between(begin, input))
                 } else {
-                    Type::TraitObject(TypeTraitObject { dyn_token, bounds })
+                    Type::TraitObject(TypeTraitObject {
+                        dyn_token: Some(dyn_token),
+                        bounds,
+                    })
                 });
             }
 
@@ -896,15 +900,6 @@ pub mod parsing {
         }
     }
 
-    fn at_least_one_type(bounds: &Punctuated<TypeParamBound, Token![+]>) -> bool {
-        for bound in bounds {
-            if let TypeParamBound::Trait(_) = *bound {
-                return true;
-            }
-        }
-        false
-    }
-
     impl TypeTraitObject {
         #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
         pub fn without_plus(input: ParseStream) -> Result<Self> {
@@ -914,20 +909,38 @@ pub mod parsing {
 
         // Only allow multiple trait references if allow_plus is true.
         pub(crate) fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
-            Ok(TypeTraitObject {
-                dyn_token: input.parse()?,
-                bounds: Self::parse_bounds(input, allow_plus)?,
-            })
+            let dyn_token: Option<Token![dyn]> = input.parse()?;
+            let dyn_span = match &dyn_token {
+                Some(token) => token.span,
+                None => input.span(),
+            };
+            let bounds = Self::parse_bounds(dyn_span, input, allow_plus)?;
+            Ok(TypeTraitObject { dyn_token, bounds })
         }
 
         fn parse_bounds(
+            dyn_span: Span,
             input: ParseStream,
             allow_plus: bool,
         ) -> Result<Punctuated<TypeParamBound, Token![+]>> {
             let bounds = TypeParamBound::parse_multiple(input, allow_plus)?;
+            let mut last_lifetime_span = None;
+            let mut at_least_one_trait = false;
+            for bound in &bounds {
+                match bound {
+                    TypeParamBound::Trait(_) => {
+                        at_least_one_trait = true;
+                        break;
+                    }
+                    TypeParamBound::Lifetime(lifetime) => {
+                        last_lifetime_span = Some(lifetime.ident.span());
+                    }
+                }
+            }
             // Just lifetimes like `'a + 'b` is not a TraitObject.
-            if !at_least_one_type(&bounds) {
-                return Err(input.error("expected at least one type"));
+            if !at_least_one_trait {
+                let msg = "at least one trait is required for an object type";
+                return Err(error::new2(dyn_span, last_lifetime_span.unwrap(), msg));
             }
             Ok(bounds)
         }
@@ -949,10 +962,30 @@ pub mod parsing {
         }
 
         pub(crate) fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
-            Ok(TypeImplTrait {
-                impl_token: input.parse()?,
-                bounds: TypeTraitObject::parse_bounds(input, allow_plus)?,
-            })
+            let impl_token: Token![impl] = input.parse()?;
+            let bounds = TypeParamBound::parse_multiple(input, allow_plus)?;
+            let mut last_lifetime_span = None;
+            let mut at_least_one_trait = false;
+            for bound in &bounds {
+                match bound {
+                    TypeParamBound::Trait(_) => {
+                        at_least_one_trait = true;
+                        break;
+                    }
+                    TypeParamBound::Lifetime(lifetime) => {
+                        last_lifetime_span = Some(lifetime.ident.span());
+                    }
+                }
+            }
+            if !at_least_one_trait {
+                let msg = "at least one trait must be specified";
+                return Err(error::new2(
+                    impl_token.span,
+                    last_lifetime_span.unwrap(),
+                    msg,
+                ));
+            }
+            Ok(TypeImplTrait { impl_token, bounds })
         }
     }
 
