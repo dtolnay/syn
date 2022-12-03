@@ -119,7 +119,7 @@ fn parse_delimited<'a>(
 ///             struct_token: input.parse()?,
 ///             ident: input.parse()?,
 ///             paren_token: parenthesized!(content in input),
-///             fields: content.parse_terminated(Type::parse)?,
+///             fields: content.parse_terminated(Type::parse, Token![,])?,
 ///             semi_token: input.parse()?,
 ///         })
 ///     }
@@ -185,7 +185,7 @@ macro_rules! parenthesized {
 ///             struct_token: input.parse()?,
 ///             ident: input.parse()?,
 ///             brace_token: braced!(content in input),
-///             fields: content.parse_terminated(Field::parse)?,
+///             fields: content.parse_terminated(Field::parse, Token![,])?,
 ///         })
 ///     }
 /// }

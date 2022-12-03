@@ -208,7 +208,7 @@ pub mod parsing {
 
         let content;
         let brace = braced!(content in input);
-        let variants = content.parse_terminated(Variant::parse)?;
+        let variants = content.parse_terminated(Variant::parse, Token![,])?;
 
         Ok((where_clause, brace, variants))
     }

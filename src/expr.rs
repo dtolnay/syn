@@ -1586,7 +1586,7 @@ pub(crate) mod parsing {
                     attrs: Vec::new(),
                     func: Box::new(e),
                     paren_token: parenthesized!(content in input),
-                    args: content.parse_terminated(Expr::parse)?,
+                    args: content.parse_terminated(Expr::parse, Token![,])?,
                 });
             } else if input.peek(Token![.])
                 && !input.peek(Token![..])
@@ -1632,7 +1632,7 @@ pub(crate) mod parsing {
                             method,
                             turbofish,
                             paren_token: parenthesized!(content in input),
-                            args: content.parse_terminated(Expr::parse)?,
+                            args: content.parse_terminated(Expr::parse, Token![,])?,
                         });
                         continue;
                     }
@@ -1676,7 +1676,7 @@ pub(crate) mod parsing {
                     attrs: Vec::new(),
                     func: Box::new(e),
                     paren_token: parenthesized!(content in input),
-                    args: content.parse_terminated(Expr::parse)?,
+                    args: content.parse_terminated(Expr::parse, Token![,])?,
                 });
             } else if input.peek(Token![.]) && !input.peek(Token![..]) && !input.peek2(token::Await)
             {

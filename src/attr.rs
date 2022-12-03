@@ -608,7 +608,7 @@ pub mod parsing {
         Ok(MetaList {
             path,
             paren_token: parenthesized!(content in input),
-            nested: content.parse_terminated(NestedMeta::parse)?,
+            nested: content.parse_terminated(NestedMeta::parse, Token![,])?,
         })
     }
 

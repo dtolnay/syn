@@ -388,7 +388,7 @@ pub mod parsing {
             let content;
             Ok(ParenthesizedGenericArguments {
                 paren_token: parenthesized!(content in input),
-                inputs: content.parse_terminated(Type::parse)?,
+                inputs: content.parse_terminated(Type::parse, Token![,])?,
                 output: input.call(ReturnType::without_plus)?,
             })
         }
