@@ -53,6 +53,26 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/test/ui/try-trait/yeet-for-option.rs",
     "src/test/ui/try-trait/yeet-for-result.rs",
 
+    // Edition 2015 code using identifiers that are now keywords
+    // TODO: some of these we should probably parse
+    "src/test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs",
+    "src/test/ui/editions/edition-keywords-2015-2015.rs",
+    "src/test/ui/editions/edition-keywords-2015-2018.rs",
+    "src/test/ui/lint/lint_pre_expansion_extern_module_aux.rs",
+    "src/test/ui/macros/macro-comma-support-rpass.rs",
+    "src/test/ui/macros/try-macro.rs",
+    "src/test/ui/parser/extern-crate-async.rs",
+    "src/test/ui/try-block/try-is-identifier-edition2015.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0159_try_macro_fallback.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0160_try_macro_rules.rs",
+    "src/tools/rustfmt/tests/source/configs/indent_style/block_call.rs",
+    "src/tools/rustfmt/tests/source/configs/use_try_shorthand/false.rs",
+    "src/tools/rustfmt/tests/source/configs/use_try_shorthand/true.rs",
+    "src/tools/rustfmt/tests/source/try-conversion.rs",
+    "src/tools/rustfmt/tests/target/configs/indent_style/block_call.rs",
+    "src/tools/rustfmt/tests/target/configs/use_try_shorthand/false.rs",
+    "src/tools/rustfmt/tests/target/issue-1681.rs",
+
     // Excessive nesting
     "src/test/ui/issues/issue-74564-if-expr-stack-overflow.rs",
 
