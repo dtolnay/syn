@@ -20,16 +20,17 @@ pub fn Ident(marker: lookahead::TokenMarker) -> Ident {
 fn accept_as_ident(ident: &Ident) -> bool {
     match ident.to_string().as_str() {
         "_" |
-        // Based on https://doc.rust-lang.org/grammar.html#keywords
+        // Based on https://doc.rust-lang.org/reference/keywords.html
         // and https://github.com/rust-lang/rfcs/blob/master/text/2421-unreservations-2018.md
         // and https://github.com/rust-lang/rfcs/blob/master/text/2420-unreserve-proc.md
-        "abstract" | "as" | "become" | "box" | "break" | "const" | "continue" |
-        "crate" | "do" | "else" | "enum" | "extern" | "false" | "final" | "fn" |
-        "for" | "if" | "impl" | "in" | "let" | "loop" | "macro" | "match" |
-        "mod" | "move" | "mut" | "override" | "priv" | "pub" | "ref" |
-        "return" | "Self" | "self" | "static" | "struct" | "super" | "trait" |
-        "true" | "type" | "typeof" | "unsafe" | "unsized" | "use" | "virtual" |
-        "where" | "while" | "yield" => false,
+        "abstract" | "as" | "async" | "await" | "become" | "box" | "break" |
+        "const" | "continue" | "crate" | "do" | "dyn" | "else" | "enum" |
+        "extern" | "false" | "final" | "fn" | "for" | "if" | "impl" | "in" |
+        "let" | "loop" | "macro" | "match" | "mod" | "move" | "mut" |
+        "override" | "priv" | "pub" | "ref" | "return" | "Self" | "self" |
+        "static" | "struct" | "super" | "trait" | "true" | "try" | "type" |
+        "typeof" | "unsafe" | "unsized" | "use" | "virtual" | "where" |
+        "while" | "yield" => false,
         _ => true,
     }
 }
