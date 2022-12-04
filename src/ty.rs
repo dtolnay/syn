@@ -545,21 +545,6 @@ pub mod parsing {
             || lookahead.peek(Token![::])
             || lookahead.peek(Token![<])
         {
-            let dyn_token: Option<Token![dyn]> = input.parse()?;
-            if let Some(dyn_token) = dyn_token {
-                let dyn_span = dyn_token.span;
-                let star_token: Option<Token![*]> = input.parse()?;
-                let bounds = TypeTraitObject::parse_bounds(dyn_span, input, allow_plus)?;
-                return Ok(if star_token.is_some() {
-                    Type::Verbatim(verbatim::between(begin, input))
-                } else {
-                    Type::TraitObject(TypeTraitObject {
-                        dyn_token: Some(dyn_token),
-                        bounds,
-                    })
-                });
-            }
-
             let ty: TypePath = input.parse()?;
             if ty.qself.is_some() {
                 return Ok(Type::Path(ty));
@@ -619,6 +604,19 @@ pub mod parsing {
             }
 
             Ok(Type::Path(ty))
+        } else if lookahead.peek(Token![dyn]) {
+            let dyn_token: Token![dyn] = input.parse()?;
+            let dyn_span = dyn_token.span;
+            let star_token: Option<Token![*]> = input.parse()?;
+            let bounds = TypeTraitObject::parse_bounds(dyn_span, input, allow_plus)?;
+            return Ok(if star_token.is_some() {
+                Type::Verbatim(verbatim::between(begin, input))
+            } else {
+                Type::TraitObject(TypeTraitObject {
+                    dyn_token: Some(dyn_token),
+                    bounds,
+                })
+            });
         } else if lookahead.peek(token::Bracket) {
             let content;
             let bracket_token = bracketed!(content in input);
