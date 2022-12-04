@@ -1018,6 +1018,21 @@ impl<T, P> Pair<T, P> {
 
 #[cfg(feature = "clone-impls")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl<T, P> Pair<&T, &P> {
+    pub fn cloned(self) -> Pair<T, P>
+    where
+        T: Clone,
+        P: Clone,
+    {
+        match self {
+            Pair::Punctuated(t, p) => Pair::Punctuated(t.clone(), p.clone()),
+            Pair::End(t) => Pair::End(t.clone()),
+        }
+    }
+}
+
+#[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl<T, P> Clone for Pair<T, P>
 where
     T: Clone,
