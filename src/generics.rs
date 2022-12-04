@@ -9,6 +9,11 @@ ast_struct! {
     /// Lifetimes and type parameters attached to a declaration of a function,
     /// enum, trait, etc.
     ///
+    /// **Note**: this truct represents two distinct yet related optional syntactic items,
+    /// [generic parameters](https://doc.rust-lang.org/stable/reference/items/generics.html#generic-parameters)
+    /// and [where clause](https://doc.rust-lang.org/stable/reference/items/generics.html#where-clauses).
+    /// Even though they are semantically related, syntactically they are separated by other tokens.
+    ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
