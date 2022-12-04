@@ -278,7 +278,7 @@ pub mod parsing {
             let content;
             Ok(FieldsNamed {
                 brace_token: braced!(content in input),
-                named: content.parse_terminated(Field::parse_named)?,
+                named: content.parse_terminated(Field::parse_named, Token![,])?,
             })
         }
     }
@@ -289,7 +289,7 @@ pub mod parsing {
             let content;
             Ok(FieldsUnnamed {
                 paren_token: parenthesized!(content in input),
-                unnamed: content.parse_terminated(Field::parse_unnamed)?,
+                unnamed: content.parse_terminated(Field::parse_unnamed, Token![,])?,
             })
         }
     }

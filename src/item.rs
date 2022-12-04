@@ -1390,7 +1390,7 @@ pub mod parsing {
                 let content;
                 Ok(UseTree::Group(UseGroup {
                     brace_token: braced!(content in input),
-                    items: content.parse_terminated(UseTree::parse)?,
+                    items: content.parse_terminated(UseTree::parse, Token![,])?,
                 }))
             } else {
                 Err(lookahead.error())

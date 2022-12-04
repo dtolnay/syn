@@ -66,7 +66,7 @@
 //!             struct_token: input.parse()?,
 //!             ident: input.parse()?,
 //!             brace_token: braced!(content in input),
-//!             fields: content.parse_terminated(Field::parse_named)?,
+//!             fields: content.parse_terminated(Field::parse_named, Token![,])?,
 //!         })
 //!     }
 //! }
@@ -685,7 +685,7 @@ impl<'a> ParseBuffer<'a> {
     ///             struct_token: input.parse()?,
     ///             ident: input.parse()?,
     ///             paren_token: parenthesized!(content in input),
-    ///             fields: content.parse_terminated(Type::parse)?,
+    ///             fields: content.parse_terminated(Type::parse, Token![,])?,
     ///             semi_token: input.parse()?,
     ///         })
     ///     }
@@ -696,10 +696,63 @@ impl<'a> ParseBuffer<'a> {
     /// # };
     /// # syn::parse2::<TupleStruct>(input).unwrap();
     /// ```
-    pub fn parse_terminated<T, P: Parse>(
+    ///
+    /// # See also
+    ///
+    /// If your separator is anything more complicated than an invocation of the
+    /// `Token!` macro, this method won't be applicable and you can instead
+    /// directly use `Punctuated`'s parser functions: [`parse_terminated`],
+    /// [`parse_separated_nonempty`] etc.
+    ///
+    /// [`parse_terminated`]: Punctuated::parse_terminated
+    /// [`parse_separated_nonempty`]: Punctuated::parse_separated_nonempty
+    ///
+    /// ```
+    /// use syn::{custom_keyword, Expr, Result, Token};
+    /// use syn::parse::{Parse, ParseStream};
+    /// use syn::punctuated::Punctuated;
+    ///
+    /// mod kw {
+    ///     syn::custom_keyword!(fin);
+    /// }
+    ///
+    /// struct Fin(kw::fin, Token![;]);
+    ///
+    /// impl Parse for Fin {
+    ///     fn parse(input: ParseStream) -> Result<Self> {
+    ///         Ok(Self(input.parse()?, input.parse()?))
+    ///     }
+    /// }
+    ///
+    /// struct Thing {
+    ///     steps: Punctuated<Expr, Fin>,
+    /// }
+    ///
+    /// impl Parse for Thing {
+    ///     fn parse(input: ParseStream) -> Result<Self> {
+    /// # if true {
+    ///         Ok(Thing {
+    ///             steps: Punctuated::parse_terminated(input)?,
+    ///         })
+    /// # } else {
+    ///         // or equivalently, this means the same thing:
+    /// #       Ok(Thing {
+    ///             steps: input.call(Punctuated::parse_terminated)?,
+    /// #       })
+    /// # }
+    ///     }
+    /// }
+    /// ```
+    pub fn parse_terminated<T, P>(
         &self,
         parser: fn(ParseStream) -> Result<T>,
-    ) -> Result<Punctuated<T, P>> {
+        separator: P,
+    ) -> Result<Punctuated<T, P::Token>>
+    where
+        P: Peek,
+        P::Token: Parse,
+    {
+        let _ = separator;
         Punctuated::parse_terminated_with(self, parser)
     }
 
