@@ -1046,6 +1046,15 @@ where
     }
 }
 
+#[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl<T, P> Copy for Pair<T, P>
+where
+    T: Copy,
+    P: Copy,
+{
+}
+
 impl<T, P> Index<usize> for Punctuated<T, P> {
     type Output = T;
 
