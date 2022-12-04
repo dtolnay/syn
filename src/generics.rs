@@ -9,13 +9,15 @@ ast_struct! {
     /// Lifetimes and type parameters attached to a declaration of a function,
     /// enum, trait, etc.
     ///
-    /// **Note**: this truct represents two distinct yet related optional syntactic items,
-    /// [generic parameters](https://doc.rust-lang.org/stable/reference/items/generics.html#generic-parameters)
-    /// and [where clause](https://doc.rust-lang.org/stable/reference/items/generics.html#where-clauses).
-    /// Even though they are semantically related, syntactically they are separated by other tokens.
+    /// This struct represents two distinct optional syntactic elements,
+    /// [generic parameters] and [where clause]. In some locations of the
+    /// grammar, there may be other tokens in between these two things.
     ///
     /// *This type is available only if Syn is built with the `"derive"` or `"full"`
     /// feature.*
+    ///
+    /// [generic parameters]: https://doc.rust-lang.org/stable/reference/items/generics.html#generic-parameters
+    /// [where clause]: https://doc.rust-lang.org/stable/reference/items/generics.html#where-clauses
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Generics {
         pub lt_token: Option<Token![<]>,
