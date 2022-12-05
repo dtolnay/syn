@@ -12,8 +12,13 @@ env:
   RUSTFLAGS: -Dwarnings
 
 jobs:
+  pre_ci:
+    uses: ./.github/workflows/pre_ci.yml
+
   test:
     name: Tests
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -25,6 +30,8 @@ jobs:
 
   build:
     name: ${{matrix.name || format('Rust {0}', matrix.rust)}}
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
     runs-on: ${{matrix.os || 'ubuntu'}}-latest
     strategy:
       fail-fast: false
@@ -72,6 +79,8 @@ jobs:
 
   examples:
     name: Examples
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -84,6 +93,8 @@ jobs:
 
   docs:
     name: Docs
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
     runs-on: ubuntu-latest
     env:
       RUSTDOCFLAGS: --cfg=doc_cfg -Dbroken_intra_doc_links
@@ -96,6 +107,8 @@ jobs:
 
   codegen:
     name: Codegen
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -106,6 +119,8 @@ jobs:
 
   msrv:
     name: Minimal versions
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -116,6 +131,8 @@ jobs:
 
   fuzz:
     name: Fuzz
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -126,6 +143,8 @@ jobs:
 
   miri:
     name: Miri
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
