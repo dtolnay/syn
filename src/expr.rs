@@ -1,7 +1,5 @@
 use super::*;
 use crate::punctuated::Punctuated;
-#[cfg(feature = "full")]
-use crate::reserved::Reserved;
 use proc_macro2::{Span, TokenStream};
 #[cfg(feature = "printing")]
 use quote::IdentFragment;
@@ -630,7 +628,6 @@ ast_struct! {
     pub struct ExprReference #full {
         pub attrs: Vec<Attribute>,
         pub and_token: Token![&],
-        pub raw: Reserved,
         pub mutability: Option<Token![mut]>,
         pub expr: Box<Expr>,
     }
@@ -1523,7 +1520,6 @@ pub(crate) mod parsing {
                 Ok(Expr::Reference(ExprReference {
                     attrs,
                     and_token,
-                    raw: Reserved::default(),
                     mutability,
                     expr,
                 }))
@@ -2385,7 +2381,6 @@ pub(crate) mod parsing {
             Ok(ExprReference {
                 attrs: Vec::new(),
                 and_token: input.parse()?,
-                raw: Reserved::default(),
                 mutability: input.parse()?,
                 expr: Box::new(unary_expr(input, allow_struct)?),
             })

@@ -1474,7 +1474,6 @@ where
     ExprReference {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         and_token: Token![&](tokens_helper(f, &node.and_token.spans)),
-        raw: node.raw,
         mutability: (node.mutability).map(|it| Token![mut](tokens_helper(f, &it.span))),
         expr: Box::new(f.fold_expr(*node.expr)),
     }

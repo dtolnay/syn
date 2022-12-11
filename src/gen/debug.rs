@@ -926,7 +926,6 @@ impl Debug for ExprReference {
         let mut formatter = formatter.debug_struct("ExprReference");
         formatter.field("attrs", &self.attrs);
         formatter.field("and_token", &self.and_token);
-        formatter.field("raw", &self.raw);
         formatter.field("mutability", &self.mutability);
         formatter.field("expr", &self.expr);
         formatter.finish()

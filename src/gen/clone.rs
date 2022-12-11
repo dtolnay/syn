@@ -612,7 +612,6 @@ impl Clone for ExprReference {
         ExprReference {
             attrs: self.attrs.clone(),
             and_token: self.and_token.clone(),
-            raw: self.raw.clone(),
             mutability: self.mutability.clone(),
             expr: self.expr.clone(),
         }
