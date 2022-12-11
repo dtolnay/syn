@@ -4449,14 +4449,11 @@
         "Expr": [
           {
             "syn": "Expr"
-          }
-        ],
-        "Semi": [
-          {
-            "syn": "Expr"
           },
           {
-            "token": "Semi"
+            "option": {
+              "token": "Semi"
+            }
           }
         ]
       }

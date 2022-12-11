@@ -3204,12 +3204,11 @@ where
         Stmt::Item(_binding_0) => {
             v.visit_item(_binding_0);
         }
-        Stmt::Expr(_binding_0) => {
+        Stmt::Expr(_binding_0, _binding_1) => {
             v.visit_expr(_binding_0);
-        }
-        Stmt::Semi(_binding_0, _binding_1) => {
-            v.visit_expr(_binding_0);
-            tokens_helper(v, &_binding_1.spans);
+            if let Some(it) = _binding_1 {
+                tokens_helper(v, &it.spans);
+            }
         }
     }
 }

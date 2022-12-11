@@ -4490,16 +4490,30 @@ impl Debug for Lite<syn::Stmt> {
                 formatter.write_str(")")?;
                 Ok(())
             }
-            syn::Stmt::Expr(_val) => {
-                formatter.write_str("Expr")?;
-                formatter.write_str("(")?;
-                Debug::fmt(Lite(_val), formatter)?;
-                formatter.write_str(")")?;
-                Ok(())
-            }
-            syn::Stmt::Semi(_v0, _v1) => {
-                let mut formatter = formatter.debug_tuple("Semi");
+            syn::Stmt::Expr(_v0, _v1) => {
+                let mut formatter = formatter.debug_tuple("Expr");
                 formatter.field(Lite(_v0));
+                formatter
+                    .field({
+                        #[derive(RefCast)]
+                        #[repr(transparent)]
+                        struct Print(Option<syn::token::Semi>);
+                        impl Debug for Print {
+                            fn fmt(
+                                &self,
+                                formatter: &mut fmt::Formatter,
+                            ) -> fmt::Result {
+                                match &self.0 {
+                                    Some(_val) => {
+                                        formatter.write_str("Some")?;
+                                        Ok(())
+                                    }
+                                    None => formatter.write_str("None"),
+                                }
+                            }
+                        }
+                        Print::ref_cast(_v1)
+                    });
                 formatter.finish()
             }
         }

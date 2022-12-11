@@ -24,11 +24,8 @@ ast_enum! {
         /// An item definition.
         Item(Item),
 
-        /// Expr without trailing semicolon.
-        Expr(Expr),
-
-        /// Expression with trailing semicolon.
-        Semi(Expr, Token![;]),
+        /// Expression, with or without trailing semicolon.
+        Expr(Expr, Option<Token![;]>),
     }
 }
 
@@ -110,14 +107,14 @@ pub mod parsing {
         pub fn parse_within(input: ParseStream) -> Result<Vec<Stmt>> {
             let mut stmts = Vec::new();
             loop {
-                while let Some(semi) = input.parse::<Option<Token![;]>>()? {
-                    stmts.push(Stmt::Semi(Expr::Verbatim(TokenStream::new()), semi));
+                while let semi @ Some(_) = input.parse()? {
+                    stmts.push(Stmt::Expr(Expr::Verbatim(TokenStream::new()), semi));
                 }
                 if input.is_empty() {
                     break;
                 }
                 let s = parse_stmt(input, true)?;
-                let requires_semicolon = if let Stmt::Expr(s) = &s {
+                let requires_semicolon = if let Stmt::Expr(s, None) = &s {
                     expr::requires_terminator(s)
                 } else {
                     false
@@ -253,7 +250,7 @@ pub mod parsing {
                 content.call(Block::parse_within)?;
                 let verbatim = Expr::Verbatim(verbatim::between(begin, input));
                 let semi_token: Token![;] = input.parse()?;
-                return Ok(Stmt::Semi(verbatim, semi_token));
+                return Ok(Stmt::Expr(verbatim, Some(semi_token)));
             }
 
             Some((eq_token, Box::new(init)))
@@ -291,12 +288,12 @@ pub mod parsing {
         attrs.extend(attr_target.replace_attrs(Vec::new()));
         attr_target.replace_attrs(attrs);
 
-        if input.peek(Token![;]) {
-            return Ok(Stmt::Semi(e, input.parse()?));
+        if let semi @ Some(_) = input.parse()? {
+            return Ok(Stmt::Expr(e, semi));
         }
 
         if allow_nosemi || !expr::requires_terminator(&e) {
-            Ok(Stmt::Expr(e))
+            Ok(Stmt::Expr(e, None))
         } else {
             Err(input.error("expected semicolon"))
         }
@@ -324,8 +321,7 @@ mod printing {
             match self {
                 Stmt::Local(local) => local.to_tokens(tokens),
                 Stmt::Item(item) => item.to_tokens(tokens),
-                Stmt::Expr(expr) => expr.to_tokens(tokens),
-                Stmt::Semi(expr, semi) => {
+                Stmt::Expr(expr, semi) => {
                     expr.to_tokens(tokens);
                     semi.to_tokens(tokens);
                 }
