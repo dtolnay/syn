@@ -1715,8 +1715,9 @@ impl PartialEq for Stmt {
         match (self, other) {
             (Stmt::Local(self0), Stmt::Local(other0)) => self0 == other0,
             (Stmt::Item(self0), Stmt::Item(other0)) => self0 == other0,
-            (Stmt::Expr(self0), Stmt::Expr(other0)) => self0 == other0,
-            (Stmt::Semi(self0, _), Stmt::Semi(other0, _)) => self0 == other0,
+            (Stmt::Expr(self0, self1), Stmt::Expr(other0, other1)) => {
+                self0 == other0 && self1 == other1
+            }
             _ => false,
         }
     }

@@ -1788,8 +1788,7 @@ impl Clone for Stmt {
         match self {
             Stmt::Local(v0) => Stmt::Local(v0.clone()),
             Stmt::Item(v0) => Stmt::Item(v0.clone()),
-            Stmt::Expr(v0) => Stmt::Expr(v0.clone()),
-            Stmt::Semi(v0, v1) => Stmt::Semi(v0.clone(), v1.clone()),
+            Stmt::Expr(v0, v1) => Stmt::Expr(v0.clone(), v1.clone()),
         }
     }
 }

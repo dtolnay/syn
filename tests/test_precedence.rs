@@ -395,14 +395,8 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
         fn fold_stmt(&mut self, stmt: Stmt) -> Stmt {
             match stmt {
                 // Don't wrap toplevel expressions in statements.
-                Stmt::Expr(e) => Stmt::Expr(fold_expr(self, e)),
-                Stmt::Semi(e, semi) => {
-                    if let Expr::Verbatim(_) = e {
-                        Stmt::Semi(e, semi)
-                    } else {
-                        Stmt::Semi(fold_expr(self, e), semi)
-                    }
-                }
+                Stmt::Expr(Expr::Verbatim(_), Some(_)) => stmt,
+                Stmt::Expr(e, semi) => Stmt::Expr(fold_expr(self, e), semi),
                 s => s,
             }
         }

@@ -2275,13 +2275,10 @@ impl Hash for Stmt {
                 state.write_u8(1u8);
                 v0.hash(state);
             }
-            Stmt::Expr(v0) => {
+            Stmt::Expr(v0, v1) => {
                 state.write_u8(2u8);
                 v0.hash(state);
-            }
-            Stmt::Semi(v0, _) => {
-                state.write_u8(3u8);
-                v0.hash(state);
+                v1.hash(state);
             }
         }
     }
