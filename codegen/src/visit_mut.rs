@@ -62,9 +62,9 @@ fn visit(
         Type::Option(t) => {
             let it = Borrowed(quote!(it));
             let val = visit(t, features, defs, &it)?;
-            let name = name.owned_tokens();
+            let name = name.ref_mut_tokens();
             Some(quote! {
-                if let Some(it) = &mut #name {
+                if let Some(it) = #name {
                     #val;
                 }
             })
