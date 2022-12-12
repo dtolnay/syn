@@ -6,6 +6,8 @@ use std::str;
 // opening a GitHub issue if your build environment requires some way to enable
 // these cfgs other than by executing our build script.
 fn main() {
+    println!("cargo:rerun-if-changed=build.rs");
+
     let compiler = match rustc_version() {
         Some(compiler) => compiler,
         None => return,
