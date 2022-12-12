@@ -312,12 +312,36 @@ ast_struct! {
 pub mod parsing {
     use super::*;
     use crate::ext::IdentExt;
-    use crate::parse::{Parse, ParseBuffer, ParseStream, Result};
+    use crate::parse::{ParseBuffer, ParseStream, Result};
     use crate::path;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-    impl Parse for Pat {
-        fn parse(input: ParseStream) -> Result<Self> {
+    impl Pat {
+        /// Parse a pattern that does _not_ involve `|` at the top level.
+        ///
+        /// This parser matches the behavior of the `$:pat_param` macro_rules
+        /// matcher, and on editions prior to Rust 2021, the behavior of
+        /// `$:pat`.
+        ///
+        /// In Rust syntax, some examples of where this syntax would occur are
+        /// in the argument pattern of functions and closures. Patterns using
+        /// `|` are not allowed to occur in these positions.
+        ///
+        /// ```compile_fail
+        /// fn f(Some(_) | None: Option<T>) {
+        ///     let _ = |Some(_) | None: Option<T>| {};
+        ///     //       ^^^^^^^^^^^^^^^^^^^^^^^^^??? :(
+        /// }
+        /// ```
+        ///
+        /// ```console
+        /// error: top-level or-patterns are not allowed in function parameters
+        ///  --> src/main.rs:1:6
+        ///   |
+        /// 1 | fn f(Some(_) | None: Option<T>) {
+        ///   |      ^^^^^^^^^^^^^^ help: wrap the pattern in parentheses: `(Some(_) | None)`
+        /// ```
+        pub fn parse_single(input: ParseStream) -> Result<Self> {
             let begin = input.fork();
             let lookahead = input.lookahead1();
             if {
@@ -367,6 +391,80 @@ pub mod parsing {
                 Err(lookahead.error())
             }
         }
+
+        /// Parse a pattern, possibly involving `|`, but not a leading `|`.
+        pub fn parse_multi(input: ParseStream) -> Result<Self> {
+            multi_pat_impl(input, None)
+        }
+
+        /// Parse a pattern, possibly involving `|`, possibly including a
+        /// leading `|`.
+        ///
+        /// This parser matches the behavior of the Rust 2021 edition's `$:pat`
+        /// macro_rules matcher.
+        ///
+        /// In Rust syntax, an example of where this syntax would occur is in
+        /// the pattern of a `match` arm, where the language permits an optional
+        /// leading `|`, although it is not idiomatic to write one there in
+        /// handwritten code.
+        ///
+        /// ```
+        /// # let wat = None;
+        /// match wat {
+        ///     |None |Some(false) => {}
+        ///     |Some(true) => {}
+        /// }
+        /// ```
+        ///
+        /// The compiler accepts it only to facilitate some situations in
+        /// macro-generated code where a macro author might need to write:
+        ///
+        /// ```
+        /// # macro_rules! doc {
+        /// #     ($value:expr, ($($conditions1:pat),*), ($($conditions2:pat),*), $then:expr) => {
+        /// match $value {
+        ///     $(| $conditions1)* $(| $conditions2)* => $then
+        /// }
+        /// #     };
+        /// # }
+        /// #
+        /// # doc!(true, (true), (false), {});
+        /// # doc!(true, (), (true, false), {});
+        /// # doc!(true, (true, false), (), {});
+        /// ```
+        ///
+        /// Expressing the same thing correctly in the case that either one (but
+        /// not both) of `$conditions1` and `$conditions2` might be empty,
+        /// without leading `|`, is complex.
+        ///
+        /// Use [`Pat::parse_multi`] instead if you are not intending to support
+        /// macro-generated macro input.
+        pub fn parse_multi_with_leading_vert(input: ParseStream) -> Result<Self> {
+            let leading_vert: Option<Token![|]> = input.parse()?;
+            multi_pat_impl(input, leading_vert)
+        }
+    }
+
+    fn multi_pat_impl(input: ParseStream, leading_vert: Option<Token![|]>) -> Result<Pat> {
+        let mut pat = Pat::parse_single(input)?;
+        if leading_vert.is_some()
+            || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=])
+        {
+            let mut cases = Punctuated::new();
+            cases.push_value(pat);
+            while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
+                let punct = input.parse()?;
+                cases.push_punct(punct);
+                let pat = Pat::parse_single(input)?;
+                cases.push_value(pat);
+            }
+            pat = Pat::Or(PatOr {
+                attrs: Vec::new(),
+                leading_vert,
+                cases,
+            });
+        }
+        Ok(pat)
     }
 
     fn pat_path_or_macro_or_struct_or_range(input: ParseStream) -> Result<Pat> {
@@ -435,7 +533,7 @@ pub mod parsing {
         Ok(PatBox {
             attrs: Vec::new(),
             box_token: input.parse()?,
-            pat: input.parse()?,
+            pat: Box::new(Pat::parse_single(input)?),
         })
     }
 
@@ -448,7 +546,7 @@ pub mod parsing {
             subpat: {
                 if input.peek(Token![@]) {
                     let at_token: Token![@] = input.parse()?;
-                    let subpat: Pat = input.parse()?;
+                    let subpat = Pat::parse_single(input)?;
                     Some((at_token, Box::new(subpat)))
                 } else {
                     None
@@ -521,7 +619,7 @@ pub mod parsing {
                 attrs: Vec::new(),
                 member,
                 colon_token: input.parse()?,
-                pat: Box::new(multi_pat_with_leading_vert(input)?),
+                pat: Box::new(Pat::parse_multi_with_leading_vert(input)?),
             });
         }
 
@@ -600,7 +698,7 @@ pub mod parsing {
 
         let mut elems = Punctuated::new();
         while !content.is_empty() {
-            let value = multi_pat_with_leading_vert(&content)?;
+            let value = Pat::parse_multi_with_leading_vert(&content)?;
             elems.push_value(value);
             if content.is_empty() {
                 break;
@@ -621,7 +719,7 @@ pub mod parsing {
             attrs: Vec::new(),
             and_token: input.parse()?,
             mutability: input.parse()?,
-            pat: input.parse()?,
+            pat: Box::new(Pat::parse_single(input)?),
         })
     }
 
@@ -699,7 +797,7 @@ pub mod parsing {
 
         let mut elems = Punctuated::new();
         while !content.is_empty() {
-            let value = multi_pat_with_leading_vert(&content)?;
+            let value = Pat::parse_multi_with_leading_vert(&content)?;
             elems.push_value(value);
             if content.is_empty() {
                 break;
@@ -725,37 +823,6 @@ pub mod parsing {
         content.call(Block::parse_within)?;
 
         Ok(verbatim::between(begin, input))
-    }
-
-    pub fn multi_pat(input: ParseStream) -> Result<Pat> {
-        multi_pat_impl(input, None)
-    }
-
-    pub fn multi_pat_with_leading_vert(input: ParseStream) -> Result<Pat> {
-        let leading_vert: Option<Token![|]> = input.parse()?;
-        multi_pat_impl(input, leading_vert)
-    }
-
-    fn multi_pat_impl(input: ParseStream, leading_vert: Option<Token![|]>) -> Result<Pat> {
-        let mut pat: Pat = input.parse()?;
-        if leading_vert.is_some()
-            || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=])
-        {
-            let mut cases = Punctuated::new();
-            cases.push_value(pat);
-            while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
-                let punct = input.parse()?;
-                cases.push_punct(punct);
-                let pat: Pat = input.parse()?;
-                cases.push_value(pat);
-            }
-            pat = Pat::Or(PatOr {
-                attrs: Vec::new(),
-                leading_vert,
-                cases,
-            });
-        }
-        Ok(pat)
     }
 }
 
