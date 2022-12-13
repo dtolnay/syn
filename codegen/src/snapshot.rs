@@ -5,7 +5,7 @@ use quote::{format_ident, quote};
 use syn::Index;
 use syn_codegen::{Data, Definitions, Node, Type};
 
-const DEBUG_SRC: &str = "../tests/debug/gen.rs";
+const TESTS_DEBUG_SRC: &str = "../tests/debug/gen.rs";
 
 fn rust_type(ty: &Type) -> TokenStream {
     match ty {
@@ -293,7 +293,7 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     }
 
     file::write(
-        DEBUG_SRC,
+        TESTS_DEBUG_SRC,
         quote! {
             use super::{Lite, RefCast};
             use std::fmt::{self, Debug, Display};

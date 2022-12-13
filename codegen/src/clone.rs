@@ -4,7 +4,7 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
 use syn_codegen::{Data, Definitions, Node, Type};
 
-const DEBUG_SRC: &str = "../src/gen/clone.rs";
+const CLONE_SRC: &str = "../src/gen/clone.rs";
 
 fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
     let type_name = &node.ident;
@@ -122,7 +122,7 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     }
 
     file::write(
-        DEBUG_SRC,
+        CLONE_SRC,
         quote! {
             #![allow(clippy::clone_on_copy, clippy::expl_impl_clone_on_copy)]
 
