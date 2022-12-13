@@ -2,7 +2,7 @@
 name = "syn-internal-codegen"
 version = "0.0.0"
 authors = ["David Tolnay <dtolnay@gmail.com>", "Nika Layzell <nika@thelayzells.com>"]
-edition = "2018"
+edition = "2021"
 
 publish = false # this is an internal crate which should never be published
 
