@@ -1,8 +1,10 @@
 use super::*;
 use crate::token::{Brace, Bracket, Paren};
+#[cfg(any(feature = "parsing", feature = "printing"))]
+use proc_macro2::Delimiter;
 use proc_macro2::TokenStream;
 #[cfg(feature = "parsing")]
-use proc_macro2::{Delimiter, Group, Span, TokenTree};
+use proc_macro2::{Group, Span, TokenTree};
 
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream, Parser, Result};
@@ -203,11 +205,14 @@ mod printing {
         where
             F: FnOnce(&mut TokenStream),
         {
-            match self {
-                MacroDelimiter::Paren(paren) => paren.surround(tokens, f),
-                MacroDelimiter::Brace(brace) => brace.surround(tokens, f),
-                MacroDelimiter::Bracket(bracket) => bracket.surround(tokens, f),
-            }
+            let (delim, span) = match self {
+                MacroDelimiter::Paren(paren) => (Delimiter::Parenthesis, paren.span),
+                MacroDelimiter::Brace(brace) => (Delimiter::Brace, brace.span),
+                MacroDelimiter::Bracket(bracket) => (Delimiter::Bracket, bracket.span),
+            };
+            let mut inner = TokenStream::new();
+            f(&mut inner);
+            token::printing::delim(delim, span, tokens, inner);
         }
     }
 
