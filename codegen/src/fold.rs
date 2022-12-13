@@ -206,7 +206,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                     #ty {
                         #fold_fields
                     }
-                })
+                });
             }
         }
         Data::Private => {
