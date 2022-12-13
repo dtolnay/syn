@@ -5,7 +5,7 @@ use quote::{format_ident, quote};
 use syn::Index;
 use syn_codegen::{Data, Definitions, Node, Type};
 
-const TESTS_DEBUG_SRC: &str = "../tests/debug/gen.rs";
+const TESTS_DEBUG_SRC: &str = "tests/debug/gen.rs";
 
 fn rust_type(ty: &Type) -> TokenStream {
     match ty {

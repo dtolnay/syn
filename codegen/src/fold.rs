@@ -5,7 +5,7 @@ use quote::{format_ident, quote};
 use syn::Index;
 use syn_codegen::{Data, Definitions, Features, Node, Type};
 
-const FOLD_SRC: &str = "../src/gen/fold.rs";
+const FOLD_SRC: &str = "src/gen/fold.rs";
 
 fn simple_visit(item: &str, name: &TokenStream) -> TokenStream {
     let ident = gen::under_name(item);

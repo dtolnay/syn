@@ -6,7 +6,7 @@ use quote::{format_ident, quote};
 use syn::Index;
 use syn_codegen::{Data, Definitions, Features, Node, Type};
 
-const VISIT_SRC: &str = "../src/gen/visit.rs";
+const VISIT_SRC: &str = "src/gen/visit.rs";
 
 fn simple_visit(item: &str, name: &Operand) -> TokenStream {
     let ident = gen::under_name(item);
