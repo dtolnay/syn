@@ -541,11 +541,11 @@ struct LoadFileError {
 }
 
 fn load_file<P: AsRef<Path>>(
-    name: P,
+    path: P,
     features: &[Attribute],
     lookup: &mut ItemLookup,
 ) -> Result<()> {
-    let error = match do_load_file(&name, features, lookup).err() {
+    let error = match do_load_file(&path, features, lookup).err() {
         None => return Ok(()),
         Some(error) => error,
     };
@@ -554,7 +554,7 @@ fn load_file<P: AsRef<Path>>(
     let span = error.span().start();
 
     bail!(LoadFileError {
-        path: name.as_ref().to_owned(),
+        path: path.as_ref().to_owned(),
         line: span.line,
         column: span.column + 1,
         error,
@@ -562,15 +562,15 @@ fn load_file<P: AsRef<Path>>(
 }
 
 fn do_load_file<P: AsRef<Path>>(
-    name: P,
+    path: P,
     features: &[Attribute],
     lookup: &mut ItemLookup,
 ) -> Result<()> {
-    let name = name.as_ref();
-    let parent = name.parent().expect("no parent path");
+    let path = path.as_ref();
+    let parent = path.parent().expect("no parent path");
 
     // Parse the file
-    let src = fs::read_to_string(name)?;
+    let src = fs::read_to_string(path)?;
     let file = syn::parse_file(&src)?;
 
     // Collect all of the interesting AstItems declared in this file or submodules.
@@ -663,9 +663,9 @@ fn do_load_file<P: AsRef<Path>>(
     Ok(())
 }
 
-fn load_token_file<P: AsRef<Path>>(name: P) -> Result<TokenLookup> {
-    let name = name.as_ref();
-    let src = fs::read_to_string(name)?;
+fn load_token_file<P: AsRef<Path>>(path: P) -> Result<TokenLookup> {
+    let path = path.as_ref();
+    let src = fs::read_to_string(path)?;
     let file = syn::parse_file(&src)?;
     for item in file.items {
         if let Item::Macro(item) = item {
