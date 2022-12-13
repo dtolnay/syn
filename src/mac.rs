@@ -198,22 +198,26 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::ToTokens;
 
+    impl MacroDelimiter {
+        pub(crate) fn surround<F>(&self, tokens: &mut TokenStream, f: F)
+        where
+            F: FnOnce(&mut TokenStream),
+        {
+            match self {
+                MacroDelimiter::Paren(paren) => paren.surround(tokens, f),
+                MacroDelimiter::Brace(brace) => brace.surround(tokens, f),
+                MacroDelimiter::Bracket(bracket) => bracket.surround(tokens, f),
+            }
+        }
+    }
+
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for Macro {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.path.to_tokens(tokens);
             self.bang_token.to_tokens(tokens);
-            match &self.delimiter {
-                MacroDelimiter::Paren(paren) => {
-                    paren.surround(tokens, |tokens| self.tokens.to_tokens(tokens));
-                }
-                MacroDelimiter::Brace(brace) => {
-                    brace.surround(tokens, |tokens| self.tokens.to_tokens(tokens));
-                }
-                MacroDelimiter::Bracket(bracket) => {
-                    bracket.surround(tokens, |tokens| self.tokens.to_tokens(tokens));
-                }
-            }
+            self.delimiter
+                .surround(tokens, |tokens| self.tokens.to_tokens(tokens));
         }
     }
 }
