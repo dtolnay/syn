@@ -94,7 +94,7 @@ fn introspect_enum(item: &DataEnum, items: &ItemLookup, tokens: &TokenLookup) ->
                     .map(|field| introspect_type(&field.ty, items, tokens))
                     .collect(),
                 Fields::Unit => vec![],
-                _ => panic!("Enum representation not supported"),
+                Fields::Named(_) => panic!("Enum representation not supported"),
             };
             Some((variant.ident.to_string(), fields))
         })
@@ -114,7 +114,7 @@ fn introspect_struct(item: &DataStruct, items: &ItemLookup, tokens: &TokenLookup
             })
             .collect(),
         Fields::Unit => IndexMap::new(),
-        _ => panic!("Struct representation not supported"),
+        Fields::Unnamed(_) => panic!("Struct representation not supported"),
     }
 }
 
