@@ -4,7 +4,7 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
 use syn_codegen::{Data, Definitions, Node, Type};
 
-const HASH_SRC: &str = "../src/gen/hash.rs";
+const HASH_SRC: &str = "src/gen/hash.rs";
 
 fn skip(field_type: &Type) -> bool {
     match field_type {

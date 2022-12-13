@@ -28,6 +28,7 @@ mod snapshot;
 mod version;
 mod visit;
 mod visit_mut;
+mod workspace_path;
 
 fn main() -> anyhow::Result<()> {
     color_backtrace::install();

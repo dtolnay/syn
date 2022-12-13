@@ -4,7 +4,7 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
 use syn_codegen::{Data, Definitions, Node, Type};
 
-const EQ_SRC: &str = "../src/gen/eq.rs";
+const EQ_SRC: &str = "src/gen/eq.rs";
 
 fn always_eq(field_type: &Type) -> bool {
     match field_type {

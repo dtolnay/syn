@@ -4,7 +4,7 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
 use syn_codegen::{Data, Definitions, Node, Type};
 
-const CLONE_SRC: &str = "../src/gen/clone.rs";
+const CLONE_SRC: &str = "src/gen/clone.rs";
 
 fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
     let type_name = &node.ident;

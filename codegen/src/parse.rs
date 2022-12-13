@@ -1,4 +1,4 @@
-use crate::version;
+use crate::{version, workspace_path};
 use anyhow::{bail, Result};
 use indexmap::IndexMap;
 use quote::quote;
@@ -13,8 +13,8 @@ use syn::{
 use syn_codegen as types;
 use thiserror::Error;
 
-const SYN_CRATE_ROOT: &str = "../src/lib.rs";
-const TOKEN_SRC: &str = "../src/token.rs";
+const SYN_CRATE_ROOT: &str = "src/lib.rs";
+const TOKEN_SRC: &str = "src/token.rs";
 const IGNORED_MODS: &[&str] = &["fold", "visit", "visit_mut"];
 const EXTRA_TYPES: &[&str] = &["Lifetime"];
 
@@ -541,11 +541,11 @@ struct LoadFileError {
 }
 
 fn load_file(
-    path: impl AsRef<Path>,
+    relative_to_workspace_root: impl AsRef<Path>,
     features: &[Attribute],
     lookup: &mut ItemLookup,
 ) -> Result<()> {
-    let error = match do_load_file(&path, features, lookup).err() {
+    let error = match do_load_file(&relative_to_workspace_root, features, lookup).err() {
         None => return Ok(()),
         Some(error) => error,
     };
@@ -554,7 +554,7 @@ fn load_file(
     let span = error.span().start();
 
     bail!(LoadFileError {
-        path: path.as_ref().to_owned(),
+        path: relative_to_workspace_root.as_ref().to_owned(),
         line: span.line,
         column: span.column + 1,
         error,
@@ -562,15 +562,15 @@ fn load_file(
 }
 
 fn do_load_file(
-    path: impl AsRef<Path>,
+    relative_to_workspace_root: impl AsRef<Path>,
     features: &[Attribute],
     lookup: &mut ItemLookup,
 ) -> Result<()> {
-    let path = path.as_ref();
-    let parent = path.parent().expect("no parent path");
+    let relative_to_workspace_root = relative_to_workspace_root.as_ref();
+    let parent = relative_to_workspace_root.parent().expect("no parent path");
 
     // Parse the file
-    let src = fs::read_to_string(path)?;
+    let src = fs::read_to_string(workspace_path::get(relative_to_workspace_root))?;
     let file = syn::parse_file(&src)?;
 
     // Collect all of the interesting AstItems declared in this file or submodules.
@@ -663,8 +663,8 @@ fn do_load_file(
     Ok(())
 }
 
-fn load_token_file(path: impl AsRef<Path>) -> Result<TokenLookup> {
-    let path = path.as_ref();
+fn load_token_file(relative_to_workspace_root: impl AsRef<Path>) -> Result<TokenLookup> {
+    let path = workspace_path::get(relative_to_workspace_root);
     let src = fs::read_to_string(path)?;
     let file = syn::parse_file(&src)?;
     for item in file.items {
