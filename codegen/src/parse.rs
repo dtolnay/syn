@@ -540,8 +540,8 @@ struct LoadFileError {
     error: Error,
 }
 
-fn load_file<P: AsRef<Path>>(
-    path: P,
+fn load_file(
+    path: impl AsRef<Path>,
     features: &[Attribute],
     lookup: &mut ItemLookup,
 ) -> Result<()> {
@@ -561,8 +561,8 @@ fn load_file<P: AsRef<Path>>(
     })
 }
 
-fn do_load_file<P: AsRef<Path>>(
-    path: P,
+fn do_load_file(
+    path: impl AsRef<Path>,
     features: &[Attribute],
     lookup: &mut ItemLookup,
 ) -> Result<()> {
@@ -663,7 +663,7 @@ fn do_load_file<P: AsRef<Path>>(
     Ok(())
 }
 
-fn load_token_file<P: AsRef<Path>>(path: P) -> Result<TokenLookup> {
+fn load_token_file(path: impl AsRef<Path>) -> Result<TokenLookup> {
     let path = path.as_ref();
     let src = fs::read_to_string(path)?;
     let file = syn::parse_file(&src)?;

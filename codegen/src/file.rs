@@ -4,7 +4,7 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 
-pub fn write<P: AsRef<Path>>(path: P, content: TokenStream) -> Result<()> {
+pub fn write(path: impl AsRef<Path>, content: TokenStream) -> Result<()> {
     let mut formatted = Vec::new();
     writeln!(
         formatted,
