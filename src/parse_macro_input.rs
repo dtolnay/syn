@@ -107,7 +107,7 @@
 #[cfg_attr(doc_cfg, doc(cfg(all(feature = "parsing", feature = "proc-macro"))))]
 macro_rules! parse_macro_input {
     ($tokenstream:ident as $ty:ty) => {
-        match $crate::parse_macro_input::parse::<$ty>($tokenstream) {
+        match $crate::parse::<$ty>($tokenstream) {
             $crate::__private::Ok(data) => data,
             $crate::__private::Err(err) => {
                 return $crate::__private::TokenStream::from(err.to_compile_error());
@@ -125,28 +125,4 @@ macro_rules! parse_macro_input {
     ($tokenstream:ident) => {
         $crate::parse_macro_input!($tokenstream as _)
     };
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Can parse any type that implements Parse.
-
-use crate::parse::{Parse, ParseStream, Parser, Result};
-use proc_macro::TokenStream;
-
-// Not public API.
-#[doc(hidden)]
-pub fn parse<T: ParseMacroInput>(token_stream: TokenStream) -> Result<T> {
-    T::parse.parse(token_stream)
-}
-
-// Not public API.
-#[doc(hidden)]
-pub trait ParseMacroInput: Sized {
-    fn parse(input: ParseStream) -> Result<Self>;
-}
-
-impl<T: Parse> ParseMacroInput for T {
-    fn parse(input: ParseStream) -> Result<Self> {
-        <T as Parse>::parse(input)
-    }
 }
