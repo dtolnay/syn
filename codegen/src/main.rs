@@ -9,11 +9,7 @@
 // Finally this crate generates the Visit, VisitMut, and Fold traits in Syn
 // programmatically from the syntax tree description.
 
-#![allow(
-    clippy::items_after_statements,
-    clippy::needless_pass_by_value,
-    clippy::too_many_lines
-)]
+#![allow(clippy::items_after_statements, clippy::too_many_lines)]
 
 mod cfg;
 mod clone;
