@@ -165,6 +165,7 @@ jobs:
         with:
           components: clippy,rustc-dev
       - run: cargo clippy --all-features --tests --benches -- -Dclippy::all -Dclippy::pedantic
+      - run: cargo clippy --manifest-path codegen/Cargo.toml -- -Dclippy::all -Dclippy::pedantic
 
   outdated:
     name: Outdated

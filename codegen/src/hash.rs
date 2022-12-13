@@ -27,7 +27,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                 .iter()
                 .enumerate()
                 .map(|(i, (variant_name, fields))| {
-                    let i = i as u8;
+                    let i = u8::try_from(i).unwrap();
                     let variant = Ident::new(variant_name, Span::call_site());
                     if fields.is_empty() {
                         quote! {

@@ -94,7 +94,7 @@ fn introspect_enum(item: &DataEnum, items: &ItemLookup, tokens: &TokenLookup) ->
                     .map(|field| introspect_type(&field.ty, items, tokens))
                     .collect(),
                 Fields::Unit => vec![],
-                _ => panic!("Enum representation not supported"),
+                Fields::Named(_) => panic!("Enum representation not supported"),
             };
             Some((variant.ident.to_string(), fields))
         })
@@ -114,7 +114,7 @@ fn introspect_struct(item: &DataStruct, items: &ItemLookup, tokens: &TokenLookup
             })
             .collect(),
         Fields::Unit => IndexMap::new(),
-        _ => panic!("Struct representation not supported"),
+        Fields::Unnamed(_) => panic!("Struct representation not supported"),
     }
 }
 
@@ -168,7 +168,7 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
         syn::Type::Tuple(TypeTuple { ref elems, .. }) => {
             let tys = elems
                 .iter()
-                .map(|ty| introspect_type(&ty, items, tokens))
+                .map(|ty| introspect_type(ty, items, tokens))
                 .collect();
             types::Type::Tuple(tys)
         }
@@ -216,13 +216,12 @@ fn is_pub(vis: &Visibility) -> bool {
 
 fn is_doc_hidden(attrs: &[Attribute]) -> bool {
     for attr in attrs {
-        if attr.path.is_ident("doc") {
-            if parsing::parse_doc_hidden_attr
+        if attr.path.is_ident("doc")
+            && parsing::parse_doc_hidden_attr
                 .parse2(attr.tokens.clone())
                 .is_ok()
-            {
-                return true;
-            }
+        {
+            return true;
         }
     }
     false
@@ -388,9 +387,10 @@ mod parsing {
             let variants = variants.iter().map(|v| {
                 let attrs = &v.attrs;
                 let name = &v.name;
-                match v.member {
-                    Some(ref member) => quote!(#(#attrs)* #name(#member)),
-                    None => quote!(#(#attrs)* #name),
+                if let Some(ref member) = v.member {
+                    quote!(#(#attrs)* #name(#member))
+                } else {
+                    quote!(#(#attrs)* #name)
                 }
             });
             parse_quote! {
@@ -603,9 +603,10 @@ fn do_load_file(
 
                 // Look up the submodule file, and recursively parse it.
                 // Only handles same-directory .rs file submodules for now.
-                let filename = match parsing::path_attr(&item.attrs)? {
-                    Some(filename) => filename.value(),
-                    None => format!("{}.rs", item.ident),
+                let filename = if let Some(filename) = parsing::path_attr(&item.attrs)? {
+                    filename.value()
+                } else {
+                    format!("{}.rs", item.ident)
                 };
                 let path = parent.join(filename);
                 load_file(path, &features, lookup)?;

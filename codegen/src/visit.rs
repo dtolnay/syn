@@ -187,9 +187,9 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                     }
                 }
 
-                let id = Ident::new(&field, Span::call_site());
+                let id = Ident::new(field, Span::call_site());
                 let ref_toks = Owned(quote!(node.#id));
-                let visit_field = visit(&ty, &s.features, defs, &ref_toks)
+                let visit_field = visit(ty, &s.features, defs, &ref_toks)
                     .unwrap_or_else(|| noop_visit(&ref_toks));
                 visit_impl.extend(quote! {
                     #visit_field;
