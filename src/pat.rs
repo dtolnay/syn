@@ -610,7 +610,12 @@ pub mod parsing {
         let boxed: Option<Token![box]> = input.parse()?;
         let by_ref: Option<Token![ref]> = input.parse()?;
         let mutability: Option<Token![mut]> = input.parse()?;
-        let member: Member = input.parse()?;
+
+        let member = if boxed.is_some() || by_ref.is_some() || mutability.is_some() {
+            input.parse().map(Member::Named)
+        } else {
+            input.parse()
+        }?;
 
         if boxed.is_none() && by_ref.is_none() && mutability.is_none() && input.peek(Token![:])
             || member.is_unnamed()
@@ -618,7 +623,7 @@ pub mod parsing {
             return Ok(FieldPat {
                 attrs: Vec::new(),
                 member,
-                colon_token: input.parse()?,
+                colon_token: Some(input.parse()?),
                 pat: Box::new(Pat::parse_multi_with_leading_vert(input)?),
             });
         }
