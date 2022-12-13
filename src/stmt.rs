@@ -50,6 +50,8 @@ pub mod parsing {
     use crate::parse::{Parse, ParseBuffer, ParseStream, Result};
     use proc_macro2::TokenStream;
 
+    struct AllowNoSemi(bool);
+
     impl Block {
         /// Parse the body of a block as zero or more statements, possibly
         /// including one trailing expression.
@@ -113,7 +115,7 @@ pub mod parsing {
                 if input.is_empty() {
                     break;
                 }
-                let s = parse_stmt(input, true)?;
+                let s = parse_stmt(input, AllowNoSemi(true))?;
                 let requires_semicolon = if let Stmt::Expr(s, None) = &s {
                     expr::requires_terminator(s)
                 } else {
@@ -144,11 +146,12 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Stmt {
         fn parse(input: ParseStream) -> Result<Self> {
-            parse_stmt(input, false)
+            let allow_nosemi = AllowNoSemi(false);
+            parse_stmt(input, allow_nosemi)
         }
     }
 
-    fn parse_stmt(input: ParseStream, allow_nosemi: bool) -> Result<Stmt> {
+    fn parse_stmt(input: ParseStream, allow_nosemi: AllowNoSemi) -> Result<Stmt> {
         let begin = input.fork();
         let mut attrs = input.call(Attribute::parse_outer)?;
 
@@ -271,7 +274,7 @@ pub mod parsing {
 
     fn stmt_expr(
         input: ParseStream,
-        allow_nosemi: bool,
+        allow_nosemi: AllowNoSemi,
         mut attrs: Vec<Attribute>,
     ) -> Result<Stmt> {
         let mut e = expr::parsing::expr_early(input)?;
@@ -292,7 +295,7 @@ pub mod parsing {
             return Ok(Stmt::Expr(e, semi));
         }
 
-        if allow_nosemi || !expr::requires_terminator(&e) {
+        if allow_nosemi.0 || !expr::requires_terminator(&e) {
             Ok(Stmt::Expr(e, None))
         } else {
             Err(input.error("expected semicolon"))
