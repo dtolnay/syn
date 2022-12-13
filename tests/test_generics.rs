@@ -39,15 +39,14 @@ fn test_split_for_impl() {
                     attrs: [
                         Attribute {
                             style: Outer,
-                            path: Path {
+                            meta: Path(Path {
                                 segments: [
                                     PathSegment {
                                         ident: "may_dangle",
                                         arguments: None,
                                     },
                                 ],
-                            },
-                            tokens: TokenStream(``),
+                            }),
                         },
                     ],
                     ident: "T",

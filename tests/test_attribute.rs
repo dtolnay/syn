@@ -34,7 +34,9 @@ fn test_meta_item_name_value() {
                 },
             ],
         },
-        lit: 5,
+        value: Expr::Lit {
+            lit: 5,
+        },
     }
     "###);
 }
@@ -53,8 +55,10 @@ fn test_meta_item_bool_value() {
                 },
             ],
         },
-        lit: Lit::Bool {
-            value: true,
+        value: Expr::Lit {
+            lit: Lit::Bool {
+                value: true,
+            },
         },
     }
     "###);
@@ -71,8 +75,10 @@ fn test_meta_item_bool_value() {
                 },
             ],
         },
-        lit: Lit::Bool {
-            value: false,
+        value: Expr::Lit {
+            lit: Lit::Bool {
+                value: false,
+            },
         },
     }
     "###);
@@ -92,9 +98,8 @@ fn test_meta_item_list_lit() {
                 },
             ],
         },
-        nested: [
-            Lit(5),
-        ],
+        delimiter: Paren,
+        tokens: TokenStream(`5`),
     }
     "###);
 }
@@ -113,16 +118,8 @@ fn test_meta_item_list_word() {
                 },
             ],
         },
-        nested: [
-            Meta(Path(Path {
-                segments: [
-                    PathSegment {
-                        ident: "bar",
-                        arguments: None,
-                    },
-                ],
-            })),
-        ],
+        delimiter: Paren,
+        tokens: TokenStream(`bar`),
     }
     "###);
 }
@@ -141,19 +138,8 @@ fn test_meta_item_list_name_value() {
                 },
             ],
         },
-        nested: [
-            Meta(Meta::NameValue {
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "bar",
-                            arguments: None,
-                        },
-                    ],
-                },
-                lit: 5,
-            }),
-        ],
+        delimiter: Paren,
+        tokens: TokenStream(`bar = 5`),
     }
     "###);
 }
@@ -172,21 +158,8 @@ fn test_meta_item_list_bool_value() {
                 },
             ],
         },
-        nested: [
-            Meta(Meta::NameValue {
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "bar",
-                            arguments: None,
-                        },
-                    ],
-                },
-                lit: Lit::Bool {
-                    value: true,
-                },
-            }),
-        ],
+        delimiter: Paren,
+        tokens: TokenStream(`bar = true`),
     }
     "###);
 }
@@ -205,58 +178,8 @@ fn test_meta_item_multiple() {
                 },
             ],
         },
-        nested: [
-            Meta(Path(Path {
-                segments: [
-                    PathSegment {
-                        ident: "word",
-                        arguments: None,
-                    },
-                ],
-            })),
-            Meta(Meta::NameValue {
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "name",
-                            arguments: None,
-                        },
-                    ],
-                },
-                lit: 5,
-            }),
-            Meta(Meta::List {
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "list",
-                            arguments: None,
-                        },
-                    ],
-                },
-                nested: [
-                    Meta(Meta::NameValue {
-                        path: Path {
-                            segments: [
-                                PathSegment {
-                                    ident: "name2",
-                                    arguments: None,
-                                },
-                            ],
-                        },
-                        lit: 6,
-                    }),
-                ],
-            }),
-            Meta(Path(Path {
-                segments: [
-                    PathSegment {
-                        ident: "word2",
-                        arguments: None,
-                    },
-                ],
-            })),
-        ],
+        delimiter: Paren,
+        tokens: TokenStream(`word , name = 5 , list (name2 = 6) , word2`),
     }
     "###);
 }
@@ -275,11 +198,8 @@ fn test_bool_lit() {
                 },
             ],
         },
-        nested: [
-            Lit(Lit::Bool {
-                value: true,
-            }),
-        ],
+        delimiter: Paren,
+        tokens: TokenStream(`true`),
     }
     "###);
 }
@@ -298,30 +218,8 @@ fn test_negative_lit() {
                 },
             ],
         },
-        nested: [
-            Meta(Meta::NameValue {
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "min",
-                            arguments: None,
-                        },
-                    ],
-                },
-                lit: -1,
-            }),
-            Meta(Meta::NameValue {
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "max",
-                            arguments: None,
-                        },
-                    ],
-                },
-                lit: 200,
-            }),
-        ],
+        delimiter: Paren,
+        tokens: TokenStream(`min = - 1 , max = 200`),
     }
     "###);
 }
@@ -332,5 +230,5 @@ fn test(input: &str) -> Meta {
     assert_eq!(attrs.len(), 1);
     let attr = attrs.into_iter().next().unwrap();
 
-    attr.parse_meta().unwrap()
+    attr.meta
 }

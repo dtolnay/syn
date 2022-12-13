@@ -65,8 +65,7 @@ impl Hash for Attribute {
         H: Hasher,
     {
         self.style.hash(state);
-        self.path.hash(state);
-        TokenStreamHelper(&self.tokens).hash(state);
+        self.meta.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1798,7 +1797,8 @@ impl Hash for MetaList {
         H: Hasher,
     {
         self.path.hash(state);
-        self.nested.hash(state);
+        self.delimiter.hash(state);
+        TokenStreamHelper(&self.tokens).hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1809,7 +1809,7 @@ impl Hash for MetaNameValue {
         H: Hasher,
     {
         self.path.hash(state);
-        self.lit.hash(state);
+        self.value.hash(state);
     }
 }
 #[cfg(feature = "full")]
@@ -1820,25 +1820,6 @@ impl Hash for MethodTurbofish {
         H: Hasher,
     {
         self.args.hash(state);
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for NestedMeta {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        match self {
-            NestedMeta::Meta(v0) => {
-                state.write_u8(0u8);
-                v0.hash(state);
-            }
-            NestedMeta::Lit(v0) => {
-                state.write_u8(1u8);
-                v0.hash(state);
-            }
-        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

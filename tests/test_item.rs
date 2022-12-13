@@ -22,15 +22,14 @@ fn test_macro_variable_attr() {
         attrs: [
             Attribute {
                 style: Outer,
-                path: Path {
+                meta: Path(Path {
                     segments: [
                         PathSegment {
                             ident: "test",
                             arguments: None,
                         },
                     ],
-                },
-                tokens: TokenStream(``),
+                }),
             },
         ],
         vis: Inherited,

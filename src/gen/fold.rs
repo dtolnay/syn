@@ -494,10 +494,6 @@ pub trait Fold {
         fold_method_turbofish(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn fold_nested_meta(&mut self, i: NestedMeta) -> NestedMeta {
-        fold_nested_meta(self, i)
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_parenthesized_generic_arguments(
         &mut self,
         i: ParenthesizedGenericArguments,
@@ -844,8 +840,7 @@ where
         pound_token: Token![#](tokens_helper(f, &node.pound_token.spans)),
         style: f.fold_attr_style(node.style),
         bracket_token: Bracket(tokens_helper(f, &node.bracket_token.span)),
-        path: f.fold_path(node.path),
-        tokens: node.tokens,
+        meta: f.fold_meta(node.meta),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2420,8 +2415,8 @@ where
 {
     MetaList {
         path: f.fold_path(node.path),
-        paren_token: Paren(tokens_helper(f, &node.paren_token.span)),
-        nested: FoldHelper::lift(node.nested, |it| f.fold_nested_meta(it)),
+        delimiter: f.fold_macro_delimiter(node.delimiter),
+        tokens: node.tokens,
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2432,7 +2427,7 @@ where
     MetaNameValue {
         path: f.fold_path(node.path),
         eq_token: Token![=](tokens_helper(f, &node.eq_token.spans)),
-        lit: f.fold_lit(node.lit),
+        value: f.fold_expr(node.value),
     }
 }
 #[cfg(feature = "full")]
@@ -2445,16 +2440,6 @@ where
         lt_token: Token![<](tokens_helper(f, &node.lt_token.spans)),
         args: FoldHelper::lift(node.args, |it| f.fold_generic_method_argument(it)),
         gt_token: Token![>](tokens_helper(f, &node.gt_token.spans)),
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-pub fn fold_nested_meta<F>(f: &mut F, node: NestedMeta) -> NestedMeta
-where
-    F: Fold + ?Sized,
-{
-    match node {
-        NestedMeta::Meta(_binding_0) => NestedMeta::Meta(f.fold_meta(_binding_0)),
-        NestedMeta::Lit(_binding_0) => NestedMeta::Lit(f.fold_lit(_binding_0)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

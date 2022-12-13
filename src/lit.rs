@@ -142,8 +142,7 @@ impl LitStr {
     /// # Example
     ///
     /// ```
-    /// use proc_macro2::Span;
-    /// use syn::{Attribute, Error, Ident, Lit, Meta, MetaNameValue, Path, Result};
+    /// use syn::{Attribute, Error, Expr, Lit, Meta, Path, Result};
     ///
     /// // Parses the path from an attribute that looks like:
     /// //
@@ -151,19 +150,20 @@ impl LitStr {
     /// //
     /// // or returns `None` if the input is some other attribute.
     /// fn get_path(attr: &Attribute) -> Result<Option<Path>> {
-    ///     if !attr.path.is_ident("path") {
+    ///     if !attr.path().is_ident("path") {
     ///         return Ok(None);
     ///     }
     ///
-    ///     match attr.parse_meta()? {
-    ///         Meta::NameValue(MetaNameValue { lit: Lit::Str(lit_str), .. }) => {
-    ///             lit_str.parse().map(Some)
-    ///         }
-    ///         _ => {
-    ///             let message = "expected #[path = \"...\"]";
-    ///             Err(Error::new_spanned(attr, message))
+    ///     if let Meta::NameValue(meta) = &attr.meta {
+    ///         if let Expr::Lit(expr) = &meta.value {
+    ///             if let Lit::Str(lit_str) = &expr.lit {
+    ///                 return lit_str.parse().map(Some);
+    ///             }
     ///         }
     ///     }
+    ///
+    ///     let message = "expected #[path = \"...\"]";
+    ///     Err(Error::new_spanned(attr, message))
     /// }
     /// ```
     #[cfg(feature = "parsing")]

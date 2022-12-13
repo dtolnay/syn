@@ -32,15 +32,18 @@ fn test_comment() {
         attrs: [
             Attribute {
                 style: Inner,
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "allow",
-                            arguments: None,
-                        },
-                    ],
+                meta: Meta::List {
+                    path: Path {
+                        segments: [
+                            PathSegment {
+                                ident: "allow",
+                                arguments: None,
+                            },
+                        ],
+                    },
+                    delimiter: Paren,
+                    tokens: TokenStream(`dead_code`),
                 },
-                tokens: TokenStream(`(dead_code)`),
             },
         ],
         items: [

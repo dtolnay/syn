@@ -494,10 +494,6 @@ pub trait VisitMut {
         visit_method_turbofish_mut(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn visit_nested_meta_mut(&mut self, i: &mut NestedMeta) {
-        visit_nested_meta_mut(self, i);
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_parenthesized_generic_arguments_mut(
         &mut self,
         i: &mut ParenthesizedGenericArguments,
@@ -846,8 +842,7 @@ where
     tokens_helper(v, &mut node.pound_token.spans);
     v.visit_attr_style_mut(&mut node.style);
     tokens_helper(v, &mut node.bracket_token.span);
-    v.visit_path_mut(&mut node.path);
-    skip!(node.tokens);
+    v.visit_meta_mut(&mut node.meta);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_bare_fn_arg_mut<V>(v: &mut V, node: &mut BareFnArg)
@@ -2684,14 +2679,8 @@ where
     V: VisitMut + ?Sized,
 {
     v.visit_path_mut(&mut node.path);
-    tokens_helper(v, &mut node.paren_token.span);
-    for el in Punctuated::pairs_mut(&mut node.nested) {
-        let (it, p) = el.into_tuple();
-        v.visit_nested_meta_mut(it);
-        if let Some(p) = p {
-            tokens_helper(v, &mut p.spans);
-        }
-    }
+    v.visit_macro_delimiter_mut(&mut node.delimiter);
+    skip!(node.tokens);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_meta_name_value_mut<V>(v: &mut V, node: &mut MetaNameValue)
@@ -2700,7 +2689,7 @@ where
 {
     v.visit_path_mut(&mut node.path);
     tokens_helper(v, &mut node.eq_token.spans);
-    v.visit_lit_mut(&mut node.lit);
+    v.visit_expr_mut(&mut node.value);
 }
 #[cfg(feature = "full")]
 pub fn visit_method_turbofish_mut<V>(v: &mut V, node: &mut MethodTurbofish)
@@ -2717,20 +2706,6 @@ where
         }
     }
     tokens_helper(v, &mut node.gt_token.spans);
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-pub fn visit_nested_meta_mut<V>(v: &mut V, node: &mut NestedMeta)
-where
-    V: VisitMut + ?Sized,
-{
-    match node {
-        NestedMeta::Meta(_binding_0) => {
-            v.visit_meta_mut(_binding_0);
-        }
-        NestedMeta::Lit(_binding_0) => {
-            v.visit_lit_mut(_binding_0);
-        }
-    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_parenthesized_generic_arguments_mut<V>(
