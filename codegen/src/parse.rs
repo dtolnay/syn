@@ -58,13 +58,13 @@ fn introspect_item(item: &AstItem, items: &ItemLookup, tokens: &TokenLookup) -> 
     let features = introspect_features(&item.features);
 
     match &item.ast.data {
-        Data::Enum(ref data) => types::Node {
+        Data::Enum(data) => types::Node {
             ident: item.ast.ident.to_string(),
             features,
             data: types::Data::Enum(introspect_enum(data, items, tokens)),
             exhaustive: !data.variants.iter().any(|v| is_doc_hidden(&v.attrs)),
         },
-        Data::Struct(ref data) => types::Node {
+        Data::Struct(data) => types::Node {
             ident: item.ast.ident.to_string(),
             features,
             data: {
@@ -120,10 +120,7 @@ fn introspect_struct(item: &DataStruct, items: &ItemLookup, tokens: &TokenLookup
 
 fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -> types::Type {
     match item {
-        syn::Type::Path(TypePath {
-            qself: None,
-            ref path,
-        }) => {
+        syn::Type::Path(TypePath { qself: None, path }) => {
             let last = path.segments.last().unwrap();
             let string = last.ident.to_string();
 
@@ -165,14 +162,14 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
                 }
             }
         }
-        syn::Type::Tuple(TypeTuple { ref elems, .. }) => {
+        syn::Type::Tuple(TypeTuple { elems, .. }) => {
             let tys = elems
                 .iter()
                 .map(|ty| introspect_type(ty, items, tokens))
                 .collect();
             types::Type::Tuple(tys)
         }
-        syn::Type::Macro(TypeMacro { ref mac })
+        syn::Type::Macro(TypeMacro { mac })
             if mac.path.segments.last().unwrap().ident == "Token" =>
         {
             let content = mac.tokens.to_string();
@@ -228,33 +225,33 @@ fn is_doc_hidden(attrs: &[Attribute]) -> bool {
 }
 
 fn first_arg(params: &PathArguments) -> &syn::Type {
-    let data = match *params {
-        PathArguments::AngleBracketed(ref data) => data,
+    let data = match params {
+        PathArguments::AngleBracketed(data) => data,
         _ => panic!("Expected at least 1 type argument here"),
     };
 
-    match *data
+    match data
         .args
         .first()
         .expect("Expected at least 1 type argument here")
     {
-        GenericArgument::Type(ref ty) => ty,
+        GenericArgument::Type(ty) => ty,
         _ => panic!("Expected at least 1 type argument here"),
     }
 }
 
 fn last_arg(params: &PathArguments) -> &syn::Type {
-    let data = match *params {
-        PathArguments::AngleBracketed(ref data) => data,
+    let data = match params {
+        PathArguments::AngleBracketed(data) => data,
         _ => panic!("Expected at least 1 type argument here"),
     };
 
-    match *data
+    match data
         .args
         .last()
         .expect("Expected at least 1 type argument here")
     {
-        GenericArgument::Type(ref ty) => ty,
+        GenericArgument::Type(ty) => ty,
         _ => panic!("Expected at least 1 type argument here"),
     }
 }
@@ -387,7 +384,7 @@ mod parsing {
             let variants = variants.iter().map(|v| {
                 let attrs = &v.attrs;
                 let name = &v.name;
-                if let Some(ref member) = v.member {
+                if let Some(member) = &v.member {
                     quote!(#(#attrs)* #name(#member))
                 } else {
                     quote!(#(#attrs)* #name)
@@ -671,7 +668,7 @@ fn load_token_file(relative_to_workspace_root: impl AsRef<Path>) -> Result<Token
     for item in file.items {
         if let Item::Macro(item) = item {
             match item.ident {
-                Some(ref i) if i == "export_token_macro" => {}
+                Some(i) if i == "export_token_macro" => {}
                 _ => continue,
             }
             let tokens = item.mac.parse_body_with(parsing::parse_token_macro)?;
