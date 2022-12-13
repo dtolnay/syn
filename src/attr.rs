@@ -1,7 +1,6 @@
 use super::*;
 use crate::punctuated::Punctuated;
 use proc_macro2::TokenStream;
-use std::fmt::Write;
 use std::iter;
 use std::slice;
 
@@ -9,6 +8,8 @@ use std::slice;
 use crate::parse::{Parse, ParseBuffer, ParseStream, Parser, Result};
 #[cfg(feature = "parsing")]
 use crate::punctuated::Pair;
+#[cfg(feature = "parsing")]
+use std::fmt::Write;
 
 ast_struct! {
     /// An attribute like `#[repr(transparent)]`.
