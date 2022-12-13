@@ -34,17 +34,33 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// # extern crate proc_macro;
 /// #
 /// use proc_macro::TokenStream;
-/// use syn::{parse_macro_input, AttributeArgs, ItemFn};
+/// use syn::parse::{Parse, ParseStream, Result};
+/// use syn::{parse_macro_input, ItemFn};
 ///
 /// # const IGNORE: &str = stringify! {
 /// #[proc_macro_attribute]
 /// # };
 /// pub fn my_attr(args: TokenStream, input: TokenStream) -> TokenStream {
-///     let args = parse_macro_input!(args as AttributeArgs);
+///     let args = parse_macro_input!(args as MyAttrArgs);
 ///     let input = parse_macro_input!(input as ItemFn);
 ///
 ///     /* ... */
 ///     # TokenStream::new()
+/// }
+///
+/// struct MyAttrArgs {
+///     # _k: [(); { stringify! {
+///     ...
+///     # }; 0 }]
+/// }
+///
+/// impl Parse for MyAttrArgs {
+///     fn parse(input: ParseStream) -> Result<Self> {
+///         # stringify! {
+///         ...
+///         # };
+///         # unimplemented!()
+///     }
 /// }
 /// ```
 ///

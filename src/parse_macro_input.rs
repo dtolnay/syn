@@ -150,30 +150,3 @@ impl<T: Parse> ParseMacroInput for T {
         <T as Parse>::parse(input)
     }
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// Any other types that we want `parse_macro_input!` to be able to parse.
-
-#[cfg(any(feature = "full", feature = "derive"))]
-use crate::AttributeArgs;
-
-#[cfg(any(feature = "full", feature = "derive"))]
-impl ParseMacroInput for AttributeArgs {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let mut metas = Vec::new();
-
-        loop {
-            if input.is_empty() {
-                break;
-            }
-            let value = input.parse()?;
-            metas.push(value);
-            if input.is_empty() {
-                break;
-            }
-            input.parse::<Token![,]>()?;
-        }
-
-        Ok(metas)
-    }
-}
