@@ -10,7 +10,6 @@
 // programmatically from the syntax tree description.
 
 #![allow(
-    clippy::inefficient_to_string,
     clippy::items_after_statements,
     clippy::match_wildcard_for_single_variants,
     clippy::needless_borrow,
