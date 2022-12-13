@@ -1,6 +1,7 @@
 use super::*;
 use crate::punctuated::Punctuated;
 use proc_macro2::TokenStream;
+use std::fmt::Write;
 use std::iter;
 use std::slice;
 
@@ -258,20 +259,20 @@ impl Attribute {
 
 #[cfg(feature = "parsing")]
 fn expected_parentheses(attr: &Attribute) -> String {
-    let style = match attr.style {
-        AttrStyle::Outer => "#",
-        AttrStyle::Inner(_) => "#!",
-    };
-
-    let mut path = String::new();
-    for segment in &attr.path.segments {
-        if !path.is_empty() || attr.path.leading_colon.is_some() {
-            path += "::";
-        }
-        path += &segment.ident.to_string();
+    let mut suggestion = String::new();
+    match attr.style {
+        AttrStyle::Outer => suggestion.push('#'),
+        AttrStyle::Inner(_) => suggestion.push_str("#!"),
     }
-
-    format!("{}[{}(...)]", style, path)
+    suggestion.push('[');
+    for (i, segment) in attr.path.segments.iter().enumerate() {
+        if i > 0 || attr.path.leading_colon.is_some() {
+            suggestion.push_str("::");
+        }
+        write!(suggestion, "{}", segment.ident).unwrap();
+    }
+    suggestion.push_str("(...)]");
+    suggestion
 }
 
 #[cfg(feature = "parsing")]
