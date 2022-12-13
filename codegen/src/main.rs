@@ -9,7 +9,19 @@
 // Finally this crate generates the Visit, VisitMut, and Fold traits in Syn
 // programmatically from the syntax tree description.
 
-#![allow(clippy::needless_pass_by_value)]
+#![allow(
+    clippy::cast_possible_truncation,
+    clippy::collapsible_if,
+    clippy::if_not_else,
+    clippy::inefficient_to_string,
+    clippy::items_after_statements,
+    clippy::match_wildcard_for_single_variants,
+    clippy::needless_borrow,
+    clippy::needless_pass_by_value,
+    clippy::semicolon_if_nothing_returned,
+    clippy::single_match_else,
+    clippy::too_many_lines
+)]
 
 mod cfg;
 mod clone;
