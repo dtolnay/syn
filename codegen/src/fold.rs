@@ -190,13 +190,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                 });
             }
 
-            if !fields.is_empty() {
-                fold_impl.extend(quote! {
-                    #ty {
-                        #fold_fields
-                    }
-                })
-            } else {
+            if fields.is_empty() {
                 if ty == "Ident" {
                     fold_impl.extend(quote! {
                         let mut node = node;
@@ -207,6 +201,12 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                 fold_impl.extend(quote! {
                     node
                 });
+            } else {
+                fold_impl.extend(quote! {
+                    #ty {
+                        #fold_fields
+                    }
+                })
             }
         }
         Data::Private => {
