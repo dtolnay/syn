@@ -171,7 +171,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
             let mut fold_fields = TokenStream::new();
 
             for (field, ty) in fields {
-                let id = Ident::new(&field, Span::call_site());
+                let id = Ident::new(field, Span::call_site());
                 let ref_toks = quote!(node.#id);
 
                 if let Type::Syn(ty) = ty {
@@ -183,7 +183,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                     }
                 }
 
-                let fold = visit(&ty, &s.features, defs, &ref_toks).unwrap_or(ref_toks);
+                let fold = visit(ty, &s.features, defs, &ref_toks).unwrap_or(ref_toks);
 
                 fold_fields.extend(quote! {
                     #id: #fold,

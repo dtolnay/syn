@@ -168,7 +168,7 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
         syn::Type::Tuple(TypeTuple { ref elems, .. }) => {
             let tys = elems
                 .iter()
-                .map(|ty| introspect_type(&ty, items, tokens))
+                .map(|ty| introspect_type(ty, items, tokens))
                 .collect();
             types::Type::Tuple(tys)
         }

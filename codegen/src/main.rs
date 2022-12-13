@@ -11,7 +11,6 @@
 
 #![allow(
     clippy::items_after_statements,
-    clippy::needless_borrow,
     clippy::needless_pass_by_value,
     clippy::semicolon_if_nothing_returned,
     clippy::single_match_else,
