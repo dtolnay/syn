@@ -387,9 +387,10 @@ mod parsing {
             let variants = variants.iter().map(|v| {
                 let attrs = &v.attrs;
                 let name = &v.name;
-                match v.member {
-                    Some(ref member) => quote!(#(#attrs)* #name(#member)),
-                    None => quote!(#(#attrs)* #name),
+                if let Some(ref member) = v.member {
+                    quote!(#(#attrs)* #name(#member))
+                } else {
+                    quote!(#(#attrs)* #name)
                 }
             });
             parse_quote! {
@@ -602,9 +603,10 @@ fn do_load_file(
 
                 // Look up the submodule file, and recursively parse it.
                 // Only handles same-directory .rs file submodules for now.
-                let filename = match parsing::path_attr(&item.attrs)? {
-                    Some(filename) => filename.value(),
-                    None => format!("{}.rs", item.ident),
+                let filename = if let Some(filename) = parsing::path_attr(&item.attrs)? {
+                    filename.value()
+                } else {
+                    format!("{}.rs", item.ident)
                 };
                 let path = parent.join(filename);
                 load_file(path, &features, lookup)?;
