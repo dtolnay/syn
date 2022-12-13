@@ -439,7 +439,7 @@ spanless_eq_struct!(Local; pat ty kind id span attrs !tokens);
 spanless_eq_struct!(MacCall; path args prior_type_ascription);
 spanless_eq_struct!(MacCallStmt; mac style attrs tokens);
 spanless_eq_struct!(MacroDef; body macro_rules);
-spanless_eq_struct!(MetaItemLit; token_lit kind span);
+spanless_eq_struct!(MetaItemLit; symbol suffix kind span);
 spanless_eq_struct!(MethodCall; seg receiver args !span);
 spanless_eq_struct!(ModSpans; !inner_span !inject_use_span);
 spanless_eq_struct!(MutTy; ty mutbl);
@@ -452,7 +452,7 @@ spanless_eq_struct!(PathSegment; ident id args);
 spanless_eq_struct!(PolyTraitRef; bound_generic_params trait_ref span);
 spanless_eq_struct!(QSelf; ty path_span position);
 spanless_eq_struct!(Stmt; id kind span);
-spanless_eq_struct!(StrLit; style symbol suffix span symbol_unescaped);
+spanless_eq_struct!(StrLit; symbol suffix symbol_unescaped style span);
 spanless_eq_struct!(StructExpr; qself path fields rest);
 spanless_eq_struct!(Token; kind span);
 spanless_eq_struct!(Trait; unsafety is_auto generics bounds items);
@@ -536,7 +536,7 @@ spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
 spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0 1 2) Const(0 1 2)
     Fn(0) Mod(0 1) ForeignMod(0) GlobalAsm(0) TyAlias(0) Enum(0 1) Struct(0 1)
     Union(0 1) Trait(0) TraitAlias(0 1) Impl(0) MacCall(0) MacroDef(0));
-spanless_eq_enum!(LitKind; Str(0 1) ByteStr(0) Byte(0) Char(0) Int(0 1)
+spanless_eq_enum!(LitKind; Str(0 1) ByteStr(0 1) Byte(0) Char(0) Int(0 1)
     Float(0 1) Bool(0) Err);
 spanless_eq_enum!(PatKind; Wild Ident(0 1 2) Struct(0 1 2 3) TupleStruct(0 1 2)
     Or(0) Path(0 1) Tuple(0) Box(0) Ref(0 1) Lit(0) Range(0 1 2) Slice(0) Rest
@@ -734,12 +734,8 @@ fn is_escaped_literal_attr_args(value: &AttrArgsEq, unescaped: Symbol) -> bool {
 fn is_escaped_literal_meta_item_lit(lit: &MetaItemLit, unescaped: Symbol) -> bool {
     match lit {
         MetaItemLit {
-            token_lit:
-                Lit {
-                    kind: token::LitKind::Str,
-                    symbol: _,
-                    suffix: None,
-                },
+            symbol: _,
+            suffix: None,
             kind,
             span: _,
         } => is_escaped_lit_kind(kind, unescaped),
