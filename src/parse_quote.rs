@@ -140,7 +140,7 @@ use crate::punctuated::Punctuated;
 #[cfg(any(feature = "full", feature = "derive"))]
 use crate::{attr, Attribute};
 #[cfg(feature = "full")]
-use crate::{Block, Stmt};
+use crate::{Block, Pat, Stmt};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl ParseQuote for Attribute {
@@ -150,6 +150,13 @@ impl ParseQuote for Attribute {
         } else {
             attr::parsing::single_parse_outer(input)
         }
+    }
+}
+
+#[cfg(feature = "full")]
+impl ParseQuote for Pat {
+    fn parse(input: ParseStream) -> Result<Self> {
+        Pat::parse_multi_with_leading_vert(input)
     }
 }
 

@@ -227,7 +227,7 @@ pub mod parsing {
     fn stmt_local(input: ParseStream, attrs: Vec<Attribute>, begin: ParseBuffer) -> Result<Stmt> {
         let let_token: Token![let] = input.parse()?;
 
-        let mut pat: Pat = pat::parsing::multi_pat_with_leading_vert(input)?;
+        let mut pat = Pat::parse_single(input)?;
         if input.peek(Token![:]) {
             let colon_token: Token![:] = input.parse()?;
             let ty: Type = input.parse()?;
