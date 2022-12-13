@@ -201,17 +201,12 @@ mod printing {
     use quote::ToTokens;
 
     impl MacroDelimiter {
-        pub(crate) fn surround<F>(&self, tokens: &mut TokenStream, f: F)
-        where
-            F: FnOnce(&mut TokenStream),
-        {
+        pub(crate) fn surround(&self, tokens: &mut TokenStream, inner: TokenStream) {
             let (delim, span) = match self {
                 MacroDelimiter::Paren(paren) => (Delimiter::Parenthesis, paren.span),
                 MacroDelimiter::Brace(brace) => (Delimiter::Brace, brace.span),
                 MacroDelimiter::Bracket(bracket) => (Delimiter::Bracket, bracket.span),
             };
-            let mut inner = TokenStream::new();
-            f(&mut inner);
             token::printing::delim(delim, span, tokens, inner);
         }
     }
@@ -221,8 +216,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.path.to_tokens(tokens);
             self.bang_token.to_tokens(tokens);
-            self.delimiter
-                .surround(tokens, |tokens| self.tokens.to_tokens(tokens));
+            self.delimiter.surround(tokens, self.tokens.clone());
         }
     }
 }
