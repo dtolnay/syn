@@ -10,7 +10,6 @@
 // programmatically from the syntax tree description.
 
 #![allow(
-    clippy::collapsible_if,
     clippy::if_not_else,
     clippy::inefficient_to_string,
     clippy::items_after_statements,

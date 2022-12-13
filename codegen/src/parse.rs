@@ -216,13 +216,12 @@ fn is_pub(vis: &Visibility) -> bool {
 
 fn is_doc_hidden(attrs: &[Attribute]) -> bool {
     for attr in attrs {
-        if attr.path.is_ident("doc") {
-            if parsing::parse_doc_hidden_attr
+        if attr.path.is_ident("doc")
+            && parsing::parse_doc_hidden_attr
                 .parse2(attr.tokens.clone())
                 .is_ok()
-            {
-                return true;
-            }
+        {
+            return true;
         }
     }
     false
