@@ -114,7 +114,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@stable
-      - run: cd codegen && cargo run
+      - run: cargo run --manifest-path codegen/Cargo.toml
       - run: git diff --exit-code
 
   msrv:
