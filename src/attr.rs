@@ -4,6 +4,8 @@ use std::iter;
 use std::slice;
 
 #[cfg(feature = "parsing")]
+use crate::meta::{self, ParseNestedMeta};
+#[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream, Parser, Result};
 #[cfg(feature = "parsing")]
 use std::fmt::Write;
@@ -256,6 +258,80 @@ impl Attribute {
             }
             Meta::List(meta) => parser.parse2(meta.tokens.clone()),
         }
+    }
+
+    /// Parse the arguments to the attribute, expecting it to follow the
+    /// conventional structure used by most of Rust's built-in attributes.
+    ///
+    /// The [*Meta Item Attribute Syntax*][syntax] section in the Rust reference
+    /// explains the convention in more detail. Not all attributes follow this
+    /// convention, so [`parse_args()`][Self::parse_args] is available if you
+    /// need to parse arbitrarily goofy attribute syntax.
+    ///
+    /// [syntax]: https://doc.rust-lang.org/reference/attributes.html#meta-item-attribute-syntax
+    ///
+    /// # Example
+    ///
+    /// We'll parse a struct, and then parse some of Rust's `#[repr]` attribute
+    /// syntax.
+    ///
+    /// ```
+    /// # fn example() -> syn::Result<()> {
+    /// use syn::{parenthesized, parse_quote, token, ItemStruct, LitInt};
+    ///
+    /// let input: ItemStruct = parse_quote! {
+    ///     #[repr(C, align(4))]
+    ///     pub struct MyStruct(u16, u32);
+    /// };
+    ///
+    /// let mut repr_c = false;
+    /// let mut repr_transparent = false;
+    /// let mut repr_align = None::<usize>;
+    /// let mut repr_packed = None::<usize>;
+    /// for attr in &input.attrs {
+    ///     if attr.path().is_ident("repr") {
+    ///         attr.parse_nested_meta(|meta| {
+    ///             if meta.path.is_ident("C") {
+    ///                 // #[repr(C)]
+    ///                 repr_c = true;
+    ///             } else if meta.path.is_ident("transparent") {
+    ///                 // #[repr(transparent)]
+    ///                 repr_transparent = true;
+    ///             } else if meta.path.is_ident("align") {
+    ///                 // #[repr(align(N))]
+    ///                 let content;
+    ///                 parenthesized!(content in meta.input);
+    ///                 let lit: LitInt = content.parse()?;
+    ///                 let n: usize = lit.base10_parse()?;
+    ///                 repr_align = Some(n);
+    ///             } else if meta.path.is_ident("packed") {
+    ///                 // #[repr(packed)] or #[repr(packed(N))], omitted N means 1
+    ///                 if meta.input.peek(token::Paren) {
+    ///                     let content;
+    ///                     parenthesized!(content in meta.input);
+    ///                     let lit: LitInt = content.parse()?;
+    ///                     let n: usize = lit.base10_parse()?;
+    ///                     repr_packed = Some(n);
+    ///                 } else {
+    ///                     repr_packed = Some(1);
+    ///                 }
+    ///             } else {
+    ///                 return Err(meta.error("unrecognized repr"));
+    ///             }
+    ///             Ok(())
+    ///         })?;
+    ///     }
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    pub fn parse_nested_meta(
+        &self,
+        logic: impl FnMut(ParseNestedMeta) -> Result<()>,
+    ) -> Result<()> {
+        self.parse_args_with(meta::parser(logic))
     }
 
     /// Parses zero or more outer attributes from the stream.

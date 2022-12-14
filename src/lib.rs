@@ -405,6 +405,13 @@ mod mac;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::mac::{Macro, MacroDelimiter};
 
+#[cfg(all(feature = "parsing", any(feature = "full", feature = "derive")))]
+#[cfg_attr(
+    doc_cfg,
+    doc(cfg(all(feature = "parsing", any(feature = "full", feature = "derive"))))
+)]
+pub mod meta;
+
 #[cfg(any(feature = "full", feature = "derive"))]
 mod op;
 #[cfg(any(feature = "full", feature = "derive"))]
