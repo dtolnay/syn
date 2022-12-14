@@ -40,15 +40,18 @@ fn test_struct() {
         attrs: [
             Attribute {
                 style: Outer,
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "derive",
-                            arguments: None,
-                        },
-                    ],
+                meta: Meta::List {
+                    path: Path {
+                        segments: [
+                            PathSegment {
+                                ident: "derive",
+                                arguments: None,
+                            },
+                        ],
+                    },
+                    delimiter: Paren,
+                    tokens: TokenStream(`Debug , Clone`),
                 },
-                tokens: TokenStream(`(Debug , Clone)`),
             },
         ],
         vis: Visibility::Public,
@@ -106,7 +109,7 @@ fn test_struct() {
     }
     "###);
 
-    snapshot!(input.attrs[0].parse_meta().unwrap(), @r###"
+    snapshot!(&input.attrs[0].meta, @r###"
     Meta::List {
         path: Path {
             segments: [
@@ -116,24 +119,8 @@ fn test_struct() {
                 },
             ],
         },
-        nested: [
-            Meta(Path(Path {
-                segments: [
-                    PathSegment {
-                        ident: "Debug",
-                        arguments: None,
-                    },
-                ],
-            })),
-            Meta(Path(Path {
-                segments: [
-                    PathSegment {
-                        ident: "Clone",
-                        arguments: None,
-                    },
-                ],
-            })),
-        ],
+        delimiter: Paren,
+        tokens: TokenStream(`Debug , Clone`),
     }
     "###);
 }
@@ -213,27 +200,30 @@ fn test_enum() {
         attrs: [
             Attribute {
                 style: Outer,
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "doc",
-                            arguments: None,
-                        },
-                    ],
+                meta: Meta::NameValue {
+                    path: Path {
+                        segments: [
+                            PathSegment {
+                                ident: "doc",
+                                arguments: None,
+                            },
+                        ],
+                    },
+                    value: Expr::Lit {
+                        lit: " See the std::result module documentation for details.",
+                    },
                 },
-                tokens: TokenStream(`= r" See the std::result module documentation for details."`),
             },
             Attribute {
                 style: Outer,
-                path: Path {
+                meta: Path(Path {
                     segments: [
                         PathSegment {
                             ident: "must_use",
                             arguments: None,
                         },
                     ],
-                },
-                tokens: TokenStream(``),
+                }),
             },
         ],
         vis: Visibility::Public,
@@ -323,11 +313,7 @@ fn test_enum() {
     }
     "###);
 
-    let meta_items: Vec<_> = input
-        .attrs
-        .into_iter()
-        .map(|attr| attr.parse_meta().unwrap())
-        .collect();
+    let meta_items: Vec<_> = input.attrs.into_iter().map(|attr| attr.meta).collect();
 
     snapshot!(meta_items, @r###"
     [
@@ -340,7 +326,9 @@ fn test_enum() {
                     },
                 ],
             },
-            lit: " See the std::result module documentation for details.",
+            value: Expr::Lit {
+                lit: " See the std::result module documentation for details.",
+            },
         },
         Path(Path {
             segments: [
@@ -355,81 +343,13 @@ fn test_enum() {
 }
 
 #[test]
-fn test_attr_with_path() {
-    let input = quote! {
-        #[::attr_args::identity
-            fn main() { assert_eq!(foo(), "Hello, world!"); }]
-        struct Dummy;
-    };
-
-    snapshot!(input as DeriveInput, @r###"
-    DeriveInput {
-        attrs: [
-            Attribute {
-                style: Outer,
-                path: Path {
-                    leading_colon: Some,
-                    segments: [
-                        PathSegment {
-                            ident: "attr_args",
-                            arguments: None,
-                        },
-                        PathSegment {
-                            ident: "identity",
-                            arguments: None,
-                        },
-                    ],
-                },
-                tokens: TokenStream(`fn main () { assert_eq ! (foo () , "Hello, world!") ; }`),
-            },
-        ],
-        vis: Inherited,
-        ident: "Dummy",
-        generics: Generics,
-        data: Data::Struct {
-            fields: Unit,
-            semi_token: Some,
-        },
-    }
-    "###);
-
-    assert!(input.attrs[0].parse_meta().is_err());
-}
-
-#[test]
 fn test_attr_with_non_mod_style_path() {
     let input = quote! {
         #[inert <T>]
         struct S;
     };
 
-    snapshot!(input as DeriveInput, @r###"
-    DeriveInput {
-        attrs: [
-            Attribute {
-                style: Outer,
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "inert",
-                            arguments: None,
-                        },
-                    ],
-                },
-                tokens: TokenStream(`< T >`),
-            },
-        ],
-        vis: Inherited,
-        ident: "S",
-        generics: Generics,
-        data: Data::Struct {
-            fields: Unit,
-            semi_token: Some,
-        },
-    }
-    "###);
-
-    assert!(input.attrs[0].parse_meta().is_err());
+    syn::parse2::<DeriveInput>(input).unwrap_err();
 }
 
 #[test]
@@ -444,7 +364,7 @@ fn test_attr_with_mod_style_path_with_self() {
         attrs: [
             Attribute {
                 style: Outer,
-                path: Path {
+                meta: Path(Path {
                     segments: [
                         PathSegment {
                             ident: "foo",
@@ -455,8 +375,7 @@ fn test_attr_with_mod_style_path_with_self() {
                             arguments: None,
                         },
                     ],
-                },
-                tokens: TokenStream(``),
+                }),
             },
         ],
         vis: Inherited,
@@ -469,7 +388,7 @@ fn test_attr_with_mod_style_path_with_self() {
     }
     "###);
 
-    snapshot!(input.attrs[0].parse_meta().unwrap(), @r###"
+    snapshot!(&input.attrs[0].meta, @r###"
     Path(Path {
         segments: [
             PathSegment {

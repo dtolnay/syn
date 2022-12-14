@@ -61,8 +61,7 @@ impl Debug for Attribute {
         formatter.field("pound_token", &self.pound_token);
         formatter.field("style", &self.style);
         formatter.field("bracket_token", &self.bracket_token);
-        formatter.field("path", &self.path);
-        formatter.field("tokens", &self.tokens);
+        formatter.field("meta", &self.meta);
         formatter.finish()
     }
 }
@@ -1949,8 +1948,8 @@ impl Debug for MetaList {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("MetaList");
         formatter.field("path", &self.path);
-        formatter.field("paren_token", &self.paren_token);
-        formatter.field("nested", &self.nested);
+        formatter.field("delimiter", &self.delimiter);
+        formatter.field("tokens", &self.tokens);
         formatter.finish()
     }
 }
@@ -1961,7 +1960,7 @@ impl Debug for MetaNameValue {
         let mut formatter = formatter.debug_struct("MetaNameValue");
         formatter.field("path", &self.path);
         formatter.field("eq_token", &self.eq_token);
-        formatter.field("lit", &self.lit);
+        formatter.field("value", &self.value);
         formatter.finish()
     }
 }
@@ -1975,24 +1974,6 @@ impl Debug for MethodTurbofish {
         formatter.field("args", &self.args);
         formatter.field("gt_token", &self.gt_token);
         formatter.finish()
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for NestedMeta {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            NestedMeta::Meta(v0) => {
-                let mut formatter = formatter.debug_tuple("Meta");
-                formatter.field(v0);
-                formatter.finish()
-            }
-            NestedMeta::Lit(v0) => {
-                let mut formatter = formatter.debug_tuple("Lit");
-                formatter.field(v0);
-                formatter.finish()
-            }
-        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

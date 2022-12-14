@@ -57,8 +57,7 @@ impl Clone for Attribute {
             pound_token: self.pound_token.clone(),
             style: self.style.clone(),
             bracket_token: self.bracket_token.clone(),
-            path: self.path.clone(),
-            tokens: self.tokens.clone(),
+            meta: self.meta.clone(),
         }
     }
 }
@@ -1407,8 +1406,8 @@ impl Clone for MetaList {
     fn clone(&self) -> Self {
         MetaList {
             path: self.path.clone(),
-            paren_token: self.paren_token.clone(),
-            nested: self.nested.clone(),
+            delimiter: self.delimiter.clone(),
+            tokens: self.tokens.clone(),
         }
     }
 }
@@ -1419,7 +1418,7 @@ impl Clone for MetaNameValue {
         MetaNameValue {
             path: self.path.clone(),
             eq_token: self.eq_token.clone(),
-            lit: self.lit.clone(),
+            value: self.value.clone(),
         }
     }
 }
@@ -1432,16 +1431,6 @@ impl Clone for MethodTurbofish {
             lt_token: self.lt_token.clone(),
             args: self.args.clone(),
             gt_token: self.gt_token.clone(),
-        }
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for NestedMeta {
-    fn clone(&self) -> Self {
-        match self {
-            NestedMeta::Meta(v0) => NestedMeta::Meta(v0.clone()),
-            NestedMeta::Lit(v0) => NestedMeta::Lit(v0.clone()),
         }
     }
 }

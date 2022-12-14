@@ -56,8 +56,7 @@ impl Eq for Attribute {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for Attribute {
     fn eq(&self, other: &Self) -> bool {
-        self.style == other.style && self.path == other.path
-            && TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
+        self.style == other.style && self.meta == other.meta
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1336,7 +1335,8 @@ impl Eq for MetaList {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for MetaList {
     fn eq(&self, other: &Self) -> bool {
-        self.path == other.path && self.nested == other.nested
+        self.path == other.path && self.delimiter == other.delimiter
+            && TokenStreamHelper(&self.tokens) == TokenStreamHelper(&other.tokens)
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1346,7 +1346,7 @@ impl Eq for MetaNameValue {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for MetaNameValue {
     fn eq(&self, other: &Self) -> bool {
-        self.path == other.path && self.lit == other.lit
+        self.path == other.path && self.value == other.value
     }
 }
 #[cfg(feature = "full")]
@@ -1357,20 +1357,6 @@ impl Eq for MethodTurbofish {}
 impl PartialEq for MethodTurbofish {
     fn eq(&self, other: &Self) -> bool {
         self.args == other.args
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for NestedMeta {}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for NestedMeta {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (NestedMeta::Meta(self0), NestedMeta::Meta(other0)) => self0 == other0,
-            (NestedMeta::Lit(self0), NestedMeta::Lit(other0)) => self0 == other0,
-            _ => false,
-        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

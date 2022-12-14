@@ -349,7 +349,10 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 /// form of the resulting expression.
 fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
     use syn::fold::{fold_expr, fold_generic_argument, fold_generic_method_argument, Fold};
-    use syn::{token, Expr, ExprParen, GenericArgument, GenericMethodArgument, Pat, Stmt, Type};
+    use syn::{
+        token, Expr, ExprParen, GenericArgument, GenericMethodArgument, MetaNameValue, Pat, Stmt,
+        Type,
+    };
 
     struct ParenthesizeEveryExpr;
     impl Fold for ParenthesizeEveryExpr {
@@ -399,6 +402,11 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
                 Stmt::Expr(e, semi) => Stmt::Expr(fold_expr(self, e), semi),
                 s => s,
             }
+        }
+
+        fn fold_meta_name_value(&mut self, meta: MetaNameValue) -> MetaNameValue {
+            // Don't turn #[p = "..."] into #[p = ("...")].
+            meta
         }
 
         // We don't want to look at expressions that might appear in patterns or

@@ -130,11 +130,8 @@
         "bracket_token": {
           "group": "Bracket"
         },
-        "path": {
-          "syn": "Path"
-        },
-        "tokens": {
-          "proc_macro2": "TokenStream"
+        "meta": {
+          "syn": "Meta"
         }
       }
     },
@@ -3545,16 +3542,11 @@
         "path": {
           "syn": "Path"
         },
-        "paren_token": {
-          "group": "Paren"
+        "delimiter": {
+          "syn": "MacroDelimiter"
         },
-        "nested": {
-          "punctuated": {
-            "element": {
-              "syn": "NestedMeta"
-            },
-            "punct": "Comma"
-          }
+        "tokens": {
+          "proc_macro2": "TokenStream"
         }
       }
     },
@@ -3573,8 +3565,8 @@
         "eq_token": {
           "token": "Eq"
         },
-        "lit": {
-          "syn": "Lit"
+        "value": {
+          "syn": "Expr"
         }
       }
     },
@@ -3603,27 +3595,6 @@
         "gt_token": {
           "token": "Gt"
         }
-      }
-    },
-    {
-      "ident": "NestedMeta",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "variants": {
-        "Meta": [
-          {
-            "syn": "Meta"
-          }
-        ],
-        "Lit": [
-          {
-            "syn": "Lit"
-          }
-        ]
       }
     },
     {

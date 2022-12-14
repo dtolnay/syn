@@ -1,21 +1,18 @@
 use super::*;
-use crate::punctuated::Punctuated;
 use proc_macro2::TokenStream;
 use std::iter;
 use std::slice;
 
 #[cfg(feature = "parsing")]
-use crate::parse::{Parse, ParseBuffer, ParseStream, Parser, Result};
-#[cfg(feature = "parsing")]
-use crate::punctuated::Pair;
+use crate::parse::{Parse, ParseStream, Parser, Result};
 #[cfg(feature = "parsing")]
 use std::fmt::Write;
 
 ast_struct! {
-    /// An attribute like `#[repr(transparent)]`.
+    /// An attribute, like `#[repr(transparent)]`.
     ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
+    /// *This type is available only if Syn is built with the `"derive"` or
+    /// `"full"` feature.*
     ///
     /// <br>
     ///
@@ -25,27 +22,52 @@ ast_struct! {
     ///
     /// - Outer attributes like `#[repr(transparent)]`. These appear outside or
     ///   in front of the item they describe.
+    ///
     /// - Inner attributes like `#![feature(proc_macro)]`. These appear inside
     ///   of the item they describe, usually a module.
-    /// - Outer doc comments like `/// # Example`.
-    /// - Inner doc comments like `//! Please file an issue`.
-    /// - Outer block comments `/** # Example */`.
-    /// - Inner block comments `/*! Please file an issue */`.
+    ///
+    /// - Outer one-line doc comments like `/// Example`.
+    ///
+    /// - Inner one-line doc comments like `//! Please file an issue`.
+    ///
+    /// - Outer documentation blocks `/** Example */`.
+    ///
+    /// - Inner documentation blocks `/*! Please file an issue */`.
     ///
     /// The `style` field of type `AttrStyle` distinguishes whether an attribute
-    /// is outer or inner. Doc comments and block comments are promoted to
-    /// attributes, as this is how they are processed by the compiler and by
+    /// is outer or inner.
+    ///
+    /// Every attribute has a `path` that indicates the intended interpretation
+    /// of the rest of the attribute's contents. The path and the optional
+    /// additional contents are represented together in the `meta` field of the
+    /// attribute in three possible varieties:
+    ///
+    /// - Meta::Path &mdash; attributes whose information content conveys just a
+    ///   path, for example the `#[test]` attribute.
+    ///
+    /// - Meta::List &mdash; attributes that carry arbitrary tokens after the
+    ///   path, surrounded by a delimiter (parenthesis, bracket, or brace). For
+    ///   example `#[derive(Copy)]` or `#[precondition(x < 5)]`.
+    ///
+    /// - Meta::NameValue &mdash; attributes with an `=` sign after the path,
+    ///   followed by a Rust expression. For example `#[path =
+    ///   "sys/windows.rs"]`.
+    ///
+    /// All doc comments are represented in the NameValue style with a path of
+    /// "doc", as this is how they are processed by the compiler and by
     /// `macro_rules!` macros.
     ///
-    /// The `path` field gives the possibly colon-delimited path against which
-    /// the attribute is resolved. It is equal to `"doc"` for desugared doc
-    /// comments. The `tokens` field contains the rest of the attribute body as
-    /// tokens.
-    ///
     /// ```text
-    /// #[derive(Copy)]      #[crate::precondition x < 5]
-    ///   ^^^^^^~~~~~~         ^^^^^^^^^^^^^^^^^^^ ~~~~~
-    ///   path  tokens                 path        tokens
+    /// #[derive(Copy, Clone)]
+    ///   ~~~~~~Path
+    ///   ^^^^^^^^^^^^^^^^^^^Meta::List
+    ///
+    /// #[path = "sys/windows.rs"]
+    ///   ~~~~Path
+    ///   ^^^^^^^^^^^^^^^^^^^^^^^Meta::NameValue
+    ///
+    /// #[test]
+    ///   ^^^^Meta::Path
     /// ```
     ///
     /// <br>
@@ -95,18 +117,13 @@ ast_struct! {
     ///
     /// The grammar of attributes in Rust is very flexible, which makes the
     /// syntax tree not that useful on its own. In particular, arguments of the
-    /// attribute are held in an arbitrary `tokens: TokenStream`. Macros are
-    /// expected to check the `path` of the attribute, decide whether they
-    /// recognize it, and then parse the remaining tokens according to whatever
-    /// grammar they wish to require for that kind of attribute.
+    /// `Meta::List` variety of attribute are held in an arbitrary `tokens:
+    /// TokenStream`. Macros are expected to check the `path` of the attribute,
+    /// decide whether they recognize it, and then parse the remaining tokens
+    /// according to whatever grammar they wish to require for that kind of
+    /// attribute. Use [`parse_args()`] to parse those tokens into the expected
+    /// data structure.
     ///
-    /// If the attribute you are parsing is expected to conform to the
-    /// conventional structured form of attribute, use [`parse_meta()`] to
-    /// obtain that structured representation. If the attribute follows some
-    /// other grammar of its own, use [`parse_args()`] to parse that into the
-    /// expected data structure.
-    ///
-    /// [`parse_meta()`]: Attribute::parse_meta
     /// [`parse_args()`]: Attribute::parse_args
     ///
     /// <p><br></p>
@@ -152,48 +169,17 @@ ast_struct! {
         pub pound_token: Token![#],
         pub style: AttrStyle,
         pub bracket_token: token::Bracket,
-        pub path: Path,
-        pub tokens: TokenStream,
+        pub meta: Meta,
     }
 }
 
 impl Attribute {
-    /// Parses the content of the attribute, consisting of the path and tokens,
-    /// as a [`Meta`] if possible.
+    /// Returns the path that identifies the interpretation of this attribute.
     ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
-    #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-    pub fn parse_meta(&self) -> Result<Meta> {
-        fn clone_ident_segment(segment: &PathSegment) -> PathSegment {
-            PathSegment {
-                ident: segment.ident.clone(),
-                arguments: PathArguments::None,
-            }
-        }
-
-        let path = Path {
-            leading_colon: self
-                .path
-                .leading_colon
-                .as_ref()
-                .map(|colon| Token![::](colon.spans)),
-            segments: self
-                .path
-                .segments
-                .pairs()
-                .map(|pair| match pair {
-                    Pair::Punctuated(seg, punct) => {
-                        Pair::Punctuated(clone_ident_segment(seg), Token![::](punct.spans))
-                    }
-                    Pair::End(seg) => Pair::End(clone_ident_segment(seg)),
-                })
-                .collect(),
-        };
-
-        let parser = |input: ParseStream| parsing::parse_meta_after_path(path, input);
-        parse::Parser::parse2(parser, self.tokens.clone())
+    /// For example this would return the `test` in `#[test]`, the `derive` in
+    /// `#[derive(Copy)]`, and the `path` in `#[path = "sys/windows.rs"]`.
+    pub fn path(&self) -> &Path {
+        self.meta.path()
     }
 
     /// Parse the arguments to the attribute as a syntax tree.
@@ -224,11 +210,23 @@ impl Attribute {
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_args_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
-        let parser = |input: ParseStream| {
-            let args = enter_args(self, input)?;
-            parse::parse_stream(parser, &args)
-        };
-        parser.parse2(self.tokens.clone())
+        match &self.meta {
+            Meta::Path(path) => {
+                let expected = expected_parentheses(&self.style, path);
+                let msg = format!("expected attribute arguments in parentheses: {}", expected);
+                Err(crate::error::new2(
+                    self.pound_token.span,
+                    self.bracket_token.span,
+                    msg,
+                ))
+            }
+            Meta::NameValue(meta) => {
+                let expected = expected_parentheses(&self.style, &meta.path);
+                let msg = format!("expected parentheses: {}", expected);
+                Err(Error::new(meta.eq_token.span, msg))
+            }
+            Meta::List(meta) => parser.parse2(meta.tokens.clone()),
+        }
     }
 
     /// Parses zero or more outer attributes from the stream.
@@ -259,55 +257,23 @@ impl Attribute {
 }
 
 #[cfg(feature = "parsing")]
-fn expected_parentheses(attr: &Attribute) -> String {
+fn expected_parentheses(style: &AttrStyle, path: &Path) -> String {
     let mut suggestion = String::new();
-    match attr.style {
+    match style {
         AttrStyle::Outer => suggestion.push('#'),
         AttrStyle::Inner(_) => suggestion.push_str("#!"),
     }
     suggestion.push('[');
-    for (i, segment) in attr.path.segments.iter().enumerate() {
-        if i > 0 || attr.path.leading_colon.is_some() {
+
+    for (i, segment) in path.segments.iter().enumerate() {
+        if i > 0 || path.leading_colon.is_some() {
             suggestion.push_str("::");
         }
         write!(suggestion, "{}", segment.ident).unwrap();
     }
+
     suggestion.push_str("(...)]");
     suggestion
-}
-
-#[cfg(feature = "parsing")]
-fn enter_args<'a>(attr: &Attribute, input: ParseStream<'a>) -> Result<ParseBuffer<'a>> {
-    if input.is_empty() {
-        let expected = expected_parentheses(attr);
-        let msg = format!("expected attribute arguments in parentheses: {}", expected);
-        return Err(crate::error::new2(
-            attr.pound_token.span,
-            attr.bracket_token.span,
-            msg,
-        ));
-    } else if input.peek(Token![=]) {
-        let expected = expected_parentheses(attr);
-        let msg = format!("expected parentheses: {}", expected);
-        return Err(input.error(msg));
-    };
-
-    let content;
-    if input.peek(token::Paren) {
-        parenthesized!(content in input);
-    } else if input.peek(token::Bracket) {
-        bracketed!(content in input);
-    } else if input.peek(token::Brace) {
-        braced!(content in input);
-    } else {
-        return Err(input.error("unexpected token in attribute arguments"));
-    }
-
-    if input.is_empty() {
-        Ok(content)
-    } else {
-        Err(input.error("unexpected token in attribute arguments"))
-    }
 }
 
 ast_enum! {
@@ -379,8 +345,8 @@ ast_struct! {
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct MetaList {
         pub path: Path,
-        pub paren_token: token::Paren,
-        pub nested: Punctuated<NestedMeta, Token![,]>,
+        pub delimiter: MacroDelimiter,
+        pub tokens: TokenStream,
     }
 }
 
@@ -393,12 +359,12 @@ ast_struct! {
     pub struct MetaNameValue {
         pub path: Path,
         pub eq_token: Token![=],
-        pub lit: Lit,
+        pub value: Expr,
     }
 }
 
 impl Meta {
-    /// Returns the identifier that begins this structured meta item.
+    /// Returns the path that begins this structured meta item.
     ///
     /// For example this would return the `test` in `#[test]`, the `derive` in
     /// `#[derive(Copy)]`, and the `path` in `#[path = "sys/windows.rs"]`.
@@ -408,22 +374,6 @@ impl Meta {
             Meta::List(meta) => &meta.path,
             Meta::NameValue(meta) => &meta.path,
         }
-    }
-}
-
-ast_enum_of_structs! {
-    /// Element of a compile-time attribute list.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub enum NestedMeta {
-        /// A structured meta item, like the `Copy` in `#[derive(Copy)]` which
-        /// would be a nested `Meta::Path`.
-        Meta(Meta),
-
-        /// A Rust literal, like the `"new_name"` in `#[rename("new_name")]`.
-        Lit(Lit),
     }
 }
 
@@ -461,7 +411,6 @@ impl<'a> FilterAttrs<'a> for &'a [Attribute] {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
-    use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
 
     pub fn parse_inner(input: ParseStream, attrs: &mut Vec<Attribute>) -> Result<()> {
@@ -477,8 +426,7 @@ pub mod parsing {
             pound_token: input.parse()?,
             style: AttrStyle::Inner(input.parse()?),
             bracket_token: bracketed!(content in input),
-            path: content.call(Path::parse_mod_style)?,
-            tokens: content.parse()?,
+            meta: content.parse()?,
         })
     }
 
@@ -488,40 +436,14 @@ pub mod parsing {
             pound_token: input.parse()?,
             style: AttrStyle::Outer,
             bracket_token: bracketed!(content in input),
-            path: content.call(Path::parse_mod_style)?,
-            tokens: content.parse()?,
-        })
-    }
-
-    // Like Path::parse_mod_style but accepts keywords in the path.
-    fn parse_meta_path(input: ParseStream) -> Result<Path> {
-        Ok(Path {
-            leading_colon: input.parse()?,
-            segments: {
-                let mut segments = Punctuated::new();
-                while input.peek(Ident::peek_any) {
-                    let ident = Ident::parse_any(input)?;
-                    segments.push_value(PathSegment::from(ident));
-                    if !input.peek(Token![::]) {
-                        break;
-                    }
-                    let punct = input.parse()?;
-                    segments.push_punct(punct);
-                }
-                if segments.is_empty() {
-                    return Err(input.error("expected path"));
-                } else if segments.trailing_punct() {
-                    return Err(input.error("expected path segment"));
-                }
-                segments
-            },
+            meta: content.parse()?,
         })
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Meta {
         fn parse(input: ParseStream) -> Result<Self> {
-            let path = input.call(parse_meta_path)?;
+            let path = input.call(Path::parse_mod_style)?;
             parse_meta_after_path(path, input)
         }
     }
@@ -529,7 +451,7 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for MetaList {
         fn parse(input: ParseStream) -> Result<Self> {
-            let path = input.call(parse_meta_path)?;
+            let path = input.call(Path::parse_mod_style)?;
             parse_meta_list_after_path(path, input)
         }
     }
@@ -537,28 +459,13 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for MetaNameValue {
         fn parse(input: ParseStream) -> Result<Self> {
-            let path = input.call(parse_meta_path)?;
+            let path = input.call(Path::parse_mod_style)?;
             parse_meta_name_value_after_path(path, input)
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-    impl Parse for NestedMeta {
-        fn parse(input: ParseStream) -> Result<Self> {
-            if input.peek(Lit) && !(input.peek(LitBool) && input.peek2(Token![=])) {
-                input.parse().map(NestedMeta::Lit)
-            } else if input.peek(Ident::peek_any)
-                || input.peek(Token![::]) && input.peek3(Ident::peek_any)
-            {
-                input.parse().map(NestedMeta::Meta)
-            } else {
-                Err(input.error("expected identifier or literal"))
-            }
-        }
-    }
-
     pub fn parse_meta_after_path(path: Path, input: ParseStream) -> Result<Meta> {
-        if input.peek(token::Paren) {
+        if input.peek(token::Paren) || input.peek(token::Bracket) || input.peek(token::Brace) {
             parse_meta_list_after_path(path, input).map(Meta::List)
         } else if input.peek(Token![=]) {
             parse_meta_name_value_after_path(path, input).map(Meta::NameValue)
@@ -568,11 +475,11 @@ pub mod parsing {
     }
 
     fn parse_meta_list_after_path(path: Path, input: ParseStream) -> Result<MetaList> {
-        let content;
+        let (delimiter, tokens) = mac::parse_delimiter(input)?;
         Ok(MetaList {
             path,
-            paren_token: parenthesized!(content in input),
-            nested: content.parse_terminated(NestedMeta::parse, Token![,])?,
+            delimiter,
+            tokens,
         })
     }
 
@@ -580,7 +487,7 @@ pub mod parsing {
         Ok(MetaNameValue {
             path,
             eq_token: input.parse()?,
-            lit: input.parse()?,
+            value: input.parse()?,
         })
     }
 }
@@ -599,8 +506,7 @@ mod printing {
                 b.to_tokens(tokens);
             }
             self.bracket_token.surround(tokens, |tokens| {
-                self.path.to_tokens(tokens);
-                self.tokens.to_tokens(tokens);
+                self.meta.to_tokens(tokens);
             });
         }
     }
@@ -609,9 +515,7 @@ mod printing {
     impl ToTokens for MetaList {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.path.to_tokens(tokens);
-            self.paren_token.surround(tokens, |tokens| {
-                self.nested.to_tokens(tokens);
-            });
+            self.delimiter.surround(tokens, self.tokens.clone());
         }
     }
 
@@ -620,7 +524,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.path.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
-            self.lit.to_tokens(tokens);
+            self.value.to_tokens(tokens);
         }
     }
 }

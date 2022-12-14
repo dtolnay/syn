@@ -552,17 +552,18 @@ pub mod parsing {
         /// # Example
         ///
         /// ```
-        /// use syn::{Attribute, Error, Meta, NestedMeta, Result};
+        /// use proc_macro2::TokenStream;
+        /// use syn::{Attribute, Error, Meta, Result};
         /// # use std::iter::FromIterator;
         ///
-        /// fn get_serde_meta_items(attr: &Attribute) -> Result<Vec<NestedMeta>> {
-        ///     if attr.path.is_ident("serde") {
-        ///         match attr.parse_meta()? {
-        ///             Meta::List(meta) => Ok(Vec::from_iter(meta.nested)),
+        /// fn get_serde_meta_item(attr: &Attribute) -> Result<Option<&TokenStream>> {
+        ///     if attr.path().is_ident("serde") {
+        ///         match &attr.meta {
+        ///             Meta::List(meta) => Ok(Some(&meta.tokens)),
         ///             bad => Err(Error::new_spanned(bad, "unrecognized attribute")),
         ///         }
         ///     } else {
-        ///         Ok(Vec::new())
+        ///         Ok(None)
         ///     }
         /// }
         /// ```

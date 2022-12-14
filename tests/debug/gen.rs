@@ -105,8 +105,7 @@ impl Debug for Lite<syn::Attribute> {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("Attribute");
         formatter.field("style", Lite(&_val.style));
-        formatter.field("path", Lite(&_val.path));
-        formatter.field("tokens", Lite(&_val.tokens));
+        formatter.field("meta", Lite(&_val.meta));
         formatter.finish()
     }
 }
@@ -3582,15 +3581,14 @@ impl Debug for Lite<syn::Meta> {
             syn::Meta::List(_val) => {
                 let mut formatter = formatter.debug_struct("Meta::List");
                 formatter.field("path", Lite(&_val.path));
-                if !_val.nested.is_empty() {
-                    formatter.field("nested", Lite(&_val.nested));
-                }
+                formatter.field("delimiter", Lite(&_val.delimiter));
+                formatter.field("tokens", Lite(&_val.tokens));
                 formatter.finish()
             }
             syn::Meta::NameValue(_val) => {
                 let mut formatter = formatter.debug_struct("Meta::NameValue");
                 formatter.field("path", Lite(&_val.path));
-                formatter.field("lit", Lite(&_val.lit));
+                formatter.field("value", Lite(&_val.value));
                 formatter.finish()
             }
         }
@@ -3601,9 +3599,8 @@ impl Debug for Lite<syn::MetaList> {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("MetaList");
         formatter.field("path", Lite(&_val.path));
-        if !_val.nested.is_empty() {
-            formatter.field("nested", Lite(&_val.nested));
-        }
+        formatter.field("delimiter", Lite(&_val.delimiter));
+        formatter.field("tokens", Lite(&_val.tokens));
         formatter.finish()
     }
 }
@@ -3612,7 +3609,7 @@ impl Debug for Lite<syn::MetaNameValue> {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("MetaNameValue");
         formatter.field("path", Lite(&_val.path));
-        formatter.field("lit", Lite(&_val.lit));
+        formatter.field("value", Lite(&_val.value));
         formatter.finish()
     }
 }
@@ -3624,27 +3621,6 @@ impl Debug for Lite<syn::MethodTurbofish> {
             formatter.field("args", Lite(&_val.args));
         }
         formatter.finish()
-    }
-}
-impl Debug for Lite<syn::NestedMeta> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        match _val {
-            syn::NestedMeta::Meta(_val) => {
-                formatter.write_str("Meta")?;
-                formatter.write_str("(")?;
-                Debug::fmt(Lite(_val), formatter)?;
-                formatter.write_str(")")?;
-                Ok(())
-            }
-            syn::NestedMeta::Lit(_val) => {
-                formatter.write_str("Lit")?;
-                formatter.write_str("(")?;
-                Debug::fmt(Lite(_val), formatter)?;
-                formatter.write_str(")")?;
-                Ok(())
-            }
-        }
     }
 }
 impl Debug for Lite<syn::ParenthesizedGenericArguments> {

@@ -493,10 +493,6 @@ pub trait Visit<'ast> {
         visit_method_turbofish(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn visit_nested_meta(&mut self, i: &'ast NestedMeta) {
-        visit_nested_meta(self, i);
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_parenthesized_generic_arguments(
         &mut self,
         i: &'ast ParenthesizedGenericArguments,
@@ -845,8 +841,7 @@ where
     tokens_helper(v, &node.pound_token.spans);
     v.visit_attr_style(&node.style);
     tokens_helper(v, &node.bracket_token.span);
-    v.visit_path(&node.path);
-    skip!(node.tokens);
+    v.visit_meta(&node.meta);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_bare_fn_arg<'ast, V>(v: &mut V, node: &'ast BareFnArg)
@@ -2684,14 +2679,8 @@ where
     V: Visit<'ast> + ?Sized,
 {
     v.visit_path(&node.path);
-    tokens_helper(v, &node.paren_token.span);
-    for el in Punctuated::pairs(&node.nested) {
-        let (it, p) = el.into_tuple();
-        v.visit_nested_meta(it);
-        if let Some(p) = p {
-            tokens_helper(v, &p.spans);
-        }
-    }
+    v.visit_macro_delimiter(&node.delimiter);
+    skip!(node.tokens);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_meta_name_value<'ast, V>(v: &mut V, node: &'ast MetaNameValue)
@@ -2700,7 +2689,7 @@ where
 {
     v.visit_path(&node.path);
     tokens_helper(v, &node.eq_token.spans);
-    v.visit_lit(&node.lit);
+    v.visit_expr(&node.value);
 }
 #[cfg(feature = "full")]
 pub fn visit_method_turbofish<'ast, V>(v: &mut V, node: &'ast MethodTurbofish)
@@ -2717,20 +2706,6 @@ where
         }
     }
     tokens_helper(v, &node.gt_token.spans);
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-pub fn visit_nested_meta<'ast, V>(v: &mut V, node: &'ast NestedMeta)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    match node {
-        NestedMeta::Meta(_binding_0) => {
-            v.visit_meta(_binding_0);
-        }
-        NestedMeta::Lit(_binding_0) => {
-            v.visit_lit(_binding_0);
-        }
-    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_parenthesized_generic_arguments<'ast, V>(
