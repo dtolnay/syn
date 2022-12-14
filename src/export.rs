@@ -8,7 +8,7 @@ pub use std::option::Option::{None, Some};
 pub use std::result::Result::{Err, Ok};
 
 #[cfg(feature = "printing")]
-pub extern crate quote;
+pub use quote;
 
 pub use proc_macro2::{Span, TokenStream as TokenStream2};
 

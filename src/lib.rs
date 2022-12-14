@@ -295,10 +295,6 @@
     feature = "proc-macro"
 ))]
 extern crate proc_macro;
-extern crate proc_macro2;
-
-#[cfg(feature = "printing")]
-extern crate quote;
 
 #[macro_use]
 mod macros;
