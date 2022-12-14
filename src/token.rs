@@ -102,13 +102,13 @@ use crate::lookahead;
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream};
 use crate::span::IntoSpans;
-#[cfg(any(feature = "parsing", feature = "printing"))]
-use proc_macro2::Ident;
 use proc_macro2::Span;
 #[cfg(feature = "printing")]
 use proc_macro2::TokenStream;
+#[cfg(any(feature = "parsing", feature = "printing"))]
+use proc_macro2::{Delimiter, Ident};
 #[cfg(feature = "parsing")]
-use proc_macro2::{Delimiter, Literal, Punct, TokenTree};
+use proc_macro2::{Literal, Punct, TokenTree};
 #[cfg(feature = "printing")]
 use quote::{ToTokens, TokenStreamExt};
 #[cfg(feature = "extra-traits")]
@@ -476,7 +476,7 @@ macro_rules! define_punctuation {
 }
 
 macro_rules! define_delimiters {
-    ($($token:tt pub struct $name:ident #[$doc:meta])*) => {
+    ($($delim:ident pub struct $name:ident #[$doc:meta])*) => {
         $(
             #[$doc]
             pub struct $name {
@@ -543,7 +543,9 @@ macro_rules! define_delimiters {
                 where
                     F: FnOnce(&mut TokenStream),
                 {
-                    printing::delim($token, self.span, tokens, f);
+                    let mut inner = TokenStream::new();
+                    f(&mut inner);
+                    printing::delim(Delimiter::$delim, self.span, tokens, inner);
                 }
             }
 
@@ -754,10 +756,10 @@ define_punctuation! {
 }
 
 define_delimiters! {
-    "{"           pub struct Brace        /// `{...}`
-    "["           pub struct Bracket      /// `[...]`
-    "("           pub struct Paren        /// `(...)`
-    " "           pub struct Group        /// None-delimited group
+    Brace         pub struct Brace        /// `{...}`
+    Bracket       pub struct Bracket      /// `[...]`
+    Parenthesis   pub struct Paren        /// `(...)`
+    None          pub struct Group        /// None-delimited group
 }
 
 macro_rules! export_token_macro {
@@ -993,19 +995,7 @@ pub mod printing {
         tokens.append(Ident::new(s, span));
     }
 
-    pub fn delim<F>(s: &str, span: Span, tokens: &mut TokenStream, f: F)
-    where
-        F: FnOnce(&mut TokenStream),
-    {
-        let delim = match s {
-            "(" => Delimiter::Parenthesis,
-            "[" => Delimiter::Bracket,
-            "{" => Delimiter::Brace,
-            " " => Delimiter::None,
-            _ => panic!("unknown delimiter: {}", s),
-        };
-        let mut inner = TokenStream::new();
-        f(&mut inner);
+    pub fn delim(delim: Delimiter, span: Span, tokens: &mut TokenStream, inner: TokenStream) {
         let mut g = Group::new(delim, inner);
         g.set_span(span);
         tokens.append(g);
