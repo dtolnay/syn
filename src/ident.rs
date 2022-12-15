@@ -9,6 +9,7 @@ use crate::token::Token;
 
 pub use proc_macro2::Ident;
 
+#[cfg(not(doc))] // rustdoc bug: https://github.com/rust-lang/rust/issues/105735
 #[cfg(feature = "parsing")]
 #[doc(hidden)]
 #[allow(non_snake_case)]
