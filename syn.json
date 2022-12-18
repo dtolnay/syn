@@ -3449,7 +3449,7 @@
               },
               {
                 "box": {
-                  "syn": "ExprBlock"
+                  "syn": "Expr"
                 }
               }
             ]

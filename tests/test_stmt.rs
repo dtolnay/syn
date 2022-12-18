@@ -134,7 +134,7 @@ fn test_let_else() {
                     ],
                 },
             },
-            else_block: Some(ExprBlock {
+            else_block: Some(Expr::Block {
                 block: Block {
                     stmts: [
                         Expr(

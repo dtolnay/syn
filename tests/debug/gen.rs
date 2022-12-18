@@ -3525,7 +3525,7 @@ impl Debug for Lite<syn::LocalInit> {
         if let Some(val) = &_val.else_block {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print((syn::token::Else, Box<syn::ExprBlock>));
+            struct Print((syn::token::Else, Box<syn::Expr>));
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some")?;

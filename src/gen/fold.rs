@@ -2367,7 +2367,7 @@ where
         else_block: (node.else_block)
             .map(|it| (
                 Token![else](tokens_helper(f, &(it).0.span)),
-                Box::new(f.fold_expr_block(*(it).1)),
+                Box::new(f.fold_expr(*(it).1)),
             )),
     }
 }

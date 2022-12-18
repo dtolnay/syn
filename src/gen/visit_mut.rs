@@ -2627,7 +2627,7 @@ where
     v.visit_expr_mut(&mut *node.expr);
     if let Some(it) = &mut node.else_block {
         tokens_helper(v, &mut (it).0.span);
-        v.visit_expr_block_mut(&mut *(it).1);
+        v.visit_expr_mut(&mut *(it).1);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

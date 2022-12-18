@@ -2627,7 +2627,7 @@ where
     v.visit_expr(&*node.expr);
     if let Some(it) = &node.else_block {
         tokens_helper(v, &(it).0.span);
-        v.visit_expr_block(&*(it).1);
+        v.visit_expr(&*(it).1);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

@@ -54,7 +54,7 @@ ast_struct! {
     pub struct LocalInit {
         pub eq_token: Token![=],
         pub expr: Box<Expr>,
-        pub else_block: Option<(Token![else], Box<ExprBlock>)>,
+        pub else_block: Option<(Token![else], Box<Expr>)>,
     }
 }
 
@@ -263,7 +263,7 @@ pub mod parsing {
             let else_block = if input.peek(Token![else]) {
                 let else_token = input.parse::<Token![else]>()?;
                 let expr_block = input.parse::<ExprBlock>()?;
-                Some((else_token, Box::new(expr_block)))
+                Some((else_token, Box::new(Expr::Block(expr_block))))
             } else {
                 None
             };
