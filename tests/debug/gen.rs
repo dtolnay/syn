@@ -3522,7 +3522,7 @@ impl Debug for Lite<syn::LocalInit> {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("LocalInit");
         formatter.field("expr", Lite(&_val.expr));
-        if let Some(val) = &_val.else_block {
+        if let Some(val) = &_val.diverge {
             #[derive(RefCast)]
             #[repr(transparent)]
             struct Print((syn::token::Else, Box<syn::Expr>));
@@ -3536,7 +3536,7 @@ impl Debug for Lite<syn::LocalInit> {
                     Ok(())
                 }
             }
-            formatter.field("else_block", Print::ref_cast(val));
+            formatter.field("diverge", Print::ref_cast(val));
         }
         formatter.finish()
     }

@@ -2625,7 +2625,7 @@ where
 {
     tokens_helper(v, &node.eq_token.spans);
     v.visit_expr(&*node.expr);
-    if let Some(it) = &node.else_block {
+    if let Some(it) = &node.diverge {
         tokens_helper(v, &(it).0.span);
         v.visit_expr(&*(it).1);
     }

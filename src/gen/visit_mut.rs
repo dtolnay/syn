@@ -2625,7 +2625,7 @@ where
 {
     tokens_helper(v, &mut node.eq_token.spans);
     v.visit_expr_mut(&mut *node.expr);
-    if let Some(it) = &mut node.else_block {
+    if let Some(it) = &mut node.diverge {
         tokens_helper(v, &mut (it).0.span);
         v.visit_expr_mut(&mut *(it).1);
     }

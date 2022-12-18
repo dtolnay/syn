@@ -1873,7 +1873,7 @@ impl Debug for LocalInit {
         let mut formatter = formatter.debug_struct("LocalInit");
         formatter.field("eq_token", &self.eq_token);
         formatter.field("expr", &self.expr);
-        formatter.field("else_block", &self.else_block);
+        formatter.field("diverge", &self.diverge);
         formatter.finish()
     }
 }

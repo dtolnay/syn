@@ -1294,7 +1294,7 @@ impl Eq for LocalInit {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for LocalInit {
     fn eq(&self, other: &Self) -> bool {
-        self.expr == other.expr && self.else_block == other.else_block
+        self.expr == other.expr && self.diverge == other.diverge
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

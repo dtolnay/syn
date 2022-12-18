@@ -1363,7 +1363,7 @@ impl Clone for LocalInit {
         LocalInit {
             eq_token: self.eq_token.clone(),
             expr: self.expr.clone(),
-            else_block: self.else_block.clone(),
+            diverge: self.diverge.clone(),
         }
     }
 }

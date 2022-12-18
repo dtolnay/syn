@@ -1742,7 +1742,7 @@ impl Hash for LocalInit {
         H: Hasher,
     {
         self.expr.hash(state);
-        self.else_block.hash(state);
+        self.diverge.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

@@ -54,7 +54,7 @@ ast_struct! {
     pub struct LocalInit {
         pub eq_token: Token![=],
         pub expr: Box<Expr>,
-        pub else_block: Option<(Token![else], Box<Expr>)>,
+        pub diverge: Option<(Token![else], Box<Expr>)>,
     }
 }
 
@@ -260,7 +260,7 @@ pub mod parsing {
             let eq_token: Token![=] = input.parse()?;
             let init: Expr = input.parse()?;
 
-            let else_block = if input.peek(Token![else]) {
+            let diverge = if input.peek(Token![else]) {
                 let else_token = input.parse::<Token![else]>()?;
                 let expr_block = input.parse::<ExprBlock>()?;
                 Some((else_token, Box::new(Expr::Block(expr_block))))
@@ -271,7 +271,7 @@ pub mod parsing {
             Some(LocalInit {
                 eq_token,
                 expr: Box::new(init),
-                else_block,
+                diverge,
             })
         } else {
             None
@@ -365,9 +365,9 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.eq_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
-            if let Some((else_token, expr_block)) = &self.else_block {
+            if let Some((else_token, diverge)) = &self.diverge {
                 else_token.to_tokens(tokens);
-                expr_block.to_tokens(tokens);
+                diverge.to_tokens(tokens);
             }
         }
     }

@@ -3441,7 +3441,7 @@
             "syn": "Expr"
           }
         },
-        "else_block": {
+        "diverge": {
           "option": {
             "tuple": [
               {

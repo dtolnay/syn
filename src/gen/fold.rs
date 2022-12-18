@@ -2364,7 +2364,7 @@ where
     LocalInit {
         eq_token: Token![=](tokens_helper(f, &node.eq_token.spans)),
         expr: Box::new(f.fold_expr(*node.expr)),
-        else_block: (node.else_block)
+        diverge: (node.diverge)
             .map(|it| (
                 Token![else](tokens_helper(f, &(it).0.span)),
                 Box::new(f.fold_expr(*(it).1)),
