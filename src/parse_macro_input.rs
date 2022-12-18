@@ -40,7 +40,7 @@
 ///     let input = parse_macro_input!(tokens as MyMacroInput);
 ///
 ///     /* ... */
-/// #   "".parse().unwrap()
+/// #   TokenStream::new()
 /// }
 /// ```
 ///
@@ -76,7 +76,7 @@
 ///     let input = parse_macro_input!(tokens with MyMacroInput::parse_alternate);
 ///
 ///     /* ... */
-/// #   "".parse().unwrap()
+/// #   TokenStream::new()
 /// }
 /// ```
 ///

@@ -84,7 +84,7 @@
 //!     let input = parse_macro_input!(tokens as Item);
 //!
 //!     /* ... */
-//! #   "".parse().unwrap()
+//! #   TokenStream::new()
 //! }
 //! ```
 //!
@@ -1304,7 +1304,7 @@ pub(crate) fn parse_scoped<F: Parser>(f: F, scope: Span, tokens: TokenStream) ->
 ///     parse_macro_input!(args as Nothing);
 ///
 ///     /* ... */
-/// #   "".parse().unwrap()
+/// #   TokenStream::new()
 /// }
 /// ```
 ///
