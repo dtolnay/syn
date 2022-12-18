@@ -1356,6 +1356,17 @@ impl Clone for Local {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for LocalInitializer {
+    fn clone(&self) -> Self {
+        LocalInitializer {
+            eq_token: self.eq_token.clone(),
+            expr: self.expr.clone(),
+            else_block: self.else_block.clone(),
+        }
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for Macro {

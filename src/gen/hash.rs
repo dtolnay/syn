@@ -1734,6 +1734,17 @@ impl Hash for Local {
         self.init.hash(state);
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for LocalInitializer {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.expr.hash(state);
+        self.else_block.hash(state);
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for Macro {
