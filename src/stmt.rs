@@ -360,21 +360,14 @@ mod printing {
             self.let_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
             if let Some(init) = &self.init {
-                init.to_tokens(tokens);
+                init.eq_token.to_tokens(tokens);
+                init.expr.to_tokens(tokens);
+                if let Some((else_token, diverge)) = &init.diverge {
+                    else_token.to_tokens(tokens);
+                    diverge.to_tokens(tokens);
+                }
             }
             self.semi_token.to_tokens(tokens);
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for LocalInit {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.eq_token.to_tokens(tokens);
-            self.expr.to_tokens(tokens);
-            if let Some((else_token, diverge)) = &self.diverge {
-                else_token.to_tokens(tokens);
-                diverge.to_tokens(tokens);
-            }
         }
     }
 }
