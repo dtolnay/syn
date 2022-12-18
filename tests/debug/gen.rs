@@ -3501,7 +3501,7 @@ impl Debug for Lite<syn::Local> {
         if let Some(val) = &_val.init {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print(syn::LocalInitializer);
+            struct Print(syn::LocalInit);
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some")?;
@@ -3517,10 +3517,10 @@ impl Debug for Lite<syn::Local> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::LocalInitializer> {
+impl Debug for Lite<syn::LocalInit> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
-        let mut formatter = formatter.debug_struct("LocalInitializer");
+        let mut formatter = formatter.debug_struct("LocalInit");
         formatter.field("expr", Lite(&_val.expr));
         if let Some(val) = &_val.else_block {
             #[derive(RefCast)]

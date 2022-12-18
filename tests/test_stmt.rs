@@ -15,7 +15,7 @@ fn test_raw_operator() {
     snapshot!(stmt, @r###"
     Local(Local {
         pat: Pat::Wild,
-        init: Some(LocalInitializer {
+        init: Some(LocalInit {
             expr: Verbatim(`& raw const x`),
         }),
     })
@@ -29,7 +29,7 @@ fn test_raw_variable() {
     snapshot!(stmt, @r###"
     Local(Local {
         pat: Pat::Wild,
-        init: Some(LocalInitializer {
+        init: Some(LocalInit {
             expr: Expr::Reference {
                 expr: Expr::Path {
                     path: Path {
@@ -89,7 +89,7 @@ fn test_let_dot_dot() {
     snapshot!(tokens as Stmt, @r###"
     Local(Local {
         pat: Pat::Rest,
-        init: Some(LocalInitializer {
+        init: Some(LocalInit {
             expr: Expr::Lit {
                 lit: 10,
             },
@@ -123,7 +123,7 @@ fn test_let_else() {
                 ],
             },
         },
-        init: Some(LocalInitializer {
+        init: Some(LocalInit {
             expr: Expr::Path {
                 path: Path {
                     segments: [

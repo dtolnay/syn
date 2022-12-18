@@ -1868,9 +1868,9 @@ impl Debug for Local {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for LocalInitializer {
+impl Debug for LocalInit {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("LocalInitializer");
+        let mut formatter = formatter.debug_struct("LocalInit");
         formatter.field("eq_token", &self.eq_token);
         formatter.field("expr", &self.expr);
         formatter.field("else_block", &self.else_block);

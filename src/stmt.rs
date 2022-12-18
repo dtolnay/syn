@@ -38,7 +38,7 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub let_token: Token![let],
         pub pat: Pat,
-        pub init: Option<LocalInitializer>,
+        pub init: Option<LocalInit>,
         pub semi_token: Token![;],
     }
 }
@@ -46,12 +46,12 @@ ast_struct! {
 ast_struct! {
     /// An initializer of local `let` binding (with optional diverging else-block)
     ///
-    /// `LocalInitializer` represents `= s.parse()?` in `let x: u64 = s.parse()?`
-    /// and `= r else { return }` in `let Ok(x) = r else { return }`.
+    /// `LocalInit` represents `= s.parse()?` in `let x: u64 = s.parse()?` and
+    /// `= r else { return }` in `let Ok(x) = r else { return }`.
     ///
     /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct LocalInitializer {
+    pub struct LocalInit {
         pub eq_token: Token![=],
         pub expr: Box<Expr>,
         pub else_block: Option<(Token![else], Box<ExprBlock>)>,
@@ -268,7 +268,7 @@ pub mod parsing {
                 None
             };
 
-            Some(LocalInitializer {
+            Some(LocalInit {
                 eq_token,
                 expr: Box::new(init),
                 else_block,
@@ -361,7 +361,7 @@ mod printing {
         }
     }
 
-    impl ToTokens for LocalInitializer {
+    impl ToTokens for LocalInit {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.eq_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);

@@ -3417,7 +3417,7 @@
         },
         "init": {
           "option": {
-            "syn": "LocalInitializer"
+            "syn": "LocalInit"
           }
         },
         "semi_token": {
@@ -3426,7 +3426,7 @@
       }
     },
     {
-      "ident": "LocalInitializer",
+      "ident": "LocalInit",
       "features": {
         "any": [
           "full"

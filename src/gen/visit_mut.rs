@@ -466,8 +466,8 @@ pub trait VisitMut {
         visit_local_mut(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_local_initializer_mut(&mut self, i: &mut LocalInitializer) {
-        visit_local_initializer_mut(self, i);
+    fn visit_local_init_mut(&mut self, i: &mut LocalInit) {
+        visit_local_init_mut(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_macro_mut(&mut self, i: &mut Macro) {
@@ -2614,12 +2614,12 @@ where
     tokens_helper(v, &mut node.let_token.span);
     v.visit_pat_mut(&mut node.pat);
     if let Some(it) = &mut node.init {
-        v.visit_local_initializer_mut(it);
+        v.visit_local_init_mut(it);
     }
     tokens_helper(v, &mut node.semi_token.spans);
 }
 #[cfg(feature = "full")]
-pub fn visit_local_initializer_mut<V>(v: &mut V, node: &mut LocalInitializer)
+pub fn visit_local_init_mut<V>(v: &mut V, node: &mut LocalInit)
 where
     V: VisitMut + ?Sized,
 {

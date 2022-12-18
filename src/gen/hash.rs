@@ -1736,7 +1736,7 @@ impl Hash for Local {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for LocalInitializer {
+impl Hash for LocalInit {
     fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,

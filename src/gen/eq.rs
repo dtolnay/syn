@@ -1289,10 +1289,10 @@ impl PartialEq for Local {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for LocalInitializer {}
+impl Eq for LocalInit {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for LocalInitializer {
+impl PartialEq for LocalInit {
     fn eq(&self, other: &Self) -> bool {
         self.expr == other.expr && self.else_block == other.else_block
     }
