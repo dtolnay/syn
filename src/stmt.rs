@@ -30,7 +30,7 @@ ast_enum! {
 }
 
 ast_struct! {
-    /// A local `let` binding: `let x: u64 = s.parse()?` (including let-else construction).
+    /// A local `let` binding: `let x: u64 = s.parse()?`.
     ///
     /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
@@ -44,7 +44,8 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// An initializer of local `let` binding (with optional diverging else-block)
+    /// The expression assigned in a local `let` binding, including optional
+    /// diverging `else` block.
     ///
     /// `LocalInit` represents `= s.parse()?` in `let x: u64 = s.parse()?` and
     /// `= r else { return }` in `let Ok(x) = r else { return }`.
@@ -184,7 +185,7 @@ pub mod parsing {
         }
 
         if input.peek(Token![let]) {
-            stmt_local(input, attrs)
+            stmt_local(input, attrs).map(Stmt::Local)
         } else if input.peek(Token![pub])
             || input.peek(Token![crate]) && !input.peek2(Token![::])
             || input.peek(Token![extern])
@@ -241,7 +242,7 @@ pub mod parsing {
         })))
     }
 
-    fn stmt_local(input: ParseStream, attrs: Vec<Attribute>) -> Result<Stmt> {
+    fn stmt_local(input: ParseStream, attrs: Vec<Attribute>) -> Result<Local> {
         let let_token: Token![let] = input.parse()?;
 
         let mut pat = Pat::parse_single(input)?;
@@ -256,12 +257,12 @@ pub mod parsing {
             });
         }
 
-        let init = if input.peek(Token![=]) {
-            let eq_token: Token![=] = input.parse()?;
-            let init: Expr = input.parse()?;
+        let init = if let Some(eq_token) = input.parse()? {
+            let eq_token: Token![=] = eq_token;
+            let expr: Expr = input.parse()?;
 
-            let diverge = if input.peek(Token![else]) {
-                let else_token = input.parse::<Token![else]>()?;
+            let diverge = if let Some(else_token) = input.parse()? {
+                let else_token: Token![else] = else_token;
                 let diverge = ExprBlock {
                     attrs: Vec::new(),
                     label: None,
@@ -274,7 +275,7 @@ pub mod parsing {
 
             Some(LocalInit {
                 eq_token,
-                expr: Box::new(init),
+                expr: Box::new(expr),
                 diverge,
             })
         } else {
@@ -283,13 +284,13 @@ pub mod parsing {
 
         let semi_token: Token![;] = input.parse()?;
 
-        Ok(Stmt::Local(Local {
+        Ok(Local {
             attrs,
             let_token,
             pat,
             init,
             semi_token,
-        }))
+        })
     }
 
     fn stmt_expr(
@@ -365,6 +366,7 @@ mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for LocalInit {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.eq_token.to_tokens(tokens);
