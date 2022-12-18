@@ -1,6 +1,6 @@
 [package]
 name = "syn"
-version = "1.0.106" # don't forget to update html_root_url and syn.json
+version = "1.0.107" # don't forget to update html_root_url and syn.json
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 categories = ["development-tools::procedural-macro-helpers", "parser-implementations"]
 description = "Parser for Rust source code"
@@ -53,6 +53,9 @@ syn-test-suite = { version = "0", path = "tests/features" }
 tar = "0.4.16"
 termcolor = "1.0"
 walkdir = "2.1"
+
+[lib]
+doc-scrape-examples = false
 
 [[bench]]
 name = "rust"
