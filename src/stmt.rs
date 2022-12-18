@@ -262,8 +262,12 @@ pub mod parsing {
 
             let diverge = if input.peek(Token![else]) {
                 let else_token = input.parse::<Token![else]>()?;
-                let expr_block = input.parse::<ExprBlock>()?;
-                Some((else_token, Box::new(Expr::Block(expr_block))))
+                let diverge = ExprBlock {
+                    attrs: Vec::new(),
+                    label: None,
+                    block: input.parse()?,
+                };
+                Some((else_token, Box::new(Expr::Block(diverge))))
             } else {
                 None
             };
