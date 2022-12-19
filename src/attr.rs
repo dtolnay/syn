@@ -181,15 +181,35 @@ impl Attribute {
 
     /// Parse the arguments to the attribute as a syntax tree.
     ///
-    /// This is similar to `syn::parse2::<T>(attr.tokens)` except that:
+    /// This is similar to pulling out the `TokenStream` from `Meta::List` and
+    /// doing `syn::parse2::<T>(meta_list.tokens)`, except that using
+    /// `parse_args` the error message has a more useful span when `tokens` is
+    /// empty.
     ///
-    /// - the surrounding delimiters are *not* included in the input to the
-    ///   parser; and
-    /// - the error message has a more useful span when `tokens` is empty.
+    /// The surrounding delimiters are *not* included in the input to the
+    /// parser.
     ///
     /// ```text
     /// #[my_attr(value < 5)]
     ///           ^^^^^^^^^ what gets parsed
+    /// ```
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn example() -> syn::Result<()> {
+    /// use syn::{parse_quote, Attribute, Expr};
+    ///
+    /// let attr: Attribute = parse_quote! {
+    ///     #[precondition(value < 5)]
+    /// };
+    ///
+    /// if attr.path().is_ident("precondition") {
+    ///     let precondition: Expr = attr.parse_args()?;
+    ///     // ...
+    /// }
+    /// # Ok(())
+    /// # }
     /// ```
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -198,6 +218,24 @@ impl Attribute {
     }
 
     /// Parse the arguments to the attribute using the given parser.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn example() -> syn::Result<()> {
+    /// use syn::{parse_quote, Attribute};
+    ///
+    /// let attr: Attribute = parse_quote! {
+    ///     #[inception { #[brrrrrrraaaaawwwwrwrrrmrmrmmrmrmmmmm] }]
+    /// };
+    ///
+    /// let bwom = attr.parse_args_with(Attribute::parse_outer)?;
+    ///
+    /// // Attribute does not have a Parse impl, so we couldn't directly do:
+    /// // let bwom: Attribute = attr.parse_args()?;
+    /// # Ok(())
+    /// # }
+    /// ```
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_args_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
@@ -221,6 +259,11 @@ impl Attribute {
     }
 
     /// Parses zero or more outer attributes from the stream.
+    ///
+    /// # Example
+    ///
+    /// See
+    /// [*Parsing from tokens to Attribute*](#parsing-from-tokens-to-attribute).
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
@@ -232,6 +275,11 @@ impl Attribute {
     }
 
     /// Parses zero or more inner attributes from the stream.
+    ///
+    /// # Example
+    ///
+    /// See
+    /// [*Parsing from tokens to Attribute*](#parsing-from-tokens-to-attribute).
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
