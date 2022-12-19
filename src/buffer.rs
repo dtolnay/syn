@@ -305,6 +305,33 @@ impl<'a> Cursor<'a> {
         }
     }
 
+    /// Returns the `Span` of the token immediately prior to the position of
+    /// this cursor, or of the current token if there is no previous one.
+    #[cfg(any(feature = "full", feature = "derive"))]
+    pub(crate) fn prev_span(mut self) -> Span {
+        if start_of_buffer(self) < self.ptr {
+            self.ptr = unsafe { self.ptr.offset(-1) };
+            if let Entry::End(_) = self.entry() {
+                // Locate the matching Group begin token.
+                let mut depth = 1;
+                loop {
+                    self.ptr = unsafe { self.ptr.offset(-1) };
+                    match self.entry() {
+                        Entry::Group(group, _) => {
+                            depth -= 1;
+                            if depth == 0 {
+                                return group.span();
+                            }
+                        }
+                        Entry::End(_) => depth += 1,
+                        Entry::Literal(_) | Entry::Ident(_) | Entry::Punct(_) => {}
+                    }
+                }
+            }
+        }
+        self.span()
+    }
+
     /// Skip over the next token without cloning it. Returns `None` if this
     /// cursor points to eof.
     ///
@@ -360,11 +387,13 @@ pub(crate) fn same_scope(a: Cursor, b: Cursor) -> bool {
 }
 
 pub(crate) fn same_buffer(a: Cursor, b: Cursor) -> bool {
+    start_of_buffer(a) == start_of_buffer(b)
+}
+
+fn start_of_buffer(cursor: Cursor) -> *const Entry {
     unsafe {
-        match (&*a.scope, &*b.scope) {
-            (Entry::End(a_offset), Entry::End(b_offset)) => {
-                a.scope.offset(*a_offset) == b.scope.offset(*b_offset)
-            }
+        match &*cursor.scope {
+            Entry::End(offset) => cursor.scope.offset(*offset),
             _ => unreachable!(),
         }
     }
