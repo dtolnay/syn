@@ -3,8 +3,6 @@ use crate::punctuated::Punctuated;
 
 ast_struct! {
     /// Data structure sent to a `proc_macro_derive` macro.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "derive")))]
     pub struct DeriveInput {
         /// Attributes tagged on the whole struct or enum.
@@ -26,8 +24,6 @@ ast_struct! {
 
 ast_enum_of_structs! {
     /// The storage of a struct, enum or union data structure.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` feature.*
     ///
     /// # Syntax tree enum
     ///
@@ -51,9 +47,6 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A struct input to a `proc_macro_derive` macro.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"`
-    /// feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "derive")))]
     pub struct DataStruct {
         pub struct_token: Token![struct],
@@ -64,9 +57,6 @@ ast_struct! {
 
 ast_struct! {
     /// An enum input to a `proc_macro_derive` macro.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"`
-    /// feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "derive")))]
     pub struct DataEnum {
         pub enum_token: Token![enum],
@@ -77,9 +67,6 @@ ast_struct! {
 
 ast_struct! {
     /// An untagged union input to a `proc_macro_derive` macro.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"`
-    /// feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "derive")))]
     pub struct DataUnion {
         pub union_token: Token![union],

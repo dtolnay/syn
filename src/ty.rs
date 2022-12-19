@@ -5,9 +5,6 @@ use proc_macro2::TokenStream;
 ast_enum_of_structs! {
     /// The possible types that a Rust value could have.
     ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
-    ///
     /// # Syntax tree enum
     ///
     /// This type is a [syntax tree enum].
@@ -90,9 +87,6 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A fixed size array type: `[T; n]`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeArray {
         pub bracket_token: token::Bracket,
@@ -104,9 +98,6 @@ ast_struct! {
 
 ast_struct! {
     /// A bare function type: `fn(usize) -> bool`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeBareFn {
         pub lifetimes: Option<BoundLifetimes>,
@@ -122,9 +113,6 @@ ast_struct! {
 
 ast_struct! {
     /// A type contained within invisible delimiters.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeGroup {
         pub group_token: token::Group,
@@ -135,9 +123,6 @@ ast_struct! {
 ast_struct! {
     /// An `impl Bound1 + Bound2 + Bound3` type where `Bound` is a trait or
     /// a lifetime.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeImplTrait {
         pub impl_token: Token![impl],
@@ -147,9 +132,6 @@ ast_struct! {
 
 ast_struct! {
     /// Indication that a type should be inferred by the compiler: `_`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeInfer {
         pub underscore_token: Token![_],
@@ -158,9 +140,6 @@ ast_struct! {
 
 ast_struct! {
     /// A macro in the type position.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeMacro {
         pub mac: Macro,
@@ -169,9 +148,6 @@ ast_struct! {
 
 ast_struct! {
     /// The never type: `!`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeNever {
         pub bang_token: Token![!],
@@ -180,9 +156,6 @@ ast_struct! {
 
 ast_struct! {
     /// A parenthesized type equivalent to the inner type.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeParen {
         pub paren_token: token::Paren,
@@ -193,9 +166,6 @@ ast_struct! {
 ast_struct! {
     /// A path like `std::slice::Iter`, optionally qualified with a
     /// self-type as in `<Vec<T> as SomeTrait>::Associated`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypePath {
         pub qself: Option<QSelf>,
@@ -205,9 +175,6 @@ ast_struct! {
 
 ast_struct! {
     /// A raw pointer type: `*const T` or `*mut T`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypePtr {
         pub star_token: Token![*],
@@ -219,9 +186,6 @@ ast_struct! {
 
 ast_struct! {
     /// A reference type: `&'a T` or `&'a mut T`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeReference {
         pub and_token: Token![&],
@@ -233,9 +197,6 @@ ast_struct! {
 
 ast_struct! {
     /// A dynamically sized slice type: `[T]`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeSlice {
         pub bracket_token: token::Bracket,
@@ -246,9 +207,6 @@ ast_struct! {
 ast_struct! {
     /// A trait object type `dyn Bound1 + Bound2 + Bound3` where `Bound` is a
     /// trait or a lifetime.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeTraitObject {
         pub dyn_token: Option<Token![dyn]>,
@@ -258,9 +216,6 @@ ast_struct! {
 
 ast_struct! {
     /// A tuple type: `(A, B, C, String)`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeTuple {
         pub paren_token: token::Paren,
@@ -270,9 +225,6 @@ ast_struct! {
 
 ast_struct! {
     /// The binary interface of a function: `extern "C"`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Abi {
         pub extern_token: Token![extern],
@@ -282,9 +234,6 @@ ast_struct! {
 
 ast_struct! {
     /// An argument in a function type: the `usize` in `fn(usize) -> bool`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct BareFnArg {
         pub attrs: Vec<Attribute>,
@@ -305,9 +254,6 @@ ast_struct! {
     ///     //                               ^^^
     /// }
     /// ```
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Variadic {
         pub attrs: Vec<Attribute>,
@@ -317,9 +263,6 @@ ast_struct! {
 
 ast_enum! {
     /// Return type of a function signature.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum ReturnType {
         /// Return type is not specified.

@@ -274,8 +274,6 @@ pub fn generate(defs: &Definitions) -> Result<()> {
             /// See the [module documentation] for details.
             ///
             /// [module documentation]: self
-            ///
-            /// *This trait is available only if Syn is built with the `"fold"` feature.*
             pub trait Fold {
                 #traits
             }

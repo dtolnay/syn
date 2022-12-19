@@ -530,8 +530,6 @@ mod gen {
     /// /* ... */
     /// ```
     ///
-    /// *This module is available only if Syn is built with the `"fold"` feature.*
-    ///
     /// <br>
     ///
     /// # Example
@@ -612,8 +610,6 @@ mod gen {
     ///
     /// /* ... */
     /// ```
-    ///
-    /// *This module is available only if Syn is built with the `"visit"` feature.*
     ///
     /// <br>
     ///
@@ -735,9 +731,6 @@ mod gen {
     /// /* ... */
     /// ```
     ///
-    /// *This module is available only if Syn is built with the `"visit-mut"`
-    /// feature.*
-    ///
     /// <br>
     ///
     /// # Example
@@ -831,9 +824,6 @@ pub mod __private;
 ///
 /// [`syn::parse2`]: parse2
 ///
-/// *This function is available only if Syn is built with both the `"parsing"` and
-/// `"proc-macro"` features.*
-///
 /// # Examples
 ///
 /// ```
@@ -881,8 +871,6 @@ pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
 /// instead.
 ///
 /// [`syn::parse`]: parse()
-///
-/// *This function is available only if Syn is built with the `"parsing"` feature.*
 #[cfg(feature = "parsing")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
@@ -890,8 +878,6 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 }
 
 /// Parse a string of Rust code into the chosen syntax tree node.
-///
-/// *This function is available only if Syn is built with the `"parsing"` feature.*
 ///
 /// # Hygiene
 ///
@@ -928,9 +914,6 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 /// - It preserves the shebang line of the file, such as `#!/usr/bin/env rustx`.
 ///
 /// If present, either of these would be an error using `from_str`.
-///
-/// *This function is available only if Syn is built with the `"parsing"` and
-/// `"full"` features.*
 ///
 /// # Examples
 ///

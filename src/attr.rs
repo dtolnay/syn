@@ -11,9 +11,6 @@ use std::fmt::Write;
 ast_struct! {
     /// An attribute, like `#[repr(transparent)]`.
     ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
-    ///
     /// <br>
     ///
     /// # Syntax
@@ -194,9 +191,6 @@ impl Attribute {
     /// #[my_attr(value < 5)]
     ///           ^^^^^^^^^ what gets parsed
     /// ```
-    ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_args<T: Parse>(&self) -> Result<T> {
@@ -204,9 +198,6 @@ impl Attribute {
     }
 
     /// Parse the arguments to the attribute using the given parser.
-    ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_args_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
@@ -230,9 +221,6 @@ impl Attribute {
     }
 
     /// Parses zero or more outer attributes from the stream.
-    ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
@@ -244,9 +232,6 @@ impl Attribute {
     }
 
     /// Parses zero or more inner attributes from the stream.
-    ///
-    /// *This function is available only if Syn is built with the `"parsing"`
-    /// feature.*
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
@@ -280,9 +265,6 @@ ast_enum! {
     /// Distinguishes between attributes that decorate an item and attributes
     /// that are contained within an item.
     ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
-    ///
     /// # Outer attributes
     ///
     /// - `#[repr(transparent)]`
@@ -303,9 +285,6 @@ ast_enum! {
 
 ast_enum_of_structs! {
     /// Content of a compile-time structured attribute.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
     ///
     /// ## Path
     ///
@@ -339,9 +318,6 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A structured list within an attribute, like `derive(Copy, Clone)`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct MetaList {
         pub path: Path,
@@ -352,9 +328,6 @@ ast_struct! {
 
 ast_struct! {
     /// A name-value pair within an attribute, like `feature = "nightly"`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or
-    /// `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct MetaNameValue {
         pub path: Path,

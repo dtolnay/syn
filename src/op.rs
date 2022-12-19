@@ -1,8 +1,5 @@
 ast_enum! {
     /// A binary operator: `+`, `+=`, `&`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum BinOp {
         /// The `+` operator (addition)
@@ -66,9 +63,6 @@ ast_enum! {
 
 ast_enum! {
     /// A unary operator: `*`, `!`, `-`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum UnOp {
         /// The `*` operator for dereferencing
