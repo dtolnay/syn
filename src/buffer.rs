@@ -1,7 +1,5 @@
 //! A stably addressed token buffer supporting efficient traversal based on a
 //! cheaply copyable cursor.
-//!
-//! *This module is available only if Syn is built with the `"parsing"` feature.*
 
 // This module is heavily commented as it contains most of the unsafe code in
 // Syn, and caution should be used when editing it. The public-facing interface
@@ -33,8 +31,6 @@ enum Entry {
 /// A buffer that can be efficiently traversed multiple times, unlike
 /// `TokenStream` which requires a deep copy in order to traverse more than
 /// once.
-///
-/// *This type is available only if Syn is built with the `"parsing"` feature.*
 pub struct TokenBuffer {
     // NOTE: Do not implement clone on this - while the current design could be
     // cloned, other designs which could be desirable may not be cloneable.
@@ -63,13 +59,11 @@ impl TokenBuffer {
 
     /// Creates a `TokenBuffer` containing all the tokens from the input
     /// `proc_macro::TokenStream`.
-    ///
-    /// *This method is available only if Syn is built with both the `"parsing"` and
-    /// `"proc-macro"` features.*
     #[cfg(all(
         not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
         feature = "proc-macro"
     ))]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "proc-macro")))]
     pub fn new(stream: pm::TokenStream) -> Self {
         Self::new2(stream.into())
     }
@@ -104,8 +98,6 @@ impl TokenBuffer {
 ///
 /// Two cursors are equal if they have the same location in the same input
 /// stream, and have the same scope.
-///
-/// *This type is available only if Syn is built with the `"parsing"` feature.*
 pub struct Cursor<'a> {
     // The current entry which the `Cursor` is pointing at.
     ptr: *const Entry,

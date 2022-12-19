@@ -2,8 +2,6 @@ use super::*;
 
 ast_struct! {
     /// A braced block containing Rust statements.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct Block {
         pub brace_token: token::Brace,
@@ -14,8 +12,6 @@ ast_struct! {
 
 ast_enum! {
     /// A statement, usually ending in a semicolon.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub enum Stmt {
         /// A local (let) binding.
@@ -31,8 +27,6 @@ ast_enum! {
 
 ast_struct! {
     /// A local `let` binding: `let x: u64 = s.parse()?`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct Local {
         pub attrs: Vec<Attribute>,
@@ -49,8 +43,6 @@ ast_struct! {
     ///
     /// `LocalInit` represents `= s.parse()?` in `let x: u64 = s.parse()?` and
     /// `= r else { return }` in `let Ok(x) = r else { return }`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct LocalInit {
         pub eq_token: Token![=],
@@ -71,9 +63,6 @@ pub mod parsing {
     impl Block {
         /// Parse the body of a block as zero or more statements, possibly
         /// including one trailing expression.
-        ///
-        /// *This function is available only if Syn is built with the `"parsing"`
-        /// feature.*
         ///
         /// # Example
         ///

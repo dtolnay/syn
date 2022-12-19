@@ -9,8 +9,6 @@ use std::mem;
 ast_enum_of_structs! {
     /// Things that can appear directly inside of a module or scope.
     ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
-    ///
     /// # Syntax tree enum
     ///
     /// This type is a [syntax tree enum].
@@ -98,8 +96,6 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A constant item: `const MAX: u16 = 65535`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemConst {
         pub attrs: Vec<Attribute>,
@@ -116,8 +112,6 @@ ast_struct! {
 
 ast_struct! {
     /// An enum definition: `enum Foo<A, B> { A(A), B(B) }`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemEnum {
         pub attrs: Vec<Attribute>,
@@ -132,8 +126,6 @@ ast_struct! {
 
 ast_struct! {
     /// An `extern crate` item: `extern crate serde`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemExternCrate {
         pub attrs: Vec<Attribute>,
@@ -147,10 +139,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A free-standing function: `fn process(n: usize) -> Result<()> { ...
-    /// }`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
+    /// A free-standing function: `fn process(n: usize) -> Result<()> { ... }`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemFn {
         pub attrs: Vec<Attribute>,
@@ -162,8 +151,6 @@ ast_struct! {
 
 ast_struct! {
     /// A block of foreign items: `extern "C" { ... }`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemForeignMod {
         pub attrs: Vec<Attribute>,
@@ -176,8 +163,6 @@ ast_struct! {
 ast_struct! {
     /// An impl block providing trait or associated items: `impl<A> Trait
     /// for Data<A> { ... }`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemImpl {
         pub attrs: Vec<Attribute>,
@@ -196,8 +181,6 @@ ast_struct! {
 
 ast_struct! {
     /// A macro invocation, which includes `macro_rules!` definitions.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemMacro {
         pub attrs: Vec<Attribute>,
@@ -210,8 +193,6 @@ ast_struct! {
 
 ast_struct! {
     /// A 2.0-style declarative macro introduced by the `macro` keyword.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemMacro2 {
         pub attrs: Vec<Attribute>,
@@ -224,8 +205,6 @@ ast_struct! {
 
 ast_struct! {
     /// A module or module declaration: `mod m` or `mod m { ... }`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemMod {
         pub attrs: Vec<Attribute>,
@@ -239,8 +218,6 @@ ast_struct! {
 
 ast_struct! {
     /// A static item: `static BIKE: Shed = Shed(42)`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemStatic {
         pub attrs: Vec<Attribute>,
@@ -258,8 +235,6 @@ ast_struct! {
 
 ast_struct! {
     /// A struct definition: `struct Foo<A> { x: A }`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemStruct {
         pub attrs: Vec<Attribute>,
@@ -274,8 +249,6 @@ ast_struct! {
 
 ast_struct! {
     /// A trait definition: `pub trait Iterator { ... }`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemTrait {
         pub attrs: Vec<Attribute>,
@@ -294,8 +267,6 @@ ast_struct! {
 
 ast_struct! {
     /// A trait alias: `pub trait SharableIterator = Iterator + Sync`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemTraitAlias {
         pub attrs: Vec<Attribute>,
@@ -311,8 +282,6 @@ ast_struct! {
 
 ast_struct! {
     /// A type alias: `type Result<T> = std::result::Result<T, MyError>`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemType {
         pub attrs: Vec<Attribute>,
@@ -328,8 +297,6 @@ ast_struct! {
 
 ast_struct! {
     /// A union definition: `union Foo<A, B> { x: A, y: B }`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemUnion {
         pub attrs: Vec<Attribute>,
@@ -343,8 +310,6 @@ ast_struct! {
 
 ast_struct! {
     /// A use declaration: `use std::collections::HashMap`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemUse {
         pub attrs: Vec<Attribute>,
@@ -467,8 +432,6 @@ impl From<ItemUnion> for DeriveInput {
 ast_enum_of_structs! {
     /// A suffix of an import tree in a `use` item: `Type as Renamed` or `*`.
     ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
-    ///
     /// # Syntax tree enum
     ///
     /// This type is a [syntax tree enum].
@@ -495,8 +458,6 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A path prefix of imports in a `use` item: `std::...`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct UsePath {
         pub ident: Ident,
@@ -507,8 +468,6 @@ ast_struct! {
 
 ast_struct! {
     /// An identifier imported by a `use` item: `HashMap`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct UseName {
         pub ident: Ident,
@@ -517,8 +476,6 @@ ast_struct! {
 
 ast_struct! {
     /// An renamed identifier imported by a `use` item: `HashMap as Map`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct UseRename {
         pub ident: Ident,
@@ -529,8 +486,6 @@ ast_struct! {
 
 ast_struct! {
     /// A glob import in a `use` item: `*`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct UseGlob {
         pub star_token: Token![*],
@@ -539,8 +494,6 @@ ast_struct! {
 
 ast_struct! {
     /// A braced group of imports in a `use` item: `{A, B, C}`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct UseGroup {
         pub brace_token: token::Brace,
@@ -550,8 +503,6 @@ ast_struct! {
 
 ast_enum_of_structs! {
     /// An item within an `extern` block.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     ///
     /// # Syntax tree enum
     ///
@@ -602,8 +553,6 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A foreign function in an `extern` block.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ForeignItemFn {
         pub attrs: Vec<Attribute>,
@@ -615,8 +564,6 @@ ast_struct! {
 
 ast_struct! {
     /// A foreign static item in an `extern` block: `static ext: u8`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ForeignItemStatic {
         pub attrs: Vec<Attribute>,
@@ -632,8 +579,6 @@ ast_struct! {
 
 ast_struct! {
     /// A foreign type in an `extern` block: `type void`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ForeignItemType {
         pub attrs: Vec<Attribute>,
@@ -646,8 +591,6 @@ ast_struct! {
 
 ast_struct! {
     /// A macro invocation within an extern block.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ForeignItemMacro {
         pub attrs: Vec<Attribute>,
@@ -658,8 +601,6 @@ ast_struct! {
 
 ast_enum_of_structs! {
     /// An item declaration within the definition of a trait.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     ///
     /// # Syntax tree enum
     ///
@@ -710,8 +651,6 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// An associated constant within the definition of a trait.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct TraitItemConst {
         pub attrs: Vec<Attribute>,
@@ -726,8 +665,6 @@ ast_struct! {
 
 ast_struct! {
     /// A trait method within the definition of a trait.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct TraitItemMethod {
         pub attrs: Vec<Attribute>,
@@ -739,8 +676,6 @@ ast_struct! {
 
 ast_struct! {
     /// An associated type within the definition of a trait.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct TraitItemType {
         pub attrs: Vec<Attribute>,
@@ -756,8 +691,6 @@ ast_struct! {
 
 ast_struct! {
     /// A macro invocation within the definition of a trait.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct TraitItemMacro {
         pub attrs: Vec<Attribute>,
@@ -768,8 +701,6 @@ ast_struct! {
 
 ast_enum_of_structs! {
     /// An item within an impl block.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     ///
     /// # Syntax tree enum
     ///
@@ -820,8 +751,6 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// An associated constant within an impl block.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ImplItemConst {
         pub attrs: Vec<Attribute>,
@@ -839,8 +768,6 @@ ast_struct! {
 
 ast_struct! {
     /// A method within an impl block.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ImplItemMethod {
         pub attrs: Vec<Attribute>,
@@ -853,8 +780,6 @@ ast_struct! {
 
 ast_struct! {
     /// An associated type within an impl block.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ImplItemType {
         pub attrs: Vec<Attribute>,
@@ -871,8 +796,6 @@ ast_struct! {
 
 ast_struct! {
     /// A macro invocation within an impl block.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ImplItemMacro {
         pub attrs: Vec<Attribute>,
@@ -884,8 +807,6 @@ ast_struct! {
 ast_struct! {
     /// A function signature in a trait or implementation: `unsafe fn
     /// initialize(&self)`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct Signature {
         pub constness: Option<Token![const]>,
@@ -922,8 +843,6 @@ impl Signature {
 
 ast_enum_of_structs! {
     /// An argument in a function signature: the `n: usize` in `fn f(n: usize)`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub enum FnArg {
         /// The `self` argument of an associated method, whether taken by value
@@ -944,8 +863,6 @@ ast_struct! {
     ///
     /// Note that `self` receivers with a specified type, such as `self:
     /// Box<Self>`, are parsed as a `FnArg::Typed`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct Receiver {
         pub attrs: Vec<Attribute>,

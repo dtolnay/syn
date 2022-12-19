@@ -1,6 +1,4 @@
 //! Extension traits to provide parsing methods on foreign types.
-//!
-//! *This module is available only if Syn is built with the `"parsing"` feature.*
 
 use crate::buffer::Cursor;
 use crate::parse::Peek;
@@ -13,8 +11,6 @@ use proc_macro2::Ident;
 ///
 /// This trait is sealed and cannot be implemented for types outside of Syn. It
 /// is implemented only for `proc_macro2::Ident`.
-///
-/// *This trait is available only if Syn is built with the `"parsing"` feature.*
 pub trait IdentExt: Sized + private::Sealed {
     /// Parses any identifier including keywords.
     ///

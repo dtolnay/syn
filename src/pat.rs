@@ -6,8 +6,6 @@ ast_enum_of_structs! {
     /// A pattern in a local binding, function signature, match expression, or
     /// various other places.
     ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
-    ///
     /// # Syntax tree enum
     ///
     /// This type is a [syntax tree enum].
@@ -99,8 +97,6 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A box pattern: `box v`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatBox {
         pub attrs: Vec<Attribute>,
@@ -114,8 +110,6 @@ ast_struct! {
     ///
     /// It may also be a unit struct or struct variant (e.g. `None`), or a
     /// constant; these cannot be distinguished syntactically.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatIdent {
         pub attrs: Vec<Attribute>,
@@ -131,8 +125,6 @@ ast_struct! {
     ///
     /// This holds an `Expr` rather than a `Lit` because negative numbers
     /// are represented as an `Expr::Unary`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatLit {
         pub attrs: Vec<Attribute>,
@@ -142,8 +134,6 @@ ast_struct! {
 
 ast_struct! {
     /// A macro in pattern position.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatMacro {
         pub attrs: Vec<Attribute>,
@@ -153,8 +143,6 @@ ast_struct! {
 
 ast_struct! {
     /// A pattern that matches any one of a set of cases.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatOr {
         pub attrs: Vec<Attribute>,
@@ -171,8 +159,6 @@ ast_struct! {
     /// constants or associated constants. Qualified path patterns like
     /// `<A>::B::C` and `<A as Trait>::B::C` can only legally refer to
     /// associated constants.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatPath {
         pub attrs: Vec<Attribute>,
@@ -183,8 +169,6 @@ ast_struct! {
 
 ast_struct! {
     /// A range pattern: `1..=2`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatRange {
         pub attrs: Vec<Attribute>,
@@ -196,8 +180,6 @@ ast_struct! {
 
 ast_struct! {
     /// A reference pattern: `&mut var`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatReference {
         pub attrs: Vec<Attribute>,
@@ -209,8 +191,6 @@ ast_struct! {
 
 ast_struct! {
     /// The dots in a tuple or slice pattern: `[0, 1, ..]`
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatRest {
         pub attrs: Vec<Attribute>,
@@ -220,8 +200,6 @@ ast_struct! {
 
 ast_struct! {
     /// A dynamically sized slice pattern: `[a, b, ref i @ .., y, z]`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatSlice {
         pub attrs: Vec<Attribute>,
@@ -232,8 +210,6 @@ ast_struct! {
 
 ast_struct! {
     /// A struct or struct variant pattern: `Variant { x, y, .. }`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatStruct {
         pub attrs: Vec<Attribute>,
@@ -246,8 +222,6 @@ ast_struct! {
 
 ast_struct! {
     /// A tuple pattern: `(a, b)`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatTuple {
         pub attrs: Vec<Attribute>,
@@ -258,8 +232,6 @@ ast_struct! {
 
 ast_struct! {
     /// A tuple struct or tuple variant pattern: `Variant(x, y, .., z)`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatTupleStruct {
         pub attrs: Vec<Attribute>,
@@ -270,8 +242,6 @@ ast_struct! {
 
 ast_struct! {
     /// A type ascription pattern: `foo: f64`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatType {
         pub attrs: Vec<Attribute>,
@@ -283,8 +253,6 @@ ast_struct! {
 
 ast_struct! {
     /// A pattern that matches any value: `_`.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatWild {
         pub attrs: Vec<Attribute>,
@@ -297,8 +265,6 @@ ast_struct! {
     ///
     /// Patterns like the fields of Foo `{ x, ref y, ref mut z }` are treated
     /// the same as `x: x, y: ref y, z: ref mut z` but there is no colon token.
-    ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct FieldPat {
         pub attrs: Vec<Attribute>,

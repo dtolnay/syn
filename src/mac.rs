@@ -11,9 +11,6 @@ use crate::parse::{Parse, ParseStream, Parser, Result};
 
 ast_struct! {
     /// A macro invocation: `println!("{}", mac)`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Macro {
         pub path: Path,
@@ -25,9 +22,6 @@ ast_struct! {
 
 ast_enum! {
     /// A grouping token that surrounds a macro body: `m!(...)` or `m!{...}` or `m![...]`.
-    ///
-    /// *This type is available only if Syn is built with the `"derive"` or `"full"`
-    /// feature.*
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum MacroDelimiter {
         Paren(Paren),

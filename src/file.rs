@@ -3,8 +3,6 @@ use super::*;
 ast_struct! {
     /// A complete file of Rust source code.
     ///
-    /// *This type is available only if Syn is built with the `"full"` feature.*
-    ///
     /// # Example
     ///
     /// Parse a Rust source file into a `syn::File` and print out a debug
