@@ -347,6 +347,32 @@ impl Item {
             _ => unreachable!(),
         }
     }
+
+    #[cfg(feature = "parsing")]
+    pub fn attrs(&self) -> Option<&Vec<Attribute>> {
+        match self {
+            Item::ExternCrate(ItemExternCrate { attrs, .. })
+            | Item::Use(ItemUse { attrs, .. })
+            | Item::Static(ItemStatic { attrs, .. })
+            | Item::Const(ItemConst { attrs, .. })
+            | Item::Fn(ItemFn { attrs, .. })
+            | Item::Mod(ItemMod { attrs, .. })
+            | Item::ForeignMod(ItemForeignMod { attrs, .. })
+            | Item::Type(ItemType { attrs, .. })
+            | Item::Struct(ItemStruct { attrs, .. })
+            | Item::Enum(ItemEnum { attrs, .. })
+            | Item::Union(ItemUnion { attrs, .. })
+            | Item::Trait(ItemTrait { attrs, .. })
+            | Item::TraitAlias(ItemTraitAlias { attrs, .. })
+            | Item::Impl(ItemImpl { attrs, .. })
+            | Item::Macro(ItemMacro { attrs, .. })
+            | Item::Macro2(ItemMacro2 { attrs, .. }) => Some(attrs),
+            Item::Verbatim(_) => None,
+
+            #[cfg(syn_no_non_exhaustive)]
+            _ => unreachable!(),
+        }
+    }
 }
 
 impl From<DeriveInput> for Item {
