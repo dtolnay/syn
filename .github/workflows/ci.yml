@@ -13,7 +13,7 @@ env:
 
 jobs:
   pre_ci:
-    uses: ./.github/workflows/pre_ci.yml
+    uses: dtolnay/.github/.github/workflows/pre_ci.yml@master
 
   test:
     name: Tests
