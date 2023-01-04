@@ -38,6 +38,7 @@ mod syn_parse {
 #[cfg(not(syn_only))]
 mod librustc_parse {
     extern crate rustc_data_structures;
+    extern crate rustc_driver;
     extern crate rustc_error_messages;
     extern crate rustc_errors;
     extern crate rustc_parse;

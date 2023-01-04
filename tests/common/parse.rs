@@ -1,4 +1,5 @@
 extern crate rustc_ast;
+extern crate rustc_driver;
 extern crate rustc_expand;
 extern crate rustc_parse as parse;
 extern crate rustc_session;
