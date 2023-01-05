@@ -47,7 +47,7 @@ ast_enum_of_structs! {
         /// A reference pattern: `&mut var`.
         Reference(PatReference),
 
-        /// The dots in a tuple or slice pattern: `[0, 1, ..]`
+        /// The dots in a tuple or slice pattern: `[0, 1, ..]`.
         Rest(PatRest),
 
         /// A dynamically sized slice pattern: `[a, b, ref i @ .., y, z]`.
@@ -190,7 +190,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// The dots in a tuple or slice pattern: `[0, 1, ..]`
+    /// The dots in a tuple or slice pattern: `[0, 1, ..]`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatRest {
         pub attrs: Vec<Attribute>,
