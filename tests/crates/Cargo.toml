@@ -10,8 +10,8 @@ name = "syn-parse-crates"
 path = "main.rs"
 
 [dependencies]
-anyhow = "1.0"
-flate2 = "1.0"
-rayon = "1.0"
+anyhow = "1"
+flate2 = "1"
+rayon = "1"
 syn = { path = "../..", default-features = false, features = ["full", "parsing"] }
 tar = "0.4"

@@ -14,7 +14,7 @@ path = "main.rs"
 name = "syn-dev"
 
 [dependencies]
-quote = "1.0"
+quote = "1"
 
 [dependencies.syn]
 path = ".."
