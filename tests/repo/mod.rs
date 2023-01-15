@@ -10,28 +10,39 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "98ad6a5519651af36e246c0335c964dd52c554ba";
+const REVISION: &str = "afaf3e07aaa7ca9873bdb439caec53faffa4230c";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
+    // TODO
+    "compiler/rustc_errors/src/translation.rs",
+    "library/alloc/src/collections/btree/node.rs",
+    "src/tools/clippy/tests/ui/needless_return.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0166_half_open_range_pat.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0204_yeet_expr.rs",
+    "tests/ui/closures/supertrait-hint-cycle.rs",
+    "tests/ui/inline-const/expr-unsafe.rs",
+    "tests/ui/inline-const/expr-with-block.rs",
+    "tests/ui/rfc-2632-const-trait-impl/const-impl-trait.rs",
+
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
-    "src/test/ui/rfc-2632-const-trait-impl/syntax.rs",
+    "tests/ui/rfc-2632-const-trait-impl/syntax.rs",
 
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
-    "src/test/ui/const-generics/early/closing-args-token.rs",
-    "src/test/ui/const-generics/early/const-expression-parameter.rs",
+    "tests/ui/const-generics/early/closing-args-token.rs",
+    "tests/ui/const-generics/early/const-expression-parameter.rs",
 
     // Need at least one trait in impl Trait, no such type as impl 'static
-    "src/test/ui/type-alias-impl-trait/generic_type_does_not_live_long_enough.rs",
+    "tests/ui/type-alias-impl-trait/generic_type_does_not_live_long_enough.rs",
 
     // Deprecated anonymous parameter syntax in traits
-    "src/test/ui/issues/issue-13105.rs",
-    "src/test/ui/issues/issue-13775.rs",
-    "src/test/ui/issues/issue-34074.rs",
-    "src/test/ui/proc-macro/trait-fn-args-2015.rs",
     "src/tools/rustfmt/tests/source/trait.rs",
     "src/tools/rustfmt/tests/target/trait.rs",
+    "tests/ui/issues/issue-13105.rs",
+    "tests/ui/issues/issue-13775.rs",
+    "tests/ui/issues/issue-34074.rs",
+    "tests/ui/proc-macro/trait-fn-args-2015.rs",
 
     // Various extensions to Rust syntax made up by rust-analyzer
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0012_type_item_where_clause.rs",
@@ -49,20 +60,12 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0046_mutable_const_item.rs",
 
     // Placeholder syntax for "throw expressions"
-    "src/test/pretty/yeet-expr.rs",
-    "src/test/ui/try-trait/yeet-for-option.rs",
-    "src/test/ui/try-trait/yeet-for-result.rs",
+    "tests/pretty/yeet-expr.rs",
+    "tests/ui/try-trait/yeet-for-option.rs",
+    "tests/ui/try-trait/yeet-for-result.rs",
 
     // Edition 2015 code using identifiers that are now keywords
     // TODO: some of these we should probably parse
-    "src/test/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs",
-    "src/test/ui/editions/edition-keywords-2015-2015.rs",
-    "src/test/ui/editions/edition-keywords-2015-2018.rs",
-    "src/test/ui/lint/lint_pre_expansion_extern_module_aux.rs",
-    "src/test/ui/macros/macro-comma-support-rpass.rs",
-    "src/test/ui/macros/try-macro.rs",
-    "src/test/ui/parser/extern-crate-async.rs",
-    "src/test/ui/try-block/try-is-identifier-edition2015.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0159_try_macro_fallback.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0160_try_macro_rules.rs",
     "src/tools/rustfmt/tests/source/configs/indent_style/block_call.rs",
@@ -72,13 +75,19 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/target/configs/indent_style/block_call.rs",
     "src/tools/rustfmt/tests/target/configs/use_try_shorthand/false.rs",
     "src/tools/rustfmt/tests/target/issue-1681.rs",
+    "tests/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs",
+    "tests/ui/editions/edition-keywords-2015-2015.rs",
+    "tests/ui/editions/edition-keywords-2015-2018.rs",
+    "tests/ui/lint/lint_pre_expansion_extern_module_aux.rs",
+    "tests/ui/macros/macro-comma-support-rpass.rs",
+    "tests/ui/macros/try-macro.rs",
+    "tests/ui/parser/extern-crate-async.rs",
+    "tests/ui/try-block/try-is-identifier-edition2015.rs",
 
     // Excessive nesting
-    "src/test/ui/issues/issue-74564-if-expr-stack-overflow.rs",
+    "tests/ui/issues/issue-74564-if-expr-stack-overflow.rs",
 
     // Testing tools on invalid syntax
-    "src/test/run-make/translation/test.rs",
-    "src/test/ui/generics/issue-94432-garbage-ice.rs",
     "src/tools/rustfmt/tests/coverage/target/comments.rs",
     "src/tools/rustfmt/tests/parser/issue-4126/invalid.rs",
     "src/tools/rustfmt/tests/parser/issue_4418.rs",
@@ -90,32 +99,22 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/false.rs",
     "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/true.rs",
     "src/tools/rustfmt/tests/target/type.rs",
+    "tests/run-make/translation/test.rs",
+    "tests/ui/generics/issue-94432-garbage-ice.rs",
 
     // Generated file containing a top-level expression, used with `include!`
     "compiler/rustc_codegen_gcc/src/intrinsic/archs.rs",
 
     // Clippy lint lists represented as expressions
     "src/tools/clippy/clippy_lints/src/lib.deprecated.rs",
-    "src/tools/clippy/clippy_lints/src/lib.register_all.rs",
-    "src/tools/clippy/clippy_lints/src/lib.register_cargo.rs",
-    "src/tools/clippy/clippy_lints/src/lib.register_complexity.rs",
-    "src/tools/clippy/clippy_lints/src/lib.register_correctness.rs",
-    "src/tools/clippy/clippy_lints/src/lib.register_internal.rs",
-    "src/tools/clippy/clippy_lints/src/lib.register_lints.rs",
-    "src/tools/clippy/clippy_lints/src/lib.register_nursery.rs",
-    "src/tools/clippy/clippy_lints/src/lib.register_pedantic.rs",
-    "src/tools/clippy/clippy_lints/src/lib.register_perf.rs",
-    "src/tools/clippy/clippy_lints/src/lib.register_restriction.rs",
-    "src/tools/clippy/clippy_lints/src/lib.register_style.rs",
-    "src/tools/clippy/clippy_lints/src/lib.register_suspicious.rs",
 
     // Not actually test cases
-    "src/test/ui/lint/expansion-time-include.rs",
-    "src/test/ui/macros/auxiliary/macro-comma-support.rs",
-    "src/test/ui/macros/auxiliary/macro-include-items-expr.rs",
-    "src/test/ui/macros/include-single-expr-helper.rs",
-    "src/test/ui/macros/include-single-expr-helper-1.rs",
-    "src/test/ui/parser/issues/auxiliary/issue-21146-inc.rs",
+    "tests/ui/lint/expansion-time-include.rs",
+    "tests/ui/macros/auxiliary/macro-comma-support.rs",
+    "tests/ui/macros/auxiliary/macro-include-items-expr.rs",
+    "tests/ui/macros/include-single-expr-helper.rs",
+    "tests/ui/macros/include-single-expr-helper-1.rs",
+    "tests/ui/parser/issues/auxiliary/issue-21146-inc.rs",
 ];
 
 #[rustfmt::skip]
@@ -155,7 +154,7 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         return false;
     }
 
-    if path_string.starts_with("src/test/ui") || path_string.starts_with("src/test/rustdoc-ui") {
+    if path_string.starts_with("tests/ui") || path_string.starts_with("tests/rustdoc-ui") {
         let stderr_path = path.with_extension("stderr");
         if stderr_path.exists() {
             // Expected to fail in some way
