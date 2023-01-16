@@ -13,10 +13,6 @@ fn main() {
         None => return,
     };
 
-    if compiler.minor < 40 {
-        println!("cargo:rustc-cfg=syn_no_non_exhaustive");
-    }
-
     if compiler.minor < 56 {
         println!("cargo:rustc-cfg=syn_no_negative_literal_parse");
     }

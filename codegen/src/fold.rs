@@ -147,19 +147,9 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                 }
             }
 
-            let nonexhaustive = if s.exhaustive {
-                None
-            } else {
-                Some(quote! {
-                    #[cfg(syn_no_non_exhaustive)]
-                    _ => unreachable!(),
-                })
-            };
-
             fold_impl.extend(quote! {
                 match node {
                     #fold_variants
-                    #nonexhaustive
                 }
             });
         }

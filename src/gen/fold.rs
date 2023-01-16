@@ -1123,8 +1123,6 @@ where
         Expr::Verbatim(_binding_0) => Expr::Verbatim(_binding_0),
         Expr::While(_binding_0) => Expr::While(full!(f.fold_expr_while(_binding_0))),
         Expr::Yield(_binding_0) => Expr::Yield(full!(f.fold_expr_yield(_binding_0))),
-        #[cfg(syn_no_non_exhaustive)]
-        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -1709,8 +1707,6 @@ where
             ForeignItem::Macro(f.fold_foreign_item_macro(_binding_0))
         }
         ForeignItem::Verbatim(_binding_0) => ForeignItem::Verbatim(_binding_0),
-        #[cfg(syn_no_non_exhaustive)]
-        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -1863,8 +1859,6 @@ where
             ImplItem::Macro(f.fold_impl_item_macro(_binding_0))
         }
         ImplItem::Verbatim(_binding_0) => ImplItem::Verbatim(_binding_0),
-        #[cfg(syn_no_non_exhaustive)]
-        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -1968,8 +1962,6 @@ where
         Item::Union(_binding_0) => Item::Union(f.fold_item_union(_binding_0)),
         Item::Use(_binding_0) => Item::Use(f.fold_item_use(_binding_0)),
         Item::Verbatim(_binding_0) => Item::Verbatim(_binding_0),
-        #[cfg(syn_no_non_exhaustive)]
-        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2489,8 +2481,6 @@ where
         Pat::Type(_binding_0) => Pat::Type(f.fold_pat_type(_binding_0)),
         Pat::Verbatim(_binding_0) => Pat::Verbatim(_binding_0),
         Pat::Wild(_binding_0) => Pat::Wild(f.fold_pat_wild(_binding_0)),
-        #[cfg(syn_no_non_exhaustive)]
-        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2879,8 +2869,6 @@ where
             TraitItem::Macro(f.fold_trait_item_macro(_binding_0))
         }
         TraitItem::Verbatim(_binding_0) => TraitItem::Verbatim(_binding_0),
-        #[cfg(syn_no_non_exhaustive)]
-        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2964,8 +2952,6 @@ where
         }
         Type::Tuple(_binding_0) => Type::Tuple(f.fold_type_tuple(_binding_0)),
         Type::Verbatim(_binding_0) => Type::Verbatim(_binding_0),
-        #[cfg(syn_no_non_exhaustive)]
-        _ => unreachable!(),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

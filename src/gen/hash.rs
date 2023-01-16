@@ -497,7 +497,7 @@ impl Hash for Expr {
                 state.write_u8(39u8);
                 v0.hash(state);
             }
-            #[cfg(any(syn_no_non_exhaustive, not(feature = "full")))]
+            #[cfg(not(feature = "full"))]
             _ => unreachable!(),
         }
     }
@@ -1113,8 +1113,6 @@ impl Hash for ForeignItem {
                 state.write_u8(4u8);
                 TokenStreamHelper(v0).hash(state);
             }
-            #[cfg(syn_no_non_exhaustive)]
-            _ => unreachable!(),
         }
     }
 }
@@ -1282,8 +1280,6 @@ impl Hash for ImplItem {
                 state.write_u8(4u8);
                 TokenStreamHelper(v0).hash(state);
             }
-            #[cfg(syn_no_non_exhaustive)]
-            _ => unreachable!(),
         }
     }
 }
@@ -1419,8 +1415,6 @@ impl Hash for Item {
                 state.write_u8(16u8);
                 TokenStreamHelper(v0).hash(state);
             }
-            #[cfg(syn_no_non_exhaustive)]
-            _ => unreachable!(),
         }
     }
 }
@@ -1913,8 +1907,6 @@ impl Hash for Pat {
                 state.write_u8(14u8);
                 v0.hash(state);
             }
-            #[cfg(syn_no_non_exhaustive)]
-            _ => unreachable!(),
         }
     }
 }
@@ -2321,8 +2313,6 @@ impl Hash for TraitItem {
                 state.write_u8(4u8);
                 TokenStreamHelper(v0).hash(state);
             }
-            #[cfg(syn_no_non_exhaustive)]
-            _ => unreachable!(),
         }
     }
 }
@@ -2447,8 +2437,6 @@ impl Hash for Type {
                 state.write_u8(14u8);
                 TokenStreamHelper(v0).hash(state);
             }
-            #[cfg(syn_no_non_exhaustive)]
-            _ => unreachable!(),
         }
     }
 }

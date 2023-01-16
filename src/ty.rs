@@ -11,7 +11,7 @@ ast_enum_of_structs! {
     ///
     /// [syntax tree enum]: Expr#syntax-tree-enums
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
-    #[cfg_attr(not(syn_no_non_exhaustive), non_exhaustive)]
+    #[non_exhaustive]
     pub enum Type {
         /// A fixed size array type: `[T; n]`.
         Array(TypeArray),
@@ -79,9 +79,6 @@ ast_enum_of_structs! {
         // a variant. You will be notified by a test failure when a variant is
         // added, so that you can add code to handle it, but your library will
         // continue to compile and work for downstream users in the interim.
-        #[cfg(syn_no_non_exhaustive)]
-        #[doc(hidden)]
-        __NonExhaustive,
     }
 }
 
