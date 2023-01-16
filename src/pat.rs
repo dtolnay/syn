@@ -727,6 +727,7 @@ pub mod parsing {
             || input.peek(Token![:]) && !input.peek(Token![::])
             || input.peek(Token![,])
             || input.peek(Token![;])
+            || input.peek(Token![if])
         {
             return Ok(None);
         }
