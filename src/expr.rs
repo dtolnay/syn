@@ -208,9 +208,6 @@ ast_enum_of_structs! {
         /// A tuple expression: `(a, b, c, d)`.
         Tuple(ExprTuple),
 
-        /// A type ascription expression: `foo: f64`.
-        Type(ExprType),
-
         /// A unary operation: `!x`, `*x`.
         Unary(ExprUnary),
 
@@ -653,17 +650,6 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A type ascription expression: `foo: f64`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct ExprType #full {
-        pub attrs: Vec<Attribute>,
-        pub expr: Box<Expr>,
-        pub colon_token: Token![:],
-        pub ty: Box<Type>,
-    }
-}
-
-ast_struct! {
     /// A unary operation: `!x`, `*x`.
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct ExprUnary {
@@ -754,7 +740,6 @@ impl Expr {
             | Expr::Try(ExprTry { attrs, .. })
             | Expr::TryBlock(ExprTryBlock { attrs, .. })
             | Expr::Tuple(ExprTuple { attrs, .. })
-            | Expr::Type(ExprType { attrs, .. })
             | Expr::Unary(ExprUnary { attrs, .. })
             | Expr::Unsafe(ExprUnsafe { attrs, .. })
             | Expr::While(ExprWhile { attrs, .. })
@@ -1284,18 +1269,6 @@ pub(crate) mod parsing {
                     attrs: Vec::new(),
                     expr: Box::new(lhs),
                     as_token,
-                    ty: Box::new(ty),
-                });
-            } else if Precedence::Cast >= base && input.peek(Token![:]) && !input.peek(Token![::]) {
-                let colon_token: Token![:] = input.parse()?;
-                let allow_plus = false;
-                let allow_group_generic = false;
-                let ty = ty::parsing::ambig_ty(input, allow_plus, allow_group_generic)?;
-                check_cast(input)?;
-                lhs = Expr::Type(ExprType {
-                    attrs: Vec::new(),
-                    expr: Box::new(lhs),
-                    colon_token,
                     ty: Box::new(ty),
                 });
             } else {
@@ -2225,7 +2198,6 @@ pub(crate) mod parsing {
         ExprRange, Range, "expected range expression",
         ExprTry, Try, "expected try expression",
         ExprTuple, Tuple, "expected tuple expression",
-        ExprType, Type, "expected type ascription expression",
     }
 
     #[cfg(feature = "full")]
@@ -2996,17 +2968,6 @@ pub(crate) mod printing {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.expr.to_tokens(tokens);
             self.as_token.to_tokens(tokens);
-            self.ty.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprType {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.expr.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
         }
     }

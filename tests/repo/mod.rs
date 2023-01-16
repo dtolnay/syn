@@ -39,6 +39,10 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/issues/issue-34074.rs",
     "tests/ui/proc-macro/trait-fn-args-2015.rs",
 
+    // Old type ascription expression syntax
+    "src/tools/rustfmt/tests/source/type-ascription.rs",
+    "src/tools/rustfmt/tests/target/type-ascription.rs",
+
     // Various extensions to Rust syntax made up by rust-analyzer
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0012_type_item_where_clause.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0040_crate_keyword_vis.rs",

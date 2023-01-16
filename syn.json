@@ -743,11 +743,6 @@
             "syn": "ExprTuple"
           }
         ],
-        "Type": [
-          {
-            "syn": "ExprType"
-          }
-        ],
         "Unary": [
           {
             "syn": "ExprUnary"
@@ -1774,34 +1769,6 @@
               "syn": "Expr"
             },
             "punct": "Comma"
-          }
-        }
-      }
-    },
-    {
-      "ident": "ExprType",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "expr": {
-          "box": {
-            "syn": "Expr"
-          }
-        },
-        "colon_token": {
-          "token": "Colon"
-        },
-        "ty": {
-          "box": {
-            "syn": "Type"
           }
         }
       }

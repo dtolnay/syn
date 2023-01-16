@@ -286,8 +286,6 @@ impl PartialEq for Expr {
             (Expr::TryBlock(self0), Expr::TryBlock(other0)) => self0 == other0,
             #[cfg(feature = "full")]
             (Expr::Tuple(self0), Expr::Tuple(other0)) => self0 == other0,
-            #[cfg(feature = "full")]
-            (Expr::Type(self0), Expr::Type(other0)) => self0 == other0,
             (Expr::Unary(self0), Expr::Unary(other0)) => self0 == other0,
             #[cfg(feature = "full")]
             (Expr::Unsafe(self0), Expr::Unsafe(other0)) => self0 == other0,
@@ -668,16 +666,6 @@ impl Eq for ExprTuple {}
 impl PartialEq for ExprTuple {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.elems == other.elems
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for ExprType {}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for ExprType {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.expr == other.expr && self.ty == other.ty
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

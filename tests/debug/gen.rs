@@ -1061,15 +1061,6 @@ impl Debug for Lite<syn::Expr> {
                 }
                 formatter.finish()
             }
-            syn::Expr::Type(_val) => {
-                let mut formatter = formatter.debug_struct("Expr::Type");
-                if !_val.attrs.is_empty() {
-                    formatter.field("attrs", Lite(&_val.attrs));
-                }
-                formatter.field("expr", Lite(&_val.expr));
-                formatter.field("ty", Lite(&_val.ty));
-                formatter.finish()
-            }
             syn::Expr::Unary(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Unary");
                 if !_val.attrs.is_empty() {
@@ -1882,18 +1873,6 @@ impl Debug for Lite<syn::ExprTuple> {
         if !_val.elems.is_empty() {
             formatter.field("elems", Lite(&_val.elems));
         }
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::ExprType> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("ExprType");
-        if !_val.attrs.is_empty() {
-            formatter.field("attrs", Lite(&_val.attrs));
-        }
-        formatter.field("expr", Lite(&_val.expr));
-        formatter.field("ty", Lite(&_val.ty));
         formatter.finish()
     }
 }

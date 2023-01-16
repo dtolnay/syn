@@ -242,10 +242,6 @@ pub trait Fold {
     fn fold_expr_tuple(&mut self, i: ExprTuple) -> ExprTuple {
         fold_expr_tuple(self, i)
     }
-    #[cfg(feature = "full")]
-    fn fold_expr_type(&mut self, i: ExprType) -> ExprType {
-        fold_expr_type(self, i)
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_expr_unary(&mut self, i: ExprUnary) -> ExprUnary {
         fold_expr_unary(self, i)
@@ -1122,7 +1118,6 @@ where
             Expr::TryBlock(full!(f.fold_expr_try_block(_binding_0)))
         }
         Expr::Tuple(_binding_0) => Expr::Tuple(full!(f.fold_expr_tuple(_binding_0))),
-        Expr::Type(_binding_0) => Expr::Type(full!(f.fold_expr_type(_binding_0))),
         Expr::Unary(_binding_0) => Expr::Unary(f.fold_expr_unary(_binding_0)),
         Expr::Unsafe(_binding_0) => Expr::Unsafe(full!(f.fold_expr_unsafe(_binding_0))),
         Expr::Verbatim(_binding_0) => Expr::Verbatim(_binding_0),
@@ -1558,18 +1553,6 @@ where
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         paren_token: Paren(tokens_helper(f, &node.paren_token.span)),
         elems: FoldHelper::lift(node.elems, |it| f.fold_expr(it)),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_expr_type<F>(f: &mut F, node: ExprType) -> ExprType
-where
-    F: Fold + ?Sized,
-{
-    ExprType {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        expr: Box::new(f.fold_expr(*node.expr)),
-        colon_token: Token![:](tokens_helper(f, &node.colon_token.spans)),
-        ty: Box::new(f.fold_type(*node.ty)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

@@ -244,10 +244,6 @@ pub trait Visit<'ast> {
     fn visit_expr_tuple(&mut self, i: &'ast ExprTuple) {
         visit_expr_tuple(self, i);
     }
-    #[cfg(feature = "full")]
-    fn visit_expr_type(&mut self, i: &'ast ExprType) {
-        visit_expr_type(self, i);
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_expr_unary(&mut self, i: &'ast ExprUnary) {
         visit_expr_unary(self, i);
@@ -1195,9 +1191,6 @@ where
         Expr::Tuple(_binding_0) => {
             full!(v.visit_expr_tuple(_binding_0));
         }
-        Expr::Type(_binding_0) => {
-            full!(v.visit_expr_type(_binding_0));
-        }
         Expr::Unary(_binding_0) => {
             v.visit_expr_unary(_binding_0);
         }
@@ -1722,18 +1715,6 @@ where
             tokens_helper(v, &p.spans);
         }
     }
-}
-#[cfg(feature = "full")]
-pub fn visit_expr_type<'ast, V>(v: &mut V, node: &'ast ExprType)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it);
-    }
-    v.visit_expr(&*node.expr);
-    tokens_helper(v, &node.colon_token.spans);
-    v.visit_type(&*node.ty);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr_unary<'ast, V>(v: &mut V, node: &'ast ExprUnary)
