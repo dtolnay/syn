@@ -14,9 +14,6 @@ const REVISION: &str = "afaf3e07aaa7ca9873bdb439caec53faffa4230c";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: half open range pattern with guard, 0.. if true
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0166_half_open_range_pat.rs",
-
     // TODO: multiple ~const constraints in impl Trait
     "tests/ui/rfc-2632-const-trait-impl/const-impl-trait.rs",
 
