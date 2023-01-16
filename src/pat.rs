@@ -280,7 +280,7 @@ ast_struct! {
 pub mod parsing {
     use super::*;
     use crate::ext::IdentExt;
-    use crate::parse::{ParseBuffer, ParseStream, Result};
+    use crate::parse::{ParseStream, Result};
     use crate::path;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -310,7 +310,6 @@ pub mod parsing {
         ///   |      ^^^^^^^^^^^^^^ help: wrap the pattern in parentheses: `(Some(_) | None)`
         /// ```
         pub fn parse_single(input: ParseStream) -> Result<Self> {
-            let begin = input.fork();
             let lookahead = input.lookahead1();
             if {
                 let ahead = input.fork();
@@ -352,7 +351,7 @@ pub mod parsing {
             } else if lookahead.peek(token::Bracket) {
                 input.call(pat_slice).map(Pat::Slice)
             } else if lookahead.peek(Token![..]) && !input.peek(Token![...]) {
-                pat_range_half_open(input, begin)
+                pat_range_half_open(input)
             } else if lookahead.peek(Token![const]) {
                 input.call(pat_const).map(Pat::Verbatim)
             } else {
@@ -635,11 +634,16 @@ pub mod parsing {
         }))
     }
 
-    fn pat_range_half_open(input: ParseStream, begin: ParseBuffer) -> Result<Pat> {
+    fn pat_range_half_open(input: ParseStream) -> Result<Pat> {
         let limits: RangeLimits = input.parse()?;
         let hi = input.call(pat_lit_expr)?;
         if hi.is_some() {
-            Ok(Pat::Verbatim(verbatim::between(begin, input)))
+            Ok(Pat::Range(PatRange {
+                attrs: Vec::new(),
+                lo: None,
+                limits,
+                hi,
+            }))
         } else {
             match limits {
                 RangeLimits::HalfOpen(dot2_token) => Ok(Pat::Rest(PatRest {
