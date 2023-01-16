@@ -746,7 +746,7 @@ pub mod parsing {
         {
             Expr::Path(input.parse()?)
         } else if lookahead.peek(Token![const]) {
-            Expr::Verbatim(input.call(expr::parsing::expr_const)?)
+            Expr::Const(input.parse()?)
         } else {
             return Err(lookahead.error());
         };

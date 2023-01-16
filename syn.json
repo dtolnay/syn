@@ -628,6 +628,11 @@
             "syn": "ExprClosure"
           }
         ],
+        "Const": [
+          {
+            "syn": "ExprConst"
+          }
+        ],
         "Continue": [
           {
             "syn": "ExprContinue"
@@ -1120,6 +1125,27 @@
           "box": {
             "syn": "Expr"
           }
+        }
+      }
+    },
+    {
+      "ident": "ExprConst",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "const_token": {
+          "token": "Const"
+        },
+        "block": {
+          "syn": "Block"
         }
       }
     },

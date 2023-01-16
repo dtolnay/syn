@@ -365,136 +365,141 @@ impl Hash for Expr {
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Continue(v0) => {
+            Expr::Const(v0) => {
                 state.write_u8(12u8);
                 v0.hash(state);
             }
-            Expr::Field(v0) => {
+            #[cfg(feature = "full")]
+            Expr::Continue(v0) => {
                 state.write_u8(13u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
-            Expr::ForLoop(v0) => {
+            Expr::Field(v0) => {
                 state.write_u8(14u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Group(v0) => {
+            Expr::ForLoop(v0) => {
                 state.write_u8(15u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::If(v0) => {
+            Expr::Group(v0) => {
                 state.write_u8(16u8);
                 v0.hash(state);
             }
-            Expr::Index(v0) => {
+            #[cfg(feature = "full")]
+            Expr::If(v0) => {
                 state.write_u8(17u8);
+                v0.hash(state);
+            }
+            Expr::Index(v0) => {
+                state.write_u8(18u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Let(v0) => {
-                state.write_u8(18u8);
-                v0.hash(state);
-            }
-            Expr::Lit(v0) => {
                 state.write_u8(19u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
-            Expr::Loop(v0) => {
+            Expr::Lit(v0) => {
                 state.write_u8(20u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Macro(v0) => {
+            Expr::Loop(v0) => {
                 state.write_u8(21u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Match(v0) => {
+            Expr::Macro(v0) => {
                 state.write_u8(22u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::MethodCall(v0) => {
+            Expr::Match(v0) => {
                 state.write_u8(23u8);
                 v0.hash(state);
             }
-            Expr::Paren(v0) => {
+            #[cfg(feature = "full")]
+            Expr::MethodCall(v0) => {
                 state.write_u8(24u8);
                 v0.hash(state);
             }
-            Expr::Path(v0) => {
+            Expr::Paren(v0) => {
                 state.write_u8(25u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
-            Expr::Range(v0) => {
+            Expr::Path(v0) => {
                 state.write_u8(26u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Reference(v0) => {
+            Expr::Range(v0) => {
                 state.write_u8(27u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Repeat(v0) => {
+            Expr::Reference(v0) => {
                 state.write_u8(28u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Return(v0) => {
+            Expr::Repeat(v0) => {
                 state.write_u8(29u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Struct(v0) => {
+            Expr::Return(v0) => {
                 state.write_u8(30u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Try(v0) => {
+            Expr::Struct(v0) => {
                 state.write_u8(31u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::TryBlock(v0) => {
+            Expr::Try(v0) => {
                 state.write_u8(32u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Tuple(v0) => {
+            Expr::TryBlock(v0) => {
                 state.write_u8(33u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Type(v0) => {
+            Expr::Tuple(v0) => {
                 state.write_u8(34u8);
                 v0.hash(state);
             }
-            Expr::Unary(v0) => {
+            #[cfg(feature = "full")]
+            Expr::Type(v0) => {
                 state.write_u8(35u8);
+                v0.hash(state);
+            }
+            Expr::Unary(v0) => {
+                state.write_u8(36u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Unsafe(v0) => {
-                state.write_u8(36u8);
+                state.write_u8(37u8);
                 v0.hash(state);
             }
             Expr::Verbatim(v0) => {
-                state.write_u8(37u8);
+                state.write_u8(38u8);
                 TokenStreamHelper(v0).hash(state);
             }
             #[cfg(feature = "full")]
             Expr::While(v0) => {
-                state.write_u8(38u8);
+                state.write_u8(39u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Yield(v0) => {
-                state.write_u8(39u8);
+                state.write_u8(40u8);
                 v0.hash(state);
             }
             #[cfg(any(syn_no_non_exhaustive, not(feature = "full")))]
@@ -647,6 +652,17 @@ impl Hash for ExprClosure {
         self.inputs.hash(state);
         self.output.hash(state);
         self.body.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for ExprConst {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.attrs.hash(state);
+        self.block.hash(state);
     }
 }
 #[cfg(feature = "full")]

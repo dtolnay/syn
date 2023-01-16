@@ -151,6 +151,10 @@ pub trait Fold {
         fold_expr_closure(self, i)
     }
     #[cfg(feature = "full")]
+    fn fold_expr_const(&mut self, i: ExprConst) -> ExprConst {
+        fold_expr_const(self, i)
+    }
+    #[cfg(feature = "full")]
     fn fold_expr_continue(&mut self, i: ExprContinue) -> ExprContinue {
         fold_expr_continue(self, i)
     }
@@ -1089,6 +1093,7 @@ where
         Expr::Closure(_binding_0) => {
             Expr::Closure(full!(f.fold_expr_closure(_binding_0)))
         }
+        Expr::Const(_binding_0) => Expr::Const(full!(f.fold_expr_const(_binding_0))),
         Expr::Continue(_binding_0) => {
             Expr::Continue(full!(f.fold_expr_continue(_binding_0)))
         }
@@ -1276,6 +1281,17 @@ where
         or2_token: Token![|](tokens_helper(f, &node.or2_token.spans)),
         output: f.fold_return_type(node.output),
         body: Box::new(f.fold_expr(*node.body)),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_expr_const<F>(f: &mut F, node: ExprConst) -> ExprConst
+where
+    F: Fold + ?Sized,
+{
+    ExprConst {
+        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        const_token: Token![const](tokens_helper(f, &node.const_token.span)),
+        block: f.fold_block(node.block),
     }
 }
 #[cfg(feature = "full")]

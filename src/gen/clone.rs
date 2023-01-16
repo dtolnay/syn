@@ -224,6 +224,8 @@ impl Clone for Expr {
             #[cfg(feature = "full")]
             Expr::Closure(v0) => Expr::Closure(v0.clone()),
             #[cfg(feature = "full")]
+            Expr::Const(v0) => Expr::Const(v0.clone()),
+            #[cfg(feature = "full")]
             Expr::Continue(v0) => Expr::Continue(v0.clone()),
             Expr::Field(v0) => Expr::Field(v0.clone()),
             #[cfg(feature = "full")]
@@ -420,6 +422,17 @@ impl Clone for ExprClosure {
             or2_token: self.or2_token.clone(),
             output: self.output.clone(),
             body: self.body.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for ExprConst {
+    fn clone(&self) -> Self {
+        ExprConst {
+            attrs: self.attrs.clone(),
+            const_token: self.const_token.clone(),
+            block: self.block.clone(),
         }
     }
 }

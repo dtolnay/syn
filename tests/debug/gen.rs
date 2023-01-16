@@ -633,6 +633,14 @@ impl Debug for Lite<syn::Expr> {
                 formatter.field("body", Lite(&_val.body));
                 formatter.finish()
             }
+            syn::Expr::Const(_val) => {
+                let mut formatter = formatter.debug_struct("Expr::Const");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                formatter.field("block", Lite(&_val.block));
+                formatter.finish()
+            }
             syn::Expr::Continue(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Continue");
                 if !_val.attrs.is_empty() {
@@ -1334,6 +1342,17 @@ impl Debug for Lite<syn::ExprClosure> {
         }
         formatter.field("output", Lite(&_val.output));
         formatter.field("body", Lite(&_val.body));
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::ExprConst> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("ExprConst");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        formatter.field("block", Lite(&_val.block));
         formatter.finish()
     }
 }
