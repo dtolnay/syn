@@ -92,8 +92,8 @@ impl IdentExt for Ident {
 
     fn unraw(&self) -> Ident {
         let string = self.to_string();
-        if string.starts_with("r#") {
-            Ident::new(&string[2..], self.span())
+        if let Some(string) = string.strip_prefix("r#") {
+            Ident::new(string, self.span())
         } else {
             self.clone()
         }

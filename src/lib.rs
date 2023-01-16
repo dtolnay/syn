@@ -267,7 +267,6 @@
     clippy::items_after_statements,
     clippy::large_enum_variant,
     clippy::manual_assert,
-    clippy::manual_strip,
     clippy::match_like_matches_macro,
     clippy::match_on_vec_items,
     clippy::match_same_arms,
