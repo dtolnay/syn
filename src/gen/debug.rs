@@ -558,12 +558,6 @@ impl Debug for Expr {
                 formatter.field(v0);
                 formatter.finish()
             }
-            #[cfg(feature = "full")]
-            Expr::Type(v0) => {
-                let mut formatter = formatter.debug_tuple("Type");
-                formatter.field(v0);
-                formatter.finish()
-            }
             Expr::Unary(v0) => {
                 let mut formatter = formatter.debug_tuple("Unary");
                 formatter.field(v0);
@@ -1017,18 +1011,6 @@ impl Debug for ExprTuple {
         formatter.field("attrs", &self.attrs);
         formatter.field("paren_token", &self.paren_token);
         formatter.field("elems", &self.elems);
-        formatter.finish()
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for ExprType {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("ExprType");
-        formatter.field("attrs", &self.attrs);
-        formatter.field("expr", &self.expr);
-        formatter.field("colon_token", &self.colon_token);
-        formatter.field("ty", &self.ty);
         formatter.finish()
     }
 }

@@ -474,32 +474,27 @@ impl Hash for Expr {
                 state.write_u8(34u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
-            Expr::Type(v0) => {
-                state.write_u8(35u8);
-                v0.hash(state);
-            }
             Expr::Unary(v0) => {
-                state.write_u8(36u8);
+                state.write_u8(35u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Unsafe(v0) => {
-                state.write_u8(37u8);
+                state.write_u8(36u8);
                 v0.hash(state);
             }
             Expr::Verbatim(v0) => {
-                state.write_u8(38u8);
+                state.write_u8(37u8);
                 TokenStreamHelper(v0).hash(state);
             }
             #[cfg(feature = "full")]
             Expr::While(v0) => {
-                state.write_u8(39u8);
+                state.write_u8(38u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Yield(v0) => {
-                state.write_u8(40u8);
+                state.write_u8(39u8);
                 v0.hash(state);
             }
             #[cfg(any(syn_no_non_exhaustive, not(feature = "full")))]
@@ -928,18 +923,6 @@ impl Hash for ExprTuple {
     {
         self.attrs.hash(state);
         self.elems.hash(state);
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for ExprType {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.attrs.hash(state);
-        self.expr.hash(state);
-        self.ty.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

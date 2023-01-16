@@ -264,8 +264,6 @@ impl Clone for Expr {
             Expr::TryBlock(v0) => Expr::TryBlock(v0.clone()),
             #[cfg(feature = "full")]
             Expr::Tuple(v0) => Expr::Tuple(v0.clone()),
-            #[cfg(feature = "full")]
-            Expr::Type(v0) => Expr::Type(v0.clone()),
             Expr::Unary(v0) => Expr::Unary(v0.clone()),
             #[cfg(feature = "full")]
             Expr::Unsafe(v0) => Expr::Unsafe(v0.clone()),
@@ -699,18 +697,6 @@ impl Clone for ExprTuple {
             attrs: self.attrs.clone(),
             paren_token: self.paren_token.clone(),
             elems: self.elems.clone(),
-        }
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for ExprType {
-    fn clone(&self) -> Self {
-        ExprType {
-            attrs: self.attrs.clone(),
-            expr: self.expr.clone(),
-            colon_token: self.colon_token.clone(),
-            ty: self.ty.clone(),
         }
     }
 }
