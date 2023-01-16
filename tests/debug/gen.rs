@@ -606,6 +606,18 @@ impl Debug for Lite<syn::Expr> {
                     }
                     formatter.field("lifetimes", Print::ref_cast(val));
                 }
+                if let Some(val) = &_val.constness {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::token::Const);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("constness", Print::ref_cast(val));
+                }
                 if let Some(val) = &_val.movability {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -1332,6 +1344,18 @@ impl Debug for Lite<syn::ExprClosure> {
                 }
             }
             formatter.field("lifetimes", Print::ref_cast(val));
+        }
+        if let Some(val) = &_val.constness {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Const);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("constness", Print::ref_cast(val));
         }
         if let Some(val) = &_val.movability {
             #[derive(RefCast)]

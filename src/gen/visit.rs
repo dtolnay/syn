@@ -1381,6 +1381,9 @@ where
     if let Some(it) = &node.lifetimes {
         v.visit_bound_lifetimes(it);
     }
+    if let Some(it) = &node.constness {
+        tokens_helper(v, &it.span);
+    }
     if let Some(it) = &node.movability {
         tokens_helper(v, &it.span);
     }

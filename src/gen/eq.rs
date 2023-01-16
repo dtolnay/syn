@@ -424,9 +424,10 @@ impl Eq for ExprClosure {}
 impl PartialEq for ExprClosure {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.lifetimes == other.lifetimes
-            && self.movability == other.movability && self.asyncness == other.asyncness
-            && self.capture == other.capture && self.inputs == other.inputs
-            && self.output == other.output && self.body == other.body
+            && self.constness == other.constness && self.movability == other.movability
+            && self.asyncness == other.asyncness && self.capture == other.capture
+            && self.inputs == other.inputs && self.output == other.output
+            && self.body == other.body
     }
 }
 #[cfg(feature = "full")]

@@ -1273,6 +1273,7 @@ where
     ExprClosure {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         lifetimes: (node.lifetimes).map(|it| f.fold_bound_lifetimes(it)),
+        constness: (node.constness).map(|it| Token![const](tokens_helper(f, &it.span))),
         movability: (node.movability)
             .map(|it| Token![static](tokens_helper(f, &it.span))),
         asyncness: (node.asyncness).map(|it| Token![async](tokens_helper(f, &it.span))),

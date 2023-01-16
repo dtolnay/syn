@@ -415,6 +415,7 @@ impl Clone for ExprClosure {
         ExprClosure {
             attrs: self.attrs.clone(),
             lifetimes: self.lifetimes.clone(),
+            constness: self.constness.clone(),
             movability: self.movability.clone(),
             asyncness: self.asyncness.clone(),
             capture: self.capture.clone(),
