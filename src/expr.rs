@@ -375,6 +375,7 @@ ast_struct! {
     pub struct ExprClosure #full {
         pub attrs: Vec<Attribute>,
         pub lifetimes: Option<BoundLifetimes>,
+        pub constness: Option<Token![const]>,
         pub movability: Option<Token![static]>,
         pub asyncness: Option<Token![async]>,
         pub capture: Option<Token![move]>,
@@ -1638,6 +1639,7 @@ pub(crate) mod parsing {
             || input.peek(Token![for])
                 && input.peek2(Token![<])
                 && (input.peek3(Lifetime) || input.peek3(Token![>]))
+            || input.peek(Token![const]) && !input.peek2(token::Brace)
             || input.peek(Token![static])
             || input.peek(Token![async]) && (input.peek2(Token![|]) || input.peek2(Token![move]))
         {
@@ -2342,6 +2344,7 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     fn expr_closure(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprClosure> {
         let lifetimes: Option<BoundLifetimes> = input.parse()?;
+        let constness: Option<Token![const]> = input.parse()?;
         let movability: Option<Token![static]> = input.parse()?;
         let asyncness: Option<Token![async]> = input.parse()?;
         let capture: Option<Token![move]> = input.parse()?;
@@ -2382,6 +2385,7 @@ pub(crate) mod parsing {
         Ok(ExprClosure {
             attrs: Vec::new(),
             lifetimes,
+            constness,
             movability,
             asyncness,
             capture,
@@ -3184,6 +3188,7 @@ pub(crate) mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.lifetimes.to_tokens(tokens);
+            self.constness.to_tokens(tokens);
             self.movability.to_tokens(tokens);
             self.asyncness.to_tokens(tokens);
             self.capture.to_tokens(tokens);

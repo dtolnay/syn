@@ -1094,6 +1094,11 @@
             "syn": "BoundLifetimes"
           }
         },
+        "constness": {
+          "option": {
+            "token": "Const"
+          }
+        },
         "movability": {
           "option": {
             "token": "Static"

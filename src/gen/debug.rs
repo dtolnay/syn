@@ -733,6 +733,7 @@ impl Debug for ExprClosure {
         let mut formatter = formatter.debug_struct("ExprClosure");
         formatter.field("attrs", &self.attrs);
         formatter.field("lifetimes", &self.lifetimes);
+        formatter.field("constness", &self.constness);
         formatter.field("movability", &self.movability);
         formatter.field("asyncness", &self.asyncness);
         formatter.field("capture", &self.capture);
