@@ -204,8 +204,8 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// This method operates on librustc objects.
 fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_ast::ast::{
-        Attribute, Block, BorrowKind, Expr, ExprField, ExprKind, GenericArg, Local, LocalKind, Pat,
-        Stmt, StmtKind, StructExpr, StructRest, Ty,
+        Attribute, BinOpKind, Block, BorrowKind, Expr, ExprField, ExprKind, GenericArg, Local,
+        LocalKind, Pat, Stmt, StmtKind, StructExpr, StructRest, Ty,
     };
     use rustc_ast::mut_visit::{noop_visit_generic_arg, noop_visit_local, MutVisitor};
     use rustc_data_structures::map_in_place::MapInPlace;
@@ -274,6 +274,12 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
             noop_visit_expr(e, self);
             match e.kind {
                 ExprKind::If(..) | ExprKind::Block(..) | ExprKind::Let(..) => {}
+                ExprKind::Binary(binop, ref left, ref right)
+                    if match (&left.kind, binop.node, &right.kind) {
+                        (ExprKind::Let(..), BinOpKind::And, _)
+                        | (_, BinOpKind::And, ExprKind::Let(..)) => true,
+                        _ => false,
+                    } => {}
                 _ => {
                     let inner = mem::replace(
                         e,
@@ -348,8 +354,8 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
     use syn::fold::{fold_expr, fold_generic_argument, fold_generic_method_argument, Fold};
     use syn::{
-        token, Expr, ExprParen, GenericArgument, GenericMethodArgument, MetaNameValue, Pat, Stmt,
-        Type,
+        token, BinOp, Expr, ExprParen, GenericArgument, GenericMethodArgument, MetaNameValue, Pat,
+        Stmt, Type,
     };
 
     struct ParenthesizeEveryExpr;
@@ -357,7 +363,15 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
             match expr {
                 Expr::Group(_) => unreachable!(),
-                Expr::If(..) | Expr::Unsafe(..) | Expr::Block(..) | Expr::Let(..) => {
+                Expr::If(_) | Expr::Unsafe(_) | Expr::Block(_) | Expr::Let(_) => {
+                    fold_expr(self, expr)
+                }
+                Expr::Binary(ref bin)
+                    if match (&*bin.left, bin.op, &*bin.right) {
+                        (Expr::Let(_), BinOp::And(_), _) | (_, BinOp::And(_), Expr::Let(_)) => true,
+                        _ => false,
+                    } =>
+                {
                     fold_expr(self, expr)
                 }
                 _ => Expr::Paren(ExprParen {
