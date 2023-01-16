@@ -714,16 +714,11 @@ where
 ///
 /// [module documentation]: self
 pub struct Iter<'a, T: 'a> {
-    // The `Item = &'a T` needs to be specified to support rustc 1.31 and older.
-    // On modern compilers we would be able to write just IterTrait<'a, T> where
-    // Item can be inferred unambiguously from the supertrait.
-    inner: Box<NoDrop<dyn IterTrait<'a, T, Item = &'a T> + 'a>>,
+    inner: Box<NoDrop<dyn IterTrait<'a, T> + 'a>>,
 }
 
-trait IterTrait<'a, T: 'a>:
-    DoubleEndedIterator<Item = &'a T> + ExactSizeIterator<Item = &'a T>
-{
-    fn clone_box(&self) -> Box<NoDrop<dyn IterTrait<'a, T, Item = &'a T> + 'a>>;
+trait IterTrait<'a, T: 'a>: Iterator<Item = &'a T> + DoubleEndedIterator + ExactSizeIterator {
+    fn clone_box(&self) -> Box<NoDrop<dyn IterTrait<'a, T> + 'a>>;
 }
 
 struct PrivateIter<'a, T: 'a, P: 'a> {
@@ -822,7 +817,7 @@ where
         + TrivialDrop
         + 'a,
 {
-    fn clone_box(&self) -> Box<NoDrop<dyn IterTrait<'a, T, Item = &'a T> + 'a>> {
+    fn clone_box(&self) -> Box<NoDrop<dyn IterTrait<'a, T> + 'a>> {
         Box::new(NoDrop::new(self.clone()))
     }
 }
