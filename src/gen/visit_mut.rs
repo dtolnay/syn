@@ -2905,9 +2905,13 @@ where
     for it in &mut node.attrs {
         v.visit_attribute_mut(it);
     }
-    v.visit_expr_mut(&mut *node.lo);
+    if let Some(it) = &mut node.lo {
+        v.visit_expr_mut(&mut **it);
+    }
     v.visit_range_limits_mut(&mut node.limits);
-    v.visit_expr_mut(&mut *node.hi);
+    if let Some(it) = &mut node.hi {
+        v.visit_expr_mut(&mut **it);
+    }
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_reference_mut<V>(v: &mut V, node: &mut PatReference)

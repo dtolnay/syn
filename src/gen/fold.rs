@@ -2591,9 +2591,9 @@ where
 {
     PatRange {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        lo: Box::new(f.fold_expr(*node.lo)),
+        lo: (node.lo).map(|it| Box::new(f.fold_expr(*it))),
         limits: f.fold_range_limits(node.limits),
-        hi: Box::new(f.fold_expr(*node.hi)),
+        hi: (node.hi).map(|it| Box::new(f.fold_expr(*it))),
     }
 }
 #[cfg(feature = "full")]

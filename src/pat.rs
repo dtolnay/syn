@@ -172,9 +172,9 @@ ast_struct! {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatRange {
         pub attrs: Vec<Attribute>,
-        pub lo: Box<Expr>,
+        pub lo: Option<Box<Expr>>,
         pub limits: RangeLimits,
-        pub hi: Box<Expr>,
+        pub hi: Option<Box<Expr>>,
     }
 }
 
@@ -478,7 +478,7 @@ pub mod parsing {
                 Ok(Pat::TupleStruct(pat))
             }
         } else if input.peek(Token![..]) {
-            pat_range(input, begin, qself, path)
+            pat_range(input, qself, path)
         } else {
             Ok(Pat::Path(PatPath {
                 attrs: Vec::new(),
@@ -623,28 +623,19 @@ pub mod parsing {
         })
     }
 
-    fn pat_range(
-        input: ParseStream,
-        begin: ParseBuffer,
-        qself: Option<QSelf>,
-        path: Path,
-    ) -> Result<Pat> {
+    fn pat_range(input: ParseStream, qself: Option<QSelf>, path: Path) -> Result<Pat> {
         let limits: RangeLimits = input.parse()?;
         let hi = input.call(pat_lit_expr)?;
-        if let Some(hi) = hi {
-            Ok(Pat::Range(PatRange {
+        Ok(Pat::Range(PatRange {
+            attrs: Vec::new(),
+            lo: Some(Box::new(Expr::Path(ExprPath {
                 attrs: Vec::new(),
-                lo: Box::new(Expr::Path(ExprPath {
-                    attrs: Vec::new(),
-                    qself,
-                    path,
-                })),
-                limits,
-                hi,
-            }))
-        } else {
-            Ok(Pat::Verbatim(verbatim::between(begin, input)))
-        }
+                qself,
+                path,
+            }))),
+            limits,
+            hi,
+        }))
     }
 
     fn pat_range_half_open(input: ParseStream, begin: ParseBuffer) -> Result<Pat> {
@@ -695,21 +686,16 @@ pub mod parsing {
     }
 
     fn pat_lit_or_range(input: ParseStream) -> Result<Pat> {
-        let begin = input.fork();
         let lo = input.call(pat_lit_expr)?.unwrap();
         if input.peek(Token![..]) {
             let limits: RangeLimits = input.parse()?;
             let hi = input.call(pat_lit_expr)?;
-            if let Some(hi) = hi {
-                Ok(Pat::Range(PatRange {
-                    attrs: Vec::new(),
-                    lo,
-                    limits,
-                    hi,
-                }))
-            } else {
-                Ok(Pat::Verbatim(verbatim::between(begin, input)))
-            }
+            Ok(Pat::Range(PatRange {
+                attrs: Vec::new(),
+                lo: Some(lo),
+                limits,
+                hi,
+            }))
         } else if let Expr::Verbatim(verbatim) = *lo {
             Ok(Pat::Verbatim(verbatim))
         } else {
