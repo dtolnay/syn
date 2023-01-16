@@ -153,6 +153,10 @@ pub trait Visit<'ast> {
         visit_expr_closure(self, i);
     }
     #[cfg(feature = "full")]
+    fn visit_expr_const(&mut self, i: &'ast ExprConst) {
+        visit_expr_const(self, i);
+    }
+    #[cfg(feature = "full")]
     fn visit_expr_continue(&mut self, i: &'ast ExprContinue) {
         visit_expr_continue(self, i);
     }
@@ -1126,6 +1130,9 @@ where
         Expr::Closure(_binding_0) => {
             full!(v.visit_expr_closure(_binding_0));
         }
+        Expr::Const(_binding_0) => {
+            full!(v.visit_expr_const(_binding_0));
+        }
         Expr::Continue(_binding_0) => {
             full!(v.visit_expr_continue(_binding_0));
         }
@@ -1391,6 +1398,17 @@ where
     tokens_helper(v, &node.or2_token.spans);
     v.visit_return_type(&node.output);
     v.visit_expr(&*node.body);
+}
+#[cfg(feature = "full")]
+pub fn visit_expr_const<'ast, V>(v: &mut V, node: &'ast ExprConst)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    tokens_helper(v, &node.const_token.span);
+    v.visit_block(&node.block);
 }
 #[cfg(feature = "full")]
 pub fn visit_expr_continue<'ast, V>(v: &mut V, node: &'ast ExprContinue)

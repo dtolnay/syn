@@ -271,10 +271,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 
     impl MutVisitor for BracketsVisitor {
         fn visit_expr(&mut self, e: &mut P<Expr>) {
-            match e.kind {
-                ExprKind::ConstBlock(..) => {}
-                _ => noop_visit_expr(e, self),
-            }
+            noop_visit_expr(e, self);
             match e.kind {
                 ExprKind::If(..) | ExprKind::Block(..) | ExprKind::Let(..) => {}
                 _ => {

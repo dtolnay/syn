@@ -426,6 +426,12 @@ impl Debug for Expr {
                 formatter.finish()
             }
             #[cfg(feature = "full")]
+            Expr::Const(v0) => {
+                let mut formatter = formatter.debug_tuple("Const");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            #[cfg(feature = "full")]
             Expr::Continue(v0) => {
                 let mut formatter = formatter.debug_tuple("Continue");
                 formatter.field(v0);
@@ -734,6 +740,17 @@ impl Debug for ExprClosure {
         formatter.field("or2_token", &self.or2_token);
         formatter.field("output", &self.output);
         formatter.field("body", &self.body);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for ExprConst {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ExprConst");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("const_token", &self.const_token);
+        formatter.field("block", &self.block);
         formatter.finish()
     }
 }

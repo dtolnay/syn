@@ -154,6 +154,10 @@ pub trait VisitMut {
         visit_expr_closure_mut(self, i);
     }
     #[cfg(feature = "full")]
+    fn visit_expr_const_mut(&mut self, i: &mut ExprConst) {
+        visit_expr_const_mut(self, i);
+    }
+    #[cfg(feature = "full")]
     fn visit_expr_continue_mut(&mut self, i: &mut ExprContinue) {
         visit_expr_continue_mut(self, i);
     }
@@ -1127,6 +1131,9 @@ where
         Expr::Closure(_binding_0) => {
             full!(v.visit_expr_closure_mut(_binding_0));
         }
+        Expr::Const(_binding_0) => {
+            full!(v.visit_expr_const_mut(_binding_0));
+        }
         Expr::Continue(_binding_0) => {
             full!(v.visit_expr_continue_mut(_binding_0));
         }
@@ -1392,6 +1399,17 @@ where
     tokens_helper(v, &mut node.or2_token.spans);
     v.visit_return_type_mut(&mut node.output);
     v.visit_expr_mut(&mut *node.body);
+}
+#[cfg(feature = "full")]
+pub fn visit_expr_const_mut<V>(v: &mut V, node: &mut ExprConst)
+where
+    V: VisitMut + ?Sized,
+{
+    for it in &mut node.attrs {
+        v.visit_attribute_mut(it);
+    }
+    tokens_helper(v, &mut node.const_token.span);
+    v.visit_block_mut(&mut node.block);
 }
 #[cfg(feature = "full")]
 pub fn visit_expr_continue_mut<V>(v: &mut V, node: &mut ExprContinue)

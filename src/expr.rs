@@ -124,6 +124,9 @@ ast_enum_of_structs! {
         /// A closure expression: `|a, b| a + b`.
         Closure(ExprClosure),
 
+        /// A const block: `const { ... }`.
+        Const(ExprConst),
+
         /// A `continue`, with an optional label.
         Continue(ExprContinue),
 
@@ -379,6 +382,15 @@ ast_struct! {
         pub or2_token: Token![|],
         pub output: ReturnType,
         pub body: Box<Expr>,
+    }
+}
+
+ast_struct! {
+    /// A const block: `const { ... }`.
+    pub struct ExprConst #full {
+        pub attrs: Vec<Attribute>,
+        pub const_token: Token![const],
+        pub block: Block,
     }
 }
 
@@ -718,6 +730,7 @@ impl Expr {
             | Expr::Call(ExprCall { attrs, .. })
             | Expr::Cast(ExprCast { attrs, .. })
             | Expr::Closure(ExprClosure { attrs, .. })
+            | Expr::Const(ExprConst { attrs, .. })
             | Expr::Continue(ExprContinue { attrs, .. })
             | Expr::Field(ExprField { attrs, .. })
             | Expr::ForLoop(ExprForLoop { attrs, .. })
@@ -1671,7 +1684,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![unsafe]) {
             input.parse().map(Expr::Unsafe)
         } else if input.peek(Token![const]) {
-            input.call(expr_const).map(Expr::Verbatim)
+            input.parse().map(Expr::Const)
         } else if input.peek(token::Brace) {
             input.parse().map(Expr::Block)
         } else if input.peek(Token![..]) {
@@ -1925,7 +1938,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![unsafe]) {
             Expr::Unsafe(input.parse()?)
         } else if input.peek(Token![const]) {
-            Expr::Verbatim(input.call(expr_const)?)
+            Expr::Const(input.parse()?)
         } else if input.peek(token::Brace) {
             Expr::Block(input.parse()?)
         } else {
@@ -2461,6 +2474,25 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprConst {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let const_token: Token![const] = input.parse()?;
+
+            let content;
+            let brace_token = braced!(content in input);
+            let inner_attrs = content.call(Attribute::parse_inner)?;
+            let stmts = content.call(Block::parse_within)?;
+
+            Ok(ExprConst {
+                attrs: inner_attrs,
+                const_token,
+                block: Block { brace_token, stmts },
+            })
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Label {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(Label {
@@ -2632,19 +2664,6 @@ pub(crate) mod parsing {
                 block: Block { brace_token, stmts },
             })
         }
-    }
-
-    #[cfg(feature = "full")]
-    pub(crate) fn expr_const(input: ParseStream) -> Result<TokenStream> {
-        let begin = input.fork();
-        input.parse::<Token![const]>()?;
-
-        let content;
-        braced!(content in input);
-        content.call(Attribute::parse_inner)?;
-        content.call(Block::parse_within)?;
-
-        Ok(verbatim::between(begin, input))
     }
 
     #[cfg(feature = "full")]
@@ -3316,6 +3335,19 @@ pub(crate) mod printing {
             self.break_token.to_tokens(tokens);
             self.label.to_tokens(tokens);
             self.expr.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprConst {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.const_token.to_tokens(tokens);
+            self.block.brace_token.surround(tokens, |tokens| {
+                inner_attrs_to_tokens(&self.attrs, tokens);
+                tokens.append_all(&self.block.stmts);
+            });
         }
     }
 

@@ -246,6 +246,8 @@ impl PartialEq for Expr {
             #[cfg(feature = "full")]
             (Expr::Closure(self0), Expr::Closure(other0)) => self0 == other0,
             #[cfg(feature = "full")]
+            (Expr::Const(self0), Expr::Const(other0)) => self0 == other0,
+            #[cfg(feature = "full")]
             (Expr::Continue(self0), Expr::Continue(other0)) => self0 == other0,
             (Expr::Field(self0), Expr::Field(other0)) => self0 == other0,
             #[cfg(feature = "full")]
@@ -425,6 +427,16 @@ impl PartialEq for ExprClosure {
             && self.asyncness == other.asyncness && self.capture == other.capture
             && self.inputs == other.inputs && self.output == other.output
             && self.body == other.body
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for ExprConst {}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for ExprConst {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs && self.block == other.block
     }
 }
 #[cfg(feature = "full")]
