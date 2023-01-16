@@ -278,7 +278,6 @@
     clippy::needless_doctest_main,
     clippy::needless_pass_by_value,
     clippy::never_loop,
-    clippy::ptr_as_ptr,
     clippy::redundant_else,
     clippy::return_self_not_must_use,
     clippy::similar_names,
