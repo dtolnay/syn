@@ -152,7 +152,6 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
                 "Brace" | "Bracket" | "Paren" | "Group" => types::Type::Group(string),
                 "TokenStream" | "Literal" | "Ident" | "Span" => types::Type::Ext(string),
                 "String" | "u32" | "usize" | "bool" => types::Type::Std(string),
-                "Await" => types::Type::Token("Await".to_string()),
                 _ => {
                     if items.get(&last.ident).is_some() || last.ident == "Reserved" {
                         types::Type::Syn(string)
@@ -258,7 +257,7 @@ fn last_arg(params: &PathArguments) -> &syn::Type {
 
 mod parsing {
     use super::{AstItem, TokenLookup};
-    use proc_macro2::{TokenStream, TokenTree};
+    use proc_macro2::TokenStream;
     use quote::quote;
     use std::collections::{BTreeMap, BTreeSet};
     use syn::parse::{ParseStream, Parser, Result};
@@ -409,40 +408,19 @@ mod parsing {
     }
 
     pub fn parse_token_macro(input: ParseStream) -> Result<TokenLookup> {
-        input.parse::<TokenTree>()?;
-        input.parse::<Token![=>]>()?;
-
-        let definition;
-        braced!(definition in input);
-        definition.call(Attribute::parse_outer)?;
-        definition.parse::<kw::macro_rules>()?;
-        definition.parse::<Token![!]>()?;
-        definition.parse::<kw::Token>()?;
-
-        let rules;
-        braced!(rules in definition);
-        input.parse::<Token![;]>()?;
-
         let mut tokens = BTreeMap::new();
-        while !rules.is_empty() {
-            if rules.peek(Token![$]) {
-                rules.parse::<Token![$]>()?;
-                rules.parse::<TokenTree>()?;
-                rules.parse::<Token![*]>()?;
-                tokens.insert("await".to_owned(), "Await".to_owned());
-            } else {
-                let pattern;
-                bracketed!(pattern in rules);
-                let token = pattern.parse::<TokenStream>()?.to_string();
-                rules.parse::<Token![=>]>()?;
-                let expansion;
-                braced!(expansion in rules);
-                rules.parse::<Token![;]>()?;
-                expansion.parse::<Token![$]>()?;
-                let path: Path = expansion.parse()?;
-                let ty = path.segments.last().unwrap().ident.to_string();
-                tokens.insert(token, ty.to_string());
-            }
+        while !input.is_empty() {
+            let pattern;
+            bracketed!(pattern in input);
+            let token = pattern.parse::<TokenStream>()?.to_string();
+            input.parse::<Token![=>]>()?;
+            let expansion;
+            braced!(expansion in input);
+            input.parse::<Token![;]>()?;
+            expansion.parse::<Token![$]>()?;
+            let path: Path = expansion.parse()?;
+            let ty = path.segments.last().unwrap().ident.to_string();
+            tokens.insert(token, ty.to_string());
         }
         Ok(tokens)
     }
@@ -668,7 +646,7 @@ fn load_token_file(relative_to_workspace_root: impl AsRef<Path>) -> Result<Token
     for item in file.items {
         if let Item::Macro(item) = item {
             match item.ident {
-                Some(i) if i == "export_token_macro" => {}
+                Some(i) if i == "Token" => {}
                 _ => continue,
             }
             let tokens = item.mac.parse_body_with(parsing::parse_token_macro)?;

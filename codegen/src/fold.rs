@@ -70,13 +70,9 @@ fn visit(
             } else {
                 quote!(spans)
             };
-            let ty = if repr == "await" {
-                quote!(crate::token::Await)
-            } else {
-                syn::parse_str(&format!("Token![{}]", repr)).unwrap()
-            };
+            let token: TokenStream = syn::parse_str(repr).unwrap();
             Some(quote! {
-                #ty(tokens_helper(f, &#name.#spans))
+                Token![#token](tokens_helper(f, &#name.#spans))
             })
         }
         Type::Group(t) => {

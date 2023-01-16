@@ -297,7 +297,7 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub base: Box<Expr>,
         pub dot_token: Token![.],
-        pub await_token: token::Await,
+        pub await_token: Token![await],
     }
 }
 
@@ -1474,7 +1474,7 @@ pub(crate) mod parsing {
             {
                 let mut dot_token: Token![.] = input.parse()?;
 
-                let await_token: Option<token::Await> = input.parse()?;
+                let await_token: Option<Token![await]> = input.parse()?;
                 if let Some(await_token) = await_token {
                     e = Expr::Await(ExprAwait {
                         attrs: Vec::new(),
@@ -1555,7 +1555,9 @@ pub(crate) mod parsing {
                     paren_token: parenthesized!(content in input),
                     args: content.parse_terminated(Expr::parse, Token![,])?,
                 });
-            } else if input.peek(Token![.]) && !input.peek(Token![..]) && !input.peek2(token::Await)
+            } else if input.peek(Token![.])
+                && !input.peek(Token![..])
+                && !input.peek2(Token![await])
             {
                 let mut dot_token: Token![.] = input.parse()?;
                 let float_token: Option<LitFloat> = input.parse()?;
@@ -2805,7 +2807,7 @@ pub(crate) mod parsing {
 
     fn check_cast(input: ParseStream) -> Result<()> {
         let kind = if input.peek(Token![.]) && !input.peek(Token![..]) {
-            if input.peek2(token::Await) {
+            if input.peek2(Token![await]) {
                 "`.await`"
             } else if input.peek2(Ident) && (input.peek3(token::Paren) || input.peek3(Token![::])) {
                 "a method call"
