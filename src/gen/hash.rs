@@ -891,6 +891,7 @@ impl Hash for ExprStruct {
         H: Hasher,
     {
         self.attrs.hash(state);
+        self.qself.hash(state);
         self.path.hash(state);
         self.fields.hash(state);
         self.dot2_token.hash(state);
@@ -2064,6 +2065,7 @@ impl Hash for PatStruct {
         H: Hasher,
     {
         self.attrs.hash(state);
+        self.qself.hash(state);
         self.path.hash(state);
         self.fields.hash(state);
         self.dot2_token.hash(state);
@@ -2088,6 +2090,7 @@ impl Hash for PatTupleStruct {
         H: Hasher,
     {
         self.attrs.hash(state);
+        self.qself.hash(state);
         self.path.hash(state);
         self.pat.hash(state);
     }

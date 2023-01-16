@@ -635,7 +635,7 @@ impl Eq for ExprStruct {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprStruct {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.path == other.path
+        self.attrs == other.attrs && self.qself == other.qself && self.path == other.path
             && self.fields == other.fields && self.dot2_token == other.dot2_token
             && self.rest == other.rest
     }
@@ -1534,7 +1534,7 @@ impl Eq for PatStruct {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for PatStruct {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.path == other.path
+        self.attrs == other.attrs && self.qself == other.qself && self.path == other.path
             && self.fields == other.fields && self.dot2_token == other.dot2_token
     }
 }
@@ -1555,7 +1555,8 @@ impl Eq for PatTupleStruct {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for PatTupleStruct {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.path == other.path && self.pat == other.pat
+        self.attrs == other.attrs && self.qself == other.qself && self.path == other.path
+            && self.pat == other.pat
     }
 }
 #[cfg(feature = "full")]

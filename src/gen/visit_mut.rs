@@ -1671,6 +1671,9 @@ where
     for it in &mut node.attrs {
         v.visit_attribute_mut(it);
     }
+    if let Some(it) = &mut node.qself {
+        v.visit_qself_mut(it);
+    }
     v.visit_path_mut(&mut node.path);
     tokens_helper(v, &mut node.brace_token.span);
     for el in Punctuated::pairs_mut(&mut node.fields) {
@@ -2968,6 +2971,9 @@ where
     for it in &mut node.attrs {
         v.visit_attribute_mut(it);
     }
+    if let Some(it) = &mut node.qself {
+        v.visit_qself_mut(it);
+    }
     v.visit_path_mut(&mut node.path);
     tokens_helper(v, &mut node.brace_token.span);
     for el in Punctuated::pairs_mut(&mut node.fields) {
@@ -3005,6 +3011,9 @@ where
 {
     for it in &mut node.attrs {
         v.visit_attribute_mut(it);
+    }
+    if let Some(it) = &mut node.qself {
+        v.visit_qself_mut(it);
     }
     v.visit_path_mut(&mut node.path);
     v.visit_pat_tuple_mut(&mut node.pat);

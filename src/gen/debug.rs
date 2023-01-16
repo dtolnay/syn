@@ -979,6 +979,7 @@ impl Debug for ExprStruct {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprStruct");
         formatter.field("attrs", &self.attrs);
+        formatter.field("qself", &self.qself);
         formatter.field("path", &self.path);
         formatter.field("brace_token", &self.brace_token);
         formatter.field("fields", &self.fields);
@@ -2224,6 +2225,7 @@ impl Debug for PatStruct {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatStruct");
         formatter.field("attrs", &self.attrs);
+        formatter.field("qself", &self.qself);
         formatter.field("path", &self.path);
         formatter.field("brace_token", &self.brace_token);
         formatter.field("fields", &self.fields);
@@ -2248,6 +2250,7 @@ impl Debug for PatTupleStruct {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatTupleStruct");
         formatter.field("attrs", &self.attrs);
+        formatter.field("qself", &self.qself);
         formatter.field("path", &self.path);
         formatter.field("pat", &self.pat);
         formatter.finish()
