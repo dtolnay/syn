@@ -646,6 +646,7 @@ impl Hash for ExprClosure {
         H: Hasher,
     {
         self.attrs.hash(state);
+        self.lifetimes.hash(state);
         self.movability.hash(state);
         self.asyncness.hash(state);
         self.capture.hash(state);

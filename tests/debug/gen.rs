@@ -590,6 +590,22 @@ impl Debug for Lite<syn::Expr> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
+                if let Some(val) = &_val.lifetimes {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::BoundLifetimes);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            let _val = &self.0;
+                            formatter.write_str("(")?;
+                            Debug::fmt(Lite(_val), formatter)?;
+                            formatter.write_str(")")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("lifetimes", Print::ref_cast(val));
+                }
                 if let Some(val) = &_val.movability {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -1300,6 +1316,22 @@ impl Debug for Lite<syn::ExprClosure> {
         let mut formatter = formatter.debug_struct("ExprClosure");
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if let Some(val) = &_val.lifetimes {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::BoundLifetimes);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("lifetimes", Print::ref_cast(val));
         }
         if let Some(val) = &_val.movability {
             #[derive(RefCast)]

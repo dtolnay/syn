@@ -1378,6 +1378,9 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
+    if let Some(it) = &node.lifetimes {
+        v.visit_bound_lifetimes(it);
+    }
     if let Some(it) = &node.movability {
         tokens_helper(v, &it.span);
     }

@@ -1379,6 +1379,9 @@ where
     for it in &mut node.attrs {
         v.visit_attribute_mut(it);
     }
+    if let Some(it) = &mut node.lifetimes {
+        v.visit_bound_lifetimes_mut(it);
+    }
     if let Some(it) = &mut node.movability {
         tokens_helper(v, &mut it.span);
     }
