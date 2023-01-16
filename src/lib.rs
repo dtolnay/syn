@@ -929,7 +929,7 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 /// use std::fs::File;
 /// use std::io::Read;
 ///
-/// fn run() -> Result<(), Box<Error>> {
+/// fn run() -> Result<(), Box<dyn Error>> {
 ///     let mut file = File::open("path/to/code.rs")?;
 ///     let mut content = String::new();
 ///     file.read_to_string(&mut content)?;
