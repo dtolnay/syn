@@ -2,7 +2,11 @@
 #![cfg(not(miri))]
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
-#![allow(clippy::manual_assert)]
+#![allow(
+    clippy::manual_assert,
+    clippy::match_like_matches_macro,
+    clippy::unnested_or_patterns
+)]
 
 extern crate rustc_ast;
 extern crate rustc_data_structures;
