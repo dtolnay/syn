@@ -414,6 +414,7 @@ impl Clone for ExprClosure {
     fn clone(&self) -> Self {
         ExprClosure {
             attrs: self.attrs.clone(),
+            lifetimes: self.lifetimes.clone(),
             movability: self.movability.clone(),
             asyncness: self.asyncness.clone(),
             capture: self.capture.clone(),

@@ -732,6 +732,7 @@ impl Debug for ExprClosure {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprClosure");
         formatter.field("attrs", &self.attrs);
+        formatter.field("lifetimes", &self.lifetimes);
         formatter.field("movability", &self.movability);
         formatter.field("asyncness", &self.asyncness);
         formatter.field("capture", &self.capture);

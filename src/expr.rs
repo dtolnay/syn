@@ -374,6 +374,7 @@ ast_struct! {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprClosure #full {
         pub attrs: Vec<Attribute>,
+        pub lifetimes: Option<BoundLifetimes>,
         pub movability: Option<Token![static]>,
         pub asyncness: Option<Token![async]>,
         pub capture: Option<Token![move]>,
@@ -1633,20 +1634,14 @@ pub(crate) mod parsing {
         } else if input.peek(Token![try]) && input.peek2(token::Brace) {
             input.parse().map(Expr::TryBlock)
         } else if input.peek(Token![|])
-            || input.peek(Token![async]) && (input.peek2(Token![|]) || input.peek2(Token![move]))
-            || input.peek(Token![static])
             || input.peek(Token![move])
+            || input.peek(Token![for])
+                && input.peek2(Token![<])
+                && (input.peek3(Lifetime) || input.peek3(Token![>]))
+            || input.peek(Token![static])
+            || input.peek(Token![async]) && (input.peek2(Token![|]) || input.peek2(Token![move]))
         {
             expr_closure(input, allow_struct).map(Expr::Closure)
-        } else if input.peek(Token![for])
-            && input.peek2(Token![<])
-            && (input.peek3(Lifetime) || input.peek3(Token![>]))
-        {
-            let begin = input.fork();
-            input.parse::<BoundLifetimes>()?;
-            expr_closure(input, allow_struct)?;
-            let verbatim = verbatim::between(begin, input);
-            Ok(Expr::Verbatim(verbatim))
         } else if input.peek(Ident)
             || input.peek(Token![::])
             || input.peek(Token![<])
@@ -2346,6 +2341,7 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     fn expr_closure(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprClosure> {
+        let lifetimes: Option<BoundLifetimes> = input.parse()?;
         let movability: Option<Token![static]> = input.parse()?;
         let asyncness: Option<Token![async]> = input.parse()?;
         let capture: Option<Token![move]> = input.parse()?;
@@ -2385,6 +2381,7 @@ pub(crate) mod parsing {
 
         Ok(ExprClosure {
             attrs: Vec::new(),
+            lifetimes,
             movability,
             asyncness,
             capture,
@@ -3186,6 +3183,7 @@ pub(crate) mod printing {
     impl ToTokens for ExprClosure {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
+            self.lifetimes.to_tokens(tokens);
             self.movability.to_tokens(tokens);
             self.asyncness.to_tokens(tokens);
             self.capture.to_tokens(tokens);

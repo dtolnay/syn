@@ -1089,6 +1089,11 @@
             "syn": "Attribute"
           }
         },
+        "lifetimes": {
+          "option": {
+            "syn": "BoundLifetimes"
+          }
+        },
         "movability": {
           "option": {
             "token": "Static"
