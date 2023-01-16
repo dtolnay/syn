@@ -927,7 +927,11 @@ pub mod parsing {
                     Err(lookahead.error())
                 }
             } else if lookahead.peek(Token![use]) {
-                input.parse().map(Item::Use)
+                let allow_crate_root_in_path = true;
+                match parse_item_use(input, allow_crate_root_in_path)? {
+                    Some(item_use) => Ok(Item::Use(item_use)),
+                    None => Ok(Item::Verbatim(verbatim::between(begin, input))),
+                }
             } else if lookahead.peek(Token![static]) {
                 let vis = input.parse()?;
                 let static_token = input.parse()?;
@@ -1255,63 +1259,109 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ItemUse {
         fn parse(input: ParseStream) -> Result<Self> {
-            Ok(ItemUse {
-                attrs: input.call(Attribute::parse_outer)?,
-                vis: input.parse()?,
-                use_token: input.parse()?,
-                leading_colon: input.parse()?,
-                tree: input.parse()?,
-                semi_token: input.parse()?,
-            })
+            let allow_crate_root_in_path = false;
+            parse_item_use(input, allow_crate_root_in_path).map(Option::unwrap)
         }
+    }
+
+    fn parse_item_use(
+        input: ParseStream,
+        allow_crate_root_in_path: bool,
+    ) -> Result<Option<ItemUse>> {
+        let attrs = input.call(Attribute::parse_outer)?;
+        let vis: Visibility = input.parse()?;
+        let use_token: Token![use] = input.parse()?;
+        let leading_colon: Option<Token![::]> = input.parse()?;
+        let tree = parse_use_tree(input, allow_crate_root_in_path)?;
+        let semi_token: Token![;] = input.parse()?;
+
+        let tree = match tree {
+            Some(tree) => tree,
+            None => return Ok(None),
+        };
+
+        Ok(Some(ItemUse {
+            attrs,
+            vis,
+            use_token,
+            leading_colon,
+            tree,
+            semi_token,
+        }))
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for UseTree {
         fn parse(input: ParseStream) -> Result<UseTree> {
-            let lookahead = input.lookahead1();
-            if lookahead.peek(Ident)
-                || lookahead.peek(Token![self])
-                || lookahead.peek(Token![super])
-                || lookahead.peek(Token![crate])
-            {
-                let ident = input.call(Ident::parse_any)?;
-                if input.peek(Token![::]) {
-                    Ok(UseTree::Path(UsePath {
-                        ident,
-                        colon2_token: input.parse()?,
-                        tree: Box::new(input.parse()?),
-                    }))
-                } else if input.peek(Token![as]) {
-                    Ok(UseTree::Rename(UseRename {
-                        ident,
-                        as_token: input.parse()?,
-                        rename: {
-                            if input.peek(Ident) {
-                                input.parse()?
-                            } else if input.peek(Token![_]) {
-                                Ident::from(input.parse::<Token![_]>()?)
-                            } else {
-                                return Err(input.error("expected identifier or underscore"));
-                            }
-                        },
-                    }))
-                } else {
-                    Ok(UseTree::Name(UseName { ident }))
-                }
-            } else if lookahead.peek(Token![*]) {
-                Ok(UseTree::Glob(UseGlob {
-                    star_token: input.parse()?,
-                }))
-            } else if lookahead.peek(token::Brace) {
-                let content;
-                Ok(UseTree::Group(UseGroup {
-                    brace_token: braced!(content in input),
-                    items: content.parse_terminated(UseTree::parse, Token![,])?,
-                }))
+            let allow_crate_root_in_path = false;
+            parse_use_tree(input, allow_crate_root_in_path).map(Option::unwrap)
+        }
+    }
+
+    fn parse_use_tree(
+        input: ParseStream,
+        allow_crate_root_in_path: bool,
+    ) -> Result<Option<UseTree>> {
+        let lookahead = input.lookahead1();
+        if lookahead.peek(Ident)
+            || lookahead.peek(Token![self])
+            || lookahead.peek(Token![super])
+            || lookahead.peek(Token![crate])
+        {
+            let ident = input.call(Ident::parse_any)?;
+            if input.peek(Token![::]) {
+                Ok(Some(UseTree::Path(UsePath {
+                    ident,
+                    colon2_token: input.parse()?,
+                    tree: Box::new(input.parse()?),
+                })))
+            } else if input.peek(Token![as]) {
+                Ok(Some(UseTree::Rename(UseRename {
+                    ident,
+                    as_token: input.parse()?,
+                    rename: {
+                        if input.peek(Ident) {
+                            input.parse()?
+                        } else if input.peek(Token![_]) {
+                            Ident::from(input.parse::<Token![_]>()?)
+                        } else {
+                            return Err(input.error("expected identifier or underscore"));
+                        }
+                    },
+                })))
             } else {
-                Err(lookahead.error())
+                Ok(Some(UseTree::Name(UseName { ident })))
             }
+        } else if lookahead.peek(Token![*]) {
+            Ok(Some(UseTree::Glob(UseGlob {
+                star_token: input.parse()?,
+            })))
+        } else if lookahead.peek(token::Brace) {
+            let content;
+            let brace_token = braced!(content in input);
+            let mut items = Punctuated::new();
+            let mut has_crate_root_in_path = false;
+            loop {
+                if content.is_empty() {
+                    break;
+                }
+                has_crate_root_in_path |=
+                    allow_crate_root_in_path && content.parse::<Option<Token![::]>>()?.is_some();
+                let tree: UseTree = content.parse()?;
+                items.push_value(tree);
+                if content.is_empty() {
+                    break;
+                }
+                let comma: Token![,] = content.parse()?;
+                items.push_punct(comma);
+            }
+            if has_crate_root_in_path {
+                Ok(None)
+            } else {
+                Ok(Some(UseTree::Group(UseGroup { brace_token, items })))
+            }
+        } else {
+            Err(lookahead.error())
         }
     }
 
