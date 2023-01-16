@@ -2905,9 +2905,13 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
-    v.visit_expr(&*node.lo);
+    if let Some(it) = &node.lo {
+        v.visit_expr(&**it);
+    }
     v.visit_range_limits(&node.limits);
-    v.visit_expr(&*node.hi);
+    if let Some(it) = &node.hi {
+        v.visit_expr(&**it);
+    }
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_reference<'ast, V>(v: &mut V, node: &'ast PatReference)

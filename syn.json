@@ -3930,16 +3930,20 @@
           }
         },
         "lo": {
-          "box": {
-            "syn": "Expr"
+          "option": {
+            "box": {
+              "syn": "Expr"
+            }
           }
         },
         "limits": {
           "syn": "RangeLimits"
         },
         "hi": {
-          "box": {
-            "syn": "Expr"
+          "option": {
+            "box": {
+              "syn": "Expr"
+            }
           }
         }
       }
