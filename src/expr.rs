@@ -692,7 +692,7 @@ ast_struct! {
 }
 
 impl Expr {
-    #[cfg(all(feature = "parsing", not(syn_no_const_vec_new)))]
+    #[cfg(feature = "parsing")]
     const DUMMY: Self = Expr::Path(ExprPath {
         attrs: Vec::new(),
         qself: None,
@@ -2780,10 +2780,7 @@ pub(crate) mod parsing {
         }
         for part in float_repr.split('.') {
             let index = crate::parse_str(part).map_err(|err| Error::new(float.span(), err))?;
-            #[cfg(not(syn_no_const_vec_new))]
             let base = mem::replace(e, Expr::DUMMY);
-            #[cfg(syn_no_const_vec_new)]
-            let base = mem::replace(e, Expr::Verbatim(TokenStream::new()));
             *e = Expr::Field(ExprField {
                 attrs: Vec::new(),
                 base: Box::new(base),

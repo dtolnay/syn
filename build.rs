@@ -13,10 +13,6 @@ fn main() {
         None => return,
     };
 
-    if compiler.minor < 39 {
-        println!("cargo:rustc-cfg=syn_no_const_vec_new");
-    }
-
     if compiler.minor < 40 {
         println!("cargo:rustc-cfg=syn_no_non_exhaustive");
     }
