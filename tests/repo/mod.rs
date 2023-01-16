@@ -19,7 +19,6 @@ static EXCLUDE_FILES: &[&str] = &[
 
     // TODO: precedence
     "tests/ui/closures/supertrait-hint-cycle.rs",
-    "tests/ui/inline-const/expr-unsafe.rs",
 
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
