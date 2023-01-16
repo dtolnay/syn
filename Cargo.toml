@@ -6,6 +6,7 @@ categories = ["development-tools::procedural-macro-helpers", "parser-implementat
 description = "Parser for Rust source code"
 documentation = "https://docs.rs/syn"
 edition = "2021"
+exclude = ["build.rs"]
 include = [
     "/benches/**",
     "/build.rs",

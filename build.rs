@@ -13,9 +13,9 @@ fn main() {
         None => return,
     };
 
-    if compiler.minor < 56 {
-        println!("cargo:rustc-cfg=syn_no_negative_literal_parse");
-    }
+    // Note: remove exclude=["build.rs"] from Cargo.toml if adding any
+    // conditional compilation within the library.
+    let _ = compiler.minor;
 
     if !compiler.nightly {
         println!("cargo:rustc-cfg=syn_disable_nightly_tests");

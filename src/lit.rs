@@ -359,11 +359,7 @@ impl LitInt {
             None => panic!("Not an integer literal: `{}`", repr),
         };
 
-        let mut token = match value::to_literal(repr, &digits, &suffix) {
-            Some(token) => token,
-            None => panic!("Unsupported integer literal: `{}`", repr),
-        };
-
+        let mut token: Literal = repr.parse().unwrap();
         token.set_span(span);
         LitInt {
             repr: Box::new(LitIntRepr {
@@ -457,11 +453,7 @@ impl LitFloat {
             None => panic!("Not a float literal: `{}`", repr),
         };
 
-        let mut token = match value::to_literal(repr, &digits, &suffix) {
-            Some(token) => token,
-            None => panic!("Unsupported float literal: `{}`", repr),
-        };
-
+        let mut token: Literal = repr.parse().unwrap();
         token.set_span(span);
         LitFloat {
             repr: Box::new(LitFloatRepr {
@@ -783,23 +775,22 @@ pub mod parsing {
         repr.insert(0, '-');
 
         if let Some((digits, suffix)) = value::parse_lit_int(&repr) {
-            if let Some(mut token) = value::to_literal(&repr, &digits, &suffix) {
-                token.set_span(span);
-                return Some((
-                    Lit::Int(LitInt {
-                        repr: Box::new(LitIntRepr {
-                            token,
-                            digits,
-                            suffix,
-                        }),
+            let mut token: Literal = repr.parse().unwrap();
+            token.set_span(span);
+            return Some((
+                Lit::Int(LitInt {
+                    repr: Box::new(LitIntRepr {
+                        token,
+                        digits,
+                        suffix,
                     }),
-                    rest,
-                ));
-            }
+                }),
+                rest,
+            ));
         }
 
         let (digits, suffix) = value::parse_lit_float(&repr)?;
-        let mut token = value::to_literal(&repr, &digits, &suffix)?;
+        let mut token: Literal = repr.parse().unwrap();
         token.set_span(span);
         Some((
             Lit::Float(LitFloat {
@@ -1562,39 +1553,5 @@ mod value {
         } else {
             None
         }
-    }
-
-    #[allow(clippy::unnecessary_wraps)]
-    pub fn to_literal(repr: &str, digits: &str, suffix: &str) -> Option<Literal> {
-        #[cfg(syn_no_negative_literal_parse)]
-        {
-            // Rustc older than https://github.com/rust-lang/rust/pull/87262.
-            if repr.starts_with('-') {
-                let f64_parse_finite = || digits.parse().ok().filter(|x: &f64| x.is_finite());
-                let f32_parse_finite = || digits.parse().ok().filter(|x: &f32| x.is_finite());
-                return if suffix == "f64" {
-                    f64_parse_finite().map(Literal::f64_suffixed)
-                } else if suffix == "f32" {
-                    f32_parse_finite().map(Literal::f32_suffixed)
-                } else if suffix == "i64" {
-                    digits.parse().ok().map(Literal::i64_suffixed)
-                } else if suffix == "i32" {
-                    digits.parse().ok().map(Literal::i32_suffixed)
-                } else if suffix == "i16" {
-                    digits.parse().ok().map(Literal::i16_suffixed)
-                } else if suffix == "i8" {
-                    digits.parse().ok().map(Literal::i8_suffixed)
-                } else if !suffix.is_empty() {
-                    None
-                } else if digits.contains('.') {
-                    f64_parse_finite().map(Literal::f64_unsuffixed)
-                } else {
-                    digits.parse().ok().map(Literal::i64_unsuffixed)
-                };
-            }
-        }
-        let _ = digits;
-        let _ = suffix;
-        Some(repr.parse::<Literal>().unwrap())
     }
 }
