@@ -769,6 +769,13 @@ impl Debug for Lite<syn::Expr> {
                 formatter.field("index", Lite(&_val.index));
                 formatter.finish()
             }
+            syn::Expr::Infer(_val) => {
+                let mut formatter = formatter.debug_struct("Expr::Infer");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                formatter.finish()
+            }
             syn::Expr::Let(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Let");
                 if !_val.attrs.is_empty() {
@@ -1543,6 +1550,16 @@ impl Debug for Lite<syn::ExprIndex> {
         }
         formatter.field("expr", Lite(&_val.expr));
         formatter.field("index", Lite(&_val.index));
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::ExprInfer> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("ExprInfer");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
         formatter.finish()
     }
 }

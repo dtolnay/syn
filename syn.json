@@ -663,6 +663,11 @@
             "syn": "ExprIndex"
           }
         ],
+        "Infer": [
+          {
+            "syn": "ExprInfer"
+          }
+        ],
         "Let": [
           {
             "syn": "ExprLet"
@@ -1335,6 +1340,24 @@
           "box": {
             "syn": "Expr"
           }
+        }
+      }
+    },
+    {
+      "ident": "ExprInfer",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "underscore_token": {
+          "token": "Underscore"
         }
       }
     },

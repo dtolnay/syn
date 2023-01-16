@@ -258,6 +258,8 @@ impl PartialEq for Expr {
             (Expr::If(self0), Expr::If(other0)) => self0 == other0,
             (Expr::Index(self0), Expr::Index(other0)) => self0 == other0,
             #[cfg(feature = "full")]
+            (Expr::Infer(self0), Expr::Infer(other0)) => self0 == other0,
+            #[cfg(feature = "full")]
             (Expr::Let(self0), Expr::Let(other0)) => self0 == other0,
             (Expr::Lit(self0), Expr::Lit(other0)) => self0 == other0,
             #[cfg(feature = "full")]
@@ -502,6 +504,16 @@ impl Eq for ExprIndex {}
 impl PartialEq for ExprIndex {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.expr == other.expr && self.index == other.index
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for ExprInfer {}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for ExprInfer {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs
     }
 }
 #[cfg(feature = "full")]

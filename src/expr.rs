@@ -154,6 +154,9 @@ ast_enum_of_structs! {
         /// A square bracketed indexing expression: `vector[2]`.
         Index(ExprIndex),
 
+        /// The inferred value of a const generic argument, denoted `_`.
+        Infer(ExprInfer),
+
         /// A `let` guard: `let Some(x) = opt`.
         Let(ExprLet),
 
@@ -474,6 +477,14 @@ ast_struct! {
 }
 
 ast_struct! {
+    /// The inferred value of a const generic argument, denoted `_`.
+    pub struct ExprInfer #full {
+        pub attrs: Vec<Attribute>,
+        pub underscore_token: Token![_],
+    }
+}
+
+ast_struct! {
     /// A `let` guard: `let Some(x) = opt`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprLet #full {
@@ -740,6 +751,7 @@ impl Expr {
             | Expr::Group(ExprGroup { attrs, .. })
             | Expr::If(ExprIf { attrs, .. })
             | Expr::Index(ExprIndex { attrs, .. })
+            | Expr::Infer(ExprInfer { attrs, .. })
             | Expr::Let(ExprLet { attrs, .. })
             | Expr::Lit(ExprLit { attrs, .. })
             | Expr::Loop(ExprLoop { attrs, .. })
@@ -1005,8 +1017,6 @@ pub(crate) mod parsing {
     use crate::parse::ParseBuffer;
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
-    #[cfg(feature = "full")]
-    use proc_macro2::TokenTree;
     use std::cmp::Ordering;
 
     crate::custom_keyword!(raw);
@@ -1687,9 +1697,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![..]) {
             expr_range(input, allow_struct).map(Expr::Range)
         } else if input.peek(Token![_]) {
-            Ok(Expr::Verbatim(TokenStream::from(
-                input.parse::<TokenTree>()?,
-            )))
+            input.parse().map(Expr::Infer)
         } else if input.peek(Lifetime) {
             let the_label: Label = input.parse()?;
             let mut expr = if input.peek(Token![while]) {
@@ -2101,6 +2109,17 @@ pub(crate) mod parsing {
         };
 
         Ok((else_token, Box::new(else_branch)))
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprInfer {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ExprInfer {
+                attrs: input.call(Attribute::parse_outer)?,
+                underscore_token: input.parse()?,
+            })
+        }
     }
 
     #[cfg(feature = "full")]
@@ -3290,6 +3309,15 @@ pub(crate) mod printing {
             self.bracket_token.surround(tokens, |tokens| {
                 self.index.to_tokens(tokens);
             });
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprInfer {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.underscore_token.to_tokens(tokens);
         }
     }
 
