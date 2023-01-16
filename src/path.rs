@@ -521,7 +521,6 @@ pub mod parsing {
         /// ```
         /// use proc_macro2::TokenStream;
         /// use syn::{Attribute, Error, Meta, Result};
-        /// # use std::iter::FromIterator;
         ///
         /// fn get_serde_meta_item(attr: &Attribute) -> Result<Option<&TokenStream>> {
         ///     if attr.path().is_ident("serde") {

@@ -7,7 +7,6 @@ use proc_macro2::{
 #[cfg(feature = "printing")]
 use quote::ToTokens;
 use std::fmt::{self, Debug, Display};
-use std::iter::FromIterator;
 use std::slice;
 use std::vec;
 

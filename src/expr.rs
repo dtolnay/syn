@@ -924,7 +924,7 @@ ast_struct! {
 
 #[cfg(feature = "full")]
 ast_struct! {
-    /// One arm of a `match` expression: `0...10 => { return true; }`.
+    /// One arm of a `match` expression: `0..=10 => { return true; }`.
     ///
     /// As in:
     ///
@@ -932,7 +932,7 @@ ast_struct! {
     /// # fn f() -> bool {
     /// #     let n = 0;
     /// match n {
-    ///     0...10 => {
+    ///     0..=10 => {
     ///         return true;
     ///     }
     ///     // ...

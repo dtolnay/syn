@@ -3,7 +3,6 @@ mod macros;
 
 use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
 use quote::{quote, ToTokens};
-use std::iter::FromIterator;
 use syn::{parse_quote, Expr, Type, TypePath};
 
 #[test]
