@@ -238,8 +238,6 @@ impl PartialEq for Expr {
             #[cfg(feature = "full")]
             (Expr::Block(self0), Expr::Block(other0)) => self0 == other0,
             #[cfg(feature = "full")]
-            (Expr::Box(self0), Expr::Box(other0)) => self0 == other0,
-            #[cfg(feature = "full")]
             (Expr::Break(self0), Expr::Break(other0)) => self0 == other0,
             (Expr::Call(self0), Expr::Call(other0)) => self0 == other0,
             (Expr::Cast(self0), Expr::Cast(other0)) => self0 == other0,
@@ -376,16 +374,6 @@ impl PartialEq for ExprBlock {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.label == other.label
             && self.block == other.block
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for ExprBox {}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for ExprBox {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.expr == other.expr
     }
 }
 #[cfg(feature = "full")]
@@ -1412,7 +1400,6 @@ impl Eq for Pat {}
 impl PartialEq for Pat {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Pat::Box(self0), Pat::Box(other0)) => self0 == other0,
             (Pat::Ident(self0), Pat::Ident(other0)) => self0 == other0,
             (Pat::Lit(self0), Pat::Lit(other0)) => self0 == other0,
             (Pat::Macro(self0), Pat::Macro(other0)) => self0 == other0,
@@ -1432,16 +1419,6 @@ impl PartialEq for Pat {
             (Pat::Wild(self0), Pat::Wild(other0)) => self0 == other0,
             _ => false,
         }
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for PatBox {}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for PatBox {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.pat == other.pat
     }
 }
 #[cfg(feature = "full")]

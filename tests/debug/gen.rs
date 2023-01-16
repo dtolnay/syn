@@ -518,14 +518,6 @@ impl Debug for Lite<syn::Expr> {
                 formatter.field("block", Lite(&_val.block));
                 formatter.finish()
             }
-            syn::Expr::Box(_val) => {
-                let mut formatter = formatter.debug_struct("Expr::Box");
-                if !_val.attrs.is_empty() {
-                    formatter.field("attrs", Lite(&_val.attrs));
-                }
-                formatter.field("expr", Lite(&_val.expr));
-                formatter.finish()
-            }
             syn::Expr::Break(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Break");
                 if !_val.attrs.is_empty() {
@@ -1263,17 +1255,6 @@ impl Debug for Lite<syn::ExprBlock> {
             formatter.field("label", Print::ref_cast(val));
         }
         formatter.field("block", Lite(&_val.block));
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::ExprBox> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("ExprBox");
-        if !_val.attrs.is_empty() {
-            formatter.field("attrs", Lite(&_val.attrs));
-        }
-        formatter.field("expr", Lite(&_val.expr));
         formatter.finish()
     }
 }
@@ -3786,14 +3767,6 @@ impl Debug for Lite<syn::Pat> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
-            syn::Pat::Box(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Box");
-                if !_val.attrs.is_empty() {
-                    formatter.field("attrs", Lite(&_val.attrs));
-                }
-                formatter.field("pat", Lite(&_val.pat));
-                formatter.finish()
-            }
             syn::Pat::Ident(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Ident");
                 if !_val.attrs.is_empty() {
@@ -4084,17 +4057,6 @@ impl Debug for Lite<syn::Pat> {
             }
             _ => unreachable!(),
         }
-    }
-}
-impl Debug for Lite<syn::PatBox> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("PatBox");
-        if !_val.attrs.is_empty() {
-            formatter.field("attrs", Lite(&_val.attrs));
-        }
-        formatter.field("pat", Lite(&_val.pat));
-        formatter.finish()
     }
 }
 impl Debug for Lite<syn::PatIdent> {

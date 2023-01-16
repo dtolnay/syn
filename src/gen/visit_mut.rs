@@ -134,10 +134,6 @@ pub trait VisitMut {
         visit_expr_block_mut(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_expr_box_mut(&mut self, i: &mut ExprBox) {
-        visit_expr_box_mut(self, i);
-    }
-    #[cfg(feature = "full")]
     fn visit_expr_break_mut(&mut self, i: &mut ExprBreak) {
         visit_expr_break_mut(self, i);
     }
@@ -513,10 +509,6 @@ pub trait VisitMut {
     #[cfg(feature = "full")]
     fn visit_pat_mut(&mut self, i: &mut Pat) {
         visit_pat_mut(self, i);
-    }
-    #[cfg(feature = "full")]
-    fn visit_pat_box_mut(&mut self, i: &mut PatBox) {
-        visit_pat_box_mut(self, i);
     }
     #[cfg(feature = "full")]
     fn visit_pat_ident_mut(&mut self, i: &mut PatIdent) {
@@ -1120,9 +1112,6 @@ where
         Expr::Block(_binding_0) => {
             full!(v.visit_expr_block_mut(_binding_0));
         }
-        Expr::Box(_binding_0) => {
-            full!(v.visit_expr_box_mut(_binding_0));
-        }
         Expr::Break(_binding_0) => {
             full!(v.visit_expr_break_mut(_binding_0));
         }
@@ -1320,17 +1309,6 @@ where
         v.visit_label_mut(it);
     }
     v.visit_block_mut(&mut node.block);
-}
-#[cfg(feature = "full")]
-pub fn visit_expr_box_mut<V>(v: &mut V, node: &mut ExprBox)
-where
-    V: VisitMut + ?Sized,
-{
-    for it in &mut node.attrs {
-        v.visit_attribute_mut(it);
-    }
-    tokens_helper(v, &mut node.box_token.span);
-    v.visit_expr_mut(&mut *node.expr);
 }
 #[cfg(feature = "full")]
 pub fn visit_expr_break_mut<V>(v: &mut V, node: &mut ExprBreak)
@@ -2788,9 +2766,6 @@ where
     V: VisitMut + ?Sized,
 {
     match node {
-        Pat::Box(_binding_0) => {
-            v.visit_pat_box_mut(_binding_0);
-        }
         Pat::Ident(_binding_0) => {
             v.visit_pat_ident_mut(_binding_0);
         }
@@ -2839,17 +2814,6 @@ where
         #[cfg(syn_no_non_exhaustive)]
         _ => unreachable!(),
     }
-}
-#[cfg(feature = "full")]
-pub fn visit_pat_box_mut<V>(v: &mut V, node: &mut PatBox)
-where
-    V: VisitMut + ?Sized,
-{
-    for it in &mut node.attrs {
-        v.visit_attribute_mut(it);
-    }
-    tokens_helper(v, &mut node.box_token.span);
-    v.visit_pat_mut(&mut *node.pat);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_ident_mut<V>(v: &mut V, node: &mut PatIdent)

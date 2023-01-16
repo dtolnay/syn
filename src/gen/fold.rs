@@ -131,10 +131,6 @@ pub trait Fold {
         fold_expr_block(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_expr_box(&mut self, i: ExprBox) -> ExprBox {
-        fold_expr_box(self, i)
-    }
-    #[cfg(feature = "full")]
     fn fold_expr_break(&mut self, i: ExprBreak) -> ExprBreak {
         fold_expr_break(self, i)
     }
@@ -513,10 +509,6 @@ pub trait Fold {
     #[cfg(feature = "full")]
     fn fold_pat(&mut self, i: Pat) -> Pat {
         fold_pat(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn fold_pat_box(&mut self, i: PatBox) -> PatBox {
-        fold_pat_box(self, i)
     }
     #[cfg(feature = "full")]
     fn fold_pat_ident(&mut self, i: PatIdent) -> PatIdent {
@@ -1090,7 +1082,6 @@ where
         Expr::Await(_binding_0) => Expr::Await(full!(f.fold_expr_await(_binding_0))),
         Expr::Binary(_binding_0) => Expr::Binary(f.fold_expr_binary(_binding_0)),
         Expr::Block(_binding_0) => Expr::Block(full!(f.fold_expr_block(_binding_0))),
-        Expr::Box(_binding_0) => Expr::Box(full!(f.fold_expr_box(_binding_0))),
         Expr::Break(_binding_0) => Expr::Break(full!(f.fold_expr_break(_binding_0))),
         Expr::Call(_binding_0) => Expr::Call(f.fold_expr_call(_binding_0)),
         Expr::Cast(_binding_0) => Expr::Cast(f.fold_expr_cast(_binding_0)),
@@ -1221,17 +1212,6 @@ where
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         label: (node.label).map(|it| f.fold_label(it)),
         block: f.fold_block(node.block),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_expr_box<F>(f: &mut F, node: ExprBox) -> ExprBox
-where
-    F: Fold + ?Sized,
-{
-    ExprBox {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        box_token: Token![box](tokens_helper(f, &node.box_token.span)),
-        expr: Box::new(f.fold_expr(*node.expr)),
     }
 }
 #[cfg(feature = "full")]
@@ -2509,7 +2489,6 @@ where
     F: Fold + ?Sized,
 {
     match node {
-        Pat::Box(_binding_0) => Pat::Box(f.fold_pat_box(_binding_0)),
         Pat::Ident(_binding_0) => Pat::Ident(f.fold_pat_ident(_binding_0)),
         Pat::Lit(_binding_0) => Pat::Lit(f.fold_pat_lit(_binding_0)),
         Pat::Macro(_binding_0) => Pat::Macro(f.fold_pat_macro(_binding_0)),
@@ -2529,17 +2508,6 @@ where
         Pat::Wild(_binding_0) => Pat::Wild(f.fold_pat_wild(_binding_0)),
         #[cfg(syn_no_non_exhaustive)]
         _ => unreachable!(),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_pat_box<F>(f: &mut F, node: PatBox) -> PatBox
-where
-    F: Fold + ?Sized,
-{
-    PatBox {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        box_token: Token![box](tokens_helper(f, &node.box_token.span)),
-        pat: Box::new(f.fold_pat(*node.pat)),
     }
 }
 #[cfg(feature = "full")]

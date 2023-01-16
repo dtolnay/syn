@@ -247,7 +247,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     fn noop_visit_expr<T: MutVisitor>(e: &mut Expr, vis: &mut T) {
         use rustc_ast::mut_visit::{noop_visit_expr, visit_attrs};
         match &mut e.kind {
-            ExprKind::AddrOf(BorrowKind::Raw, ..) => {}
+            ExprKind::AddrOf(BorrowKind::Raw, ..) | ExprKind::Box(..) => {}
             ExprKind::Struct(expr) => {
                 let StructExpr {
                     qself,
@@ -273,7 +273,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
         fn visit_expr(&mut self, e: &mut P<Expr>) {
             noop_visit_expr(e, self);
             match e.kind {
-                ExprKind::If(..) | ExprKind::Block(..) | ExprKind::Let(..) => {}
+                ExprKind::Block(..) | ExprKind::If(..) | ExprKind::Let(..) => {}
                 ExprKind::Binary(binop, ref left, ref right)
                     if match (&left.kind, binop.node, &right.kind) {
                         (ExprKind::Let(..), BinOpKind::And, _)

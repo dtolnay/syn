@@ -133,10 +133,6 @@ pub trait Visit<'ast> {
         visit_expr_block(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_expr_box(&mut self, i: &'ast ExprBox) {
-        visit_expr_box(self, i);
-    }
-    #[cfg(feature = "full")]
     fn visit_expr_break(&mut self, i: &'ast ExprBreak) {
         visit_expr_break(self, i);
     }
@@ -512,10 +508,6 @@ pub trait Visit<'ast> {
     #[cfg(feature = "full")]
     fn visit_pat(&mut self, i: &'ast Pat) {
         visit_pat(self, i);
-    }
-    #[cfg(feature = "full")]
-    fn visit_pat_box(&mut self, i: &'ast PatBox) {
-        visit_pat_box(self, i);
     }
     #[cfg(feature = "full")]
     fn visit_pat_ident(&mut self, i: &'ast PatIdent) {
@@ -1119,9 +1111,6 @@ where
         Expr::Block(_binding_0) => {
             full!(v.visit_expr_block(_binding_0));
         }
-        Expr::Box(_binding_0) => {
-            full!(v.visit_expr_box(_binding_0));
-        }
         Expr::Break(_binding_0) => {
             full!(v.visit_expr_break(_binding_0));
         }
@@ -1319,17 +1308,6 @@ where
         v.visit_label(it);
     }
     v.visit_block(&node.block);
-}
-#[cfg(feature = "full")]
-pub fn visit_expr_box<'ast, V>(v: &mut V, node: &'ast ExprBox)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it);
-    }
-    tokens_helper(v, &node.box_token.span);
-    v.visit_expr(&*node.expr);
 }
 #[cfg(feature = "full")]
 pub fn visit_expr_break<'ast, V>(v: &mut V, node: &'ast ExprBreak)
@@ -2788,9 +2766,6 @@ where
     V: Visit<'ast> + ?Sized,
 {
     match node {
-        Pat::Box(_binding_0) => {
-            v.visit_pat_box(_binding_0);
-        }
         Pat::Ident(_binding_0) => {
             v.visit_pat_ident(_binding_0);
         }
@@ -2839,17 +2814,6 @@ where
         #[cfg(syn_no_non_exhaustive)]
         _ => unreachable!(),
     }
-}
-#[cfg(feature = "full")]
-pub fn visit_pat_box<'ast, V>(v: &mut V, node: &'ast PatBox)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it);
-    }
-    tokens_helper(v, &node.box_token.span);
-    v.visit_pat(&*node.pat);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_ident<'ast, V>(v: &mut V, node: &'ast PatIdent)

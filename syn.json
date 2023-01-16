@@ -603,11 +603,6 @@
             "syn": "ExprBlock"
           }
         ],
-        "Box": [
-          {
-            "syn": "ExprBox"
-          }
-        ],
         "Break": [
           {
             "syn": "ExprBreak"
@@ -964,29 +959,6 @@
         },
         "block": {
           "syn": "Block"
-        }
-      }
-    },
-    {
-      "ident": "ExprBox",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "box_token": {
-          "token": "Box"
-        },
-        "expr": {
-          "box": {
-            "syn": "Expr"
-          }
         }
       }
     },
@@ -3717,11 +3689,6 @@
         ]
       },
       "variants": {
-        "Box": [
-          {
-            "syn": "PatBox"
-          }
-        ],
         "Ident": [
           {
             "syn": "PatIdent"
@@ -3799,29 +3766,6 @@
         ]
       },
       "exhaustive": false
-    },
-    {
-      "ident": "PatBox",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "box_token": {
-          "token": "Box"
-        },
-        "pat": {
-          "box": {
-            "syn": "Pat"
-          }
-        }
-      }
     },
     {
       "ident": "PatIdent",
