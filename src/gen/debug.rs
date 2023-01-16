@@ -586,7 +586,7 @@ impl Debug for Expr {
                 formatter.field(v0);
                 formatter.finish()
             }
-            #[cfg(any(syn_no_non_exhaustive, not(feature = "full")))]
+            #[cfg(not(feature = "full"))]
             _ => unreachable!(),
         }
     }
@@ -1195,8 +1195,6 @@ impl Debug for ForeignItem {
                 formatter.field(v0);
                 formatter.finish()
             }
-            #[cfg(syn_no_non_exhaustive)]
-            _ => unreachable!(),
         }
     }
 }
@@ -1368,8 +1366,6 @@ impl Debug for ImplItem {
                 formatter.field(v0);
                 formatter.finish()
             }
-            #[cfg(syn_no_non_exhaustive)]
-            _ => unreachable!(),
         }
     }
 }
@@ -1532,8 +1528,6 @@ impl Debug for Item {
                 formatter.field(v0);
                 formatter.finish()
             }
-            #[cfg(syn_no_non_exhaustive)]
-            _ => unreachable!(),
         }
     }
 }
@@ -2079,8 +2073,6 @@ impl Debug for Pat {
                 formatter.field(v0);
                 formatter.finish()
             }
-            #[cfg(syn_no_non_exhaustive)]
-            _ => unreachable!(),
         }
     }
 }
@@ -2473,8 +2465,6 @@ impl Debug for TraitItem {
                 formatter.field(v0);
                 formatter.finish()
             }
-            #[cfg(syn_no_non_exhaustive)]
-            _ => unreachable!(),
         }
     }
 }
@@ -2612,8 +2602,6 @@ impl Debug for Type {
                 formatter.field(v0);
                 formatter.finish()
             }
-            #[cfg(syn_no_non_exhaustive)]
-            _ => unreachable!(),
         }
     }
 }

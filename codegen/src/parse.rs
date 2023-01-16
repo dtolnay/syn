@@ -62,7 +62,8 @@ fn introspect_item(item: &AstItem, items: &ItemLookup, tokens: &TokenLookup) -> 
             ident: item.ast.ident.to_string(),
             features,
             data: types::Data::Enum(introspect_enum(data, items, tokens)),
-            exhaustive: !data.variants.iter().any(|v| is_doc_hidden(&v.attrs)),
+            exhaustive: !(is_non_exhaustive(&item.ast.attrs)
+                || data.variants.iter().any(|v| is_doc_hidden(&v.attrs))),
         },
         Data::Struct(data) => types::Node {
             ident: item.ast.ident.to_string(),
@@ -210,6 +211,15 @@ fn is_pub(vis: &Visibility) -> bool {
     }
 }
 
+fn is_non_exhaustive(attrs: &[Attribute]) -> bool {
+    for attr in attrs {
+        if attr.path.is_ident("non_exhaustive") {
+            return true;
+        }
+    }
+    false
+}
+
 fn is_doc_hidden(attrs: &[Attribute]) -> bool {
     for attr in attrs {
         if attr.path.is_ident("doc")
@@ -319,7 +329,7 @@ mod parsing {
     }
 
     pub fn ast_enum(input: ParseStream) -> Result<Option<AstItem>> {
-        input.call(Attribute::parse_outer)?;
+        let attrs = input.call(Attribute::parse_outer)?;
         input.parse::<Token![pub]>()?;
         input.parse::<Token![enum]>()?;
         let ident: Ident = input.parse()?;
@@ -330,6 +340,7 @@ mod parsing {
         } else {
             Some(AstItem {
                 ast: syn::parse2(quote! {
+                    #(#attrs)*
                     pub enum #ident #rest
                 })?,
                 features: vec![],
@@ -363,7 +374,7 @@ mod parsing {
     }
 
     pub fn ast_enum_of_structs(input: ParseStream) -> Result<AstItem> {
-        input.call(Attribute::parse_outer)?;
+        let attrs = input.call(Attribute::parse_outer)?;
         input.parse::<Token![pub]>()?;
         input.parse::<Token![enum]>()?;
         let ident: Ident = input.parse()?;
@@ -390,6 +401,7 @@ mod parsing {
                 }
             });
             parse_quote! {
+                #(#attrs)*
                 pub enum #ident {
                     #(#variants),*
                 }

@@ -152,14 +152,10 @@ pub fn parser(logic: impl FnMut(ParseNestedMeta) -> Result<()>) -> impl Parser<O
 ///
 /// [`Attribute::parse_nested_meta`]: crate::Attribute::parse_nested_meta
 /// [`syn::meta::parser`]: crate::meta::parser
-#[cfg_attr(not(syn_no_non_exhaustive), non_exhaustive)]
+#[non_exhaustive]
 pub struct ParseNestedMeta<'a> {
     pub path: Path,
     pub input: ParseStream<'a>,
-
-    #[cfg(syn_no_non_exhaustive)]
-    #[allow(dead_code)]
-    non_exhaustive: (),
 }
 
 impl<'a> ParseNestedMeta<'a> {
@@ -390,12 +386,7 @@ pub(crate) fn parse_nested_meta(
 ) -> Result<()> {
     loop {
         let path = input.call(parse_meta_path)?;
-        logic(ParseNestedMeta {
-            path,
-            input,
-            #[cfg(syn_no_non_exhaustive)]
-            non_exhaustive: (),
-        })?;
+        logic(ParseNestedMeta { path, input })?;
         if input.is_empty() {
             return Ok(());
         }

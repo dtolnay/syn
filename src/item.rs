@@ -15,7 +15,7 @@ ast_enum_of_structs! {
     ///
     /// [syntax tree enum]: Expr#syntax-tree-enums
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    #[cfg_attr(not(syn_no_non_exhaustive), non_exhaustive)]
+    #[non_exhaustive]
     pub enum Item {
         /// A constant item: `const MAX: u16 = 65535`.
         Const(ItemConst),
@@ -88,9 +88,6 @@ ast_enum_of_structs! {
         // a variant. You will be notified by a test failure when a variant is
         // added, so that you can add code to handle it, but your library will
         // continue to compile and work for downstream users in the interim.
-        #[cfg(syn_no_non_exhaustive)]
-        #[doc(hidden)]
-        __NonExhaustive,
     }
 }
 
@@ -342,9 +339,6 @@ impl Item {
             | Item::Union(ItemUnion { attrs, .. })
             | Item::Use(ItemUse { attrs, .. }) => mem::replace(attrs, new),
             Item::Verbatim(_) => Vec::new(),
-
-            #[cfg(syn_no_non_exhaustive)]
-            _ => unreachable!(),
         }
     }
 }
@@ -510,7 +504,7 @@ ast_enum_of_structs! {
     ///
     /// [syntax tree enum]: Expr#syntax-tree-enums
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    #[cfg_attr(not(syn_no_non_exhaustive), non_exhaustive)]
+    #[non_exhaustive]
     pub enum ForeignItem {
         /// A foreign function in an `extern` block.
         Fn(ForeignItemFn),
@@ -545,9 +539,6 @@ ast_enum_of_structs! {
         // a variant. You will be notified by a test failure when a variant is
         // added, so that you can add code to handle it, but your library will
         // continue to compile and work for downstream users in the interim.
-        #[cfg(syn_no_non_exhaustive)]
-        #[doc(hidden)]
-        __NonExhaustive,
     }
 }
 
@@ -608,7 +599,7 @@ ast_enum_of_structs! {
     ///
     /// [syntax tree enum]: Expr#syntax-tree-enums
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    #[cfg_attr(not(syn_no_non_exhaustive), non_exhaustive)]
+    #[non_exhaustive]
     pub enum TraitItem {
         /// An associated constant within the definition of a trait.
         Const(TraitItemConst),
@@ -643,9 +634,6 @@ ast_enum_of_structs! {
         // a variant. You will be notified by a test failure when a variant is
         // added, so that you can add code to handle it, but your library will
         // continue to compile and work for downstream users in the interim.
-        #[cfg(syn_no_non_exhaustive)]
-        #[doc(hidden)]
-        __NonExhaustive,
     }
 }
 
@@ -708,7 +696,7 @@ ast_enum_of_structs! {
     ///
     /// [syntax tree enum]: Expr#syntax-tree-enums
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    #[cfg_attr(not(syn_no_non_exhaustive), non_exhaustive)]
+    #[non_exhaustive]
     pub enum ImplItem {
         /// An associated constant within an impl block.
         Const(ImplItemConst),
@@ -743,9 +731,6 @@ ast_enum_of_structs! {
         // a variant. You will be notified by a test failure when a variant is
         // added, so that you can add code to handle it, but your library will
         // continue to compile and work for downstream users in the interim.
-        #[cfg(syn_no_non_exhaustive)]
-        #[doc(hidden)]
-        __NonExhaustive,
     }
 }
 
@@ -1780,9 +1765,6 @@ pub mod parsing {
                 ForeignItem::Type(item) => &mut item.attrs,
                 ForeignItem::Macro(item) => &mut item.attrs,
                 ForeignItem::Verbatim(_) => return Ok(item),
-
-                #[cfg(syn_no_non_exhaustive)]
-                _ => unreachable!(),
             };
             attrs.append(item_attrs);
             *item_attrs = attrs;
@@ -2214,9 +2196,6 @@ pub mod parsing {
                 TraitItem::Type(item) => &mut item.attrs,
                 TraitItem::Macro(item) => &mut item.attrs,
                 TraitItem::Verbatim(_) => unreachable!(),
-
-                #[cfg(syn_no_non_exhaustive)]
-                _ => unreachable!(),
             };
             attrs.append(item_attrs);
             *item_attrs = attrs;
@@ -2555,9 +2534,6 @@ pub mod parsing {
                     ImplItem::Type(item) => &mut item.attrs,
                     ImplItem::Macro(item) => &mut item.attrs,
                     ImplItem::Verbatim(_) => return Ok(item),
-
-                    #[cfg(syn_no_non_exhaustive)]
-                    _ => unreachable!(),
                 };
                 attrs.append(item_attrs);
                 *item_attrs = attrs;
