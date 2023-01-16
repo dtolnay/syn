@@ -981,17 +981,16 @@ ast_enum! {
 #[cfg(any(feature = "parsing", feature = "printing"))]
 #[cfg(feature = "full")]
 pub(crate) fn requires_terminator(expr: &Expr) -> bool {
-    // see https://github.com/rust-lang/rust/blob/2679c38fc/src/librustc_ast/util/classify.rs#L7-L25
+    // see https://github.com/rust-lang/rust/blob/9a19e7604/compiler/rustc_ast/src/util/classify.rs#L7-L26
     match *expr {
-        Expr::Unsafe(..)
-        | Expr::Block(..)
-        | Expr::If(..)
-        | Expr::Match(..)
-        | Expr::While(..)
-        | Expr::Loop(..)
-        | Expr::ForLoop(..)
-        | Expr::Async(..)
-        | Expr::TryBlock(..) => false,
+        Expr::If(_)
+        | Expr::Match(_)
+        | Expr::Block(_) | Expr::Unsafe(_) // both under ExprKind::Block in rustc
+        | Expr::While(_)
+        | Expr::Loop(_)
+        | Expr::ForLoop(_)
+        | Expr::TryBlock(_)
+        | Expr::Const(_) => false,
         _ => true,
     }
 }
