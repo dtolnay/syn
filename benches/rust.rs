@@ -8,8 +8,7 @@
 #![allow(
     clippy::cast_lossless,
     clippy::match_like_matches_macro,
-    clippy::unnecessary_wraps,
-    clippy::unnested_or_patterns
+    clippy::unnecessary_wraps
 )]
 
 #[macro_use]

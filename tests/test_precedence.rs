@@ -7,8 +7,7 @@
     clippy::manual_assert,
     clippy::match_like_matches_macro,
     clippy::match_wildcard_for_single_variants,
-    clippy::too_many_lines,
-    clippy::unnested_or_patterns
+    clippy::too_many_lines
 )]
 
 //! The tests in this module do the following:

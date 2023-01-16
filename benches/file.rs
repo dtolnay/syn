@@ -6,8 +6,7 @@
     clippy::items_after_statements,
     clippy::match_like_matches_macro,
     clippy::missing_panics_doc,
-    clippy::must_use_candidate,
-    clippy::unnested_or_patterns
+    clippy::must_use_candidate
 )]
 
 extern crate test;
