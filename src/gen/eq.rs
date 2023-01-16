@@ -1535,7 +1535,7 @@ impl Eq for PatStruct {}
 impl PartialEq for PatStruct {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.qself == other.qself && self.path == other.path
-            && self.fields == other.fields && self.dot2_token == other.dot2_token
+            && self.fields == other.fields && self.rest == other.rest
     }
 }
 #[cfg(feature = "full")]

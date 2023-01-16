@@ -3989,17 +3989,21 @@ impl Debug for Lite<syn::Pat> {
                 if !_val.fields.is_empty() {
                     formatter.field("fields", Lite(&_val.fields));
                 }
-                if let Some(val) = &_val.dot2_token {
+                if let Some(val) = &_val.rest {
                     #[derive(RefCast)]
                     #[repr(transparent)]
-                    struct Print(syn::token::Dot2);
+                    struct Print(syn::PatRest);
                     impl Debug for Print {
                         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                             formatter.write_str("Some")?;
+                            let _val = &self.0;
+                            formatter.write_str("(")?;
+                            Debug::fmt(Lite(_val), formatter)?;
+                            formatter.write_str(")")?;
                             Ok(())
                         }
                     }
-                    formatter.field("dot2_token", Print::ref_cast(val));
+                    formatter.field("rest", Print::ref_cast(val));
                 }
                 formatter.finish()
             }
@@ -4317,17 +4321,21 @@ impl Debug for Lite<syn::PatStruct> {
         if !_val.fields.is_empty() {
             formatter.field("fields", Lite(&_val.fields));
         }
-        if let Some(val) = &_val.dot2_token {
+        if let Some(val) = &_val.rest {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print(syn::token::Dot2);
+            struct Print(syn::PatRest);
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
                     Ok(())
                 }
             }
-            formatter.field("dot2_token", Print::ref_cast(val));
+            formatter.field("rest", Print::ref_cast(val));
         }
         formatter.finish()
     }

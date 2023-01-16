@@ -2229,7 +2229,7 @@ impl Debug for PatStruct {
         formatter.field("path", &self.path);
         formatter.field("brace_token", &self.brace_token);
         formatter.field("fields", &self.fields);
-        formatter.field("dot2_token", &self.dot2_token);
+        formatter.field("rest", &self.rest);
         formatter.finish()
     }
 }

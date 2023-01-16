@@ -1619,7 +1619,7 @@ impl Clone for PatStruct {
             path: self.path.clone(),
             brace_token: self.brace_token.clone(),
             fields: self.fields.clone(),
-            dot2_token: self.dot2_token.clone(),
+            rest: self.rest.clone(),
         }
     }
 }
