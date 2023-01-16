@@ -13,6 +13,10 @@ fn main() {
         None => return,
     };
 
+    // Note: remove exclude=["build.rs"] from Cargo.toml if adding any
+    // conditional compilation within the library.
+    let _ = compiler.minor;
+
     if !compiler.nightly {
         println!("cargo:rustc-cfg=syn_disable_nightly_tests");
     }
