@@ -325,22 +325,22 @@ impl Item {
     #[cfg(feature = "parsing")]
     pub(crate) fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
         match self {
-            Item::ExternCrate(ItemExternCrate { attrs, .. })
-            | Item::Use(ItemUse { attrs, .. })
-            | Item::Static(ItemStatic { attrs, .. })
-            | Item::Const(ItemConst { attrs, .. })
-            | Item::Fn(ItemFn { attrs, .. })
-            | Item::Mod(ItemMod { attrs, .. })
-            | Item::ForeignMod(ItemForeignMod { attrs, .. })
-            | Item::Type(ItemType { attrs, .. })
-            | Item::Struct(ItemStruct { attrs, .. })
+            Item::Const(ItemConst { attrs, .. })
             | Item::Enum(ItemEnum { attrs, .. })
-            | Item::Union(ItemUnion { attrs, .. })
-            | Item::Trait(ItemTrait { attrs, .. })
-            | Item::TraitAlias(ItemTraitAlias { attrs, .. })
+            | Item::ExternCrate(ItemExternCrate { attrs, .. })
+            | Item::Fn(ItemFn { attrs, .. })
+            | Item::ForeignMod(ItemForeignMod { attrs, .. })
             | Item::Impl(ItemImpl { attrs, .. })
             | Item::Macro(ItemMacro { attrs, .. })
-            | Item::Macro2(ItemMacro2 { attrs, .. }) => mem::replace(attrs, new),
+            | Item::Macro2(ItemMacro2 { attrs, .. })
+            | Item::Mod(ItemMod { attrs, .. })
+            | Item::Static(ItemStatic { attrs, .. })
+            | Item::Struct(ItemStruct { attrs, .. })
+            | Item::Trait(ItemTrait { attrs, .. })
+            | Item::TraitAlias(ItemTraitAlias { attrs, .. })
+            | Item::Type(ItemType { attrs, .. })
+            | Item::Union(ItemUnion { attrs, .. })
+            | Item::Use(ItemUse { attrs, .. }) => mem::replace(attrs, new),
             Item::Verbatim(_) => Vec::new(),
 
             #[cfg(syn_no_non_exhaustive)]
