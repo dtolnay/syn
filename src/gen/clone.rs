@@ -661,6 +661,7 @@ impl Clone for ExprStruct {
     fn clone(&self) -> Self {
         ExprStruct {
             attrs: self.attrs.clone(),
+            qself: self.qself.clone(),
             path: self.path.clone(),
             brace_token: self.brace_token.clone(),
             fields: self.fields.clone(),
@@ -1614,6 +1615,7 @@ impl Clone for PatStruct {
     fn clone(&self) -> Self {
         PatStruct {
             attrs: self.attrs.clone(),
+            qself: self.qself.clone(),
             path: self.path.clone(),
             brace_token: self.brace_token.clone(),
             fields: self.fields.clone(),
@@ -1638,6 +1640,7 @@ impl Clone for PatTupleStruct {
     fn clone(&self) -> Self {
         PatTupleStruct {
             attrs: self.attrs.clone(),
+            qself: self.qself.clone(),
             path: self.path.clone(),
             pat: self.pat.clone(),
         }

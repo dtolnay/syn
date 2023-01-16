@@ -1680,6 +1680,11 @@
             "syn": "Attribute"
           }
         },
+        "qself": {
+          "option": {
+            "syn": "QSelf"
+          }
+        },
         "path": {
           "syn": "Path"
         },
@@ -4043,6 +4048,11 @@
             "syn": "Attribute"
           }
         },
+        "qself": {
+          "option": {
+            "syn": "QSelf"
+          }
+        },
         "path": {
           "syn": "Path"
         },
@@ -4101,6 +4111,11 @@
         "attrs": {
           "vec": {
             "syn": "Attribute"
+          }
+        },
+        "qself": {
+          "option": {
+            "syn": "QSelf"
           }
         },
         "path": {

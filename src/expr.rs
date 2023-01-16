@@ -615,6 +615,7 @@ ast_struct! {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprStruct #full {
         pub attrs: Vec<Attribute>,
+        pub qself: Option<QSelf>,
         pub path: Path,
         pub brace_token: token::Brace,
         pub fields: Punctuated<FieldValue, Token![,]>,
@@ -1737,12 +1738,11 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     fn path_or_macro_or_struct(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        let begin = input.fork();
-        let expr: ExprPath = input.parse()?;
+        let (qself, path) = path::parsing::qpath(input, true)?;
 
-        if expr.qself.is_none() && input.peek(Token![!]) && !input.peek(Token![!=]) {
+        if qself.is_none() && input.peek(Token![!]) && !input.peek(Token![!=]) {
             let mut contains_arguments = false;
-            for segment in &expr.path.segments {
+            for segment in &path.segments {
                 match segment.arguments {
                     PathArguments::None => {}
                     PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
@@ -1757,7 +1757,7 @@ pub(crate) mod parsing {
                 return Ok(Expr::Macro(ExprMacro {
                     attrs: Vec::new(),
                     mac: Macro {
-                        path: expr.path,
+                        path,
                         bang_token,
                         delimiter,
                         tokens,
@@ -1767,14 +1767,13 @@ pub(crate) mod parsing {
         }
 
         if allow_struct.0 && input.peek(token::Brace) {
-            let expr_struct = expr_struct_helper(input, expr.path)?;
-            if expr.qself.is_some() {
-                Ok(Expr::Verbatim(verbatim::between(begin, input)))
-            } else {
-                Ok(Expr::Struct(expr_struct))
-            }
+            expr_struct_helper(input, qself, path).map(Expr::Struct)
         } else {
-            Ok(Expr::Path(expr))
+            Ok(Expr::Path(ExprPath {
+                attrs: Vec::new(),
+                qself,
+                path,
+            }))
         }
     }
 
@@ -2602,13 +2601,17 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprStruct {
         fn parse(input: ParseStream) -> Result<Self> {
-            let path: Path = input.parse()?;
-            expr_struct_helper(input, path)
+            let (qself, path) = path::parsing::qpath(input, true)?;
+            expr_struct_helper(input, qself, path)
         }
     }
 
     #[cfg(feature = "full")]
-    fn expr_struct_helper(input: ParseStream, path: Path) -> Result<ExprStruct> {
+    fn expr_struct_helper(
+        input: ParseStream,
+        qself: Option<QSelf>,
+        path: Path,
+    ) -> Result<ExprStruct> {
         let content;
         let brace_token = braced!(content in input);
 
@@ -2617,8 +2620,9 @@ pub(crate) mod parsing {
             if content.peek(Token![..]) {
                 return Ok(ExprStruct {
                     attrs: Vec::new(),
-                    brace_token,
+                    qself,
                     path,
+                    brace_token,
                     fields,
                     dot2_token: Some(content.parse()?),
                     rest: if content.is_empty() {
@@ -2639,8 +2643,9 @@ pub(crate) mod parsing {
 
         Ok(ExprStruct {
             attrs: Vec::new(),
-            brace_token,
+            qself,
             path,
+            brace_token,
             fields,
             dot2_token: None,
             rest: None,
@@ -3387,7 +3392,7 @@ pub(crate) mod printing {
     impl ToTokens for ExprStruct {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.path.to_tokens(tokens);
+            path::printing::print_path(tokens, &self.qself, &self.path);
             self.brace_token.surround(tokens, |tokens| {
                 self.fields.to_tokens(tokens);
                 if let Some(dot2_token) = &self.dot2_token {

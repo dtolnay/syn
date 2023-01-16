@@ -986,6 +986,22 @@ impl Debug for Lite<syn::Expr> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
+                if let Some(val) = &_val.qself {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::QSelf);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            let _val = &self.0;
+                            formatter.write_str("(")?;
+                            Debug::fmt(Lite(_val), formatter)?;
+                            formatter.write_str(")")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("qself", Print::ref_cast(val));
+                }
                 formatter.field("path", Lite(&_val.path));
                 if !_val.fields.is_empty() {
                     formatter.field("fields", Lite(&_val.fields));
@@ -1784,6 +1800,22 @@ impl Debug for Lite<syn::ExprStruct> {
         let mut formatter = formatter.debug_struct("ExprStruct");
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if let Some(val) = &_val.qself {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::QSelf);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("qself", Print::ref_cast(val));
         }
         formatter.field("path", Lite(&_val.path));
         if !_val.fields.is_empty() {
@@ -3937,6 +3969,22 @@ impl Debug for Lite<syn::Pat> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
+                if let Some(val) = &_val.qself {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::QSelf);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            let _val = &self.0;
+                            formatter.write_str("(")?;
+                            Debug::fmt(Lite(_val), formatter)?;
+                            formatter.write_str(")")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("qself", Print::ref_cast(val));
+                }
                 formatter.field("path", Lite(&_val.path));
                 if !_val.fields.is_empty() {
                     formatter.field("fields", Lite(&_val.fields));
@@ -3969,6 +4017,22 @@ impl Debug for Lite<syn::Pat> {
                 let mut formatter = formatter.debug_struct("Pat::TupleStruct");
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
+                }
+                if let Some(val) = &_val.qself {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::QSelf);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            let _val = &self.0;
+                            formatter.write_str("(")?;
+                            Debug::fmt(Lite(_val), formatter)?;
+                            formatter.write_str(")")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("qself", Print::ref_cast(val));
                 }
                 formatter.field("path", Lite(&_val.path));
                 formatter.field("pat", Lite(&_val.pat));
@@ -4233,6 +4297,22 @@ impl Debug for Lite<syn::PatStruct> {
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
         }
+        if let Some(val) = &_val.qself {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::QSelf);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("qself", Print::ref_cast(val));
+        }
         formatter.field("path", Lite(&_val.path));
         if !_val.fields.is_empty() {
             formatter.field("fields", Lite(&_val.fields));
@@ -4271,6 +4351,22 @@ impl Debug for Lite<syn::PatTupleStruct> {
         let mut formatter = formatter.debug_struct("PatTupleStruct");
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if let Some(val) = &_val.qself {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::QSelf);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("qself", Print::ref_cast(val));
         }
         formatter.field("path", Lite(&_val.path));
         formatter.field("pat", Lite(&_val.pat));

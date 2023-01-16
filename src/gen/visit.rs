@@ -1670,6 +1670,9 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
+    if let Some(it) = &node.qself {
+        v.visit_qself(it);
+    }
     v.visit_path(&node.path);
     tokens_helper(v, &node.brace_token.span);
     for el in Punctuated::pairs(&node.fields) {
@@ -2968,6 +2971,9 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
+    if let Some(it) = &node.qself {
+        v.visit_qself(it);
+    }
     v.visit_path(&node.path);
     tokens_helper(v, &node.brace_token.span);
     for el in Punctuated::pairs(&node.fields) {
@@ -3005,6 +3011,9 @@ where
 {
     for it in &node.attrs {
         v.visit_attribute(it);
+    }
+    if let Some(it) = &node.qself {
+        v.visit_qself(it);
     }
     v.visit_path(&node.path);
     v.visit_pat_tuple(&node.pat);

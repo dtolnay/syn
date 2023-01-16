@@ -1524,6 +1524,7 @@ where
 {
     ExprStruct {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        qself: (node.qself).map(|it| f.fold_qself(it)),
         path: f.fold_path(node.path),
         brace_token: Brace(tokens_helper(f, &node.brace_token.span)),
         fields: FoldHelper::lift(node.fields, |it| f.fold_field_value(it)),
@@ -2638,6 +2639,7 @@ where
 {
     PatStruct {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        qself: (node.qself).map(|it| f.fold_qself(it)),
         path: f.fold_path(node.path),
         brace_token: Brace(tokens_helper(f, &node.brace_token.span)),
         fields: FoldHelper::lift(node.fields, |it| f.fold_field_pat(it)),
@@ -2662,6 +2664,7 @@ where
 {
     PatTupleStruct {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        qself: (node.qself).map(|it| f.fold_qself(it)),
         path: f.fold_path(node.path),
         pat: f.fold_pat_tuple(node.pat),
     }

@@ -213,6 +213,7 @@ ast_struct! {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatStruct {
         pub attrs: Vec<Attribute>,
+        pub qself: Option<QSelf>,
         pub path: Path,
         pub brace_token: token::Brace,
         pub fields: Punctuated<FieldPat, Token![,]>,
@@ -235,6 +236,7 @@ ast_struct! {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatTupleStruct {
         pub attrs: Vec<Attribute>,
+        pub qself: Option<QSelf>,
         pub path: Path,
         pub pat: PatTuple,
     }
@@ -464,19 +466,9 @@ pub mod parsing {
         }
 
         if input.peek(token::Brace) {
-            let pat = pat_struct(begin.fork(), input, path)?;
-            if qself.is_some() {
-                Ok(Pat::Verbatim(verbatim::between(begin, input)))
-            } else {
-                Ok(pat)
-            }
+            pat_struct(begin.fork(), input, qself, path)
         } else if input.peek(token::Paren) {
-            let pat = pat_tuple_struct(input, path)?;
-            if qself.is_some() {
-                Ok(Pat::Verbatim(verbatim::between(begin, input)))
-            } else {
-                Ok(Pat::TupleStruct(pat))
-            }
+            pat_tuple_struct(input, qself, path).map(Pat::TupleStruct)
         } else if input.peek(Token![..]) {
             pat_range(input, qself, path)
         } else {
@@ -521,15 +513,25 @@ pub mod parsing {
         })
     }
 
-    fn pat_tuple_struct(input: ParseStream, path: Path) -> Result<PatTupleStruct> {
+    fn pat_tuple_struct(
+        input: ParseStream,
+        qself: Option<QSelf>,
+        path: Path,
+    ) -> Result<PatTupleStruct> {
         Ok(PatTupleStruct {
             attrs: Vec::new(),
+            qself,
             path,
             pat: input.call(pat_tuple)?,
         })
     }
 
-    fn pat_struct(begin: ParseBuffer, input: ParseStream, path: Path) -> Result<Pat> {
+    fn pat_struct(
+        begin: ParseBuffer,
+        input: ParseStream,
+        qself: Option<QSelf>,
+        path: Path,
+    ) -> Result<Pat> {
         let content;
         let brace_token = braced!(content in input);
 
@@ -556,6 +558,7 @@ pub mod parsing {
 
         Ok(Pat::Struct(PatStruct {
             attrs: Vec::new(),
+            qself,
             path,
             brace_token,
             fields,
@@ -817,7 +820,7 @@ mod printing {
     impl ToTokens for PatStruct {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
-            self.path.to_tokens(tokens);
+            path::printing::print_path(tokens, &self.qself, &self.path);
             self.brace_token.surround(tokens, |tokens| {
                 self.fields.to_tokens(tokens);
                 // NOTE: We need a comma before the dot2 token if it is present.
@@ -833,7 +836,7 @@ mod printing {
     impl ToTokens for PatTupleStruct {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
-            self.path.to_tokens(tokens);
+            path::printing::print_path(tokens, &self.qself, &self.path);
             self.pat.to_tokens(tokens);
         }
     }
