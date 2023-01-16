@@ -236,6 +236,8 @@ impl Clone for Expr {
             Expr::If(v0) => Expr::If(v0.clone()),
             Expr::Index(v0) => Expr::Index(v0.clone()),
             #[cfg(feature = "full")]
+            Expr::Infer(v0) => Expr::Infer(v0.clone()),
+            #[cfg(feature = "full")]
             Expr::Let(v0) => Expr::Let(v0.clone()),
             Expr::Lit(v0) => Expr::Lit(v0.clone()),
             #[cfg(feature = "full")]
@@ -509,6 +511,16 @@ impl Clone for ExprIndex {
             expr: self.expr.clone(),
             bracket_token: self.bracket_token.clone(),
             index: self.index.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for ExprInfer {
+    fn clone(&self) -> Self {
+        ExprInfer {
+            attrs: self.attrs.clone(),
+            underscore_token: self.underscore_token.clone(),
         }
     }
 }

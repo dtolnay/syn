@@ -466,6 +466,12 @@ impl Debug for Expr {
                 formatter.finish()
             }
             #[cfg(feature = "full")]
+            Expr::Infer(v0) => {
+                let mut formatter = formatter.debug_tuple("Infer");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            #[cfg(feature = "full")]
             Expr::Let(v0) => {
                 let mut formatter = formatter.debug_tuple("Let");
                 formatter.field(v0);
@@ -827,6 +833,16 @@ impl Debug for ExprIndex {
         formatter.field("expr", &self.expr);
         formatter.field("bracket_token", &self.bracket_token);
         formatter.field("index", &self.index);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for ExprInfer {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ExprInfer");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("underscore_token", &self.underscore_token);
         formatter.finish()
     }
 }

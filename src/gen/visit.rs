@@ -181,6 +181,10 @@ pub trait Visit<'ast> {
         visit_expr_index(self, i);
     }
     #[cfg(feature = "full")]
+    fn visit_expr_infer(&mut self, i: &'ast ExprInfer) {
+        visit_expr_infer(self, i);
+    }
+    #[cfg(feature = "full")]
     fn visit_expr_let(&mut self, i: &'ast ExprLet) {
         visit_expr_let(self, i);
     }
@@ -1151,6 +1155,9 @@ where
         Expr::Index(_binding_0) => {
             v.visit_expr_index(_binding_0);
         }
+        Expr::Infer(_binding_0) => {
+            full!(v.visit_expr_infer(_binding_0));
+        }
         Expr::Let(_binding_0) => {
             full!(v.visit_expr_let(_binding_0));
         }
@@ -1496,6 +1503,16 @@ where
     v.visit_expr(&*node.expr);
     tokens_helper(v, &node.bracket_token.span);
     v.visit_expr(&*node.index);
+}
+#[cfg(feature = "full")]
+pub fn visit_expr_infer<'ast, V>(v: &mut V, node: &'ast ExprInfer)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    tokens_helper(v, &node.underscore_token.spans);
 }
 #[cfg(feature = "full")]
 pub fn visit_expr_let<'ast, V>(v: &mut V, node: &'ast ExprLet)
