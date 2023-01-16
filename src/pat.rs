@@ -565,7 +565,7 @@ pub mod parsing {
 
     impl Member {
         fn is_unnamed(&self) -> bool {
-            match *self {
+            match self {
                 Member::Named(_) => false,
                 Member::Unnamed(_) => true,
             }

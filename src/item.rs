@@ -2660,7 +2660,7 @@ pub mod parsing {
 
     impl Visibility {
         fn is_inherited(&self) -> bool {
-            match *self {
+            match self {
                 Visibility::Inherited => true,
                 _ => false,
             }
@@ -2669,7 +2669,7 @@ pub mod parsing {
 
     impl MacroDelimiter {
         fn is_brace(&self) -> bool {
-            match *self {
+            match self {
                 MacroDelimiter::Brace(_) => true,
                 MacroDelimiter::Paren(_) | MacroDelimiter::Bracket(_) => false,
             }

@@ -1026,7 +1026,7 @@ mod printing {
                 }
             }
             for param in self.params.pairs() {
-                match **param.value() {
+                match param.value() {
                     GenericParam::Type(_) | GenericParam::Const(_) => {
                         if !trailing_or_empty {
                             <Token![,]>::default().to_tokens(tokens);
@@ -1070,7 +1070,7 @@ mod printing {
                     <Token![,]>::default().to_tokens(tokens);
                     trailing_or_empty = true;
                 }
-                match *param.value() {
+                match param.value() {
                     GenericParam::Lifetime(_) => unreachable!(),
                     GenericParam::Type(param) => {
                         // Leave off the type parameter defaults
@@ -1127,7 +1127,7 @@ mod printing {
                     <Token![,]>::default().to_tokens(tokens);
                     trailing_or_empty = true;
                 }
-                match *param.value() {
+                match param.value() {
                     GenericParam::Lifetime(_) => unreachable!(),
                     GenericParam::Type(param) => {
                         // Leave off the type parameter defaults

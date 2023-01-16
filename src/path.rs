@@ -693,7 +693,7 @@ pub(crate) mod printing {
             match self {
                 GenericArgument::Lifetime(lt) => lt.to_tokens(tokens),
                 GenericArgument::Type(ty) => ty.to_tokens(tokens),
-                GenericArgument::Const(e) => match *e {
+                GenericArgument::Const(e) => match e {
                     Expr::Lit(_) => e.to_tokens(tokens),
 
                     // NOTE: We should probably support parsing blocks with only
@@ -724,7 +724,7 @@ pub(crate) mod printing {
             // order in self.args.
             let mut trailing_or_empty = true;
             for param in self.args.pairs() {
-                match **param.value() {
+                match param.value() {
                     GenericArgument::Lifetime(_) => {
                         param.to_tokens(tokens);
                         trailing_or_empty = param.punct().is_some();
@@ -736,7 +736,7 @@ pub(crate) mod printing {
                 }
             }
             for param in self.args.pairs() {
-                match **param.value() {
+                match param.value() {
                     GenericArgument::Type(_)
                     | GenericArgument::Const(_)
                     | GenericArgument::Binding(_)
