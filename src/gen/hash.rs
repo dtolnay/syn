@@ -2068,7 +2068,7 @@ impl Hash for PatStruct {
         self.qself.hash(state);
         self.path.hash(state);
         self.fields.hash(state);
-        self.dot2_token.hash(state);
+        self.rest.hash(state);
     }
 }
 #[cfg(feature = "full")]

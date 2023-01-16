@@ -4067,9 +4067,9 @@
             "punct": "Comma"
           }
         },
-        "dot2_token": {
+        "rest": {
           "option": {
-            "token": "Dot2"
+            "syn": "PatRest"
           }
         }
       }

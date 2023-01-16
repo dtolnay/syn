@@ -2643,7 +2643,7 @@ where
         path: f.fold_path(node.path),
         brace_token: Brace(tokens_helper(f, &node.brace_token.span)),
         fields: FoldHelper::lift(node.fields, |it| f.fold_field_pat(it)),
-        dot2_token: (node.dot2_token).map(|it| Token![..](tokens_helper(f, &it.spans))),
+        rest: (node.rest).map(|it| f.fold_pat_rest(it)),
     }
 }
 #[cfg(feature = "full")]

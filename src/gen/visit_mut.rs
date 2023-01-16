@@ -2983,8 +2983,8 @@ where
             tokens_helper(v, &mut p.spans);
         }
     }
-    if let Some(it) = &mut node.dot2_token {
-        tokens_helper(v, &mut it.spans);
+    if let Some(it) = &mut node.rest {
+        v.visit_pat_rest_mut(it);
     }
 }
 #[cfg(feature = "full")]

@@ -217,7 +217,7 @@ ast_struct! {
         pub path: Path,
         pub brace_token: token::Brace,
         pub fields: Punctuated<FieldPat, Token![,]>,
-        pub dot2_token: Option<Token![..]>,
+        pub rest: Option<PatRest>,
     }
 }
 
@@ -436,7 +436,6 @@ pub mod parsing {
     }
 
     fn pat_path_or_macro_or_struct_or_range(input: ParseStream) -> Result<Pat> {
-        let begin = input.fork();
         let (qself, path) = path::parsing::qpath(input, true)?;
 
         if qself.is_none() && input.peek(Token![!]) && !input.peek(Token![!=]) {
@@ -466,7 +465,7 @@ pub mod parsing {
         }
 
         if input.peek(token::Brace) {
-            pat_struct(begin.fork(), input, qself, path)
+            pat_struct(input, qself, path).map(Pat::Struct)
         } else if input.peek(token::Paren) {
             pat_tuple_struct(input, qself, path).map(Pat::TupleStruct)
         } else if input.peek(Token![..]) {
@@ -526,24 +525,19 @@ pub mod parsing {
         })
     }
 
-    fn pat_struct(
-        begin: ParseBuffer,
-        input: ParseStream,
-        qself: Option<QSelf>,
-        path: Path,
-    ) -> Result<Pat> {
+    fn pat_struct(input: ParseStream, qself: Option<QSelf>, path: Path) -> Result<PatStruct> {
         let content;
         let brace_token = braced!(content in input);
 
         let mut fields = Punctuated::new();
-        let mut dot2_token = None;
+        let mut rest = None;
         while !content.is_empty() {
             let attrs = content.call(Attribute::parse_outer)?;
             if content.peek(Token![..]) {
-                dot2_token = Some(content.parse()?);
-                if !attrs.is_empty() {
-                    return Ok(Pat::Verbatim(verbatim::between(begin, input)));
-                }
+                rest = Some(PatRest {
+                    attrs,
+                    dot2_token: content.parse()?,
+                });
                 break;
             }
             let mut value = content.call(field_pat)?;
@@ -556,14 +550,14 @@ pub mod parsing {
             fields.push_punct(punct);
         }
 
-        Ok(Pat::Struct(PatStruct {
+        Ok(PatStruct {
             attrs: Vec::new(),
             qself,
             path,
             brace_token,
             fields,
-            dot2_token,
-        }))
+            rest,
+        })
     }
 
     impl Member {
@@ -824,10 +818,10 @@ mod printing {
             self.brace_token.surround(tokens, |tokens| {
                 self.fields.to_tokens(tokens);
                 // NOTE: We need a comma before the dot2 token if it is present.
-                if !self.fields.empty_or_trailing() && self.dot2_token.is_some() {
+                if !self.fields.empty_or_trailing() && self.rest.is_some() {
                     <Token![,]>::default().to_tokens(tokens);
                 }
-                self.dot2_token.to_tokens(tokens);
+                self.rest.to_tokens(tokens);
             });
         }
     }
