@@ -5,7 +5,6 @@ mod macros;
 
 use proc_macro2::{Delimiter, Group, Ident, Span, TokenStream, TokenTree};
 use quote::quote;
-use std::iter::FromIterator;
 use syn::Stmt;
 
 #[test]

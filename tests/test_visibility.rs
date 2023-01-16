@@ -2,7 +2,6 @@
 mod macros;
 
 use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
-use std::iter::FromIterator;
 use syn::parse::{Parse, ParseStream};
 use syn::{DeriveInput, Result, Visibility};
 

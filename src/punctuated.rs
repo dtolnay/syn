@@ -26,7 +26,6 @@ use std::fmt::{self, Debug};
 use std::hash::{Hash, Hasher};
 #[cfg(any(feature = "full", feature = "derive"))]
 use std::iter;
-use std::iter::FromIterator;
 use std::ops::{Index, IndexMut};
 use std::option;
 use std::slice;

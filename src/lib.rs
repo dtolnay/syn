@@ -94,9 +94,8 @@
 //! ```
 //!
 //! The [`heapsize`] example directory shows a complete working implementation
-//! of a derive macro. It works on any Rust compiler 1.31+. The example derives
-//! a `HeapSize` trait which computes an estimate of the amount of heap memory
-//! owned by a value.
+//! of a derive macro. The example derives a `HeapSize` trait which computes an
+//! estimate of the amount of heap memory owned by a value.
 //!
 //! [`heapsize`]: https://github.com/dtolnay/syn/tree/master/examples/heapsize
 //!
