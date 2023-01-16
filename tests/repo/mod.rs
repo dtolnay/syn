@@ -14,16 +14,19 @@ const REVISION: &str = "afaf3e07aaa7ca9873bdb439caec53faffa4230c";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO
-    "compiler/rustc_errors/src/translation.rs",
+    // TODO: const block without semicolon or match arm separator
     "library/alloc/src/collections/btree/node.rs",
-    "src/tools/clippy/tests/ui/needless_return.rs",
+    "tests/ui/inline-const/expr-with-block.rs",
+
+    // TODO: half open range pattern with guard, 0.. if true
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0166_half_open_range_pat.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0204_yeet_expr.rs",
+
+    // TODO: multiple ~const constraints in impl Trait
+    "tests/ui/rfc-2632-const-trait-impl/const-impl-trait.rs",
+
+    // TODO: precedence
     "tests/ui/closures/supertrait-hint-cycle.rs",
     "tests/ui/inline-const/expr-unsafe.rs",
-    "tests/ui/inline-const/expr-with-block.rs",
-    "tests/ui/rfc-2632-const-trait-impl/const-impl-trait.rs",
 
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
@@ -60,6 +63,9 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0046_mutable_const_item.rs",
 
     // Placeholder syntax for "throw expressions"
+    "compiler/rustc_errors/src/translation.rs",
+    "src/tools/clippy/tests/ui/needless_return.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0204_yeet_expr.rs",
     "tests/pretty/yeet-expr.rs",
     "tests/ui/try-trait/yeet-for-option.rs",
     "tests/ui/try-trait/yeet-for-result.rs",
