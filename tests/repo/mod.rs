@@ -14,10 +14,6 @@ const REVISION: &str = "afaf3e07aaa7ca9873bdb439caec53faffa4230c";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: const block without semicolon or match arm separator
-    "library/alloc/src/collections/btree/node.rs",
-    "tests/ui/inline-const/expr-with-block.rs",
-
     // TODO: half open range pattern with guard, 0.. if true
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0166_half_open_range_pat.rs",
 
