@@ -108,9 +108,6 @@ ast_enum_of_structs! {
         /// A blocked scope: `{ ... }`.
         Block(ExprBlock),
 
-        /// A box expression: `box f`.
-        Box(ExprBox),
-
         /// A `break`, with an optional label to break and an optional
         /// expression.
         Break(ExprBreak),
@@ -325,16 +322,6 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub label: Option<Label>,
         pub block: Block,
-    }
-}
-
-ast_struct! {
-    /// A box expression: `box f`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct ExprBox #full {
-        pub attrs: Vec<Attribute>,
-        pub box_token: Token![box],
-        pub expr: Box<Expr>,
     }
 }
 
@@ -739,7 +726,6 @@ impl Expr {
             | Expr::Await(ExprAwait { attrs, .. })
             | Expr::Binary(ExprBinary { attrs, .. })
             | Expr::Block(ExprBlock { attrs, .. })
-            | Expr::Box(ExprBox { attrs, .. })
             | Expr::Break(ExprBreak { attrs, .. })
             | Expr::Call(ExprCall { attrs, .. })
             | Expr::Cast(ExprCast { attrs, .. })
@@ -1447,7 +1433,7 @@ pub(crate) mod parsing {
                 }))
             }
         } else if input.peek(Token![box]) {
-            expr_box(input, attrs, allow_struct).map(Expr::Box)
+            expr_box(begin, input, allow_struct)
         } else if input.peek(Token![*]) || input.peek(Token![!]) || input.peek(Token![-]) {
             expr_unary(input, attrs, allow_struct).map(Expr::Unary)
         } else {
@@ -2243,26 +2229,10 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-    impl Parse for ExprBox {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let attrs = Vec::new();
-            let allow_struct = AllowStruct(true);
-            expr_box(input, attrs, allow_struct)
-        }
-    }
-
-    #[cfg(feature = "full")]
-    fn expr_box(
-        input: ParseStream,
-        attrs: Vec<Attribute>,
-        allow_struct: AllowStruct,
-    ) -> Result<ExprBox> {
-        Ok(ExprBox {
-            attrs,
-            box_token: input.parse()?,
-            expr: Box::new(unary_expr(input, allow_struct)?),
-        })
+    fn expr_box(begin: ParseBuffer, input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
+        input.parse::<Token![box]>()?;
+        unary_expr(input, allow_struct)?;
+        Ok(Expr::Verbatim(verbatim::between(begin, input)))
     }
 
     #[cfg(feature = "full")]
@@ -2442,7 +2412,6 @@ pub(crate) mod parsing {
             }))
         } else {
             match &mut pat {
-                Pat::Box(pat) => pat.attrs = attrs,
                 Pat::Ident(pat) => pat.attrs = attrs,
                 Pat::Lit(pat) => pat.attrs = attrs,
                 Pat::Macro(pat) => pat.attrs = attrs,
@@ -2918,16 +2887,6 @@ pub(crate) mod printing {
 
     #[cfg(not(feature = "full"))]
     pub(crate) fn outer_attrs_to_tokens(_attrs: &[Attribute], _tokens: &mut TokenStream) {}
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprBox {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.box_token.to_tokens(tokens);
-            self.expr.to_tokens(tokens);
-        }
-    }
 
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]

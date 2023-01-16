@@ -398,12 +398,6 @@ impl Debug for Expr {
                 formatter.finish()
             }
             #[cfg(feature = "full")]
-            Expr::Box(v0) => {
-                let mut formatter = formatter.debug_tuple("Box");
-                formatter.field(v0);
-                formatter.finish()
-            }
-            #[cfg(feature = "full")]
             Expr::Break(v0) => {
                 let mut formatter = formatter.debug_tuple("Break");
                 formatter.field(v0);
@@ -682,17 +676,6 @@ impl Debug for ExprBlock {
         formatter.field("attrs", &self.attrs);
         formatter.field("label", &self.label);
         formatter.field("block", &self.block);
-        formatter.finish()
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for ExprBox {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("ExprBox");
-        formatter.field("attrs", &self.attrs);
-        formatter.field("box_token", &self.box_token);
-        formatter.field("expr", &self.expr);
         formatter.finish()
     }
 }
@@ -2039,11 +2022,6 @@ impl Debug for ParenthesizedGenericArguments {
 impl Debug for Pat {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Pat::Box(v0) => {
-                let mut formatter = formatter.debug_tuple("Box");
-                formatter.field(v0);
-                formatter.finish()
-            }
             Pat::Ident(v0) => {
                 let mut formatter = formatter.debug_tuple("Ident");
                 formatter.field(v0);
@@ -2122,17 +2100,6 @@ impl Debug for Pat {
             #[cfg(syn_no_non_exhaustive)]
             _ => unreachable!(),
         }
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for PatBox {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("PatBox");
-        formatter.field("attrs", &self.attrs);
-        formatter.field("box_token", &self.box_token);
-        formatter.field("pat", &self.pat);
-        formatter.finish()
     }
 }
 #[cfg(feature = "full")]

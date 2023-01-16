@@ -14,9 +14,6 @@ ast_enum_of_structs! {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     #[cfg_attr(not(syn_no_non_exhaustive), non_exhaustive)]
     pub enum Pat {
-        /// A box pattern: `box v`.
-        Box(PatBox),
-
         /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
         Ident(PatIdent),
 
@@ -92,16 +89,6 @@ ast_enum_of_structs! {
         #[cfg(syn_no_non_exhaustive)]
         #[doc(hidden)]
         __NonExhaustive,
-    }
-}
-
-ast_struct! {
-    /// A box pattern: `box v`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct PatBox {
-        pub attrs: Vec<Attribute>,
-        pub box_token: Token![box],
-        pub pat: Box<Pat>,
     }
 }
 
@@ -280,7 +267,7 @@ ast_struct! {
 pub mod parsing {
     use super::*;
     use crate::ext::IdentExt;
-    use crate::parse::{ParseStream, Result};
+    use crate::parse::{ParseBuffer, ParseStream, Result};
     use crate::path;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -310,6 +297,7 @@ pub mod parsing {
         ///   |      ^^^^^^^^^^^^^^ help: wrap the pattern in parentheses: `(Some(_) | None)`
         /// ```
         pub fn parse_single(input: ParseStream) -> Result<Self> {
+            let begin = input.fork();
             let lookahead = input.lookahead1();
             if {
                 let ahead = input.fork();
@@ -334,7 +322,7 @@ pub mod parsing {
             } else if lookahead.peek(Token![_]) {
                 input.call(pat_wild).map(Pat::Wild)
             } else if input.peek(Token![box]) {
-                input.call(pat_box).map(Pat::Box)
+                pat_box(begin, input)
             } else if input.peek(Token![-]) || lookahead.peek(Lit) || lookahead.peek(Token![const])
             {
                 pat_lit_or_range(input)
@@ -485,12 +473,10 @@ pub mod parsing {
         })
     }
 
-    fn pat_box(input: ParseStream) -> Result<PatBox> {
-        Ok(PatBox {
-            attrs: Vec::new(),
-            box_token: input.parse()?,
-            pat: Box::new(Pat::parse_single(input)?),
-        })
+    fn pat_box(begin: ParseBuffer, input: ParseStream) -> Result<Pat> {
+        input.parse::<Token![box]>()?;
+        Pat::parse_single(input)?;
+        Ok(Pat::Verbatim(verbatim::between(begin, input)))
     }
 
     fn pat_ident(input: ParseStream) -> Result<PatIdent> {
@@ -569,6 +555,7 @@ pub mod parsing {
     }
 
     fn field_pat(input: ParseStream) -> Result<FieldPat> {
+        let begin = input.fork();
         let boxed: Option<Token![box]> = input.parse()?;
         let by_ref: Option<Token![ref]> = input.parse()?;
         let mutability: Option<Token![mut]> = input.parse()?;
@@ -603,12 +590,8 @@ pub mod parsing {
             subpat: None,
         });
 
-        if let Some(boxed) = boxed {
-            pat = Pat::Box(PatBox {
-                attrs: Vec::new(),
-                box_token: boxed,
-                pat: Box::new(pat),
-            });
+        if boxed.is_some() {
+            pat = Pat::Verbatim(verbatim::between(begin, input));
         }
 
         Ok(FieldPat {
@@ -864,15 +847,6 @@ mod printing {
             self.paren_token.surround(tokens, |tokens| {
                 self.elems.to_tokens(tokens);
             });
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for PatBox {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            self.box_token.to_tokens(tokens);
-            self.pat.to_tokens(tokens);
         }
     }
 

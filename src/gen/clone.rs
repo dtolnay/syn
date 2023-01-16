@@ -216,8 +216,6 @@ impl Clone for Expr {
             #[cfg(feature = "full")]
             Expr::Block(v0) => Expr::Block(v0.clone()),
             #[cfg(feature = "full")]
-            Expr::Box(v0) => Expr::Box(v0.clone()),
-            #[cfg(feature = "full")]
             Expr::Break(v0) => Expr::Break(v0.clone()),
             Expr::Call(v0) => Expr::Call(v0.clone()),
             Expr::Cast(v0) => Expr::Cast(v0.clone()),
@@ -360,17 +358,6 @@ impl Clone for ExprBlock {
             attrs: self.attrs.clone(),
             label: self.label.clone(),
             block: self.block.clone(),
-        }
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for ExprBox {
-    fn clone(&self) -> Self {
-        ExprBox {
-            attrs: self.attrs.clone(),
-            box_token: self.box_token.clone(),
-            expr: self.expr.clone(),
         }
     }
 }
@@ -1489,7 +1476,6 @@ impl Clone for ParenthesizedGenericArguments {
 impl Clone for Pat {
     fn clone(&self) -> Self {
         match self {
-            Pat::Box(v0) => Pat::Box(v0.clone()),
             Pat::Ident(v0) => Pat::Ident(v0.clone()),
             Pat::Lit(v0) => Pat::Lit(v0.clone()),
             Pat::Macro(v0) => Pat::Macro(v0.clone()),
@@ -1507,17 +1493,6 @@ impl Clone for Pat {
             Pat::Wild(v0) => Pat::Wild(v0.clone()),
             #[cfg(syn_no_non_exhaustive)]
             _ => unreachable!(),
-        }
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for PatBox {
-    fn clone(&self) -> Self {
-        PatBox {
-            attrs: self.attrs.clone(),
-            box_token: self.box_token.clone(),
-            pat: self.pat.clone(),
         }
     }
 }
