@@ -272,9 +272,9 @@ impl ErrorMessage {
         let start = self
             .start_span
             .get()
-            .cloned()
+            .copied()
             .unwrap_or_else(Span::call_site);
-        let end = self.end_span.get().cloned().unwrap_or_else(Span::call_site);
+        let end = self.end_span.get().copied().unwrap_or_else(Span::call_site);
 
         // compile_error!($message)
         TokenStream::from_iter(vec![
@@ -365,9 +365,9 @@ impl Clone for ErrorMessage {
         let start = self
             .start_span
             .get()
-            .cloned()
+            .copied()
             .unwrap_or_else(Span::call_site);
-        let end = self.end_span.get().cloned().unwrap_or_else(Span::call_site);
+        let end = self.end_span.get().copied().unwrap_or_else(Span::call_site);
         ErrorMessage {
             start_span: ThreadBound::new(start),
             end_span: ThreadBound::new(end),

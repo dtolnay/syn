@@ -5,7 +5,11 @@
 
 #![cfg_attr(not(syn_only), feature(rustc_private))]
 #![recursion_limit = "1024"]
-#![allow(clippy::cast_lossless, clippy::unnecessary_wraps)]
+#![allow(
+    clippy::cast_lossless,
+    clippy::match_like_matches_macro,
+    clippy::unnecessary_wraps
+)]
 
 #[macro_use]
 #[path = "../tests/macros/mod.rs"]

@@ -267,6 +267,7 @@
     clippy::items_after_statements,
     clippy::large_enum_variant,
     clippy::manual_assert,
+    clippy::match_like_matches_macro,
     clippy::match_on_vec_items,
     clippy::match_same_arms,
     clippy::match_wildcard_for_single_variants, // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6984

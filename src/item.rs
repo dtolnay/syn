@@ -1427,7 +1427,7 @@ pub mod parsing {
 
         if let Pat::Verbatim(pat) = last.pat.as_ref() {
             if pat.to_string() == "..." && !trailing_punct {
-                variadic.attrs = mem::replace(&mut last.attrs, Vec::new());
+                variadic.attrs = mem::take(&mut last.attrs);
                 args.pop();
             }
         }

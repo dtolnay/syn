@@ -5,6 +5,7 @@
 #![allow(
     clippy::explicit_deref_methods,
     clippy::manual_assert,
+    clippy::match_like_matches_macro,
     clippy::match_wildcard_for_single_variants,
     clippy::too_many_lines
 )]

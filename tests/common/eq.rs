@@ -592,7 +592,7 @@ impl SpanlessEq for TokenKind {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (TokenKind::Literal(this), TokenKind::Literal(other)) => SpanlessEq::eq(this, other),
-            (TokenKind::DotDotEq, _) | (TokenKind::DotDotDot, _) => match other {
+            (TokenKind::DotDotEq | TokenKind::DotDotDot, _) => match other {
                 TokenKind::DotDotEq | TokenKind::DotDotDot => true,
                 _ => false,
             },
