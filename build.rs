@@ -13,10 +13,6 @@ fn main() {
         None => return,
     };
 
-    if compiler.minor < 36 {
-        println!("cargo:rustc-cfg=syn_omit_await_from_token_macro");
-    }
-
     if compiler.minor < 39 {
         println!("cargo:rustc-cfg=syn_no_const_vec_new");
     }

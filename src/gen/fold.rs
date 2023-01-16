@@ -1183,7 +1183,7 @@ where
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         base: Box::new(f.fold_expr(*node.base)),
         dot_token: Token![.](tokens_helper(f, &node.dot_token.spans)),
-        await_token: crate::token::Await(tokens_helper(f, &node.await_token.span)),
+        await_token: Token![await](tokens_helper(f, &node.await_token.span)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
