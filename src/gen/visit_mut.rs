@@ -1430,7 +1430,7 @@ where
         v.visit_label_mut(it);
     }
     tokens_helper(v, &mut node.for_token.span);
-    v.visit_pat_mut(&mut node.pat);
+    v.visit_pat_mut(&mut *node.pat);
     tokens_helper(v, &mut node.in_token.span);
     v.visit_expr_mut(&mut *node.expr);
     v.visit_block_mut(&mut node.body);
@@ -1493,7 +1493,7 @@ where
         v.visit_attribute_mut(it);
     }
     tokens_helper(v, &mut node.let_token.span);
-    v.visit_pat_mut(&mut node.pat);
+    v.visit_pat_mut(&mut *node.pat);
     tokens_helper(v, &mut node.eq_token.spans);
     v.visit_expr_mut(&mut *node.expr);
 }

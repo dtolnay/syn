@@ -1306,7 +1306,7 @@ where
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         label: (node.label).map(|it| f.fold_label(it)),
         for_token: Token![for](tokens_helper(f, &node.for_token.span)),
-        pat: f.fold_pat(node.pat),
+        pat: Box::new(f.fold_pat(*node.pat)),
         in_token: Token![in](tokens_helper(f, &node.in_token.span)),
         expr: Box::new(f.fold_expr(*node.expr)),
         body: f.fold_block(node.body),
@@ -1370,7 +1370,7 @@ where
     ExprLet {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         let_token: Token![let](tokens_helper(f, &node.let_token.span)),
-        pat: f.fold_pat(node.pat),
+        pat: Box::new(f.fold_pat(*node.pat)),
         eq_token: Token![=](tokens_helper(f, &node.eq_token.spans)),
         expr: Box::new(f.fold_expr(*node.expr)),
     }
