@@ -700,13 +700,6 @@ pub mod parsing {
         }
 
         let lookahead = input.lookahead1();
-        if lookahead.peek(Token![-]) {
-            return Ok(Some(Box::new(Expr::Lit(ExprLit {
-                attrs: Vec::new(),
-                lit: input.parse()?,
-            }))));
-        }
-
         let expr = if lookahead.peek(Lit) {
             Expr::Lit(input.parse()?)
         } else if lookahead.peek(Ident)
