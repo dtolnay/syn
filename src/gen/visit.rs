@@ -1429,7 +1429,7 @@ where
         v.visit_label(it);
     }
     tokens_helper(v, &node.for_token.span);
-    v.visit_pat(&node.pat);
+    v.visit_pat(&*node.pat);
     tokens_helper(v, &node.in_token.span);
     v.visit_expr(&*node.expr);
     v.visit_block(&node.body);
@@ -1492,7 +1492,7 @@ where
         v.visit_attribute(it);
     }
     tokens_helper(v, &node.let_token.span);
-    v.visit_pat(&node.pat);
+    v.visit_pat(&*node.pat);
     tokens_helper(v, &node.eq_token.spans);
     v.visit_expr(&*node.expr);
 }

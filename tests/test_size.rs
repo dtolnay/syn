@@ -6,7 +6,7 @@ use syn::{Expr, Item, Lit, Pat, Type};
 #[rustversion::attr(before(2022-11-24), ignore)]
 #[test]
 fn test_expr_size() {
-    assert_eq!(mem::size_of::<Expr>(), 312);
+    assert_eq!(mem::size_of::<Expr>(), 176);
 }
 
 #[rustversion::attr(before(2022-09-09), ignore)]
@@ -18,7 +18,7 @@ fn test_item_size() {
 #[rustversion::attr(before(2022-11-24), ignore)]
 #[test]
 fn test_type_size() {
-    assert_eq!(mem::size_of::<Type>(), 328);
+    assert_eq!(mem::size_of::<Type>(), 192);
 }
 
 #[rustversion::attr(before(2021-10-11), ignore)]

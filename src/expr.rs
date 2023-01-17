@@ -409,7 +409,7 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub label: Option<Label>,
         pub for_token: Token![for],
-        pub pat: Pat,
+        pub pat: Box<Pat>,
         pub in_token: Token![in],
         pub expr: Box<Expr>,
         pub body: Block,
@@ -471,7 +471,7 @@ ast_struct! {
     pub struct ExprLet #full {
         pub attrs: Vec<Attribute>,
         pub let_token: Token![let],
-        pub pat: Pat,
+        pub pat: Box<Pat>,
         pub eq_token: Token![=],
         pub expr: Box<Expr>,
     }
@@ -2014,7 +2014,7 @@ pub(crate) mod parsing {
             Ok(ExprLet {
                 attrs: Vec::new(),
                 let_token: input.parse()?,
-                pat: Pat::parse_multi_with_leading_vert(input)?,
+                pat: Box::new(Pat::parse_multi_with_leading_vert(input)?),
                 eq_token: input.parse()?,
                 expr: Box::new({
                     let allow_struct = AllowStruct(false);
@@ -2099,7 +2099,7 @@ pub(crate) mod parsing {
                 attrs,
                 label,
                 for_token,
-                pat,
+                pat: Box::new(pat),
                 in_token,
                 expr: Box::new(expr),
                 body: Block { brace_token, stmts },

@@ -1203,7 +1203,9 @@
           "token": "For"
         },
         "pat": {
-          "syn": "Pat"
+          "box": {
+            "syn": "Pat"
+          }
         },
         "in_token": {
           "token": "In"
@@ -1345,7 +1347,9 @@
           "token": "Let"
         },
         "pat": {
-          "syn": "Pat"
+          "box": {
+            "syn": "Pat"
+          }
         },
         "eq_token": {
           "token": "Eq"
