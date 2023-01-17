@@ -18,25 +18,32 @@ const TOKEN_SRC: &str = "src/token.rs";
 const IGNORED_MODS: &[&str] = &["fold", "visit", "visit_mut"];
 const EXTRA_TYPES: &[&str] = &["Lifetime"];
 
-// NOTE: BTreeMap is used here instead of HashMap to have deterministic output.
-type ItemLookup = BTreeMap<Ident, AstItem>;
-type TokenLookup = BTreeMap<String, String>;
+struct Lookup {
+    items: BTreeMap<Ident, AstItem>,
+    tokens: BTreeMap<String, String>,
+}
 
 /// Parse the contents of `src` and return a list of AST types.
 pub fn parse() -> Result<types::Definitions> {
-    let mut item_lookup = BTreeMap::new();
-    load_file(SYN_CRATE_ROOT, &[], &mut item_lookup)?;
+    let tokens = load_token_file(TOKEN_SRC)?;
 
-    let token_lookup = load_token_file(TOKEN_SRC)?;
+    let mut lookup = Lookup {
+        items: BTreeMap::new(),
+        tokens,
+    };
+
+    load_file(SYN_CRATE_ROOT, &[], &mut lookup)?;
 
     let version = version::get()?;
 
-    let types = item_lookup
+    let types = lookup
+        .items
         .values()
-        .map(|item| introspect_item(item, &item_lookup, &token_lookup))
+        .map(|item| introspect_item(item, &lookup))
         .collect();
 
-    let tokens = token_lookup
+    let tokens = lookup
+        .tokens
         .into_iter()
         .map(|(name, ty)| (ty, name))
         .collect();
@@ -54,14 +61,14 @@ pub struct AstItem {
     features: Vec<Attribute>,
 }
 
-fn introspect_item(item: &AstItem, items: &ItemLookup, tokens: &TokenLookup) -> types::Node {
+fn introspect_item(item: &AstItem, lookup: &Lookup) -> types::Node {
     let features = introspect_features(&item.features);
 
     match &item.ast.data {
         Data::Enum(data) => types::Node {
             ident: item.ast.ident.to_string(),
             features,
-            data: types::Data::Enum(introspect_enum(data, items, tokens)),
+            data: types::Data::Enum(introspect_enum(data, lookup)),
             exhaustive: !(is_non_exhaustive(&item.ast.attrs)
                 || data.variants.iter().any(|v| is_doc_hidden(&v.attrs))),
         },
@@ -70,7 +77,7 @@ fn introspect_item(item: &AstItem, items: &ItemLookup, tokens: &TokenLookup) -> 
             features,
             data: {
                 if data.fields.iter().all(|f| is_pub(&f.vis)) {
-                    types::Data::Struct(introspect_struct(data, items, tokens))
+                    types::Data::Struct(introspect_struct(data, lookup))
                 } else {
                     types::Data::Private
                 }
@@ -81,7 +88,7 @@ fn introspect_item(item: &AstItem, items: &ItemLookup, tokens: &TokenLookup) -> 
     }
 }
 
-fn introspect_enum(item: &DataEnum, items: &ItemLookup, tokens: &TokenLookup) -> types::Variants {
+fn introspect_enum(item: &DataEnum, lookup: &Lookup) -> types::Variants {
     item.variants
         .iter()
         .filter_map(|variant| {
@@ -92,7 +99,7 @@ fn introspect_enum(item: &DataEnum, items: &ItemLookup, tokens: &TokenLookup) ->
                 Fields::Unnamed(fields) => fields
                     .unnamed
                     .iter()
-                    .map(|field| introspect_type(&field.ty, items, tokens))
+                    .map(|field| introspect_type(&field.ty, lookup))
                     .collect(),
                 Fields::Unit => vec![],
                 Fields::Named(_) => panic!("Enum representation not supported"),
@@ -102,7 +109,7 @@ fn introspect_enum(item: &DataEnum, items: &ItemLookup, tokens: &TokenLookup) ->
         .collect()
 }
 
-fn introspect_struct(item: &DataStruct, items: &ItemLookup, tokens: &TokenLookup) -> types::Fields {
+fn introspect_struct(item: &DataStruct, lookup: &Lookup) -> types::Fields {
     match &item.fields {
         Fields::Named(fields) => fields
             .named
@@ -110,7 +117,7 @@ fn introspect_struct(item: &DataStruct, items: &ItemLookup, tokens: &TokenLookup
             .map(|field| {
                 (
                     field.ident.as_ref().unwrap().to_string(),
-                    introspect_type(&field.ty, items, tokens),
+                    introspect_type(&field.ty, lookup),
                 )
             })
             .collect(),
@@ -119,7 +126,7 @@ fn introspect_struct(item: &DataStruct, items: &ItemLookup, tokens: &TokenLookup
     }
 }
 
-fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -> types::Type {
+fn introspect_type(item: &syn::Type, lookup: &Lookup) -> types::Type {
     match item {
         syn::Type::Path(TypePath { qself: None, path }) => {
             let last = path.segments.last().unwrap();
@@ -127,12 +134,12 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
 
             match string.as_str() {
                 "Option" => {
-                    let nested = introspect_type(first_arg(&last.arguments), items, tokens);
+                    let nested = introspect_type(first_arg(&last.arguments), lookup);
                     types::Type::Option(Box::new(nested))
                 }
                 "Punctuated" => {
-                    let nested = introspect_type(first_arg(&last.arguments), items, tokens);
-                    let punct = match introspect_type(last_arg(&last.arguments), items, tokens) {
+                    let nested = introspect_type(first_arg(&last.arguments), lookup);
+                    let punct = match introspect_type(last_arg(&last.arguments), lookup) {
                         types::Type::Token(s) => s,
                         _ => panic!(),
                     };
@@ -143,18 +150,18 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
                     })
                 }
                 "Vec" => {
-                    let nested = introspect_type(first_arg(&last.arguments), items, tokens);
+                    let nested = introspect_type(first_arg(&last.arguments), lookup);
                     types::Type::Vec(Box::new(nested))
                 }
                 "Box" => {
-                    let nested = introspect_type(first_arg(&last.arguments), items, tokens);
+                    let nested = introspect_type(first_arg(&last.arguments), lookup);
                     types::Type::Box(Box::new(nested))
                 }
                 "Brace" | "Bracket" | "Paren" | "Group" => types::Type::Group(string),
                 "TokenStream" | "Literal" | "Ident" | "Span" => types::Type::Ext(string),
                 "String" | "u32" | "usize" | "bool" => types::Type::Std(string),
                 _ => {
-                    if items.get(&last.ident).is_some() || last.ident == "Reserved" {
+                    if lookup.items.get(&last.ident).is_some() || last.ident == "Reserved" {
                         types::Type::Syn(string)
                     } else {
                         unimplemented!("{}", string);
@@ -163,17 +170,14 @@ fn introspect_type(item: &syn::Type, items: &ItemLookup, tokens: &TokenLookup) -
             }
         }
         syn::Type::Tuple(TypeTuple { elems, .. }) => {
-            let tys = elems
-                .iter()
-                .map(|ty| introspect_type(ty, items, tokens))
-                .collect();
+            let tys = elems.iter().map(|ty| introspect_type(ty, lookup)).collect();
             types::Type::Tuple(tys)
         }
         syn::Type::Macro(TypeMacro { mac })
             if mac.path.segments.last().unwrap().ident == "Token" =>
         {
             let content = mac.tokens.to_string();
-            let ty = tokens.get(&content).unwrap().to_string();
+            let ty = lookup.tokens.get(&content).unwrap().to_string();
 
             types::Type::Token(ty)
         }
@@ -266,7 +270,7 @@ fn last_arg(params: &PathArguments) -> &syn::Type {
 }
 
 mod parsing {
-    use super::{AstItem, TokenLookup};
+    use super::AstItem;
     use proc_macro2::TokenStream;
     use quote::quote;
     use std::collections::{BTreeMap, BTreeSet};
@@ -419,7 +423,7 @@ mod parsing {
         syn::custom_keyword!(Token);
     }
 
-    pub fn parse_token_macro(input: ParseStream) -> Result<TokenLookup> {
+    pub fn parse_token_macro(input: ParseStream) -> Result<BTreeMap<String, String>> {
         let mut tokens = BTreeMap::new();
         while !input.is_empty() {
             let pattern;
@@ -530,7 +534,7 @@ struct LoadFileError {
 fn load_file(
     relative_to_workspace_root: impl AsRef<Path>,
     features: &[Attribute],
-    lookup: &mut ItemLookup,
+    lookup: &mut Lookup,
 ) -> Result<()> {
     let error = match do_load_file(&relative_to_workspace_root, features, lookup).err() {
         None => return Ok(()),
@@ -551,7 +555,7 @@ fn load_file(
 fn do_load_file(
     relative_to_workspace_root: impl AsRef<Path>,
     features: &[Attribute],
-    lookup: &mut ItemLookup,
+    lookup: &mut Lookup,
 ) -> Result<()> {
     let relative_to_workspace_root = relative_to_workspace_root.as_ref();
     let parent = relative_to_workspace_root.parent().expect("no parent path");
@@ -619,14 +623,14 @@ fn do_load_file(
                 if let Some(mut item) = found {
                     if item.ast.ident != "Reserved" {
                         item.features.extend(clone_features(&features));
-                        lookup.insert(item.ast.ident.clone(), item);
+                        lookup.items.insert(item.ast.ident.clone(), item);
                     }
                 }
             }
             Item::Struct(item) => {
                 let ident = item.ident;
                 if EXTRA_TYPES.contains(&&ident.to_string()[..]) {
-                    lookup.insert(
+                    lookup.items.insert(
                         ident.clone(),
                         AstItem {
                             ast: DeriveInput {
@@ -651,7 +655,9 @@ fn do_load_file(
     Ok(())
 }
 
-fn load_token_file(relative_to_workspace_root: impl AsRef<Path>) -> Result<TokenLookup> {
+fn load_token_file(
+    relative_to_workspace_root: impl AsRef<Path>,
+) -> Result<BTreeMap<String, String>> {
     let path = workspace_path::get(relative_to_workspace_root);
     let src = fs::read_to_string(path)?;
     let file = syn::parse_file(&src)?;
