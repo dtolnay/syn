@@ -3746,6 +3746,13 @@ impl Debug for Lite<syn::Pat> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
         match _val {
+            syn::Pat::Const(_val) => {
+                formatter.write_str("Const")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
+            }
             syn::Pat::Ident(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Ident");
                 if !_val.attrs.is_empty() {
@@ -3795,20 +3802,18 @@ impl Debug for Lite<syn::Pat> {
                 formatter.finish()
             }
             syn::Pat::Lit(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Lit");
-                if !_val.attrs.is_empty() {
-                    formatter.field("attrs", Lite(&_val.attrs));
-                }
-                formatter.field("expr", Lite(&_val.expr));
-                formatter.finish()
+                formatter.write_str("Lit")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
             syn::Pat::Macro(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Macro");
-                if !_val.attrs.is_empty() {
-                    formatter.field("attrs", Lite(&_val.attrs));
-                }
-                formatter.field("mac", Lite(&_val.mac));
-                formatter.finish()
+                formatter.write_str("Macro")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
             syn::Pat::Or(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Or");
@@ -3833,68 +3838,18 @@ impl Debug for Lite<syn::Pat> {
                 formatter.finish()
             }
             syn::Pat::Path(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Path");
-                if !_val.attrs.is_empty() {
-                    formatter.field("attrs", Lite(&_val.attrs));
-                }
-                if let Some(val) = &_val.qself {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::QSelf);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            let _val = &self.0;
-                            formatter.write_str("(")?;
-                            Debug::fmt(Lite(_val), formatter)?;
-                            formatter.write_str(")")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("qself", Print::ref_cast(val));
-                }
-                formatter.field("path", Lite(&_val.path));
-                formatter.finish()
+                formatter.write_str("Path")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
             syn::Pat::Range(_val) => {
-                let mut formatter = formatter.debug_struct("Pat::Range");
-                if !_val.attrs.is_empty() {
-                    formatter.field("attrs", Lite(&_val.attrs));
-                }
-                if let Some(val) = &_val.start {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(Box<syn::Expr>);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            let _val = &self.0;
-                            formatter.write_str("(")?;
-                            Debug::fmt(Lite(_val), formatter)?;
-                            formatter.write_str(")")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("start", Print::ref_cast(val));
-                }
-                formatter.field("limits", Lite(&_val.limits));
-                if let Some(val) = &_val.end {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(Box<syn::Expr>);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            let _val = &self.0;
-                            formatter.write_str("(")?;
-                            Debug::fmt(Lite(_val), formatter)?;
-                            formatter.write_str(")")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("end", Print::ref_cast(val));
-                }
-                formatter.finish()
+                formatter.write_str("Range")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
             syn::Pat::Reference(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Reference");
@@ -4089,28 +4044,6 @@ impl Debug for Lite<syn::PatIdent> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::PatLit> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("PatLit");
-        if !_val.attrs.is_empty() {
-            formatter.field("attrs", Lite(&_val.attrs));
-        }
-        formatter.field("expr", Lite(&_val.expr));
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::PatMacro> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("PatMacro");
-        if !_val.attrs.is_empty() {
-            formatter.field("attrs", Lite(&_val.attrs));
-        }
-        formatter.field("mac", Lite(&_val.mac));
-        formatter.finish()
-    }
-}
 impl Debug for Lite<syn::PatOr> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
@@ -4132,76 +4065,6 @@ impl Debug for Lite<syn::PatOr> {
         }
         if !_val.cases.is_empty() {
             formatter.field("cases", Lite(&_val.cases));
-        }
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::PatPath> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("PatPath");
-        if !_val.attrs.is_empty() {
-            formatter.field("attrs", Lite(&_val.attrs));
-        }
-        if let Some(val) = &_val.qself {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::QSelf);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    let _val = &self.0;
-                    formatter.write_str("(")?;
-                    Debug::fmt(Lite(_val), formatter)?;
-                    formatter.write_str(")")?;
-                    Ok(())
-                }
-            }
-            formatter.field("qself", Print::ref_cast(val));
-        }
-        formatter.field("path", Lite(&_val.path));
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::PatRange> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("PatRange");
-        if !_val.attrs.is_empty() {
-            formatter.field("attrs", Lite(&_val.attrs));
-        }
-        if let Some(val) = &_val.start {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(Box<syn::Expr>);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    let _val = &self.0;
-                    formatter.write_str("(")?;
-                    Debug::fmt(Lite(_val), formatter)?;
-                    formatter.write_str(")")?;
-                    Ok(())
-                }
-            }
-            formatter.field("start", Print::ref_cast(val));
-        }
-        formatter.field("limits", Lite(&_val.limits));
-        if let Some(val) = &_val.end {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(Box<syn::Expr>);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    let _val = &self.0;
-                    formatter.write_str("(")?;
-                    Debug::fmt(Lite(_val), formatter)?;
-                    formatter.write_str(")")?;
-                    Ok(())
-                }
-            }
-            formatter.field("end", Print::ref_cast(val));
         }
         formatter.finish()
     }

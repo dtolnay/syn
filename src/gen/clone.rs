@@ -1456,6 +1456,7 @@ impl Clone for ParenthesizedGenericArguments {
 impl Clone for Pat {
     fn clone(&self) -> Self {
         match self {
+            Pat::Const(v0) => Pat::Const(v0.clone()),
             Pat::Ident(v0) => Pat::Ident(v0.clone()),
             Pat::Lit(v0) => Pat::Lit(v0.clone()),
             Pat::Macro(v0) => Pat::Macro(v0.clone()),
@@ -1489,55 +1490,12 @@ impl Clone for PatIdent {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for PatLit {
-    fn clone(&self) -> Self {
-        PatLit {
-            attrs: self.attrs.clone(),
-            expr: self.expr.clone(),
-        }
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for PatMacro {
-    fn clone(&self) -> Self {
-        PatMacro {
-            attrs: self.attrs.clone(),
-            mac: self.mac.clone(),
-        }
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for PatOr {
     fn clone(&self) -> Self {
         PatOr {
             attrs: self.attrs.clone(),
             leading_vert: self.leading_vert.clone(),
             cases: self.cases.clone(),
-        }
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for PatPath {
-    fn clone(&self) -> Self {
-        PatPath {
-            attrs: self.attrs.clone(),
-            qself: self.qself.clone(),
-            path: self.path.clone(),
-        }
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for PatRange {
-    fn clone(&self) -> Self {
-        PatRange {
-            attrs: self.attrs.clone(),
-            start: self.start.clone(),
-            limits: self.limits.clone(),
-            end: self.end.clone(),
         }
     }
 }

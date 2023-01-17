@@ -1998,6 +1998,11 @@ impl Debug for ParenthesizedGenericArguments {
 impl Debug for Pat {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            Pat::Const(v0) => {
+                let mut formatter = formatter.debug_tuple("Const");
+                formatter.field(v0);
+                formatter.finish()
+            }
             Pat::Ident(v0) => {
                 let mut formatter = formatter.debug_tuple("Ident");
                 formatter.field(v0);
@@ -2091,55 +2096,12 @@ impl Debug for PatIdent {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for PatLit {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("PatLit");
-        formatter.field("attrs", &self.attrs);
-        formatter.field("expr", &self.expr);
-        formatter.finish()
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for PatMacro {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("PatMacro");
-        formatter.field("attrs", &self.attrs);
-        formatter.field("mac", &self.mac);
-        formatter.finish()
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for PatOr {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatOr");
         formatter.field("attrs", &self.attrs);
         formatter.field("leading_vert", &self.leading_vert);
         formatter.field("cases", &self.cases);
-        formatter.finish()
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for PatPath {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("PatPath");
-        formatter.field("attrs", &self.attrs);
-        formatter.field("qself", &self.qself);
-        formatter.field("path", &self.path);
-        formatter.finish()
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for PatRange {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("PatRange");
-        formatter.field("attrs", &self.attrs);
-        formatter.field("start", &self.start);
-        formatter.field("limits", &self.limits);
-        formatter.field("end", &self.end);
         formatter.finish()
     }
 }

@@ -440,8 +440,8 @@ pub mod parse_quote;
 mod pat;
 #[cfg(feature = "full")]
 pub use crate::pat::{
-    FieldPat, Pat, PatIdent, PatLit, PatMacro, PatOr, PatPath, PatRange, PatReference, PatRest,
-    PatSlice, PatStruct, PatTuple, PatTupleStruct, PatType, PatWild,
+    FieldPat, Pat, PatIdent, PatOr, PatReference, PatRest, PatSlice, PatStruct, PatTuple,
+    PatTupleStruct, PatType, PatWild,
 };
 
 #[cfg(any(feature = "full", feature = "derive"))]

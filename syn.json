@@ -3660,6 +3660,11 @@
         ]
       },
       "variants": {
+        "Const": [
+          {
+            "syn": "ExprConst"
+          }
+        ],
         "Ident": [
           {
             "syn": "PatIdent"
@@ -3667,12 +3672,12 @@
         ],
         "Lit": [
           {
-            "syn": "PatLit"
+            "syn": "ExprLit"
           }
         ],
         "Macro": [
           {
-            "syn": "PatMacro"
+            "syn": "ExprMacro"
           }
         ],
         "Or": [
@@ -3682,12 +3687,12 @@
         ],
         "Path": [
           {
-            "syn": "PatPath"
+            "syn": "ExprPath"
           }
         ],
         "Range": [
           {
-            "syn": "PatRange"
+            "syn": "ExprRange"
           }
         ],
         "Reference": [
@@ -3781,44 +3786,6 @@
       }
     },
     {
-      "ident": "PatLit",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "expr": {
-          "box": {
-            "syn": "Expr"
-          }
-        }
-      }
-    },
-    {
-      "ident": "PatMacro",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "mac": {
-          "syn": "Macro"
-        }
-      }
-    },
-    {
       "ident": "PatOr",
       "features": {
         "any": [
@@ -3842,61 +3809,6 @@
               "syn": "Pat"
             },
             "punct": "Or"
-          }
-        }
-      }
-    },
-    {
-      "ident": "PatPath",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "qself": {
-          "option": {
-            "syn": "QSelf"
-          }
-        },
-        "path": {
-          "syn": "Path"
-        }
-      }
-    },
-    {
-      "ident": "PatRange",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "start": {
-          "option": {
-            "box": {
-              "syn": "Expr"
-            }
-          }
-        },
-        "limits": {
-          "syn": "RangeLimits"
-        },
-        "end": {
-          "option": {
-            "box": {
-              "syn": "Expr"
-            }
           }
         }
       }

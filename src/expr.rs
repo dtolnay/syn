@@ -2380,6 +2380,7 @@ pub(crate) mod parsing {
             }))
         } else {
             match &mut pat {
+                Pat::Const(pat) => pat.attrs = attrs,
                 Pat::Ident(pat) => pat.attrs = attrs,
                 Pat::Lit(pat) => pat.attrs = attrs,
                 Pat::Macro(pat) => pat.attrs = attrs,

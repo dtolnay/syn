@@ -14,17 +14,17 @@ ast_enum_of_structs! {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     #[non_exhaustive]
     pub enum Pat {
+        /// A const block: `const { ... }`.
+        Const(ExprConst),
+
         /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
         Ident(PatIdent),
 
         /// A literal pattern: `0`.
-        ///
-        /// This holds an `Expr` rather than a `Lit` because negative numbers
-        /// are represented as an `Expr::Unary`.
-        Lit(PatLit),
+        Lit(ExprLit),
 
         /// A macro in pattern position.
-        Macro(PatMacro),
+        Macro(ExprMacro),
 
         /// A pattern that matches any one of a set of cases.
         Or(PatOr),
@@ -36,10 +36,10 @@ ast_enum_of_structs! {
         /// constants or associated constants. Qualified path patterns like
         /// `<A>::B::C` and `<A as Trait>::B::C` can only legally refer to
         /// associated constants.
-        Path(PatPath),
+        Path(ExprPath),
 
         /// A range pattern: `1..=2`.
-        Range(PatRange),
+        Range(ExprRange),
 
         /// A reference pattern: `&mut var`.
         Reference(PatReference),
@@ -105,60 +105,12 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A literal pattern: `0`.
-    ///
-    /// This holds an `Expr` rather than a `Lit` because negative numbers
-    /// are represented as an `Expr::Unary`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct PatLit {
-        pub attrs: Vec<Attribute>,
-        pub expr: Box<Expr>,
-    }
-}
-
-ast_struct! {
-    /// A macro in pattern position.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct PatMacro {
-        pub attrs: Vec<Attribute>,
-        pub mac: Macro,
-    }
-}
-
-ast_struct! {
     /// A pattern that matches any one of a set of cases.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatOr {
         pub attrs: Vec<Attribute>,
         pub leading_vert: Option<Token![|]>,
         pub cases: Punctuated<Pat, Token![|]>,
-    }
-}
-
-ast_struct! {
-    /// A path pattern like `Color::Red`, optionally qualified with a
-    /// self-type.
-    ///
-    /// Unqualified path patterns can legally refer to variants, structs,
-    /// constants or associated constants. Qualified path patterns like
-    /// `<A>::B::C` and `<A as Trait>::B::C` can only legally refer to
-    /// associated constants.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct PatPath {
-        pub attrs: Vec<Attribute>,
-        pub qself: Option<QSelf>,
-        pub path: Path,
-    }
-}
-
-ast_struct! {
-    /// A range pattern: `1..=2`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct PatRange {
-        pub attrs: Vec<Attribute>,
-        pub start: Option<Box<Expr>>,
-        pub limits: RangeLimits,
-        pub end: Option<Box<Expr>>,
     }
 }
 
@@ -436,7 +388,7 @@ pub mod parsing {
             if !contains_arguments {
                 let bang_token: Token![!] = input.parse()?;
                 let (delimiter, tokens) = mac::parse_delimiter(input)?;
-                return Ok(Pat::Macro(PatMacro {
+                return Ok(Pat::Macro(ExprMacro {
                     attrs: Vec::new(),
                     mac: Macro {
                         path,
@@ -455,7 +407,7 @@ pub mod parsing {
         } else if input.peek(Token![..]) {
             pat_range(input, qself, path)
         } else {
-            Ok(Pat::Path(PatPath {
+            Ok(Pat::Path(ExprPath {
                 attrs: Vec::new(),
                 qself,
                 path,
@@ -601,8 +553,8 @@ pub mod parsing {
 
     fn pat_range(input: ParseStream, qself: Option<QSelf>, path: Path) -> Result<Pat> {
         let limits: RangeLimits = input.parse()?;
-        let end = input.call(pat_lit_expr)?;
-        Ok(Pat::Range(PatRange {
+        let end = input.call(pat_range_bound)?;
+        Ok(Pat::Range(ExprRange {
             attrs: Vec::new(),
             start: Some(Box::new(Expr::Path(ExprPath {
                 attrs: Vec::new(),
@@ -610,19 +562,19 @@ pub mod parsing {
                 path,
             }))),
             limits,
-            end,
+            end: end.map(PatRangeBound::into_expr),
         }))
     }
 
     fn pat_range_half_open(input: ParseStream) -> Result<Pat> {
         let limits: RangeLimits = input.parse()?;
-        let end = input.call(pat_lit_expr)?;
+        let end = input.call(pat_range_bound)?;
         if end.is_some() {
-            Ok(Pat::Range(PatRange {
+            Ok(Pat::Range(ExprRange {
                 attrs: Vec::new(),
                 start: None,
                 limits,
-                end,
+                end: end.map(PatRangeBound::into_expr),
             }))
         } else {
             match limits {
@@ -667,27 +619,47 @@ pub mod parsing {
     }
 
     fn pat_lit_or_range(input: ParseStream) -> Result<Pat> {
-        let start = input.call(pat_lit_expr)?.unwrap();
+        let start = input.call(pat_range_bound)?.unwrap();
         if input.peek(Token![..]) {
             let limits: RangeLimits = input.parse()?;
-            let end = input.call(pat_lit_expr)?;
-            Ok(Pat::Range(PatRange {
+            let end = input.call(pat_range_bound)?;
+            Ok(Pat::Range(ExprRange {
                 attrs: Vec::new(),
-                start: Some(start),
+                start: Some(start.into_expr()),
                 limits,
-                end,
+                end: end.map(PatRangeBound::into_expr),
             }))
-        } else if let Expr::Verbatim(verbatim) = *start {
-            Ok(Pat::Verbatim(verbatim))
         } else {
-            Ok(Pat::Lit(PatLit {
-                attrs: Vec::new(),
-                expr: start,
-            }))
+            Ok(start.into_pat())
         }
     }
 
-    fn pat_lit_expr(input: ParseStream) -> Result<Option<Box<Expr>>> {
+    // Patterns that can appear on either side of a range pattern.
+    enum PatRangeBound {
+        Const(ExprConst),
+        Lit(ExprLit),
+        Path(ExprPath),
+    }
+
+    impl PatRangeBound {
+        fn into_expr(self) -> Box<Expr> {
+            Box::new(match self {
+                PatRangeBound::Const(pat) => Expr::Const(pat),
+                PatRangeBound::Lit(pat) => Expr::Lit(pat),
+                PatRangeBound::Path(pat) => Expr::Path(pat),
+            })
+        }
+
+        fn into_pat(self) -> Pat {
+            match self {
+                PatRangeBound::Const(pat) => Pat::Const(pat),
+                PatRangeBound::Lit(pat) => Pat::Lit(pat),
+                PatRangeBound::Path(pat) => Pat::Path(pat),
+            }
+        }
+    }
+
+    fn pat_range_bound(input: ParseStream) -> Result<Option<PatRangeBound>> {
         if input.is_empty()
             || input.peek(Token![|])
             || input.peek(Token![=])
@@ -701,7 +673,7 @@ pub mod parsing {
 
         let lookahead = input.lookahead1();
         let expr = if lookahead.peek(Lit) {
-            Expr::Lit(input.parse()?)
+            PatRangeBound::Lit(input.parse()?)
         } else if lookahead.peek(Ident)
             || lookahead.peek(Token![::])
             || lookahead.peek(Token![<])
@@ -710,14 +682,14 @@ pub mod parsing {
             || lookahead.peek(Token![super])
             || lookahead.peek(Token![crate])
         {
-            Expr::Path(input.parse()?)
+            PatRangeBound::Path(input.parse()?)
         } else if lookahead.peek(Token![const]) {
-            Expr::Const(input.parse()?)
+            PatRangeBound::Const(input.parse()?)
         } else {
             return Err(lookahead.error());
         };
 
-        Ok(Some(Box::new(expr)))
+        Ok(Some(expr))
     }
 
     fn pat_slice(input: ParseStream) -> Result<PatSlice> {
@@ -820,14 +792,6 @@ mod printing {
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for PatPath {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            path::printing::print_path(tokens, &self.qself, &self.path);
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatTuple {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -856,38 +820,12 @@ mod printing {
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for PatLit {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            self.expr.to_tokens(tokens);
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for PatRange {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            self.start.to_tokens(tokens);
-            self.limits.to_tokens(tokens);
-            self.end.to_tokens(tokens);
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatSlice {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.bracket_token.surround(tokens, |tokens| {
                 self.elems.to_tokens(tokens);
             });
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for PatMacro {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            self.mac.to_tokens(tokens);
         }
     }
 
