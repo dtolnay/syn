@@ -591,8 +591,8 @@ impl Eq for ExprRange {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprRange {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.from == other.from
-            && self.limits == other.limits && self.to == other.to
+        self.attrs == other.attrs && self.start == other.start
+            && self.limits == other.limits && self.end == other.end
     }
 }
 #[cfg(feature = "full")]
@@ -1469,8 +1469,8 @@ impl Eq for PatRange {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for PatRange {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.lo == other.lo && self.limits == other.limits
-            && self.hi == other.hi
+        self.attrs == other.attrs && self.start == other.start
+            && self.limits == other.limits && self.end == other.end
     }
 }
 #[cfg(feature = "full")]

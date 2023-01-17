@@ -11,7 +11,7 @@ fn test_expr_parse() {
     snapshot!(tokens as Expr, @r###"
     Expr::Range {
         limits: HalfOpen,
-        to: Some(Expr::Lit {
+        end: Some(Expr::Lit {
             lit: 100u32,
         }),
     }
@@ -21,7 +21,7 @@ fn test_expr_parse() {
     snapshot!(tokens as ExprRange, @r###"
     ExprRange {
         limits: HalfOpen,
-        to: Some(Expr::Lit {
+        end: Some(Expr::Lit {
             lit: 100u32,
         }),
     }

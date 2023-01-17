@@ -837,9 +837,9 @@ impl Hash for ExprRange {
         H: Hasher,
     {
         self.attrs.hash(state);
-        self.from.hash(state);
+        self.start.hash(state);
         self.limits.hash(state);
-        self.to.hash(state);
+        self.end.hash(state);
     }
 }
 #[cfg(feature = "full")]
@@ -1978,9 +1978,9 @@ impl Hash for PatRange {
         H: Hasher,
     {
         self.attrs.hash(state);
-        self.lo.hash(state);
+        self.start.hash(state);
         self.limits.hash(state);
-        self.hi.hash(state);
+        self.end.hash(state);
     }
 }
 #[cfg(feature = "full")]

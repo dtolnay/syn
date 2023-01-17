@@ -560,9 +560,9 @@ ast_struct! {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprRange #full {
         pub attrs: Vec<Attribute>,
-        pub from: Option<Box<Expr>>,
+        pub start: Option<Box<Expr>>,
         pub limits: RangeLimits,
-        pub to: Option<Box<Expr>>,
+        pub end: Option<Box<Expr>>,
     }
 }
 
@@ -1249,9 +1249,9 @@ pub(crate) mod parsing {
                 };
                 lhs = Expr::Range(ExprRange {
                     attrs: Vec::new(),
-                    from: Some(Box::new(lhs)),
+                    start: Some(Box::new(lhs)),
                     limits,
-                    to: rhs.map(Box::new),
+                    end: rhs.map(Box::new),
                 });
             } else if Precedence::Cast >= base && input.peek(Token![as]) {
                 let as_token: Token![as] = input.parse()?;
@@ -2648,9 +2648,9 @@ pub(crate) mod parsing {
     fn expr_range(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprRange> {
         Ok(ExprRange {
             attrs: Vec::new(),
-            from: None,
+            start: None,
             limits: input.parse()?,
-            to: {
+            end: {
                 if input.is_empty()
                     || input.peek(Token![,])
                     || input.peek(Token![;])
@@ -3247,9 +3247,9 @@ pub(crate) mod printing {
     impl ToTokens for ExprRange {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.from.to_tokens(tokens);
+            self.start.to_tokens(tokens);
             self.limits.to_tokens(tokens);
-            self.to.to_tokens(tokens);
+            self.end.to_tokens(tokens);
         }
     }
 

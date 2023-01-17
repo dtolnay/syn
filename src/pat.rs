@@ -156,9 +156,9 @@ ast_struct! {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatRange {
         pub attrs: Vec<Attribute>,
-        pub lo: Option<Box<Expr>>,
+        pub start: Option<Box<Expr>>,
         pub limits: RangeLimits,
-        pub hi: Option<Box<Expr>>,
+        pub end: Option<Box<Expr>>,
     }
 }
 
@@ -601,28 +601,28 @@ pub mod parsing {
 
     fn pat_range(input: ParseStream, qself: Option<QSelf>, path: Path) -> Result<Pat> {
         let limits: RangeLimits = input.parse()?;
-        let hi = input.call(pat_lit_expr)?;
+        let end = input.call(pat_lit_expr)?;
         Ok(Pat::Range(PatRange {
             attrs: Vec::new(),
-            lo: Some(Box::new(Expr::Path(ExprPath {
+            start: Some(Box::new(Expr::Path(ExprPath {
                 attrs: Vec::new(),
                 qself,
                 path,
             }))),
             limits,
-            hi,
+            end,
         }))
     }
 
     fn pat_range_half_open(input: ParseStream) -> Result<Pat> {
         let limits: RangeLimits = input.parse()?;
-        let hi = input.call(pat_lit_expr)?;
-        if hi.is_some() {
+        let end = input.call(pat_lit_expr)?;
+        if end.is_some() {
             Ok(Pat::Range(PatRange {
                 attrs: Vec::new(),
-                lo: None,
+                start: None,
                 limits,
-                hi,
+                end,
             }))
         } else {
             match limits {
@@ -667,22 +667,22 @@ pub mod parsing {
     }
 
     fn pat_lit_or_range(input: ParseStream) -> Result<Pat> {
-        let lo = input.call(pat_lit_expr)?.unwrap();
+        let start = input.call(pat_lit_expr)?.unwrap();
         if input.peek(Token![..]) {
             let limits: RangeLimits = input.parse()?;
-            let hi = input.call(pat_lit_expr)?;
+            let end = input.call(pat_lit_expr)?;
             Ok(Pat::Range(PatRange {
                 attrs: Vec::new(),
-                lo: Some(lo),
+                start: Some(start),
                 limits,
-                hi,
+                end,
             }))
-        } else if let Expr::Verbatim(verbatim) = *lo {
+        } else if let Expr::Verbatim(verbatim) = *start {
             Ok(Pat::Verbatim(verbatim))
         } else {
             Ok(Pat::Lit(PatLit {
                 attrs: Vec::new(),
-                expr: lo,
+                expr: start,
             }))
         }
     }
@@ -877,9 +877,9 @@ mod printing {
     impl ToTokens for PatRange {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
-            self.lo.to_tokens(tokens);
+            self.start.to_tokens(tokens);
             self.limits.to_tokens(tokens);
-            self.hi.to_tokens(tokens);
+            self.end.to_tokens(tokens);
         }
     }
 

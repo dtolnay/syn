@@ -1600,11 +1600,11 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
-    if let Some(it) = &node.from {
+    if let Some(it) = &node.start {
         v.visit_expr(&**it);
     }
     v.visit_range_limits(&node.limits);
-    if let Some(it) = &node.to {
+    if let Some(it) = &node.end {
         v.visit_expr(&**it);
     }
 }
@@ -2866,11 +2866,11 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
-    if let Some(it) = &node.lo {
+    if let Some(it) = &node.start {
         v.visit_expr(&**it);
     }
     v.visit_range_limits(&node.limits);
-    if let Some(it) = &node.hi {
+    if let Some(it) = &node.end {
         v.visit_expr(&**it);
     }
 }
