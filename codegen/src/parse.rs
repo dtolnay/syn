@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use syn::parse::{Error, Parser};
 use syn::{
     parse_quote, Attribute, Data, DataEnum, DataStruct, DeriveInput, Fields, GenericArgument,
-    Ident, Item, PathArguments, TypeMacro, TypePath, TypeTuple, Visibility,
+    Ident, Item, PathArguments, TypeMacro, TypePath, TypeTuple, UseTree, Visibility,
 };
 use syn_codegen as types;
 use thiserror::Error;
@@ -20,7 +20,10 @@ const EXTRA_TYPES: &[&str] = &["Lifetime"];
 
 struct Lookup {
     items: BTreeMap<Ident, AstItem>,
+    // "+" => "Add"
     tokens: BTreeMap<String, String>,
+    // "PatLit" => "ExprLit"
+    aliases: BTreeMap<Ident, Ident>,
 }
 
 /// Parse the contents of `src` and return a list of AST types.
@@ -30,6 +33,7 @@ pub fn parse() -> Result<types::Definitions> {
     let mut lookup = Lookup {
         items: BTreeMap::new(),
         tokens,
+        aliases: BTreeMap::new(),
     };
 
     load_file(SYN_CRATE_ROOT, &[], &mut lookup)?;
@@ -161,10 +165,14 @@ fn introspect_type(item: &syn::Type, lookup: &Lookup) -> types::Type {
                 "TokenStream" | "Literal" | "Ident" | "Span" => types::Type::Ext(string),
                 "String" | "u32" | "usize" | "bool" => types::Type::Std(string),
                 _ => {
-                    if lookup.items.get(&last.ident).is_some() || last.ident == "Reserved" {
-                        types::Type::Syn(string)
+                    let mut resolved = &last.ident;
+                    while let Some(alias) = lookup.aliases.get(resolved) {
+                        resolved = alias;
+                    }
+                    if lookup.items.get(resolved).is_some() || resolved == "Reserved" {
+                        types::Type::Syn(resolved.to_string())
                     } else {
-                        unimplemented!("{}", string);
+                        unimplemented!("{}", resolved);
                     }
                 }
             }
@@ -649,10 +657,31 @@ fn do_load_file(
                     );
                 }
             }
+            Item::Use(item)
+                if relative_to_workspace_root == Path::new(SYN_CRATE_ROOT)
+                    && matches!(item.vis, Visibility::Public(_)) =>
+            {
+                load_aliases(item.tree, lookup);
+            }
             _ => {}
         }
     }
     Ok(())
+}
+
+fn load_aliases(use_tree: UseTree, lookup: &mut Lookup) {
+    match use_tree {
+        UseTree::Path(use_tree) => load_aliases(*use_tree.tree, lookup),
+        UseTree::Rename(use_tree) => {
+            lookup.aliases.insert(use_tree.rename, use_tree.ident);
+        }
+        UseTree::Group(use_tree) => {
+            for use_tree in use_tree.items {
+                load_aliases(use_tree, lookup);
+            }
+        }
+        UseTree::Name(_) | UseTree::Glob(_) => {}
+    }
 }
 
 fn load_token_file(
