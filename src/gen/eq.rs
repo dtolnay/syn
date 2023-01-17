@@ -1388,6 +1388,7 @@ impl Eq for Pat {}
 impl PartialEq for Pat {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
+            (Pat::Const(self0), Pat::Const(other0)) => self0 == other0,
             (Pat::Ident(self0), Pat::Ident(other0)) => self0 == other0,
             (Pat::Lit(self0), Pat::Lit(other0)) => self0 == other0,
             (Pat::Macro(self0), Pat::Macro(other0)) => self0 == other0,
@@ -1423,26 +1424,6 @@ impl PartialEq for PatIdent {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for PatLit {}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for PatLit {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.expr == other.expr
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for PatMacro {}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for PatMacro {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.mac == other.mac
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatOr {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1450,27 +1431,6 @@ impl PartialEq for PatOr {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.leading_vert == other.leading_vert
             && self.cases == other.cases
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for PatPath {}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for PatPath {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.qself == other.qself && self.path == other.path
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for PatRange {}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for PatRange {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.start == other.start
-            && self.limits == other.limits && self.end == other.end
     }
 }
 #[cfg(feature = "full")]

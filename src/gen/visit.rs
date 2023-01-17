@@ -510,24 +510,8 @@ pub trait Visit<'ast> {
         visit_pat_ident(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_pat_lit(&mut self, i: &'ast PatLit) {
-        visit_pat_lit(self, i);
-    }
-    #[cfg(feature = "full")]
-    fn visit_pat_macro(&mut self, i: &'ast PatMacro) {
-        visit_pat_macro(self, i);
-    }
-    #[cfg(feature = "full")]
     fn visit_pat_or(&mut self, i: &'ast PatOr) {
         visit_pat_or(self, i);
-    }
-    #[cfg(feature = "full")]
-    fn visit_pat_path(&mut self, i: &'ast PatPath) {
-        visit_pat_path(self, i);
-    }
-    #[cfg(feature = "full")]
-    fn visit_pat_range(&mut self, i: &'ast PatRange) {
-        visit_pat_range(self, i);
     }
     #[cfg(feature = "full")]
     fn visit_pat_reference(&mut self, i: &'ast PatReference) {
@@ -2739,23 +2723,26 @@ where
     V: Visit<'ast> + ?Sized,
 {
     match node {
+        Pat::Const(_binding_0) => {
+            v.visit_expr_const(_binding_0);
+        }
         Pat::Ident(_binding_0) => {
             v.visit_pat_ident(_binding_0);
         }
         Pat::Lit(_binding_0) => {
-            v.visit_pat_lit(_binding_0);
+            v.visit_expr_lit(_binding_0);
         }
         Pat::Macro(_binding_0) => {
-            v.visit_pat_macro(_binding_0);
+            v.visit_expr_macro(_binding_0);
         }
         Pat::Or(_binding_0) => {
             v.visit_pat_or(_binding_0);
         }
         Pat::Path(_binding_0) => {
-            v.visit_pat_path(_binding_0);
+            v.visit_expr_path(_binding_0);
         }
         Pat::Range(_binding_0) => {
-            v.visit_pat_range(_binding_0);
+            v.visit_expr_range(_binding_0);
         }
         Pat::Reference(_binding_0) => {
             v.visit_pat_reference(_binding_0);
@@ -2807,26 +2794,6 @@ where
     }
 }
 #[cfg(feature = "full")]
-pub fn visit_pat_lit<'ast, V>(v: &mut V, node: &'ast PatLit)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it);
-    }
-    v.visit_expr(&*node.expr);
-}
-#[cfg(feature = "full")]
-pub fn visit_pat_macro<'ast, V>(v: &mut V, node: &'ast PatMacro)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it);
-    }
-    v.visit_macro(&node.mac);
-}
-#[cfg(feature = "full")]
 pub fn visit_pat_or<'ast, V>(v: &mut V, node: &'ast PatOr)
 where
     V: Visit<'ast> + ?Sized,
@@ -2843,35 +2810,6 @@ where
         if let Some(p) = p {
             tokens_helper(v, &p.spans);
         }
-    }
-}
-#[cfg(feature = "full")]
-pub fn visit_pat_path<'ast, V>(v: &mut V, node: &'ast PatPath)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it);
-    }
-    if let Some(it) = &node.qself {
-        v.visit_qself(it);
-    }
-    v.visit_path(&node.path);
-}
-#[cfg(feature = "full")]
-pub fn visit_pat_range<'ast, V>(v: &mut V, node: &'ast PatRange)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it);
-    }
-    if let Some(it) = &node.start {
-        v.visit_expr(&**it);
-    }
-    v.visit_range_limits(&node.limits);
-    if let Some(it) = &node.end {
-        v.visit_expr(&**it);
     }
 }
 #[cfg(feature = "full")]

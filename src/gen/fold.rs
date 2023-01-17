@@ -511,24 +511,8 @@ pub trait Fold {
         fold_pat_ident(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_pat_lit(&mut self, i: PatLit) -> PatLit {
-        fold_pat_lit(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn fold_pat_macro(&mut self, i: PatMacro) -> PatMacro {
-        fold_pat_macro(self, i)
-    }
-    #[cfg(feature = "full")]
     fn fold_pat_or(&mut self, i: PatOr) -> PatOr {
         fold_pat_or(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn fold_pat_path(&mut self, i: PatPath) -> PatPath {
-        fold_pat_path(self, i)
-    }
-    #[cfg(feature = "full")]
-    fn fold_pat_range(&mut self, i: PatRange) -> PatRange {
-        fold_pat_range(self, i)
     }
     #[cfg(feature = "full")]
     fn fold_pat_reference(&mut self, i: PatReference) -> PatReference {
@@ -2464,12 +2448,13 @@ where
     F: Fold + ?Sized,
 {
     match node {
+        Pat::Const(_binding_0) => Pat::Const(f.fold_expr_const(_binding_0)),
         Pat::Ident(_binding_0) => Pat::Ident(f.fold_pat_ident(_binding_0)),
-        Pat::Lit(_binding_0) => Pat::Lit(f.fold_pat_lit(_binding_0)),
-        Pat::Macro(_binding_0) => Pat::Macro(f.fold_pat_macro(_binding_0)),
+        Pat::Lit(_binding_0) => Pat::Lit(f.fold_expr_lit(_binding_0)),
+        Pat::Macro(_binding_0) => Pat::Macro(f.fold_expr_macro(_binding_0)),
         Pat::Or(_binding_0) => Pat::Or(f.fold_pat_or(_binding_0)),
-        Pat::Path(_binding_0) => Pat::Path(f.fold_pat_path(_binding_0)),
-        Pat::Range(_binding_0) => Pat::Range(f.fold_pat_range(_binding_0)),
+        Pat::Path(_binding_0) => Pat::Path(f.fold_expr_path(_binding_0)),
+        Pat::Range(_binding_0) => Pat::Range(f.fold_expr_range(_binding_0)),
         Pat::Reference(_binding_0) => Pat::Reference(f.fold_pat_reference(_binding_0)),
         Pat::Rest(_binding_0) => Pat::Rest(f.fold_pat_rest(_binding_0)),
         Pat::Slice(_binding_0) => Pat::Slice(f.fold_pat_slice(_binding_0)),
@@ -2501,26 +2486,6 @@ where
     }
 }
 #[cfg(feature = "full")]
-pub fn fold_pat_lit<F>(f: &mut F, node: PatLit) -> PatLit
-where
-    F: Fold + ?Sized,
-{
-    PatLit {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        expr: Box::new(f.fold_expr(*node.expr)),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_pat_macro<F>(f: &mut F, node: PatMacro) -> PatMacro
-where
-    F: Fold + ?Sized,
-{
-    PatMacro {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        mac: f.fold_macro(node.mac),
-    }
-}
-#[cfg(feature = "full")]
 pub fn fold_pat_or<F>(f: &mut F, node: PatOr) -> PatOr
 where
     F: Fold + ?Sized,
@@ -2530,29 +2495,6 @@ where
         leading_vert: (node.leading_vert)
             .map(|it| Token![|](tokens_helper(f, &it.spans))),
         cases: FoldHelper::lift(node.cases, |it| f.fold_pat(it)),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_pat_path<F>(f: &mut F, node: PatPath) -> PatPath
-where
-    F: Fold + ?Sized,
-{
-    PatPath {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        qself: (node.qself).map(|it| f.fold_qself(it)),
-        path: f.fold_path(node.path),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_pat_range<F>(f: &mut F, node: PatRange) -> PatRange
-where
-    F: Fold + ?Sized,
-{
-    PatRange {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        start: (node.start).map(|it| Box::new(f.fold_expr(*it))),
-        limits: f.fold_range_limits(node.limits),
-        end: (node.end).map(|it| Box::new(f.fold_expr(*it))),
     }
 }
 #[cfg(feature = "full")]
