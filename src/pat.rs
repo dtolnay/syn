@@ -699,9 +699,15 @@ pub mod parsing {
             return Ok(None);
         }
 
-        let neg: Option<Token![-]> = input.parse()?;
-
         let lookahead = input.lookahead1();
+        if lookahead.peek(Token![-]) {
+            return Ok(Some(Box::new(Expr::Unary(ExprUnary {
+                attrs: Vec::new(),
+                op: UnOp::Neg(input.parse()?),
+                expr: Box::new(Expr::Lit(input.parse()?)),
+            }))));
+        }
+
         let expr = if lookahead.peek(Lit) {
             Expr::Lit(input.parse()?)
         } else if lookahead.peek(Ident)
@@ -719,15 +725,7 @@ pub mod parsing {
             return Err(lookahead.error());
         };
 
-        Ok(Some(Box::new(if let Some(neg) = neg {
-            Expr::Unary(ExprUnary {
-                attrs: Vec::new(),
-                op: UnOp::Neg(neg),
-                expr: Box::new(expr),
-            })
-        } else {
-            expr
-        })))
+        Ok(Some(Box::new(expr)))
     }
 
     fn pat_slice(input: ParseStream) -> Result<PatSlice> {
