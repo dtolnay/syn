@@ -15,16 +15,16 @@ ast_enum_of_structs! {
     #[non_exhaustive]
     pub enum Pat {
         /// A const block: `const { ... }`.
-        Const(ExprConst),
+        Const(PatConst),
 
         /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
         Ident(PatIdent),
 
         /// A literal pattern: `0`.
-        Lit(ExprLit),
+        Lit(PatLit),
 
         /// A macro in pattern position.
-        Macro(ExprMacro),
+        Macro(PatMacro),
 
         /// A pattern that matches any one of a set of cases.
         Or(PatOr),
@@ -36,10 +36,10 @@ ast_enum_of_structs! {
         /// constants or associated constants. Qualified path patterns like
         /// `<A>::B::C` and `<A as Trait>::B::C` can only legally refer to
         /// associated constants.
-        Path(ExprPath),
+        Path(PatPath),
 
         /// A range pattern: `1..=2`.
-        Range(ExprRange),
+        Range(PatRange),
 
         /// A reference pattern: `&mut var`.
         Reference(PatReference),
