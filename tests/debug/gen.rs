@@ -893,7 +893,7 @@ impl Debug for Lite<syn::Expr> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
-                if let Some(val) = &_val.from {
+                if let Some(val) = &_val.start {
                     #[derive(RefCast)]
                     #[repr(transparent)]
                     struct Print(Box<syn::Expr>);
@@ -907,10 +907,10 @@ impl Debug for Lite<syn::Expr> {
                             Ok(())
                         }
                     }
-                    formatter.field("from", Print::ref_cast(val));
+                    formatter.field("start", Print::ref_cast(val));
                 }
                 formatter.field("limits", Lite(&_val.limits));
-                if let Some(val) = &_val.to {
+                if let Some(val) = &_val.end {
                     #[derive(RefCast)]
                     #[repr(transparent)]
                     struct Print(Box<syn::Expr>);
@@ -924,7 +924,7 @@ impl Debug for Lite<syn::Expr> {
                             Ok(())
                         }
                     }
-                    formatter.field("to", Print::ref_cast(val));
+                    formatter.field("end", Print::ref_cast(val));
                 }
                 formatter.finish()
             }
@@ -1686,7 +1686,7 @@ impl Debug for Lite<syn::ExprRange> {
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
         }
-        if let Some(val) = &_val.from {
+        if let Some(val) = &_val.start {
             #[derive(RefCast)]
             #[repr(transparent)]
             struct Print(Box<syn::Expr>);
@@ -1700,10 +1700,10 @@ impl Debug for Lite<syn::ExprRange> {
                     Ok(())
                 }
             }
-            formatter.field("from", Print::ref_cast(val));
+            formatter.field("start", Print::ref_cast(val));
         }
         formatter.field("limits", Lite(&_val.limits));
-        if let Some(val) = &_val.to {
+        if let Some(val) = &_val.end {
             #[derive(RefCast)]
             #[repr(transparent)]
             struct Print(Box<syn::Expr>);
@@ -1717,7 +1717,7 @@ impl Debug for Lite<syn::ExprRange> {
                     Ok(())
                 }
             }
-            formatter.field("to", Print::ref_cast(val));
+            formatter.field("end", Print::ref_cast(val));
         }
         formatter.finish()
     }
@@ -3861,7 +3861,7 @@ impl Debug for Lite<syn::Pat> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
-                if let Some(val) = &_val.lo {
+                if let Some(val) = &_val.start {
                     #[derive(RefCast)]
                     #[repr(transparent)]
                     struct Print(Box<syn::Expr>);
@@ -3875,10 +3875,10 @@ impl Debug for Lite<syn::Pat> {
                             Ok(())
                         }
                     }
-                    formatter.field("lo", Print::ref_cast(val));
+                    formatter.field("start", Print::ref_cast(val));
                 }
                 formatter.field("limits", Lite(&_val.limits));
-                if let Some(val) = &_val.hi {
+                if let Some(val) = &_val.end {
                     #[derive(RefCast)]
                     #[repr(transparent)]
                     struct Print(Box<syn::Expr>);
@@ -3892,7 +3892,7 @@ impl Debug for Lite<syn::Pat> {
                             Ok(())
                         }
                     }
-                    formatter.field("hi", Print::ref_cast(val));
+                    formatter.field("end", Print::ref_cast(val));
                 }
                 formatter.finish()
             }
@@ -4170,7 +4170,7 @@ impl Debug for Lite<syn::PatRange> {
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
         }
-        if let Some(val) = &_val.lo {
+        if let Some(val) = &_val.start {
             #[derive(RefCast)]
             #[repr(transparent)]
             struct Print(Box<syn::Expr>);
@@ -4184,10 +4184,10 @@ impl Debug for Lite<syn::PatRange> {
                     Ok(())
                 }
             }
-            formatter.field("lo", Print::ref_cast(val));
+            formatter.field("start", Print::ref_cast(val));
         }
         formatter.field("limits", Lite(&_val.limits));
-        if let Some(val) = &_val.hi {
+        if let Some(val) = &_val.end {
             #[derive(RefCast)]
             #[repr(transparent)]
             struct Print(Box<syn::Expr>);
@@ -4201,7 +4201,7 @@ impl Debug for Lite<syn::PatRange> {
                     Ok(())
                 }
             }
-            formatter.field("hi", Print::ref_cast(val));
+            formatter.field("end", Print::ref_cast(val));
         }
         formatter.finish()
     }

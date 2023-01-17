@@ -610,9 +610,9 @@ impl Clone for ExprRange {
     fn clone(&self) -> Self {
         ExprRange {
             attrs: self.attrs.clone(),
-            from: self.from.clone(),
+            start: self.start.clone(),
             limits: self.limits.clone(),
-            to: self.to.clone(),
+            end: self.end.clone(),
         }
     }
 }
@@ -1535,9 +1535,9 @@ impl Clone for PatRange {
     fn clone(&self) -> Self {
         PatRange {
             attrs: self.attrs.clone(),
-            lo: self.lo.clone(),
+            start: self.start.clone(),
             limits: self.limits.clone(),
-            hi: self.hi.clone(),
+            end: self.end.clone(),
         }
     }
 }

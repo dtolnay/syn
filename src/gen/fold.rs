@@ -1464,9 +1464,9 @@ where
 {
     ExprRange {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        from: (node.from).map(|it| Box::new(f.fold_expr(*it))),
+        start: (node.start).map(|it| Box::new(f.fold_expr(*it))),
         limits: f.fold_range_limits(node.limits),
-        to: (node.to).map(|it| Box::new(f.fold_expr(*it))),
+        end: (node.end).map(|it| Box::new(f.fold_expr(*it))),
     }
 }
 #[cfg(feature = "full")]
@@ -2550,9 +2550,9 @@ where
 {
     PatRange {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        lo: (node.lo).map(|it| Box::new(f.fold_expr(*it))),
+        start: (node.start).map(|it| Box::new(f.fold_expr(*it))),
         limits: f.fold_range_limits(node.limits),
-        hi: (node.hi).map(|it| Box::new(f.fold_expr(*it))),
+        end: (node.end).map(|it| Box::new(f.fold_expr(*it))),
     }
 }
 #[cfg(feature = "full")]

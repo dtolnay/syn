@@ -924,9 +924,9 @@ impl Debug for ExprRange {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprRange");
         formatter.field("attrs", &self.attrs);
-        formatter.field("from", &self.from);
+        formatter.field("start", &self.start);
         formatter.field("limits", &self.limits);
-        formatter.field("to", &self.to);
+        formatter.field("end", &self.end);
         formatter.finish()
     }
 }
@@ -2137,9 +2137,9 @@ impl Debug for PatRange {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatRange");
         formatter.field("attrs", &self.attrs);
-        formatter.field("lo", &self.lo);
+        formatter.field("start", &self.start);
         formatter.field("limits", &self.limits);
-        formatter.field("hi", &self.hi);
+        formatter.field("end", &self.end);
         formatter.finish()
     }
 }

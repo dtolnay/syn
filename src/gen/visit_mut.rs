@@ -1601,11 +1601,11 @@ where
     for it in &mut node.attrs {
         v.visit_attribute_mut(it);
     }
-    if let Some(it) = &mut node.from {
+    if let Some(it) = &mut node.start {
         v.visit_expr_mut(&mut **it);
     }
     v.visit_range_limits_mut(&mut node.limits);
-    if let Some(it) = &mut node.to {
+    if let Some(it) = &mut node.end {
         v.visit_expr_mut(&mut **it);
     }
 }
@@ -2866,11 +2866,11 @@ where
     for it in &mut node.attrs {
         v.visit_attribute_mut(it);
     }
-    if let Some(it) = &mut node.lo {
+    if let Some(it) = &mut node.start {
         v.visit_expr_mut(&mut **it);
     }
     v.visit_range_limits_mut(&mut node.limits);
-    if let Some(it) = &mut node.hi {
+    if let Some(it) = &mut node.end {
         v.visit_expr_mut(&mut **it);
     }
 }

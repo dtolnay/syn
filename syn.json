@@ -1558,7 +1558,7 @@
             "syn": "Attribute"
           }
         },
-        "from": {
+        "start": {
           "option": {
             "box": {
               "syn": "Expr"
@@ -1568,7 +1568,7 @@
         "limits": {
           "syn": "RangeLimits"
         },
-        "to": {
+        "end": {
           "option": {
             "box": {
               "syn": "Expr"
@@ -3882,7 +3882,7 @@
             "syn": "Attribute"
           }
         },
-        "lo": {
+        "start": {
           "option": {
             "box": {
               "syn": "Expr"
@@ -3892,7 +3892,7 @@
         "limits": {
           "syn": "RangeLimits"
         },
-        "hi": {
+        "end": {
           "option": {
             "box": {
               "syn": "Expr"
