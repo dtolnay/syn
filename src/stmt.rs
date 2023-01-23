@@ -295,13 +295,13 @@ pub mod parsing {
                 Expr::Assign(e) => &mut e.left,
                 Expr::AssignOp(e) => &mut e.left,
                 Expr::Binary(e) => &mut e.left,
+                Expr::Cast(e) => &mut e.expr,
                 Expr::Array(_)
                 | Expr::Async(_)
                 | Expr::Await(_)
                 | Expr::Block(_)
                 | Expr::Break(_)
                 | Expr::Call(_)
-                | Expr::Cast(_)
                 | Expr::Closure(_)
                 | Expr::Const(_)
                 | Expr::Continue(_)
