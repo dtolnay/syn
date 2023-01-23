@@ -1,4 +1,5 @@
 use std::fmt::{self, Debug};
+use std::panic;
 use std::thread::{self, ThreadId};
 
 /// ThreadBound is a Sync-maker and Send-maker that allows accessing a value
@@ -6,7 +7,9 @@ use std::thread::{self, ThreadId};
 /// constructed.
 pub struct ThreadBound<T> {
     value: T,
-    thread_id: ThreadId,
+    // None if constructed in atexit context after the standard library's thread
+    // local data has already been torn down.
+    thread_id: Option<ThreadId>,
 }
 
 unsafe impl<T> Sync for ThreadBound<T> {}
@@ -18,12 +21,12 @@ impl<T> ThreadBound<T> {
     pub fn new(value: T) -> Self {
         ThreadBound {
             value,
-            thread_id: thread::current().id(),
+            thread_id: thread_id_if_possible(),
         }
     }
 
     pub fn get(&self) -> Option<&T> {
-        if thread::current().id() == self.thread_id {
+        if thread_id_if_possible() == self.thread_id {
             Some(&self.value)
         } else {
             None
@@ -46,5 +49,12 @@ impl<T: Clone> Clone for ThreadBound<T> {
             value: self.value.clone(),
             thread_id: self.thread_id,
         }
+    }
+}
+
+fn thread_id_if_possible() -> Option<ThreadId> {
+    match panic::catch_unwind(thread::current) {
+        Ok(thread) => Some(thread.id()),
+        Err(_panic) => None,
     }
 }
