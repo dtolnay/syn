@@ -1,5 +1,5 @@
 use std::fmt::{self, Debug};
-use std::panic;
+use std::panic::{self, PanicInfo};
 use std::thread::{self, ThreadId};
 
 /// ThreadBound is a Sync-maker and Send-maker that allows accessing a value
@@ -53,8 +53,18 @@ impl<T: Clone> Clone for ThreadBound<T> {
 }
 
 fn thread_id_if_possible() -> Option<ThreadId> {
-    match panic::catch_unwind(thread::current) {
+    type PanicHook = dyn Fn(&PanicInfo) + Sync + Send + 'static;
+
+    let null_hook: Box<PanicHook> = Box::new(|_panic_info| { /* ignore */ });
+    let original_hook = panic::take_hook();
+    panic::set_hook(null_hook);
+
+    let thread_id = match panic::catch_unwind(thread::current) {
         Ok(thread) => Some(thread.id()),
         Err(_panic) => None,
-    }
+    };
+
+    panic::set_hook(original_hook);
+
+    thread_id
 }
