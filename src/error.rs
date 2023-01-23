@@ -107,9 +107,16 @@ struct ErrorMessage {
     // errors to be Send and Sync to play nicely with ecosystem crates for error
     // handling, so pin the span we're given to its original thread and assume
     // it is Span::call_site if accessed from any other thread.
-    start_span: ThreadBound<Span>,
-    end_span: ThreadBound<Span>,
+    span: ThreadBound<SpanRange>,
     message: String,
+}
+
+// Cannot use std::ops::Range<Span> because that does not implement Copy,
+// whereas ThreadBound<T> requires a Copy impl as a way to ensure no Drop impls
+// are involved.
+struct SpanRange {
+    start: Span,
+    end: Span,
 }
 
 #[cfg(test)]
@@ -154,8 +161,10 @@ impl Error {
         fn new(span: Span, message: String) -> Error {
             Error {
                 messages: vec![ErrorMessage {
-                    start_span: ThreadBound::new(span),
-                    end_span: ThreadBound::new(span),
+                    span: ThreadBound::new(SpanRange {
+                        start: span,
+                        end: span,
+                    }),
                     message,
                 }],
             }
@@ -185,8 +194,7 @@ impl Error {
             let end = iter.last().map_or(start, |t| t.span());
             Error {
                 messages: vec![ErrorMessage {
-                    start_span: ThreadBound::new(start),
-                    end_span: ThreadBound::new(end),
+                    span: ThreadBound::new(SpanRange { start, end }),
                     message,
                 }],
             }
@@ -199,11 +207,7 @@ impl Error {
     /// if called from a different thread than the one on which the `Error` was
     /// originally created.
     pub fn span(&self) -> Span {
-        let start = match self.messages[0].start_span.get() {
-            Some(span) => *span,
-            None => return Span::call_site(),
-        };
-        let end = match self.messages[0].end_span.get() {
+        let SpanRange { start, end } = match self.messages[0].span.get() {
             Some(span) => *span,
             None => return Span::call_site(),
         };
@@ -269,12 +273,10 @@ impl Error {
 
 impl ErrorMessage {
     fn to_compile_error(&self) -> TokenStream {
-        let start = self
-            .start_span
-            .get()
-            .copied()
-            .unwrap_or_else(Span::call_site);
-        let end = self.end_span.get().copied().unwrap_or_else(Span::call_site);
+        let (start, end) = match self.span.get() {
+            Some(range) => (range.start, range.end),
+            None => (Span::call_site(), Span::call_site()),
+        };
 
         // compile_error!($message)
         TokenStream::from_iter(vec![
@@ -316,8 +318,7 @@ pub fn new2<T: Display>(start: Span, end: Span, message: T) -> Error {
     fn new2(start: Span, end: Span, message: String) -> Error {
         Error {
             messages: vec![ErrorMessage {
-                start_span: ThreadBound::new(start),
-                end_span: ThreadBound::new(end),
+                span: ThreadBound::new(SpanRange { start, end }),
                 message,
             }],
         }
@@ -363,12 +364,19 @@ impl Clone for Error {
 impl Clone for ErrorMessage {
     fn clone(&self) -> Self {
         ErrorMessage {
-            start_span: self.start_span,
-            end_span: self.end_span,
+            span: self.span.clone(),
             message: self.message.clone(),
         }
     }
 }
+
+impl Clone for SpanRange {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl Copy for SpanRange {}
 
 impl std::error::Error for Error {}
 
