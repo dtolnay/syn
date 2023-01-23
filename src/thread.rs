@@ -1,3 +1,4 @@
+use std::cell::Cell;
 use std::fmt::{self, Debug};
 use std::panic::{self, PanicInfo};
 use std::thread::{self, ThreadId};
@@ -53,8 +54,25 @@ impl<T: Clone> Clone for ThreadBound<T> {
 }
 
 fn thread_id_if_possible() -> Option<ThreadId> {
-    fn get_id_from_current_thread() -> Option<ThreadId> {
-        type PanicHook = dyn Fn(&PanicInfo) + Sync + Send + 'static;
+    type PanicHook = dyn Fn(&PanicInfo) + Sync + Send + 'static;
+
+    #[derive(Copy, Clone)]
+    enum TryThreadId {
+        None,
+        Some(ThreadId),
+        Panic,
+    }
+
+    thread_local! {
+        static THREAD_ID: Cell<TryThreadId> = const { Cell::new(TryThreadId::None) };
+    }
+
+    THREAD_ID.with(|thread_id| {
+        match thread_id.get() {
+            TryThreadId::None => {}
+            TryThreadId::Some(thread_id) => return Some(thread_id),
+            TryThreadId::Panic => return None,
+        }
 
         let null_hook: Box<PanicHook> = Box::new(|_panic_info| { /* ignore */ });
         let sanity_check = &*null_hook as *const PanicHook;
@@ -62,8 +80,14 @@ fn thread_id_if_possible() -> Option<ThreadId> {
         panic::set_hook(null_hook);
 
         let thread_id = match panic::catch_unwind(thread::current) {
-            Ok(thread) => Some(thread.id()),
-            Err(_panic) => None,
+            Ok(thread) => {
+                thread_id.set(TryThreadId::Some(thread.id()));
+                Some(thread.id())
+            }
+            Err(_panic) => {
+                thread_id.set(TryThreadId::Panic);
+                None
+            }
         };
 
         let hopefully_null_hook = panic::take_hook();
@@ -73,11 +97,5 @@ fn thread_id_if_possible() -> Option<ThreadId> {
         }
 
         thread_id
-    }
-
-    thread_local! {
-        static THREAD_ID: Option<ThreadId> = get_id_from_current_thread();
-    }
-
-    THREAD_ID.with(Option::clone)
+    })
 }
