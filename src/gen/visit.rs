@@ -486,10 +486,6 @@ pub trait Visit<'ast> {
     fn visit_meta_name_value(&mut self, i: &'ast MetaNameValue) {
         visit_meta_name_value(self, i);
     }
-    #[cfg(feature = "full")]
-    fn visit_method_turbofish(&mut self, i: &'ast MethodTurbofish) {
-        visit_method_turbofish(self, i);
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_parenthesized_generic_arguments(
         &mut self,
@@ -1537,7 +1533,7 @@ where
     tokens_helper(v, &node.dot_token.spans);
     v.visit_ident(&node.method);
     if let Some(it) = &node.turbofish {
-        v.visit_method_turbofish(it);
+        v.visit_angle_bracketed_generic_arguments(it);
     }
     tokens_helper(v, &node.paren_token.span);
     for el in Punctuated::pairs(&node.args) {
@@ -2661,22 +2657,6 @@ where
     v.visit_path(&node.path);
     tokens_helper(v, &node.eq_token.spans);
     v.visit_expr(&node.value);
-}
-#[cfg(feature = "full")]
-pub fn visit_method_turbofish<'ast, V>(v: &mut V, node: &'ast MethodTurbofish)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    tokens_helper(v, &node.colon2_token.spans);
-    tokens_helper(v, &node.lt_token.spans);
-    for el in Punctuated::pairs(&node.args) {
-        let (it, p) = el.into_tuple();
-        v.visit_generic_argument(it);
-        if let Some(p) = p {
-            tokens_helper(v, &p.spans);
-        }
-    }
-    tokens_helper(v, &node.gt_token.spans);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_parenthesized_generic_arguments<'ast, V>(

@@ -1481,7 +1481,7 @@
         },
         "turbofish": {
           "option": {
-            "syn": "MethodTurbofish"
+            "syn": "AngleBracketedGenericArguments"
           }
         },
         "paren_token": {
@@ -3577,33 +3577,6 @@
         },
         "value": {
           "syn": "Expr"
-        }
-      }
-    },
-    {
-      "ident": "MethodTurbofish",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "colon2_token": {
-          "token": "Colon2"
-        },
-        "lt_token": {
-          "token": "Lt"
-        },
-        "args": {
-          "punctuated": {
-            "element": {
-              "syn": "GenericArgument"
-            },
-            "punct": "Comma"
-          }
-        },
-        "gt_token": {
-          "token": "Gt"
         }
       }
     },

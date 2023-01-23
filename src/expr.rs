@@ -526,7 +526,7 @@ ast_struct! {
         pub receiver: Box<Expr>,
         pub dot_token: Token![.],
         pub method: Ident,
-        pub turbofish: Option<MethodTurbofish>,
+        pub turbofish: Option<AngleBracketedGenericArguments>,
         pub paren_token: token::Paren,
         pub args: Punctuated<Expr, Token![,]>,
     }
@@ -855,19 +855,6 @@ impl IdentFragment for Index {
 
     fn span(&self) -> Option<Span> {
         Some(self.span)
-    }
-}
-
-#[cfg(feature = "full")]
-ast_struct! {
-    /// The `::<>` explicit type parameters passed to a method call:
-    /// `parse::<u64>()`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct MethodTurbofish {
-        pub colon2_token: Token![::],
-        pub lt_token: Token![<],
-        pub args: Punctuated<GenericArgument, Token![,]>,
-        pub gt_token: Token![>],
     }
 }
 
@@ -1473,7 +1460,7 @@ pub(crate) mod parsing {
 
                 let member: Member = input.parse()?;
                 let turbofish = if member.is_named() && input.peek(Token![::]) {
-                    Some(input.parse::<MethodTurbofish>()?)
+                    Some(AngleBracketedGenericArguments::parse_turbofish(input)?)
                 } else {
                     None
                 };
@@ -1944,34 +1931,6 @@ pub(crate) mod parsing {
             paren_token: parenthesized!(content in input),
             expr: content.parse()?,
         })
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-    impl Parse for MethodTurbofish {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(MethodTurbofish {
-                colon2_token: input.parse()?,
-                lt_token: input.parse()?,
-                args: {
-                    let mut args = Punctuated::new();
-                    loop {
-                        if input.peek(Token![>]) {
-                            break;
-                        }
-                        let value: GenericArgument = input.parse()?;
-                        args.push_value(value);
-                        if input.peek(Token![>]) {
-                            break;
-                        }
-                        let punct = input.parse()?;
-                        args.push_punct(punct);
-                    }
-                    args
-                },
-                gt_token: input.parse()?,
-            })
-        }
     }
 
     #[cfg(feature = "full")]
@@ -2852,17 +2811,6 @@ pub(crate) mod printing {
             self.paren_token.surround(tokens, |tokens| {
                 self.args.to_tokens(tokens);
             });
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for MethodTurbofish {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.colon2_token.to_tokens(tokens);
-            self.lt_token.to_tokens(tokens);
-            self.args.to_tokens(tokens);
-            self.gt_token.to_tokens(tokens);
         }
     }
 

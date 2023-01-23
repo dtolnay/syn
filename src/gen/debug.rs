@@ -1952,18 +1952,6 @@ impl Debug for MetaNameValue {
         formatter.finish()
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for MethodTurbofish {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("MethodTurbofish");
-        formatter.field("colon2_token", &self.colon2_token);
-        formatter.field("lt_token", &self.lt_token);
-        formatter.field("args", &self.args);
-        formatter.field("gt_token", &self.gt_token);
-        formatter.finish()
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ParenthesizedGenericArguments {
