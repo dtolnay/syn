@@ -2798,16 +2798,6 @@ impl Debug for Lite<syn::Item> {
                 }
                 formatter.finish()
             }
-            syn::Item::Macro2(_val) => {
-                let mut formatter = formatter.debug_struct("Item::Macro2");
-                if !_val.attrs.is_empty() {
-                    formatter.field("attrs", Lite(&_val.attrs));
-                }
-                formatter.field("vis", Lite(&_val.vis));
-                formatter.field("ident", Lite(&_val.ident));
-                formatter.field("rules", Lite(&_val.rules));
-                formatter.finish()
-            }
             syn::Item::Mod(_val) => {
                 let mut formatter = formatter.debug_struct("Item::Mod");
                 if !_val.attrs.is_empty() {
@@ -3211,19 +3201,6 @@ impl Debug for Lite<syn::ItemMacro> {
             }
             formatter.field("semi_token", Print::ref_cast(val));
         }
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::ItemMacro2> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("ItemMacro2");
-        if !_val.attrs.is_empty() {
-            formatter.field("attrs", Lite(&_val.attrs));
-        }
-        formatter.field("vis", Lite(&_val.vis));
-        formatter.field("ident", Lite(&_val.ident));
-        formatter.field("rules", Lite(&_val.rules));
         formatter.finish()
     }
 }

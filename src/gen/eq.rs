@@ -1000,7 +1000,6 @@ impl PartialEq for Item {
             (Item::ForeignMod(self0), Item::ForeignMod(other0)) => self0 == other0,
             (Item::Impl(self0), Item::Impl(other0)) => self0 == other0,
             (Item::Macro(self0), Item::Macro(other0)) => self0 == other0,
-            (Item::Macro2(self0), Item::Macro2(other0)) => self0 == other0,
             (Item::Mod(self0), Item::Mod(other0)) => self0 == other0,
             (Item::Static(self0), Item::Static(other0)) => self0 == other0,
             (Item::Struct(self0), Item::Struct(other0)) => self0 == other0,
@@ -1092,17 +1091,6 @@ impl PartialEq for ItemMacro {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.ident == other.ident && self.mac == other.mac
             && self.semi_token == other.semi_token
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for ItemMacro2 {}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for ItemMacro2 {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.vis == other.vis && self.ident == other.ident
-            && TokenStreamHelper(&self.rules) == TokenStreamHelper(&other.rules)
     }
 }
 #[cfg(feature = "full")]

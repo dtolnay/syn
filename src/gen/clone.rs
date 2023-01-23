@@ -1030,7 +1030,6 @@ impl Clone for Item {
             Item::ForeignMod(v0) => Item::ForeignMod(v0.clone()),
             Item::Impl(v0) => Item::Impl(v0.clone()),
             Item::Macro(v0) => Item::Macro(v0.clone()),
-            Item::Macro2(v0) => Item::Macro2(v0.clone()),
             Item::Mod(v0) => Item::Mod(v0.clone()),
             Item::Static(v0) => Item::Static(v0.clone()),
             Item::Struct(v0) => Item::Struct(v0.clone()),
@@ -1140,19 +1139,6 @@ impl Clone for ItemMacro {
             ident: self.ident.clone(),
             mac: self.mac.clone(),
             semi_token: self.semi_token.clone(),
-        }
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for ItemMacro2 {
-    fn clone(&self) -> Self {
-        ItemMacro2 {
-            attrs: self.attrs.clone(),
-            vis: self.vis.clone(),
-            macro_token: self.macro_token.clone(),
-            ident: self.ident.clone(),
-            rules: self.rules.clone(),
         }
     }
 }

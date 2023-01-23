@@ -2554,11 +2554,6 @@
             "syn": "ItemMacro"
           }
         ],
-        "Macro2": [
-          {
-            "syn": "ItemMacro2"
-          }
-        ],
         "Mod": [
           {
             "syn": "ItemMod"
@@ -2868,33 +2863,6 @@
           "option": {
             "token": "Semi"
           }
-        }
-      }
-    },
-    {
-      "ident": "ItemMacro2",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "vis": {
-          "syn": "Visibility"
-        },
-        "macro_token": {
-          "token": "Macro"
-        },
-        "ident": {
-          "proc_macro2": "Ident"
-        },
-        "rules": {
-          "proc_macro2": "TokenStream"
         }
       }
     },

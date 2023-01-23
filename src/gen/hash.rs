@@ -1356,44 +1356,40 @@ impl Hash for Item {
                 state.write_u8(6u8);
                 v0.hash(state);
             }
-            Item::Macro2(v0) => {
+            Item::Mod(v0) => {
                 state.write_u8(7u8);
                 v0.hash(state);
             }
-            Item::Mod(v0) => {
+            Item::Static(v0) => {
                 state.write_u8(8u8);
                 v0.hash(state);
             }
-            Item::Static(v0) => {
+            Item::Struct(v0) => {
                 state.write_u8(9u8);
                 v0.hash(state);
             }
-            Item::Struct(v0) => {
+            Item::Trait(v0) => {
                 state.write_u8(10u8);
                 v0.hash(state);
             }
-            Item::Trait(v0) => {
+            Item::TraitAlias(v0) => {
                 state.write_u8(11u8);
                 v0.hash(state);
             }
-            Item::TraitAlias(v0) => {
+            Item::Type(v0) => {
                 state.write_u8(12u8);
                 v0.hash(state);
             }
-            Item::Type(v0) => {
+            Item::Union(v0) => {
                 state.write_u8(13u8);
                 v0.hash(state);
             }
-            Item::Union(v0) => {
+            Item::Use(v0) => {
                 state.write_u8(14u8);
                 v0.hash(state);
             }
-            Item::Use(v0) => {
-                state.write_u8(15u8);
-                v0.hash(state);
-            }
             Item::Verbatim(v0) => {
-                state.write_u8(16u8);
+                state.write_u8(15u8);
                 TokenStreamHelper(v0).hash(state);
             }
         }
@@ -1492,19 +1488,6 @@ impl Hash for ItemMacro {
         self.ident.hash(state);
         self.mac.hash(state);
         self.semi_token.hash(state);
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for ItemMacro2 {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.attrs.hash(state);
-        self.vis.hash(state);
-        self.ident.hash(state);
-        TokenStreamHelper(&self.rules).hash(state);
     }
 }
 #[cfg(feature = "full")]
