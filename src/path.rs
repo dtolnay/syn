@@ -328,11 +328,21 @@ pub mod parsing {
         Err(lookahead.error())
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-    impl Parse for AngleBracketedGenericArguments {
-        fn parse(input: ParseStream) -> Result<Self> {
+    impl AngleBracketedGenericArguments {
+        /// Parse `::<…>` with mandatory leading `::`.
+        ///
+        /// The ordinary [`Parse`] impl for `AngleBracketedGenericArguments`
+        /// parses optional leading `::`.
+        #[cfg(feature = "full")]
+        #[cfg_attr(doc_cfg, doc(cfg(all(feature = "parsing", feature = "full"))))]
+        pub fn parse_turbofish(input: ParseStream) -> Result<Self> {
+            let colon2_token: Token![::] = input.parse()?;
+            Self::do_parse(Some(colon2_token), input)
+        }
+
+        fn do_parse(colon2_token: Option<Token![::]>, input: ParseStream) -> Result<Self> {
             Ok(AngleBracketedGenericArguments {
-                colon2_token: input.parse()?,
+                colon2_token,
                 lt_token: input.parse()?,
                 args: {
                     let mut args = Punctuated::new();
@@ -340,18 +350,26 @@ pub mod parsing {
                         if input.peek(Token![>]) {
                             break;
                         }
-                        let value = input.parse()?;
+                        let value: GenericArgument = input.parse()?;
                         args.push_value(value);
                         if input.peek(Token![>]) {
                             break;
                         }
-                        let punct = input.parse()?;
+                        let punct: Token![,] = input.parse()?;
                         args.push_punct(punct);
                     }
                     args
                 },
                 gt_token: input.parse()?,
             })
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for AngleBracketedGenericArguments {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let colon2_token: Option<Token![::]> = input.parse()?;
+            Self::do_parse(colon2_token, input)
         }
     }
 

@@ -838,7 +838,7 @@ impl Debug for Lite<syn::Expr> {
                 if let Some(val) = &_val.turbofish {
                     #[derive(RefCast)]
                     #[repr(transparent)]
-                    struct Print(syn::MethodTurbofish);
+                    struct Print(syn::AngleBracketedGenericArguments);
                     impl Debug for Print {
                         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                             formatter.write_str("Some")?;
@@ -1622,7 +1622,7 @@ impl Debug for Lite<syn::ExprMethodCall> {
         if let Some(val) = &_val.turbofish {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print(syn::MethodTurbofish);
+            struct Print(syn::AngleBracketedGenericArguments);
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some")?;
@@ -3697,16 +3697,6 @@ impl Debug for Lite<syn::MetaNameValue> {
         let mut formatter = formatter.debug_struct("MetaNameValue");
         formatter.field("path", Lite(&_val.path));
         formatter.field("value", Lite(&_val.value));
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::MethodTurbofish> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("MethodTurbofish");
-        if !_val.args.is_empty() {
-            formatter.field("args", Lite(&_val.args));
-        }
         formatter.finish()
     }
 }

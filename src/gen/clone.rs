@@ -1418,18 +1418,6 @@ impl Clone for MetaNameValue {
         }
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for MethodTurbofish {
-    fn clone(&self) -> Self {
-        MethodTurbofish {
-            colon2_token: self.colon2_token.clone(),
-            lt_token: self.lt_token.clone(),
-            args: self.args.clone(),
-            gt_token: self.gt_token.clone(),
-        }
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for ParenthesizedGenericArguments {

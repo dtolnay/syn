@@ -1341,16 +1341,6 @@ impl PartialEq for MetaNameValue {
         self.path == other.path && self.value == other.value
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for MethodTurbofish {}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for MethodTurbofish {
-    fn eq(&self, other: &Self) -> bool {
-        self.args == other.args
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ParenthesizedGenericArguments {}

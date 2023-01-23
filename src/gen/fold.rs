@@ -484,10 +484,6 @@ pub trait Fold {
     fn fold_meta_name_value(&mut self, i: MetaNameValue) -> MetaNameValue {
         fold_meta_name_value(self, i)
     }
-    #[cfg(feature = "full")]
-    fn fold_method_turbofish(&mut self, i: MethodTurbofish) -> MethodTurbofish {
-        fold_method_turbofish(self, i)
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_parenthesized_generic_arguments(
         &mut self,
@@ -1407,7 +1403,8 @@ where
         receiver: Box::new(f.fold_expr(*node.receiver)),
         dot_token: Token![.](tokens_helper(f, &node.dot_token.spans)),
         method: f.fold_ident(node.method),
-        turbofish: (node.turbofish).map(|it| f.fold_method_turbofish(it)),
+        turbofish: (node.turbofish)
+            .map(|it| f.fold_angle_bracketed_generic_arguments(it)),
         paren_token: Paren(tokens_helper(f, &node.paren_token.span)),
         args: FoldHelper::lift(node.args, |it| f.fold_expr(it)),
     }
@@ -2390,18 +2387,6 @@ where
         path: f.fold_path(node.path),
         eq_token: Token![=](tokens_helper(f, &node.eq_token.spans)),
         value: f.fold_expr(node.value),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_method_turbofish<F>(f: &mut F, node: MethodTurbofish) -> MethodTurbofish
-where
-    F: Fold + ?Sized,
-{
-    MethodTurbofish {
-        colon2_token: Token![::](tokens_helper(f, &node.colon2_token.spans)),
-        lt_token: Token![<](tokens_helper(f, &node.lt_token.spans)),
-        args: FoldHelper::lift(node.args, |it| f.fold_generic_argument(it)),
-        gt_token: Token![>](tokens_helper(f, &node.gt_token.spans)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
