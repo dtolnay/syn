@@ -155,3 +155,93 @@ fn test_let_else() {
     })
     "###);
 }
+
+#[test]
+fn test_macros() {
+    let tokens = quote! {
+        fn main() {
+            macro_rules! mac {}
+            thread_local! { static FOO }
+            println!("");
+            vec![]
+        }
+    };
+
+    snapshot!(tokens as Stmt, @r###"
+    Item(Item::Fn {
+        vis: Inherited,
+        sig: Signature {
+            ident: "main",
+            generics: Generics,
+            output: Default,
+        },
+        block: Block {
+            stmts: [
+                Item(Item::Macro {
+                    ident: Some("mac"),
+                    mac: Macro {
+                        path: Path {
+                            segments: [
+                                PathSegment {
+                                    ident: "macro_rules",
+                                    arguments: None,
+                                },
+                            ],
+                        },
+                        delimiter: Brace,
+                        tokens: TokenStream(``),
+                    },
+                }),
+                Item(Item::Macro {
+                    mac: Macro {
+                        path: Path {
+                            segments: [
+                                PathSegment {
+                                    ident: "thread_local",
+                                    arguments: None,
+                                },
+                            ],
+                        },
+                        delimiter: Brace,
+                        tokens: TokenStream(`static FOO`),
+                    },
+                }),
+                Expr(
+                    Expr::Macro {
+                        mac: Macro {
+                            path: Path {
+                                segments: [
+                                    PathSegment {
+                                        ident: "println",
+                                        arguments: None,
+                                    },
+                                ],
+                            },
+                            delimiter: Paren,
+                            tokens: TokenStream(`""`),
+                        },
+                    },
+                    Some,
+                ),
+                Expr(
+                    Expr::Macro {
+                        mac: Macro {
+                            path: Path {
+                                segments: [
+                                    PathSegment {
+                                        ident: "vec",
+                                        arguments: None,
+                                    },
+                                ],
+                            },
+                            delimiter: Bracket,
+                            tokens: TokenStream(``),
+                        },
+                    },
+                    None,
+                ),
+            ],
+        },
+    })
+    "###);
+}
