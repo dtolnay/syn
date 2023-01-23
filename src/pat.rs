@@ -68,8 +68,6 @@ ast_enum_of_structs! {
         /// A pattern that matches any value: `_`.
         Wild(PatWild),
 
-        // Not public API.
-        //
         // For testing exhaustiveness in downstream code, use the following idiom:
         //
         //     match pat {

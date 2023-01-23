@@ -67,8 +67,6 @@ ast_enum_of_structs! {
         /// Tokens forming an item not interpreted by Syn.
         Verbatim(TokenStream),
 
-        // Not public API.
-        //
         // For testing exhaustiveness in downstream code, use the following idiom:
         //
         //     match item {
@@ -505,8 +503,6 @@ ast_enum_of_structs! {
         /// Tokens in an `extern` block not interpreted by Syn.
         Verbatim(TokenStream),
 
-        // Not public API.
-        //
         // For testing exhaustiveness in downstream code, use the following idiom:
         //
         //     match item {
@@ -600,8 +596,6 @@ ast_enum_of_structs! {
         /// Tokens within the definition of a trait not interpreted by Syn.
         Verbatim(TokenStream),
 
-        // Not public API.
-        //
         // For testing exhaustiveness in downstream code, use the following idiom:
         //
         //     match item {
@@ -697,8 +691,6 @@ ast_enum_of_structs! {
         /// Tokens within an impl block not interpreted by Syn.
         Verbatim(TokenStream),
 
-        // Not public API.
-        //
         // For testing exhaustiveness in downstream code, use the following idiom:
         //
         //     match item {

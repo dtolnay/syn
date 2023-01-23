@@ -223,8 +223,6 @@ ast_enum_of_structs! {
         /// A yield expression: `yield expr`.
         Yield(ExprYield),
 
-        // Not public API.
-        //
         // For testing exhaustiveness in downstream code, use the following idiom:
         //
         //     match expr {

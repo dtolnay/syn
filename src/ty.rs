@@ -61,8 +61,6 @@ ast_enum_of_structs! {
         /// Tokens in type position not interpreted by Syn.
         Verbatim(TokenStream),
 
-        // Not public API.
-        //
         // For testing exhaustiveness in downstream code, use the following idiom:
         //
         //     match ty {
