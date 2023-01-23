@@ -104,9 +104,9 @@ pub struct Error {
 struct ErrorMessage {
     // Span is implemented as an index into a thread-local interner to keep the
     // size small. It is not safe to access from a different thread. We want
-    // errors to be Send and Sync to play nicely with the Failure crate, so pin
-    // the span we're given to its original thread and assume it is
-    // Span::call_site if accessed from any other thread.
+    // errors to be Send and Sync to play nicely with ecosystem crates for error
+    // handling, so pin the span we're given to its original thread and assume
+    // it is Span::call_site if accessed from any other thread.
     start_span: ThreadBound<Span>,
     end_span: ThreadBound<Span>,
     message: String,
