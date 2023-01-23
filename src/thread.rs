@@ -53,23 +53,31 @@ impl<T: Clone> Clone for ThreadBound<T> {
 }
 
 fn thread_id_if_possible() -> Option<ThreadId> {
-    type PanicHook = dyn Fn(&PanicInfo) + Sync + Send + 'static;
+    fn get_id_from_current_thread() -> Option<ThreadId> {
+        type PanicHook = dyn Fn(&PanicInfo) + Sync + Send + 'static;
 
-    let null_hook: Box<PanicHook> = Box::new(|_panic_info| { /* ignore */ });
-    let sanity_check = &*null_hook as *const PanicHook;
-    let original_hook = panic::take_hook();
-    panic::set_hook(null_hook);
+        let null_hook: Box<PanicHook> = Box::new(|_panic_info| { /* ignore */ });
+        let sanity_check = &*null_hook as *const PanicHook;
+        let original_hook = panic::take_hook();
+        panic::set_hook(null_hook);
 
-    let thread_id = match panic::catch_unwind(thread::current) {
-        Ok(thread) => Some(thread.id()),
-        Err(_panic) => None,
-    };
+        let thread_id = match panic::catch_unwind(thread::current) {
+            Ok(thread) => Some(thread.id()),
+            Err(_panic) => None,
+        };
 
-    let hopefully_null_hook = panic::take_hook();
-    panic::set_hook(original_hook);
-    if sanity_check != &*hopefully_null_hook {
-        panic!("observed race condition in syn::thread::ThreadBound");
+        let hopefully_null_hook = panic::take_hook();
+        panic::set_hook(original_hook);
+        if sanity_check != &*hopefully_null_hook {
+            panic!("observed race condition in syn::thread::ThreadBound");
+        }
+
+        thread_id
     }
 
-    thread_id
+    thread_local! {
+        static THREAD_ID: Option<ThreadId> = get_id_from_current_thread();
+    }
+
+    THREAD_ID.with(Option::clone)
 }
