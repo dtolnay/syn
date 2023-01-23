@@ -362,15 +362,9 @@ impl Clone for Error {
 
 impl Clone for ErrorMessage {
     fn clone(&self) -> Self {
-        let start = self
-            .start_span
-            .get()
-            .copied()
-            .unwrap_or_else(Span::call_site);
-        let end = self.end_span.get().copied().unwrap_or_else(Span::call_site);
         ErrorMessage {
-            start_span: ThreadBound::new(start),
-            end_span: ThreadBound::new(end),
+            start_span: self.start_span.clone(),
+            end_span: self.end_span.clone(),
             message: self.message.clone(),
         }
     }
