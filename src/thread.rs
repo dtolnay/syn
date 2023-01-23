@@ -56,6 +56,7 @@ fn thread_id_if_possible() -> Option<ThreadId> {
     type PanicHook = dyn Fn(&PanicInfo) + Sync + Send + 'static;
 
     let null_hook: Box<PanicHook> = Box::new(|_panic_info| { /* ignore */ });
+    let sanity_check = &*null_hook as *const PanicHook;
     let original_hook = panic::take_hook();
     panic::set_hook(null_hook);
 
@@ -64,7 +65,11 @@ fn thread_id_if_possible() -> Option<ThreadId> {
         Err(_panic) => None,
     };
 
+    let hopefully_null_hook = panic::take_hook();
     panic::set_hook(original_hook);
+    if sanity_check != &*hopefully_null_hook {
+        panic!("observed race condition in syn::thread::ThreadBound");
+    }
 
     thread_id
 }
