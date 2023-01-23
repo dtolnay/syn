@@ -295,7 +295,43 @@ pub mod parsing {
                 Expr::Assign(e) => &mut e.left,
                 Expr::AssignOp(e) => &mut e.left,
                 Expr::Binary(e) => &mut e.left,
-                _ => break,
+                Expr::Array(_)
+                | Expr::Async(_)
+                | Expr::Await(_)
+                | Expr::Block(_)
+                | Expr::Break(_)
+                | Expr::Call(_)
+                | Expr::Cast(_)
+                | Expr::Closure(_)
+                | Expr::Const(_)
+                | Expr::Continue(_)
+                | Expr::Field(_)
+                | Expr::ForLoop(_)
+                | Expr::Group(_)
+                | Expr::If(_)
+                | Expr::Index(_)
+                | Expr::Infer(_)
+                | Expr::Let(_)
+                | Expr::Lit(_)
+                | Expr::Loop(_)
+                | Expr::Macro(_)
+                | Expr::Match(_)
+                | Expr::MethodCall(_)
+                | Expr::Paren(_)
+                | Expr::Path(_)
+                | Expr::Range(_)
+                | Expr::Reference(_)
+                | Expr::Repeat(_)
+                | Expr::Return(_)
+                | Expr::Struct(_)
+                | Expr::Try(_)
+                | Expr::TryBlock(_)
+                | Expr::Tuple(_)
+                | Expr::Unary(_)
+                | Expr::Unsafe(_)
+                | Expr::While(_)
+                | Expr::Yield(_)
+                | Expr::Verbatim(_) => break,
             };
         }
         attrs.extend(attr_target.replace_attrs(Vec::new()));
