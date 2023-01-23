@@ -582,6 +582,10 @@ pub trait Fold {
     fn fold_stmt(&mut self, i: Stmt) -> Stmt {
         fold_stmt(self, i)
     }
+    #[cfg(feature = "full")]
+    fn fold_stmt_macro(&mut self, i: StmtMacro) -> StmtMacro {
+        fold_stmt_macro(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_trait_bound(&mut self, i: TraitBound) -> TraitBound {
         fold_trait_bound(self, i)
@@ -2704,6 +2708,18 @@ where
                 (_binding_1).map(|it| Token![;](tokens_helper(f, &it.spans))),
             )
         }
+        Stmt::Macro(_binding_0) => Stmt::Macro(f.fold_stmt_macro(_binding_0)),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_stmt_macro<F>(f: &mut F, node: StmtMacro) -> StmtMacro
+where
+    F: Fold + ?Sized,
+{
+    StmtMacro {
+        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        mac: f.fold_macro(node.mac),
+        semi_token: (node.semi_token).map(|it| Token![;](tokens_helper(f, &it.spans))),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

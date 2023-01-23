@@ -1694,6 +1694,18 @@ impl Clone for Stmt {
             Stmt::Local(v0) => Stmt::Local(v0.clone()),
             Stmt::Item(v0) => Stmt::Item(v0.clone()),
             Stmt::Expr(v0, v1) => Stmt::Expr(v0.clone(), v1.clone()),
+            Stmt::Macro(v0) => Stmt::Macro(v0.clone()),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for StmtMacro {
+    fn clone(&self) -> Self {
+        StmtMacro {
+            attrs: self.attrs.clone(),
+            mac: self.mac.clone(),
+            semi_token: self.semi_token.clone(),
         }
     }
 }

@@ -584,6 +584,10 @@ pub trait Visit<'ast> {
     fn visit_stmt(&mut self, i: &'ast Stmt) {
         visit_stmt(self, i);
     }
+    #[cfg(feature = "full")]
+    fn visit_stmt_macro(&mut self, i: &'ast StmtMacro) {
+        visit_stmt_macro(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_trait_bound(&mut self, i: &'ast TraitBound) {
         visit_trait_bound(self, i);
@@ -3064,6 +3068,22 @@ where
                 tokens_helper(v, &it.spans);
             }
         }
+        Stmt::Macro(_binding_0) => {
+            v.visit_stmt_macro(_binding_0);
+        }
+    }
+}
+#[cfg(feature = "full")]
+pub fn visit_stmt_macro<'ast, V>(v: &mut V, node: &'ast StmtMacro)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    v.visit_macro(&node.mac);
+    if let Some(it) = &node.semi_token {
+        tokens_helper(v, &it.spans);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

@@ -4275,7 +4275,35 @@
               "token": "Semi"
             }
           }
+        ],
+        "Macro": [
+          {
+            "syn": "StmtMacro"
+          }
         ]
+      }
+    },
+    {
+      "ident": "StmtMacro",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "mac": {
+          "syn": "Macro"
+        },
+        "semi_token": {
+          "option": {
+            "token": "Semi"
+          }
+        }
       }
     },
     {

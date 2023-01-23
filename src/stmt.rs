@@ -22,6 +22,13 @@ ast_enum! {
 
         /// Expression, with or without trailing semicolon.
         Expr(Expr, Option<Token![;]>),
+
+        /// A macro invocation in statement position.
+        ///
+        /// Syntactically it's ambiguous which other kind of statement this
+        /// macro would expand to. It can be an of local variable (`let`), item,
+        /// or expression.
+        Macro(StmtMacro),
     }
 }
 
@@ -48,6 +55,20 @@ ast_struct! {
         pub eq_token: Token![=],
         pub expr: Box<Expr>,
         pub diverge: Option<(Token![else], Box<Expr>)>,
+    }
+}
+
+ast_struct! {
+    /// A macro invocation in statement position.
+    ///
+    /// Syntactically it's ambiguous which other kind of statement this macro
+    /// would expand to. It can be an of local variable (`let`), item, or
+    /// expression.
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    pub struct StmtMacro {
+        pub attrs: Vec<Attribute>,
+        pub mac: Macro,
+        pub semi_token: Option<Token![;]>,
     }
 }
 
@@ -120,13 +141,15 @@ pub mod parsing {
                 if input.is_empty() {
                     break;
                 }
-                let s = parse_stmt(input, AllowNoSemi(true))?;
-                let requires_semicolon = if let Stmt::Expr(s, None) = &s {
-                    expr::requires_terminator(s)
-                } else {
-                    false
+                let stmt = parse_stmt(input, AllowNoSemi(true))?;
+                let requires_semicolon = match &stmt {
+                    Stmt::Expr(stmt, None) => expr::requires_terminator(stmt),
+                    Stmt::Macro(stmt) => {
+                        stmt.semi_token.is_none() && !stmt.mac.delimiter.is_brace()
+                    }
+                    Stmt::Local(_) | Stmt::Item(_) | Stmt::Expr(_, Some(_)) => false,
                 };
-                stmts.push(s);
+                stmts.push(stmt);
                 if input.is_empty() {
                     break;
                 } else if requires_semicolon {
@@ -162,14 +185,17 @@ pub mod parsing {
         // brace-style macros; paren and bracket macros get parsed as
         // expression statements.
         let ahead = input.fork();
+        let mut is_item_macro = false;
         if let Ok(path) = ahead.call(Path::parse_mod_style) {
-            if ahead.peek(Token![!])
-                && (ahead.peek2(token::Brace)
+            if ahead.peek(Token![!]) {
+                if ahead.peek2(Ident) {
+                    is_item_macro = true;
+                } else if ahead.peek2(token::Brace)
                     && !(ahead.peek3(Token![.]) || ahead.peek3(Token![?]))
-                    || ahead.peek2(Ident))
-            {
-                input.advance_to(&ahead);
-                return stmt_mac(input, attrs, path);
+                {
+                    input.advance_to(&ahead);
+                    return stmt_mac(input, attrs, path).map(Stmt::Macro);
+                }
             }
         }
 
@@ -202,6 +228,7 @@ pub mod parsing {
                 && (input.peek2(Token![unsafe]) || input.peek2(Token![impl]))
             || input.peek(Token![impl])
             || input.peek(Token![macro])
+            || is_item_macro
         {
             let mut item: Item = input.parse()?;
             attrs.extend(item.replace_attrs(Vec::new()));
@@ -212,15 +239,13 @@ pub mod parsing {
         }
     }
 
-    fn stmt_mac(input: ParseStream, attrs: Vec<Attribute>, path: Path) -> Result<Stmt> {
+    fn stmt_mac(input: ParseStream, attrs: Vec<Attribute>, path: Path) -> Result<StmtMacro> {
         let bang_token: Token![!] = input.parse()?;
-        let ident: Option<Ident> = input.parse()?;
         let (delimiter, tokens) = mac::parse_delimiter(input)?;
         let semi_token: Option<Token![;]> = input.parse()?;
 
-        Ok(Stmt::Item(Item::Macro(ItemMacro {
+        Ok(StmtMacro {
             attrs,
-            ident,
             mac: Macro {
                 path,
                 bang_token,
@@ -228,7 +253,7 @@ pub mod parsing {
                 tokens,
             },
             semi_token,
-        })))
+        })
     }
 
     fn stmt_local(input: ParseStream, attrs: Vec<Attribute>) -> Result<Local> {
@@ -337,11 +362,21 @@ pub mod parsing {
         attrs.extend(attr_target.replace_attrs(Vec::new()));
         attr_target.replace_attrs(attrs);
 
-        if let semi @ Some(_) = input.parse()? {
-            return Ok(Stmt::Expr(e, semi));
+        let semi_token: Option<Token![;]> = input.parse()?;
+
+        if allow_nosemi.0 || semi_token.is_some() {
+            if let Expr::Macro(ExprMacro { attrs, mac }) = e {
+                return Ok(Stmt::Macro(StmtMacro {
+                    attrs,
+                    mac,
+                    semi_token,
+                }));
+            }
         }
 
-        if allow_nosemi.0 || !expr::requires_terminator(&e) {
+        if semi_token.is_some() {
+            Ok(Stmt::Expr(e, semi_token))
+        } else if allow_nosemi.0 || !expr::requires_terminator(&e) {
             Ok(Stmt::Expr(e, None))
         } else {
             Err(input.error("expected semicolon"))
@@ -374,6 +409,7 @@ mod printing {
                     expr.to_tokens(tokens);
                     semi.to_tokens(tokens);
                 }
+                Stmt::Macro(mac) => mac.to_tokens(tokens),
             }
         }
     }
@@ -392,6 +428,15 @@ mod printing {
                     diverge.to_tokens(tokens);
                 }
             }
+            self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for StmtMacro {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            expr::printing::outer_attrs_to_tokens(&self.attrs, tokens);
+            self.mac.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }

@@ -2653,7 +2653,7 @@ pub mod parsing {
     }
 
     impl MacroDelimiter {
-        fn is_brace(&self) -> bool {
+        pub(crate) fn is_brace(&self) -> bool {
             match self {
                 MacroDelimiter::Brace(_) => true,
                 MacroDelimiter::Paren(_) | MacroDelimiter::Bracket(_) => false,

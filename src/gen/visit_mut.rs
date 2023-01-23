@@ -585,6 +585,10 @@ pub trait VisitMut {
     fn visit_stmt_mut(&mut self, i: &mut Stmt) {
         visit_stmt_mut(self, i);
     }
+    #[cfg(feature = "full")]
+    fn visit_stmt_macro_mut(&mut self, i: &mut StmtMacro) {
+        visit_stmt_macro_mut(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_trait_bound_mut(&mut self, i: &mut TraitBound) {
         visit_trait_bound_mut(self, i);
@@ -3067,6 +3071,22 @@ where
                 tokens_helper(v, &mut it.spans);
             }
         }
+        Stmt::Macro(_binding_0) => {
+            v.visit_stmt_macro_mut(_binding_0);
+        }
+    }
+}
+#[cfg(feature = "full")]
+pub fn visit_stmt_macro_mut<V>(v: &mut V, node: &mut StmtMacro)
+where
+    V: VisitMut + ?Sized,
+{
+    for it in &mut node.attrs {
+        v.visit_attribute_mut(it);
+    }
+    v.visit_macro_mut(&mut node.mac);
+    if let Some(it) = &mut node.semi_token {
+        tokens_helper(v, &mut it.spans);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

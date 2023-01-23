@@ -2163,7 +2163,23 @@ impl Hash for Stmt {
                 v0.hash(state);
                 v1.hash(state);
             }
+            Stmt::Macro(v0) => {
+                state.write_u8(3u8);
+                v0.hash(state);
+            }
         }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for StmtMacro {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.attrs.hash(state);
+        self.mac.hash(state);
+        self.semi_token.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
