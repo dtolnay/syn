@@ -5,9 +5,11 @@
 #![allow(
     clippy::explicit_deref_methods,
     clippy::manual_assert,
+    clippy::manual_let_else,
     clippy::match_like_matches_macro,
     clippy::match_wildcard_for_single_variants,
-    clippy::too_many_lines
+    clippy::too_many_lines,
+    clippy::uninlined_format_args
 )]
 
 //! The tests in this module do the following:

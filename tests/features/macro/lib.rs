@@ -1,4 +1,4 @@
-#![allow(clippy::toplevel_ref_arg)]
+#![allow(clippy::toplevel_ref_arg, clippy::uninlined_format_args)]
 
 use proc_macro::TokenStream;
 use std::io::Write;

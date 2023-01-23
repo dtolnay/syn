@@ -1,3 +1,5 @@
+#![allow(clippy::uninlined_format_args)]
+
 use syn::{parse_quote, FnArg, Receiver, TraitItemMethod};
 
 #[test]

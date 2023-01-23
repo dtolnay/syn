@@ -1,3 +1,5 @@
+#![allow(clippy::manual_let_else)]
+
 use std::env;
 use std::process::Command;
 use std::str;

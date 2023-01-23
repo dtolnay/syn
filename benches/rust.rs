@@ -7,7 +7,9 @@
 #![recursion_limit = "1024"]
 #![allow(
     clippy::cast_lossless,
+    clippy::manual_let_else,
     clippy::match_like_matches_macro,
+    clippy::uninlined_format_args,
     clippy::unnecessary_wraps
 )]
 

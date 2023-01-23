@@ -259,6 +259,7 @@
     clippy::cast_possible_wrap,
     clippy::cast_ptr_alignment,
     clippy::default_trait_access,
+    clippy::derivable_impls,
     clippy::doc_markdown,
     clippy::expl_impl_clone_on_copy,
     clippy::explicit_auto_deref,
@@ -267,6 +268,7 @@
     clippy::items_after_statements,
     clippy::large_enum_variant,
     clippy::manual_assert,
+    clippy::manual_let_else,
     clippy::match_like_matches_macro,
     clippy::match_on_vec_items,
     clippy::match_same_arms,
@@ -285,9 +287,10 @@
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::trivially_copy_pass_by_ref,
+    clippy::uninlined_format_args,
     clippy::unnecessary_unwrap,
     clippy::used_underscore_binding,
-    clippy::wildcard_imports
+    clippy::wildcard_imports,
 )]
 
 #[cfg(all(

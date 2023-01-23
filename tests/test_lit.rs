@@ -1,4 +1,8 @@
-#![allow(clippy::float_cmp, clippy::non_ascii_literal)]
+#![allow(
+    clippy::float_cmp,
+    clippy::non_ascii_literal,
+    clippy::uninlined_format_args
+)]
 
 #[macro_use]
 mod macros;

@@ -1,4 +1,8 @@
-#![allow(clippy::too_many_lines)]
+#![allow(
+    clippy::manual_let_else,
+    clippy::too_many_lines,
+    clippy::uninlined_format_args
+)]
 
 #[macro_use]
 mod macros;
