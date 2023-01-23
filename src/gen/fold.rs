@@ -382,10 +382,6 @@ pub trait Fold {
         fold_item_macro(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_item_macro2(&mut self, i: ItemMacro2) -> ItemMacro2 {
-        fold_item_macro2(self, i)
-    }
-    #[cfg(feature = "full")]
     fn fold_item_mod(&mut self, i: ItemMod) -> ItemMod {
         fold_item_mod(self, i)
     }
@@ -1907,7 +1903,6 @@ where
         }
         Item::Impl(_binding_0) => Item::Impl(f.fold_item_impl(_binding_0)),
         Item::Macro(_binding_0) => Item::Macro(f.fold_item_macro(_binding_0)),
-        Item::Macro2(_binding_0) => Item::Macro2(f.fold_item_macro2(_binding_0)),
         Item::Mod(_binding_0) => Item::Mod(f.fold_item_mod(_binding_0)),
         Item::Static(_binding_0) => Item::Static(f.fold_item_static(_binding_0)),
         Item::Struct(_binding_0) => Item::Struct(f.fold_item_struct(_binding_0)),
@@ -2029,19 +2024,6 @@ where
         ident: (node.ident).map(|it| f.fold_ident(it)),
         mac: f.fold_macro(node.mac),
         semi_token: (node.semi_token).map(|it| Token![;](tokens_helper(f, &it.spans))),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_item_macro2<F>(f: &mut F, node: ItemMacro2) -> ItemMacro2
-where
-    F: Fold + ?Sized,
-{
-    ItemMacro2 {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        vis: f.fold_visibility(node.vis),
-        macro_token: Token![macro](tokens_helper(f, &node.macro_token.span)),
-        ident: f.fold_ident(node.ident),
-        rules: node.rules,
     }
 }
 #[cfg(feature = "full")]

@@ -385,10 +385,6 @@ pub trait VisitMut {
         visit_item_macro_mut(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_item_macro2_mut(&mut self, i: &mut ItemMacro2) {
-        visit_item_macro2_mut(self, i);
-    }
-    #[cfg(feature = "full")]
     fn visit_item_mod_mut(&mut self, i: &mut ItemMod) {
         visit_item_mod_mut(self, i);
     }
@@ -2130,9 +2126,6 @@ where
         Item::Macro(_binding_0) => {
             v.visit_item_macro_mut(_binding_0);
         }
-        Item::Macro2(_binding_0) => {
-            v.visit_item_macro2_mut(_binding_0);
-        }
         Item::Mod(_binding_0) => {
             v.visit_item_mod_mut(_binding_0);
         }
@@ -2288,19 +2281,6 @@ where
     if let Some(it) = &mut node.semi_token {
         tokens_helper(v, &mut it.spans);
     }
-}
-#[cfg(feature = "full")]
-pub fn visit_item_macro2_mut<V>(v: &mut V, node: &mut ItemMacro2)
-where
-    V: VisitMut + ?Sized,
-{
-    for it in &mut node.attrs {
-        v.visit_attribute_mut(it);
-    }
-    v.visit_visibility_mut(&mut node.vis);
-    tokens_helper(v, &mut node.macro_token.span);
-    v.visit_ident_mut(&mut node.ident);
-    skip!(node.rules);
 }
 #[cfg(feature = "full")]
 pub fn visit_item_mod_mut<V>(v: &mut V, node: &mut ItemMod)

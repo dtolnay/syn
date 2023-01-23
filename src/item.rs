@@ -40,9 +40,6 @@ ast_enum_of_structs! {
         /// A macro invocation, which includes `macro_rules!` definitions.
         Macro(ItemMacro),
 
-        /// A 2.0-style declarative macro introduced by the `macro` keyword.
-        Macro2(ItemMacro2),
-
         /// A module or module declaration: `mod m` or `mod m { ... }`.
         Mod(ItemMod),
 
@@ -189,18 +186,6 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A 2.0-style declarative macro introduced by the `macro` keyword.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct ItemMacro2 {
-        pub attrs: Vec<Attribute>,
-        pub vis: Visibility,
-        pub macro_token: Token![macro],
-        pub ident: Ident,
-        pub rules: TokenStream,
-    }
-}
-
-ast_struct! {
     /// A module or module declaration: `mod m` or `mod m { ... }`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemMod {
@@ -329,7 +314,6 @@ impl Item {
             | Item::ForeignMod(ItemForeignMod { attrs, .. })
             | Item::Impl(ItemImpl { attrs, .. })
             | Item::Macro(ItemMacro { attrs, .. })
-            | Item::Macro2(ItemMacro2 { attrs, .. })
             | Item::Mod(ItemMod { attrs, .. })
             | Item::Static(ItemStatic { attrs, .. })
             | Item::Struct(ItemStruct { attrs, .. })
@@ -870,8 +854,8 @@ pub mod parsing {
     use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseBuffer, ParseStream, Result};
     use crate::token::Brace;
-    use proc_macro2::{Delimiter, Group, Punct, Spacing, TokenTree};
-    use std::iter::{self, FromIterator};
+    use proc_macro2::{Punct, Spacing, TokenTree};
+    use std::iter::FromIterator;
 
     crate::custom_keyword!(macro_rules);
 
@@ -1034,7 +1018,8 @@ pub mod parsing {
                     Ok(Item::Verbatim(verbatim::between(begin, input)))
                 }
             } else if lookahead.peek(Token![macro]) {
-                input.parse().map(Item::Macro2)
+                input.advance_to(&ahead);
+                parse_macro2(begin, vis, input)
             } else if vis.is_inherited()
                 && (lookahead.peek(Ident)
                     || lookahead.peek(Token![self])
@@ -1167,45 +1152,27 @@ pub mod parsing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-    impl Parse for ItemMacro2 {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let attrs = input.call(Attribute::parse_outer)?;
-            let vis: Visibility = input.parse()?;
-            let macro_token: Token![macro] = input.parse()?;
-            let ident: Ident = input.parse()?;
-            let mut rules = TokenStream::new();
+    fn parse_macro2(begin: ParseBuffer, _vis: Visibility, input: ParseStream) -> Result<Item> {
+        input.parse::<Token![macro]>()?;
+        input.parse::<Ident>()?;
 
-            let mut lookahead = input.lookahead1();
-            if lookahead.peek(token::Paren) {
-                let paren_content;
-                let paren_token = parenthesized!(paren_content in input);
-                let args: TokenStream = paren_content.parse()?;
-                let mut args = Group::new(Delimiter::Parenthesis, args);
-                args.set_span(paren_token.span);
-                rules.extend(iter::once(TokenTree::Group(args)));
-                lookahead = input.lookahead1();
-            }
-
-            if lookahead.peek(token::Brace) {
-                let brace_content;
-                let brace_token = braced!(brace_content in input);
-                let body: TokenStream = brace_content.parse()?;
-                let mut body = Group::new(Delimiter::Brace, body);
-                body.set_span(brace_token.span);
-                rules.extend(iter::once(TokenTree::Group(body)));
-            } else {
-                return Err(lookahead.error());
-            }
-
-            Ok(ItemMacro2 {
-                attrs,
-                vis,
-                macro_token,
-                ident,
-                rules,
-            })
+        let mut lookahead = input.lookahead1();
+        if lookahead.peek(token::Paren) {
+            let paren_content;
+            parenthesized!(paren_content in input);
+            paren_content.parse::<TokenStream>()?;
+            lookahead = input.lookahead1();
         }
+
+        if lookahead.peek(token::Brace) {
+            let brace_content;
+            braced!(brace_content in input);
+            brace_content.parse::<TokenStream>()?;
+        } else {
+            return Err(lookahead.error());
+        }
+
+        Ok(Item::Verbatim(verbatim::between(begin, input)))
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -2960,17 +2927,6 @@ mod printing {
                 }
             }
             self.semi_token.to_tokens(tokens);
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ItemMacro2 {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            self.vis.to_tokens(tokens);
-            self.macro_token.to_tokens(tokens);
-            self.ident.to_tokens(tokens);
-            self.rules.to_tokens(tokens);
         }
     }
 

@@ -1460,11 +1460,6 @@ impl Debug for Item {
                 formatter.field(v0);
                 formatter.finish()
             }
-            Item::Macro2(v0) => {
-                let mut formatter = formatter.debug_tuple("Macro2");
-                formatter.field(v0);
-                formatter.finish()
-            }
             Item::Mod(v0) => {
                 let mut formatter = formatter.debug_tuple("Mod");
                 formatter.field(v0);
@@ -1610,19 +1605,6 @@ impl Debug for ItemMacro {
         formatter.field("ident", &self.ident);
         formatter.field("mac", &self.mac);
         formatter.field("semi_token", &self.semi_token);
-        formatter.finish()
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for ItemMacro2 {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("ItemMacro2");
-        formatter.field("attrs", &self.attrs);
-        formatter.field("vis", &self.vis);
-        formatter.field("macro_token", &self.macro_token);
-        formatter.field("ident", &self.ident);
-        formatter.field("rules", &self.rules);
         formatter.finish()
     }
 }
