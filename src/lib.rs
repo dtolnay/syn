@@ -477,7 +477,7 @@ pub mod spanned;
 #[cfg(feature = "full")]
 mod stmt;
 #[cfg(feature = "full")]
-pub use crate::stmt::{Block, Local, LocalInit, Stmt};
+pub use crate::stmt::{Block, Local, LocalInit, Stmt, StmtMacro};
 
 mod thread;
 

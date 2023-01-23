@@ -192,7 +192,7 @@ fn test_macros() {
                         tokens: TokenStream(``),
                     },
                 }),
-                Item(Item::Macro {
+                Stmt::Macro {
                     mac: Macro {
                         path: Path {
                             segments: [
@@ -205,41 +205,36 @@ fn test_macros() {
                         delimiter: Brace,
                         tokens: TokenStream(`static FOO`),
                     },
-                }),
-                Expr(
-                    Expr::Macro {
-                        mac: Macro {
-                            path: Path {
-                                segments: [
-                                    PathSegment {
-                                        ident: "println",
-                                        arguments: None,
-                                    },
-                                ],
-                            },
-                            delimiter: Paren,
-                            tokens: TokenStream(`""`),
+                },
+                Stmt::Macro {
+                    mac: Macro {
+                        path: Path {
+                            segments: [
+                                PathSegment {
+                                    ident: "println",
+                                    arguments: None,
+                                },
+                            ],
                         },
+                        delimiter: Paren,
+                        tokens: TokenStream(`""`),
                     },
-                    Some,
-                ),
-                Expr(
-                    Expr::Macro {
-                        mac: Macro {
-                            path: Path {
-                                segments: [
-                                    PathSegment {
-                                        ident: "vec",
-                                        arguments: None,
-                                    },
-                                ],
-                            },
-                            delimiter: Bracket,
-                            tokens: TokenStream(``),
+                    semi_token: Some,
+                },
+                Stmt::Macro {
+                    mac: Macro {
+                        path: Path {
+                            segments: [
+                                PathSegment {
+                                    ident: "vec",
+                                    arguments: None,
+                                },
+                            ],
                         },
+                        delimiter: Bracket,
+                        tokens: TokenStream(``),
                     },
-                    None,
-                ),
+                },
             ],
         },
     })

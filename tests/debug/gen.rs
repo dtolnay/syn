@@ -4522,7 +4522,50 @@ impl Debug for Lite<syn::Stmt> {
                     });
                 formatter.finish()
             }
+            syn::Stmt::Macro(_val) => {
+                let mut formatter = formatter.debug_struct("Stmt::Macro");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                formatter.field("mac", Lite(&_val.mac));
+                if let Some(val) = &_val.semi_token {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::token::Semi);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("semi_token", Print::ref_cast(val));
+                }
+                formatter.finish()
+            }
         }
+    }
+}
+impl Debug for Lite<syn::StmtMacro> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("StmtMacro");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        formatter.field("mac", Lite(&_val.mac));
+        if let Some(val) = &_val.semi_token {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Semi);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("semi_token", Print::ref_cast(val));
+        }
+        formatter.finish()
     }
 }
 impl Debug for Lite<syn::TraitBound> {

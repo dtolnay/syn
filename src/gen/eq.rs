@@ -1624,8 +1624,20 @@ impl PartialEq for Stmt {
             (Stmt::Expr(self0, self1), Stmt::Expr(other0, other1)) => {
                 self0 == other0 && self1 == other1
             }
+            (Stmt::Macro(self0), Stmt::Macro(other0)) => self0 == other0,
             _ => false,
         }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for StmtMacro {}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for StmtMacro {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs && self.mac == other.mac
+            && self.semi_token == other.semi_token
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
