@@ -2262,26 +2262,6 @@
       }
     },
     {
-      "ident": "GenericMethodArgument",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "variants": {
-        "Type": [
-          {
-            "syn": "Type"
-          }
-        ],
-        "Const": [
-          {
-            "syn": "Expr"
-          }
-        ]
-      }
-    },
-    {
       "ident": "GenericParam",
       "features": {
         "any": [
@@ -3617,7 +3597,7 @@
         "args": {
           "punctuated": {
             "element": {
-              "syn": "GenericMethodArgument"
+              "syn": "GenericArgument"
             },
             "punct": "Comma"
           }

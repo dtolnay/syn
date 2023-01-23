@@ -2322,27 +2322,6 @@ impl Debug for Lite<syn::GenericArgument> {
         }
     }
 }
-impl Debug for Lite<syn::GenericMethodArgument> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        match _val {
-            syn::GenericMethodArgument::Type(_val) => {
-                formatter.write_str("Type")?;
-                formatter.write_str("(")?;
-                Debug::fmt(Lite(_val), formatter)?;
-                formatter.write_str(")")?;
-                Ok(())
-            }
-            syn::GenericMethodArgument::Const(_val) => {
-                formatter.write_str("Const")?;
-                formatter.write_str("(")?;
-                Debug::fmt(Lite(_val), formatter)?;
-                formatter.write_str(")")?;
-                Ok(())
-            }
-        }
-    }
-}
 impl Debug for Lite<syn::GenericParam> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;

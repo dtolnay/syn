@@ -345,9 +345,7 @@ pub use crate::error::{Error, Result};
 #[cfg(any(feature = "full", feature = "derive"))]
 mod expr;
 #[cfg(feature = "full")]
-pub use crate::expr::{
-    Arm, FieldValue, GenericMethodArgument, Label, MethodTurbofish, RangeLimits,
-};
+pub use crate::expr::{Arm, FieldValue, Label, MethodTurbofish, RangeLimits};
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::expr::{
     Expr, ExprArray, ExprAssign, ExprAssignOp, ExprAsync, ExprAwait, ExprBinary, ExprBlock,

@@ -1197,25 +1197,6 @@ impl Hash for GenericArgument {
         }
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for GenericMethodArgument {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        match self {
-            GenericMethodArgument::Type(v0) => {
-                state.write_u8(0u8);
-                v0.hash(state);
-            }
-            GenericMethodArgument::Const(v0) => {
-                state.write_u8(1u8);
-                v0.hash(state);
-            }
-        }
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for GenericParam {

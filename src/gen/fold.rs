@@ -314,13 +314,6 @@ pub trait Fold {
     fn fold_generic_argument(&mut self, i: GenericArgument) -> GenericArgument {
         fold_generic_argument(self, i)
     }
-    #[cfg(feature = "full")]
-    fn fold_generic_method_argument(
-        &mut self,
-        i: GenericMethodArgument,
-    ) -> GenericMethodArgument {
-        fold_generic_method_argument(self, i)
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_generic_param(&mut self, i: GenericParam) -> GenericParam {
         fold_generic_param(self, i)
@@ -1771,23 +1764,6 @@ where
         }
     }
 }
-#[cfg(feature = "full")]
-pub fn fold_generic_method_argument<F>(
-    f: &mut F,
-    node: GenericMethodArgument,
-) -> GenericMethodArgument
-where
-    F: Fold + ?Sized,
-{
-    match node {
-        GenericMethodArgument::Type(_binding_0) => {
-            GenericMethodArgument::Type(f.fold_type(_binding_0))
-        }
-        GenericMethodArgument::Const(_binding_0) => {
-            GenericMethodArgument::Const(f.fold_expr(_binding_0))
-        }
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_generic_param<F>(f: &mut F, node: GenericParam) -> GenericParam
 where
@@ -2424,7 +2400,7 @@ where
     MethodTurbofish {
         colon2_token: Token![::](tokens_helper(f, &node.colon2_token.spans)),
         lt_token: Token![<](tokens_helper(f, &node.lt_token.spans)),
-        args: FoldHelper::lift(node.args, |it| f.fold_generic_method_argument(it)),
+        args: FoldHelper::lift(node.args, |it| f.fold_generic_argument(it)),
         gt_token: Token![>](tokens_helper(f, &node.gt_token.spans)),
     }
 }

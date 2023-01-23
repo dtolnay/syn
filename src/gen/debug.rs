@@ -1283,24 +1283,6 @@ impl Debug for GenericArgument {
         }
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for GenericMethodArgument {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            GenericMethodArgument::Type(v0) => {
-                let mut formatter = formatter.debug_tuple("Type");
-                formatter.field(v0);
-                formatter.finish()
-            }
-            GenericMethodArgument::Const(v0) => {
-                let mut formatter = formatter.debug_tuple("Const");
-                formatter.field(v0);
-                formatter.finish()
-            }
-        }
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for GenericParam {

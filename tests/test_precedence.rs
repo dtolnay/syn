@@ -355,11 +355,8 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 /// reveal the precedence of the parsed expressions, and produce a stringified
 /// form of the resulting expression.
 fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
-    use syn::fold::{fold_expr, fold_generic_argument, fold_generic_method_argument, Fold};
-    use syn::{
-        token, BinOp, Expr, ExprParen, GenericArgument, GenericMethodArgument, MetaNameValue, Pat,
-        Stmt, Type,
-    };
+    use syn::fold::{fold_expr, fold_generic_argument, Fold};
+    use syn::{token, BinOp, Expr, ExprParen, GenericArgument, MetaNameValue, Pat, Stmt, Type};
 
     struct ParenthesizeEveryExpr;
     impl Fold for ParenthesizeEveryExpr {
@@ -393,20 +390,6 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
                     _ => arg,
                 }),
                 _ => fold_generic_argument(self, arg),
-            }
-        }
-
-        fn fold_generic_method_argument(
-            &mut self,
-            arg: GenericMethodArgument,
-        ) -> GenericMethodArgument {
-            match arg {
-                GenericMethodArgument::Const(arg) => GenericMethodArgument::Const(match arg {
-                    Expr::Block(_) => fold_expr(self, arg),
-                    // Don't wrap unbraced const generic arg as that's invalid syntax.
-                    _ => arg,
-                }),
-                _ => fold_generic_method_argument(self, arg),
             }
         }
 
