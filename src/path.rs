@@ -214,9 +214,7 @@ pub mod parsing {
                     let begin = input.fork();
 
                     #[cfg(feature = "full")]
-                    {
-                        input.parse::<ExprBlock>()?;
-                    }
+                    input.parse::<ExprBlock>()?;
 
                     #[cfg(not(feature = "full"))]
                     {
@@ -238,10 +236,8 @@ pub mod parsing {
             }
 
             #[cfg(feature = "full")]
-            {
-                if input.peek(Ident) && input.peek2(Token![:]) && !input.peek2(Token![::]) {
-                    return Ok(GenericArgument::Constraint(input.parse()?));
-                }
+            if input.peek(Ident) && input.peek2(Token![:]) && !input.peek2(Token![::]) {
+                return Ok(GenericArgument::Constraint(input.parse()?));
             }
 
             if input.peek(Lit) || input.peek(token::Brace) {
@@ -254,33 +250,31 @@ pub mod parsing {
             let argument: Type = input.parse()?;
 
             #[cfg(feature = "full")]
-            {
-                if match &argument {
-                    Type::Path(argument)
-                        if argument.qself.is_none()
-                            && argument.path.leading_colon.is_none()
-                            && argument.path.segments.len() == 1 =>
-                    {
-                        match argument.path.segments[0].arguments {
-                            PathArguments::AngleBracketed(_) => true,
-                            _ => false,
-                        }
+            if match &argument {
+                Type::Path(argument)
+                    if argument.qself.is_none()
+                        && argument.path.leading_colon.is_none()
+                        && argument.path.segments.len() == 1 =>
+                {
+                    match argument.path.segments[0].arguments {
+                        PathArguments::AngleBracketed(_) => true,
+                        _ => false,
                     }
-                    _ => false,
-                } && if input.peek(Token![=]) {
-                    input.parse::<Token![=]>()?;
-                    input.parse::<Type>()?;
-                    true
-                } else if input.peek(Token![:]) {
-                    input.parse::<Token![:]>()?;
-                    input.call(constraint_bounds)?;
-                    true
-                } else {
-                    false
-                } {
-                    let verbatim = verbatim::between(begin, input);
-                    return Ok(GenericArgument::Type(Type::Verbatim(verbatim)));
                 }
+                _ => false,
+            } && if input.peek(Token![=]) {
+                input.parse::<Token![=]>()?;
+                input.parse::<Type>()?;
+                true
+            } else if input.peek(Token![:]) {
+                input.parse::<Token![:]>()?;
+                input.call(constraint_bounds)?;
+                true
+            } else {
+                false
+            } {
+                let verbatim = verbatim::between(begin, input);
+                return Ok(GenericArgument::Type(Type::Verbatim(verbatim)));
             }
 
             Ok(GenericArgument::Type(argument))
@@ -296,15 +290,13 @@ pub mod parsing {
         }
 
         #[cfg(feature = "full")]
-        {
-            if input.peek(Ident) {
-                let ident: Ident = input.parse()?;
-                return Ok(Expr::Path(ExprPath {
-                    attrs: Vec::new(),
-                    qself: None,
-                    path: Path::from(ident),
-                }));
-            }
+        if input.peek(Ident) {
+            let ident: Ident = input.parse()?;
+            return Ok(Expr::Path(ExprPath {
+                attrs: Vec::new(),
+                qself: None,
+                path: Path::from(ident),
+            }));
         }
 
         if input.peek(token::Brace) {

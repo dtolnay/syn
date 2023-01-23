@@ -829,18 +829,16 @@ pub mod parsing {
             }
 
             #[cfg(feature = "full")]
-            {
-                if let Some((tilde_token, const_token)) = tilde_const {
-                    path.segments.insert(
-                        0,
-                        PathSegment {
-                            ident: Ident::new("const", const_token.span),
-                            arguments: PathArguments::None,
-                        },
-                    );
-                    let (_const, punct) = path.segments.pairs_mut().next().unwrap().into_tuple();
-                    *punct.unwrap() = Token![::](tilde_token.span);
-                }
+            if let Some((tilde_token, const_token)) = tilde_const {
+                path.segments.insert(
+                    0,
+                    PathSegment {
+                        ident: Ident::new("const", const_token.span),
+                        arguments: PathArguments::None,
+                    },
+                );
+                let (_const, punct) = path.segments.pairs_mut().next().unwrap().into_tuple();
+                *punct.unwrap() = Token![::](tilde_token.span);
             }
 
             Ok(TraitBound {
@@ -1187,21 +1185,19 @@ mod printing {
             }
             if let Some(default) = &self.default {
                 #[cfg(feature = "full")]
-                {
-                    if self.eq_token.is_none() {
-                        if let Type::Verbatim(default) = default {
-                            let mut iter = default.clone().into_iter().peekable();
-                            while let Some(token) = iter.next() {
-                                if let TokenTree::Punct(q) = token {
-                                    if q.as_char() == '~' {
-                                        if let Some(TokenTree::Ident(c)) = iter.peek() {
-                                            if c == "const" {
-                                                if self.bounds.is_empty() {
-                                                    TokensOrDefault(&self.colon_token)
-                                                        .to_tokens(tokens);
-                                                }
-                                                return default.to_tokens(tokens);
+                if self.eq_token.is_none() {
+                    if let Type::Verbatim(default) = default {
+                        let mut iter = default.clone().into_iter().peekable();
+                        while let Some(token) = iter.next() {
+                            if let TokenTree::Punct(q) = token {
+                                if q.as_char() == '~' {
+                                    if let Some(TokenTree::Ident(c)) = iter.peek() {
+                                        if c == "const" {
+                                            if self.bounds.is_empty() {
+                                                TokensOrDefault(&self.colon_token)
+                                                    .to_tokens(tokens);
                                             }
+                                            return default.to_tokens(tokens);
                                         }
                                     }
                                 }
@@ -1236,9 +1232,7 @@ mod printing {
                     tokens.append_all(self.path.segments.pairs().skip(skip));
                 }
                 #[cfg(not(feature = "full"))]
-                {
-                    self.path.to_tokens(tokens);
-                }
+                self.path.to_tokens(tokens);
             };
             match &self.paren_token {
                 Some(paren) => paren.surround(tokens, to_tokens),
