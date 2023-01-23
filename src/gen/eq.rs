@@ -947,7 +947,8 @@ impl PartialEq for ImplItemConst {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis
             && self.defaultness == other.defaultness && self.ident == other.ident
-            && self.ty == other.ty && self.expr == other.expr
+            && self.generics == other.generics && self.ty == other.ty
+            && self.expr == other.expr
     }
 }
 #[cfg(feature = "full")]
@@ -1023,7 +1024,8 @@ impl Eq for ItemConst {}
 impl PartialEq for ItemConst {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis && self.ident == other.ident
-            && self.ty == other.ty && self.expr == other.expr
+            && self.generics == other.generics && self.ty == other.ty
+            && self.expr == other.expr
     }
 }
 #[cfg(feature = "full")]
@@ -1691,7 +1693,8 @@ impl Eq for TraitItemConst {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for TraitItemConst {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.ident == other.ident && self.ty == other.ty
+        self.attrs == other.attrs && self.ident == other.ident
+            && self.generics == other.generics && self.ty == other.ty
             && self.default == other.default
     }
 }

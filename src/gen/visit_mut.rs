@@ -2042,6 +2042,7 @@ where
     }
     tokens_helper(v, &mut node.const_token.span);
     v.visit_ident_mut(&mut node.ident);
+    v.visit_generics_mut(&mut node.generics);
     tokens_helper(v, &mut node.colon_token.spans);
     v.visit_type_mut(&mut node.ty);
     tokens_helper(v, &mut node.eq_token.spans);
@@ -2170,6 +2171,7 @@ where
     v.visit_visibility_mut(&mut node.vis);
     tokens_helper(v, &mut node.const_token.span);
     v.visit_ident_mut(&mut node.ident);
+    v.visit_generics_mut(&mut node.generics);
     tokens_helper(v, &mut node.colon_token.spans);
     v.visit_type_mut(&mut *node.ty);
     tokens_helper(v, &mut node.eq_token.spans);
@@ -3148,6 +3150,7 @@ where
     }
     tokens_helper(v, &mut node.const_token.span);
     v.visit_ident_mut(&mut node.ident);
+    v.visit_generics_mut(&mut node.generics);
     tokens_helper(v, &mut node.colon_token.spans);
     v.visit_type_mut(&mut node.ty);
     if let Some(it) = &mut node.default {

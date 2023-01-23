@@ -94,6 +94,7 @@ ast_struct! {
         pub vis: Visibility,
         pub const_token: Token![const],
         pub ident: Ident,
+        pub generics: Generics,
         pub colon_token: Token![:],
         pub ty: Box<Type>,
         pub eq_token: Token![=],
@@ -622,6 +623,7 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub const_token: Token![const],
         pub ident: Ident,
+        pub generics: Generics,
         pub colon_token: Token![:],
         pub ty: Type,
         pub default: Option<(Token![=], Expr)>,
@@ -719,6 +721,7 @@ ast_struct! {
         pub defaultness: Option<Token![default]>,
         pub const_token: Token![const],
         pub ident: Ident,
+        pub generics: Generics,
         pub colon_token: Token![:],
         pub ty: Type,
         pub eq_token: Token![=],
@@ -949,6 +952,7 @@ pub mod parsing {
                             vis,
                             const_token,
                             ident,
+                            generics: Generics::default(),
                             colon_token,
                             ty,
                             eq_token: input.parse()?,
@@ -1342,6 +1346,7 @@ pub mod parsing {
                         return Err(lookahead.error());
                     }
                 },
+                generics: Generics::default(),
                 colon_token: input.parse()?,
                 ty: input.parse()?,
                 eq_token: input.parse()?,
@@ -2176,6 +2181,7 @@ pub mod parsing {
                         return Err(lookahead.error());
                     }
                 },
+                generics: Generics::default(),
                 colon_token: input.parse()?,
                 ty: input.parse()?,
                 default: {
@@ -2458,6 +2464,7 @@ pub mod parsing {
                             defaultness,
                             const_token,
                             ident,
+                            generics: Generics::default(),
                             colon_token,
                             ty,
                             eq_token,
@@ -2518,6 +2525,7 @@ pub mod parsing {
                         return Err(lookahead.error());
                     }
                 },
+                generics: Generics::default(),
                 colon_token: input.parse()?,
                 ty: input.parse()?,
                 eq_token: input.parse()?,

@@ -2384,6 +2384,9 @@
         "ident": {
           "proc_macro2": "Ident"
         },
+        "generics": {
+          "syn": "Generics"
+        },
         "colon_token": {
           "token": "Colon"
         },
@@ -2623,6 +2626,9 @@
         },
         "ident": {
           "proc_macro2": "Ident"
+        },
+        "generics": {
+          "syn": "Generics"
         },
         "colon_token": {
           "token": "Colon"
@@ -4404,6 +4410,9 @@
         },
         "ident": {
           "proc_macro2": "Ident"
+        },
+        "generics": {
+          "syn": "Generics"
         },
         "colon_token": {
           "token": "Colon"

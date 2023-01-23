@@ -2423,6 +2423,7 @@ impl Debug for Lite<syn::ImplItem> {
                     formatter.field("defaultness", Print::ref_cast(val));
                 }
                 formatter.field("ident", Lite(&_val.ident));
+                formatter.field("generics", Lite(&_val.generics));
                 formatter.field("ty", Lite(&_val.ty));
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.finish()
@@ -2524,6 +2525,7 @@ impl Debug for Lite<syn::ImplItemConst> {
             formatter.field("defaultness", Print::ref_cast(val));
         }
         formatter.field("ident", Lite(&_val.ident));
+        formatter.field("generics", Lite(&_val.generics));
         formatter.field("ty", Lite(&_val.ty));
         formatter.field("expr", Lite(&_val.expr));
         formatter.finish()
@@ -2622,6 +2624,7 @@ impl Debug for Lite<syn::Item> {
                 }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
+                formatter.field("generics", Lite(&_val.generics));
                 formatter.field("ty", Lite(&_val.ty));
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.finish()
@@ -3009,6 +3012,7 @@ impl Debug for Lite<syn::ItemConst> {
         }
         formatter.field("vis", Lite(&_val.vis));
         formatter.field("ident", Lite(&_val.ident));
+        formatter.field("generics", Lite(&_val.generics));
         formatter.field("ty", Lite(&_val.ty));
         formatter.field("expr", Lite(&_val.expr));
         formatter.finish()
@@ -4627,6 +4631,7 @@ impl Debug for Lite<syn::TraitItem> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("ident", Lite(&_val.ident));
+                formatter.field("generics", Lite(&_val.generics));
                 formatter.field("ty", Lite(&_val.ty));
                 if let Some(val) = &_val.default {
                     #[derive(RefCast)]
@@ -4761,6 +4766,7 @@ impl Debug for Lite<syn::TraitItemConst> {
             formatter.field("attrs", Lite(&_val.attrs));
         }
         formatter.field("ident", Lite(&_val.ident));
+        formatter.field("generics", Lite(&_val.generics));
         formatter.field("ty", Lite(&_val.ty));
         if let Some(val) = &_val.default {
             #[derive(RefCast)]

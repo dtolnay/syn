@@ -1361,6 +1361,7 @@ impl Debug for ImplItemConst {
         formatter.field("defaultness", &self.defaultness);
         formatter.field("const_token", &self.const_token);
         formatter.field("ident", &self.ident);
+        formatter.field("generics", &self.generics);
         formatter.field("colon_token", &self.colon_token);
         formatter.field("ty", &self.ty);
         formatter.field("eq_token", &self.eq_token);
@@ -1517,6 +1518,7 @@ impl Debug for ItemConst {
         formatter.field("vis", &self.vis);
         formatter.field("const_token", &self.const_token);
         formatter.field("ident", &self.ident);
+        formatter.field("generics", &self.generics);
         formatter.field("colon_token", &self.colon_token);
         formatter.field("ty", &self.ty);
         formatter.field("eq_token", &self.eq_token);
@@ -2406,6 +2408,7 @@ impl Debug for TraitItemConst {
         formatter.field("attrs", &self.attrs);
         formatter.field("const_token", &self.const_token);
         formatter.field("ident", &self.ident);
+        formatter.field("generics", &self.generics);
         formatter.field("colon_token", &self.colon_token);
         formatter.field("ty", &self.ty);
         formatter.field("default", &self.default);
