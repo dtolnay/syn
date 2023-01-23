@@ -584,8 +584,8 @@ ast_enum_of_structs! {
         /// An associated constant within the definition of a trait.
         Const(TraitItemConst),
 
-        /// A trait method within the definition of a trait.
-        Method(TraitItemMethod),
+        /// An associated function within the definition of a trait.
+        Fn(TraitItemFn),
 
         /// An associated type within the definition of a trait.
         Type(TraitItemType),
@@ -600,7 +600,7 @@ ast_enum_of_structs! {
         //
         //     match item {
         //         TraitItem::Const(item) => {...}
-        //         TraitItem::Method(item) => {...}
+        //         TraitItem::Fn(item) => {...}
         //         ...
         //         TraitItem::Verbatim(item) => {...}
         //
@@ -630,9 +630,9 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A trait method within the definition of a trait.
+    /// An associated function within the definition of a trait.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct TraitItemMethod {
+    pub struct TraitItemFn {
         pub attrs: Vec<Attribute>,
         pub sig: Signature,
         pub default: Option<Block>,
@@ -679,8 +679,8 @@ ast_enum_of_structs! {
         /// An associated constant within an impl block.
         Const(ImplItemConst),
 
-        /// A method within an impl block.
-        Method(ImplItemMethod),
+        /// An associated function within an impl block.
+        Fn(ImplItemFn),
 
         /// An associated type within an impl block.
         Type(ImplItemType),
@@ -695,7 +695,7 @@ ast_enum_of_structs! {
         //
         //     match item {
         //         ImplItem::Const(item) => {...}
-        //         ImplItem::Method(item) => {...}
+        //         ImplItem::Fn(item) => {...}
         //         ...
         //         ImplItem::Verbatim(item) => {...}
         //
@@ -728,9 +728,9 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A method within an impl block.
+    /// An associated function within an impl block.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct ImplItemMethod {
+    pub struct ImplItemFn {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
         pub defaultness: Option<Token![default]>,
@@ -2116,7 +2116,7 @@ pub mod parsing {
 
             let lookahead = ahead.lookahead1();
             let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead) {
-                input.parse().map(TraitItem::Method)
+                input.parse().map(TraitItem::Fn)
             } else if lookahead.peek(Token![const]) {
                 ahead.parse::<Token![const]>()?;
                 let lookahead = ahead.lookahead1();
@@ -2127,7 +2127,7 @@ pub mod parsing {
                     || lookahead.peek(Token![extern])
                     || lookahead.peek(Token![fn])
                 {
-                    input.parse().map(TraitItem::Method)
+                    input.parse().map(TraitItem::Fn)
                 } else {
                     Err(lookahead.error())
                 }
@@ -2151,7 +2151,7 @@ pub mod parsing {
 
             let item_attrs = match &mut item {
                 TraitItem::Const(item) => &mut item.attrs,
-                TraitItem::Method(item) => &mut item.attrs,
+                TraitItem::Fn(item) => &mut item.attrs,
                 TraitItem::Type(item) => &mut item.attrs,
                 TraitItem::Macro(item) => &mut item.attrs,
                 TraitItem::Verbatim(_) => unreachable!(),
@@ -2193,7 +2193,7 @@ pub mod parsing {
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-    impl Parse for TraitItemMethod {
+    impl Parse for TraitItemFn {
         fn parse(input: ParseStream) -> Result<Self> {
             let mut attrs = input.call(Attribute::parse_outer)?;
             let sig: Signature = input.parse()?;
@@ -2212,7 +2212,7 @@ pub mod parsing {
                 return Err(lookahead.error());
             };
 
-            Ok(TraitItemMethod {
+            Ok(TraitItemFn {
                 attrs,
                 sig,
                 default: brace_token.map(|brace_token| Block { brace_token, stmts }),
@@ -2442,7 +2442,7 @@ pub mod parsing {
             };
 
             let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead) {
-                input.parse().map(ImplItem::Method)
+                input.parse().map(ImplItem::Fn)
             } else if lookahead.peek(Token![const]) {
                 let const_token: Token![const] = ahead.parse()?;
                 let lookahead = ahead.lookahead1();
@@ -2489,7 +2489,7 @@ pub mod parsing {
             {
                 let item_attrs = match &mut item {
                     ImplItem::Const(item) => &mut item.attrs,
-                    ImplItem::Method(item) => &mut item.attrs,
+                    ImplItem::Fn(item) => &mut item.attrs,
                     ImplItem::Type(item) => &mut item.attrs,
                     ImplItem::Macro(item) => &mut item.attrs,
                     ImplItem::Verbatim(_) => return Ok(item),
@@ -2528,7 +2528,7 @@ pub mod parsing {
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-    impl Parse for ImplItemMethod {
+    impl Parse for ImplItemFn {
         fn parse(input: ParseStream) -> Result<Self> {
             let mut attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
@@ -2536,7 +2536,7 @@ pub mod parsing {
             let sig: Signature = input.parse()?;
 
             let block = if let Some(semi) = input.parse::<Option<Token![;]>>()? {
-                // Accept methods without a body in an impl block because
+                // Accept functions without a body in an impl block because
                 // rustc's *parser* does not reject them (the compilation error
                 // is emitted later than parsing) and it can be useful for macro
                 // DSLs.
@@ -2557,7 +2557,7 @@ pub mod parsing {
                 }
             };
 
-            Ok(ImplItemMethod {
+            Ok(ImplItemFn {
                 attrs,
                 vis,
                 defaultness,
@@ -2980,7 +2980,7 @@ mod printing {
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for TraitItemMethod {
+    impl ToTokens for TraitItemFn {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.sig.to_tokens(tokens);
@@ -3044,7 +3044,7 @@ mod printing {
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ImplItemMethod {
+    impl ToTokens for ImplItemFn {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);

@@ -384,11 +384,11 @@ mod item;
 #[cfg(feature = "full")]
 pub use crate::item::{
     FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
-    ImplItem, ImplItemConst, ImplItemMacro, ImplItemMethod, ImplItemType, Item, ItemConst,
-    ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemStatic,
-    ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Signature,
-    TraitItem, TraitItemConst, TraitItemMacro, TraitItemMethod, TraitItemType, UseGlob, UseGroup,
-    UseName, UsePath, UseRename, UseTree,
+    ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType, Item, ItemConst, ItemEnum,
+    ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct,
+    ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Signature, TraitItem,
+    TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob, UseGroup, UseName,
+    UsePath, UseRename, UseTree,
 };
 
 mod lifetime;

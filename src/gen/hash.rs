@@ -1245,7 +1245,7 @@ impl Hash for ImplItem {
                 state.write_u8(0u8);
                 v0.hash(state);
             }
-            ImplItem::Method(v0) => {
+            ImplItem::Fn(v0) => {
                 state.write_u8(1u8);
                 v0.hash(state);
             }
@@ -1281,19 +1281,7 @@ impl Hash for ImplItemConst {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for ImplItemMacro {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.attrs.hash(state);
-        self.mac.hash(state);
-        self.semi_token.hash(state);
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for ImplItemMethod {
+impl Hash for ImplItemFn {
     fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,
@@ -1303,6 +1291,18 @@ impl Hash for ImplItemMethod {
         self.defaultness.hash(state);
         self.sig.hash(state);
         self.block.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for ImplItemMacro {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.attrs.hash(state);
+        self.mac.hash(state);
+        self.semi_token.hash(state);
     }
 }
 #[cfg(feature = "full")]
@@ -2208,7 +2208,7 @@ impl Hash for TraitItem {
                 state.write_u8(0u8);
                 v0.hash(state);
             }
-            TraitItem::Method(v0) => {
+            TraitItem::Fn(v0) => {
                 state.write_u8(1u8);
                 v0.hash(state);
             }
@@ -2242,19 +2242,7 @@ impl Hash for TraitItemConst {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for TraitItemMacro {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.attrs.hash(state);
-        self.mac.hash(state);
-        self.semi_token.hash(state);
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for TraitItemMethod {
+impl Hash for TraitItemFn {
     fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,
@@ -2262,6 +2250,18 @@ impl Hash for TraitItemMethod {
         self.attrs.hash(state);
         self.sig.hash(state);
         self.default.hash(state);
+        self.semi_token.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for TraitItemMacro {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.attrs.hash(state);
+        self.mac.hash(state);
         self.semi_token.hash(state);
     }
 }

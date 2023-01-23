@@ -336,12 +336,12 @@ pub trait Visit<'ast> {
         visit_impl_item_const(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_impl_item_macro(&mut self, i: &'ast ImplItemMacro) {
-        visit_impl_item_macro(self, i);
+    fn visit_impl_item_fn(&mut self, i: &'ast ImplItemFn) {
+        visit_impl_item_fn(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_impl_item_method(&mut self, i: &'ast ImplItemMethod) {
-        visit_impl_item_method(self, i);
+    fn visit_impl_item_macro(&mut self, i: &'ast ImplItemMacro) {
+        visit_impl_item_macro(self, i);
     }
     #[cfg(feature = "full")]
     fn visit_impl_item_type(&mut self, i: &'ast ImplItemType) {
@@ -601,12 +601,12 @@ pub trait Visit<'ast> {
         visit_trait_item_const(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_trait_item_macro(&mut self, i: &'ast TraitItemMacro) {
-        visit_trait_item_macro(self, i);
+    fn visit_trait_item_fn(&mut self, i: &'ast TraitItemFn) {
+        visit_trait_item_fn(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_trait_item_method(&mut self, i: &'ast TraitItemMethod) {
-        visit_trait_item_method(self, i);
+    fn visit_trait_item_macro(&mut self, i: &'ast TraitItemMacro) {
+        visit_trait_item_macro(self, i);
     }
     #[cfg(feature = "full")]
     fn visit_trait_item_type(&mut self, i: &'ast TraitItemType) {
@@ -2007,8 +2007,8 @@ where
         ImplItem::Const(_binding_0) => {
             v.visit_impl_item_const(_binding_0);
         }
-        ImplItem::Method(_binding_0) => {
-            v.visit_impl_item_method(_binding_0);
+        ImplItem::Fn(_binding_0) => {
+            v.visit_impl_item_fn(_binding_0);
         }
         ImplItem::Type(_binding_0) => {
             v.visit_impl_item_type(_binding_0);
@@ -2042,20 +2042,7 @@ where
     tokens_helper(v, &node.semi_token.spans);
 }
 #[cfg(feature = "full")]
-pub fn visit_impl_item_macro<'ast, V>(v: &mut V, node: &'ast ImplItemMacro)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it);
-    }
-    v.visit_macro(&node.mac);
-    if let Some(it) = &node.semi_token {
-        tokens_helper(v, &it.spans);
-    }
-}
-#[cfg(feature = "full")]
-pub fn visit_impl_item_method<'ast, V>(v: &mut V, node: &'ast ImplItemMethod)
+pub fn visit_impl_item_fn<'ast, V>(v: &mut V, node: &'ast ImplItemFn)
 where
     V: Visit<'ast> + ?Sized,
 {
@@ -2068,6 +2055,19 @@ where
     }
     v.visit_signature(&node.sig);
     v.visit_block(&node.block);
+}
+#[cfg(feature = "full")]
+pub fn visit_impl_item_macro<'ast, V>(v: &mut V, node: &'ast ImplItemMacro)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    v.visit_macro(&node.mac);
+    if let Some(it) = &node.semi_token {
+        tokens_helper(v, &it.spans);
+    }
 }
 #[cfg(feature = "full")]
 pub fn visit_impl_item_type<'ast, V>(v: &mut V, node: &'ast ImplItemType)
@@ -3101,8 +3101,8 @@ where
         TraitItem::Const(_binding_0) => {
             v.visit_trait_item_const(_binding_0);
         }
-        TraitItem::Method(_binding_0) => {
-            v.visit_trait_item_method(_binding_0);
+        TraitItem::Fn(_binding_0) => {
+            v.visit_trait_item_fn(_binding_0);
         }
         TraitItem::Type(_binding_0) => {
             v.visit_trait_item_type(_binding_0);
@@ -3134,20 +3134,7 @@ where
     tokens_helper(v, &node.semi_token.spans);
 }
 #[cfg(feature = "full")]
-pub fn visit_trait_item_macro<'ast, V>(v: &mut V, node: &'ast TraitItemMacro)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it);
-    }
-    v.visit_macro(&node.mac);
-    if let Some(it) = &node.semi_token {
-        tokens_helper(v, &it.spans);
-    }
-}
-#[cfg(feature = "full")]
-pub fn visit_trait_item_method<'ast, V>(v: &mut V, node: &'ast TraitItemMethod)
+pub fn visit_trait_item_fn<'ast, V>(v: &mut V, node: &'ast TraitItemFn)
 where
     V: Visit<'ast> + ?Sized,
 {
@@ -3158,6 +3145,19 @@ where
     if let Some(it) = &node.default {
         v.visit_block(it);
     }
+    if let Some(it) = &node.semi_token {
+        tokens_helper(v, &it.spans);
+    }
+}
+#[cfg(feature = "full")]
+pub fn visit_trait_item_macro<'ast, V>(v: &mut V, node: &'ast TraitItemMacro)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    v.visit_macro(&node.mac);
     if let Some(it) = &node.semi_token {
         tokens_helper(v, &it.spans);
     }

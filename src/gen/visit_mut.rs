@@ -337,12 +337,12 @@ pub trait VisitMut {
         visit_impl_item_const_mut(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_impl_item_macro_mut(&mut self, i: &mut ImplItemMacro) {
-        visit_impl_item_macro_mut(self, i);
+    fn visit_impl_item_fn_mut(&mut self, i: &mut ImplItemFn) {
+        visit_impl_item_fn_mut(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_impl_item_method_mut(&mut self, i: &mut ImplItemMethod) {
-        visit_impl_item_method_mut(self, i);
+    fn visit_impl_item_macro_mut(&mut self, i: &mut ImplItemMacro) {
+        visit_impl_item_macro_mut(self, i);
     }
     #[cfg(feature = "full")]
     fn visit_impl_item_type_mut(&mut self, i: &mut ImplItemType) {
@@ -602,12 +602,12 @@ pub trait VisitMut {
         visit_trait_item_const_mut(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_trait_item_macro_mut(&mut self, i: &mut TraitItemMacro) {
-        visit_trait_item_macro_mut(self, i);
+    fn visit_trait_item_fn_mut(&mut self, i: &mut TraitItemFn) {
+        visit_trait_item_fn_mut(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_trait_item_method_mut(&mut self, i: &mut TraitItemMethod) {
-        visit_trait_item_method_mut(self, i);
+    fn visit_trait_item_macro_mut(&mut self, i: &mut TraitItemMacro) {
+        visit_trait_item_macro_mut(self, i);
     }
     #[cfg(feature = "full")]
     fn visit_trait_item_type_mut(&mut self, i: &mut TraitItemType) {
@@ -2010,8 +2010,8 @@ where
         ImplItem::Const(_binding_0) => {
             v.visit_impl_item_const_mut(_binding_0);
         }
-        ImplItem::Method(_binding_0) => {
-            v.visit_impl_item_method_mut(_binding_0);
+        ImplItem::Fn(_binding_0) => {
+            v.visit_impl_item_fn_mut(_binding_0);
         }
         ImplItem::Type(_binding_0) => {
             v.visit_impl_item_type_mut(_binding_0);
@@ -2045,20 +2045,7 @@ where
     tokens_helper(v, &mut node.semi_token.spans);
 }
 #[cfg(feature = "full")]
-pub fn visit_impl_item_macro_mut<V>(v: &mut V, node: &mut ImplItemMacro)
-where
-    V: VisitMut + ?Sized,
-{
-    for it in &mut node.attrs {
-        v.visit_attribute_mut(it);
-    }
-    v.visit_macro_mut(&mut node.mac);
-    if let Some(it) = &mut node.semi_token {
-        tokens_helper(v, &mut it.spans);
-    }
-}
-#[cfg(feature = "full")]
-pub fn visit_impl_item_method_mut<V>(v: &mut V, node: &mut ImplItemMethod)
+pub fn visit_impl_item_fn_mut<V>(v: &mut V, node: &mut ImplItemFn)
 where
     V: VisitMut + ?Sized,
 {
@@ -2071,6 +2058,19 @@ where
     }
     v.visit_signature_mut(&mut node.sig);
     v.visit_block_mut(&mut node.block);
+}
+#[cfg(feature = "full")]
+pub fn visit_impl_item_macro_mut<V>(v: &mut V, node: &mut ImplItemMacro)
+where
+    V: VisitMut + ?Sized,
+{
+    for it in &mut node.attrs {
+        v.visit_attribute_mut(it);
+    }
+    v.visit_macro_mut(&mut node.mac);
+    if let Some(it) = &mut node.semi_token {
+        tokens_helper(v, &mut it.spans);
+    }
 }
 #[cfg(feature = "full")]
 pub fn visit_impl_item_type_mut<V>(v: &mut V, node: &mut ImplItemType)
@@ -3104,8 +3104,8 @@ where
         TraitItem::Const(_binding_0) => {
             v.visit_trait_item_const_mut(_binding_0);
         }
-        TraitItem::Method(_binding_0) => {
-            v.visit_trait_item_method_mut(_binding_0);
+        TraitItem::Fn(_binding_0) => {
+            v.visit_trait_item_fn_mut(_binding_0);
         }
         TraitItem::Type(_binding_0) => {
             v.visit_trait_item_type_mut(_binding_0);
@@ -3137,20 +3137,7 @@ where
     tokens_helper(v, &mut node.semi_token.spans);
 }
 #[cfg(feature = "full")]
-pub fn visit_trait_item_macro_mut<V>(v: &mut V, node: &mut TraitItemMacro)
-where
-    V: VisitMut + ?Sized,
-{
-    for it in &mut node.attrs {
-        v.visit_attribute_mut(it);
-    }
-    v.visit_macro_mut(&mut node.mac);
-    if let Some(it) = &mut node.semi_token {
-        tokens_helper(v, &mut it.spans);
-    }
-}
-#[cfg(feature = "full")]
-pub fn visit_trait_item_method_mut<V>(v: &mut V, node: &mut TraitItemMethod)
+pub fn visit_trait_item_fn_mut<V>(v: &mut V, node: &mut TraitItemFn)
 where
     V: VisitMut + ?Sized,
 {
@@ -3161,6 +3148,19 @@ where
     if let Some(it) = &mut node.default {
         v.visit_block_mut(it);
     }
+    if let Some(it) = &mut node.semi_token {
+        tokens_helper(v, &mut it.spans);
+    }
+}
+#[cfg(feature = "full")]
+pub fn visit_trait_item_macro_mut<V>(v: &mut V, node: &mut TraitItemMacro)
+where
+    V: VisitMut + ?Sized,
+{
+    for it in &mut node.attrs {
+        v.visit_attribute_mut(it);
+    }
+    v.visit_macro_mut(&mut node.mac);
     if let Some(it) = &mut node.semi_token {
         tokens_helper(v, &mut it.spans);
     }

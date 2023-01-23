@@ -334,12 +334,12 @@ pub trait Fold {
         fold_impl_item_const(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_impl_item_macro(&mut self, i: ImplItemMacro) -> ImplItemMacro {
-        fold_impl_item_macro(self, i)
+    fn fold_impl_item_fn(&mut self, i: ImplItemFn) -> ImplItemFn {
+        fold_impl_item_fn(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_impl_item_method(&mut self, i: ImplItemMethod) -> ImplItemMethod {
-        fold_impl_item_method(self, i)
+    fn fold_impl_item_macro(&mut self, i: ImplItemMacro) -> ImplItemMacro {
+        fold_impl_item_macro(self, i)
     }
     #[cfg(feature = "full")]
     fn fold_impl_item_type(&mut self, i: ImplItemType) -> ImplItemType {
@@ -602,12 +602,12 @@ pub trait Fold {
         fold_trait_item_const(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_trait_item_macro(&mut self, i: TraitItemMacro) -> TraitItemMacro {
-        fold_trait_item_macro(self, i)
+    fn fold_trait_item_fn(&mut self, i: TraitItemFn) -> TraitItemFn {
+        fold_trait_item_fn(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_trait_item_method(&mut self, i: TraitItemMethod) -> TraitItemMethod {
-        fold_trait_item_method(self, i)
+    fn fold_trait_item_macro(&mut self, i: TraitItemMacro) -> TraitItemMacro {
+        fold_trait_item_macro(self, i)
     }
     #[cfg(feature = "full")]
     fn fold_trait_item_type(&mut self, i: TraitItemType) -> TraitItemType {
@@ -1804,9 +1804,7 @@ where
         ImplItem::Const(_binding_0) => {
             ImplItem::Const(f.fold_impl_item_const(_binding_0))
         }
-        ImplItem::Method(_binding_0) => {
-            ImplItem::Method(f.fold_impl_item_method(_binding_0))
-        }
+        ImplItem::Fn(_binding_0) => ImplItem::Fn(f.fold_impl_item_fn(_binding_0)),
         ImplItem::Type(_binding_0) => ImplItem::Type(f.fold_impl_item_type(_binding_0)),
         ImplItem::Macro(_binding_0) => {
             ImplItem::Macro(f.fold_impl_item_macro(_binding_0))
@@ -1834,6 +1832,20 @@ where
     }
 }
 #[cfg(feature = "full")]
+pub fn fold_impl_item_fn<F>(f: &mut F, node: ImplItemFn) -> ImplItemFn
+where
+    F: Fold + ?Sized,
+{
+    ImplItemFn {
+        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        vis: f.fold_visibility(node.vis),
+        defaultness: (node.defaultness)
+            .map(|it| Token![default](tokens_helper(f, &it.span))),
+        sig: f.fold_signature(node.sig),
+        block: f.fold_block(node.block),
+    }
+}
+#[cfg(feature = "full")]
 pub fn fold_impl_item_macro<F>(f: &mut F, node: ImplItemMacro) -> ImplItemMacro
 where
     F: Fold + ?Sized,
@@ -1842,20 +1854,6 @@ where
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         mac: f.fold_macro(node.mac),
         semi_token: (node.semi_token).map(|it| Token![;](tokens_helper(f, &it.spans))),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_impl_item_method<F>(f: &mut F, node: ImplItemMethod) -> ImplItemMethod
-where
-    F: Fold + ?Sized,
-{
-    ImplItemMethod {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        vis: f.fold_visibility(node.vis),
-        defaultness: (node.defaultness)
-            .map(|it| Token![default](tokens_helper(f, &it.span))),
-        sig: f.fold_signature(node.sig),
-        block: f.fold_block(node.block),
     }
 }
 #[cfg(feature = "full")]
@@ -2744,9 +2742,7 @@ where
         TraitItem::Const(_binding_0) => {
             TraitItem::Const(f.fold_trait_item_const(_binding_0))
         }
-        TraitItem::Method(_binding_0) => {
-            TraitItem::Method(f.fold_trait_item_method(_binding_0))
-        }
+        TraitItem::Fn(_binding_0) => TraitItem::Fn(f.fold_trait_item_fn(_binding_0)),
         TraitItem::Type(_binding_0) => {
             TraitItem::Type(f.fold_trait_item_type(_binding_0))
         }
@@ -2773,6 +2769,18 @@ where
     }
 }
 #[cfg(feature = "full")]
+pub fn fold_trait_item_fn<F>(f: &mut F, node: TraitItemFn) -> TraitItemFn
+where
+    F: Fold + ?Sized,
+{
+    TraitItemFn {
+        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        sig: f.fold_signature(node.sig),
+        default: (node.default).map(|it| f.fold_block(it)),
+        semi_token: (node.semi_token).map(|it| Token![;](tokens_helper(f, &it.spans))),
+    }
+}
+#[cfg(feature = "full")]
 pub fn fold_trait_item_macro<F>(f: &mut F, node: TraitItemMacro) -> TraitItemMacro
 where
     F: Fold + ?Sized,
@@ -2780,18 +2788,6 @@ where
     TraitItemMacro {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         mac: f.fold_macro(node.mac),
-        semi_token: (node.semi_token).map(|it| Token![;](tokens_helper(f, &it.spans))),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_trait_item_method<F>(f: &mut F, node: TraitItemMethod) -> TraitItemMethod
-where
-    F: Fold + ?Sized,
-{
-    TraitItemMethod {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        sig: f.fold_signature(node.sig),
-        default: (node.default).map(|it| f.fold_block(it)),
         semi_token: (node.semi_token).map(|it| Token![;](tokens_helper(f, &it.spans))),
     }
 }
