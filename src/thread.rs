@@ -1,6 +1,7 @@
 use std::cell::Cell;
 use std::fmt::{self, Debug};
 use std::panic::{self, PanicInfo};
+use std::ptr;
 use std::thread::{self, ThreadId};
 
 /// ThreadBound is a Sync-maker and Send-maker that allows accessing a value
@@ -75,7 +76,7 @@ fn thread_id_if_possible() -> Option<ThreadId> {
         }
 
         let null_hook: Box<PanicHook> = Box::new(|_panic_info| { /* ignore */ });
-        let sanity_check = &*null_hook as *const PanicHook;
+        let sanity_check = ptr::addr_of!(*null_hook);
         let original_hook = panic::take_hook();
         panic::set_hook(null_hook);
 
