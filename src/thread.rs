@@ -39,3 +39,12 @@ impl<T: Debug> Debug for ThreadBound<T> {
         }
     }
 }
+
+impl<T: Clone> Clone for ThreadBound<T> {
+    fn clone(&self) -> Self {
+        ThreadBound {
+            value: self.value.clone(),
+            thread_id: self.thread_id,
+        }
+    }
+}
