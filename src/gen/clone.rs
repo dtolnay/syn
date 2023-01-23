@@ -942,7 +942,7 @@ impl Clone for ImplItem {
     fn clone(&self) -> Self {
         match self {
             ImplItem::Const(v0) => ImplItem::Const(v0.clone()),
-            ImplItem::Method(v0) => ImplItem::Method(v0.clone()),
+            ImplItem::Fn(v0) => ImplItem::Fn(v0.clone()),
             ImplItem::Type(v0) => ImplItem::Type(v0.clone()),
             ImplItem::Macro(v0) => ImplItem::Macro(v0.clone()),
             ImplItem::Verbatim(v0) => ImplItem::Verbatim(v0.clone()),
@@ -969,25 +969,25 @@ impl Clone for ImplItemConst {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for ImplItemFn {
+    fn clone(&self) -> Self {
+        ImplItemFn {
+            attrs: self.attrs.clone(),
+            vis: self.vis.clone(),
+            defaultness: self.defaultness.clone(),
+            sig: self.sig.clone(),
+            block: self.block.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for ImplItemMacro {
     fn clone(&self) -> Self {
         ImplItemMacro {
             attrs: self.attrs.clone(),
             mac: self.mac.clone(),
             semi_token: self.semi_token.clone(),
-        }
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for ImplItemMethod {
-    fn clone(&self) -> Self {
-        ImplItemMethod {
-            attrs: self.attrs.clone(),
-            vis: self.vis.clone(),
-            defaultness: self.defaultness.clone(),
-            sig: self.sig.clone(),
-            block: self.block.clone(),
         }
     }
 }
@@ -1725,7 +1725,7 @@ impl Clone for TraitItem {
     fn clone(&self) -> Self {
         match self {
             TraitItem::Const(v0) => TraitItem::Const(v0.clone()),
-            TraitItem::Method(v0) => TraitItem::Method(v0.clone()),
+            TraitItem::Fn(v0) => TraitItem::Fn(v0.clone()),
             TraitItem::Type(v0) => TraitItem::Type(v0.clone()),
             TraitItem::Macro(v0) => TraitItem::Macro(v0.clone()),
             TraitItem::Verbatim(v0) => TraitItem::Verbatim(v0.clone()),
@@ -1749,23 +1749,23 @@ impl Clone for TraitItemConst {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for TraitItemMacro {
+impl Clone for TraitItemFn {
     fn clone(&self) -> Self {
-        TraitItemMacro {
+        TraitItemFn {
             attrs: self.attrs.clone(),
-            mac: self.mac.clone(),
+            sig: self.sig.clone(),
+            default: self.default.clone(),
             semi_token: self.semi_token.clone(),
         }
     }
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for TraitItemMethod {
+impl Clone for TraitItemMacro {
     fn clone(&self) -> Self {
-        TraitItemMethod {
+        TraitItemMacro {
             attrs: self.attrs.clone(),
-            sig: self.sig.clone(),
-            default: self.default.clone(),
+            mac: self.mac.clone(),
             semi_token: self.semi_token.clone(),
         }
     }

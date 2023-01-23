@@ -1328,8 +1328,8 @@ impl Debug for ImplItem {
                 formatter.field(v0);
                 formatter.finish()
             }
-            ImplItem::Method(v0) => {
-                let mut formatter = formatter.debug_tuple("Method");
+            ImplItem::Fn(v0) => {
+                let mut formatter = formatter.debug_tuple("Fn");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -1371,25 +1371,25 @@ impl Debug for ImplItemConst {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for ImplItemFn {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ImplItemFn");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("vis", &self.vis);
+        formatter.field("defaultness", &self.defaultness);
+        formatter.field("sig", &self.sig);
+        formatter.field("block", &self.block);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ImplItemMacro {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ImplItemMacro");
         formatter.field("attrs", &self.attrs);
         formatter.field("mac", &self.mac);
         formatter.field("semi_token", &self.semi_token);
-        formatter.finish()
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for ImplItemMethod {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("ImplItemMethod");
-        formatter.field("attrs", &self.attrs);
-        formatter.field("vis", &self.vis);
-        formatter.field("defaultness", &self.defaultness);
-        formatter.field("sig", &self.sig);
-        formatter.field("block", &self.block);
         formatter.finish()
     }
 }
@@ -2359,8 +2359,8 @@ impl Debug for TraitItem {
                 formatter.field(v0);
                 formatter.finish()
             }
-            TraitItem::Method(v0) => {
-                let mut formatter = formatter.debug_tuple("Method");
+            TraitItem::Fn(v0) => {
+                let mut formatter = formatter.debug_tuple("Fn");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -2399,23 +2399,23 @@ impl Debug for TraitItemConst {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for TraitItemMacro {
+impl Debug for TraitItemFn {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("TraitItemMacro");
+        let mut formatter = formatter.debug_struct("TraitItemFn");
         formatter.field("attrs", &self.attrs);
-        formatter.field("mac", &self.mac);
+        formatter.field("sig", &self.sig);
+        formatter.field("default", &self.default);
         formatter.field("semi_token", &self.semi_token);
         formatter.finish()
     }
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for TraitItemMethod {
+impl Debug for TraitItemMacro {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("TraitItemMethod");
+        let mut formatter = formatter.debug_struct("TraitItemMacro");
         formatter.field("attrs", &self.attrs);
-        formatter.field("sig", &self.sig);
-        formatter.field("default", &self.default);
+        formatter.field("mac", &self.mac);
         formatter.field("semi_token", &self.semi_token);
         formatter.finish()
     }

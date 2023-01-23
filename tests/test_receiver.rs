@@ -1,10 +1,10 @@
 #![allow(clippy::uninlined_format_args)]
 
-use syn::{parse_quote, FnArg, Receiver, TraitItemMethod};
+use syn::{parse_quote, FnArg, Receiver, TraitItemFn};
 
 #[test]
 fn test_by_value() {
-    let TraitItemMethod { sig, .. } = parse_quote! {
+    let TraitItemFn { sig, .. } = parse_quote! {
         fn by_value(self: Self);
     };
     match sig.receiver() {
@@ -15,7 +15,7 @@ fn test_by_value() {
 
 #[test]
 fn test_by_mut_value() {
-    let TraitItemMethod { sig, .. } = parse_quote! {
+    let TraitItemFn { sig, .. } = parse_quote! {
         fn by_mut(mut self: Self);
     };
     match sig.receiver() {
@@ -26,7 +26,7 @@ fn test_by_mut_value() {
 
 #[test]
 fn test_by_ref() {
-    let TraitItemMethod { sig, .. } = parse_quote! {
+    let TraitItemFn { sig, .. } = parse_quote! {
         fn by_ref(self: &Self);
     };
     match sig.receiver() {
@@ -37,7 +37,7 @@ fn test_by_ref() {
 
 #[test]
 fn test_by_box() {
-    let TraitItemMethod { sig, .. } = parse_quote! {
+    let TraitItemFn { sig, .. } = parse_quote! {
         fn by_box(self: Box<Self>);
     };
     match sig.receiver() {
@@ -48,7 +48,7 @@ fn test_by_box() {
 
 #[test]
 fn test_by_pin() {
-    let TraitItemMethod { sig, .. } = parse_quote! {
+    let TraitItemFn { sig, .. } = parse_quote! {
         fn by_pin(self: Pin<Self>);
     };
     match sig.receiver() {
@@ -59,7 +59,7 @@ fn test_by_pin() {
 
 #[test]
 fn test_explicit_type() {
-    let TraitItemMethod { sig, .. } = parse_quote! {
+    let TraitItemFn { sig, .. } = parse_quote! {
         fn explicit_type(self: Pin<MyType>);
     };
     match sig.receiver() {
@@ -70,7 +70,7 @@ fn test_explicit_type() {
 
 #[test]
 fn test_value_shorthand() {
-    let TraitItemMethod { sig, .. } = parse_quote! {
+    let TraitItemFn { sig, .. } = parse_quote! {
         fn value_shorthand(self);
     };
     match sig.receiver() {
@@ -85,7 +85,7 @@ fn test_value_shorthand() {
 
 #[test]
 fn test_mut_value_shorthand() {
-    let TraitItemMethod { sig, .. } = parse_quote! {
+    let TraitItemFn { sig, .. } = parse_quote! {
         fn mut_value_shorthand(mut self);
     };
     match sig.receiver() {
@@ -100,7 +100,7 @@ fn test_mut_value_shorthand() {
 
 #[test]
 fn test_ref_shorthand() {
-    let TraitItemMethod { sig, .. } = parse_quote! {
+    let TraitItemFn { sig, .. } = parse_quote! {
         fn ref_shorthand(&self);
     };
     match sig.receiver() {
@@ -115,7 +115,7 @@ fn test_ref_shorthand() {
 
 #[test]
 fn test_ref_mut_shorthand() {
-    let TraitItemMethod { sig, .. } = parse_quote! {
+    let TraitItemFn { sig, .. } = parse_quote! {
         fn ref_mut_shorthand(&mut self);
     };
     match sig.receiver() {

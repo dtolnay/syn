@@ -2427,8 +2427,8 @@ impl Debug for Lite<syn::ImplItem> {
                 formatter.field("expr", Lite(&_val.expr));
                 formatter.finish()
             }
-            syn::ImplItem::Method(_val) => {
-                let mut formatter = formatter.debug_struct("ImplItem::Method");
+            syn::ImplItem::Fn(_val) => {
+                let mut formatter = formatter.debug_struct("ImplItem::Fn");
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
@@ -2529,6 +2529,31 @@ impl Debug for Lite<syn::ImplItemConst> {
         formatter.finish()
     }
 }
+impl Debug for Lite<syn::ImplItemFn> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("ImplItemFn");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        formatter.field("vis", Lite(&_val.vis));
+        if let Some(val) = &_val.defaultness {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Default);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("defaultness", Print::ref_cast(val));
+        }
+        formatter.field("sig", Lite(&_val.sig));
+        formatter.field("block", Lite(&_val.block));
+        formatter.finish()
+    }
+}
 impl Debug for Lite<syn::ImplItemMacro> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
@@ -2549,31 +2574,6 @@ impl Debug for Lite<syn::ImplItemMacro> {
             }
             formatter.field("semi_token", Print::ref_cast(val));
         }
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::ImplItemMethod> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("ImplItemMethod");
-        if !_val.attrs.is_empty() {
-            formatter.field("attrs", Lite(&_val.attrs));
-        }
-        formatter.field("vis", Lite(&_val.vis));
-        if let Some(val) = &_val.defaultness {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Default);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("defaultness", Print::ref_cast(val));
-        }
-        formatter.field("sig", Lite(&_val.sig));
-        formatter.field("block", Lite(&_val.block));
         formatter.finish()
     }
 }
@@ -4603,8 +4603,8 @@ impl Debug for Lite<syn::TraitItem> {
                 }
                 formatter.finish()
             }
-            syn::TraitItem::Method(_val) => {
-                let mut formatter = formatter.debug_struct("TraitItem::Method");
+            syn::TraitItem::Fn(_val) => {
+                let mut formatter = formatter.debug_struct("TraitItem::Fn");
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
@@ -4738,33 +4738,10 @@ impl Debug for Lite<syn::TraitItemConst> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::TraitItemMacro> {
+impl Debug for Lite<syn::TraitItemFn> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
-        let mut formatter = formatter.debug_struct("TraitItemMacro");
-        if !_val.attrs.is_empty() {
-            formatter.field("attrs", Lite(&_val.attrs));
-        }
-        formatter.field("mac", Lite(&_val.mac));
-        if let Some(val) = &_val.semi_token {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Semi);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
-            }
-            formatter.field("semi_token", Print::ref_cast(val));
-        }
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::TraitItemMethod> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("TraitItemMethod");
+        let mut formatter = formatter.debug_struct("TraitItemFn");
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
         }
@@ -4785,6 +4762,29 @@ impl Debug for Lite<syn::TraitItemMethod> {
             }
             formatter.field("default", Print::ref_cast(val));
         }
+        if let Some(val) = &_val.semi_token {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Semi);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("semi_token", Print::ref_cast(val));
+        }
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::TraitItemMacro> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("TraitItemMacro");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        formatter.field("mac", Lite(&_val.mac));
         if let Some(val) = &_val.semi_token {
             #[derive(RefCast)]
             #[repr(transparent)]

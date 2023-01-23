@@ -2334,9 +2334,9 @@
             "syn": "ImplItemConst"
           }
         ],
-        "Method": [
+        "Fn": [
           {
-            "syn": "ImplItemMethod"
+            "syn": "ImplItemFn"
           }
         ],
         "Type": [
@@ -2402,30 +2402,7 @@
       }
     },
     {
-      "ident": "ImplItemMacro",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "mac": {
-          "syn": "Macro"
-        },
-        "semi_token": {
-          "option": {
-            "token": "Semi"
-          }
-        }
-      }
-    },
-    {
-      "ident": "ImplItemMethod",
+      "ident": "ImplItemFn",
       "features": {
         "any": [
           "full"
@@ -2450,6 +2427,29 @@
         },
         "block": {
           "syn": "Block"
+        }
+      }
+    },
+    {
+      "ident": "ImplItemMacro",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "mac": {
+          "syn": "Macro"
+        },
+        "semi_token": {
+          "option": {
+            "token": "Semi"
+          }
         }
       }
     },
@@ -4335,9 +4335,9 @@
             "syn": "TraitItemConst"
           }
         ],
-        "Method": [
+        "Fn": [
           {
-            "syn": "TraitItemMethod"
+            "syn": "TraitItemFn"
           }
         ],
         "Type": [
@@ -4401,30 +4401,7 @@
       }
     },
     {
-      "ident": "TraitItemMacro",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "mac": {
-          "syn": "Macro"
-        },
-        "semi_token": {
-          "option": {
-            "token": "Semi"
-          }
-        }
-      }
-    },
-    {
-      "ident": "TraitItemMethod",
+      "ident": "TraitItemFn",
       "features": {
         "any": [
           "full"
@@ -4443,6 +4420,29 @@
           "option": {
             "syn": "Block"
           }
+        },
+        "semi_token": {
+          "option": {
+            "token": "Semi"
+          }
+        }
+      }
+    },
+    {
+      "ident": "TraitItemMacro",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "mac": {
+          "syn": "Macro"
         },
         "semi_token": {
           "option": {

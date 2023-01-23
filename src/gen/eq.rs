@@ -928,7 +928,7 @@ impl PartialEq for ImplItem {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (ImplItem::Const(self0), ImplItem::Const(other0)) => self0 == other0,
-            (ImplItem::Method(self0), ImplItem::Method(other0)) => self0 == other0,
+            (ImplItem::Fn(self0), ImplItem::Fn(other0)) => self0 == other0,
             (ImplItem::Type(self0), ImplItem::Type(other0)) => self0 == other0,
             (ImplItem::Macro(self0), ImplItem::Macro(other0)) => self0 == other0,
             (ImplItem::Verbatim(self0), ImplItem::Verbatim(other0)) => {
@@ -952,6 +952,18 @@ impl PartialEq for ImplItemConst {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for ImplItemFn {}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for ImplItemFn {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs && self.vis == other.vis
+            && self.defaultness == other.defaultness && self.sig == other.sig
+            && self.block == other.block
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ImplItemMacro {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -959,18 +971,6 @@ impl PartialEq for ImplItemMacro {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.mac == other.mac
             && self.semi_token == other.semi_token
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for ImplItemMethod {}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for ImplItemMethod {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.vis == other.vis
-            && self.defaultness == other.defaultness && self.sig == other.sig
-            && self.block == other.block
     }
 }
 #[cfg(feature = "full")]
@@ -1662,7 +1662,7 @@ impl PartialEq for TraitItem {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (TraitItem::Const(self0), TraitItem::Const(other0)) => self0 == other0,
-            (TraitItem::Method(self0), TraitItem::Method(other0)) => self0 == other0,
+            (TraitItem::Fn(self0), TraitItem::Fn(other0)) => self0 == other0,
             (TraitItem::Type(self0), TraitItem::Type(other0)) => self0 == other0,
             (TraitItem::Macro(self0), TraitItem::Macro(other0)) => self0 == other0,
             (TraitItem::Verbatim(self0), TraitItem::Verbatim(other0)) => {
@@ -1685,6 +1685,17 @@ impl PartialEq for TraitItemConst {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for TraitItemFn {}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for TraitItemFn {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs && self.sig == other.sig
+            && self.default == other.default && self.semi_token == other.semi_token
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for TraitItemMacro {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1692,17 +1703,6 @@ impl PartialEq for TraitItemMacro {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.mac == other.mac
             && self.semi_token == other.semi_token
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for TraitItemMethod {}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for TraitItemMethod {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.sig == other.sig
-            && self.default == other.default && self.semi_token == other.semi_token
     }
 }
 #[cfg(feature = "full")]
