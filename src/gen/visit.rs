@@ -45,6 +45,14 @@ pub trait Visit<'ast> {
         visit_arm(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
+    fn visit_assoc_const(&mut self, i: &'ast AssocConst) {
+        visit_assoc_const(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    fn visit_assoc_type(&mut self, i: &'ast AssocType) {
+        visit_assoc_type(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_attr_style(&mut self, i: &'ast AttrStyle) {
         visit_attr_style(self, i);
     }
@@ -59,10 +67,6 @@ pub trait Visit<'ast> {
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_bin_op(&mut self, i: &'ast BinOp) {
         visit_bin_op(self, i);
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    fn visit_binding(&mut self, i: &'ast Binding) {
-        visit_binding(self, i);
     }
     #[cfg(feature = "full")]
     fn visit_block(&mut self, i: &'ast Block) {
@@ -796,6 +800,30 @@ where
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
+pub fn visit_assoc_const<'ast, V>(v: &mut V, node: &'ast AssocConst)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    v.visit_ident(&node.ident);
+    if let Some(it) = &node.generics {
+        v.visit_angle_bracketed_generic_arguments(it);
+    }
+    tokens_helper(v, &node.eq_token.spans);
+    v.visit_expr(&node.value);
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+pub fn visit_assoc_type<'ast, V>(v: &mut V, node: &'ast AssocType)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    v.visit_ident(&node.ident);
+    if let Some(it) = &node.generics {
+        v.visit_angle_bracketed_generic_arguments(it);
+    }
+    tokens_helper(v, &node.eq_token.spans);
+    v.visit_type(&node.ty);
+}
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_attr_style<'ast, V>(v: &mut V, node: &'ast AttrStyle)
 where
     V: Visit<'ast> + ?Sized,
@@ -923,15 +951,6 @@ where
         }
     }
 }
-#[cfg(any(feature = "derive", feature = "full"))]
-pub fn visit_binding<'ast, V>(v: &mut V, node: &'ast Binding)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    v.visit_ident(&node.ident);
-    tokens_helper(v, &node.eq_token.spans);
-    v.visit_type(&node.ty);
-}
 #[cfg(feature = "full")]
 pub fn visit_block<'ast, V>(v: &mut V, node: &'ast Block)
 where
@@ -983,6 +1002,9 @@ where
     V: Visit<'ast> + ?Sized,
 {
     v.visit_ident(&node.ident);
+    if let Some(it) = &node.generics {
+        v.visit_angle_bracketed_generic_arguments(it);
+    }
     tokens_helper(v, &node.colon_token.spans);
     for el in Punctuated::pairs(&node.bounds) {
         let (it, p) = el.into_tuple();
@@ -1949,8 +1971,11 @@ where
         GenericArgument::Const(_binding_0) => {
             v.visit_expr(_binding_0);
         }
-        GenericArgument::Binding(_binding_0) => {
-            v.visit_binding(_binding_0);
+        GenericArgument::AssocType(_binding_0) => {
+            v.visit_assoc_type(_binding_0);
+        }
+        GenericArgument::AssocConst(_binding_0) => {
+            v.visit_assoc_const(_binding_0);
         }
         GenericArgument::Constraint(_binding_0) => {
             v.visit_constraint(_binding_0);

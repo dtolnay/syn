@@ -454,7 +454,7 @@ pub use crate::pat::{
 mod path;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::path::{
-    AngleBracketedGenericArguments, Binding, Constraint, GenericArgument,
+    AngleBracketedGenericArguments, AssocConst, AssocType, Constraint, GenericArgument,
     ParenthesizedGenericArguments, Path, PathArguments, PathSegment, QSelf,
 };
 

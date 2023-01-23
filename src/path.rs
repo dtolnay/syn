@@ -103,7 +103,10 @@ ast_enum! {
         Const(Expr),
         /// A binding (equality constraint) on an associated type: the `Item =
         /// u8` in `Iterator<Item = u8>`.
-        Binding(Binding),
+        AssocType(AssocType),
+        /// An equality constraint on an associated constant: the `PANIC =
+        /// false` in `Trait<PANIC = false>`.
+        AssocConst(AssocConst),
         /// An associated type bound: `Iterator<Item: Display>`.
         Constraint(Constraint),
     }
@@ -122,12 +125,26 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A binding (equality constraint) on an associated type: `Item = u8`.
+    /// A binding (equality constraint) on an associated type: the `Item = u8`
+    /// in `Iterator<Item = u8>`.
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub struct Binding {
+    pub struct AssocType {
         pub ident: Ident,
+        pub generics: Option<AngleBracketedGenericArguments>,
         pub eq_token: Token![=],
         pub ty: Type,
+    }
+}
+
+ast_struct! {
+    /// An equality constraint on an associated constant: the `PANIC = false` in
+    /// `Trait<PANIC = false>`.
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    pub struct AssocConst {
+        pub ident: Ident,
+        pub generics: Option<AngleBracketedGenericArguments>,
+        pub eq_token: Token![=],
+        pub value: Expr,
     }
 }
 
@@ -136,6 +153,7 @@ ast_struct! {
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Constraint {
         pub ident: Ident,
+        pub generics: Option<AngleBracketedGenericArguments>,
         pub colon_token: Token![:],
         pub bounds: Punctuated<TypeParamBound, Token![+]>,
     }
@@ -202,79 +220,80 @@ pub mod parsing {
                 return Ok(GenericArgument::Lifetime(input.parse()?));
             }
 
-            if input.peek(Ident) && input.peek2(Token![=]) {
-                let ident: Ident = input.parse()?;
-                let eq_token: Token![=] = input.parse()?;
-
-                let ty = if input.peek(Lit) {
-                    let begin = input.fork();
-                    input.parse::<Lit>()?;
-                    Type::Verbatim(verbatim::between(begin, input))
-                } else if input.peek(token::Brace) {
-                    let begin = input.fork();
-
-                    #[cfg(feature = "full")]
-                    input.parse::<ExprBlock>()?;
-
-                    #[cfg(not(feature = "full"))]
-                    {
-                        let content;
-                        braced!(content in input);
-                        content.parse::<Expr>()?;
-                    }
-
-                    Type::Verbatim(verbatim::between(begin, input))
-                } else {
-                    input.parse()?
-                };
-
-                return Ok(GenericArgument::Binding(Binding {
-                    ident,
-                    eq_token,
-                    ty,
-                }));
-            }
-
-            #[cfg(feature = "full")]
-            if input.peek(Ident) && input.peek2(Token![:]) && !input.peek2(Token![::]) {
-                return Ok(GenericArgument::Constraint(input.parse()?));
-            }
-
             if input.peek(Lit) || input.peek(token::Brace) {
                 return const_argument(input).map(GenericArgument::Const);
             }
 
-            #[cfg(feature = "full")]
-            let begin = input.fork();
+            let mut argument: Type = input.parse()?;
 
-            let argument: Type = input.parse()?;
-
-            #[cfg(feature = "full")]
-            if match &argument {
-                Type::Path(argument)
-                    if argument.qself.is_none()
-                        && argument.path.leading_colon.is_none()
-                        && argument.path.segments.len() == 1 =>
+            match argument {
+                Type::Path(mut ty)
+                    if ty.qself.is_none()
+                        && ty.path.leading_colon.is_none()
+                        && ty.path.segments.len() == 1
+                        && match &ty.path.segments[0].arguments {
+                            PathArguments::None | PathArguments::AngleBracketed(_) => true,
+                            PathArguments::Parenthesized(_) => false,
+                        } =>
                 {
-                    match argument.path.segments[0].arguments {
-                        PathArguments::AngleBracketed(_) => true,
-                        _ => false,
+                    if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
+                        let segment = ty.path.segments.pop().unwrap().into_value();
+                        let ident = segment.ident;
+                        let generics = match segment.arguments {
+                            PathArguments::None => None,
+                            PathArguments::AngleBracketed(arguments) => Some(arguments),
+                            PathArguments::Parenthesized(_) => unreachable!(),
+                        };
+                        return if input.peek(Lit) || input.peek(token::Brace) {
+                            Ok(GenericArgument::AssocConst(AssocConst {
+                                ident,
+                                generics,
+                                eq_token,
+                                value: const_argument(input)?,
+                            }))
+                        } else {
+                            Ok(GenericArgument::AssocType(AssocType {
+                                ident,
+                                generics,
+                                eq_token,
+                                ty: input.parse()?,
+                            }))
+                        };
                     }
+
+                    #[cfg(feature = "full")]
+                    if let Some(colon_token) = input.parse::<Option<Token![:]>>()? {
+                        let segment = ty.path.segments.pop().unwrap().into_value();
+                        return Ok(GenericArgument::Constraint(Constraint {
+                            ident: segment.ident,
+                            generics: match segment.arguments {
+                                PathArguments::None => None,
+                                PathArguments::AngleBracketed(arguments) => Some(arguments),
+                                PathArguments::Parenthesized(_) => unreachable!(),
+                            },
+                            colon_token,
+                            bounds: {
+                                let mut bounds = Punctuated::new();
+                                loop {
+                                    if input.peek(Token![,]) || input.peek(Token![>]) {
+                                        break;
+                                    }
+                                    let value: TypeParamBound = input.parse()?;
+                                    bounds.push_value(value);
+                                    if !input.peek(Token![+]) {
+                                        break;
+                                    }
+                                    let punct: Token![+] = input.parse()?;
+                                    bounds.push_punct(punct);
+                                }
+                                bounds
+                            },
+                        }));
+                    }
+
+                    argument = Type::Path(ty);
                 }
-                _ => false,
-            } && if input.peek(Token![=]) {
-                input.parse::<Token![=]>()?;
-                input.parse::<Type>()?;
-                true
-            } else if input.peek(Token![:]) {
-                input.parse::<Token![:]>()?;
-                input.call(constraint_bounds)?;
-                true
-            } else {
-                false
-            } {
-                let verbatim = verbatim::between(begin, input);
-                return Ok(GenericArgument::Type(Type::Verbatim(verbatim)));
+                _ => {}
             }
 
             Ok(GenericArgument::Type(argument))
@@ -408,47 +427,6 @@ pub mod parsing {
                 Ok(PathSegment::from(ident))
             }
         }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-    impl Parse for Binding {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(Binding {
-                ident: input.parse()?,
-                eq_token: input.parse()?,
-                ty: input.parse()?,
-            })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-    impl Parse for Constraint {
-        fn parse(input: ParseStream) -> Result<Self> {
-            Ok(Constraint {
-                ident: input.parse()?,
-                colon_token: input.parse()?,
-                bounds: constraint_bounds(input)?,
-            })
-        }
-    }
-
-    #[cfg(feature = "full")]
-    fn constraint_bounds(input: ParseStream) -> Result<Punctuated<TypeParamBound, Token![+]>> {
-        let mut bounds = Punctuated::new();
-        loop {
-            if input.peek(Token![,]) || input.peek(Token![>]) {
-                break;
-            }
-            let value = input.parse()?;
-            bounds.push_value(value);
-            if !input.peek(Token![+]) {
-                break;
-            }
-            let punct = input.parse()?;
-            bounds.push_punct(punct);
-        }
-        Ok(bounds)
     }
 
     impl Path {
@@ -702,23 +680,21 @@ pub(crate) mod printing {
             match self {
                 GenericArgument::Lifetime(lt) => lt.to_tokens(tokens),
                 GenericArgument::Type(ty) => ty.to_tokens(tokens),
-                GenericArgument::Const(e) => match e {
-                    Expr::Lit(_) => e.to_tokens(tokens),
+                GenericArgument::Const(expr) => match expr {
+                    Expr::Lit(_) => expr.to_tokens(tokens),
 
-                    // NOTE: We should probably support parsing blocks with only
-                    // expressions in them without the full feature for const
-                    // generics.
                     #[cfg(feature = "full")]
-                    Expr::Block(_) => e.to_tokens(tokens),
+                    Expr::Block(_) => expr.to_tokens(tokens),
 
                     // ERROR CORRECTION: Add braces to make sure that the
                     // generated code is valid.
                     _ => token::Brace::default().surround(tokens, |tokens| {
-                        e.to_tokens(tokens);
+                        expr.to_tokens(tokens);
                     }),
                 },
-                GenericArgument::Binding(tb) => tb.to_tokens(tokens),
-                GenericArgument::Constraint(tc) => tc.to_tokens(tokens),
+                GenericArgument::AssocType(assoc) => assoc.to_tokens(tokens),
+                GenericArgument::AssocConst(assoc) => assoc.to_tokens(tokens),
+                GenericArgument::Constraint(constraint) => constraint.to_tokens(tokens),
             }
         }
     }
@@ -740,7 +716,8 @@ pub(crate) mod printing {
                     }
                     GenericArgument::Type(_)
                     | GenericArgument::Const(_)
-                    | GenericArgument::Binding(_)
+                    | GenericArgument::AssocType(_)
+                    | GenericArgument::AssocConst(_)
                     | GenericArgument::Constraint(_) => {}
                 }
             }
@@ -748,7 +725,8 @@ pub(crate) mod printing {
                 match param.value() {
                     GenericArgument::Type(_)
                     | GenericArgument::Const(_)
-                    | GenericArgument::Binding(_)
+                    | GenericArgument::AssocType(_)
+                    | GenericArgument::AssocConst(_)
                     | GenericArgument::Constraint(_) => {
                         if !trailing_or_empty {
                             <Token![,]>::default().to_tokens(tokens);
@@ -765,11 +743,22 @@ pub(crate) mod printing {
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for Binding {
+    impl ToTokens for AssocType {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for AssocConst {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.eq_token.to_tokens(tokens);
+            self.value.to_tokens(tokens);
         }
     }
 
@@ -777,6 +766,7 @@ pub(crate) mod printing {
     impl ToTokens for Constraint {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.bounds.to_tokens(tokens);
         }

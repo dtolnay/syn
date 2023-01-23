@@ -96,6 +96,56 @@
       }
     },
     {
+      "ident": "AssocConst",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "generics": {
+          "option": {
+            "syn": "AngleBracketedGenericArguments"
+          }
+        },
+        "eq_token": {
+          "token": "Eq"
+        },
+        "value": {
+          "syn": "Expr"
+        }
+      }
+    },
+    {
+      "ident": "AssocType",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "generics": {
+          "option": {
+            "syn": "AngleBracketedGenericArguments"
+          }
+        },
+        "eq_token": {
+          "token": "Eq"
+        },
+        "ty": {
+          "syn": "Type"
+        }
+      }
+    },
+    {
       "ident": "AttrStyle",
       "features": {
         "any": [
@@ -318,26 +368,6 @@
       }
     },
     {
-      "ident": "Binding",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "fields": {
-        "ident": {
-          "proc_macro2": "Ident"
-        },
-        "eq_token": {
-          "token": "Eq"
-        },
-        "ty": {
-          "syn": "Type"
-        }
-      }
-    },
-    {
       "ident": "Block",
       "features": {
         "any": [
@@ -432,6 +462,11 @@
       "fields": {
         "ident": {
           "proc_macro2": "Ident"
+        },
+        "generics": {
+          "option": {
+            "syn": "AngleBracketedGenericArguments"
+          }
         },
         "colon_token": {
           "token": "Colon"
@@ -2249,9 +2284,14 @@
             "syn": "Expr"
           }
         ],
-        "Binding": [
+        "AssocType": [
           {
-            "syn": "Binding"
+            "syn": "AssocType"
+          }
+        ],
+        "AssocConst": [
+          {
+            "syn": "AssocConst"
           }
         ],
         "Constraint": [

@@ -88,6 +88,56 @@ impl Debug for Lite<syn::Arm> {
         formatter.finish()
     }
 }
+impl Debug for Lite<syn::AssocConst> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("AssocConst");
+        formatter.field("ident", Lite(&_val.ident));
+        if let Some(val) = &_val.generics {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::AngleBracketedGenericArguments);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("generics", Print::ref_cast(val));
+        }
+        formatter.field("value", Lite(&_val.value));
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::AssocType> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("AssocType");
+        formatter.field("ident", Lite(&_val.ident));
+        if let Some(val) = &_val.generics {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::AngleBracketedGenericArguments);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("generics", Print::ref_cast(val));
+        }
+        formatter.field("ty", Lite(&_val.ty));
+        formatter.finish()
+    }
+}
 impl Debug for Lite<syn::AttrStyle> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
@@ -255,15 +305,6 @@ impl Debug for Lite<syn::BinOp> {
         }
     }
 }
-impl Debug for Lite<syn::Binding> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("Binding");
-        formatter.field("ident", Lite(&_val.ident));
-        formatter.field("ty", Lite(&_val.ty));
-        formatter.finish()
-    }
-}
 impl Debug for Lite<syn::Block> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
@@ -329,6 +370,22 @@ impl Debug for Lite<syn::Constraint> {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("Constraint");
         formatter.field("ident", Lite(&_val.ident));
+        if let Some(val) = &_val.generics {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::AngleBracketedGenericArguments);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("generics", Print::ref_cast(val));
+        }
         if !_val.bounds.is_empty() {
             formatter.field("bounds", Lite(&_val.bounds));
         }
@@ -2305,8 +2362,15 @@ impl Debug for Lite<syn::GenericArgument> {
                 formatter.write_str(")")?;
                 Ok(())
             }
-            syn::GenericArgument::Binding(_val) => {
-                formatter.write_str("Binding")?;
+            syn::GenericArgument::AssocType(_val) => {
+                formatter.write_str("AssocType")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
+            }
+            syn::GenericArgument::AssocConst(_val) => {
+                formatter.write_str("AssocConst")?;
                 formatter.write_str("(")?;
                 Debug::fmt(Lite(_val), formatter)?;
                 formatter.write_str(")")?;

@@ -37,6 +37,28 @@ impl PartialEq for Arm {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for AssocConst {}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for AssocConst {
+    fn eq(&self, other: &Self) -> bool {
+        self.ident == other.ident && self.generics == other.generics
+            && self.value == other.value
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for AssocType {}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for AssocType {
+    fn eq(&self, other: &Self) -> bool {
+        self.ident == other.ident && self.generics == other.generics
+            && self.ty == other.ty
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for AttrStyle {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -109,16 +131,6 @@ impl PartialEq for BinOp {
         }
     }
 }
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for Binding {}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for Binding {
-    fn eq(&self, other: &Self) -> bool {
-        self.ident == other.ident && self.ty == other.ty
-    }
-}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Block {}
@@ -157,7 +169,8 @@ impl Eq for Constraint {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for Constraint {
     fn eq(&self, other: &Self) -> bool {
-        self.ident == other.ident && self.bounds == other.bounds
+        self.ident == other.ident && self.generics == other.generics
+            && self.bounds == other.bounds
     }
 }
 #[cfg(feature = "derive")]
@@ -881,7 +894,10 @@ impl PartialEq for GenericArgument {
             (GenericArgument::Const(self0), GenericArgument::Const(other0)) => {
                 self0 == other0
             }
-            (GenericArgument::Binding(self0), GenericArgument::Binding(other0)) => {
+            (GenericArgument::AssocType(self0), GenericArgument::AssocType(other0)) => {
+                self0 == other0
+            }
+            (GenericArgument::AssocConst(self0), GenericArgument::AssocConst(other0)) => {
                 self0 == other0
             }
             (GenericArgument::Constraint(self0), GenericArgument::Constraint(other0)) => {

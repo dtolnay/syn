@@ -41,6 +41,30 @@ impl Clone for Arm {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for AssocConst {
+    fn clone(&self) -> Self {
+        AssocConst {
+            ident: self.ident.clone(),
+            generics: self.generics.clone(),
+            eq_token: self.eq_token.clone(),
+            value: self.value.clone(),
+        }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for AssocType {
+    fn clone(&self) -> Self {
+        AssocType {
+            ident: self.ident.clone(),
+            generics: self.generics.clone(),
+            eq_token: self.eq_token.clone(),
+            ty: self.ty.clone(),
+        }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Copy for AttrStyle {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
@@ -80,17 +104,6 @@ impl Copy for BinOp {}
 impl Clone for BinOp {
     fn clone(&self) -> Self {
         *self
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for Binding {
-    fn clone(&self) -> Self {
-        Binding {
-            ident: self.ident.clone(),
-            eq_token: self.eq_token.clone(),
-            ty: self.ty.clone(),
-        }
     }
 }
 #[cfg(feature = "full")]
@@ -136,6 +149,7 @@ impl Clone for Constraint {
     fn clone(&self) -> Self {
         Constraint {
             ident: self.ident.clone(),
+            generics: self.generics.clone(),
             colon_token: self.colon_token.clone(),
             bounds: self.bounds.clone(),
         }
@@ -908,7 +922,8 @@ impl Clone for GenericArgument {
             GenericArgument::Lifetime(v0) => GenericArgument::Lifetime(v0.clone()),
             GenericArgument::Type(v0) => GenericArgument::Type(v0.clone()),
             GenericArgument::Const(v0) => GenericArgument::Const(v0.clone()),
-            GenericArgument::Binding(v0) => GenericArgument::Binding(v0.clone()),
+            GenericArgument::AssocType(v0) => GenericArgument::AssocType(v0.clone()),
+            GenericArgument::AssocConst(v0) => GenericArgument::AssocConst(v0.clone()),
             GenericArgument::Constraint(v0) => GenericArgument::Constraint(v0.clone()),
         }
     }
