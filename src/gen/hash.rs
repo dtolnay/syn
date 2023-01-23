@@ -1275,6 +1275,7 @@ impl Hash for ImplItemConst {
         self.vis.hash(state);
         self.defaultness.hash(state);
         self.ident.hash(state);
+        self.generics.hash(state);
         self.ty.hash(state);
         self.expr.hash(state);
     }
@@ -1405,6 +1406,7 @@ impl Hash for ItemConst {
         self.attrs.hash(state);
         self.vis.hash(state);
         self.ident.hash(state);
+        self.generics.hash(state);
         self.ty.hash(state);
         self.expr.hash(state);
     }
@@ -2252,6 +2254,7 @@ impl Hash for TraitItemConst {
     {
         self.attrs.hash(state);
         self.ident.hash(state);
+        self.generics.hash(state);
         self.ty.hash(state);
         self.default.hash(state);
     }

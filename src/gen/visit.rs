@@ -2039,6 +2039,7 @@ where
     }
     tokens_helper(v, &node.const_token.span);
     v.visit_ident(&node.ident);
+    v.visit_generics(&node.generics);
     tokens_helper(v, &node.colon_token.spans);
     v.visit_type(&node.ty);
     tokens_helper(v, &node.eq_token.spans);
@@ -2167,6 +2168,7 @@ where
     v.visit_visibility(&node.vis);
     tokens_helper(v, &node.const_token.span);
     v.visit_ident(&node.ident);
+    v.visit_generics(&node.generics);
     tokens_helper(v, &node.colon_token.spans);
     v.visit_type(&*node.ty);
     tokens_helper(v, &node.eq_token.spans);
@@ -3145,6 +3147,7 @@ where
     }
     tokens_helper(v, &node.const_token.span);
     v.visit_ident(&node.ident);
+    v.visit_generics(&node.generics);
     tokens_helper(v, &node.colon_token.spans);
     v.visit_type(&node.ty);
     if let Some(it) = &node.default {

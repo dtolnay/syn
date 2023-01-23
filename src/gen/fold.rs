@@ -1828,6 +1828,7 @@ where
             .map(|it| Token![default](tokens_helper(f, &it.span))),
         const_token: Token![const](tokens_helper(f, &node.const_token.span)),
         ident: f.fold_ident(node.ident),
+        generics: f.fold_generics(node.generics),
         colon_token: Token![:](tokens_helper(f, &node.colon_token.spans)),
         ty: f.fold_type(node.ty),
         eq_token: Token![=](tokens_helper(f, &node.eq_token.spans)),
@@ -1928,6 +1929,7 @@ where
         vis: f.fold_visibility(node.vis),
         const_token: Token![const](tokens_helper(f, &node.const_token.span)),
         ident: f.fold_ident(node.ident),
+        generics: f.fold_generics(node.generics),
         colon_token: Token![:](tokens_helper(f, &node.colon_token.spans)),
         ty: Box::new(f.fold_type(*node.ty)),
         eq_token: Token![=](tokens_helper(f, &node.eq_token.spans)),
@@ -2777,6 +2779,7 @@ where
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         const_token: Token![const](tokens_helper(f, &node.const_token.span)),
         ident: f.fold_ident(node.ident),
+        generics: f.fold_generics(node.generics),
         colon_token: Token![:](tokens_helper(f, &node.colon_token.spans)),
         ty: f.fold_type(node.ty),
         default: (node.default)
