@@ -363,8 +363,8 @@ impl Clone for Error {
 impl Clone for ErrorMessage {
     fn clone(&self) -> Self {
         ErrorMessage {
-            start_span: self.start_span.clone(),
-            end_span: self.end_span.clone(),
+            start_span: self.start_span,
+            end_span: self.end_span,
             message: self.message.clone(),
         }
     }

@@ -48,3 +48,5 @@ impl<T: Clone> Clone for ThreadBound<T> {
         }
     }
 }
+
+impl<T: Copy> Copy for ThreadBound<T> {}
