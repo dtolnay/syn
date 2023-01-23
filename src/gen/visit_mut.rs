@@ -317,10 +317,6 @@ pub trait VisitMut {
     fn visit_generic_argument_mut(&mut self, i: &mut GenericArgument) {
         visit_generic_argument_mut(self, i);
     }
-    #[cfg(feature = "full")]
-    fn visit_generic_method_argument_mut(&mut self, i: &mut GenericMethodArgument) {
-        visit_generic_method_argument_mut(self, i);
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_generic_param_mut(&mut self, i: &mut GenericParam) {
         visit_generic_param_mut(self, i);
@@ -1966,20 +1962,6 @@ where
         }
     }
 }
-#[cfg(feature = "full")]
-pub fn visit_generic_method_argument_mut<V>(v: &mut V, node: &mut GenericMethodArgument)
-where
-    V: VisitMut + ?Sized,
-{
-    match node {
-        GenericMethodArgument::Type(_binding_0) => {
-            v.visit_type_mut(_binding_0);
-        }
-        GenericMethodArgument::Const(_binding_0) => {
-            v.visit_expr_mut(_binding_0);
-        }
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_generic_param_mut<V>(v: &mut V, node: &mut GenericParam)
 where
@@ -2692,7 +2674,7 @@ where
     tokens_helper(v, &mut node.lt_token.spans);
     for el in Punctuated::pairs_mut(&mut node.args) {
         let (it, p) = el.into_tuple();
-        v.visit_generic_method_argument_mut(it);
+        v.visit_generic_argument_mut(it);
         if let Some(p) = p {
             tokens_helper(v, &mut p.spans);
         }

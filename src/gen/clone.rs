@@ -913,16 +913,6 @@ impl Clone for GenericArgument {
         }
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for GenericMethodArgument {
-    fn clone(&self) -> Self {
-        match self {
-            GenericMethodArgument::Type(v0) => GenericMethodArgument::Type(v0.clone()),
-            GenericMethodArgument::Const(v0) => GenericMethodArgument::Const(v0.clone()),
-        }
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for GenericParam {

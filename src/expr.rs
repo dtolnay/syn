@@ -866,23 +866,8 @@ ast_struct! {
     pub struct MethodTurbofish {
         pub colon2_token: Token![::],
         pub lt_token: Token![<],
-        pub args: Punctuated<GenericMethodArgument, Token![,]>,
+        pub args: Punctuated<GenericArgument, Token![,]>,
         pub gt_token: Token![>],
-    }
-}
-
-#[cfg(feature = "full")]
-ast_enum! {
-    /// An individual generic argument to a method, like `T`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub enum GenericMethodArgument {
-        /// A type argument.
-        Type(Type),
-        /// A const expression. Must be inside of a block.
-        ///
-        /// NOTE: Identity expressions are represented as Type arguments, as
-        /// they are indistinguishable syntactically.
-        Const(Expr),
     }
 }
 
@@ -1963,24 +1948,6 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-    impl Parse for GenericMethodArgument {
-        fn parse(input: ParseStream) -> Result<Self> {
-            if input.peek(Lit) {
-                let lit = input.parse()?;
-                return Ok(GenericMethodArgument::Const(Expr::Lit(lit)));
-            }
-
-            if input.peek(token::Brace) {
-                let block: ExprBlock = input.parse()?;
-                return Ok(GenericMethodArgument::Const(Expr::Block(block)));
-            }
-
-            input.parse().map(GenericMethodArgument::Type)
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for MethodTurbofish {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(MethodTurbofish {
@@ -1992,7 +1959,7 @@ pub(crate) mod parsing {
                         if input.peek(Token![>]) {
                             break;
                         }
-                        let value: GenericMethodArgument = input.parse()?;
+                        let value: GenericArgument = input.parse()?;
                         args.push_value(value);
                         if input.peek(Token![>]) {
                             break;
@@ -2896,17 +2863,6 @@ pub(crate) mod printing {
             self.lt_token.to_tokens(tokens);
             self.args.to_tokens(tokens);
             self.gt_token.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for GenericMethodArgument {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            match self {
-                GenericMethodArgument::Type(t) => t.to_tokens(tokens),
-                GenericMethodArgument::Const(c) => c.to_tokens(tokens),
-            }
         }
     }
 

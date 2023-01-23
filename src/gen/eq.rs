@@ -891,25 +891,6 @@ impl PartialEq for GenericArgument {
         }
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for GenericMethodArgument {}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for GenericMethodArgument {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (GenericMethodArgument::Type(self0), GenericMethodArgument::Type(other0)) => {
-                self0 == other0
-            }
-            (
-                GenericMethodArgument::Const(self0),
-                GenericMethodArgument::Const(other0),
-            ) => self0 == other0,
-            _ => false,
-        }
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for GenericParam {}
