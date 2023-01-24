@@ -41,6 +41,30 @@ impl Debug for Arm {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for AssocConst {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("AssocConst");
+        formatter.field("ident", &self.ident);
+        formatter.field("generics", &self.generics);
+        formatter.field("eq_token", &self.eq_token);
+        formatter.field("value", &self.value);
+        formatter.finish()
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for AssocType {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("AssocType");
+        formatter.field("ident", &self.ident);
+        formatter.field("generics", &self.generics);
+        formatter.field("eq_token", &self.eq_token);
+        formatter.field("ty", &self.ty);
+        formatter.finish()
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for AttrStyle {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -224,17 +248,6 @@ impl Debug for BinOp {
         }
     }
 }
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for Binding {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("Binding");
-        formatter.field("ident", &self.ident);
-        formatter.field("eq_token", &self.eq_token);
-        formatter.field("ty", &self.ty);
-        formatter.finish()
-    }
-}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Block {
@@ -278,6 +291,7 @@ impl Debug for Constraint {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("Constraint");
         formatter.field("ident", &self.ident);
+        formatter.field("generics", &self.generics);
         formatter.field("colon_token", &self.colon_token);
         formatter.field("bounds", &self.bounds);
         formatter.finish()
@@ -1270,8 +1284,13 @@ impl Debug for GenericArgument {
                 formatter.field(v0);
                 formatter.finish()
             }
-            GenericArgument::Binding(v0) => {
-                let mut formatter = formatter.debug_tuple("Binding");
+            GenericArgument::AssocType(v0) => {
+                let mut formatter = formatter.debug_tuple("AssocType");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            GenericArgument::AssocConst(v0) => {
+                let mut formatter = formatter.debug_tuple("AssocConst");
                 formatter.field(v0);
                 formatter.finish()
             }

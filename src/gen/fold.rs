@@ -43,6 +43,14 @@ pub trait Fold {
         fold_arm(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
+    fn fold_assoc_const(&mut self, i: AssocConst) -> AssocConst {
+        fold_assoc_const(self, i)
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    fn fold_assoc_type(&mut self, i: AssocType) -> AssocType {
+        fold_assoc_type(self, i)
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_attr_style(&mut self, i: AttrStyle) -> AttrStyle {
         fold_attr_style(self, i)
     }
@@ -57,10 +65,6 @@ pub trait Fold {
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_bin_op(&mut self, i: BinOp) -> BinOp {
         fold_bin_op(self, i)
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    fn fold_binding(&mut self, i: Binding) -> Binding {
-        fold_binding(self, i)
     }
     #[cfg(feature = "full")]
     fn fold_block(&mut self, i: Block) -> Block {
@@ -791,6 +795,30 @@ where
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
+pub fn fold_assoc_const<F>(f: &mut F, node: AssocConst) -> AssocConst
+where
+    F: Fold + ?Sized,
+{
+    AssocConst {
+        ident: f.fold_ident(node.ident),
+        generics: (node.generics).map(|it| f.fold_angle_bracketed_generic_arguments(it)),
+        eq_token: Token![=](tokens_helper(f, &node.eq_token.spans)),
+        value: f.fold_expr(node.value),
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+pub fn fold_assoc_type<F>(f: &mut F, node: AssocType) -> AssocType
+where
+    F: Fold + ?Sized,
+{
+    AssocType {
+        ident: f.fold_ident(node.ident),
+        generics: (node.generics).map(|it| f.fold_angle_bracketed_generic_arguments(it)),
+        eq_token: Token![=](tokens_helper(f, &node.eq_token.spans)),
+        ty: f.fold_type(node.ty),
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_attr_style<F>(f: &mut F, node: AttrStyle) -> AttrStyle
 where
     F: Fold + ?Sized,
@@ -921,17 +949,6 @@ where
         }
     }
 }
-#[cfg(any(feature = "derive", feature = "full"))]
-pub fn fold_binding<F>(f: &mut F, node: Binding) -> Binding
-where
-    F: Fold + ?Sized,
-{
-    Binding {
-        ident: f.fold_ident(node.ident),
-        eq_token: Token![=](tokens_helper(f, &node.eq_token.spans)),
-        ty: f.fold_type(node.ty),
-    }
-}
 #[cfg(feature = "full")]
 pub fn fold_block<F>(f: &mut F, node: Block) -> Block
 where
@@ -976,6 +993,7 @@ where
 {
     Constraint {
         ident: f.fold_ident(node.ident),
+        generics: (node.generics).map(|it| f.fold_angle_bracketed_generic_arguments(it)),
         colon_token: Token![:](tokens_helper(f, &node.colon_token.spans)),
         bounds: FoldHelper::lift(node.bounds, |it| f.fold_type_param_bound(it)),
     }
@@ -1753,8 +1771,11 @@ where
         GenericArgument::Const(_binding_0) => {
             GenericArgument::Const(f.fold_expr(_binding_0))
         }
-        GenericArgument::Binding(_binding_0) => {
-            GenericArgument::Binding(f.fold_binding(_binding_0))
+        GenericArgument::AssocType(_binding_0) => {
+            GenericArgument::AssocType(f.fold_assoc_type(_binding_0))
+        }
+        GenericArgument::AssocConst(_binding_0) => {
+            GenericArgument::AssocConst(f.fold_assoc_const(_binding_0))
         }
         GenericArgument::Constraint(_binding_0) => {
             GenericArgument::Constraint(f.fold_constraint(_binding_0))

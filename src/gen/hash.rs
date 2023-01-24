@@ -42,6 +42,30 @@ impl Hash for Arm {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for AssocConst {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.ident.hash(state);
+        self.generics.hash(state);
+        self.value.hash(state);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for AssocType {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.ident.hash(state);
+        self.generics.hash(state);
+        self.ty.hash(state);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for AttrStyle {
     fn hash<H>(&self, state: &mut H)
     where
@@ -175,17 +199,6 @@ impl Hash for BinOp {
         }
     }
 }
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for Binding {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.ident.hash(state);
-        self.ty.hash(state);
-    }
-}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for Block {
@@ -228,6 +241,7 @@ impl Hash for Constraint {
         H: Hasher,
     {
         self.ident.hash(state);
+        self.generics.hash(state);
         self.bounds.hash(state);
     }
 }
@@ -1186,12 +1200,16 @@ impl Hash for GenericArgument {
                 state.write_u8(2u8);
                 v0.hash(state);
             }
-            GenericArgument::Binding(v0) => {
+            GenericArgument::AssocType(v0) => {
                 state.write_u8(3u8);
                 v0.hash(state);
             }
-            GenericArgument::Constraint(v0) => {
+            GenericArgument::AssocConst(v0) => {
                 state.write_u8(4u8);
+                v0.hash(state);
+            }
+            GenericArgument::Constraint(v0) => {
+                state.write_u8(5u8);
                 v0.hash(state);
             }
         }
