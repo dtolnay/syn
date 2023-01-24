@@ -207,10 +207,13 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// This method operates on librustc objects.
 fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_ast::ast::{
-        Attribute, BinOpKind, Block, BorrowKind, Expr, ExprField, ExprKind, GenericArg, Local,
-        LocalKind, Pat, Stmt, StmtKind, StructExpr, StructRest, Ty,
+        Attribute, BinOpKind, Block, BorrowKind, Expr, ExprField, ExprKind, GenericArg,
+        GenericBound, Local, LocalKind, Pat, Stmt, StmtKind, StructExpr, StructRest,
+        TraitBoundModifier, Ty,
     };
-    use rustc_ast::mut_visit::{noop_visit_generic_arg, noop_visit_local, MutVisitor};
+    use rustc_ast::mut_visit::{
+        noop_visit_generic_arg, noop_visit_local, noop_visit_param_bound, MutVisitor,
+    };
     use rustc_data_structures::map_in_place::MapInPlace;
     use rustc_span::DUMMY_SP;
     use std::mem;
@@ -308,6 +311,16 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
                     }
                 }
                 _ => noop_visit_generic_arg(arg, self),
+            }
+        }
+
+        fn visit_param_bound(&mut self, bound: &mut GenericBound) {
+            match bound {
+                GenericBound::Trait(
+                    _,
+                    TraitBoundModifier::MaybeConst | TraitBoundModifier::MaybeConstMaybe,
+                ) => {}
+                _ => noop_visit_param_bound(bound, self),
             }
         }
 

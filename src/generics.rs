@@ -769,16 +769,31 @@ pub mod parsing {
                 return input.parse().map(TypeParamBound::Lifetime);
             }
 
+            let begin = input.fork();
+
             let content;
-            let (paren_token, input) = if input.peek(token::Paren) {
+            let (paren_token, content) = if input.peek(token::Paren) {
                 (Some(parenthesized!(content in input)), &content)
             } else {
                 (None, input)
             };
 
-            let mut bound: TraitBound = input.parse()?;
+            let is_tilde_const =
+                cfg!(feature = "full") && content.peek(Token![~]) && content.peek2(Token![const]);
+            if is_tilde_const {
+                content.parse::<Token![~]>()?;
+                content.parse::<Token![const]>()?;
+            }
+
+            let allow_maybe = !is_tilde_const;
+            let mut bound = TraitBound::do_parse(content, allow_maybe)?;
             bound.paren_token = paren_token;
-            Ok(TypeParamBound::Trait(bound))
+
+            if is_tilde_const {
+                Ok(TypeParamBound::Verbatim(verbatim::between(begin, input)))
+            } else {
+                Ok(TypeParamBound::Trait(bound))
+            }
         }
     }
 
@@ -798,7 +813,8 @@ pub mod parsing {
                     || input.peek(Token![::])
                     || input.peek(Token![?])
                     || input.peek(Lifetime)
-                    || input.peek(token::Paren))
+                    || input.peek(token::Paren)
+                    || input.peek(Token![~]))
                 {
                     break;
                 }
@@ -810,16 +826,19 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TraitBound {
         fn parse(input: ParseStream) -> Result<Self> {
-            #[cfg(feature = "full")]
-            let tilde_const = if input.peek(Token![~]) && input.peek2(Token![const]) {
-                let tilde_token = input.parse::<Token![~]>()?;
-                let const_token = input.parse::<Token![const]>()?;
-                Some((tilde_token, const_token))
+            let allow_maybe = true;
+            Self::do_parse(input, allow_maybe)
+        }
+    }
+
+    impl TraitBound {
+        fn do_parse(input: ParseStream, allow_maybe: bool) -> Result<Self> {
+            let modifier = if allow_maybe {
+                input.parse()?
             } else {
-                None
+                TraitBoundModifier::None
             };
 
-            let modifier: TraitBoundModifier = input.parse()?;
             let lifetimes: Option<BoundLifetimes> = input.parse()?;
 
             let mut path: Path = input.parse()?;
@@ -830,19 +849,6 @@ pub mod parsing {
                 let args: ParenthesizedGenericArguments = input.parse()?;
                 let parenthesized = PathArguments::Parenthesized(args);
                 path.segments.last_mut().unwrap().arguments = parenthesized;
-            }
-
-            #[cfg(feature = "full")]
-            if let Some((tilde_token, const_token)) = tilde_const {
-                path.segments.insert(
-                    0,
-                    PathSegment {
-                        ident: Ident::new("const", const_token.span),
-                        arguments: PathArguments::None,
-                    },
-                );
-                let (_const, punct) = path.segments.pairs_mut().next().unwrap().into_tuple();
-                *punct.unwrap() = Token![::](tilde_token.span);
             }
 
             Ok(TraitBound {
@@ -999,8 +1005,6 @@ mod printing {
     use super::*;
     use crate::attr::FilterAttrs;
     use crate::print::TokensOrDefault;
-    #[cfg(feature = "full")]
-    use crate::punctuated::Pair;
     use proc_macro2::TokenStream;
     #[cfg(feature = "full")]
     use proc_macro2::TokenTree;
@@ -1219,23 +1223,8 @@ mod printing {
     impl ToTokens for TraitBound {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             let to_tokens = |tokens: &mut TokenStream| {
-                #[cfg(feature = "full")]
-                let skip = match self.path.segments.pairs().next() {
-                    Some(Pair::Punctuated(t, p)) if t.ident == "const" => {
-                        Token![~](p.spans[0]).to_tokens(tokens);
-                        t.to_tokens(tokens);
-                        1
-                    }
-                    _ => 0,
-                };
                 self.modifier.to_tokens(tokens);
                 self.lifetimes.to_tokens(tokens);
-                #[cfg(feature = "full")]
-                {
-                    self.path.leading_colon.to_tokens(tokens);
-                    tokens.append_all(self.path.segments.pairs().skip(skip));
-                }
-                #[cfg(not(feature = "full"))]
                 self.path.to_tokens(tokens);
             };
             match &self.paren_token {

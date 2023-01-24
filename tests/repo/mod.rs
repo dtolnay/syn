@@ -14,9 +14,6 @@ const REVISION: &str = "afaf3e07aaa7ca9873bdb439caec53faffa4230c";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: multiple ~const constraints in impl Trait
-    "tests/ui/rfc-2632-const-trait-impl/const-impl-trait.rs",
-
     // TODO: precedence
     "tests/ui/closures/supertrait-hint-cycle.rs",
 
