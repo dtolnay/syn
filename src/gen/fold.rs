@@ -2976,6 +2976,7 @@ where
         TypeParamBound::Lifetime(_binding_0) => {
             TypeParamBound::Lifetime(f.fold_lifetime(_binding_0))
         }
+        TypeParamBound::Verbatim(_binding_0) => TypeParamBound::Verbatim(_binding_0),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

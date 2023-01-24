@@ -1875,6 +1875,9 @@ impl PartialEq for TypeParamBound {
             (TypeParamBound::Lifetime(self0), TypeParamBound::Lifetime(other0)) => {
                 self0 == other0
             }
+            (TypeParamBound::Verbatim(self0), TypeParamBound::Verbatim(other0)) => {
+                TokenStreamHelper(self0) == TokenStreamHelper(other0)
+            }
             _ => false,
         }
     }

@@ -5381,6 +5381,14 @@ impl Debug for Lite<syn::TypeParamBound> {
                 formatter.write_str(")")?;
                 Ok(())
             }
+            syn::TypeParamBound::Verbatim(_val) => {
+                formatter.write_str("Verbatim")?;
+                formatter.write_str("(`")?;
+                Display::fmt(_val, formatter)?;
+                formatter.write_str("`)")?;
+                Ok(())
+            }
+            _ => unreachable!(),
         }
     }
 }

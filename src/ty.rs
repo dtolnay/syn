@@ -441,7 +441,8 @@ pub mod parsing {
                                         ..trait_bound
                                     })
                                 }
-                                other @ TypeParamBound::Lifetime(_) => other,
+                                other @ (TypeParamBound::Lifetime(_)
+                                | TypeParamBound::Verbatim(_)) => other,
                             }
                         }
                         _ => break,
@@ -871,6 +872,7 @@ pub mod parsing {
                     TypeParamBound::Lifetime(lifetime) => {
                         last_lifetime_span = Some(lifetime.ident.span());
                     }
+                    TypeParamBound::Verbatim(_) => {}
                 }
             }
             // Just lifetimes like `'a + 'b` is not a TraitObject.
@@ -911,6 +913,7 @@ pub mod parsing {
                     TypeParamBound::Lifetime(lifetime) => {
                         last_lifetime_span = Some(lifetime.ident.span());
                     }
+                    TypeParamBound::Verbatim(_) => {}
                 }
             }
             if !at_least_one_trait {

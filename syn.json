@@ -4883,8 +4883,14 @@
           {
             "syn": "Lifetime"
           }
+        ],
+        "Verbatim": [
+          {
+            "proc_macro2": "TokenStream"
+          }
         ]
-      }
+      },
+      "exhaustive": false
     },
     {
       "ident": "TypeParen",

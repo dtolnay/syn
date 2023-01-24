@@ -1933,6 +1933,7 @@ impl Clone for TypeParamBound {
         match self {
             TypeParamBound::Trait(v0) => TypeParamBound::Trait(v0.clone()),
             TypeParamBound::Lifetime(v0) => TypeParamBound::Lifetime(v0.clone()),
+            TypeParamBound::Verbatim(v0) => TypeParamBound::Verbatim(v0.clone()),
         }
     }
 }
