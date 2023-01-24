@@ -2491,6 +2491,10 @@ impl Hash for TypeParamBound {
                 state.write_u8(1u8);
                 v0.hash(state);
             }
+            TypeParamBound::Verbatim(v0) => {
+                state.write_u8(2u8);
+                TokenStreamHelper(v0).hash(state);
+            }
         }
     }
 }

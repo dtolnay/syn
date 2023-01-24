@@ -3409,6 +3409,9 @@ where
         TypeParamBound::Lifetime(_binding_0) => {
             v.visit_lifetime(_binding_0);
         }
+        TypeParamBound::Verbatim(_binding_0) => {
+            skip!(_binding_0);
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

@@ -2661,6 +2661,11 @@ impl Debug for TypeParamBound {
                 formatter.field(v0);
                 formatter.finish()
             }
+            TypeParamBound::Verbatim(v0) => {
+                let mut formatter = formatter.debug_tuple("Verbatim");
+                formatter.field(v0);
+                formatter.finish()
+            }
         }
     }
 }

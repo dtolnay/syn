@@ -1,5 +1,6 @@
 use super::*;
 use crate::punctuated::{Iter, IterMut, Punctuated};
+use proc_macro2::TokenStream;
 #[cfg(all(feature = "printing", feature = "extra-traits"))]
 use std::fmt::{self, Debug};
 #[cfg(all(feature = "printing", feature = "extra-traits"))]
@@ -444,9 +445,11 @@ impl From<Ident> for TypeParam {
 ast_enum_of_structs! {
     /// A trait or lifetime used as a bound on a type parameter.
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[non_exhaustive]
     pub enum TypeParamBound {
         Trait(TraitBound),
         Lifetime(Lifetime),
+        Verbatim(TokenStream),
     }
 }
 
