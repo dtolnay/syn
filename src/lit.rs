@@ -1403,6 +1403,7 @@ mod value {
         };
 
         let mut value = BigInt::new();
+        let mut has_digit = false;
         'outer: loop {
             let b = byte(s, 0);
             let digit = match b {
@@ -1446,9 +1447,14 @@ mod value {
                 return None;
             }
 
+            has_digit = true;
             value *= base;
             value += digit;
             s = &s[1..];
+        }
+
+        if !has_digit {
+            return None;
         }
 
         let suffix = s;
