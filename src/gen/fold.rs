@@ -63,6 +63,10 @@ pub trait Fold {
         fold_bare_fn_arg(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
+    fn fold_bare_variadic(&mut self, i: BareVariadic) -> BareVariadic {
+        fold_bare_variadic(self, i)
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_bin_op(&mut self, i: BinOp) -> BinOp {
         fold_bin_op(self, i)
     }
@@ -717,7 +721,7 @@ pub trait Fold {
     fn fold_use_tree(&mut self, i: UseTree) -> UseTree {
         fold_use_tree(self, i)
     }
-    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg(feature = "full")]
     fn fold_variadic(&mut self, i: Variadic) -> Variadic {
         fold_variadic(self, i)
     }
@@ -855,6 +859,22 @@ where
                 Token![:](tokens_helper(f, &(it).1.spans)),
             )),
         ty: f.fold_type(node.ty),
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+pub fn fold_bare_variadic<F>(f: &mut F, node: BareVariadic) -> BareVariadic
+where
+    F: Fold + ?Sized,
+{
+    BareVariadic {
+        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        name: (node.name)
+            .map(|it| (
+                f.fold_ident((it).0),
+                Token![:](tokens_helper(f, &(it).1.spans)),
+            )),
+        dots: Token![...](tokens_helper(f, &node.dots.spans)),
+        comma: (node.comma).map(|it| Token![,](tokens_helper(f, &it.spans))),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2899,7 +2919,7 @@ where
         fn_token: Token![fn](tokens_helper(f, &node.fn_token.span)),
         paren_token: Paren(tokens_helper(f, &node.paren_token.span)),
         inputs: FoldHelper::lift(node.inputs, |it| f.fold_bare_fn_arg(it)),
-        variadic: (node.variadic).map(|it| f.fold_variadic(it)),
+        variadic: (node.variadic).map(|it| f.fold_bare_variadic(it)),
         output: f.fold_return_type(node.output),
     }
 }
@@ -3134,14 +3154,20 @@ where
         UseTree::Group(_binding_0) => UseTree::Group(f.fold_use_group(_binding_0)),
     }
 }
-#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg(feature = "full")]
 pub fn fold_variadic<F>(f: &mut F, node: Variadic) -> Variadic
 where
     F: Fold + ?Sized,
 {
     Variadic {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        pat: (node.pat)
+            .map(|it| (
+                Box::new(f.fold_pat(*(it).0)),
+                Token![:](tokens_helper(f, &(it).1.spans)),
+            )),
         dots: Token![...](tokens_helper(f, &node.dots.spans)),
+        comma: (node.comma).map(|it| Token![,](tokens_helper(f, &it.spans))),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

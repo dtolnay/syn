@@ -388,7 +388,7 @@ pub use crate::item::{
     ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct,
     ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Signature, TraitItem,
     TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob, UseGroup, UseName,
-    UsePath, UseRename, UseTree,
+    UsePath, UseRename, UseTree, Variadic,
 };
 
 mod lifetime;
@@ -488,9 +488,9 @@ mod tt;
 mod ty;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::ty::{
-    Abi, BareFnArg, ReturnType, Type, TypeArray, TypeBareFn, TypeGroup, TypeImplTrait, TypeInfer,
-    TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice, TypeTraitObject,
-    TypeTuple, Variadic,
+    Abi, BareFnArg, BareVariadic, ReturnType, Type, TypeArray, TypeBareFn, TypeGroup,
+    TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference,
+    TypeSlice, TypeTraitObject, TypeTuple,
 };
 
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "parsing"))]
