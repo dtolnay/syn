@@ -865,14 +865,13 @@ pub mod parsing {
             let mut at_least_one_trait = false;
             for bound in &bounds {
                 match bound {
-                    TypeParamBound::Trait(_) => {
+                    TypeParamBound::Trait(_) | TypeParamBound::Verbatim(_) => {
                         at_least_one_trait = true;
                         break;
                     }
                     TypeParamBound::Lifetime(lifetime) => {
                         last_lifetime_span = Some(lifetime.ident.span());
                     }
-                    TypeParamBound::Verbatim(_) => {}
                 }
             }
             // Just lifetimes like `'a + 'b` is not a TraitObject.
@@ -906,14 +905,13 @@ pub mod parsing {
             let mut at_least_one_trait = false;
             for bound in &bounds {
                 match bound {
-                    TypeParamBound::Trait(_) => {
+                    TypeParamBound::Trait(_) | TypeParamBound::Verbatim(_) => {
                         at_least_one_trait = true;
                         break;
                     }
                     TypeParamBound::Lifetime(lifetime) => {
                         last_lifetime_span = Some(lifetime.ident.span());
                     }
-                    TypeParamBound::Verbatim(_) => {}
                 }
             }
             if !at_least_one_trait {
