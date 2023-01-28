@@ -469,13 +469,9 @@ pub mod parsing {
             || lookahead.peek(Token![unsafe])
             || lookahead.peek(Token![extern])
         {
-            let allow_mut_self = true;
-            if let Some(mut bare_fn) = parse_bare_fn(input, allow_mut_self)? {
-                bare_fn.lifetimes = lifetimes;
-                Ok(Type::BareFn(bare_fn))
-            } else {
-                Ok(Type::Verbatim(verbatim::between(begin, input)))
-            }
+            let mut bare_fn: TypeBareFn = input.parse()?;
+            bare_fn.lifetimes = lifetimes;
+            Ok(Type::BareFn(bare_fn))
         } else if lookahead.peek(Ident)
             || input.peek(Token![super])
             || input.peek(Token![self])
@@ -653,61 +649,45 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeBareFn {
         fn parse(input: ParseStream) -> Result<Self> {
-            let allow_mut_self = false;
-            parse_bare_fn(input, allow_mut_self).map(Option::unwrap)
-        }
-    }
+            let args;
+            let mut variadic = None;
 
-    fn parse_bare_fn(input: ParseStream, allow_mut_self: bool) -> Result<Option<TypeBareFn>> {
-        let args;
-        let mut variadic = None;
-        let mut has_mut_self = false;
+            Ok(TypeBareFn {
+                lifetimes: input.parse()?,
+                unsafety: input.parse()?,
+                abi: input.parse()?,
+                fn_token: input.parse()?,
+                paren_token: parenthesized!(args in input),
+                inputs: {
+                    let mut inputs = Punctuated::new();
 
-        let bare_fn = TypeBareFn {
-            lifetimes: input.parse()?,
-            unsafety: input.parse()?,
-            abi: input.parse()?,
-            fn_token: input.parse()?,
-            paren_token: parenthesized!(args in input),
-            inputs: {
-                let mut inputs = Punctuated::new();
+                    while !args.is_empty() {
+                        let attrs = args.call(Attribute::parse_outer)?;
 
-                while !args.is_empty() {
-                    let attrs = args.call(Attribute::parse_outer)?;
+                        if inputs.empty_or_trailing() && args.peek(Token![...]) {
+                            variadic = Some(Variadic {
+                                attrs,
+                                dots: args.parse()?,
+                            });
+                            break;
+                        }
 
-                    if inputs.empty_or_trailing() && args.peek(Token![...]) {
-                        variadic = Some(Variadic {
-                            attrs,
-                            dots: args.parse()?,
-                        });
-                        break;
-                    }
-
-                    if let Some(arg) = parse_bare_fn_arg(&args, allow_mut_self)? {
+                        let allow_self = inputs.is_empty();
+                        let arg = parse_bare_fn_arg(&args, allow_self)?;
                         inputs.push_value(BareFnArg { attrs, ..arg });
-                    } else {
-                        has_mut_self = true;
-                    }
-                    if args.is_empty() {
-                        break;
-                    }
+                        if args.is_empty() {
+                            break;
+                        }
 
-                    let comma = args.parse()?;
-                    if !has_mut_self {
+                        let comma = args.parse()?;
                         inputs.push_punct(comma);
                     }
-                }
 
-                inputs
-            },
-            variadic,
-            output: input.call(ReturnType::without_plus)?,
-        };
-
-        if has_mut_self {
-            Ok(None)
-        } else {
-            Ok(Some(bare_fn))
+                    inputs
+                },
+                variadic,
+                output: input.call(ReturnType::without_plus)?,
+            })
         }
     }
 
@@ -961,75 +941,69 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for BareFnArg {
         fn parse(input: ParseStream) -> Result<Self> {
-            let allow_mut_self = false;
-            parse_bare_fn_arg(input, allow_mut_self).map(Option::unwrap)
+            let allow_self = false;
+            parse_bare_fn_arg(input, allow_self)
         }
     }
 
-    fn parse_bare_fn_arg(
-        input: ParseStream,
-        mut allow_mut_self: bool,
-    ) -> Result<Option<BareFnArg>> {
-        let mut has_mut_self = false;
-        let arg = BareFnArg {
-            attrs: input.call(Attribute::parse_outer)?,
-            name: {
-                if (input.peek(Ident) || input.peek(Token![_]) || input.peek(Token![self]))
-                    && input.peek2(Token![:])
-                    && !input.peek2(Token![::])
-                {
-                    let name = input.call(Ident::parse_any)?;
-                    let colon: Token![:] = input.parse()?;
-                    Some((name, colon))
-                } else if allow_mut_self
-                    && input.peek(Token![mut])
-                    && input.peek2(Token![self])
-                    && input.peek3(Token![:])
-                    && !input.peek3(Token![::])
-                {
-                    has_mut_self = true;
-                    allow_mut_self = false;
-                    input.parse::<Token![mut]>()?;
-                    input.parse::<Token![self]>()?;
-                    input.parse::<Token![:]>()?;
-                    None
-                } else {
-                    None
-                }
-            },
-            ty: if !has_mut_self && input.peek(Token![...]) {
-                let dot3 = input.parse::<Token![...]>()?;
-                let args = vec![
-                    TokenTree::Punct(Punct::new('.', Spacing::Joint)),
-                    TokenTree::Punct(Punct::new('.', Spacing::Joint)),
-                    TokenTree::Punct(Punct::new('.', Spacing::Alone)),
-                ];
-                let tokens: TokenStream = args
-                    .into_iter()
-                    .zip(&dot3.spans)
-                    .map(|(mut arg, span)| {
-                        arg.set_span(*span);
-                        arg
-                    })
-                    .collect();
-                Type::Verbatim(tokens)
-            } else if allow_mut_self && input.peek(Token![mut]) && input.peek2(Token![self]) {
-                has_mut_self = true;
-                input.parse::<Token![mut]>()?;
-                Type::Path(TypePath {
-                    qself: None,
-                    path: input.parse::<Token![self]>()?.into(),
-                })
-            } else {
-                input.parse()?
-            },
+    fn parse_bare_fn_arg(input: ParseStream, allow_self: bool) -> Result<BareFnArg> {
+        let attrs = input.call(Attribute::parse_outer)?;
+
+        let begin = input.fork();
+
+        let has_mut_self = allow_self && input.peek(Token![mut]) && input.peek2(Token![self]);
+        if has_mut_self {
+            input.parse::<Token![mut]>()?;
+        }
+
+        let mut has_self = false;
+        let name = if (input.peek(Ident) || input.peek(Token![_]) || {
+            has_self = allow_self && input.peek(Token![self]);
+            has_self
+        }) && input.peek2(Token![:])
+            && !input.peek2(Token![::])
+        {
+            let name = input.call(Ident::parse_any)?;
+            let colon: Token![:] = input.parse()?;
+            Some((name, colon))
+        } else {
+            has_self = false;
+            None
         };
 
-        if has_mut_self {
-            Ok(None)
+        let ty = if !has_self && input.peek(Token![...]) {
+            let dot3 = input.parse::<Token![...]>()?;
+            let args = vec![
+                TokenTree::Punct(Punct::new('.', Spacing::Joint)),
+                TokenTree::Punct(Punct::new('.', Spacing::Joint)),
+                TokenTree::Punct(Punct::new('.', Spacing::Alone)),
+            ];
+            let tokens: TokenStream = args
+                .into_iter()
+                .zip(&dot3.spans)
+                .map(|(mut arg, span)| {
+                    arg.set_span(*span);
+                    arg
+                })
+                .collect();
+            Some(Type::Verbatim(tokens))
+        } else if allow_self && !has_self && input.peek(Token![mut]) && input.peek2(Token![self]) {
+            input.parse::<Token![mut]>()?;
+            input.parse::<Token![self]>()?;
+            None
+        } else if has_mut_self && name.is_none() {
+            input.parse::<Token![self]>()?;
+            None
         } else {
-            Ok(Some(arg))
-        }
+            Some(input.parse()?)
+        };
+
+        let ty = match ty {
+            Some(ty) if !has_mut_self => ty,
+            _ => Type::Verbatim(verbatim::between(begin, input)),
+        };
+
+        Ok(BareFnArg { attrs, name, ty })
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
