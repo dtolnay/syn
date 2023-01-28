@@ -715,18 +715,11 @@ pub mod parsing {
             let ident: Ident = input.parse()?;
             let colon_token: Option<Token![:]> = input.parse()?;
 
-            let begin_bound = input.fork();
-            let mut is_maybe_const = false;
             let mut bounds = Punctuated::new();
             if colon_token.is_some() {
                 loop {
                     if input.peek(Token![,]) || input.peek(Token![>]) || input.peek(Token![=]) {
                         break;
-                    }
-                    if input.peek(Token![~]) && input.peek2(Token![const]) {
-                        input.parse::<Token![~]>()?;
-                        input.parse::<Token![const]>()?;
-                        is_maybe_const = true;
                     }
                     let value: TypeParamBound = input.parse()?;
                     bounds.push_value(value);
@@ -738,18 +731,12 @@ pub mod parsing {
                 }
             }
 
-            let mut eq_token: Option<Token![=]> = input.parse()?;
-            let mut default = if eq_token.is_some() {
+            let eq_token: Option<Token![=]> = input.parse()?;
+            let default = if eq_token.is_some() {
                 Some(input.parse::<Type>()?)
             } else {
                 None
             };
-
-            if is_maybe_const {
-                bounds.clear();
-                eq_token = None;
-                default = Some(Type::Verbatim(verbatim::between(begin_bound, input)));
-            }
 
             Ok(TypeParam {
                 attrs,
@@ -785,8 +772,7 @@ pub mod parsing {
                 content.parse::<Token![const]>()?;
             }
 
-            let allow_maybe = !is_tilde_const;
-            let mut bound = TraitBound::do_parse(content, allow_maybe)?;
+            let mut bound: TraitBound = content.parse()?;
             bound.paren_token = paren_token;
 
             if is_tilde_const {
@@ -826,19 +812,7 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TraitBound {
         fn parse(input: ParseStream) -> Result<Self> {
-            let allow_maybe = true;
-            Self::do_parse(input, allow_maybe)
-        }
-    }
-
-    impl TraitBound {
-        fn do_parse(input: ParseStream, allow_maybe: bool) -> Result<Self> {
-            let modifier = if allow_maybe {
-                input.parse()?
-            } else {
-                TraitBoundModifier::None
-            };
-
+            let modifier: TraitBoundModifier = input.parse()?;
             let lifetimes: Option<BoundLifetimes> = input.parse()?;
 
             let mut path: Path = input.parse()?;
