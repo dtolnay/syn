@@ -769,15 +769,16 @@ pub mod parsing {
                 return input.parse().map(TypeParamBound::Lifetime);
             }
 
-            if input.peek(token::Paren) {
-                let content;
-                let paren_token = parenthesized!(content in input);
-                let mut bound: TraitBound = content.parse()?;
-                bound.paren_token = Some(paren_token);
-                return Ok(TypeParamBound::Trait(bound));
-            }
+            let content;
+            let (paren_token, input) = if input.peek(token::Paren) {
+                (Some(parenthesized!(content in input)), &content)
+            } else {
+                (None, input)
+            };
 
-            input.parse().map(TypeParamBound::Trait)
+            let mut bound: TraitBound = input.parse()?;
+            bound.paren_token = paren_token;
+            Ok(TypeParamBound::Trait(bound))
         }
     }
 
