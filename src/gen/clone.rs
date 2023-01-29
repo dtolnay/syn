@@ -98,6 +98,18 @@ impl Clone for BareFnArg {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for BareVariadic {
+    fn clone(&self) -> Self {
+        BareVariadic {
+            attrs: self.attrs.clone(),
+            name: self.name.clone(),
+            dots: self.dots.clone(),
+            comma: self.comma.clone(),
+        }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Copy for BinOp {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
@@ -2084,13 +2096,15 @@ impl Clone for UseTree {
         }
     }
 }
-#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for Variadic {
     fn clone(&self) -> Self {
         Variadic {
             attrs: self.attrs.clone(),
+            pat: self.pat.clone(),
             dots: self.dots.clone(),
+            comma: self.comma.clone(),
         }
     }
 }

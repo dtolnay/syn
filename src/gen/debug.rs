@@ -102,6 +102,18 @@ impl Debug for BareFnArg {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for BareVariadic {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("BareVariadic");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("name", &self.name);
+        formatter.field("dots", &self.dots);
+        formatter.field("comma", &self.comma);
+        formatter.finish()
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for BinOp {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -2849,13 +2861,15 @@ impl Debug for UseTree {
         }
     }
 }
-#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Variadic {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("Variadic");
         formatter.field("attrs", &self.attrs);
+        formatter.field("pat", &self.pat);
         formatter.field("dots", &self.dots);
+        formatter.field("comma", &self.comma);
         formatter.finish()
     }
 }

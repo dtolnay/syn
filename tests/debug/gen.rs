@@ -186,6 +186,44 @@ impl Debug for Lite<syn::BareFnArg> {
         formatter.finish()
     }
 }
+impl Debug for Lite<syn::BareVariadic> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        let mut formatter = formatter.debug_struct("BareVariadic");
+        if !_val.attrs.is_empty() {
+            formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if let Some(val) = &_val.name {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print((proc_macro2::Ident, syn::token::Colon));
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(&_val.0), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("name", Print::ref_cast(val));
+        }
+        if let Some(val) = &_val.comma {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Comma);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("comma", Print::ref_cast(val));
+        }
+        formatter.finish()
+    }
+}
 impl Debug for Lite<syn::BinOp> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
@@ -5018,7 +5056,7 @@ impl Debug for Lite<syn::Type> {
                 if let Some(val) = &_val.variadic {
                     #[derive(RefCast)]
                     #[repr(transparent)]
-                    struct Print(syn::Variadic);
+                    struct Print(syn::BareVariadic);
                     impl Debug for Print {
                         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                             formatter.write_str("Some")?;
@@ -5252,7 +5290,7 @@ impl Debug for Lite<syn::TypeBareFn> {
         if let Some(val) = &_val.variadic {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print(syn::Variadic);
+            struct Print(syn::BareVariadic);
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some")?;
@@ -5642,6 +5680,34 @@ impl Debug for Lite<syn::Variadic> {
         let mut formatter = formatter.debug_struct("Variadic");
         if !_val.attrs.is_empty() {
             formatter.field("attrs", Lite(&_val.attrs));
+        }
+        if let Some(val) = &_val.pat {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print((Box<syn::Pat>, syn::token::Colon));
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(&_val.0), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("pat", Print::ref_cast(val));
+        }
+        if let Some(val) = &_val.comma {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::token::Comma);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    Ok(())
+                }
+            }
+            formatter.field("comma", Print::ref_cast(val));
         }
         formatter.finish()
     }

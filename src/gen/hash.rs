@@ -106,6 +106,18 @@ impl Hash for BareFnArg {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for BareVariadic {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.attrs.hash(state);
+        self.name.hash(state);
+        self.comma.hash(state);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for BinOp {
     fn hash<H>(&self, state: &mut H)
     where
@@ -2675,7 +2687,7 @@ impl Hash for UseTree {
         }
     }
 }
-#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for Variadic {
     fn hash<H>(&self, state: &mut H)
@@ -2683,6 +2695,8 @@ impl Hash for Variadic {
         H: Hasher,
     {
         self.attrs.hash(state);
+        self.pat.hash(state);
+        self.comma.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

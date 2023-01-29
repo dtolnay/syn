@@ -65,6 +65,10 @@ pub trait Visit<'ast> {
         visit_bare_fn_arg(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
+    fn visit_bare_variadic(&mut self, i: &'ast BareVariadic) {
+        visit_bare_variadic(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_bin_op(&mut self, i: &'ast BinOp) {
         visit_bin_op(self, i);
     }
@@ -716,7 +720,7 @@ pub trait Visit<'ast> {
     fn visit_use_tree(&mut self, i: &'ast UseTree) {
         visit_use_tree(self, i);
     }
-    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg(feature = "full")]
     fn visit_variadic(&mut self, i: &'ast Variadic) {
         visit_variadic(self, i);
     }
@@ -858,6 +862,23 @@ where
         tokens_helper(v, &(it).1.spans);
     }
     v.visit_type(&node.ty);
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+pub fn visit_bare_variadic<'ast, V>(v: &mut V, node: &'ast BareVariadic)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    if let Some(it) = &node.name {
+        v.visit_ident(&(it).0);
+        tokens_helper(v, &(it).1.spans);
+    }
+    tokens_helper(v, &node.dots.spans);
+    if let Some(it) = &node.comma {
+        tokens_helper(v, &it.spans);
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_bin_op<'ast, V>(v: &mut V, node: &'ast BinOp)
@@ -3324,7 +3345,7 @@ where
         }
     }
     if let Some(it) = &node.variadic {
-        v.visit_variadic(it);
+        v.visit_bare_variadic(it);
     }
     v.visit_return_type(&node.output);
 }
@@ -3584,7 +3605,7 @@ where
         }
     }
 }
-#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg(feature = "full")]
 pub fn visit_variadic<'ast, V>(v: &mut V, node: &'ast Variadic)
 where
     V: Visit<'ast> + ?Sized,
@@ -3592,7 +3613,14 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
+    if let Some(it) = &node.pat {
+        v.visit_pat(&*(it).0);
+        tokens_helper(v, &(it).1.spans);
+    }
     tokens_helper(v, &node.dots.spans);
+    if let Some(it) = &node.comma {
+        tokens_helper(v, &it.spans);
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_variant<'ast, V>(v: &mut V, node: &'ast Variant)

@@ -842,6 +842,16 @@ impl Receiver {
     }
 }
 
+ast_struct! {
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    pub struct Variadic {
+        pub attrs: Vec<Attribute>,
+        pub pat: Option<(Box<Pat>, Token![:])>,
+        pub dots: Token![...],
+        pub comma: Option<Token![,]>,
+    }
+}
+
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
@@ -1356,54 +1366,6 @@ pub mod parsing {
         }
     }
 
-    fn pop_variadic(args: &mut Punctuated<FnArg, Token![,]>) -> Option<Variadic> {
-        let trailing_punct = args.trailing_punct();
-
-        let last = match args.last_mut()? {
-            FnArg::Typed(last) => last,
-            _ => return None,
-        };
-
-        let ty = match last.ty.as_ref() {
-            Type::Verbatim(ty) => ty,
-            _ => return None,
-        };
-
-        let mut variadic = Variadic {
-            attrs: Vec::new(),
-            dots: parse2(ty.clone()).ok()?,
-        };
-
-        if let Pat::Verbatim(pat) = last.pat.as_ref() {
-            if pat.to_string() == "..." && !trailing_punct {
-                variadic.attrs = mem::take(&mut last.attrs);
-                args.pop();
-            }
-        }
-
-        Some(variadic)
-    }
-
-    fn variadic_to_tokens(dots: &Token![...]) -> TokenStream {
-        TokenStream::from_iter(vec![
-            TokenTree::Punct({
-                let mut dot = Punct::new('.', Spacing::Joint);
-                dot.set_span(dots.spans[0]);
-                dot
-            }),
-            TokenTree::Punct({
-                let mut dot = Punct::new('.', Spacing::Joint);
-                dot.set_span(dots.spans[1]);
-                dot
-            }),
-            TokenTree::Punct({
-                let mut dot = Punct::new('.', Spacing::Alone);
-                dot.set_span(dots.spans[2]);
-                dot
-            }),
-        ])
-    }
-
     fn peek_signature(input: ParseStream) -> bool {
         let fork = input.fork();
         fork.parse::<Option<Token![const]>>().is_ok()
@@ -1426,8 +1388,7 @@ pub mod parsing {
 
             let content;
             let paren_token = parenthesized!(content in input);
-            let mut inputs = parse_fn_args(&content)?;
-            let variadic = pop_variadic(&mut inputs);
+            let (inputs, variadic) = parse_fn_args(&content)?;
 
             let output: ReturnType = input.parse()?;
             generics.where_clause = input.parse()?;
@@ -1480,45 +1441,70 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for FnArg {
         fn parse(input: ParseStream) -> Result<Self> {
+            let allow_variadic = false;
             let attrs = input.call(Attribute::parse_outer)?;
-
-            let ahead = input.fork();
-            if let Ok(mut receiver) = ahead.parse::<Receiver>() {
-                if !ahead.peek(Token![:]) {
-                    input.advance_to(&ahead);
-                    receiver.attrs = attrs;
-                    return Ok(FnArg::Receiver(receiver));
-                }
+            match parse_fn_arg_or_variadic(input, attrs, allow_variadic)? {
+                FnArgOrVariadic::FnArg(arg) => Ok(arg),
+                FnArgOrVariadic::Variadic(_) => unreachable!(),
             }
-
-            Ok(FnArg::Typed(
-                if input.peek(Ident) && input.peek2(Token![<]) {
-                    // Hack to parse pre-2018 syntax in
-                    // test/ui/rfc-2565-param-attrs/param-attrs-pretty.rs
-                    // because the rest of the test case is valuable.
-                    let span = input.fork().parse::<Ident>()?.span();
-                    PatType {
-                        attrs,
-                        pat: Box::new(Pat::Wild(PatWild {
-                            attrs: Vec::new(),
-                            underscore_token: Token![_](span),
-                        })),
-                        colon_token: Token![:](span),
-                        ty: input.parse()?,
-                    }
-                } else {
-                    PatType {
-                        attrs,
-                        pat: Box::new(Pat::parse_single(input)?),
-                        colon_token: input.parse()?,
-                        ty: Box::new(match input.parse::<Option<Token![...]>>()? {
-                            Some(dot3) => Type::Verbatim(variadic_to_tokens(&dot3)),
-                            None => input.parse()?,
-                        }),
-                    }
-                },
-            ))
         }
+    }
+
+    enum FnArgOrVariadic {
+        FnArg(FnArg),
+        Variadic(Variadic),
+    }
+
+    fn parse_fn_arg_or_variadic(
+        input: ParseStream,
+        attrs: Vec<Attribute>,
+        allow_variadic: bool,
+    ) -> Result<FnArgOrVariadic> {
+        let ahead = input.fork();
+        if let Ok(mut receiver) = ahead.parse::<Receiver>() {
+            if !ahead.peek(Token![:]) {
+                input.advance_to(&ahead);
+                receiver.attrs = attrs;
+                return Ok(FnArgOrVariadic::FnArg(FnArg::Receiver(receiver)));
+            }
+        }
+
+        // Hack to parse pre-2018 syntax in
+        // test/ui/rfc-2565-param-attrs/param-attrs-pretty.rs
+        // because the rest of the test case is valuable.
+        if input.peek(Ident) && input.peek2(Token![<]) {
+            let span = input.fork().parse::<Ident>()?.span();
+            return Ok(FnArgOrVariadic::FnArg(FnArg::Typed(PatType {
+                attrs,
+                pat: Box::new(Pat::Wild(PatWild {
+                    attrs: Vec::new(),
+                    underscore_token: Token![_](span),
+                })),
+                colon_token: Token![:](span),
+                ty: input.parse()?,
+            })));
+        }
+
+        let pat = Box::new(Pat::parse_single(input)?);
+        let colon_token: Token![:] = input.parse()?;
+
+        if allow_variadic {
+            if let Some(dots) = input.parse::<Option<Token![...]>>()? {
+                return Ok(FnArgOrVariadic::Variadic(Variadic {
+                    attrs,
+                    pat: Some((pat, colon_token)),
+                    dots,
+                    comma: None,
+                }));
+            }
+        }
+
+        Ok(FnArgOrVariadic::FnArg(FnArg::Typed(PatType {
+            attrs,
+            pat,
+            colon_token,
+            ty: input.parse()?,
+        })))
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -1539,43 +1525,62 @@ pub mod parsing {
         }
     }
 
-    fn parse_fn_args(input: ParseStream) -> Result<Punctuated<FnArg, Token![,]>> {
+    fn parse_fn_args(
+        input: ParseStream,
+    ) -> Result<(Punctuated<FnArg, Token![,]>, Option<Variadic>)> {
         let mut args = Punctuated::new();
+        let mut variadic = None;
         let mut has_receiver = false;
 
         while !input.is_empty() {
             let attrs = input.call(Attribute::parse_outer)?;
 
-            let arg = if let Some(dots) = input.parse::<Option<Token![...]>>()? {
-                FnArg::Typed(PatType {
+            if let Some(dots) = input.parse::<Option<Token![...]>>()? {
+                variadic = Some(Variadic {
                     attrs,
-                    pat: Box::new(Pat::Verbatim(variadic_to_tokens(&dots))),
-                    colon_token: Token![:](dots.spans[0]),
-                    ty: Box::new(Type::Verbatim(variadic_to_tokens(&dots))),
-                })
-            } else {
-                let mut arg: FnArg = input.parse()?;
-                match &mut arg {
-                    FnArg::Receiver(receiver) if has_receiver => {
-                        return Err(Error::new(
-                            receiver.self_token.span,
-                            "unexpected second method receiver",
-                        ));
-                    }
-                    FnArg::Receiver(receiver) if !args.is_empty() => {
-                        return Err(Error::new(
-                            receiver.self_token.span,
-                            "unexpected method receiver",
-                        ));
-                    }
-                    FnArg::Receiver(receiver) => {
-                        has_receiver = true;
-                        receiver.attrs = attrs;
-                    }
-                    FnArg::Typed(arg) => arg.attrs = attrs,
+                    pat: None,
+                    dots,
+                    comma: if input.is_empty() {
+                        None
+                    } else {
+                        Some(input.parse()?)
+                    },
+                });
+                break;
+            }
+
+            let allow_variadic = true;
+            let arg = match parse_fn_arg_or_variadic(input, attrs, allow_variadic)? {
+                FnArgOrVariadic::FnArg(arg) => arg,
+                FnArgOrVariadic::Variadic(arg) => {
+                    variadic = Some(Variadic {
+                        comma: if input.is_empty() {
+                            None
+                        } else {
+                            Some(input.parse()?)
+                        },
+                        ..arg
+                    });
+                    break;
                 }
-                arg
             };
+
+            match &arg {
+                FnArg::Receiver(receiver) if has_receiver => {
+                    return Err(Error::new(
+                        receiver.self_token.span,
+                        "unexpected second method receiver",
+                    ));
+                }
+                FnArg::Receiver(receiver) if !args.is_empty() => {
+                    return Err(Error::new(
+                        receiver.self_token.span,
+                        "unexpected method receiver",
+                    ));
+                }
+                FnArg::Receiver(_) => has_receiver = true,
+                FnArg::Typed(_) => {}
+            }
             args.push_value(arg);
 
             if input.is_empty() {
@@ -1586,7 +1591,7 @@ pub mod parsing {
             args.push_punct(comma);
         }
 
-        Ok(args)
+        Ok((args, variadic))
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -3138,33 +3143,6 @@ mod printing {
         }
     }
 
-    fn maybe_variadic_to_tokens(arg: &FnArg, tokens: &mut TokenStream) -> bool {
-        let arg = match arg {
-            FnArg::Typed(arg) => arg,
-            FnArg::Receiver(receiver) => {
-                receiver.to_tokens(tokens);
-                return false;
-            }
-        };
-
-        match arg.ty.as_ref() {
-            Type::Verbatim(ty) if ty.to_string() == "..." => {
-                match arg.pat.as_ref() {
-                    Pat::Verbatim(pat) if pat.to_string() == "..." => {
-                        tokens.append_all(arg.attrs.outer());
-                        pat.to_tokens(tokens);
-                    }
-                    _ => arg.to_tokens(tokens),
-                }
-                true
-            }
-            _ => {
-                arg.to_tokens(tokens);
-                false
-            }
-        }
-    }
-
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for Signature {
         fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -3176,16 +3154,12 @@ mod printing {
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);
             self.paren_token.surround(tokens, |tokens| {
-                let mut last_is_variadic = false;
-                for pair in self.inputs.pairs() {
-                    last_is_variadic = maybe_variadic_to_tokens(pair.value(), tokens);
-                    pair.punct().to_tokens(tokens);
-                }
-                if self.variadic.is_some() && !last_is_variadic {
+                self.inputs.to_tokens(tokens);
+                if let Some(variadic) = &self.variadic {
                     if !self.inputs.empty_or_trailing() {
                         <Token![,]>::default().to_tokens(tokens);
                     }
-                    self.variadic.to_tokens(tokens);
+                    variadic.to_tokens(tokens);
                 }
             });
             self.output.to_tokens(tokens);
@@ -3203,6 +3177,19 @@ mod printing {
             }
             self.mutability.to_tokens(tokens);
             self.self_token.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for Variadic {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            if let Some((pat, colon)) = &self.pat {
+                pat.to_tokens(tokens);
+                colon.to_tokens(tokens);
+            }
+            self.dots.to_tokens(tokens);
+            self.comma.to_tokens(tokens);
         }
     }
 }

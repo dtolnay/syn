@@ -25,6 +25,9 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/const-generics/early/closing-args-token.rs",
     "tests/ui/const-generics/early/const-expression-parameter.rs",
 
+    // Compile-fail variadics in not the last position of a function parameter list
+    "tests/ui/parser/variadic-ffi-syntactic-pass.rs",
+
     // Need at least one trait in impl Trait, no such type as impl 'static
     "tests/ui/type-alias-impl-trait/generic_type_does_not_live_long_enough.rs",
 
@@ -43,7 +46,9 @@ static EXCLUDE_FILES: &[&str] = &[
     // Various extensions to Rust syntax made up by rust-analyzer
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0012_type_item_where_clause.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0040_crate_keyword_vis.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0123_param_list_vararg.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0131_existential_type.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0156_fn_def_param.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0179_use_tree_abs_star.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0188_const_param_default_path.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0015_use_tree.rs",

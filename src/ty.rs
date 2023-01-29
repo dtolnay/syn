@@ -101,7 +101,7 @@ ast_struct! {
         pub fn_token: Token![fn],
         pub paren_token: token::Paren,
         pub inputs: Punctuated<BareFnArg, Token![,]>,
-        pub variadic: Option<Variadic>,
+        pub variadic: Option<BareVariadic>,
         pub output: ReturnType,
     }
 }
@@ -250,9 +250,11 @@ ast_struct! {
     /// }
     /// ```
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub struct Variadic {
+    pub struct BareVariadic {
         pub attrs: Vec<Attribute>,
+        pub name: Option<(Ident, Token![:])>,
         pub dots: Token![...],
+        pub comma: Option<Token![,]>,
     }
 }
 
@@ -275,7 +277,7 @@ pub mod parsing {
     use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
-    use proc_macro2::{Punct, Spacing, Span, TokenTree};
+    use proc_macro2::Span;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Type {
@@ -664,11 +666,13 @@ pub mod parsing {
                     while !args.is_empty() {
                         let attrs = args.call(Attribute::parse_outer)?;
 
-                        if inputs.empty_or_trailing() && args.peek(Token![...]) {
-                            variadic = Some(Variadic {
-                                attrs,
-                                dots: args.parse()?,
-                            });
+                        if inputs.empty_or_trailing()
+                            && (args.peek(Token![...])
+                                || args.peek(Ident)
+                                    && args.peek2(Token![:])
+                                    && args.peek3(Token![...]))
+                        {
+                            variadic = Some(parse_bare_variadic(&args, attrs)?);
                             break;
                         }
 
@@ -971,23 +975,8 @@ pub mod parsing {
             None
         };
 
-        let ty = if !has_self && input.peek(Token![...]) {
-            let dot3 = input.parse::<Token![...]>()?;
-            let args = vec![
-                TokenTree::Punct(Punct::new('.', Spacing::Joint)),
-                TokenTree::Punct(Punct::new('.', Spacing::Joint)),
-                TokenTree::Punct(Punct::new('.', Spacing::Alone)),
-            ];
-            let tokens: TokenStream = args
-                .into_iter()
-                .zip(&dot3.spans)
-                .map(|(mut arg, span)| {
-                    arg.set_span(*span);
-                    arg
-                })
-                .collect();
-            Some(Type::Verbatim(tokens))
-        } else if allow_self && !has_self && input.peek(Token![mut]) && input.peek2(Token![self]) {
+        let ty = if allow_self && !has_self && input.peek(Token![mut]) && input.peek2(Token![self])
+        {
             input.parse::<Token![mut]>()?;
             input.parse::<Token![self]>()?;
             None
@@ -1004,6 +993,21 @@ pub mod parsing {
         };
 
         Ok(BareFnArg { attrs, name, ty })
+    }
+
+    fn parse_bare_variadic(input: ParseStream, attrs: Vec<Attribute>) -> Result<BareVariadic> {
+        Ok(BareVariadic {
+            attrs,
+            name: if input.peek(Ident) || input.peek(Token![_]) {
+                let name = input.call(Ident::parse_any)?;
+                let colon: Token![:] = input.parse()?;
+                Some((name, colon))
+            } else {
+                None
+            },
+            dots: input.parse()?,
+            comma: input.parse()?,
+        })
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -1198,10 +1202,15 @@ mod printing {
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for Variadic {
+    impl ToTokens for BareVariadic {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
+            if let Some((name, colon)) = &self.name {
+                name.to_tokens(tokens);
+                colon.to_tokens(tokens);
+            }
             self.dots.to_tokens(tokens);
+            self.comma.to_tokens(tokens);
         }
     }
 
