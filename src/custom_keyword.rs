@@ -104,18 +104,20 @@ macro_rules! custom_keyword {
             }
         }
 
-        impl $crate::__private::Default for $ident {
-            fn default() -> Self {
-                $ident {
-                    span: $crate::__private::Span::call_site(),
+        const _: () = {
+            impl $crate::__private::Default for $ident {
+                fn default() -> Self {
+                    $ident {
+                        span: $crate::__private::Span::call_site(),
+                    }
                 }
             }
-        }
 
-        $crate::impl_parse_for_custom_keyword!($ident);
-        $crate::impl_to_tokens_for_custom_keyword!($ident);
-        $crate::impl_clone_for_custom_keyword!($ident);
-        $crate::impl_extra_traits_for_custom_keyword!($ident);
+            $crate::impl_parse_for_custom_keyword!($ident);
+            $crate::impl_to_tokens_for_custom_keyword!($ident);
+            $crate::impl_clone_for_custom_keyword!($ident);
+            $crate::impl_extra_traits_for_custom_keyword!($ident);
+        };
     };
 }
 
