@@ -980,8 +980,6 @@ mod printing {
     use crate::attr::FilterAttrs;
     use crate::print::TokensOrDefault;
     use proc_macro2::TokenStream;
-    #[cfg(feature = "full")]
-    use proc_macro2::TokenTree;
     use quote::{ToTokens, TokenStreamExt};
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
@@ -1166,27 +1164,6 @@ mod printing {
                 self.bounds.to_tokens(tokens);
             }
             if let Some(default) = &self.default {
-                #[cfg(feature = "full")]
-                if self.eq_token.is_none() {
-                    if let Type::Verbatim(default) = default {
-                        let mut iter = default.clone().into_iter().peekable();
-                        while let Some(token) = iter.next() {
-                            if let TokenTree::Punct(q) = token {
-                                if q.as_char() == '~' {
-                                    if let Some(TokenTree::Ident(c)) = iter.peek() {
-                                        if c == "const" {
-                                            if self.bounds.is_empty() {
-                                                TokensOrDefault(&self.colon_token)
-                                                    .to_tokens(tokens);
-                                            }
-                                            return default.to_tokens(tokens);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
                 TokensOrDefault(&self.eq_token).to_tokens(tokens);
                 default.to_tokens(tokens);
             }
