@@ -4,6 +4,12 @@ pub trait IntoSpans<S> {
     fn into_spans(self) -> S;
 }
 
+impl IntoSpans<Span> for Span {
+    fn into_spans(self) -> Span {
+        self
+    }
+}
+
 impl IntoSpans<[Span; 1]> for Span {
     fn into_spans(self) -> [Span; 1] {
         [self]

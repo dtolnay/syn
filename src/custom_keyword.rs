@@ -96,11 +96,11 @@ macro_rules! custom_keyword {
 
         #[doc(hidden)]
         #[allow(dead_code, non_snake_case)]
-        pub fn $ident<__S: $crate::__private::IntoSpans<[$crate::__private::Span; 1]>>(
+        pub fn $ident<__S: $crate::__private::IntoSpans<$crate::__private::Span>>(
             span: __S,
         ) -> $ident {
             $ident {
-                span: $crate::__private::IntoSpans::into_spans(span)[0],
+                span: $crate::__private::IntoSpans::into_spans(span),
             }
         }
 

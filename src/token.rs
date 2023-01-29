@@ -253,9 +253,9 @@ macro_rules! define_keywords {
 
             #[doc(hidden)]
             #[allow(non_snake_case)]
-            pub fn $name<S: IntoSpans<[Span; 1]>>(span: S) -> $name {
+            pub fn $name<S: IntoSpans<Span>>(span: S) -> $name {
                 $name {
-                    span: span.into_spans()[0],
+                    span: span.into_spans(),
                 }
             }
 
