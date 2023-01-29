@@ -3,9 +3,6 @@ use std::cmp::Ordering;
 use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
 
-#[cfg(feature = "parsing")]
-use crate::lookahead;
-
 /// A Rust lifetime: `'a`.
 ///
 /// Lifetime names must conform to the following rules:
@@ -114,15 +111,17 @@ impl Hash for Lifetime {
 
 #[cfg(feature = "parsing")]
 #[doc(hidden)]
-#[allow(non_snake_case)]
-pub fn Lifetime(marker: lookahead::TokenMarker) -> Lifetime {
-    match marker {}
-}
+#[allow(non_upper_case_globals)]
+pub const Lifetime: parsing::PeekLifetime = parsing::PeekLifetime {};
 
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+    use crate::buffer::Cursor;
+    use crate::lookahead::{Either, Peek};
     use crate::parse::{Parse, ParseStream, Result};
+    use crate::token::Token;
+    use std::ops::BitOr;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Lifetime {
@@ -132,6 +131,26 @@ pub mod parsing {
                     .lifetime()
                     .ok_or_else(|| cursor.error("expected lifetime"))
             })
+        }
+    }
+
+    #[derive(Copy, Clone)]
+    pub struct PeekLifetime {}
+
+    impl Peek for PeekLifetime {
+        type Token = Lifetime;
+        fn peek(cursor: Cursor) -> bool {
+            Lifetime::peek(cursor)
+        }
+        fn display(f: &mut dyn FnMut(&'static str)) {
+            f(Lifetime::display());
+        }
+    }
+
+    impl<U: Peek> BitOr<U> for PeekLifetime {
+        type Output = Either<Self, U>;
+        fn bitor(self, _other: U) -> Self::Output {
+            Either::new()
         }
     }
 }

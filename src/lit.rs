@@ -1,6 +1,4 @@
 #[cfg(feature = "parsing")]
-use crate::lookahead;
-#[cfg(feature = "parsing")]
 use crate::parse::{Parse, Parser};
 use crate::{Error, Result};
 use proc_macro2::{Ident, Literal, Span};
@@ -682,13 +680,6 @@ macro_rules! lit_extra_traits {
                 self.repr.token.to_string().hash(state);
             }
         }
-
-        #[cfg(feature = "parsing")]
-        #[doc(hidden)]
-        #[allow(non_snake_case)]
-        pub fn $ty(marker: lookahead::TokenMarker) -> $ty {
-            match marker {}
-        }
     };
 }
 
@@ -701,10 +692,43 @@ lit_extra_traits!(LitFloat);
 
 #[cfg(feature = "parsing")]
 #[doc(hidden)]
-#[allow(non_snake_case)]
-pub fn LitBool(marker: lookahead::TokenMarker) -> LitBool {
-    match marker {}
-}
+#[allow(non_upper_case_globals)]
+pub const Lit: parsing::PeekLit = parsing::PeekLit {};
+
+#[cfg(feature = "parsing")]
+#[doc(hidden)]
+#[allow(non_upper_case_globals)]
+pub const LitStr: parsing::PeekLitStr = parsing::PeekLitStr {};
+
+#[cfg(feature = "parsing")]
+#[doc(hidden)]
+#[allow(non_upper_case_globals)]
+pub const LitByteStr: parsing::PeekLitByteStr = parsing::PeekLitByteStr {};
+
+#[cfg(feature = "parsing")]
+#[doc(hidden)]
+#[allow(non_upper_case_globals)]
+pub const LitByte: parsing::PeekLitByte = parsing::PeekLitByte {};
+
+#[cfg(feature = "parsing")]
+#[doc(hidden)]
+#[allow(non_upper_case_globals)]
+pub const LitChar: parsing::PeekLitChar = parsing::PeekLitChar {};
+
+#[cfg(feature = "parsing")]
+#[doc(hidden)]
+#[allow(non_upper_case_globals)]
+pub const LitInt: parsing::PeekLitInt = parsing::PeekLitInt {};
+
+#[cfg(feature = "parsing")]
+#[doc(hidden)]
+#[allow(non_upper_case_globals)]
+pub const LitFloat: parsing::PeekLitFloat = parsing::PeekLitFloat {};
+
+#[cfg(feature = "parsing")]
+#[doc(hidden)]
+#[allow(non_upper_case_globals)]
+pub const LitBool: parsing::PeekLitBool = parsing::PeekLitBool {};
 
 ast_enum! {
     /// The style of a string literal, either plain quoted or a raw string like
@@ -720,18 +744,14 @@ ast_enum! {
 }
 
 #[cfg(feature = "parsing")]
-#[doc(hidden)]
-#[allow(non_snake_case)]
-pub fn Lit(marker: lookahead::TokenMarker) -> Lit {
-    match marker {}
-}
-
-#[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
     use crate::buffer::Cursor;
+    use crate::lookahead::{Either, Peek};
     use crate::parse::{Parse, ParseStream, Result};
+    use crate::token::Token;
     use proc_macro2::Punct;
+    use std::ops::BitOr;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Lit {
@@ -878,6 +898,150 @@ pub mod parsing {
                 Ok(Lit::Bool(lit)) => Ok(lit),
                 _ => Err(head.error("expected boolean literal")),
             }
+        }
+    }
+
+    #[derive(Copy, Clone)]
+    pub struct PeekLit;
+    impl Peek for PeekLit {
+        type Token = Lit;
+        fn peek(cursor: Cursor) -> bool {
+            Lit::peek(cursor)
+        }
+        fn display(f: &mut dyn FnMut(&'static str)) {
+            f(Lit::display());
+        }
+    }
+    impl<U: Peek> BitOr<U> for PeekLit {
+        type Output = Either<Self, U>;
+        fn bitor(self, _other: U) -> Self::Output {
+            Either::new()
+        }
+    }
+
+    #[derive(Copy, Clone)]
+    pub struct PeekLitStr;
+    impl Peek for PeekLitStr {
+        type Token = LitStr;
+        fn peek(cursor: Cursor) -> bool {
+            LitStr::peek(cursor)
+        }
+        fn display(f: &mut dyn FnMut(&'static str)) {
+            f(LitStr::display());
+        }
+    }
+    impl<U: Peek> BitOr<U> for PeekLitStr {
+        type Output = Either<Self, U>;
+        fn bitor(self, _other: U) -> Self::Output {
+            Either::new()
+        }
+    }
+
+    #[derive(Copy, Clone)]
+    pub struct PeekLitByteStr;
+    impl Peek for PeekLitByteStr {
+        type Token = LitByteStr;
+        fn peek(cursor: Cursor) -> bool {
+            LitByteStr::peek(cursor)
+        }
+        fn display(f: &mut dyn FnMut(&'static str)) {
+            f(LitByteStr::display());
+        }
+    }
+    impl<U: Peek> BitOr<U> for PeekLitByteStr {
+        type Output = Either<Self, U>;
+        fn bitor(self, _other: U) -> Self::Output {
+            Either::new()
+        }
+    }
+
+    #[derive(Copy, Clone)]
+    pub struct PeekLitByte;
+    impl Peek for PeekLitByte {
+        type Token = LitByte;
+        fn peek(cursor: Cursor) -> bool {
+            LitByte::peek(cursor)
+        }
+        fn display(f: &mut dyn FnMut(&'static str)) {
+            f(LitByte::display());
+        }
+    }
+    impl<U: Peek> BitOr<U> for PeekLitByte {
+        type Output = Either<Self, U>;
+        fn bitor(self, _other: U) -> Self::Output {
+            Either::new()
+        }
+    }
+
+    #[derive(Copy, Clone)]
+    pub struct PeekLitChar;
+    impl Peek for PeekLitChar {
+        type Token = LitChar;
+        fn peek(cursor: Cursor) -> bool {
+            LitChar::peek(cursor)
+        }
+        fn display(f: &mut dyn FnMut(&'static str)) {
+            f(LitChar::display());
+        }
+    }
+    impl<U: Peek> BitOr<U> for PeekLitChar {
+        type Output = Either<Self, U>;
+        fn bitor(self, _other: U) -> Self::Output {
+            Either::new()
+        }
+    }
+
+    #[derive(Copy, Clone)]
+    pub struct PeekLitInt;
+    impl Peek for PeekLitInt {
+        type Token = LitInt;
+        fn peek(cursor: Cursor) -> bool {
+            LitInt::peek(cursor)
+        }
+        fn display(f: &mut dyn FnMut(&'static str)) {
+            f(LitInt::display());
+        }
+    }
+    impl<U: Peek> BitOr<U> for PeekLitInt {
+        type Output = Either<Self, U>;
+        fn bitor(self, _other: U) -> Self::Output {
+            Either::new()
+        }
+    }
+
+    #[derive(Copy, Clone)]
+    pub struct PeekLitFloat;
+    impl Peek for PeekLitFloat {
+        type Token = LitFloat;
+        fn peek(cursor: Cursor) -> bool {
+            LitFloat::peek(cursor)
+        }
+        fn display(f: &mut dyn FnMut(&'static str)) {
+            f(LitFloat::display());
+        }
+    }
+    impl<U: Peek> BitOr<U> for PeekLitFloat {
+        type Output = Either<Self, U>;
+        fn bitor(self, _other: U) -> Self::Output {
+            Either::new()
+        }
+    }
+
+    #[derive(Copy, Clone)]
+    pub struct PeekLitBool;
+    impl Peek for PeekLitBool {
+        type Token = LitBool;
+        fn peek(cursor: Cursor) -> bool {
+            LitBool::peek(cursor)
+        }
+        fn display(f: &mut dyn FnMut(&'static str)) {
+            f(LitBool::display());
+        }
+    }
+    impl<U: Peek> BitOr<U> for PeekLitBool {
+        type Output = Either<Self, U>;
+        fn bitor(self, _other: U) -> Self::Output {
+            Either::new()
         }
     }
 }

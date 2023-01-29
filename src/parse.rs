@@ -554,7 +554,7 @@ impl<'a> ParseBuffer<'a> {
     ///         if colon_token.is_some() {
     ///             loop {
     ///                 supertraits.push_value(input.parse()?);
-    ///                 if input.peek(Token![where]) || input.peek(token::Brace) {
+    ///                 if input.peek(Token![where] | token::Brace) {
     ///                     break;
     ///                 }
     ///                 supertraits.push_punct(input.parse()?);
@@ -578,7 +578,7 @@ impl<'a> ParseBuffer<'a> {
     /// ```
     pub fn peek<T: Peek>(&self, token: T) -> bool {
         let _ = token;
-        T::Token::peek(self.cursor())
+        T::peek(self.cursor())
     }
 
     /// Looks at the second-next token in the parse stream.
@@ -626,7 +626,7 @@ impl<'a> ParseBuffer<'a> {
         }
 
         let _ = token;
-        peek2(self, T::Token::peek)
+        peek2(self, T::peek)
     }
 
     /// Looks at the third-next token in the parse stream.
@@ -645,7 +645,7 @@ impl<'a> ParseBuffer<'a> {
         }
 
         let _ = token;
-        peek3(self, T::Token::peek)
+        peek3(self, T::peek)
     }
 
     /// Parses zero or more occurrences of `T` separated by punctuation of type
@@ -933,10 +933,7 @@ impl<'a> ParseBuffer<'a> {
     ///             let mut content;
     ///             parenthesized!(content in ahead);
     ///
-    ///             if content.peek(Token![crate])
-    ///                 || content.peek(Token![self])
-    ///                 || content.peek(Token![super])
-    ///             {
+    ///             if content.peek(Token![crate] | Token![self] | Token![super]) {
     ///                 return Ok(PubVisibility {
     ///                     pub_token,
     ///                     restricted: Some(Restricted {
@@ -990,10 +987,7 @@ impl<'a> ParseBuffer<'a> {
     ///
     /// impl Parse for Loop {
     ///     fn parse(input: ParseStream) -> Result<Self> {
-    ///         if input.peek(Token![while])
-    ///             || input.peek(Token![for])
-    ///             || input.peek(Token![loop])
-    ///         {
+    ///         if input.peek(Token![while] | Token![for] | Token![loop]) {
     ///             Ok(Loop {
     ///                 expr: input.parse()?,
     ///             })

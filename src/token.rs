@@ -101,7 +101,6 @@ use crate::lit::{Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, L
 use crate::lookahead;
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream};
-use crate::span::IntoSpans;
 use proc_macro2::Span;
 #[cfg(feature = "printing")]
 use proc_macro2::TokenStream;
@@ -144,6 +143,14 @@ mod private {
     #[repr(C)]
     pub struct WithSpan {
         pub span: Span,
+    }
+
+    pub enum Peek {}
+    impl Copy for Peek {}
+    impl Clone for Peek {
+        fn clone(&self) -> Self {
+            match *self {}
+        }
     }
 }
 
@@ -251,14 +258,6 @@ macro_rules! define_keywords {
                 pub span: Span,
             }
 
-            #[doc(hidden)]
-            #[allow(non_snake_case)]
-            pub fn $name<S: IntoSpans<Span>>(span: S) -> $name {
-                $name {
-                    span: span.into_spans(),
-                }
-            }
-
             impl std::default::Default for $name {
                 fn default() -> Self {
                     $name {
@@ -337,6 +336,59 @@ macro_rules! define_keywords {
             #[cfg(feature = "parsing")]
             impl private::Sealed for $name {}
         )*
+
+        mod keywords {
+            #[cfg(feature = "parsing")]
+            use crate::buffer::Cursor;
+            #[cfg(feature = "parsing")]
+            use crate::token::Token;
+            #[cfg(feature = "parsing")]
+            use crate::lookahead::Either;
+            use proc_macro2::Span;
+            use std::ops::Deref;
+            #[cfg(feature = "parsing")]
+            use std::ops::BitOr;
+
+            $(
+                #[derive(Copy, Clone)]
+                pub struct $name {}
+
+                #[allow(non_upper_case_globals)]
+                pub const $name: $name = $name {};
+
+                #[cfg(feature = "parsing")]
+                impl crate::lookahead::Peek for $name {
+                    type Token = super::$name;
+                    fn peek(cursor: Cursor) -> bool {
+                        super::$name::peek(cursor)
+                    }
+                    fn display(f: &mut dyn FnMut(&'static str)) {
+                        f(super::$name::display());
+                    }
+                }
+
+                impl Deref for $name {
+                    type Target = fn(Span) -> super::$name;
+                    fn deref(&self) -> &Self::Target {
+                        fn make(span: Span) -> super::$name {
+                            super::$name { span }
+                        }
+                        &(make as fn(Span) -> super::$name)
+                    }
+                }
+
+                #[cfg(feature = "parsing")]
+                impl<U: crate::lookahead::Peek> BitOr<U> for $name {
+                    type Output = Either<$name, U>;
+                    fn bitor(self, _other: U) -> Self::Output {
+                        Either::new()
+                    }
+                }
+            )*
+        }
+
+        #[doc(hidden)]
+        pub use self::keywords::*;
     };
 }
 
@@ -372,14 +424,6 @@ macro_rules! define_punctuation_structs {
             /// [`Token!`]: crate::token
             pub struct $name {
                 pub spans: [Span; $len],
-            }
-
-            #[doc(hidden)]
-            #[allow(non_snake_case)]
-            pub fn $name<S: IntoSpans<[Span; $len]>>(spans: S) -> $name {
-                $name {
-                    spans: spans.into_spans(),
-                }
             }
 
             impl std::default::Default for $name {
@@ -472,6 +516,135 @@ macro_rules! define_punctuation {
             #[cfg(feature = "parsing")]
             impl private::Sealed for $name {}
         )*
+
+        mod punctuation_factories {
+            #[cfg(feature = "parsing")]
+            use crate::buffer::Cursor;
+            #[cfg(feature = "parsing")]
+            use crate::token::Token;
+            #[cfg(feature = "parsing")]
+            use crate::lookahead::Either;
+            use super::private::Peek;
+            use crate::span::IntoSpans;
+            use proc_macro2::Span;
+            use std::ops::Deref;
+            #[cfg(feature = "parsing")]
+            use std::ops::BitOr;
+
+            #[repr(C, packed)]
+            pub struct SpanType<T: ?Sized>([*const T; 0], Peek);
+
+            impl<T: ?Sized> Copy for SpanType<T> {}
+            impl<T: ?Sized> Clone for SpanType<T> {
+                fn clone(&self) -> Self {
+                    *self
+                }
+            }
+
+            unsafe impl<T: ?Sized + Send> Send for SpanType<T> {}
+            unsafe impl<T: ?Sized + Sync> Sync for SpanType<T> {}
+
+            $(
+                pub enum $name<S> {
+                    __Phantom(SpanType<S>),
+                    #[allow(dead_code)]
+                    $name,
+                }
+
+                impl<S> Copy for $name<S> {}
+                impl<S> Clone for $name<S> {
+                    fn clone(&self) -> Self {
+                        *self
+                    }
+                }
+
+                #[cfg(feature = "parsing")]
+                impl crate::lookahead::Peek for $name<Peek> {
+                    type Token = super::$name;
+                    fn peek(cursor: Cursor) -> bool {
+                        super::$name::peek(cursor)
+                    }
+                    fn display(f: &mut dyn FnMut(&'static str)) {
+                        f(super::$name::display());
+                    }
+                }
+
+                impl<S> Deref for $name<S>
+                where
+                    S: IntoSpans<[Span; $len]>,
+                {
+                    type Target = fn(S) -> super::$name;
+                    fn deref(&self) -> &Self::Target {
+                        fn make<S: IntoSpans<[Span; $len]>>(spans: S) -> super::$name {
+                            super::$name { spans: spans.into_spans() }
+                        }
+                        &(make as fn(S) -> super::$name)
+                    }
+                }
+
+                #[cfg(feature = "parsing")]
+                impl<U: crate::lookahead::Peek> BitOr<U> for $name<Peek> {
+                    type Output = Either<$name<Peek>, U>;
+                    fn bitor(self, _other: U) -> Self::Output {
+                        Either::new()
+                    }
+                }
+            )*
+
+            pub enum Underscore<S> {
+                __Phantom(SpanType<S>),
+                #[allow(dead_code)]
+                Underscore,
+            }
+
+            impl<S> Copy for Underscore<S> {}
+            impl<S> Clone for Underscore<S> {
+                fn clone(&self) -> Self {
+                    *self
+                }
+            }
+
+            #[cfg(feature = "parsing")]
+            impl crate::lookahead::Peek for Underscore<Peek> {
+                type Token = super::Underscore;
+                fn peek(cursor: Cursor) -> bool {
+                    super::Underscore::peek(cursor)
+                }
+                fn display(f: &mut dyn FnMut(&'static str)) {
+                    f(super::Underscore::display());
+                }
+            }
+
+            impl<S> Deref for Underscore<S>
+            where
+                S: IntoSpans<[Span; 1]>,
+            {
+                type Target = fn(S) -> super::Underscore;
+                fn deref(&self) -> &Self::Target {
+                    fn make<S: IntoSpans<[Span; 1]>>(spans: S) -> super::Underscore {
+                        super::Underscore { spans: spans.into_spans() }
+                    }
+                    &(make as fn(S) -> super::Underscore)
+                }
+            }
+
+            #[cfg(feature = "parsing")]
+            impl<U: crate::lookahead::Peek> BitOr<U> for Underscore<Peek> {
+                type Output = Either<Underscore<Peek>, U>;
+                fn bitor(self, _other: U) -> Self::Output {
+                    Either::new()
+                }
+            }
+        }
+
+        mod punctuations {
+            $(
+                pub use super::punctuation_factories::$name::$name;
+            )*
+            pub use super::punctuation_factories::Underscore::Underscore;
+        }
+
+        pub use self::punctuations::*;
     };
 }
 
@@ -481,14 +654,6 @@ macro_rules! define_delimiters {
             #[$doc]
             pub struct $name {
                 pub span: Span,
-            }
-
-            #[doc(hidden)]
-            #[allow(non_snake_case)]
-            pub fn $name<S: IntoSpans<Span>>(span: S) -> $name {
-                $name {
-                    span: span.into_spans(),
-                }
             }
 
             impl std::default::Default for $name {
@@ -552,6 +717,59 @@ macro_rules! define_delimiters {
             #[cfg(feature = "parsing")]
             impl private::Sealed for $name {}
         )*
+
+        mod delimiters {
+            #[cfg(feature = "parsing")]
+            use crate::buffer::Cursor;
+            #[cfg(feature = "parsing")]
+            use crate::token::Token;
+            #[cfg(feature = "parsing")]
+            use crate::lookahead::Either;
+            use proc_macro2::Span;
+            use std::ops::Deref;
+            #[cfg(feature = "parsing")]
+            use std::ops::BitOr;
+
+            $(
+                #[derive(Copy, Clone)]
+                pub struct $name {}
+
+                #[allow(non_upper_case_globals)]
+                pub const $name: $name = $name {};
+
+                #[cfg(feature = "parsing")]
+                impl crate::lookahead::Peek for $name {
+                    type Token = super::$name;
+                    fn peek(cursor: Cursor) -> bool {
+                        super::$name::peek(cursor)
+                    }
+                    fn display(f: &mut dyn FnMut(&'static str)) {
+                        f(super::$name::display());
+                    }
+                }
+
+                impl Deref for $name {
+                    type Target = fn(Span) -> super::$name;
+                    fn deref(&self) -> &Self::Target {
+                        fn make(span: Span) -> super::$name {
+                            super::$name { span }
+                        }
+                        &(make as fn(Span) -> super::$name)
+                    }
+                }
+
+                #[cfg(feature = "parsing")]
+                impl<U: crate::lookahead::Peek> BitOr<U> for $name {
+                    type Output = Either<$name, U>;
+                    fn bitor(self, _other: U) -> Self::Output {
+                        Either::new()
+                    }
+                }
+            )*
+        }
+
+        #[doc(hidden)]
+        pub use self::delimiters::*;
     };
 }
 

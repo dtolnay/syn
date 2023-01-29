@@ -220,7 +220,7 @@ pub mod parsing {
                 return Ok(GenericArgument::Lifetime(input.parse()?));
             }
 
-            if input.peek(Lit) || input.peek(token::Brace) {
+            if input.peek(Lit | token::Brace) {
                 return const_argument(input).map(GenericArgument::Const);
             }
 
@@ -244,7 +244,7 @@ pub mod parsing {
                             PathArguments::AngleBracketed(arguments) => Some(arguments),
                             PathArguments::Parenthesized(_) => unreachable!(),
                         };
-                        return if input.peek(Lit) || input.peek(token::Brace) {
+                        return if input.peek(Lit | token::Brace) {
                             Ok(GenericArgument::AssocConst(AssocConst {
                                 ident,
                                 generics,
@@ -275,7 +275,7 @@ pub mod parsing {
                             bounds: {
                                 let mut bounds = Punctuated::new();
                                 loop {
-                                    if input.peek(Token![,]) || input.peek(Token![>]) {
+                                    if input.peek(Token![,] | Token![>]) {
                                         break;
                                     }
                                     let value: TypeParamBound = input.parse()?;
@@ -405,7 +405,7 @@ pub mod parsing {
 
     impl PathSegment {
         fn parse_helper(input: ParseStream, expr_style: bool) -> Result<Self> {
-            if input.peek(Token![super]) || input.peek(Token![self]) || input.peek(Token![crate]) {
+            if input.peek(Token![super] | Token![self] | Token![crate]) {
                 let ident = input.call(Ident::parse_any)?;
                 return Ok(PathSegment::from(ident));
             }
@@ -467,12 +467,9 @@ pub mod parsing {
                 segments: {
                     let mut segments = Punctuated::new();
                     loop {
-                        if !input.peek(Ident)
-                            && !input.peek(Token![super])
-                            && !input.peek(Token![self])
-                            && !input.peek(Token![Self])
-                            && !input.peek(Token![crate])
-                        {
+                        if !input.peek(
+                            Ident | Token![super] | Token![self] | Token![Self] | Token![crate],
+                        ) {
                             break;
                         }
                         let ident = Ident::parse_any(input)?;

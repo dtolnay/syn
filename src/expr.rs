@@ -1177,8 +1177,7 @@ pub(crate) mod parsing {
                 };
             } else if Precedence::Assign >= base
                 && input.peek(Token![=])
-                && !input.peek(Token![==])
-                && !input.peek(Token![=>])
+                && !input.peek(Token![==] | Token![=>])
             {
                 let eq_token: Token![=] = input.parse()?;
                 let mut rhs = unary_expr(input, allow_struct)?;
@@ -1199,8 +1198,7 @@ pub(crate) mod parsing {
             } else if Precedence::Range >= base && input.peek(Token![..]) {
                 let limits: RangeLimits = input.parse()?;
                 let rhs = if input.is_empty()
-                    || input.peek(Token![,])
-                    || input.peek(Token![;])
+                    || input.peek(Token![,] | Token![;])
                     || input.peek(Token![.]) && !input.peek(Token![..])
                     || !allow_struct.0 && input.peek(token::Brace)
                 {
@@ -1348,18 +1346,18 @@ pub(crate) mod parsing {
         let attrs = input.call(expr_attrs)?;
         if input.peek(Token![&]) {
             let and_token: Token![&] = input.parse()?;
-            let raw: Option<raw> =
-                if input.peek(raw) && (input.peek2(Token![mut]) || input.peek2(Token![const])) {
+            let raw_token: Option<raw> =
+                if input.peek(raw) && input.peek2(Token![mut] | Token![const]) {
                     Some(input.parse()?)
                 } else {
                     None
                 };
             let mutability: Option<Token![mut]> = input.parse()?;
-            if raw.is_some() && mutability.is_none() {
+            if raw_token.is_some() && mutability.is_none() {
                 input.parse::<Token![const]>()?;
             }
             let expr = Box::new(unary_expr(input, allow_struct)?);
-            if raw.is_some() {
+            if raw_token.is_some() {
                 Ok(Expr::Verbatim(verbatim::between(begin, input)))
             } else {
                 Ok(Expr::Reference(ExprReference {
@@ -1371,7 +1369,7 @@ pub(crate) mod parsing {
             }
         } else if input.peek(Token![box]) {
             expr_box(begin, input, allow_struct)
-        } else if input.peek(Token![*]) || input.peek(Token![!]) || input.peek(Token![-]) {
+        } else if input.peek(Token![*] | Token![!] | Token![-]) {
             expr_unary(input, attrs, allow_struct).map(Expr::Unary)
         } else {
             trailer_expr(begin, attrs, input, allow_struct)
@@ -1380,7 +1378,7 @@ pub(crate) mod parsing {
 
     #[cfg(not(feature = "full"))]
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        if input.peek(Token![*]) || input.peek(Token![!]) || input.peek(Token![-]) {
+        if input.peek(Token![*] | Token![!] | Token![-]) {
             Ok(Expr::Unary(ExprUnary {
                 attrs: Vec::new(),
                 op: input.parse()?,
@@ -1556,11 +1554,7 @@ pub(crate) mod parsing {
     // interactions, as they are fully contained.
     #[cfg(feature = "full")]
     fn atom_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        if input.peek(token::Group)
-            && !input.peek2(Token![::])
-            && !input.peek2(Token![!])
-            && !input.peek2(token::Brace)
-        {
+        if input.peek(token::Group) && !input.peek2(Token![::] | Token![!] | token::Brace) {
             input.call(expr_group).map(Expr::Group)
         } else if input.peek(Lit) {
             input.parse().map(Expr::Lit)
@@ -1570,24 +1564,23 @@ pub(crate) mod parsing {
             input.parse().map(Expr::Async)
         } else if input.peek(Token![try]) && input.peek2(token::Brace) {
             input.parse().map(Expr::TryBlock)
-        } else if input.peek(Token![|])
-            || input.peek(Token![move])
+        } else if input.peek(Token![|] | Token![move] | Token![static])
             || input.peek(Token![for])
                 && input.peek2(Token![<])
-                && (input.peek3(Lifetime) || input.peek3(Token![>]))
+                && input.peek3(Lifetime | Token![>])
             || input.peek(Token![const]) && !input.peek2(token::Brace)
-            || input.peek(Token![static])
-            || input.peek(Token![async]) && (input.peek2(Token![|]) || input.peek2(Token![move]))
+            || input.peek(Token![async]) && input.peek2(Token![|] | Token![move])
         {
             expr_closure(input, allow_struct).map(Expr::Closure)
-        } else if input.peek(Ident)
-            || input.peek(Token![::])
-            || input.peek(Token![<])
-            || input.peek(Token![self])
-            || input.peek(Token![Self])
-            || input.peek(Token![super])
-            || input.peek(Token![crate])
-        {
+        } else if input.peek(
+            Ident
+                | Token![::]
+                | Token![<]
+                | Token![self]
+                | Token![Self]
+                | Token![super]
+                | Token![crate],
+        ) {
             path_or_macro_or_struct(input, allow_struct)
         } else if input.peek(token::Paren) {
             paren_or_tuple(input)
@@ -1655,14 +1648,15 @@ pub(crate) mod parsing {
             input.parse().map(Expr::Lit)
         } else if input.peek(token::Paren) {
             input.call(expr_paren).map(Expr::Paren)
-        } else if input.peek(Ident)
-            || input.peek(Token![::])
-            || input.peek(Token![<])
-            || input.peek(Token![self])
-            || input.peek(Token![Self])
-            || input.peek(Token![super])
-            || input.peek(Token![crate])
-        {
+        } else if input.peek(
+            Ident
+                | Token![::]
+                | Token![<]
+                | Token![self]
+                | Token![Self]
+                | Token![super]
+                | Token![crate],
+        ) {
             input.parse().map(Expr::Path)
         } else {
             Err(input.error("unsupported expression; enable syn's features=[\"full\"]"))
@@ -1854,7 +1848,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![while]) {
             Expr::While(input.parse()?)
         } else if input.peek(Token![for])
-            && !(input.peek2(Token![<]) && (input.peek3(Lifetime) || input.peek3(Token![>])))
+            && !(input.peek2(Token![<]) && input.peek3(Lifetime | Token![>]))
         {
             Expr::ForLoop(input.parse()?)
         } else if input.peek(Token![loop]) {
@@ -2411,8 +2405,7 @@ pub(crate) mod parsing {
             label: input.parse()?,
             expr: {
                 if input.is_empty()
-                    || input.peek(Token![,])
-                    || input.peek(Token![;])
+                    || input.peek(Token![,] | Token![;])
                     || !allow_struct.0 && input.peek(token::Brace)
                 {
                     None
@@ -2430,7 +2423,7 @@ pub(crate) mod parsing {
             attrs: Vec::new(),
             return_token: input.parse()?,
             expr: {
-                if input.is_empty() || input.peek(Token![,]) || input.peek(Token![;]) {
+                if input.is_empty() || input.peek(Token![,] | Token![;]) {
                     None
                 } else {
                     // NOTE: return is greedy and eats blocks after it even when in a
@@ -2577,8 +2570,7 @@ pub(crate) mod parsing {
             limits: input.parse()?,
             end: {
                 if input.is_empty()
-                    || input.peek(Token![,])
-                    || input.peek(Token![;])
+                    || input.peek(Token![,] | Token![;])
                     || input.peek(Token![.]) && !input.peek(Token![..])
                     || !allow_struct.0 && input.peek(token::Brace)
                 {
@@ -2722,7 +2714,7 @@ pub(crate) mod parsing {
         let kind = if input.peek(Token![.]) && !input.peek(Token![..]) {
             if input.peek2(Token![await]) {
                 "`.await`"
-            } else if input.peek2(Ident) && (input.peek3(token::Paren) || input.peek3(Token![::])) {
+            } else if input.peek2(Ident) && input.peek3(token::Paren | Token![::]) {
                 "a method call"
             } else {
                 "a field access"

@@ -1,15 +1,10 @@
-#[cfg(feature = "parsing")]
-use crate::lookahead;
-
 pub use proc_macro2::Ident;
 
 #[cfg(not(doc))] // rustdoc bug: https://github.com/rust-lang/rust/issues/105735
 #[cfg(feature = "parsing")]
 #[doc(hidden)]
-#[allow(non_snake_case)]
-pub fn Ident(marker: lookahead::TokenMarker) -> Ident {
-    match marker {}
-}
+#[allow(non_upper_case_globals)]
+pub const Ident: parsing::PeekIdent = parsing::PeekIdent {};
 
 macro_rules! ident_from_token {
     ($token:ident) => {
@@ -50,9 +45,11 @@ pub fn xid_ok(symbol: &str) -> bool {
 #[cfg(feature = "parsing")]
 mod parsing {
     use crate::buffer::Cursor;
+    use crate::lookahead::{Either, Peek};
     use crate::parse::{Parse, ParseStream, Result};
     use crate::token::Token;
     use proc_macro2::Ident;
+    use std::ops::BitOr;
 
     fn accept_as_ident(ident: &Ident) -> bool {
         match ident.to_string().as_str() {
@@ -95,6 +92,26 @@ mod parsing {
 
         fn display() -> &'static str {
             "identifier"
+        }
+    }
+
+    #[derive(Copy, Clone)]
+    pub struct PeekIdent {}
+
+    impl Peek for PeekIdent {
+        type Token = proc_macro2::Ident;
+        fn peek(cursor: Cursor) -> bool {
+            proc_macro2::Ident::peek(cursor)
+        }
+        fn display(f: &mut dyn FnMut(&'static str)) {
+            f(proc_macro2::Ident::display());
+        }
+    }
+
+    impl<U: Peek> BitOr<U> for PeekIdent {
+        type Output = Either<Self, U>;
+        fn bitor(self, _other: U) -> Self::Output {
+            Either::new()
         }
     }
 }

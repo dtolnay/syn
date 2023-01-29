@@ -82,20 +82,40 @@ macro_rules! custom_punctuation {
         }
 
         #[doc(hidden)]
-        #[allow(dead_code, non_snake_case)]
-        pub fn $ident<__S: $crate::__private::IntoSpans<$crate::custom_punctuation_repr!($($tt)+)>>(
-            spans: __S,
-        ) -> $ident {
-            let _validate_len = 0 $(+ $crate::custom_punctuation_len!(strict, $tt))*;
-            $ident {
-                spans: $crate::__private::IntoSpans::into_spans(spans)
-            }
-        }
+        #[allow(dead_code, non_upper_case_globals)]
+        pub static $ident: <$ident as $crate::__private::CustomToken>::Peek =
+            <$ident as $crate::__private::CustomToken>::PEEK;
 
         const _: () = {
+            let _validate_len = 0 $(+ $crate::custom_punctuation_len!(strict, $tt))*;
+
             impl $crate::__private::Default for $ident {
                 fn default() -> Self {
-                    $ident($crate::__private::Span::call_site())
+                    $ident { spans: $crate::__private::IntoSpans::into_spans($crate::__private::Span::call_site()) }
+                }
+            }
+
+            pub struct Peek;
+
+            impl $crate::__private::Copy for Peek {}
+
+            #[allow(clippy::expl_impl_clone_on_copy)]
+            impl $crate::__private::Clone for Peek {
+                fn clone(&self) -> Self {
+                    *self
+                }
+            }
+
+            impl $crate::__private::CustomToken for $ident {
+                type Peek = Peek;
+                const PEEK: Peek = Peek {};
+            }
+
+            impl $crate::__private::Deref for $ident {
+                type Target = fn($crate::__private::Span) -> $ident;
+                fn deref(&self) -> &Self::Target {
+                    &((|span: $crate::__private::Span| $ident { spans: $crate::__private::IntoSpans::into_spans(span) })
+                        as fn($crate::__private::Span) -> $ident)
                 }
             }
 
@@ -127,7 +147,24 @@ macro_rules! impl_parse_for_custom_punctuation {
             fn parse(input: $crate::parse::ParseStream) -> $crate::parse::Result<$ident> {
                 let spans: $crate::custom_punctuation_repr!($($tt)+) =
                     $crate::token::parsing::punct(input, $crate::stringify_punct!($($tt)+))?;
-                Ok($ident(spans))
+                Ok($ident { spans })
+            }
+        }
+
+        impl $crate::parse::Peek for Peek {
+            type Token = $ident;
+            fn peek(cursor: $crate::__private::Cursor) -> $crate::__private::bool {
+                <$ident as $crate::token::CustomToken>::peek(cursor)
+            }
+            fn display(f: &mut dyn $crate::__private::FnMut(&'static $crate::__private::str)) {
+                f(<$ident as $crate::token::CustomToken>::display());
+            }
+        }
+
+        impl<U: $crate::parse::Peek> $crate::__private::BitOr<U> for $ident {
+            type Output = $crate::__private::Either<Peek, U>;
+            fn bitor(self, _other: U) -> Self::Output {
+                $crate::__private::Either::new()
             }
         }
     };

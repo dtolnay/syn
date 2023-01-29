@@ -1,10 +1,9 @@
 use crate::buffer::Cursor;
 use crate::error::{self, Error};
-use crate::sealed::lookahead::Sealed;
-use crate::span::IntoSpans;
-use crate::token::Token;
 use proc_macro2::{Delimiter, Span};
 use std::cell::RefCell;
+use std::marker::PhantomData;
+use std::ops::BitOr;
 
 /// Support for checking the next token in a stream to decide how to parse.
 ///
@@ -76,12 +75,13 @@ pub fn new(scope: Span, cursor: Cursor) -> Lookahead1 {
 fn peek_impl(
     lookahead: &Lookahead1,
     peek: fn(Cursor) -> bool,
-    display: fn() -> &'static str,
+    display: fn(&mut dyn FnMut(&'static str)),
 ) -> bool {
     if peek(lookahead.cursor) {
         return true;
     }
-    lookahead.comparisons.borrow_mut().push(display());
+    let mut comparisons = lookahead.comparisons.borrow_mut();
+    display(&mut |s| comparisons.push(s));
     false
 }
 
@@ -102,7 +102,7 @@ impl<'a> Lookahead1<'a> {
     /// - `input.peek(token::Brace)`
     pub fn peek<T: Peek>(&self, token: T) -> bool {
         let _ = token;
-        peek_impl(self, T::Token::peek, T::Token::display)
+        peek_impl(self, T::peek, T::display)
     }
 
     /// Triggers an error at the current position of the parse stream.
@@ -144,26 +144,59 @@ impl<'a> Lookahead1<'a> {
 /// This trait is sealed and cannot be implemented for types outside of Syn.
 ///
 /// [`ParseStream::peek`]: crate::parse::ParseBuffer::peek
-pub trait Peek: Sealed {
+pub trait Peek: Copy {
     // Not public API.
     #[doc(hidden)]
-    type Token: Token;
-}
+    type Token;
 
-impl<F: Copy + FnOnce(TokenMarker) -> T, T: Token> Peek for F {
-    type Token = T;
-}
+    // Not public API.
+    #[doc(hidden)]
+    fn peek(cursor: Cursor) -> bool;
 
-pub enum TokenMarker {}
-
-impl<S> IntoSpans<S> for TokenMarker {
-    fn into_spans(self) -> S {
-        match self {}
-    }
+    // Not public API.
+    #[doc(hidden)]
+    fn display(f: &mut dyn FnMut(&'static str));
 }
 
 pub fn is_delimiter(cursor: Cursor, delimiter: Delimiter) -> bool {
     cursor.group(delimiter).is_some()
 }
 
-impl<F: Copy + FnOnce(TokenMarker) -> T, T: Token> Sealed for F {}
+pub struct Either<A, B> {
+    _a: PhantomData<A>,
+    _b: PhantomData<B>,
+}
+
+impl<A, B> Copy for Either<A, B> {}
+impl<A, B> Clone for Either<A, B> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<A: Peek, B: Peek> Either<A, B> {
+    pub fn new() -> Self {
+        Either {
+            _a: PhantomData,
+            _b: PhantomData,
+        }
+    }
+}
+
+impl<A: Peek, B: Peek> Peek for Either<A, B> {
+    type Token = Self;
+    fn peek(cursor: Cursor) -> bool {
+        A::peek(cursor) || B::peek(cursor)
+    }
+    fn display(f: &mut dyn FnMut(&'static str)) {
+        A::display(f);
+        B::display(f);
+    }
+}
+
+impl<A: Peek, B: Peek, U: Peek> BitOr<U> for Either<A, B> {
+    type Output = Either<Self, U>;
+    fn bitor(self, _other: U) -> Self::Output {
+        Either::new()
+    }
+}

@@ -201,33 +201,30 @@ pub mod parsing {
 
         if input.peek(Token![let]) {
             stmt_local(input, attrs).map(Stmt::Local)
-        } else if input.peek(Token![pub])
-            || input.peek(Token![crate]) && !input.peek2(Token![::])
-            || input.peek(Token![extern])
-            || input.peek(Token![use])
+        } else if input.peek(
+            Token![pub]
+                | Token![extern]
+                | Token![use]
+                | Token![fn]
+                | Token![mod]
+                | Token![type]
+                | Token![struct]
+                | Token![enum]
+                | Token![trait]
+                | Token![impl]
+                | Token![macro],
+        ) || input.peek(Token![crate]) && !input.peek2(Token![::])
             || input.peek(Token![static])
                 && (input.peek2(Token![mut])
                     || input.peek2(Ident)
-                        && !(input.peek2(Token![async])
-                            && (input.peek3(Token![move]) || input.peek3(Token![|]))))
+                        && !(input.peek2(Token![async]) && input.peek3(Token![move] | Token![|])))
             || input.peek(Token![const]) && !input.peek2(token::Brace)
             || input.peek(Token![unsafe]) && !input.peek2(token::Brace)
             || input.peek(Token![async])
-                && (input.peek2(Token![unsafe])
-                    || input.peek2(Token![extern])
-                    || input.peek2(Token![fn]))
-            || input.peek(Token![fn])
-            || input.peek(Token![mod])
-            || input.peek(Token![type])
-            || input.peek(Token![struct])
-            || input.peek(Token![enum])
+                && input.peek2(Token![unsafe] | Token![extern] | Token![fn])
             || input.peek(Token![union]) && input.peek2(Ident)
             || input.peek(Token![auto]) && input.peek2(Token![trait])
-            || input.peek(Token![trait])
-            || input.peek(Token![default])
-                && (input.peek2(Token![unsafe]) || input.peek2(Token![impl]))
-            || input.peek(Token![impl])
-            || input.peek(Token![macro])
+            || input.peek(Token![default]) && input.peek2(Token![unsafe] | Token![impl])
             || is_item_macro
         {
             let mut item: Item = input.parse()?;

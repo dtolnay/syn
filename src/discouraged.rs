@@ -68,11 +68,7 @@ pub trait Speculative {
     ///
     /// impl Parse for PathSegment {
     ///     fn parse(input: ParseStream) -> Result<Self> {
-    ///         if input.peek(Token![super])
-    ///             || input.peek(Token![self])
-    ///             || input.peek(Token![Self])
-    ///             || input.peek(Token![crate])
-    ///         {
+    ///         if input.peek(Token![super] | Token![self] | Token![Self] | Token![crate]) {
     ///             let ident = input.call(Ident::parse_any)?;
     ///             return Ok(PathSegment::from(ident));
     ///         }

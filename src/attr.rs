@@ -562,7 +562,7 @@ pub mod parsing {
     }
 
     pub fn parse_meta_after_path(path: Path, input: ParseStream) -> Result<Meta> {
-        if input.peek(token::Paren) || input.peek(token::Bracket) || input.peek(token::Brace) {
+        if input.peek(token::Paren | token::Bracket | token::Brace) {
             parse_meta_list_after_path(path, input).map(Meta::List)
         } else if input.peek(Token![=]) {
             parse_meta_name_value_after_path(path, input).map(Meta::NameValue)

@@ -95,14 +95,9 @@ macro_rules! custom_keyword {
         }
 
         #[doc(hidden)]
-        #[allow(dead_code, non_snake_case)]
-        pub fn $ident<__S: $crate::__private::IntoSpans<$crate::__private::Span>>(
-            span: __S,
-        ) -> $ident {
-            $ident {
-                span: $crate::__private::IntoSpans::into_spans(span),
-            }
-        }
+        #[allow(dead_code, non_upper_case_globals)]
+        pub static $ident: <$ident as $crate::__private::CustomToken>::Peek =
+            <$ident as $crate::__private::CustomToken>::PEEK;
 
         const _: () = {
             impl $crate::__private::Default for $ident {
@@ -110,6 +105,30 @@ macro_rules! custom_keyword {
                     $ident {
                         span: $crate::__private::Span::call_site(),
                     }
+                }
+            }
+
+            pub struct Peek;
+
+            impl $crate::__private::Copy for Peek {}
+
+            #[allow(clippy::expl_impl_clone_on_copy)]
+            impl $crate::__private::Clone for Peek {
+                fn clone(&self) -> Self {
+                    *self
+                }
+            }
+
+            impl $crate::__private::CustomToken for $ident {
+                type Peek = Peek;
+                const PEEK: Peek = Peek {};
+            }
+
+            impl $crate::__private::Deref for $ident {
+                type Target = fn($crate::__private::Span) -> $ident;
+                fn deref(&self) -> &Self::Target {
+                    &((|span: $crate::__private::Span| $ident { span })
+                        as fn($crate::__private::Span) -> $ident)
                 }
             }
 
@@ -156,6 +175,23 @@ macro_rules! impl_parse_for_custom_keyword {
                         "`"
                     )))
                 })
+            }
+        }
+
+        impl $crate::parse::Peek for Peek {
+            type Token = $ident;
+            fn peek(cursor: $crate::__private::Cursor) -> $crate::__private::bool {
+                <$ident as $crate::token::CustomToken>::peek(cursor)
+            }
+            fn display(f: &mut dyn $crate::__private::FnMut(&'static $crate::__private::str)) {
+                f(<$ident as $crate::token::CustomToken>::display());
+            }
+        }
+
+        impl<U: $crate::parse::Peek> $crate::__private::BitOr<U> for $ident {
+            type Output = $crate::__private::Either<Peek, U>;
+            fn bitor(self, _other: U) -> Self::Output {
+                $crate::__private::Either::new()
             }
         }
     };

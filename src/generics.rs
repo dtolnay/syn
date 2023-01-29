@@ -657,7 +657,7 @@ pub mod parsing {
                     let mut bounds = Punctuated::new();
                     if has_colon {
                         loop {
-                            if input.peek(Token![,]) || input.peek(Token![>]) {
+                            if input.peek(Token![,] | Token![>]) {
                                 break;
                             }
                             let value = input.parse()?;
@@ -718,7 +718,7 @@ pub mod parsing {
             let mut bounds = Punctuated::new();
             if colon_token.is_some() {
                 loop {
-                    if input.peek(Token![,]) || input.peek(Token![>]) || input.peek(Token![=]) {
+                    if input.peek(Token![,] | Token![>] | Token![=]) {
                         break;
                     }
                     let value: TypeParamBound = input.parse()?;
@@ -795,13 +795,9 @@ pub mod parsing {
                     break;
                 }
                 bounds.push_punct(input.parse()?);
-                if !(input.peek(Ident::peek_any)
-                    || input.peek(Token![::])
-                    || input.peek(Token![?])
-                    || input.peek(Lifetime)
-                    || input.peek(token::Paren)
-                    || input.peek(Token![~]))
-                {
+                if !input.peek(
+                    Ident::peek_any | Token![::] | Token![?] | Lifetime | token::Paren | Token![~],
+                ) {
                     break;
                 }
             }
@@ -878,11 +874,8 @@ pub mod parsing {
                     let mut predicates = Punctuated::new();
                     loop {
                         if input.is_empty()
-                            || input.peek(token::Brace)
-                            || input.peek(Token![,])
-                            || input.peek(Token![;])
+                            || input.peek(token::Brace | Token![,] | Token![;] | Token![=])
                             || input.peek(Token![:]) && !input.peek(Token![::])
-                            || input.peek(Token![=])
                         {
                             break;
                         }
@@ -922,11 +915,9 @@ pub mod parsing {
                         let mut bounds = Punctuated::new();
                         loop {
                             if input.is_empty()
-                                || input.peek(token::Brace)
-                                || input.peek(Token![,])
-                                || input.peek(Token![;])
-                                || input.peek(Token![:])
-                                || input.peek(Token![=])
+                                || input.peek(
+                                    token::Brace | Token![,] | Token![;] | Token![:] | Token![=],
+                                )
                             {
                                 break;
                             }
@@ -950,11 +941,8 @@ pub mod parsing {
                         let mut bounds = Punctuated::new();
                         loop {
                             if input.is_empty()
-                                || input.peek(token::Brace)
-                                || input.peek(Token![,])
-                                || input.peek(Token![;])
+                                || input.peek(token::Brace | Token![,] | Token![;] | Token![=])
                                 || input.peek(Token![:]) && !input.peek(Token![::])
-                                || input.peek(Token![=])
                             {
                                 break;
                             }

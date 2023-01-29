@@ -330,10 +330,7 @@ pub mod parsing {
 
                 let content;
                 let paren_token = parenthesized!(content in ahead);
-                if content.peek(Token![crate])
-                    || content.peek(Token![self])
-                    || content.peek(Token![super])
-                {
+                if content.peek(Token![crate] | Token![self] | Token![super]) {
                     let path = content.call(Ident::parse_any)?;
 
                     // Ensure there are no additional tokens within `content`.

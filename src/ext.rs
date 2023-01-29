@@ -1,11 +1,12 @@
 //! Extension traits to provide parsing methods on foreign types.
 
 use crate::buffer::Cursor;
-use crate::parse::Peek;
+use crate::lookahead::{Either, Peek};
 use crate::parse::{ParseStream, Result};
 use crate::sealed::lookahead;
 use crate::token::CustomToken;
 use proc_macro2::Ident;
+use std::ops::BitOr;
 
 /// Additional methods for `Ident` not provided by proc-macro2 or libproc_macro.
 ///
@@ -102,6 +103,19 @@ impl IdentExt for Ident {
 
 impl Peek for private::PeekFn {
     type Token = private::IdentAny;
+    fn peek(cursor: Cursor) -> bool {
+        private::IdentAny::peek(cursor)
+    }
+    fn display(f: &mut dyn FnMut(&'static str)) {
+        f(private::IdentAny::display());
+    }
+}
+
+impl<U: Peek> BitOr<U> for private::PeekFn {
+    type Output = Either<Self, U>;
+    fn bitor(self, _other: U) -> Self::Output {
+        Either::new()
+    }
 }
 
 impl CustomToken for private::IdentAny {

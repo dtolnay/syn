@@ -938,12 +938,12 @@ pub mod parsing {
             } else if lookahead.peek(Token![const]) {
                 ahead.parse::<Token![const]>()?;
                 let lookahead = ahead.lookahead1();
-                if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                if lookahead.peek(Ident | Token![_]) {
                     let vis = input.parse()?;
                     let const_token = input.parse()?;
                     let ident = {
                         let lookahead = input.lookahead1();
-                        if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                        if lookahead.peek(Ident | Token![_]) {
                             input.call(Ident::parse_any)?
                         } else {
                             return Err(lookahead.error());
@@ -1025,11 +1025,7 @@ pub mod parsing {
                 input.advance_to(&ahead);
                 parse_macro2(begin, vis, input)
             } else if vis.is_inherited()
-                && (lookahead.peek(Ident)
-                    || lookahead.peek(Token![self])
-                    || lookahead.peek(Token![super])
-                    || lookahead.peek(Token![crate])
-                    || lookahead.peek(Token![::]))
+                && lookahead.peek(Ident | Token![self] | Token![super] | Token![crate] | Token![::])
             {
                 input.parse().map(Item::Macro)
             } else {
@@ -1076,11 +1072,11 @@ pub mod parsing {
             let mut bounds = Punctuated::new();
             if colon_token.is_some() {
                 loop {
-                    if input.peek(Token![where]) || input.peek(Token![=]) || input.peek(Token![;]) {
+                    if input.peek(Token![where] | Token![=] | Token![;]) {
                         break;
                     }
                     bounds.push_value(input.parse::<TypeParamBound>()?);
-                    if input.peek(Token![where]) || input.peek(Token![=]) || input.peek(Token![;]) {
+                    if input.peek(Token![where] | Token![=] | Token![;]) {
                         break;
                     }
                     bounds.push_punct(input.parse::<Token![+]>()?);
@@ -1255,11 +1251,7 @@ pub mod parsing {
         allow_crate_root_in_path: bool,
     ) -> Result<Option<UseTree>> {
         let lookahead = input.lookahead1();
-        if lookahead.peek(Ident)
-            || lookahead.peek(Token![self])
-            || lookahead.peek(Token![super])
-            || lookahead.peek(Token![crate])
-        {
+        if lookahead.peek(Ident | Token![self] | Token![super] | Token![crate]) {
             let ident = input.call(Ident::parse_any)?;
             if input.peek(Token![::]) {
                 Ok(Some(UseTree::Path(UsePath {
@@ -1344,7 +1336,7 @@ pub mod parsing {
                 const_token: input.parse()?,
                 ident: {
                     let lookahead = input.lookahead1();
-                    if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                    if lookahead.peek(Ident | Token![_]) {
                         input.call(Ident::parse_any)?
                     } else {
                         return Err(lookahead.error());
@@ -1707,11 +1699,7 @@ pub mod parsing {
             } else if lookahead.peek(Token![type]) {
                 parse_foreign_item_type(begin, input)
             } else if vis.is_inherited()
-                && (lookahead.peek(Ident)
-                    || lookahead.peek(Token![self])
-                    || lookahead.peek(Token![super])
-                    || lookahead.peek(Token![crate])
-                    || lookahead.peek(Token![::]))
+                && lookahead.peek(Ident | Token![self] | Token![super] | Token![crate] | Token![::])
             {
                 input.parse().map(ForeignItem::Macro)
             } else {
@@ -1950,10 +1938,7 @@ pub mod parsing {
     fn parse_trait_or_trait_alias(input: ParseStream) -> Result<Item> {
         let (attrs, vis, trait_token, ident, generics) = parse_start_of_trait_alias(input)?;
         let lookahead = input.lookahead1();
-        if lookahead.peek(token::Brace)
-            || lookahead.peek(Token![:])
-            || lookahead.peek(Token![where])
-        {
+        if lookahead.peek(token::Brace | Token![:] | Token![where]) {
             let unsafety = None;
             let auto_token = None;
             parse_rest_of_trait(
@@ -2013,11 +1998,11 @@ pub mod parsing {
         let mut supertraits = Punctuated::new();
         if colon_token.is_some() {
             loop {
-                if input.peek(Token![where]) || input.peek(token::Brace) {
+                if input.peek(Token![where] | token::Brace) {
                     break;
                 }
                 supertraits.push_value(input.parse()?);
-                if input.peek(Token![where]) || input.peek(token::Brace) {
+                if input.peek(Token![where] | token::Brace) {
                     break;
                 }
                 supertraits.push_punct(input.parse()?);
@@ -2080,11 +2065,11 @@ pub mod parsing {
 
         let mut bounds = Punctuated::new();
         loop {
-            if input.peek(Token![where]) || input.peek(Token![;]) {
+            if input.peek(Token![where] | Token![;]) {
                 break;
             }
             bounds.push_value(input.parse()?);
-            if input.peek(Token![where]) || input.peek(Token![;]) {
+            if input.peek(Token![where] | Token![;]) {
                 break;
             }
             bounds.push_punct(input.parse()?);
@@ -2120,12 +2105,10 @@ pub mod parsing {
             } else if lookahead.peek(Token![const]) {
                 ahead.parse::<Token![const]>()?;
                 let lookahead = ahead.lookahead1();
-                if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                if lookahead.peek(Ident | Token![_]) {
                     input.parse().map(TraitItem::Const)
-                } else if lookahead.peek(Token![async])
-                    || lookahead.peek(Token![unsafe])
-                    || lookahead.peek(Token![extern])
-                    || lookahead.peek(Token![fn])
+                } else if lookahead
+                    .peek(Token![async] | Token![unsafe] | Token![extern] | Token![fn])
                 {
                     input.parse().map(TraitItem::Fn)
                 } else {
@@ -2133,11 +2116,8 @@ pub mod parsing {
                 }
             } else if lookahead.peek(Token![type]) {
                 parse_trait_item_type(begin.fork(), input)
-            } else if lookahead.peek(Ident)
-                || lookahead.peek(Token![self])
-                || lookahead.peek(Token![super])
-                || lookahead.peek(Token![crate])
-                || lookahead.peek(Token![::])
+            } else if lookahead
+                .peek(Ident | Token![self] | Token![super] | Token![crate] | Token![::])
             {
                 input.parse().map(TraitItem::Macro)
             } else {
@@ -2170,7 +2150,7 @@ pub mod parsing {
                 const_token: input.parse()?,
                 ident: {
                     let lookahead = input.lookahead1();
-                    if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                    if lookahead.peek(Ident | Token![_]) {
                         input.call(Ident::parse_any)?
                     } else {
                         return Err(lookahead.error());
@@ -2233,8 +2213,7 @@ pub mod parsing {
 
             let mut bounds = Punctuated::new();
             if colon_token.is_some() {
-                while !input.peek(Token![where]) && !input.peek(Token![=]) && !input.peek(Token![;])
-                {
+                while !input.peek(Token![where] | Token![=] | Token![;]) {
                     if !bounds.is_empty() {
                         bounds.push_punct(input.parse()?);
                     }
@@ -2329,14 +2308,9 @@ pub mod parsing {
         let impl_token: Token![impl] = input.parse()?;
 
         let has_generics = input.peek(Token![<])
-            && (input.peek2(Token![>])
-                || input.peek2(Token![#])
-                || (input.peek2(Ident) || input.peek2(Lifetime))
-                    && (input.peek3(Token![:])
-                        || input.peek3(Token![,])
-                        || input.peek3(Token![>])
-                        || input.peek3(Token![=]))
-                || input.peek2(Token![const]));
+            && (input.peek2(Token![>] | Token![#] | Token![const])
+                || input.peek2(Ident | Lifetime | Token![const])
+                    && input.peek3(Token![:] | Token![,] | Token![>] | Token![=]));
         let mut generics: Generics = if has_generics {
             input.parse()?
         } else {
@@ -2447,7 +2421,7 @@ pub mod parsing {
             } else if lookahead.peek(Token![const]) {
                 let const_token: Token![const] = ahead.parse()?;
                 let lookahead = ahead.lookahead1();
-                if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                if lookahead.peek(Ident | Token![_]) {
                     input.advance_to(&ahead);
                     let ident: Ident = input.call(Ident::parse_any)?;
                     let colon_token: Token![:] = input.parse()?;
@@ -2477,11 +2451,7 @@ pub mod parsing {
                 parse_impl_item_type(begin, input)
             } else if vis.is_inherited()
                 && defaultness.is_none()
-                && (lookahead.peek(Ident)
-                    || lookahead.peek(Token![self])
-                    || lookahead.peek(Token![super])
-                    || lookahead.peek(Token![crate])
-                    || lookahead.peek(Token![::]))
+                && lookahead.peek(Ident | Token![self] | Token![super] | Token![crate] | Token![::])
             {
                 input.parse().map(ImplItem::Macro)
             } else {
@@ -2514,7 +2484,7 @@ pub mod parsing {
                 const_token: input.parse()?,
                 ident: {
                     let lookahead = input.lookahead1();
-                    if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                    if lookahead.peek(Ident | Token![_]) {
                         input.call(Ident::parse_any)?
                     } else {
                         return Err(lookahead.error());

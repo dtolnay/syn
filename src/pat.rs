@@ -249,34 +249,24 @@ pub mod parsing {
             if {
                 let ahead = input.fork();
                 ahead.parse::<Option<Ident>>()?.is_some()
-                    && (ahead.peek(Token![::])
-                        || ahead.peek(Token![!])
-                        || ahead.peek(token::Brace)
-                        || ahead.peek(token::Paren)
+                    && (ahead.peek(Token![::] | Token![!] | token::Brace | token::Paren)
                         || ahead.peek(Token![..])
                             && ahead.parse::<RangeLimits>().is_ok()
                             && !(ahead.is_empty() || ahead.peek(Token![,])))
             } || {
                 let ahead = input.fork();
                 ahead.parse::<Option<Token![self]>>()?.is_some() && ahead.peek(Token![::])
-            } || lookahead.peek(Token![::])
-                || lookahead.peek(Token![<])
-                || input.peek(Token![Self])
-                || input.peek(Token![super])
-                || input.peek(Token![crate])
+            } || lookahead.peek(Token![::] | Token![<])
+                || input.peek(Token![Self] | Token![super] | Token![crate])
             {
                 pat_path_or_macro_or_struct_or_range(input)
             } else if lookahead.peek(Token![_]) {
                 input.call(pat_wild).map(Pat::Wild)
             } else if input.peek(Token![box]) {
                 pat_box(begin, input)
-            } else if input.peek(Token![-]) || lookahead.peek(Lit) || lookahead.peek(Token![const])
-            {
+            } else if input.peek(Token![-]) || lookahead.peek(Lit | Token![const]) {
                 pat_lit_or_range(input)
-            } else if lookahead.peek(Token![ref])
-                || lookahead.peek(Token![mut])
-                || input.peek(Token![self])
-                || input.peek(Ident)
+            } else if lookahead.peek(Token![ref] | Token![mut]) || input.peek(Token![self] | Ident)
             {
                 input.call(pat_ident).map(Pat::Ident)
             } else if lookahead.peek(Token![&]) {
@@ -349,12 +339,10 @@ pub mod parsing {
 
     fn multi_pat_impl(input: ParseStream, leading_vert: Option<Token![|]>) -> Result<Pat> {
         let mut pat = Pat::parse_single(input)?;
-        if leading_vert.is_some()
-            || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=])
-        {
+        if leading_vert.is_some() || input.peek(Token![|]) && !input.peek(Token![||] | Token![|=]) {
             let mut cases = Punctuated::new();
             cases.push_value(pat);
-            while input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=]) {
+            while input.peek(Token![|]) && !input.peek(Token![||] | Token![|=]) {
                 let punct = input.parse()?;
                 cases.push_punct(punct);
                 let pat = Pat::parse_single(input)?;
@@ -659,12 +647,8 @@ pub mod parsing {
 
     fn pat_range_bound(input: ParseStream) -> Result<Option<PatRangeBound>> {
         if input.is_empty()
-            || input.peek(Token![|])
-            || input.peek(Token![=])
+            || input.peek(Token![|] | Token![=] | Token![,] | Token![;] | Token![if])
             || input.peek(Token![:]) && !input.peek(Token![::])
-            || input.peek(Token![,])
-            || input.peek(Token![;])
-            || input.peek(Token![if])
         {
             return Ok(None);
         }
@@ -672,14 +656,15 @@ pub mod parsing {
         let lookahead = input.lookahead1();
         let expr = if lookahead.peek(Lit) {
             PatRangeBound::Lit(input.parse()?)
-        } else if lookahead.peek(Ident)
-            || lookahead.peek(Token![::])
-            || lookahead.peek(Token![<])
-            || lookahead.peek(Token![self])
-            || lookahead.peek(Token![Self])
-            || lookahead.peek(Token![super])
-            || lookahead.peek(Token![crate])
-        {
+        } else if lookahead.peek(
+            Ident
+                | Token![::]
+                | Token![<]
+                | Token![self]
+                | Token![Self]
+                | Token![super]
+                | Token![crate],
+        ) {
             PatRangeBound::Path(input.parse()?)
         } else if lookahead.peek(Token![const]) {
             PatRangeBound::Const(input.parse()?)
