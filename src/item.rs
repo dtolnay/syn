@@ -1491,9 +1491,33 @@ pub mod parsing {
                 }
             }
 
-            let mut typed = input.call(fn_arg_typed)?;
-            typed.attrs = attrs;
-            Ok(FnArg::Typed(typed))
+            Ok(FnArg::Typed(
+                if input.peek(Ident) && input.peek2(Token![<]) {
+                    // Hack to parse pre-2018 syntax in
+                    // test/ui/rfc-2565-param-attrs/param-attrs-pretty.rs
+                    // because the rest of the test case is valuable.
+                    let span = input.fork().parse::<Ident>()?.span();
+                    PatType {
+                        attrs,
+                        pat: Box::new(Pat::Wild(PatWild {
+                            attrs: Vec::new(),
+                            underscore_token: Token![_](span),
+                        })),
+                        colon_token: Token![:](span),
+                        ty: input.parse()?,
+                    }
+                } else {
+                    PatType {
+                        attrs,
+                        pat: Box::new(Pat::parse_single(input)?),
+                        colon_token: input.parse()?,
+                        ty: Box::new(match input.parse::<Option<Token![...]>>()? {
+                            Some(dot3) => Type::Verbatim(variadic_to_tokens(&dot3)),
+                            None => input.parse()?,
+                        }),
+                    }
+                },
+            ))
         }
     }
 
@@ -1563,34 +1587,6 @@ pub mod parsing {
         }
 
         Ok(args)
-    }
-
-    fn fn_arg_typed(input: ParseStream) -> Result<PatType> {
-        // Hack to parse pre-2018 syntax in
-        // test/ui/rfc-2565-param-attrs/param-attrs-pretty.rs
-        // because the rest of the test case is valuable.
-        if input.peek(Ident) && input.peek2(Token![<]) {
-            let span = input.fork().parse::<Ident>()?.span();
-            return Ok(PatType {
-                attrs: Vec::new(),
-                pat: Box::new(Pat::Wild(PatWild {
-                    attrs: Vec::new(),
-                    underscore_token: Token![_](span),
-                })),
-                colon_token: Token![:](span),
-                ty: input.parse()?,
-            });
-        }
-
-        Ok(PatType {
-            attrs: Vec::new(),
-            pat: Box::new(Pat::parse_single(input)?),
-            colon_token: input.parse()?,
-            ty: Box::new(match input.parse::<Option<Token![...]>>()? {
-                Some(dot3) => Type::Verbatim(variadic_to_tokens(&dot3)),
-                None => input.parse()?,
-            }),
-        })
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
