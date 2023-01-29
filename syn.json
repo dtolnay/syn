@@ -659,6 +659,11 @@
             "syn": "ExprAsync"
           }
         ],
+        "Attrs": [
+          {
+            "syn": "ExprAttrs"
+          }
+        ],
         "Await": [
           {
             "syn": "ExprAwait"
@@ -850,11 +855,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "bracket_token": {
           "group": "Bracket"
         },
@@ -876,11 +876,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "left": {
           "box": {
             "syn": "Expr"
@@ -904,11 +899,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "left": {
           "box": {
             "syn": "Expr"
@@ -932,11 +922,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "async_token": {
           "token": "Async"
         },
@@ -951,7 +936,7 @@
       }
     },
     {
-      "ident": "ExprAwait",
+      "ident": "ExprAttrs",
       "features": {
         "any": [
           "full"
@@ -963,6 +948,21 @@
             "syn": "Attribute"
           }
         },
+        "value": {
+          "box": {
+            "syn": "Expr"
+          }
+        }
+      }
+    },
+    {
+      "ident": "ExprAwait",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
         "base": {
           "box": {
             "syn": "Expr"
@@ -985,11 +985,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "left": {
           "box": {
             "syn": "Expr"
@@ -1013,11 +1008,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "label": {
           "option": {
             "syn": "Label"
@@ -1036,11 +1026,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "break_token": {
           "token": "Break"
         },
@@ -1067,11 +1052,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "func": {
           "box": {
             "syn": "Expr"
@@ -1099,11 +1079,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "expr": {
           "box": {
             "syn": "Expr"
@@ -1127,11 +1102,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "lifetimes": {
           "option": {
             "syn": "BoundLifetimes"
@@ -1189,11 +1159,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "const_token": {
           "token": "Const"
         },
@@ -1210,11 +1175,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "continue_token": {
           "token": "Continue"
         },
@@ -1234,11 +1194,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "base": {
           "box": {
             "syn": "Expr"
@@ -1260,11 +1215,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "label": {
           "option": {
             "syn": "Label"
@@ -1299,11 +1249,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "group_token": {
           "group": "Group"
         },
@@ -1322,11 +1267,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "if_token": {
           "token": "If"
         },
@@ -1363,11 +1303,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "expr": {
           "box": {
             "syn": "Expr"
@@ -1391,11 +1326,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "underscore_token": {
           "token": "Underscore"
         }
@@ -1409,11 +1339,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "let_token": {
           "token": "Let"
         },
@@ -1441,11 +1366,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "lit": {
           "syn": "Lit"
         }
@@ -1459,11 +1379,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "label": {
           "option": {
             "syn": "Label"
@@ -1485,11 +1400,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "mac": {
           "syn": "Macro"
         }
@@ -1503,11 +1413,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "match_token": {
           "token": "Match"
         },
@@ -1534,11 +1439,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "receiver": {
           "box": {
             "syn": "Expr"
@@ -1577,11 +1477,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "paren_token": {
           "group": "Paren"
         },
@@ -1601,11 +1496,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "qself": {
           "option": {
             "syn": "QSelf"
@@ -1624,11 +1514,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "start": {
           "option": {
             "box": {
@@ -1656,11 +1541,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "and_token": {
           "token": "And"
         },
@@ -1684,11 +1564,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "bracket_token": {
           "group": "Bracket"
         },
@@ -1715,11 +1590,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "return_token": {
           "token": "Return"
         },
@@ -1740,11 +1610,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "qself": {
           "option": {
             "syn": "QSelf"
@@ -1786,11 +1651,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "expr": {
           "box": {
             "syn": "Expr"
@@ -1809,11 +1669,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "try_token": {
           "token": "Try"
         },
@@ -1830,11 +1685,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "paren_token": {
           "group": "Paren"
         },
@@ -1857,11 +1707,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "op": {
           "syn": "UnOp"
         },
@@ -1880,11 +1725,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "unsafe_token": {
           "token": "Unsafe"
         },
@@ -1901,11 +1741,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "label": {
           "option": {
             "syn": "Label"
@@ -1932,11 +1767,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "yield_token": {
           "token": "Yield"
         },
@@ -3663,6 +3493,11 @@
         ]
       },
       "variants": {
+        "Attrs": [
+          {
+            "syn": "PatAttrs"
+          }
+        ],
         "Const": [
           {
             "syn": "ExprConst"
@@ -3747,7 +3582,7 @@
       "exhaustive": false
     },
     {
-      "ident": "PatIdent",
+      "ident": "PatAttrs",
       "features": {
         "any": [
           "full"
@@ -3759,6 +3594,21 @@
             "syn": "Attribute"
           }
         },
+        "value": {
+          "box": {
+            "syn": "Pat"
+          }
+        }
+      }
+    },
+    {
+      "ident": "PatIdent",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
         "by_ref": {
           "option": {
             "token": "Ref"
@@ -3796,11 +3646,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "leading_vert": {
           "option": {
             "token": "Or"
@@ -3824,11 +3669,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "and_token": {
           "token": "And"
         },
@@ -3852,11 +3692,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "dot2_token": {
           "token": "Dot2"
         }
@@ -3870,11 +3705,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "bracket_token": {
           "group": "Bracket"
         },
@@ -3896,11 +3726,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "qself": {
           "option": {
             "syn": "QSelf"
@@ -3920,6 +3745,11 @@
             "punct": "Comma"
           }
         },
+        "rest_attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "rest": {
           "option": {
             "syn": "PatRest"
@@ -3935,11 +3765,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "paren_token": {
           "group": "Paren"
         },
@@ -3961,11 +3786,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "qself": {
           "option": {
             "syn": "QSelf"
@@ -3987,11 +3807,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "pat": {
           "box": {
             "syn": "Pat"
@@ -4015,11 +3830,6 @@
         ]
       },
       "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
         "underscore_token": {
           "token": "Underscore"
         }

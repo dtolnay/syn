@@ -348,12 +348,12 @@ mod expr;
 pub use crate::expr::{Arm, FieldValue, Label, RangeLimits};
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::expr::{
-    Expr, ExprArray, ExprAssign, ExprAssignOp, ExprAsync, ExprAwait, ExprBinary, ExprBlock,
-    ExprBreak, ExprCall, ExprCast, ExprClosure, ExprConst, ExprContinue, ExprField, ExprForLoop,
-    ExprGroup, ExprIf, ExprIndex, ExprInfer, ExprLet, ExprLit, ExprLoop, ExprMacro, ExprMatch,
-    ExprMethodCall, ExprParen, ExprPath, ExprRange, ExprReference, ExprRepeat, ExprReturn,
-    ExprStruct, ExprTry, ExprTryBlock, ExprTuple, ExprUnary, ExprUnsafe, ExprWhile, ExprYield,
-    Index, Member,
+    Expr, ExprArray, ExprAssign, ExprAssignOp, ExprAsync, ExprAttrs, ExprAwait, ExprBinary,
+    ExprBlock, ExprBreak, ExprCall, ExprCast, ExprClosure, ExprConst, ExprContinue, ExprField,
+    ExprForLoop, ExprGroup, ExprIf, ExprIndex, ExprInfer, ExprLet, ExprLit, ExprLoop, ExprMacro,
+    ExprMatch, ExprMethodCall, ExprParen, ExprPath, ExprRange, ExprReference, ExprRepeat,
+    ExprReturn, ExprStruct, ExprTry, ExprTryBlock, ExprTuple, ExprUnary, ExprUnsafe, ExprWhile,
+    ExprYield, Index, Member,
 };
 
 #[cfg(feature = "parsing")]
@@ -446,7 +446,7 @@ pub use crate::expr::{
 };
 #[cfg(feature = "full")]
 pub use crate::pat::{
-    FieldPat, Pat, PatIdent, PatOr, PatReference, PatRest, PatSlice, PatStruct, PatTuple,
+    FieldPat, Pat, PatAttrs, PatIdent, PatOr, PatReference, PatRest, PatSlice, PatStruct, PatTuple,
     PatTupleStruct, PatType, PatWild,
 };
 
@@ -530,11 +530,6 @@ mod gen {
     ///     V: Fold + ?Sized,
     /// {
     ///     ExprBinary {
-    ///         attrs: node
-    ///             .attrs
-    ///             .into_iter()
-    ///             .map(|attr| v.fold_attribute(attr))
-    ///             .collect(),
     ///         left: Box::new(v.fold_expr(*node.left)),
     ///         op: v.fold_bin_op(node.op),
     ///         right: Box::new(v.fold_expr(*node.right)),
@@ -564,7 +559,6 @@ mod gen {
     /// impl Fold for ParenthesizeEveryExpr {
     ///     fn fold_expr(&mut self, expr: Expr) -> Expr {
     ///         Expr::Paren(ExprParen {
-    ///             attrs: Vec::new(),
     ///             expr: Box::new(fold_expr(self, expr)),
     ///             paren_token: token::Paren::default(),
     ///         })
@@ -614,9 +608,6 @@ mod gen {
     /// where
     ///     V: Visit<'ast> + ?Sized,
     /// {
-    ///     for attr in &node.attrs {
-    ///         v.visit_attribute(attr);
-    ///     }
     ///     v.visit_expr(&*node.left);
     ///     v.visit_bin_op(&node.op);
     ///     v.visit_expr(&*node.right);
@@ -734,9 +725,6 @@ mod gen {
     /// where
     ///     V: VisitMut + ?Sized,
     /// {
-    ///     for attr in &mut node.attrs {
-    ///         v.visit_attribute_mut(attr);
-    ///     }
     ///     v.visit_expr_mut(&mut *node.left);
     ///     v.visit_bin_op_mut(&mut node.op);
     ///     v.visit_expr_mut(&mut *node.right);

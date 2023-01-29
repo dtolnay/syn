@@ -264,7 +264,6 @@ pub mod parsing {
             let colon_token: Token![:] = input.parse()?;
             let ty: Type = input.parse()?;
             pat = Pat::Type(PatType {
-                attrs: Vec::new(),
                 pat: Box::new(pat),
                 colon_token,
                 ty: Box::new(ty),
@@ -278,7 +277,6 @@ pub mod parsing {
             let diverge = if let Some(else_token) = input.parse()? {
                 let else_token: Token![else] = else_token;
                 let diverge = ExprBlock {
-                    attrs: Vec::new(),
                     label: None,
                     block: input.parse()?,
                 };
@@ -314,6 +312,18 @@ pub mod parsing {
     ) -> Result<Stmt> {
         let mut e = expr::parsing::expr_early(input)?;
 
+        let semi_token: Option<Token![;]> = input.parse()?;
+
+        if allow_nosemi.0 || semi_token.is_some() {
+            if let Expr::Macro(ExprMacro { mac }) = e {
+                return Ok(Stmt::Macro(StmtMacro {
+                    attrs,
+                    mac,
+                    semi_token,
+                }));
+            }
+        }
+
         let mut attr_target = &mut e;
         loop {
             attr_target = match attr_target {
@@ -323,6 +333,7 @@ pub mod parsing {
                 Expr::Cast(e) => &mut e.expr,
                 Expr::Array(_)
                 | Expr::Async(_)
+                | Expr::Attrs(_)
                 | Expr::Await(_)
                 | Expr::Block(_)
                 | Expr::Break(_)
@@ -361,18 +372,6 @@ pub mod parsing {
         }
         attrs.extend(attr_target.replace_attrs(Vec::new()));
         attr_target.replace_attrs(attrs);
-
-        let semi_token: Option<Token![;]> = input.parse()?;
-
-        if allow_nosemi.0 || semi_token.is_some() {
-            if let Expr::Macro(ExprMacro { attrs, mac }) = e {
-                return Ok(Stmt::Macro(StmtMacro {
-                    attrs,
-                    mac,
-                    semi_token,
-                }));
-            }
-        }
 
         if semi_token.is_some() {
             Ok(Stmt::Expr(e, semi_token))

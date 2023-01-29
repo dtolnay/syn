@@ -256,6 +256,8 @@ impl PartialEq for Expr {
             #[cfg(feature = "full")]
             (Expr::Async(self0), Expr::Async(other0)) => self0 == other0,
             #[cfg(feature = "full")]
+            (Expr::Attrs(self0), Expr::Attrs(other0)) => self0 == other0,
+            #[cfg(feature = "full")]
             (Expr::Await(self0), Expr::Await(other0)) => self0 == other0,
             (Expr::Binary(self0), Expr::Binary(other0)) => self0 == other0,
             #[cfg(feature = "full")]
@@ -330,7 +332,7 @@ impl Eq for ExprArray {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprArray {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.elems == other.elems
+        self.elems == other.elems
     }
 }
 #[cfg(feature = "full")]
@@ -340,7 +342,7 @@ impl Eq for ExprAssign {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprAssign {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.left == other.left && self.right == other.right
+        self.left == other.left && self.right == other.right
     }
 }
 #[cfg(feature = "full")]
@@ -350,8 +352,7 @@ impl Eq for ExprAssignOp {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprAssignOp {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.left == other.left && self.op == other.op
-            && self.right == other.right
+        self.left == other.left && self.op == other.op && self.right == other.right
     }
 }
 #[cfg(feature = "full")]
@@ -361,8 +362,17 @@ impl Eq for ExprAsync {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprAsync {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.capture == other.capture
-            && self.block == other.block
+        self.capture == other.capture && self.block == other.block
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for ExprAttrs {}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for ExprAttrs {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs && self.value == other.value
     }
 }
 #[cfg(feature = "full")]
@@ -372,7 +382,7 @@ impl Eq for ExprAwait {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprAwait {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.base == other.base
+        self.base == other.base
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -382,8 +392,7 @@ impl Eq for ExprBinary {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprBinary {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.left == other.left && self.op == other.op
-            && self.right == other.right
+        self.left == other.left && self.op == other.op && self.right == other.right
     }
 }
 #[cfg(feature = "full")]
@@ -393,8 +402,7 @@ impl Eq for ExprBlock {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprBlock {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.label == other.label
-            && self.block == other.block
+        self.label == other.label && self.block == other.block
     }
 }
 #[cfg(feature = "full")]
@@ -404,7 +412,7 @@ impl Eq for ExprBreak {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprBreak {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.label == other.label && self.expr == other.expr
+        self.label == other.label && self.expr == other.expr
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -414,7 +422,7 @@ impl Eq for ExprCall {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprCall {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.func == other.func && self.args == other.args
+        self.func == other.func && self.args == other.args
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -424,7 +432,7 @@ impl Eq for ExprCast {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprCast {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.expr == other.expr && self.ty == other.ty
+        self.expr == other.expr && self.ty == other.ty
     }
 }
 #[cfg(feature = "full")]
@@ -434,11 +442,10 @@ impl Eq for ExprClosure {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprClosure {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.lifetimes == other.lifetimes
-            && self.constness == other.constness && self.movability == other.movability
-            && self.asyncness == other.asyncness && self.capture == other.capture
-            && self.inputs == other.inputs && self.output == other.output
-            && self.body == other.body
+        self.lifetimes == other.lifetimes && self.constness == other.constness
+            && self.movability == other.movability && self.asyncness == other.asyncness
+            && self.capture == other.capture && self.inputs == other.inputs
+            && self.output == other.output && self.body == other.body
     }
 }
 #[cfg(feature = "full")]
@@ -448,7 +455,7 @@ impl Eq for ExprConst {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprConst {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.block == other.block
+        self.block == other.block
     }
 }
 #[cfg(feature = "full")]
@@ -458,7 +465,7 @@ impl Eq for ExprContinue {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprContinue {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.label == other.label
+        self.label == other.label
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -468,8 +475,7 @@ impl Eq for ExprField {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprField {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.base == other.base
-            && self.member == other.member
+        self.base == other.base && self.member == other.member
     }
 }
 #[cfg(feature = "full")]
@@ -479,8 +485,8 @@ impl Eq for ExprForLoop {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprForLoop {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.label == other.label && self.pat == other.pat
-            && self.expr == other.expr && self.body == other.body
+        self.label == other.label && self.pat == other.pat && self.expr == other.expr
+            && self.body == other.body
     }
 }
 #[cfg(feature = "full")]
@@ -490,7 +496,7 @@ impl Eq for ExprGroup {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprGroup {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.expr == other.expr
+        self.expr == other.expr
     }
 }
 #[cfg(feature = "full")]
@@ -500,8 +506,7 @@ impl Eq for ExprIf {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprIf {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.cond == other.cond
-            && self.then_branch == other.then_branch
+        self.cond == other.cond && self.then_branch == other.then_branch
             && self.else_branch == other.else_branch
     }
 }
@@ -512,7 +517,7 @@ impl Eq for ExprIndex {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprIndex {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.expr == other.expr && self.index == other.index
+        self.expr == other.expr && self.index == other.index
     }
 }
 #[cfg(feature = "full")]
@@ -521,8 +526,8 @@ impl Eq for ExprInfer {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprInfer {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs
+    fn eq(&self, _other: &Self) -> bool {
+        true
     }
 }
 #[cfg(feature = "full")]
@@ -532,7 +537,7 @@ impl Eq for ExprLet {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprLet {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.pat == other.pat && self.expr == other.expr
+        self.pat == other.pat && self.expr == other.expr
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -542,7 +547,7 @@ impl Eq for ExprLit {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprLit {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.lit == other.lit
+        self.lit == other.lit
     }
 }
 #[cfg(feature = "full")]
@@ -552,7 +557,7 @@ impl Eq for ExprLoop {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprLoop {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.label == other.label && self.body == other.body
+        self.label == other.label && self.body == other.body
     }
 }
 #[cfg(feature = "full")]
@@ -562,7 +567,7 @@ impl Eq for ExprMacro {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprMacro {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.mac == other.mac
+        self.mac == other.mac
     }
 }
 #[cfg(feature = "full")]
@@ -572,7 +577,7 @@ impl Eq for ExprMatch {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprMatch {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.expr == other.expr && self.arms == other.arms
+        self.expr == other.expr && self.arms == other.arms
     }
 }
 #[cfg(feature = "full")]
@@ -582,9 +587,8 @@ impl Eq for ExprMethodCall {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprMethodCall {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.receiver == other.receiver
-            && self.method == other.method && self.turbofish == other.turbofish
-            && self.args == other.args
+        self.receiver == other.receiver && self.method == other.method
+            && self.turbofish == other.turbofish && self.args == other.args
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -594,7 +598,7 @@ impl Eq for ExprParen {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprParen {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.expr == other.expr
+        self.expr == other.expr
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -604,7 +608,7 @@ impl Eq for ExprPath {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprPath {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.qself == other.qself && self.path == other.path
+        self.qself == other.qself && self.path == other.path
     }
 }
 #[cfg(feature = "full")]
@@ -614,8 +618,7 @@ impl Eq for ExprRange {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprRange {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.start == other.start
-            && self.limits == other.limits && self.end == other.end
+        self.start == other.start && self.limits == other.limits && self.end == other.end
     }
 }
 #[cfg(feature = "full")]
@@ -625,8 +628,7 @@ impl Eq for ExprReference {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprReference {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.mutability == other.mutability
-            && self.expr == other.expr
+        self.mutability == other.mutability && self.expr == other.expr
     }
 }
 #[cfg(feature = "full")]
@@ -636,7 +638,7 @@ impl Eq for ExprRepeat {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprRepeat {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.expr == other.expr && self.len == other.len
+        self.expr == other.expr && self.len == other.len
     }
 }
 #[cfg(feature = "full")]
@@ -646,7 +648,7 @@ impl Eq for ExprReturn {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprReturn {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.expr == other.expr
+        self.expr == other.expr
     }
 }
 #[cfg(feature = "full")]
@@ -656,7 +658,7 @@ impl Eq for ExprStruct {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprStruct {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.qself == other.qself && self.path == other.path
+        self.qself == other.qself && self.path == other.path
             && self.fields == other.fields && self.dot2_token == other.dot2_token
             && self.rest == other.rest
     }
@@ -668,7 +670,7 @@ impl Eq for ExprTry {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprTry {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.expr == other.expr
+        self.expr == other.expr
     }
 }
 #[cfg(feature = "full")]
@@ -678,7 +680,7 @@ impl Eq for ExprTryBlock {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprTryBlock {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.block == other.block
+        self.block == other.block
     }
 }
 #[cfg(feature = "full")]
@@ -688,7 +690,7 @@ impl Eq for ExprTuple {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprTuple {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.elems == other.elems
+        self.elems == other.elems
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -698,7 +700,7 @@ impl Eq for ExprUnary {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprUnary {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.op == other.op && self.expr == other.expr
+        self.op == other.op && self.expr == other.expr
     }
 }
 #[cfg(feature = "full")]
@@ -708,7 +710,7 @@ impl Eq for ExprUnsafe {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprUnsafe {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.block == other.block
+        self.block == other.block
     }
 }
 #[cfg(feature = "full")]
@@ -718,8 +720,7 @@ impl Eq for ExprWhile {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprWhile {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.label == other.label && self.cond == other.cond
-            && self.body == other.body
+        self.label == other.label && self.cond == other.cond && self.body == other.body
     }
 }
 #[cfg(feature = "full")]
@@ -729,7 +730,7 @@ impl Eq for ExprYield {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprYield {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.expr == other.expr
+        self.expr == other.expr
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1375,6 +1376,7 @@ impl Eq for Pat {}
 impl PartialEq for Pat {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
+            (Pat::Attrs(self0), Pat::Attrs(other0)) => self0 == other0,
             (Pat::Const(self0), Pat::Const(other0)) => self0 == other0,
             (Pat::Ident(self0), Pat::Ident(other0)) => self0 == other0,
             (Pat::Lit(self0), Pat::Lit(other0)) => self0 == other0,
@@ -1399,14 +1401,23 @@ impl PartialEq for Pat {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for PatAttrs {}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for PatAttrs {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs && self.value == other.value
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PatIdent {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for PatIdent {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.by_ref == other.by_ref
-            && self.mutability == other.mutability && self.ident == other.ident
-            && self.subpat == other.subpat
+        self.by_ref == other.by_ref && self.mutability == other.mutability
+            && self.ident == other.ident && self.subpat == other.subpat
     }
 }
 #[cfg(feature = "full")]
@@ -1416,8 +1427,7 @@ impl Eq for PatOr {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for PatOr {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.leading_vert == other.leading_vert
-            && self.cases == other.cases
+        self.leading_vert == other.leading_vert && self.cases == other.cases
     }
 }
 #[cfg(feature = "full")]
@@ -1427,8 +1437,7 @@ impl Eq for PatReference {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for PatReference {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.mutability == other.mutability
-            && self.pat == other.pat
+        self.mutability == other.mutability && self.pat == other.pat
     }
 }
 #[cfg(feature = "full")]
@@ -1437,8 +1446,8 @@ impl Eq for PatRest {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for PatRest {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs
+    fn eq(&self, _other: &Self) -> bool {
+        true
     }
 }
 #[cfg(feature = "full")]
@@ -1448,7 +1457,7 @@ impl Eq for PatSlice {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for PatSlice {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.elems == other.elems
+        self.elems == other.elems
     }
 }
 #[cfg(feature = "full")]
@@ -1458,8 +1467,9 @@ impl Eq for PatStruct {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for PatStruct {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.qself == other.qself && self.path == other.path
-            && self.fields == other.fields && self.rest == other.rest
+        self.qself == other.qself && self.path == other.path
+            && self.fields == other.fields && self.rest_attrs == other.rest_attrs
+            && self.rest == other.rest
     }
 }
 #[cfg(feature = "full")]
@@ -1469,7 +1479,7 @@ impl Eq for PatTuple {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for PatTuple {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.elems == other.elems
+        self.elems == other.elems
     }
 }
 #[cfg(feature = "full")]
@@ -1479,8 +1489,7 @@ impl Eq for PatTupleStruct {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for PatTupleStruct {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.qself == other.qself && self.path == other.path
-            && self.pat == other.pat
+        self.qself == other.qself && self.path == other.path && self.pat == other.pat
     }
 }
 #[cfg(feature = "full")]
@@ -1490,7 +1499,7 @@ impl Eq for PatType {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for PatType {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.pat == other.pat && self.ty == other.ty
+        self.pat == other.pat && self.ty == other.ty
     }
 }
 #[cfg(feature = "full")]
@@ -1499,8 +1508,8 @@ impl Eq for PatWild {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for PatWild {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs
+    fn eq(&self, _other: &Self) -> bool {
+        true
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

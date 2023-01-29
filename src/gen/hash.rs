@@ -354,173 +354,178 @@ impl Hash for Expr {
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Await(v0) => {
+            Expr::Attrs(v0) => {
                 state.write_u8(4u8);
                 v0.hash(state);
             }
-            Expr::Binary(v0) => {
+            #[cfg(feature = "full")]
+            Expr::Await(v0) => {
                 state.write_u8(5u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
-            Expr::Block(v0) => {
+            Expr::Binary(v0) => {
                 state.write_u8(6u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Break(v0) => {
+            Expr::Block(v0) => {
                 state.write_u8(7u8);
                 v0.hash(state);
             }
-            Expr::Call(v0) => {
+            #[cfg(feature = "full")]
+            Expr::Break(v0) => {
                 state.write_u8(8u8);
                 v0.hash(state);
             }
-            Expr::Cast(v0) => {
+            Expr::Call(v0) => {
                 state.write_u8(9u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
-            Expr::Closure(v0) => {
+            Expr::Cast(v0) => {
                 state.write_u8(10u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Const(v0) => {
+            Expr::Closure(v0) => {
                 state.write_u8(11u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Continue(v0) => {
+            Expr::Const(v0) => {
                 state.write_u8(12u8);
                 v0.hash(state);
             }
-            Expr::Field(v0) => {
+            #[cfg(feature = "full")]
+            Expr::Continue(v0) => {
                 state.write_u8(13u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
-            Expr::ForLoop(v0) => {
+            Expr::Field(v0) => {
                 state.write_u8(14u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Group(v0) => {
+            Expr::ForLoop(v0) => {
                 state.write_u8(15u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::If(v0) => {
+            Expr::Group(v0) => {
                 state.write_u8(16u8);
                 v0.hash(state);
             }
-            Expr::Index(v0) => {
+            #[cfg(feature = "full")]
+            Expr::If(v0) => {
                 state.write_u8(17u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
-            Expr::Infer(v0) => {
+            Expr::Index(v0) => {
                 state.write_u8(18u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Let(v0) => {
+            Expr::Infer(v0) => {
                 state.write_u8(19u8);
                 v0.hash(state);
             }
-            Expr::Lit(v0) => {
+            #[cfg(feature = "full")]
+            Expr::Let(v0) => {
                 state.write_u8(20u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
-            Expr::Loop(v0) => {
+            Expr::Lit(v0) => {
                 state.write_u8(21u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Macro(v0) => {
+            Expr::Loop(v0) => {
                 state.write_u8(22u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Match(v0) => {
+            Expr::Macro(v0) => {
                 state.write_u8(23u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::MethodCall(v0) => {
+            Expr::Match(v0) => {
                 state.write_u8(24u8);
                 v0.hash(state);
             }
-            Expr::Paren(v0) => {
+            #[cfg(feature = "full")]
+            Expr::MethodCall(v0) => {
                 state.write_u8(25u8);
                 v0.hash(state);
             }
-            Expr::Path(v0) => {
+            Expr::Paren(v0) => {
                 state.write_u8(26u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
-            Expr::Range(v0) => {
+            Expr::Path(v0) => {
                 state.write_u8(27u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Reference(v0) => {
+            Expr::Range(v0) => {
                 state.write_u8(28u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Repeat(v0) => {
+            Expr::Reference(v0) => {
                 state.write_u8(29u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Return(v0) => {
+            Expr::Repeat(v0) => {
                 state.write_u8(30u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Struct(v0) => {
+            Expr::Return(v0) => {
                 state.write_u8(31u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Try(v0) => {
+            Expr::Struct(v0) => {
                 state.write_u8(32u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::TryBlock(v0) => {
+            Expr::Try(v0) => {
                 state.write_u8(33u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Tuple(v0) => {
+            Expr::TryBlock(v0) => {
                 state.write_u8(34u8);
                 v0.hash(state);
             }
-            Expr::Unary(v0) => {
+            #[cfg(feature = "full")]
+            Expr::Tuple(v0) => {
                 state.write_u8(35u8);
+                v0.hash(state);
+            }
+            Expr::Unary(v0) => {
+                state.write_u8(36u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Unsafe(v0) => {
-                state.write_u8(36u8);
+                state.write_u8(37u8);
                 v0.hash(state);
             }
             Expr::Verbatim(v0) => {
-                state.write_u8(37u8);
+                state.write_u8(38u8);
                 TokenStreamHelper(v0).hash(state);
             }
             #[cfg(feature = "full")]
             Expr::While(v0) => {
-                state.write_u8(38u8);
+                state.write_u8(39u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Yield(v0) => {
-                state.write_u8(39u8);
+                state.write_u8(40u8);
                 v0.hash(state);
             }
             #[cfg(not(feature = "full"))]
@@ -535,7 +540,6 @@ impl Hash for ExprArray {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.elems.hash(state);
     }
 }
@@ -546,7 +550,6 @@ impl Hash for ExprAssign {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.left.hash(state);
         self.right.hash(state);
     }
@@ -558,7 +561,6 @@ impl Hash for ExprAssignOp {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.left.hash(state);
         self.op.hash(state);
         self.right.hash(state);
@@ -571,9 +573,19 @@ impl Hash for ExprAsync {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.capture.hash(state);
         self.block.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for ExprAttrs {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.attrs.hash(state);
+        self.value.hash(state);
     }
 }
 #[cfg(feature = "full")]
@@ -583,7 +595,6 @@ impl Hash for ExprAwait {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.base.hash(state);
     }
 }
@@ -594,7 +605,6 @@ impl Hash for ExprBinary {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.left.hash(state);
         self.op.hash(state);
         self.right.hash(state);
@@ -607,7 +617,6 @@ impl Hash for ExprBlock {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.label.hash(state);
         self.block.hash(state);
     }
@@ -619,7 +628,6 @@ impl Hash for ExprBreak {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.label.hash(state);
         self.expr.hash(state);
     }
@@ -631,7 +639,6 @@ impl Hash for ExprCall {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.func.hash(state);
         self.args.hash(state);
     }
@@ -643,7 +650,6 @@ impl Hash for ExprCast {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.expr.hash(state);
         self.ty.hash(state);
     }
@@ -655,7 +661,6 @@ impl Hash for ExprClosure {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.lifetimes.hash(state);
         self.constness.hash(state);
         self.movability.hash(state);
@@ -673,7 +678,6 @@ impl Hash for ExprConst {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.block.hash(state);
     }
 }
@@ -684,7 +688,6 @@ impl Hash for ExprContinue {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.label.hash(state);
     }
 }
@@ -695,7 +698,6 @@ impl Hash for ExprField {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.base.hash(state);
         self.member.hash(state);
     }
@@ -707,7 +709,6 @@ impl Hash for ExprForLoop {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.label.hash(state);
         self.pat.hash(state);
         self.expr.hash(state);
@@ -721,7 +722,6 @@ impl Hash for ExprGroup {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.expr.hash(state);
     }
 }
@@ -732,7 +732,6 @@ impl Hash for ExprIf {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.cond.hash(state);
         self.then_branch.hash(state);
         self.else_branch.hash(state);
@@ -745,7 +744,6 @@ impl Hash for ExprIndex {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.expr.hash(state);
         self.index.hash(state);
     }
@@ -753,12 +751,10 @@ impl Hash for ExprIndex {
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for ExprInfer {
-    fn hash<H>(&self, state: &mut H)
+    fn hash<H>(&self, _state: &mut H)
     where
         H: Hasher,
-    {
-        self.attrs.hash(state);
-    }
+    {}
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -767,7 +763,6 @@ impl Hash for ExprLet {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.pat.hash(state);
         self.expr.hash(state);
     }
@@ -779,7 +774,6 @@ impl Hash for ExprLit {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.lit.hash(state);
     }
 }
@@ -790,7 +784,6 @@ impl Hash for ExprLoop {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.label.hash(state);
         self.body.hash(state);
     }
@@ -802,7 +795,6 @@ impl Hash for ExprMacro {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.mac.hash(state);
     }
 }
@@ -813,7 +805,6 @@ impl Hash for ExprMatch {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.expr.hash(state);
         self.arms.hash(state);
     }
@@ -825,7 +816,6 @@ impl Hash for ExprMethodCall {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.receiver.hash(state);
         self.method.hash(state);
         self.turbofish.hash(state);
@@ -839,7 +829,6 @@ impl Hash for ExprParen {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.expr.hash(state);
     }
 }
@@ -850,7 +839,6 @@ impl Hash for ExprPath {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.qself.hash(state);
         self.path.hash(state);
     }
@@ -862,7 +850,6 @@ impl Hash for ExprRange {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.start.hash(state);
         self.limits.hash(state);
         self.end.hash(state);
@@ -875,7 +862,6 @@ impl Hash for ExprReference {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.mutability.hash(state);
         self.expr.hash(state);
     }
@@ -887,7 +873,6 @@ impl Hash for ExprRepeat {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.expr.hash(state);
         self.len.hash(state);
     }
@@ -899,7 +884,6 @@ impl Hash for ExprReturn {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.expr.hash(state);
     }
 }
@@ -910,7 +894,6 @@ impl Hash for ExprStruct {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.qself.hash(state);
         self.path.hash(state);
         self.fields.hash(state);
@@ -925,7 +908,6 @@ impl Hash for ExprTry {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.expr.hash(state);
     }
 }
@@ -936,7 +918,6 @@ impl Hash for ExprTryBlock {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.block.hash(state);
     }
 }
@@ -947,7 +928,6 @@ impl Hash for ExprTuple {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.elems.hash(state);
     }
 }
@@ -958,7 +938,6 @@ impl Hash for ExprUnary {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.op.hash(state);
         self.expr.hash(state);
     }
@@ -970,7 +949,6 @@ impl Hash for ExprUnsafe {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.block.hash(state);
     }
 }
@@ -981,7 +959,6 @@ impl Hash for ExprWhile {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.label.hash(state);
         self.cond.hash(state);
         self.body.hash(state);
@@ -994,7 +971,6 @@ impl Hash for ExprYield {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.expr.hash(state);
     }
 }
@@ -1833,71 +1809,86 @@ impl Hash for Pat {
         H: Hasher,
     {
         match self {
-            Pat::Const(v0) => {
+            Pat::Attrs(v0) => {
                 state.write_u8(0u8);
                 v0.hash(state);
             }
-            Pat::Ident(v0) => {
+            Pat::Const(v0) => {
                 state.write_u8(1u8);
                 v0.hash(state);
             }
-            Pat::Lit(v0) => {
+            Pat::Ident(v0) => {
                 state.write_u8(2u8);
                 v0.hash(state);
             }
-            Pat::Macro(v0) => {
+            Pat::Lit(v0) => {
                 state.write_u8(3u8);
                 v0.hash(state);
             }
-            Pat::Or(v0) => {
+            Pat::Macro(v0) => {
                 state.write_u8(4u8);
                 v0.hash(state);
             }
-            Pat::Path(v0) => {
+            Pat::Or(v0) => {
                 state.write_u8(5u8);
                 v0.hash(state);
             }
-            Pat::Range(v0) => {
+            Pat::Path(v0) => {
                 state.write_u8(6u8);
                 v0.hash(state);
             }
-            Pat::Reference(v0) => {
+            Pat::Range(v0) => {
                 state.write_u8(7u8);
                 v0.hash(state);
             }
-            Pat::Rest(v0) => {
+            Pat::Reference(v0) => {
                 state.write_u8(8u8);
                 v0.hash(state);
             }
-            Pat::Slice(v0) => {
+            Pat::Rest(v0) => {
                 state.write_u8(9u8);
                 v0.hash(state);
             }
-            Pat::Struct(v0) => {
+            Pat::Slice(v0) => {
                 state.write_u8(10u8);
                 v0.hash(state);
             }
-            Pat::Tuple(v0) => {
+            Pat::Struct(v0) => {
                 state.write_u8(11u8);
                 v0.hash(state);
             }
-            Pat::TupleStruct(v0) => {
+            Pat::Tuple(v0) => {
                 state.write_u8(12u8);
                 v0.hash(state);
             }
-            Pat::Type(v0) => {
+            Pat::TupleStruct(v0) => {
                 state.write_u8(13u8);
                 v0.hash(state);
             }
-            Pat::Verbatim(v0) => {
+            Pat::Type(v0) => {
                 state.write_u8(14u8);
+                v0.hash(state);
+            }
+            Pat::Verbatim(v0) => {
+                state.write_u8(15u8);
                 TokenStreamHelper(v0).hash(state);
             }
             Pat::Wild(v0) => {
-                state.write_u8(15u8);
+                state.write_u8(16u8);
                 v0.hash(state);
             }
         }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for PatAttrs {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.attrs.hash(state);
+        self.value.hash(state);
     }
 }
 #[cfg(feature = "full")]
@@ -1907,7 +1898,6 @@ impl Hash for PatIdent {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.by_ref.hash(state);
         self.mutability.hash(state);
         self.ident.hash(state);
@@ -1921,7 +1911,6 @@ impl Hash for PatOr {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.leading_vert.hash(state);
         self.cases.hash(state);
     }
@@ -1933,7 +1922,6 @@ impl Hash for PatReference {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.mutability.hash(state);
         self.pat.hash(state);
     }
@@ -1941,12 +1929,10 @@ impl Hash for PatReference {
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for PatRest {
-    fn hash<H>(&self, state: &mut H)
+    fn hash<H>(&self, _state: &mut H)
     where
         H: Hasher,
-    {
-        self.attrs.hash(state);
-    }
+    {}
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1955,7 +1941,6 @@ impl Hash for PatSlice {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.elems.hash(state);
     }
 }
@@ -1966,10 +1951,10 @@ impl Hash for PatStruct {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.qself.hash(state);
         self.path.hash(state);
         self.fields.hash(state);
+        self.rest_attrs.hash(state);
         self.rest.hash(state);
     }
 }
@@ -1980,7 +1965,6 @@ impl Hash for PatTuple {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.elems.hash(state);
     }
 }
@@ -1991,7 +1975,6 @@ impl Hash for PatTupleStruct {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.qself.hash(state);
         self.path.hash(state);
         self.pat.hash(state);
@@ -2004,7 +1987,6 @@ impl Hash for PatType {
     where
         H: Hasher,
     {
-        self.attrs.hash(state);
         self.pat.hash(state);
         self.ty.hash(state);
     }
@@ -2012,12 +1994,10 @@ impl Hash for PatType {
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for PatWild {
-    fn hash<H>(&self, state: &mut H)
+    fn hash<H>(&self, _state: &mut H)
     where
         H: Hasher,
-    {
-        self.attrs.hash(state);
-    }
+    {}
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]

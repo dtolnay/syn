@@ -14,6 +14,9 @@ ast_enum_of_structs! {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     #[non_exhaustive]
     pub enum Pat {
+        /// Attributes in pattern position: `#[cfg(any())] _`.
+        Attrs(PatAttrs),
+
         /// A const block: `const { ... }`.
         Const(PatConst),
 
@@ -88,13 +91,21 @@ ast_enum_of_structs! {
 }
 
 ast_struct! {
+    /// Attributes in pattern position: `#[cfg(any())] _`.
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    pub struct PatAttrs {
+        pub attrs: Vec<Attribute>,
+        pub value: Box<Pat>,
+    }
+}
+
+ast_struct! {
     /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
     ///
     /// It may also be a unit struct or struct variant (e.g. `None`), or a
     /// constant; these cannot be distinguished syntactically.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatIdent {
-        pub attrs: Vec<Attribute>,
         pub by_ref: Option<Token![ref]>,
         pub mutability: Option<Token![mut]>,
         pub ident: Ident,
@@ -106,7 +117,6 @@ ast_struct! {
     /// A pattern that matches any one of a set of cases.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatOr {
-        pub attrs: Vec<Attribute>,
         pub leading_vert: Option<Token![|]>,
         pub cases: Punctuated<Pat, Token![|]>,
     }
@@ -116,7 +126,6 @@ ast_struct! {
     /// A reference pattern: `&mut var`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatReference {
-        pub attrs: Vec<Attribute>,
         pub and_token: Token![&],
         pub mutability: Option<Token![mut]>,
         pub pat: Box<Pat>,
@@ -127,7 +136,6 @@ ast_struct! {
     /// The dots in a tuple or slice pattern: `[0, 1, ..]`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatRest {
-        pub attrs: Vec<Attribute>,
         pub dot2_token: Token![..],
     }
 }
@@ -136,7 +144,6 @@ ast_struct! {
     /// A dynamically sized slice pattern: `[a, b, ref i @ .., y, z]`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatSlice {
-        pub attrs: Vec<Attribute>,
         pub bracket_token: token::Bracket,
         pub elems: Punctuated<Pat, Token![,]>,
     }
@@ -146,11 +153,11 @@ ast_struct! {
     /// A struct or struct variant pattern: `Variant { x, y, .. }`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatStruct {
-        pub attrs: Vec<Attribute>,
         pub qself: Option<QSelf>,
         pub path: Path,
         pub brace_token: token::Brace,
         pub fields: Punctuated<FieldPat, Token![,]>,
+        pub rest_attrs: Vec<Attribute>,
         pub rest: Option<PatRest>,
     }
 }
@@ -159,7 +166,6 @@ ast_struct! {
     /// A tuple pattern: `(a, b)`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatTuple {
-        pub attrs: Vec<Attribute>,
         pub paren_token: token::Paren,
         pub elems: Punctuated<Pat, Token![,]>,
     }
@@ -169,7 +175,6 @@ ast_struct! {
     /// A tuple struct or tuple variant pattern: `Variant(x, y, .., z)`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatTupleStruct {
-        pub attrs: Vec<Attribute>,
         pub qself: Option<QSelf>,
         pub path: Path,
         pub pat: PatTuple,
@@ -180,7 +185,6 @@ ast_struct! {
     /// A type ascription pattern: `foo: f64`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatType {
-        pub attrs: Vec<Attribute>,
         pub pat: Box<Pat>,
         pub colon_token: Token![:],
         pub ty: Box<Type>,
@@ -191,7 +195,6 @@ ast_struct! {
     /// A pattern that matches any value: `_`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatWild {
-        pub attrs: Vec<Attribute>,
         pub underscore_token: Token![_],
     }
 }
@@ -347,6 +350,21 @@ pub mod parsing {
         }
     }
 
+    pub(crate) fn pat_with_attrs(mut attrs: Vec<Attribute>, pat: Pat) -> Pat {
+        if attrs.is_empty() {
+            pat
+        } else if let Pat::Attrs(mut pat) = pat {
+            attrs.extend(pat.attrs);
+            pat.attrs = attrs;
+            Pat::Attrs(pat)
+        } else {
+            Pat::Attrs(PatAttrs {
+                attrs,
+                value: Box::new(pat),
+            })
+        }
+    }
+
     fn multi_pat_impl(input: ParseStream, leading_vert: Option<Token![|]>) -> Result<Pat> {
         let mut pat = Pat::parse_single(input)?;
         if leading_vert.is_some()
@@ -361,7 +379,6 @@ pub mod parsing {
                 cases.push_value(pat);
             }
             pat = Pat::Or(PatOr {
-                attrs: Vec::new(),
                 leading_vert,
                 cases,
             });
@@ -387,7 +404,6 @@ pub mod parsing {
                 let bang_token: Token![!] = input.parse()?;
                 let (delimiter, tokens) = mac::parse_delimiter(input)?;
                 return Ok(Pat::Macro(ExprMacro {
-                    attrs: Vec::new(),
                     mac: Macro {
                         path,
                         bang_token,
@@ -405,17 +421,12 @@ pub mod parsing {
         } else if input.peek(Token![..]) {
             pat_range(input, qself, path)
         } else {
-            Ok(Pat::Path(ExprPath {
-                attrs: Vec::new(),
-                qself,
-                path,
-            }))
+            Ok(Pat::Path(ExprPath { qself, path }))
         }
     }
 
     fn pat_wild(input: ParseStream) -> Result<PatWild> {
         Ok(PatWild {
-            attrs: Vec::new(),
             underscore_token: input.parse()?,
         })
     }
@@ -428,7 +439,6 @@ pub mod parsing {
 
     fn pat_ident(input: ParseStream) -> Result<PatIdent> {
         Ok(PatIdent {
-            attrs: Vec::new(),
             by_ref: input.parse()?,
             mutability: input.parse()?,
             ident: input.call(Ident::parse_any)?,
@@ -450,7 +460,6 @@ pub mod parsing {
         path: Path,
     ) -> Result<PatTupleStruct> {
         Ok(PatTupleStruct {
-            attrs: Vec::new(),
             qself,
             path,
             pat: input.call(pat_tuple)?,
@@ -462,12 +471,13 @@ pub mod parsing {
         let brace_token = braced!(content in input);
 
         let mut fields = Punctuated::new();
+        let mut rest_attrs = Vec::new();
         let mut rest = None;
         while !content.is_empty() {
             let attrs = content.call(Attribute::parse_outer)?;
             if content.peek(Token![..]) {
+                rest_attrs = attrs;
                 rest = Some(PatRest {
-                    attrs,
                     dot2_token: content.parse()?,
                 });
                 break;
@@ -483,11 +493,11 @@ pub mod parsing {
         }
 
         Ok(PatStruct {
-            attrs: Vec::new(),
             qself,
             path,
             brace_token,
             fields,
+            rest_attrs,
             rest,
         })
     }
@@ -530,7 +540,6 @@ pub mod parsing {
         };
 
         let mut pat = Pat::Ident(PatIdent {
-            attrs: Vec::new(),
             by_ref,
             mutability,
             ident: ident.clone(),
@@ -553,12 +562,7 @@ pub mod parsing {
         let limits: RangeLimits = input.parse()?;
         let end = input.call(pat_range_bound)?;
         Ok(Pat::Range(ExprRange {
-            attrs: Vec::new(),
-            start: Some(Box::new(Expr::Path(ExprPath {
-                attrs: Vec::new(),
-                qself,
-                path,
-            }))),
+            start: Some(Box::new(Expr::Path(ExprPath { qself, path }))),
             limits,
             end: end.map(PatRangeBound::into_expr),
         }))
@@ -569,17 +573,13 @@ pub mod parsing {
         let end = input.call(pat_range_bound)?;
         if end.is_some() {
             Ok(Pat::Range(ExprRange {
-                attrs: Vec::new(),
                 start: None,
                 limits,
                 end: end.map(PatRangeBound::into_expr),
             }))
         } else {
             match limits {
-                RangeLimits::HalfOpen(dot2_token) => Ok(Pat::Rest(PatRest {
-                    attrs: Vec::new(),
-                    dot2_token,
-                })),
+                RangeLimits::HalfOpen(dot2_token) => Ok(Pat::Rest(PatRest { dot2_token })),
                 RangeLimits::Closed(_) => Err(input.error("expected range upper bound")),
             }
         }
@@ -600,16 +600,11 @@ pub mod parsing {
             elems.push_punct(punct);
         }
 
-        Ok(PatTuple {
-            attrs: Vec::new(),
-            paren_token,
-            elems,
-        })
+        Ok(PatTuple { paren_token, elems })
     }
 
     fn pat_reference(input: ParseStream) -> Result<PatReference> {
         Ok(PatReference {
-            attrs: Vec::new(),
             and_token: input.parse()?,
             mutability: input.parse()?,
             pat: Box::new(Pat::parse_single(input)?),
@@ -622,7 +617,6 @@ pub mod parsing {
             let limits: RangeLimits = input.parse()?;
             let end = input.call(pat_range_bound)?;
             Ok(Pat::Range(ExprRange {
-                attrs: Vec::new(),
                 start: Some(start.into_expr()),
                 limits,
                 end: end.map(PatRangeBound::into_expr),
@@ -634,7 +628,7 @@ pub mod parsing {
 
     // Patterns that can appear on either side of a range pattern.
     enum PatRangeBound {
-        Const(ExprConst),
+        Const(Vec<Attribute>, ExprConst),
         Lit(ExprLit),
         Path(ExprPath),
     }
@@ -642,7 +636,9 @@ pub mod parsing {
     impl PatRangeBound {
         fn into_expr(self) -> Box<Expr> {
             Box::new(match self {
-                PatRangeBound::Const(pat) => Expr::Const(pat),
+                PatRangeBound::Const(attrs, pat) => {
+                    expr::parsing::expr_with_attrs(attrs, Expr::Const(pat))
+                }
                 PatRangeBound::Lit(pat) => Expr::Lit(pat),
                 PatRangeBound::Path(pat) => Expr::Path(pat),
             })
@@ -650,7 +646,7 @@ pub mod parsing {
 
         fn into_pat(self) -> Pat {
             match self {
-                PatRangeBound::Const(pat) => Pat::Const(pat),
+                PatRangeBound::Const(attrs, pat) => pat_with_attrs(attrs, Pat::Const(pat)),
                 PatRangeBound::Lit(pat) => Pat::Lit(pat),
                 PatRangeBound::Path(pat) => Pat::Path(pat),
             }
@@ -682,7 +678,8 @@ pub mod parsing {
         {
             PatRangeBound::Path(input.parse()?)
         } else if lookahead.peek(Token![const]) {
-            PatRangeBound::Const(input.parse()?)
+            let (attrs, expr) = expr::parsing::parse_expr_const(input)?;
+            PatRangeBound::Const(attrs, expr)
         } else {
             return Err(lookahead.error());
         };
@@ -706,7 +703,6 @@ pub mod parsing {
         }
 
         Ok(PatSlice {
-            attrs: Vec::new(),
             bracket_token,
             elems,
         })
@@ -731,11 +727,38 @@ mod printing {
     use crate::attr::FilterAttrs;
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
- 
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for PatAttrs {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            match &*self.value {
+                Pat::Attrs(_)
+                | Pat::Ident(_)
+                | Pat::Lit(_)
+                | Pat::Macro(_)
+                | Pat::Or(_)
+                | Pat::Path(_)
+                | Pat::Range(_)
+                | Pat::Reference(_)
+                | Pat::Rest(_)
+                | Pat::Slice(_)
+                | Pat::Struct(_)
+                | Pat::Tuple(_)
+                | Pat::TupleStruct(_)
+                | Pat::Type(_)
+                | Pat::Verbatim(_)
+                | Pat::Wild(_) => {
+                    self.value.to_tokens(tokens);
+                }
+                Pat::Const(expr) => expr::printing::expr_const_to_tokens(expr, &self.attrs, tokens),
+            }
+        }
+    }
+
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatIdent {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
             self.by_ref.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
             self.ident.to_tokens(tokens);
@@ -749,7 +772,6 @@ mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatOr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
             self.leading_vert.to_tokens(tokens);
             self.cases.to_tokens(tokens);
         }
@@ -758,7 +780,6 @@ mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatReference {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
             self.and_token.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
             self.pat.to_tokens(tokens);
@@ -768,7 +789,6 @@ mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatRest {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
             self.dot2_token.to_tokens(tokens);
         }
     }
@@ -776,7 +796,6 @@ mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatSlice {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
             self.bracket_token.surround(tokens, |tokens| {
                 self.elems.to_tokens(tokens);
             });
@@ -786,7 +805,6 @@ mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatStruct {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
             path::printing::print_path(tokens, &self.qself, &self.path);
             self.brace_token.surround(tokens, |tokens| {
                 self.fields.to_tokens(tokens);
@@ -802,7 +820,6 @@ mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatTuple {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
             self.paren_token.surround(tokens, |tokens| {
                 self.elems.to_tokens(tokens);
             });
@@ -812,7 +829,6 @@ mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatTupleStruct {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
             path::printing::print_path(tokens, &self.qself, &self.path);
             self.pat.to_tokens(tokens);
         }
@@ -821,7 +837,6 @@ mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatType {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
             self.pat.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
@@ -831,7 +846,6 @@ mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatWild {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
             self.underscore_token.to_tokens(tokens);
         }
     }

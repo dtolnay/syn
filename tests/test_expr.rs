@@ -132,7 +132,7 @@ fn test_macro_variable_func() {
     ]);
 
     snapshot!(tokens as Expr, @r###"
-    Expr::Call {
+    Expr::Attrs {
         attrs: [
             Attribute {
                 style: Outer,
@@ -146,28 +146,32 @@ fn test_macro_variable_func() {
                 }),
             },
         ],
-        func: Expr::Group {
-            expr: Expr::Path {
-                attrs: [
-                    Attribute {
-                        style: Outer,
-                        meta: Path(Path {
+        value: Expr::Call {
+            func: Expr::Group {
+                expr: Expr::Attrs {
+                    attrs: [
+                        Attribute {
+                            style: Outer,
+                            meta: Path(Path {
+                                segments: [
+                                    PathSegment {
+                                        ident: "inside",
+                                        arguments: None,
+                                    },
+                                ],
+                            }),
+                        },
+                    ],
+                    value: Expr::Path {
+                        path: Path {
                             segments: [
                                 PathSegment {
-                                    ident: "inside",
+                                    ident: "f",
                                     arguments: None,
                                 },
                             ],
-                        }),
-                    },
-                ],
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "f",
-                            arguments: None,
                         },
-                    ],
+                    },
                 },
             },
         },
@@ -257,7 +261,7 @@ fn test_macro_variable_match_arm() {
             Arm {
                 pat: Pat::Wild,
                 body: Expr::Group {
-                    expr: Expr::Tuple {
+                    expr: Expr::Attrs {
                         attrs: [
                             Attribute {
                                 style: Outer,
@@ -271,6 +275,7 @@ fn test_macro_variable_match_arm() {
                                 }),
                             },
                         ],
+                        value: Expr::Tuple,
                     },
                 },
             },

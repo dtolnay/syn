@@ -407,6 +407,12 @@ impl Debug for Expr {
                 formatter.finish()
             }
             #[cfg(feature = "full")]
+            Expr::Attrs(v0) => {
+                let mut formatter = formatter.debug_tuple("Attrs");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            #[cfg(feature = "full")]
             Expr::Await(v0) => {
                 let mut formatter = formatter.debug_tuple("Await");
                 formatter.field(v0);
@@ -622,7 +628,6 @@ impl Debug for Expr {
 impl Debug for ExprArray {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprArray");
-        formatter.field("attrs", &self.attrs);
         formatter.field("bracket_token", &self.bracket_token);
         formatter.field("elems", &self.elems);
         formatter.finish()
@@ -633,7 +638,6 @@ impl Debug for ExprArray {
 impl Debug for ExprAssign {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprAssign");
-        formatter.field("attrs", &self.attrs);
         formatter.field("left", &self.left);
         formatter.field("eq_token", &self.eq_token);
         formatter.field("right", &self.right);
@@ -645,7 +649,6 @@ impl Debug for ExprAssign {
 impl Debug for ExprAssignOp {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprAssignOp");
-        formatter.field("attrs", &self.attrs);
         formatter.field("left", &self.left);
         formatter.field("op", &self.op);
         formatter.field("right", &self.right);
@@ -657,7 +660,6 @@ impl Debug for ExprAssignOp {
 impl Debug for ExprAsync {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprAsync");
-        formatter.field("attrs", &self.attrs);
         formatter.field("async_token", &self.async_token);
         formatter.field("capture", &self.capture);
         formatter.field("block", &self.block);
@@ -666,10 +668,19 @@ impl Debug for ExprAsync {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for ExprAttrs {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ExprAttrs");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("value", &self.value);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ExprAwait {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprAwait");
-        formatter.field("attrs", &self.attrs);
         formatter.field("base", &self.base);
         formatter.field("dot_token", &self.dot_token);
         formatter.field("await_token", &self.await_token);
@@ -681,7 +692,6 @@ impl Debug for ExprAwait {
 impl Debug for ExprBinary {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprBinary");
-        formatter.field("attrs", &self.attrs);
         formatter.field("left", &self.left);
         formatter.field("op", &self.op);
         formatter.field("right", &self.right);
@@ -693,7 +703,6 @@ impl Debug for ExprBinary {
 impl Debug for ExprBlock {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprBlock");
-        formatter.field("attrs", &self.attrs);
         formatter.field("label", &self.label);
         formatter.field("block", &self.block);
         formatter.finish()
@@ -704,7 +713,6 @@ impl Debug for ExprBlock {
 impl Debug for ExprBreak {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprBreak");
-        formatter.field("attrs", &self.attrs);
         formatter.field("break_token", &self.break_token);
         formatter.field("label", &self.label);
         formatter.field("expr", &self.expr);
@@ -716,7 +724,6 @@ impl Debug for ExprBreak {
 impl Debug for ExprCall {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprCall");
-        formatter.field("attrs", &self.attrs);
         formatter.field("func", &self.func);
         formatter.field("paren_token", &self.paren_token);
         formatter.field("args", &self.args);
@@ -728,7 +735,6 @@ impl Debug for ExprCall {
 impl Debug for ExprCast {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprCast");
-        formatter.field("attrs", &self.attrs);
         formatter.field("expr", &self.expr);
         formatter.field("as_token", &self.as_token);
         formatter.field("ty", &self.ty);
@@ -740,7 +746,6 @@ impl Debug for ExprCast {
 impl Debug for ExprClosure {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprClosure");
-        formatter.field("attrs", &self.attrs);
         formatter.field("lifetimes", &self.lifetimes);
         formatter.field("constness", &self.constness);
         formatter.field("movability", &self.movability);
@@ -759,7 +764,6 @@ impl Debug for ExprClosure {
 impl Debug for ExprConst {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprConst");
-        formatter.field("attrs", &self.attrs);
         formatter.field("const_token", &self.const_token);
         formatter.field("block", &self.block);
         formatter.finish()
@@ -770,7 +774,6 @@ impl Debug for ExprConst {
 impl Debug for ExprContinue {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprContinue");
-        formatter.field("attrs", &self.attrs);
         formatter.field("continue_token", &self.continue_token);
         formatter.field("label", &self.label);
         formatter.finish()
@@ -781,7 +784,6 @@ impl Debug for ExprContinue {
 impl Debug for ExprField {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprField");
-        formatter.field("attrs", &self.attrs);
         formatter.field("base", &self.base);
         formatter.field("dot_token", &self.dot_token);
         formatter.field("member", &self.member);
@@ -793,7 +795,6 @@ impl Debug for ExprField {
 impl Debug for ExprForLoop {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprForLoop");
-        formatter.field("attrs", &self.attrs);
         formatter.field("label", &self.label);
         formatter.field("for_token", &self.for_token);
         formatter.field("pat", &self.pat);
@@ -808,7 +809,6 @@ impl Debug for ExprForLoop {
 impl Debug for ExprGroup {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprGroup");
-        formatter.field("attrs", &self.attrs);
         formatter.field("group_token", &self.group_token);
         formatter.field("expr", &self.expr);
         formatter.finish()
@@ -819,7 +819,6 @@ impl Debug for ExprGroup {
 impl Debug for ExprIf {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprIf");
-        formatter.field("attrs", &self.attrs);
         formatter.field("if_token", &self.if_token);
         formatter.field("cond", &self.cond);
         formatter.field("then_branch", &self.then_branch);
@@ -832,7 +831,6 @@ impl Debug for ExprIf {
 impl Debug for ExprIndex {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprIndex");
-        formatter.field("attrs", &self.attrs);
         formatter.field("expr", &self.expr);
         formatter.field("bracket_token", &self.bracket_token);
         formatter.field("index", &self.index);
@@ -844,7 +842,6 @@ impl Debug for ExprIndex {
 impl Debug for ExprInfer {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprInfer");
-        formatter.field("attrs", &self.attrs);
         formatter.field("underscore_token", &self.underscore_token);
         formatter.finish()
     }
@@ -854,7 +851,6 @@ impl Debug for ExprInfer {
 impl Debug for ExprLet {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprLet");
-        formatter.field("attrs", &self.attrs);
         formatter.field("let_token", &self.let_token);
         formatter.field("pat", &self.pat);
         formatter.field("eq_token", &self.eq_token);
@@ -867,7 +863,6 @@ impl Debug for ExprLet {
 impl Debug for ExprLit {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprLit");
-        formatter.field("attrs", &self.attrs);
         formatter.field("lit", &self.lit);
         formatter.finish()
     }
@@ -877,7 +872,6 @@ impl Debug for ExprLit {
 impl Debug for ExprLoop {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprLoop");
-        formatter.field("attrs", &self.attrs);
         formatter.field("label", &self.label);
         formatter.field("loop_token", &self.loop_token);
         formatter.field("body", &self.body);
@@ -889,7 +883,6 @@ impl Debug for ExprLoop {
 impl Debug for ExprMacro {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprMacro");
-        formatter.field("attrs", &self.attrs);
         formatter.field("mac", &self.mac);
         formatter.finish()
     }
@@ -899,7 +892,6 @@ impl Debug for ExprMacro {
 impl Debug for ExprMatch {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprMatch");
-        formatter.field("attrs", &self.attrs);
         formatter.field("match_token", &self.match_token);
         formatter.field("expr", &self.expr);
         formatter.field("brace_token", &self.brace_token);
@@ -912,7 +904,6 @@ impl Debug for ExprMatch {
 impl Debug for ExprMethodCall {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprMethodCall");
-        formatter.field("attrs", &self.attrs);
         formatter.field("receiver", &self.receiver);
         formatter.field("dot_token", &self.dot_token);
         formatter.field("method", &self.method);
@@ -927,7 +918,6 @@ impl Debug for ExprMethodCall {
 impl Debug for ExprParen {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprParen");
-        formatter.field("attrs", &self.attrs);
         formatter.field("paren_token", &self.paren_token);
         formatter.field("expr", &self.expr);
         formatter.finish()
@@ -938,7 +928,6 @@ impl Debug for ExprParen {
 impl Debug for ExprPath {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprPath");
-        formatter.field("attrs", &self.attrs);
         formatter.field("qself", &self.qself);
         formatter.field("path", &self.path);
         formatter.finish()
@@ -949,7 +938,6 @@ impl Debug for ExprPath {
 impl Debug for ExprRange {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprRange");
-        formatter.field("attrs", &self.attrs);
         formatter.field("start", &self.start);
         formatter.field("limits", &self.limits);
         formatter.field("end", &self.end);
@@ -961,7 +949,6 @@ impl Debug for ExprRange {
 impl Debug for ExprReference {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprReference");
-        formatter.field("attrs", &self.attrs);
         formatter.field("and_token", &self.and_token);
         formatter.field("mutability", &self.mutability);
         formatter.field("expr", &self.expr);
@@ -973,7 +960,6 @@ impl Debug for ExprReference {
 impl Debug for ExprRepeat {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprRepeat");
-        formatter.field("attrs", &self.attrs);
         formatter.field("bracket_token", &self.bracket_token);
         formatter.field("expr", &self.expr);
         formatter.field("semi_token", &self.semi_token);
@@ -986,7 +972,6 @@ impl Debug for ExprRepeat {
 impl Debug for ExprReturn {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprReturn");
-        formatter.field("attrs", &self.attrs);
         formatter.field("return_token", &self.return_token);
         formatter.field("expr", &self.expr);
         formatter.finish()
@@ -997,7 +982,6 @@ impl Debug for ExprReturn {
 impl Debug for ExprStruct {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprStruct");
-        formatter.field("attrs", &self.attrs);
         formatter.field("qself", &self.qself);
         formatter.field("path", &self.path);
         formatter.field("brace_token", &self.brace_token);
@@ -1012,7 +996,6 @@ impl Debug for ExprStruct {
 impl Debug for ExprTry {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprTry");
-        formatter.field("attrs", &self.attrs);
         formatter.field("expr", &self.expr);
         formatter.field("question_token", &self.question_token);
         formatter.finish()
@@ -1023,7 +1006,6 @@ impl Debug for ExprTry {
 impl Debug for ExprTryBlock {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprTryBlock");
-        formatter.field("attrs", &self.attrs);
         formatter.field("try_token", &self.try_token);
         formatter.field("block", &self.block);
         formatter.finish()
@@ -1034,7 +1016,6 @@ impl Debug for ExprTryBlock {
 impl Debug for ExprTuple {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprTuple");
-        formatter.field("attrs", &self.attrs);
         formatter.field("paren_token", &self.paren_token);
         formatter.field("elems", &self.elems);
         formatter.finish()
@@ -1045,7 +1026,6 @@ impl Debug for ExprTuple {
 impl Debug for ExprUnary {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprUnary");
-        formatter.field("attrs", &self.attrs);
         formatter.field("op", &self.op);
         formatter.field("expr", &self.expr);
         formatter.finish()
@@ -1056,7 +1036,6 @@ impl Debug for ExprUnary {
 impl Debug for ExprUnsafe {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprUnsafe");
-        formatter.field("attrs", &self.attrs);
         formatter.field("unsafe_token", &self.unsafe_token);
         formatter.field("block", &self.block);
         formatter.finish()
@@ -1067,7 +1046,6 @@ impl Debug for ExprUnsafe {
 impl Debug for ExprWhile {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprWhile");
-        formatter.field("attrs", &self.attrs);
         formatter.field("label", &self.label);
         formatter.field("while_token", &self.while_token);
         formatter.field("cond", &self.cond);
@@ -1080,7 +1058,6 @@ impl Debug for ExprWhile {
 impl Debug for ExprYield {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ExprYield");
-        formatter.field("attrs", &self.attrs);
         formatter.field("yield_token", &self.yield_token);
         formatter.field("expr", &self.expr);
         formatter.finish()
@@ -1983,6 +1960,11 @@ impl Debug for ParenthesizedGenericArguments {
 impl Debug for Pat {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            Pat::Attrs(v0) => {
+                let mut formatter = formatter.debug_tuple("Attrs");
+                formatter.field(v0);
+                formatter.finish()
+            }
             Pat::Const(v0) => {
                 let mut formatter = formatter.debug_tuple("Const");
                 formatter.field(v0);
@@ -2068,10 +2050,19 @@ impl Debug for Pat {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for PatAttrs {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("PatAttrs");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("value", &self.value);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for PatIdent {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatIdent");
-        formatter.field("attrs", &self.attrs);
         formatter.field("by_ref", &self.by_ref);
         formatter.field("mutability", &self.mutability);
         formatter.field("ident", &self.ident);
@@ -2084,7 +2075,6 @@ impl Debug for PatIdent {
 impl Debug for PatOr {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatOr");
-        formatter.field("attrs", &self.attrs);
         formatter.field("leading_vert", &self.leading_vert);
         formatter.field("cases", &self.cases);
         formatter.finish()
@@ -2095,7 +2085,6 @@ impl Debug for PatOr {
 impl Debug for PatReference {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatReference");
-        formatter.field("attrs", &self.attrs);
         formatter.field("and_token", &self.and_token);
         formatter.field("mutability", &self.mutability);
         formatter.field("pat", &self.pat);
@@ -2107,7 +2096,6 @@ impl Debug for PatReference {
 impl Debug for PatRest {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatRest");
-        formatter.field("attrs", &self.attrs);
         formatter.field("dot2_token", &self.dot2_token);
         formatter.finish()
     }
@@ -2117,7 +2105,6 @@ impl Debug for PatRest {
 impl Debug for PatSlice {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatSlice");
-        formatter.field("attrs", &self.attrs);
         formatter.field("bracket_token", &self.bracket_token);
         formatter.field("elems", &self.elems);
         formatter.finish()
@@ -2128,11 +2115,11 @@ impl Debug for PatSlice {
 impl Debug for PatStruct {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatStruct");
-        formatter.field("attrs", &self.attrs);
         formatter.field("qself", &self.qself);
         formatter.field("path", &self.path);
         formatter.field("brace_token", &self.brace_token);
         formatter.field("fields", &self.fields);
+        formatter.field("rest_attrs", &self.rest_attrs);
         formatter.field("rest", &self.rest);
         formatter.finish()
     }
@@ -2142,7 +2129,6 @@ impl Debug for PatStruct {
 impl Debug for PatTuple {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatTuple");
-        formatter.field("attrs", &self.attrs);
         formatter.field("paren_token", &self.paren_token);
         formatter.field("elems", &self.elems);
         formatter.finish()
@@ -2153,7 +2139,6 @@ impl Debug for PatTuple {
 impl Debug for PatTupleStruct {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatTupleStruct");
-        formatter.field("attrs", &self.attrs);
         formatter.field("qself", &self.qself);
         formatter.field("path", &self.path);
         formatter.field("pat", &self.pat);
@@ -2165,7 +2150,6 @@ impl Debug for PatTupleStruct {
 impl Debug for PatType {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatType");
-        formatter.field("attrs", &self.attrs);
         formatter.field("pat", &self.pat);
         formatter.field("colon_token", &self.colon_token);
         formatter.field("ty", &self.ty);
@@ -2177,7 +2161,6 @@ impl Debug for PatType {
 impl Debug for PatWild {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PatWild");
-        formatter.field("attrs", &self.attrs);
         formatter.field("underscore_token", &self.underscore_token);
         formatter.finish()
     }

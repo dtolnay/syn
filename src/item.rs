@@ -1468,25 +1468,24 @@ pub mod parsing {
         // because the rest of the test case is valuable.
         if input.peek(Ident) && input.peek2(Token![<]) {
             let span = input.fork().parse::<Ident>()?.span();
+            let pat = Pat::Wild(PatWild {
+                underscore_token: Token![_](span),
+            });
             return Ok(FnArgOrVariadic::FnArg(FnArg::Typed(PatType {
-                attrs,
-                pat: Box::new(Pat::Wild(PatWild {
-                    attrs: Vec::new(),
-                    underscore_token: Token![_](span),
-                })),
+                pat: Box::new(pat::parsing::pat_with_attrs(attrs, pat)),
                 colon_token: Token![:](span),
                 ty: input.parse()?,
             })));
         }
 
-        let pat = Box::new(Pat::parse_single(input)?);
+        let pat = Pat::parse_single(input)?;
         let colon_token: Token![:] = input.parse()?;
 
         if allow_variadic {
             if let Some(dots) = input.parse::<Option<Token![...]>>()? {
                 return Ok(FnArgOrVariadic::Variadic(Variadic {
                     attrs,
-                    pat: Some((pat, colon_token)),
+                    pat: Some((Box::new(pat), colon_token)),
                     dots,
                     comma: None,
                 }));
@@ -1494,8 +1493,7 @@ pub mod parsing {
         }
 
         Ok(FnArgOrVariadic::FnArg(FnArg::Typed(PatType {
-            attrs,
-            pat,
+            pat: Box::new(pat::parsing::pat_with_attrs(attrs, pat)),
             colon_token,
             ty: input.parse()?,
         })))

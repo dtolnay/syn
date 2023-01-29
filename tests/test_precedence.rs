@@ -343,13 +343,16 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 /// form of the resulting expression.
 fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
     use syn::fold::{fold_expr, fold_generic_argument, Fold};
-    use syn::{token, BinOp, Expr, ExprParen, GenericArgument, MetaNameValue, Pat, Stmt, Type};
+    use syn::{
+        token, BinOp, Expr, ExprAttrs, ExprParen, GenericArgument, MetaNameValue, Pat, Stmt, Type,
+    };
 
     struct ParenthesizeEveryExpr;
 
     fn needs_paren(expr: &Expr) -> bool {
         match expr {
             Expr::Group(_) => unreachable!(),
+            Expr::Attrs(expr) => needs_paren(&expr.value),
             Expr::If(_) | Expr::Unsafe(_) | Expr::Block(_) | Expr::Let(_) => false,
             Expr::Binary(bin) => match (&*bin.left, bin.op, &*bin.right) {
                 (Expr::Let(_), BinOp::And(_), _) | (_, BinOp::And(_), Expr::Let(_)) => false,
@@ -363,12 +366,23 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
             if needs_paren(&expr) {
                 Expr::Paren(ExprParen {
-                    attrs: Vec::new(),
-                    expr: Box::new(fold_expr(self, expr)),
+                    expr: Box::new(match expr {
+                        Expr::Attrs(expr) => Expr::Attrs(ExprAttrs {
+                            attrs: expr.attrs,
+                            value: Box::new(fold_expr(self, *expr.value)),
+                        }),
+                        _ => fold_expr(self, expr),
+                    }),
                     paren_token: token::Paren::default(),
                 })
             } else {
-                fold_expr(self, expr)
+                match expr {
+                    Expr::Attrs(expr) => Expr::Attrs(ExprAttrs {
+                        attrs: expr.attrs,
+                        value: Box::new(fold_expr(self, *expr.value)),
+                    }),
+                    _ => fold_expr(self, expr),
+                }
             }
         }
 
@@ -387,7 +401,16 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
             match stmt {
                 // Don't wrap toplevel expressions in statements.
                 Stmt::Expr(Expr::Verbatim(_), Some(_)) => stmt,
-                Stmt::Expr(e, semi) => Stmt::Expr(fold_expr(self, e), semi),
+                Stmt::Expr(e, semi) => Stmt::Expr(
+                    match e {
+                        Expr::Attrs(e) => Expr::Attrs(ExprAttrs {
+                            attrs: e.attrs,
+                            value: Box::new(fold_expr(self, *e.value)),
+                        }),
+                        _ => fold_expr(self, e),
+                    },
+                    semi,
+                ),
                 s => s,
             }
         }
@@ -428,7 +451,6 @@ fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
             }
 
             Expr::Tuple(ExprTuple {
-                attrs: vec![],
                 elems: Punctuated::new(),
                 paren_token: token::Paren::default(),
             })
