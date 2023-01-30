@@ -25,6 +25,7 @@
 //! 5. Compare the expressions with one another, if they are not equal fail.
 
 extern crate rustc_ast;
+extern crate rustc_ast_pretty;
 extern crate rustc_data_structures;
 extern crate rustc_driver;
 extern crate rustc_span;
@@ -37,6 +38,7 @@ use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use regex::Regex;
 use rustc_ast::ast;
 use rustc_ast::ptr::P;
+use rustc_ast_pretty::pprust;
 use rustc_span::edition::Edition;
 use std::fs;
 use std::process;
@@ -188,7 +190,13 @@ fn test_expressions(edition: Edition, exprs: Vec<syn::Expr>) -> (usize, usize) {
                 passed += 1;
             } else {
                 failed += 1;
-                errorf!("\nFAIL\n{:?}\n!=\n{:?}\n", syn_ast, librustc_ast);
+                let syn_program = pprust::expr_to_string(&syn_ast);
+                let librustc_program = pprust::expr_to_string(&librustc_ast);
+                errorf!(
+                    "\nFAIL\n{}\nsyn != rustc\n{}\n",
+                    syn_program,
+                    librustc_program,
+                );
             }
         }
     });
