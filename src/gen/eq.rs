@@ -739,8 +739,21 @@ impl Eq for Field {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for Field {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.vis == other.vis && self.ident == other.ident
+        self.attrs == other.attrs && self.vis == other.vis
+            && self.mutability == other.mutability && self.ident == other.ident
             && self.colon_token == other.colon_token && self.ty == other.ty
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for FieldMutability {}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for FieldMutability {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (FieldMutability::None, FieldMutability::None) => true,
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -1014,6 +1027,16 @@ impl PartialEq for ImplItemType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for ImplRestriction {}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for ImplRestriction {
+    fn eq(&self, _other: &Self) -> bool {
+        match *self {}
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for Item {}
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -1165,8 +1188,8 @@ impl PartialEq for ItemTrait {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis
             && self.unsafety == other.unsafety && self.auto_token == other.auto_token
-            && self.ident == other.ident && self.generics == other.generics
-            && self.colon_token == other.colon_token
+            && self.restriction == other.restriction && self.ident == other.ident
+            && self.generics == other.generics && self.colon_token == other.colon_token
             && self.supertraits == other.supertraits && self.items == other.items
     }
 }
@@ -1627,6 +1650,20 @@ impl PartialEq for Signature {
             && self.ident == other.ident && self.generics == other.generics
             && self.inputs == other.inputs && self.variadic == other.variadic
             && self.output == other.output
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for StaticMutability {}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for StaticMutability {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (StaticMutability::Mut(_), StaticMutability::Mut(_)) => true,
+            (StaticMutability::None, StaticMutability::None) => true,
+            _ => false,
+        }
     }
 }
 #[cfg(feature = "full")]

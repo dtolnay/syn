@@ -35,6 +35,24 @@ ast_struct! {
     }
 }
 
+ast_enum! {
+    #[non_exhaustive]
+    pub enum FieldMutability {
+        None,
+
+        // TODO: https://rust-lang.github.io/rfcs/3323-restrictions.html
+        //
+        // FieldMutability::Restricted(MutRestricted)
+        //
+        // pub struct MutRestricted {
+        //     pub mut_token: Token![mut],
+        //     pub paren_token: token::Paren,
+        //     pub in_token: Option<Token![in]>,
+        //     pub path: Box<Path>,
+        // }
+    }
+}
+
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;

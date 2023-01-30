@@ -779,9 +779,19 @@ impl Clone for Field {
         Field {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
+            mutability: self.mutability.clone(),
             ident: self.ident.clone(),
             colon_token: self.colon_token.clone(),
             ty: self.ty.clone(),
+        }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for FieldMutability {
+    fn clone(&self) -> Self {
+        match self {
+            FieldMutability::None => FieldMutability::None,
         }
     }
 }
@@ -1036,6 +1046,13 @@ impl Clone for ImplItemType {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for ImplRestriction {
+    fn clone(&self) -> Self {
+        match *self {}
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for Index {
@@ -1227,6 +1244,7 @@ impl Clone for ItemTrait {
             vis: self.vis.clone(),
             unsafety: self.unsafety.clone(),
             auto_token: self.auto_token.clone(),
+            restriction: self.restriction.clone(),
             trait_token: self.trait_token.clone(),
             ident: self.ident.clone(),
             generics: self.generics.clone(),
@@ -1701,6 +1719,16 @@ impl Clone for Signature {
             inputs: self.inputs.clone(),
             variadic: self.variadic.clone(),
             output: self.output.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for StaticMutability {
+    fn clone(&self) -> Self {
+        match self {
+            StaticMutability::Mut(v0) => StaticMutability::Mut(v0.clone()),
+            StaticMutability::None => StaticMutability::None,
         }
     }
 }

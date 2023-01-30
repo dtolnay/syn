@@ -204,7 +204,7 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
         pub static_token: Token![static],
-        pub mutability: Option<Token![mut]>,
+        pub mutability: StaticMutability,
         pub ident: Ident,
         pub colon_token: Token![:],
         pub ty: Box<Type>,
@@ -236,6 +236,7 @@ ast_struct! {
         pub vis: Visibility,
         pub unsafety: Option<Token![unsafe]>,
         pub auto_token: Option<Token![auto]>,
+        pub restriction: Option<ImplRestriction>,
         pub trait_token: Token![trait],
         pub ident: Ident,
         pub generics: Generics,
@@ -541,7 +542,7 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
         pub static_token: Token![static],
-        pub mutability: Option<Token![mut]>,
+        pub mutability: StaticMutability,
         pub ident: Ident,
         pub colon_token: Token![:],
         pub ty: Box<Type>,
@@ -850,6 +851,31 @@ ast_struct! {
         pub dots: Token![...],
         pub comma: Option<Token![,]>,
     }
+}
+
+ast_enum! {
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[non_exhaustive]
+    pub enum StaticMutability {
+        Mut(Token![mut]),
+        None,
+    }
+}
+
+ast_enum! {
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[non_exhaustive]
+    pub enum ImplRestriction {}
+
+
+    // TODO: https://rust-lang.github.io/rfcs/3323-restrictions.html
+    //
+    // pub struct ImplRestriction {
+    //     pub impl_token: Token![impl],
+    //     pub paren_token: token::Paren,
+    //     pub in_token: Option<Token![in]>,
+    //     pub path: Box<Path>,
+    // }
 }
 
 #[cfg(feature = "parsing")]
@@ -2038,6 +2064,7 @@ pub mod parsing {
             vis,
             unsafety,
             auto_token,
+            restriction: None,
             trait_token,
             ident,
             generics,
@@ -2662,6 +2689,14 @@ pub mod parsing {
             }
         }
     }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for StaticMutability {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let mut_token: Option<Token![mut]> = input.parse()?;
+            Ok(mut_token.map_or(StaticMutability::None, StaticMutability::Mut))
+        }
+    }
 }
 
 #[cfg(feature = "printing")]
@@ -3183,6 +3218,16 @@ mod printing {
             }
             self.dots.to_tokens(tokens);
             self.comma.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for StaticMutability {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                StaticMutability::None => {}
+                StaticMutability::Mut(mut_token) => mut_token.to_tokens(tokens),
+            }
         }
     }
 }

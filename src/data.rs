@@ -140,6 +140,8 @@ ast_struct! {
 
         pub vis: Visibility,
 
+        pub mutability: FieldMutability,
+
         /// Name of the field, if any.
         ///
         /// Fields of tuple structs have no names.
@@ -215,6 +217,7 @@ pub mod parsing {
             Ok(Field {
                 attrs: input.call(Attribute::parse_outer)?,
                 vis: input.parse()?,
+                mutability: FieldMutability::None,
                 ident: Some(if input.peek(Token![_]) {
                     input.call(Ident::parse_any)
                 } else {
@@ -231,6 +234,7 @@ pub mod parsing {
             Ok(Field {
                 attrs: input.call(Attribute::parse_outer)?,
                 vis: input.parse()?,
+                mutability: FieldMutability::None,
                 ident: None,
                 colon_token: None,
                 ty: input.parse()?,

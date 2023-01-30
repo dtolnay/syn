@@ -273,6 +273,10 @@ pub trait VisitMut {
     fn visit_field_mut(&mut self, i: &mut Field) {
         visit_field_mut(self, i);
     }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    fn visit_field_mutability_mut(&mut self, i: &mut FieldMutability) {
+        visit_field_mutability_mut(self, i);
+    }
     #[cfg(feature = "full")]
     fn visit_field_pat_mut(&mut self, i: &mut FieldPat) {
         visit_field_pat_mut(self, i);
@@ -355,6 +359,10 @@ pub trait VisitMut {
     #[cfg(feature = "full")]
     fn visit_impl_item_type_mut(&mut self, i: &mut ImplItemType) {
         visit_impl_item_type_mut(self, i);
+    }
+    #[cfg(feature = "full")]
+    fn visit_impl_restriction_mut(&mut self, i: &mut ImplRestriction) {
+        visit_impl_restriction_mut(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_index_mut(&mut self, i: &mut Index) {
@@ -584,6 +592,10 @@ pub trait VisitMut {
     }
     fn visit_span_mut(&mut self, i: &mut Span) {
         visit_span_mut(self, i);
+    }
+    #[cfg(feature = "full")]
+    fn visit_static_mutability_mut(&mut self, i: &mut StaticMutability) {
+        visit_static_mutability_mut(self, i);
     }
     #[cfg(feature = "full")]
     fn visit_stmt_mut(&mut self, i: &mut Stmt) {
@@ -1781,6 +1793,7 @@ where
         v.visit_attribute_mut(it);
     }
     v.visit_visibility_mut(&mut node.vis);
+    v.visit_field_mutability_mut(&mut node.mutability);
     if let Some(it) = &mut node.ident {
         v.visit_ident_mut(it);
     }
@@ -1788,6 +1801,15 @@ where
         tokens_helper(v, &mut it.spans);
     }
     v.visit_type_mut(&mut node.ty);
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+pub fn visit_field_mutability_mut<V>(v: &mut V, node: &mut FieldMutability)
+where
+    V: VisitMut + ?Sized,
+{
+    match node {
+        FieldMutability::None => {}
+    }
 }
 #[cfg(feature = "full")]
 pub fn visit_field_pat_mut<V>(v: &mut V, node: &mut FieldPat)
@@ -1945,9 +1967,7 @@ where
     }
     v.visit_visibility_mut(&mut node.vis);
     tokens_helper(v, &mut node.static_token.span);
-    if let Some(it) = &mut node.mutability {
-        tokens_helper(v, &mut it.span);
-    }
+    v.visit_static_mutability_mut(&mut node.mutability);
     v.visit_ident_mut(&mut node.ident);
     tokens_helper(v, &mut node.colon_token.spans);
     v.visit_type_mut(&mut *node.ty);
@@ -2129,6 +2149,13 @@ where
     tokens_helper(v, &mut node.eq_token.spans);
     v.visit_type_mut(&mut node.ty);
     tokens_helper(v, &mut node.semi_token.spans);
+}
+#[cfg(feature = "full")]
+pub fn visit_impl_restriction_mut<V>(v: &mut V, node: &mut ImplRestriction)
+where
+    V: VisitMut + ?Sized,
+{
+    match *node {}
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_index_mut<V>(v: &mut V, node: &mut Index)
@@ -2353,9 +2380,7 @@ where
     }
     v.visit_visibility_mut(&mut node.vis);
     tokens_helper(v, &mut node.static_token.span);
-    if let Some(it) = &mut node.mutability {
-        tokens_helper(v, &mut it.span);
-    }
+    v.visit_static_mutability_mut(&mut node.mutability);
     v.visit_ident_mut(&mut node.ident);
     tokens_helper(v, &mut node.colon_token.spans);
     v.visit_type_mut(&mut *node.ty);
@@ -2394,6 +2419,9 @@ where
     }
     if let Some(it) = &mut node.auto_token {
         tokens_helper(v, &mut it.span);
+    }
+    if let Some(it) = &mut node.restriction {
+        v.visit_impl_restriction_mut(it);
     }
     tokens_helper(v, &mut node.trait_token.span);
     v.visit_ident_mut(&mut node.ident);
@@ -3080,6 +3108,18 @@ pub fn visit_span_mut<V>(v: &mut V, node: &mut Span)
 where
     V: VisitMut + ?Sized,
 {}
+#[cfg(feature = "full")]
+pub fn visit_static_mutability_mut<V>(v: &mut V, node: &mut StaticMutability)
+where
+    V: VisitMut + ?Sized,
+{
+    match node {
+        StaticMutability::Mut(_binding_0) => {
+            tokens_helper(v, &mut _binding_0.span);
+        }
+        StaticMutability::None => {}
+    }
+}
 #[cfg(feature = "full")]
 pub fn visit_stmt_mut<V>(v: &mut V, node: &mut Stmt)
 where
