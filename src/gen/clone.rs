@@ -1619,17 +1619,6 @@ impl Clone for PathSegment {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for PredicateEq {
-    fn clone(&self) -> Self {
-        PredicateEq {
-            lhs_ty: self.lhs_ty.clone(),
-            eq_token: self.eq_token.clone(),
-            rhs_ty: self.rhs_ty.clone(),
-        }
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for PredicateLifetime {
     fn clone(&self) -> Self {
         PredicateLifetime {
@@ -2179,7 +2168,6 @@ impl Clone for WherePredicate {
         match self {
             WherePredicate::Type(v0) => WherePredicate::Type(v0.clone()),
             WherePredicate::Lifetime(v0) => WherePredicate::Lifetime(v0.clone()),
-            WherePredicate::Eq(v0) => WherePredicate::Eq(v0.clone()),
         }
     }
 }

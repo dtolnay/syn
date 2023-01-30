@@ -555,10 +555,6 @@ pub trait VisitMut {
         visit_path_segment_mut(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn visit_predicate_eq_mut(&mut self, i: &mut PredicateEq) {
-        visit_predicate_eq_mut(self, i);
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_predicate_lifetime_mut(&mut self, i: &mut PredicateLifetime) {
         visit_predicate_lifetime_mut(self, i);
     }
@@ -2964,15 +2960,6 @@ where
     v.visit_path_arguments_mut(&mut node.arguments);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-pub fn visit_predicate_eq_mut<V>(v: &mut V, node: &mut PredicateEq)
-where
-    V: VisitMut + ?Sized,
-{
-    v.visit_type_mut(&mut node.lhs_ty);
-    tokens_helper(v, &mut node.eq_token.spans);
-    v.visit_type_mut(&mut node.rhs_ty);
-}
-#[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_predicate_lifetime_mut<V>(v: &mut V, node: &mut PredicateLifetime)
 where
     V: VisitMut + ?Sized,
@@ -3709,9 +3696,6 @@ where
         }
         WherePredicate::Lifetime(_binding_0) => {
             v.visit_predicate_lifetime_mut(_binding_0);
-        }
-        WherePredicate::Eq(_binding_0) => {
-            v.visit_predicate_eq_mut(_binding_0);
         }
     }
 }

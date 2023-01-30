@@ -4089,26 +4089,6 @@
       }
     },
     {
-      "ident": "PredicateEq",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "fields": {
-        "lhs_ty": {
-          "syn": "Type"
-        },
-        "eq_token": {
-          "token": "Eq"
-        },
-        "rhs_ty": {
-          "syn": "Type"
-        }
-      }
-    },
-    {
       "ident": "PredicateLifetime",
       "features": {
         "any": [
@@ -5429,11 +5409,6 @@
         "Lifetime": [
           {
             "syn": "PredicateLifetime"
-          }
-        ],
-        "Eq": [
-          {
-            "syn": "PredicateEq"
           }
         ]
       }

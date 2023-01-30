@@ -1546,16 +1546,6 @@ impl PartialEq for PathSegment {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for PredicateEq {}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for PredicateEq {
-    fn eq(&self, other: &Self) -> bool {
-        self.lhs_ty == other.lhs_ty && self.rhs_ty == other.rhs_ty
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for PredicateLifetime {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2139,7 +2129,6 @@ impl PartialEq for WherePredicate {
             (WherePredicate::Lifetime(self0), WherePredicate::Lifetime(other0)) => {
                 self0 == other0
             }
-            (WherePredicate::Eq(self0), WherePredicate::Eq(other0)) => self0 == other0,
             _ => false,
         }
     }

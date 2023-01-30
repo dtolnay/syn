@@ -2065,17 +2065,6 @@ impl Hash for PathSegment {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for PredicateEq {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.lhs_ty.hash(state);
-        self.rhs_ty.hash(state);
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for PredicateLifetime {
     fn hash<H>(&self, state: &mut H)
     where
@@ -2789,10 +2778,6 @@ impl Hash for WherePredicate {
             }
             WherePredicate::Lifetime(v0) => {
                 state.write_u8(1u8);
-                v0.hash(state);
-            }
-            WherePredicate::Eq(v0) => {
-                state.write_u8(2u8);
                 v0.hash(state);
             }
         }

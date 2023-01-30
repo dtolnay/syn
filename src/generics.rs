@@ -501,9 +501,6 @@ ast_enum_of_structs! {
 
         /// A lifetime predicate in a `where` clause: `'a: 'b + 'c`.
         Lifetime(PredicateLifetime),
-
-        /// An equality predicate in a `where` clause (unsupported).
-        Eq(PredicateEq),
     }
 }
 
@@ -528,16 +525,6 @@ ast_struct! {
         pub lifetime: Lifetime,
         pub colon_token: Token![:],
         pub bounds: Punctuated<Lifetime, Token![+]>,
-    }
-}
-
-ast_struct! {
-    /// An equality predicate in a `where` clause (unsupported).
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub struct PredicateEq {
-        pub lhs_ty: Type,
-        pub eq_token: Token![=],
-        pub rhs_ty: Type,
     }
 }
 
@@ -1227,15 +1214,6 @@ mod printing {
             self.lifetime.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.bounds.to_tokens(tokens);
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for PredicateEq {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.lhs_ty.to_tokens(tokens);
-            self.eq_token.to_tokens(tokens);
-            self.rhs_ty.to_tokens(tokens);
         }
     }
 }
