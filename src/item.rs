@@ -1058,7 +1058,6 @@ pub mod parsing {
         // type Ty<T> where T: 'static = T;
         BeforeEq,
         // type Ty<T> = T where T: 'static;
-        #[allow(dead_code)]
         AfterEq,
         // TODO: goes away once the migration period on rust-lang/rust#89122 is over
         Both,
@@ -1091,7 +1090,7 @@ pub mod parsing {
                 WhereClauseLocation::BeforeEq | WhereClauseLocation::Both => {
                     generics.where_clause = input.parse()?;
                 }
-                _ => {}
+                WhereClauseLocation::AfterEq => {}
             }
 
             let ty = if let Some(eq_token) = input.parse()? {
@@ -1788,7 +1787,7 @@ pub mod parsing {
             bounds: _,
             ty,
             semi_token,
-        } = FlexibleItemType::parse(input, WhereClauseLocation::BeforeEq)?;
+        } = FlexibleItemType::parse(input, WhereClauseLocation::Both)?;
 
         if defaultness.is_some()
             || generics.lt_token.is_some()
@@ -2277,7 +2276,7 @@ pub mod parsing {
             bounds,
             ty,
             semi_token,
-        } = FlexibleItemType::parse(input, WhereClauseLocation::Both)?;
+        } = FlexibleItemType::parse(input, WhereClauseLocation::AfterEq)?;
 
         if defaultness.is_some() || vis.is_some() {
             Ok(TraitItem::Verbatim(verbatim::between(begin, input)))
@@ -2608,7 +2607,7 @@ pub mod parsing {
             bounds: _,
             ty,
             semi_token,
-        } = FlexibleItemType::parse(input, WhereClauseLocation::Both)?;
+        } = FlexibleItemType::parse(input, WhereClauseLocation::AfterEq)?;
 
         if colon_token.is_some() || ty.is_none() {
             Ok(ImplItem::Verbatim(verbatim::between(begin, input)))
