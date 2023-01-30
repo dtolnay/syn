@@ -5411,7 +5411,8 @@
             "syn": "PredicateLifetime"
           }
         ]
-      }
+      },
+      "exhaustive": false
     }
   ],
   "tokens": {
