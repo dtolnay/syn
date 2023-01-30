@@ -2972,7 +2972,15 @@ pub(crate) mod printing {
             self.if_token.to_tokens(tokens);
             wrap_bare_struct(tokens, &self.cond);
             self.then_branch.to_tokens(tokens);
-            maybe_wrap_else(tokens, &self.else_branch);
+            if let Some((else_token, else_)) = &self.else_branch {
+                else_token.to_tokens(tokens);
+                // If we are not one of the valid expressions to exist in an else
+                // clause, wrap ourselves in a block.
+                match **else_ {
+                    Expr::If(_) | Expr::Block(_) => else_.to_tokens(tokens),
+                    _ => token::Brace::default().surround(tokens, |tokens| else_.to_tokens(tokens)),
+                }
+            }
         }
     }
 
@@ -3237,26 +3245,6 @@ pub(crate) mod printing {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.yield_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    fn maybe_wrap_else(tokens: &mut TokenStream, else_: &Option<(Token![else], Box<Expr>)>) {
-        if let Some((else_token, else_)) = else_ {
-            else_token.to_tokens(tokens);
-
-            // If we are not one of the valid expressions to exist in an else
-            // clause, wrap ourselves in a block.
-            match **else_ {
-                Expr::If(_) | Expr::Block(_) => {
-                    else_.to_tokens(tokens);
-                }
-                _ => {
-                    token::Brace::default().surround(tokens, |tokens| {
-                        else_.to_tokens(tokens);
-                    });
-                }
-            }
         }
     }
 
