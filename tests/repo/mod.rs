@@ -39,6 +39,14 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/issues/issue-34074.rs",
     "tests/ui/proc-macro/trait-fn-args-2015.rs",
 
+    // Deprecated where-clause location
+    "src/tools/rustfmt/tests/source/issue_4257.rs",
+    "src/tools/rustfmt/tests/source/issue_4911.rs",
+    "src/tools/rustfmt/tests/target/issue_4257.rs",
+    "src/tools/rustfmt/tests/target/issue_4911.rs",
+    "tests/pretty/gat-bounds.rs",
+    "tests/rustdoc/generic-associated-types/gats.rs",
+
     // Old type ascription expression syntax
     "src/tools/rustfmt/tests/source/type-ascription.rs",
     "src/tools/rustfmt/tests/target/type-ascription.rs",
