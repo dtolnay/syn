@@ -2786,45 +2786,47 @@ pub(crate) mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprCall {
+    impl ToTokens for ExprAssign {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.func.to_tokens(tokens);
-            self.paren_token.surround(tokens, |tokens| {
-                self.args.to_tokens(tokens);
-            });
+            self.left.to_tokens(tokens);
+            self.eq_token.to_tokens(tokens);
+            self.right.to_tokens(tokens);
         }
     }
 
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprMethodCall {
+    impl ToTokens for ExprAssignOp {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.receiver.to_tokens(tokens);
+            self.left.to_tokens(tokens);
+            self.op.to_tokens(tokens);
+            self.right.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprAsync {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.async_token.to_tokens(tokens);
+            self.capture.to_tokens(tokens);
+            self.block.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprAwait {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.base.to_tokens(tokens);
             self.dot_token.to_tokens(tokens);
-            self.method.to_tokens(tokens);
-            self.turbofish.to_tokens(tokens);
-            self.paren_token.surround(tokens, |tokens| {
-                self.args.to_tokens(tokens);
-            });
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprTuple {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.paren_token.surround(tokens, |tokens| {
-                self.elems.to_tokens(tokens);
-                // If we only have one argument, we need a trailing comma to
-                // distinguish ExprTuple from ExprParen.
-                if self.elems.len() == 1 && !self.elems.trailing_punct() {
-                    <Token![,]>::default().to_tokens(tokens);
-                }
-            });
+            self.await_token.to_tokens(tokens);
         }
     }
 
@@ -2838,20 +2840,38 @@ pub(crate) mod printing {
         }
     }
 
+    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprUnary {
+    impl ToTokens for ExprBlock {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.op.to_tokens(tokens);
+            self.label.to_tokens(tokens);
+            self.block.brace_token.surround(tokens, |tokens| {
+                inner_attrs_to_tokens(&self.attrs, tokens);
+                tokens.append_all(&self.block.stmts);
+            });
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprBreak {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.break_token.to_tokens(tokens);
+            self.label.to_tokens(tokens);
             self.expr.to_tokens(tokens);
         }
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprLit {
+    impl ToTokens for ExprCall {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.lit.to_tokens(tokens);
+            self.func.to_tokens(tokens);
+            self.paren_token.surround(tokens, |tokens| {
+                self.args.to_tokens(tokens);
+            });
         }
     }
 
@@ -2866,61 +2886,53 @@ pub(crate) mod printing {
     }
 
     #[cfg(feature = "full")]
-    fn maybe_wrap_else(tokens: &mut TokenStream, else_: &Option<(Token![else], Box<Expr>)>) {
-        if let Some((else_token, else_)) = else_ {
-            else_token.to_tokens(tokens);
-
-            // If we are not one of the valid expressions to exist in an else
-            // clause, wrap ourselves in a block.
-            match **else_ {
-                Expr::If(_) | Expr::Block(_) => {
-                    else_.to_tokens(tokens);
-                }
-                _ => {
-                    token::Brace::default().surround(tokens, |tokens| {
-                        else_.to_tokens(tokens);
-                    });
-                }
-            }
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprClosure {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.lifetimes.to_tokens(tokens);
+            self.constness.to_tokens(tokens);
+            self.movability.to_tokens(tokens);
+            self.asyncness.to_tokens(tokens);
+            self.capture.to_tokens(tokens);
+            self.or1_token.to_tokens(tokens);
+            self.inputs.to_tokens(tokens);
+            self.or2_token.to_tokens(tokens);
+            self.output.to_tokens(tokens);
+            self.body.to_tokens(tokens);
         }
     }
 
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprLet {
+    impl ToTokens for ExprConst {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.let_token.to_tokens(tokens);
-            self.pat.to_tokens(tokens);
-            self.eq_token.to_tokens(tokens);
-            wrap_bare_struct(tokens, &self.expr);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprIf {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.if_token.to_tokens(tokens);
-            wrap_bare_struct(tokens, &self.cond);
-            self.then_branch.to_tokens(tokens);
-            maybe_wrap_else(tokens, &self.else_branch);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprWhile {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.label.to_tokens(tokens);
-            self.while_token.to_tokens(tokens);
-            wrap_bare_struct(tokens, &self.cond);
-            self.body.brace_token.surround(tokens, |tokens| {
+            self.const_token.to_tokens(tokens);
+            self.block.brace_token.surround(tokens, |tokens| {
                 inner_attrs_to_tokens(&self.attrs, tokens);
-                tokens.append_all(&self.body.stmts);
+                tokens.append_all(&self.block.stmts);
             });
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprContinue {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.continue_token.to_tokens(tokens);
+            self.label.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprField {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.base.to_tokens(tokens);
+            self.dot_token.to_tokens(tokens);
+            self.member.to_tokens(tokens);
         }
     }
 
@@ -2943,6 +2955,69 @@ pub(crate) mod printing {
 
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprGroup {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.group_token.surround(tokens, |tokens| {
+                self.expr.to_tokens(tokens);
+            });
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprIf {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.if_token.to_tokens(tokens);
+            wrap_bare_struct(tokens, &self.cond);
+            self.then_branch.to_tokens(tokens);
+            maybe_wrap_else(tokens, &self.else_branch);
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprIndex {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.expr.to_tokens(tokens);
+            self.bracket_token.surround(tokens, |tokens| {
+                self.index.to_tokens(tokens);
+            });
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprInfer {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.underscore_token.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprLet {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.let_token.to_tokens(tokens);
+            self.pat.to_tokens(tokens);
+            self.eq_token.to_tokens(tokens);
+            wrap_bare_struct(tokens, &self.expr);
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprLit {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.lit.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprLoop {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
@@ -2952,6 +3027,15 @@ pub(crate) mod printing {
                 inner_attrs_to_tokens(&self.attrs, tokens);
                 tokens.append_all(&self.body.stmts);
             });
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprMacro {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.mac.to_tokens(tokens);
         }
     }
 
@@ -2979,169 +3063,34 @@ pub(crate) mod printing {
 
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprAsync {
+    impl ToTokens for ExprMethodCall {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.async_token.to_tokens(tokens);
-            self.capture.to_tokens(tokens);
-            self.block.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprAwait {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.base.to_tokens(tokens);
+            self.receiver.to_tokens(tokens);
             self.dot_token.to_tokens(tokens);
-            self.await_token.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprTryBlock {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.try_token.to_tokens(tokens);
-            self.block.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprYield {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.yield_token.to_tokens(tokens);
-            self.expr.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprClosure {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.lifetimes.to_tokens(tokens);
-            self.constness.to_tokens(tokens);
-            self.movability.to_tokens(tokens);
-            self.asyncness.to_tokens(tokens);
-            self.capture.to_tokens(tokens);
-            self.or1_token.to_tokens(tokens);
-            self.inputs.to_tokens(tokens);
-            self.or2_token.to_tokens(tokens);
-            self.output.to_tokens(tokens);
-            self.body.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprUnsafe {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.unsafe_token.to_tokens(tokens);
-            self.block.brace_token.surround(tokens, |tokens| {
-                inner_attrs_to_tokens(&self.attrs, tokens);
-                tokens.append_all(&self.block.stmts);
+            self.method.to_tokens(tokens);
+            self.turbofish.to_tokens(tokens);
+            self.paren_token.surround(tokens, |tokens| {
+                self.args.to_tokens(tokens);
             });
         }
     }
 
-    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprBlock {
+    impl ToTokens for ExprParen {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.label.to_tokens(tokens);
-            self.block.brace_token.surround(tokens, |tokens| {
-                inner_attrs_to_tokens(&self.attrs, tokens);
-                tokens.append_all(&self.block.stmts);
+            self.paren_token.surround(tokens, |tokens| {
+                self.expr.to_tokens(tokens);
             });
         }
     }
 
-    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprAssign {
+    impl ToTokens for ExprPath {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.left.to_tokens(tokens);
-            self.eq_token.to_tokens(tokens);
-            self.right.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprAssignOp {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.left.to_tokens(tokens);
-            self.op.to_tokens(tokens);
-            self.right.to_tokens(tokens);
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprField {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.base.to_tokens(tokens);
-            self.dot_token.to_tokens(tokens);
-            self.member.to_tokens(tokens);
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for Member {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            match self {
-                Member::Named(ident) => ident.to_tokens(tokens),
-                Member::Unnamed(index) => index.to_tokens(tokens),
-            }
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for Index {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            let mut lit = Literal::i64_unsuffixed(i64::from(self.index));
-            lit.set_span(self.span);
-            tokens.append(lit);
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprIndex {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.expr.to_tokens(tokens);
-            self.bracket_token.surround(tokens, |tokens| {
-                self.index.to_tokens(tokens);
-            });
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprInfer {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.underscore_token.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for RangeLimits {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            match self {
-                RangeLimits::HalfOpen(t) => t.to_tokens(tokens),
-                RangeLimits::Closed(t) => t.to_tokens(tokens),
-            }
+            path::printing::print_path(tokens, &self.qself, &self.path);
         }
     }
 
@@ -3153,14 +3102,6 @@ pub(crate) mod printing {
             self.start.to_tokens(tokens);
             self.limits.to_tokens(tokens);
             self.end.to_tokens(tokens);
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprPath {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            path::printing::print_path(tokens, &self.qself, &self.path);
         }
     }
 
@@ -3177,35 +3118,14 @@ pub(crate) mod printing {
 
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprBreak {
+    impl ToTokens for ExprRepeat {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.break_token.to_tokens(tokens);
-            self.label.to_tokens(tokens);
-            self.expr.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprConst {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.const_token.to_tokens(tokens);
-            self.block.brace_token.surround(tokens, |tokens| {
-                inner_attrs_to_tokens(&self.attrs, tokens);
-                tokens.append_all(&self.block.stmts);
+            self.bracket_token.surround(tokens, |tokens| {
+                self.expr.to_tokens(tokens);
+                self.semi_token.to_tokens(tokens);
+                self.len.to_tokens(tokens);
             });
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprContinue {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.continue_token.to_tokens(tokens);
-            self.label.to_tokens(tokens);
         }
     }
 
@@ -3216,15 +3136,6 @@ pub(crate) mod printing {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.return_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprMacro {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.mac.to_tokens(tokens);
         }
     }
 
@@ -3248,45 +3159,134 @@ pub(crate) mod printing {
 
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprRepeat {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.bracket_token.surround(tokens, |tokens| {
-                self.expr.to_tokens(tokens);
-                self.semi_token.to_tokens(tokens);
-                self.len.to_tokens(tokens);
-            });
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprGroup {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.group_token.surround(tokens, |tokens| {
-                self.expr.to_tokens(tokens);
-            });
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprParen {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.paren_token.surround(tokens, |tokens| {
-                self.expr.to_tokens(tokens);
-            });
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprTry {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.expr.to_tokens(tokens);
             self.question_token.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprTryBlock {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.try_token.to_tokens(tokens);
+            self.block.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprTuple {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.paren_token.surround(tokens, |tokens| {
+                self.elems.to_tokens(tokens);
+                // If we only have one argument, we need a trailing comma to
+                // distinguish ExprTuple from ExprParen.
+                if self.elems.len() == 1 && !self.elems.trailing_punct() {
+                    <Token![,]>::default().to_tokens(tokens);
+                }
+            });
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprUnary {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.op.to_tokens(tokens);
+            self.expr.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprUnsafe {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.unsafe_token.to_tokens(tokens);
+            self.block.brace_token.surround(tokens, |tokens| {
+                inner_attrs_to_tokens(&self.attrs, tokens);
+                tokens.append_all(&self.block.stmts);
+            });
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprWhile {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.label.to_tokens(tokens);
+            self.while_token.to_tokens(tokens);
+            wrap_bare_struct(tokens, &self.cond);
+            self.body.brace_token.surround(tokens, |tokens| {
+                inner_attrs_to_tokens(&self.attrs, tokens);
+                tokens.append_all(&self.body.stmts);
+            });
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprYield {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.yield_token.to_tokens(tokens);
+            self.expr.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    fn maybe_wrap_else(tokens: &mut TokenStream, else_: &Option<(Token![else], Box<Expr>)>) {
+        if let Some((else_token, else_)) = else_ {
+            else_token.to_tokens(tokens);
+
+            // If we are not one of the valid expressions to exist in an else
+            // clause, wrap ourselves in a block.
+            match **else_ {
+                Expr::If(_) | Expr::Block(_) => {
+                    else_.to_tokens(tokens);
+                }
+                _ => {
+                    token::Brace::default().surround(tokens, |tokens| {
+                        else_.to_tokens(tokens);
+                    });
+                }
+            }
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for Member {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                Member::Named(ident) => ident.to_tokens(tokens),
+                Member::Unnamed(index) => index.to_tokens(tokens),
+            }
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for Index {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            let mut lit = Literal::i64_unsuffixed(i64::from(self.index));
+            lit.set_span(self.span);
+            tokens.append(lit);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for RangeLimits {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                RangeLimits::HalfOpen(t) => t.to_tokens(tokens),
+                RangeLimits::Closed(t) => t.to_tokens(tokens),
+            }
         }
     }
 
