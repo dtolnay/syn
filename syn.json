@@ -3381,7 +3381,8 @@
             "proc_macro2": "Literal"
           }
         ]
-      }
+      },
+      "exhaustive": false
     },
     {
       "ident": "LitBool",
