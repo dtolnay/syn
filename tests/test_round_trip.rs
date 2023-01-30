@@ -10,6 +10,7 @@
 )]
 
 extern crate rustc_ast;
+extern crate rustc_ast_pretty;
 extern crate rustc_data_structures;
 extern crate rustc_driver;
 extern crate rustc_error_messages;
@@ -27,6 +28,7 @@ use rustc_ast::ast::{
     WhereClause,
 };
 use rustc_ast::mut_visit::{self, MutVisitor};
+use rustc_ast_pretty::pprust;
 use rustc_error_messages::{DiagnosticMessage, LazyFallbackBundle};
 use rustc_errors::{translation, Diagnostic, PResult};
 use rustc_session::parse::ParseSess;
@@ -139,10 +141,10 @@ fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
                     true
                 } else {
                     errorf!(
-                        "=== {}: FAIL\nbefore: {:#?}\nafter: {:#?}\n",
+                        "=== {}: FAIL\n{}\n!=\n{}\n",
                         path.display(),
-                        before,
-                        after,
+                        pprust::crate_to_string_for_macros(&before),
+                        pprust::crate_to_string_for_macros(&after),
                     );
                     false
                 }
