@@ -731,15 +731,7 @@ mod printing {
     use crate::attr::FilterAttrs;
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for PatWild {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            self.underscore_token.to_tokens(tokens);
-        }
-    }
-
+ 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatIdent {
         fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -755,47 +747,11 @@ mod printing {
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for PatStruct {
+    impl ToTokens for PatOr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
-            path::printing::print_path(tokens, &self.qself, &self.path);
-            self.brace_token.surround(tokens, |tokens| {
-                self.fields.to_tokens(tokens);
-                // NOTE: We need a comma before the dot2 token if it is present.
-                if !self.fields.empty_or_trailing() && self.rest.is_some() {
-                    <Token![,]>::default().to_tokens(tokens);
-                }
-                self.rest.to_tokens(tokens);
-            });
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for PatTupleStruct {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            path::printing::print_path(tokens, &self.qself, &self.path);
-            self.pat.to_tokens(tokens);
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for PatType {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            self.pat.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
-            self.ty.to_tokens(tokens);
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for PatTuple {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            self.paren_token.surround(tokens, |tokens| {
-                self.elems.to_tokens(tokens);
-            });
+            self.leading_vert.to_tokens(tokens);
+            self.cases.to_tokens(tokens);
         }
     }
 
@@ -828,11 +784,55 @@ mod printing {
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for PatOr {
+    impl ToTokens for PatStruct {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
-            self.leading_vert.to_tokens(tokens);
-            self.cases.to_tokens(tokens);
+            path::printing::print_path(tokens, &self.qself, &self.path);
+            self.brace_token.surround(tokens, |tokens| {
+                self.fields.to_tokens(tokens);
+                // NOTE: We need a comma before the dot2 token if it is present.
+                if !self.fields.empty_or_trailing() && self.rest.is_some() {
+                    <Token![,]>::default().to_tokens(tokens);
+                }
+                self.rest.to_tokens(tokens);
+            });
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for PatTuple {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.paren_token.surround(tokens, |tokens| {
+                self.elems.to_tokens(tokens);
+            });
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for PatTupleStruct {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            path::printing::print_path(tokens, &self.qself, &self.path);
+            self.pat.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for PatType {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.pat.to_tokens(tokens);
+            self.colon_token.to_tokens(tokens);
+            self.ty.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for PatWild {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.underscore_token.to_tokens(tokens);
         }
     }
 
