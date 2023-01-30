@@ -264,7 +264,7 @@ fn test_fn_precedence_in_where_clause() {
 
     let predicate = match &where_clause.predicates[0] {
         WherePredicate::Type(pred) => pred,
-        _ => panic!("wrong predicate kind"),
+        WherePredicate::Lifetime(_) => panic!("wrong predicate kind"),
     };
 
     assert_eq!(predicate.bounds.len(), 2, "{:#?}", predicate.bounds);
