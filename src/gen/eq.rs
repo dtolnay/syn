@@ -2059,16 +2059,6 @@ impl PartialEq for Variant {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for VisCrate {}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for VisCrate {
-    fn eq(&self, _other: &Self) -> bool {
-        true
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for VisPublic {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -2096,7 +2086,6 @@ impl PartialEq for Visibility {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Visibility::Public(self0), Visibility::Public(other0)) => self0 == other0,
-            (Visibility::Crate(self0), Visibility::Crate(other0)) => self0 == other0,
             (Visibility::Restricted(self0), Visibility::Restricted(other0)) => {
                 self0 == other0
             }
