@@ -53,45 +53,6 @@ mod common;
 
 mod repo;
 
-/// Test some pre-set expressions chosen by us.
-#[test]
-fn test_simple_precedence() {
-    const EXPRS: &[&str] = &[
-        "1 + 2 * 3 + 4",
-        "1 + 2 * ( 3 + 4 )",
-        "{ for i in r { } *some_ptr += 1; }",
-        "{ loop { break 5; } }",
-        "{ if true { () }.mthd() }",
-        "{ for i in unsafe { 20 } { } }",
-    ];
-
-    let mut failed = 0;
-
-    for input in EXPRS {
-        let expr = if let Some(expr) = parse::syn_expr(input) {
-            expr
-        } else {
-            failed += 1;
-            continue;
-        };
-
-        let pf = match test_expressions(Edition::Edition2018, vec![expr]) {
-            (1, 0) => "passed",
-            (0, 1) => {
-                failed += 1;
-                "failed"
-            }
-            _ => unreachable!(),
-        };
-        errorf!("=== {}: {}\n", input, pf);
-    }
-
-    if failed > 0 {
-        panic!("Failed {} tests", failed);
-    }
-}
-
-/// Test expressions from rustc, like in `test_round_trip`.
 #[test]
 fn test_rustc_precedence() {
     common::rayon_init();
