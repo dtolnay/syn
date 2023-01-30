@@ -41,6 +41,7 @@ use rustc_ast::ptr::P;
 use rustc_ast_pretty::pprust;
 use rustc_span::edition::Edition;
 use std::fs;
+use std::path::Path;
 use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use walkdir::{DirEntry, WalkDir};
@@ -88,20 +89,20 @@ fn test_rustc_precedence() {
                 Ok(file) => {
                     let edition = repo::edition(path).parse().unwrap();
                     let exprs = collect_exprs(file);
-                    test_expressions(edition, exprs)
+                    let (l_passed, l_failed) = test_expressions(path, edition, exprs);
+                    errorf!(
+                        "=== {}: {} passed | {} failed\n",
+                        path.display(),
+                        l_passed,
+                        l_failed,
+                    );
+                    (l_passed, l_failed)
                 }
                 Err(msg) => {
-                    errorf!("syn failed to parse\n{:?}\n", msg);
+                    errorf!("\nFAIL {} - syn failed to parse: {}\n", path.display(), msg);
                     (0, 1)
                 }
             };
-
-            errorf!(
-                "=== {}: {} passed | {} failed\n",
-                path.display(),
-                l_passed,
-                l_failed
-            );
 
             passed.fetch_add(l_passed, Ordering::Relaxed);
             let prev_failed = failed.fetch_add(l_failed, Ordering::Relaxed);
@@ -122,7 +123,7 @@ fn test_rustc_precedence() {
     }
 }
 
-fn test_expressions(edition: Edition, exprs: Vec<syn::Expr>) -> (usize, usize) {
+fn test_expressions(path: &Path, edition: Edition, exprs: Vec<syn::Expr>) -> (usize, usize) {
     let mut passed = 0;
     let mut failed = 0;
 
@@ -134,7 +135,7 @@ fn test_expressions(edition: Edition, exprs: Vec<syn::Expr>) -> (usize, usize) {
                 e
             } else {
                 failed += 1;
-                errorf!("\nFAIL - librustc failed to parse raw\n");
+                errorf!("\nFAIL {} - librustc failed to parse raw\n", path.display());
                 continue;
             };
 
@@ -143,7 +144,10 @@ fn test_expressions(edition: Edition, exprs: Vec<syn::Expr>) -> (usize, usize) {
                 e
             } else {
                 failed += 1;
-                errorf!("\nFAIL - librustc failed to parse bracketed\n");
+                errorf!(
+                    "\nFAIL {} - librustc failed to parse bracketed\n",
+                    path.display(),
+                );
                 continue;
             };
 
@@ -154,7 +158,8 @@ fn test_expressions(edition: Edition, exprs: Vec<syn::Expr>) -> (usize, usize) {
                 let syn_program = pprust::expr_to_string(&syn_ast);
                 let librustc_program = pprust::expr_to_string(&librustc_ast);
                 errorf!(
-                    "\nFAIL\n{}\nsyn != rustc\n{}\n",
+                    "\nFAIL {}\n{}\nsyn != rustc\n{}\n",
+                    path.display(),
                     syn_program,
                     librustc_program,
                 );
