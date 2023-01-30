@@ -993,9 +993,6 @@ mod printing {
 
             // Print lifetimes before types and consts, regardless of their
             // order in self.params.
-            //
-            // TODO: ordering rules for const parameters vs type parameters have
-            // not been settled yet. https://github.com/rust-lang/rust/issues/44580
             let mut trailing_or_empty = true;
             for param in self.params.pairs() {
                 if let GenericParam::Lifetime(_) = **param.value() {
@@ -1030,9 +1027,6 @@ mod printing {
 
             // Print lifetimes before types and consts, regardless of their
             // order in self.params.
-            //
-            // TODO: ordering rules for const parameters vs type parameters have
-            // not been settled yet. https://github.com/rust-lang/rust/issues/44580
             let mut trailing_or_empty = true;
             for param in self.0.params.pairs() {
                 if let GenericParam::Lifetime(_) = **param.value() {
@@ -1085,9 +1079,6 @@ mod printing {
 
             // Print lifetimes before types and consts, regardless of their
             // order in self.params.
-            //
-            // TODO: ordering rules for const parameters vs type parameters have
-            // not been settled yet. https://github.com/rust-lang/rust/issues/44580
             let mut trailing_or_empty = true;
             for param in self.0.params.pairs() {
                 if let GenericParam::Lifetime(def) = *param.value() {
