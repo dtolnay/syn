@@ -4344,15 +4344,6 @@ impl Debug for Lite<syn::PathSegment> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::PredicateEq> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("PredicateEq");
-        formatter.field("lhs_ty", Lite(&_val.lhs_ty));
-        formatter.field("rhs_ty", Lite(&_val.rhs_ty));
-        formatter.finish()
-    }
-}
 impl Debug for Lite<syn::PredicateLifetime> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
@@ -5830,13 +5821,6 @@ impl Debug for Lite<syn::WherePredicate> {
             }
             syn::WherePredicate::Lifetime(_val) => {
                 formatter.write_str("Lifetime")?;
-                formatter.write_str("(")?;
-                Debug::fmt(Lite(_val), formatter)?;
-                formatter.write_str(")")?;
-                Ok(())
-            }
-            syn::WherePredicate::Eq(_val) => {
-                formatter.write_str("Eq")?;
                 formatter.write_str("(")?;
                 Debug::fmt(Lite(_val), formatter)?;
                 formatter.write_str(")")?;

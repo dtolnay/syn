@@ -2223,17 +2223,6 @@ impl Debug for PathSegment {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for PredicateEq {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("PredicateEq");
-        formatter.field("lhs_ty", &self.lhs_ty);
-        formatter.field("eq_token", &self.eq_token);
-        formatter.field("rhs_ty", &self.rhs_ty);
-        formatter.finish()
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for PredicateLifetime {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PredicateLifetime");
@@ -2961,11 +2950,6 @@ impl Debug for WherePredicate {
             }
             WherePredicate::Lifetime(v0) => {
                 let mut formatter = formatter.debug_tuple("Lifetime");
-                formatter.field(v0);
-                formatter.finish()
-            }
-            WherePredicate::Eq(v0) => {
-                let mut formatter = formatter.debug_tuple("Eq");
                 formatter.field(v0);
                 formatter.finish()
             }

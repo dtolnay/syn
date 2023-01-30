@@ -369,9 +369,9 @@ pub use crate::file::File;
 mod generics;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::generics::{
-    BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeDef, PredicateEq,
-    PredicateLifetime, PredicateType, TraitBound, TraitBoundModifier, TypeParam, TypeParamBound,
-    WhereClause, WherePredicate,
+    BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeDef, PredicateLifetime,
+    PredicateType, TraitBound, TraitBoundModifier, TypeParam, TypeParamBound, WhereClause,
+    WherePredicate,
 };
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 pub use crate::generics::{ImplGenerics, Turbofish, TypeGenerics};

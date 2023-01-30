@@ -552,10 +552,6 @@ pub trait Fold {
         fold_path_segment(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn fold_predicate_eq(&mut self, i: PredicateEq) -> PredicateEq {
-        fold_predicate_eq(self, i)
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_predicate_lifetime(&mut self, i: PredicateLifetime) -> PredicateLifetime {
         fold_predicate_lifetime(self, i)
     }
@@ -2618,17 +2614,6 @@ where
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-pub fn fold_predicate_eq<F>(f: &mut F, node: PredicateEq) -> PredicateEq
-where
-    F: Fold + ?Sized,
-{
-    PredicateEq {
-        lhs_ty: f.fold_type(node.lhs_ty),
-        eq_token: Token![=](tokens_helper(f, &node.eq_token.spans)),
-        rhs_ty: f.fold_type(node.rhs_ty),
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_predicate_lifetime<F>(
     f: &mut F,
     node: PredicateLifetime,
@@ -3250,9 +3235,6 @@ where
         }
         WherePredicate::Lifetime(_binding_0) => {
             WherePredicate::Lifetime(f.fold_predicate_lifetime(_binding_0))
-        }
-        WherePredicate::Eq(_binding_0) => {
-            WherePredicate::Eq(f.fold_predicate_eq(_binding_0))
         }
     }
 }
