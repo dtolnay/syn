@@ -372,26 +372,29 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
     use syn::{token, BinOp, Expr, ExprParen, GenericArgument, MetaNameValue, Pat, Stmt, Type};
 
     struct ParenthesizeEveryExpr;
+
+    fn needs_paren(expr: &Expr) -> bool {
+        match expr {
+            Expr::Group(_) => unreachable!(),
+            Expr::If(_) | Expr::Unsafe(_) | Expr::Block(_) | Expr::Let(_) => false,
+            Expr::Binary(bin) => match (&*bin.left, bin.op, &*bin.right) {
+                (Expr::Let(_), BinOp::And(_), _) | (_, BinOp::And(_), Expr::Let(_)) => false,
+                _ => true,
+            },
+            _ => true,
+        }
+    }
+
     impl Fold for ParenthesizeEveryExpr {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
-            match expr {
-                Expr::Group(_) => unreachable!(),
-                Expr::If(_) | Expr::Unsafe(_) | Expr::Block(_) | Expr::Let(_) => {
-                    fold_expr(self, expr)
-                }
-                Expr::Binary(ref bin)
-                    if match (&*bin.left, bin.op, &*bin.right) {
-                        (Expr::Let(_), BinOp::And(_), _) | (_, BinOp::And(_), Expr::Let(_)) => true,
-                        _ => false,
-                    } =>
-                {
-                    fold_expr(self, expr)
-                }
-                _ => Expr::Paren(ExprParen {
+            if needs_paren(&expr) {
+                Expr::Paren(ExprParen {
                     attrs: Vec::new(),
                     expr: Box::new(fold_expr(self, expr)),
                     paren_token: token::Paren::default(),
-                }),
+                })
+            } else {
+                fold_expr(self, expr)
             }
         }
 
