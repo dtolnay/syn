@@ -948,6 +948,7 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use super::*;
+    use crate::parse::discouraged::Speculative;
     #[cfg(feature = "full")]
     use crate::parse::ParseBuffer;
     use crate::parse::{Parse, ParseStream, Result};
@@ -1143,13 +1144,12 @@ pub(crate) mod parsing {
         base: Precedence,
     ) -> Result<Expr> {
         loop {
-            if input
-                .fork()
-                .parse::<BinOp>()
-                .ok()
-                .map_or(false, |op| Precedence::of(&op) >= base)
-            {
-                let op: BinOp = input.parse()?;
+            let ahead = input.fork();
+            if let Some(op) = match ahead.parse::<BinOp>() {
+                Ok(op) if Precedence::of(&op) >= base => Some(op),
+                _ => None,
+            } {
+                input.advance_to(&ahead);
                 let precedence = Precedence::of(&op);
                 let mut rhs = unary_expr(input, allow_struct)?;
                 loop {
@@ -1250,13 +1250,12 @@ pub(crate) mod parsing {
         base: Precedence,
     ) -> Result<Expr> {
         loop {
-            if input
-                .fork()
-                .parse::<BinOp>()
-                .ok()
-                .map_or(false, |op| Precedence::of(&op) >= base)
-            {
-                let op: BinOp = input.parse()?;
+            let ahead = input.fork();
+            if let Some(op) = match ahead.parse::<BinOp>() {
+                Ok(op) if Precedence::of(&op) >= base => Some(op),
+                _ => None,
+            } {
+                input.advance_to(&ahead);
                 let precedence = Precedence::of(&op);
                 let mut rhs = unary_expr(input, allow_struct)?;
                 loop {
