@@ -3248,42 +3248,19 @@ pub(crate) mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for Member {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            match self {
-                Member::Named(ident) => ident.to_tokens(tokens),
-                Member::Unnamed(index) => index.to_tokens(tokens),
-            }
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for Index {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            let mut lit = Literal::i64_unsuffixed(i64::from(self.index));
-            lit.set_span(self.span);
-            tokens.append(lit);
-        }
-    }
-
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for RangeLimits {
+    impl ToTokens for Arm {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            match self {
-                RangeLimits::HalfOpen(t) => t.to_tokens(tokens),
-                RangeLimits::Closed(t) => t.to_tokens(tokens),
+            tokens.append_all(&self.attrs);
+            self.pat.to_tokens(tokens);
+            if let Some((if_token, guard)) = &self.guard {
+                if_token.to_tokens(tokens);
+                guard.to_tokens(tokens);
             }
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for Label {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.name.to_tokens(tokens);
-            self.colon_token.to_tokens(tokens);
+            self.fat_arrow_token.to_tokens(tokens);
+            self.body.to_tokens(tokens);
+            self.comma.to_tokens(tokens);
         }
     }
 
@@ -3300,19 +3277,42 @@ pub(crate) mod printing {
         }
     }
 
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for Index {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            let mut lit = Literal::i64_unsuffixed(i64::from(self.index));
+            lit.set_span(self.span);
+            tokens.append(lit);
+        }
+    }
+
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for Arm {
+    impl ToTokens for Label {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(&self.attrs);
-            self.pat.to_tokens(tokens);
-            if let Some((if_token, guard)) = &self.guard {
-                if_token.to_tokens(tokens);
-                guard.to_tokens(tokens);
+            self.name.to_tokens(tokens);
+            self.colon_token.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for Member {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                Member::Named(ident) => ident.to_tokens(tokens),
+                Member::Unnamed(index) => index.to_tokens(tokens),
             }
-            self.fat_arrow_token.to_tokens(tokens);
-            self.body.to_tokens(tokens);
-            self.comma.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for RangeLimits {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                RangeLimits::HalfOpen(t) => t.to_tokens(tokens),
+                RangeLimits::Closed(t) => t.to_tokens(tokens),
+            }
         }
     }
 }
