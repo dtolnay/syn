@@ -3589,6 +3589,7 @@ impl Debug for Lite<syn::Lit> {
                 formatter.write_str("`)")?;
                 Ok(())
             }
+            _ => unreachable!(),
         }
     }
 }
