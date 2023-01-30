@@ -5290,20 +5290,6 @@
       }
     },
     {
-      "ident": "VisCrate",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "fields": {
-        "crate_token": {
-          "token": "Crate"
-        }
-      }
-    },
-    {
       "ident": "VisPublic",
       "features": {
         "any": [
@@ -5356,11 +5342,6 @@
         "Public": [
           {
             "syn": "VisPublic"
-          }
-        ],
-        "Crate": [
-          {
-            "syn": "VisCrate"
           }
         ],
         "Restricted": [

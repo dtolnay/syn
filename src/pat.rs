@@ -731,7 +731,7 @@ mod printing {
     use crate::attr::FilterAttrs;
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
- 
+
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for PatIdent {
         fn to_tokens(&self, tokens: &mut TokenStream) {

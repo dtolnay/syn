@@ -2876,15 +2876,6 @@ impl Debug for Variant {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for VisCrate {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("VisCrate");
-        formatter.field("crate_token", &self.crate_token);
-        formatter.finish()
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for VisPublic {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("VisPublic");
@@ -2911,11 +2902,6 @@ impl Debug for Visibility {
         match self {
             Visibility::Public(v0) => {
                 let mut formatter = formatter.debug_tuple("Public");
-                formatter.field(v0);
-                formatter.finish()
-            }
-            Visibility::Crate(v0) => {
-                let mut formatter = formatter.debug_tuple("Crate");
                 formatter.field(v0);
                 formatter.finish()
             }

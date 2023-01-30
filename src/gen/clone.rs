@@ -2111,15 +2111,6 @@ impl Clone for Variant {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for VisCrate {
-    fn clone(&self) -> Self {
-        VisCrate {
-            crate_token: self.crate_token.clone(),
-        }
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for VisPublic {
     fn clone(&self) -> Self {
         VisPublic {
@@ -2145,7 +2136,6 @@ impl Clone for Visibility {
     fn clone(&self) -> Self {
         match self {
             Visibility::Public(v0) => Visibility::Public(v0.clone()),
-            Visibility::Crate(v0) => Visibility::Crate(v0.clone()),
             Visibility::Restricted(v0) => Visibility::Restricted(v0.clone()),
             Visibility::Inherited => Visibility::Inherited,
         }

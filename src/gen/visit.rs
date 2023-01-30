@@ -725,10 +725,6 @@ pub trait Visit<'ast> {
         visit_variant(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn visit_vis_crate(&mut self, i: &'ast VisCrate) {
-        visit_vis_crate(self, i);
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_vis_public(&mut self, i: &'ast VisPublic) {
         visit_vis_public(self, i);
     }
@@ -3625,13 +3621,6 @@ where
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-pub fn visit_vis_crate<'ast, V>(v: &mut V, node: &'ast VisCrate)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    tokens_helper(v, &node.crate_token.span);
-}
-#[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_vis_public<'ast, V>(v: &mut V, node: &'ast VisPublic)
 where
     V: Visit<'ast> + ?Sized,
@@ -3658,9 +3647,6 @@ where
     match node {
         Visibility::Public(_binding_0) => {
             v.visit_vis_public(_binding_0);
-        }
-        Visibility::Crate(_binding_0) => {
-            v.visit_vis_crate(_binding_0);
         }
         Visibility::Restricted(_binding_0) => {
             v.visit_vis_restricted(_binding_0);

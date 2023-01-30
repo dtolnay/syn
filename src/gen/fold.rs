@@ -726,10 +726,6 @@ pub trait Fold {
         fold_variant(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn fold_vis_crate(&mut self, i: VisCrate) -> VisCrate {
-        fold_vis_crate(self, i)
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_vis_public(&mut self, i: VisPublic) -> VisPublic {
         fold_vis_public(self, i)
     }
@@ -3169,15 +3165,6 @@ where
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-pub fn fold_vis_crate<F>(f: &mut F, node: VisCrate) -> VisCrate
-where
-    F: Fold + ?Sized,
-{
-    VisCrate {
-        crate_token: Token![crate](tokens_helper(f, &node.crate_token.span)),
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_vis_public<F>(f: &mut F, node: VisPublic) -> VisPublic
 where
     F: Fold + ?Sized,
@@ -3207,7 +3194,6 @@ where
         Visibility::Public(_binding_0) => {
             Visibility::Public(f.fold_vis_public(_binding_0))
         }
-        Visibility::Crate(_binding_0) => Visibility::Crate(f.fold_vis_crate(_binding_0)),
         Visibility::Restricted(_binding_0) => {
             Visibility::Restricted(f.fold_vis_restricted(_binding_0))
         }

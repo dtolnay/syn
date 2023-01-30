@@ -169,9 +169,6 @@ ast_enum_of_structs! {
         /// A public visibility level: `pub`.
         Public(VisPublic),
 
-        /// A crate-level visibility: `crate`.
-        Crate(VisCrate),
-
         /// A visibility level restricted to some path: `pub(self)` or
         /// `pub(super)` or `pub(crate)` or `pub(in some::module)`.
         Restricted(VisRestricted),
@@ -186,14 +183,6 @@ ast_struct! {
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct VisPublic {
         pub pub_token: Token![pub],
-    }
-}
-
-ast_struct! {
-    /// A crate-level visibility: `crate`.
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub struct VisCrate {
-        pub crate_token: Token![crate],
     }
 }
 
@@ -313,8 +302,6 @@ pub mod parsing {
 
             if input.peek(Token![pub]) {
                 Self::parse_pub(input)
-            } else if input.peek(Token![crate]) {
-                Self::parse_crate(input)
             } else {
                 Ok(Visibility::Inherited)
             }
@@ -364,16 +351,6 @@ pub mod parsing {
             }
 
             Ok(Visibility::Public(VisPublic { pub_token }))
-        }
-
-        fn parse_crate(input: ParseStream) -> Result<Self> {
-            if input.peek2(Token![::]) {
-                Ok(Visibility::Inherited)
-            } else {
-                Ok(Visibility::Crate(VisCrate {
-                    crate_token: input.parse()?,
-                }))
-            }
         }
 
         #[cfg(feature = "full")]
@@ -441,13 +418,6 @@ mod printing {
     impl ToTokens for VisPublic {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.pub_token.to_tokens(tokens);
-        }
-    }
-
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for VisCrate {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.crate_token.to_tokens(tokens);
         }
     }
 

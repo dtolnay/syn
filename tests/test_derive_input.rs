@@ -470,25 +470,6 @@ fn test_pub_restricted() {
 }
 
 #[test]
-fn test_vis_crate() {
-    let input = quote! {
-        crate struct S;
-    };
-
-    snapshot!(input as DeriveInput, @r###"
-    DeriveInput {
-        vis: Visibility::Crate,
-        ident: "S",
-        generics: Generics,
-        data: Data::Struct {
-            fields: Unit,
-            semi_token: Some,
-        },
-    }
-    "###);
-}
-
-#[test]
 fn test_pub_restricted_crate() {
     let input = quote! {
         pub(crate) struct S;

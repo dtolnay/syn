@@ -328,8 +328,7 @@ mod custom_punctuation;
 mod data;
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::data::{
-    Field, Fields, FieldsNamed, FieldsUnnamed, Variant, VisCrate, VisPublic, VisRestricted,
-    Visibility,
+    Field, Fields, FieldsNamed, FieldsUnnamed, Variant, VisPublic, VisRestricted, Visibility,
 };
 
 #[cfg(any(feature = "full", feature = "derive"))]

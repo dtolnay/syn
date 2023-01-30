@@ -52,11 +52,6 @@ fn test_pub() {
 }
 
 #[test]
-fn test_crate() {
-    assert_vis_parse!("crate", Ok(Visibility::Crate(_)));
-}
-
-#[test]
 fn test_inherited() {
     assert_vis_parse!("", Ok(Visibility::Inherited));
 }
