@@ -941,7 +941,37 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
         | Expr::ForLoop(_)
         | Expr::TryBlock(_)
         | Expr::Const(_) => false,
-        _ => true,
+        Expr::Array(_)
+        | Expr::Assign(_)
+        | Expr::AssignOp(_)
+        | Expr::Async(_)
+        | Expr::Await(_)
+        | Expr::Binary(_)
+        | Expr::Break(_)
+        | Expr::Call(_)
+        | Expr::Cast(_)
+        | Expr::Closure(_)
+        | Expr::Continue(_)
+        | Expr::Field(_)
+        | Expr::Group(_)
+        | Expr::Index(_)
+        | Expr::Infer(_)
+        | Expr::Let(_)
+        | Expr::Lit(_)
+        | Expr::Macro(_)
+        | Expr::MethodCall(_)
+        | Expr::Paren(_)
+        | Expr::Path(_)
+        | Expr::Range(_)
+        | Expr::Reference(_)
+        | Expr::Repeat(_)
+        | Expr::Return(_)
+        | Expr::Struct(_)
+        | Expr::Try(_)
+        | Expr::Tuple(_)
+        | Expr::Unary(_)
+        | Expr::Yield(_)
+        | Expr::Verbatim(_) => true
     }
 }
 
