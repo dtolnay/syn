@@ -5826,6 +5826,7 @@ impl Debug for Lite<syn::WherePredicate> {
                 formatter.write_str(")")?;
                 Ok(())
             }
+            _ => unreachable!(),
         }
     }
 }
