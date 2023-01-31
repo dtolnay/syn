@@ -124,6 +124,11 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
     let mut visit_impl = TokenStream::new();
 
     match &s.data {
+        Data::Enum(variants) if variants.is_empty() => {
+            visit_impl.extend(quote! {
+                match *node {}
+            });
+        }
         Data::Enum(variants) => {
             let mut visit_variants = TokenStream::new();
 

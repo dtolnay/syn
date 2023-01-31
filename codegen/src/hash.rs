@@ -22,6 +22,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
     let ident = Ident::new(type_name, Span::call_site());
 
     match &node.data {
+        Data::Enum(variants) if variants.is_empty() => quote!(match *self {}),
         Data::Enum(variants) => {
             let arms = variants
                 .iter()
@@ -126,17 +127,18 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     let cfg_features = cfg::features(&node.features);
 
     let body = expand_impl_body(defs, node);
-    let state = if body.is_empty() {
-        quote!(_state)
-    } else {
-        quote!(state)
+
+    let hasher = match &node.data {
+        Data::Struct(_) if body.is_empty() => quote!(_state),
+        Data::Enum(variants) if variants.is_empty() => quote!(_state),
+        _ => quote!(state),
     };
 
     quote! {
         #cfg_features
         #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl Hash for #ident {
-            fn hash<H>(&self, #state: &mut H)
+            fn hash<H>(&self, #hasher: &mut H)
             where
                 H: Hasher,
             {

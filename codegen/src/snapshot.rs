@@ -275,10 +275,14 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
 
     let ident = Ident::new(&node.ident, Span::call_site());
     let body = expand_impl_body(defs, node, &node.ident);
+    let formatter = match &node.data {
+        Data::Enum(variants) if variants.is_empty() => quote!(_formatter),
+        _ => quote!(formatter),
+    };
 
     quote! {
         impl Debug for Lite<syn::#ident> {
-            fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn fmt(&self, #formatter: &mut fmt::Formatter) -> fmt::Result {
                 let _val = &self.value;
                 #body
             }
