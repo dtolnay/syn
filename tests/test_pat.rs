@@ -56,7 +56,6 @@ fn test_group() {
             segments: [
                 PathSegment {
                     ident: "Some",
-                    arguments: PathArguments::None,
                 },
             ],
         },

@@ -39,7 +39,6 @@ fn test_raw_variable() {
                         segments: [
                             PathSegment {
                                 ident: "raw",
-                                arguments: PathArguments::None,
                             },
                         ],
                     },
@@ -114,7 +113,6 @@ fn test_let_else() {
                 segments: [
                     PathSegment {
                         ident: "Some",
-                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -132,7 +130,6 @@ fn test_let_else() {
                     segments: [
                         PathSegment {
                             ident: "None",
-                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -184,7 +181,6 @@ fn test_macros() {
                             segments: [
                                 PathSegment {
                                     ident: "macro_rules",
-                                    arguments: PathArguments::None,
                                 },
                             ],
                         },
@@ -198,7 +194,6 @@ fn test_macros() {
                             segments: [
                                 PathSegment {
                                     ident: "thread_local",
-                                    arguments: PathArguments::None,
                                 },
                             ],
                         },
@@ -212,7 +207,6 @@ fn test_macros() {
                             segments: [
                                 PathSegment {
                                     ident: "println",
-                                    arguments: PathArguments::None,
                                 },
                             ],
                         },
@@ -227,7 +221,6 @@ fn test_macros() {
                             segments: [
                                 PathSegment {
                                     ident: "vec",
-                                    arguments: PathArguments::None,
                                 },
                             ],
                         },

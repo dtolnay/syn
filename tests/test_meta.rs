@@ -18,7 +18,6 @@ fn test_parse_meta_item_word() {
         segments: [
             PathSegment {
                 ident: "hello",
-                arguments: PathArguments::None,
             },
         ],
     })
@@ -36,7 +35,6 @@ fn test_parse_meta_name_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -52,7 +50,6 @@ fn test_parse_meta_name_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -76,7 +73,6 @@ fn test_parse_meta_item_list_lit() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -91,7 +87,6 @@ fn test_parse_meta_item_list_lit() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -114,7 +109,6 @@ fn test_parse_meta_item_multiple() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -129,7 +123,6 @@ fn test_parse_meta_item_multiple() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -150,11 +143,9 @@ fn test_parse_path() {
         segments: [
             PathSegment {
                 ident: "serde",
-                arguments: PathArguments::None,
             },
             PathSegment {
                 ident: "Serialize",
-                arguments: PathArguments::None,
             },
         ],
     })

@@ -42,7 +42,6 @@ fn test_await() {
                 segments: [
                     PathSegment {
                         ident: "fut",
-                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -62,7 +61,6 @@ fn test_tuple_multi_index() {
                     segments: [
                         PathSegment {
                             ident: "tuple",
-                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -115,7 +113,6 @@ fn test_macro_variable_func() {
                     segments: [
                         PathSegment {
                             ident: "f",
-                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -140,7 +137,6 @@ fn test_macro_variable_func() {
                     segments: [
                         PathSegment {
                             ident: "outside",
-                            arguments: PathArguments::None,
                         },
                     ],
                 }),
@@ -155,7 +151,6 @@ fn test_macro_variable_func() {
                             segments: [
                                 PathSegment {
                                     ident: "inside",
-                                    arguments: PathArguments::None,
                                 },
                             ],
                         }),
@@ -165,7 +160,6 @@ fn test_macro_variable_func() {
                     segments: [
                         PathSegment {
                             ident: "f",
-                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -191,7 +185,6 @@ fn test_macro_variable_macro() {
                 segments: [
                     PathSegment {
                         ident: "m",
-                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -216,7 +209,6 @@ fn test_macro_variable_struct() {
             segments: [
                 PathSegment {
                     ident: "S",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -248,7 +240,6 @@ fn test_macro_variable_match_arm() {
                 segments: [
                     PathSegment {
                         ident: "v",
-                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -265,7 +256,6 @@ fn test_macro_variable_match_arm() {
                                     segments: [
                                         PathSegment {
                                             ident: "a",
-                                            arguments: PathArguments::None,
                                         },
                                     ],
                                 }),

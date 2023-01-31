@@ -23,11 +23,9 @@ fn parse_interpolated_leading_component() {
             segments: [
                 PathSegment {
                     ident: "first",
-                    arguments: PathArguments::None,
                 },
                 PathSegment {
                     ident: "rest",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -40,11 +38,9 @@ fn parse_interpolated_leading_component() {
             segments: [
                 PathSegment {
                     ident: "first",
-                    arguments: PathArguments::None,
                 },
                 PathSegment {
                     ident: "rest",
-                    arguments: PathArguments::None,
                 },
             ],
         },

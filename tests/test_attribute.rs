@@ -15,7 +15,6 @@ fn test_meta_item_word() {
         segments: [
             PathSegment {
                 ident: "foo",
-                arguments: PathArguments::None,
             },
         ],
     })
@@ -32,7 +31,6 @@ fn test_meta_item_name_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -53,7 +51,6 @@ fn test_meta_item_bool_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -73,7 +70,6 @@ fn test_meta_item_bool_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -96,7 +92,6 @@ fn test_meta_item_list_lit() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -116,7 +111,6 @@ fn test_meta_item_list_word() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -136,7 +130,6 @@ fn test_meta_item_list_name_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -156,7 +149,6 @@ fn test_meta_item_list_bool_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -176,7 +168,6 @@ fn test_meta_item_multiple() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -196,7 +187,6 @@ fn test_bool_lit() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -216,7 +206,6 @@ fn test_negative_lit() {
             segments: [
                 PathSegment {
                     ident: "form",
-                    arguments: PathArguments::None,
                 },
             ],
         },

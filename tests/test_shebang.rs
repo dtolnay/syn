@@ -39,7 +39,6 @@ fn test_comment() {
                         segments: [
                             PathSegment {
                                 ident: "allow",
-                                arguments: PathArguments::None,
                             },
                         ],
                     },

@@ -4341,7 +4341,12 @@ impl Debug for Lite<syn::PathSegment> {
         let _val = &self.value;
         let mut formatter = formatter.debug_struct("PathSegment");
         formatter.field("ident", Lite(&_val.ident));
-        formatter.field("arguments", Lite(&_val.arguments));
+        match _val.arguments {
+            syn::PathArguments::None => {}
+            _ => {
+                formatter.field("arguments", Lite(&_val.arguments));
+            }
+        }
         formatter.finish()
     }
 }
@@ -4682,7 +4687,12 @@ impl Debug for Lite<syn::TraitBound> {
             }
             formatter.field("paren_token", Print::ref_cast(val));
         }
-        formatter.field("modifier", Lite(&_val.modifier));
+        match _val.modifier {
+            syn::TraitBoundModifier::None => {}
+            _ => {
+                formatter.field("modifier", Lite(&_val.modifier));
+            }
+        }
         if let Some(val) = &_val.lifetimes {
             #[derive(RefCast)]
             #[repr(transparent)]
