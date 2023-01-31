@@ -47,7 +47,6 @@ fn test_split_for_impl() {
                                 segments: [
                                     PathSegment {
                                         ident: "may_dangle",
-                                        arguments: PathArguments::None,
                                     },
                                 ],
                             }),
@@ -73,19 +72,16 @@ fn test_split_for_impl() {
                                 segments: [
                                     PathSegment {
                                         ident: "T",
-                                        arguments: PathArguments::None,
                                     },
                                 ],
                             },
                         },
                         bounds: [
                             TypeParamBound::Trait(TraitBound {
-                                modifier: TraitBoundModifier::None,
                                 path: Path {
                                     segments: [
                                         PathSegment {
                                             ident: "Debug",
-                                            arguments: PathArguments::None,
                                         },
                                     ],
                                 },
@@ -146,12 +142,10 @@ fn test_ty_param_bound() {
     let tokens = quote!(Debug);
     snapshot!(tokens as TypeParamBound, @r###"
     TypeParamBound::Trait(TraitBound {
-        modifier: TraitBoundModifier::None,
         path: Path {
             segments: [
                 PathSegment {
                     ident: "Debug",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -166,7 +160,6 @@ fn test_ty_param_bound() {
             segments: [
                 PathSegment {
                     ident: "Sized",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -207,14 +200,12 @@ fn test_fn_precedence_in_where_clause() {
                                     segments: [
                                         PathSegment {
                                             ident: "G",
-                                            arguments: PathArguments::None,
                                         },
                                     ],
                                 },
                             },
                             bounds: [
                                 TypeParamBound::Trait(TraitBound {
-                                    modifier: TraitBoundModifier::None,
                                     path: Path {
                                         segments: [
                                             PathSegment {
@@ -226,7 +217,6 @@ fn test_fn_precedence_in_where_clause() {
                                                                 segments: [
                                                                     PathSegment {
                                                                         ident: "i32",
-                                                                        arguments: PathArguments::None,
                                                                     },
                                                                 ],
                                                             },
@@ -238,12 +228,10 @@ fn test_fn_precedence_in_where_clause() {
                                     },
                                 }),
                                 TypeParamBound::Trait(TraitBound {
-                                    modifier: TraitBoundModifier::None,
                                     path: Path {
                                         segments: [
                                             PathSegment {
                                                 ident: "Send",
-                                                arguments: PathArguments::None,
                                             },
                                         ],
                                     },

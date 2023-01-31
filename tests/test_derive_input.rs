@@ -50,7 +50,6 @@ fn test_struct() {
                         segments: [
                             PathSegment {
                                 ident: "derive",
-                                arguments: PathArguments::None,
                             },
                         ],
                     },
@@ -74,7 +73,6 @@ fn test_struct() {
                                 segments: [
                                     PathSegment {
                                         ident: "Ident",
-                                        arguments: PathArguments::None,
                                     },
                                 ],
                             },
@@ -96,7 +94,6 @@ fn test_struct() {
                                                         segments: [
                                                             PathSegment {
                                                                 ident: "Attribute",
-                                                                arguments: PathArguments::None,
                                                             },
                                                         ],
                                                     },
@@ -120,7 +117,6 @@ fn test_struct() {
             segments: [
                 PathSegment {
                     ident: "derive",
-                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -170,7 +166,6 @@ fn test_union() {
                                 segments: [
                                     PathSegment {
                                         ident: "T",
-                                        arguments: PathArguments::None,
                                     },
                                 ],
                             },
@@ -210,7 +205,6 @@ fn test_enum() {
                         segments: [
                             PathSegment {
                                 ident: "doc",
-                                arguments: PathArguments::None,
                             },
                         ],
                     },
@@ -225,7 +219,6 @@ fn test_enum() {
                     segments: [
                         PathSegment {
                             ident: "must_use",
-                            arguments: PathArguments::None,
                         },
                     ],
                 }),
@@ -258,7 +251,6 @@ fn test_enum() {
                                         segments: [
                                             PathSegment {
                                                 ident: "T",
-                                                arguments: PathArguments::None,
                                             },
                                         ],
                                     },
@@ -278,7 +270,6 @@ fn test_enum() {
                                         segments: [
                                             PathSegment {
                                                 ident: "E",
-                                                arguments: PathArguments::None,
                                             },
                                         ],
                                     },
@@ -327,7 +318,6 @@ fn test_enum() {
                 segments: [
                     PathSegment {
                         ident: "doc",
-                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -339,7 +329,6 @@ fn test_enum() {
             segments: [
                 PathSegment {
                     ident: "must_use",
-                    arguments: PathArguments::None,
                 },
             ],
         }),
@@ -373,11 +362,9 @@ fn test_attr_with_mod_style_path_with_self() {
                     segments: [
                         PathSegment {
                             ident: "foo",
-                            arguments: PathArguments::None,
                         },
                         PathSegment {
                             ident: "self",
-                            arguments: PathArguments::None,
                         },
                     ],
                 }),
@@ -398,11 +385,9 @@ fn test_attr_with_mod_style_path_with_self() {
         segments: [
             PathSegment {
                 ident: "foo",
-                arguments: PathArguments::None,
             },
             PathSegment {
                 ident: "self",
-                arguments: PathArguments::None,
             },
         ],
     })
@@ -424,7 +409,6 @@ fn test_pub_restricted() {
                 segments: [
                     PathSegment {
                         ident: "m",
-                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -441,11 +425,9 @@ fn test_pub_restricted() {
                                 segments: [
                                     PathSegment {
                                         ident: "m",
-                                        arguments: PathArguments::None,
                                     },
                                     PathSegment {
                                         ident: "n",
-                                        arguments: PathArguments::None,
                                     },
                                 ],
                             },
@@ -455,7 +437,6 @@ fn test_pub_restricted() {
                                 segments: [
                                     PathSegment {
                                         ident: "u8",
-                                        arguments: PathArguments::None,
                                     },
                                 ],
                             },
@@ -482,7 +463,6 @@ fn test_pub_restricted_crate() {
                 segments: [
                     PathSegment {
                         ident: "crate",
-                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -510,7 +490,6 @@ fn test_pub_restricted_super() {
                 segments: [
                     PathSegment {
                         ident: "super",
-                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -539,7 +518,6 @@ fn test_pub_restricted_in_super() {
                 segments: [
                     PathSegment {
                         ident: "super",
-                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -606,7 +584,6 @@ fn test_fields_on_named_struct() {
                                 segments: [
                                     PathSegment {
                                         ident: "i32",
-                                        arguments: PathArguments::None,
                                     },
                                 ],
                             },
@@ -621,7 +598,6 @@ fn test_fields_on_named_struct() {
                                 segments: [
                                     PathSegment {
                                         ident: "String",
-                                        arguments: PathArguments::None,
                                     },
                                 ],
                             },
@@ -649,7 +625,6 @@ fn test_fields_on_named_struct() {
                     segments: [
                         PathSegment {
                             ident: "i32",
-                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -664,7 +639,6 @@ fn test_fields_on_named_struct() {
                     segments: [
                         PathSegment {
                             ident: "String",
-                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -695,7 +669,6 @@ fn test_fields_on_tuple_struct() {
                                 segments: [
                                     PathSegment {
                                         ident: "i32",
-                                        arguments: PathArguments::None,
                                     },
                                 ],
                             },
@@ -708,7 +681,6 @@ fn test_fields_on_tuple_struct() {
                                 segments: [
                                     PathSegment {
                                         ident: "String",
-                                        arguments: PathArguments::None,
                                     },
                                 ],
                             },
@@ -735,7 +707,6 @@ fn test_fields_on_tuple_struct() {
                     segments: [
                         PathSegment {
                             ident: "i32",
-                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -748,7 +719,6 @@ fn test_fields_on_tuple_struct() {
                     segments: [
                         PathSegment {
                             ident: "String",
-                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -780,11 +750,9 @@ fn test_ambiguous_crate() {
                                 segments: [
                                     PathSegment {
                                         ident: "crate",
-                                        arguments: PathArguments::None,
                                     },
                                     PathSegment {
                                         ident: "X",
-                                        arguments: PathArguments::None,
                                     },
                                 ],
                             },

@@ -27,7 +27,6 @@ fn test_macro_variable_attr() {
                     segments: [
                         PathSegment {
                             ident: "test",
-                            arguments: PathArguments::None,
                         },
                     ],
                 }),
@@ -87,7 +86,6 @@ fn test_negative_impl() {
                 segments: [
                     PathSegment {
                         ident: "Trait",
-                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -97,7 +95,6 @@ fn test_negative_impl() {
                 segments: [
                     PathSegment {
                         ident: "T",
-                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -139,7 +136,6 @@ fn test_macro_variable_impl() {
                 segments: [
                     PathSegment {
                         ident: "Trait",
-                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -150,7 +146,6 @@ fn test_macro_variable_impl() {
                     segments: [
                         PathSegment {
                             ident: "Type",
-                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -201,12 +196,10 @@ fn test_supertraits() {
         colon_token: Some,
         supertraits: [
             TypeParamBound::Trait(TraitBound {
-                modifier: TraitBoundModifier::None,
                 path: Path {
                     segments: [
                         PathSegment {
                             ident: "Sized",
-                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -227,12 +220,10 @@ fn test_supertraits() {
         colon_token: Some,
         supertraits: [
             TypeParamBound::Trait(TraitBound {
-                modifier: TraitBoundModifier::None,
                 path: Path {
                     segments: [
                         PathSegment {
                             ident: "Sized",
-                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -317,12 +308,10 @@ fn test_impl_trait_trailing_plus() {
                 Type::ImplTrait {
                     bounds: [
                         TypeParamBound::Trait(TraitBound {
-                            modifier: TraitBoundModifier::None,
                             path: Path {
                                 segments: [
                                     PathSegment {
                                         ident: "Sized",
-                                        arguments: PathArguments::None,
                                     },
                                 ],
                             },

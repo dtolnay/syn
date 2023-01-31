@@ -243,6 +243,23 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                                 #call
                             }
                         };
+                    } else if let Type::Syn(inner) = ty {
+                        for node in &defs.types {
+                            if node.ident == *inner {
+                                if let Data::Enum(variants) = &node.data {
+                                    if variants.get("None").map_or(false, Vec::is_empty) {
+                                        let ty = rust_type(ty);
+                                        call = quote! {
+                                            match _val.#ident {
+                                                #ty::None => {}
+                                                _ => { #call }
+                                            }
+                                        };
+                                    }
+                                }
+                                break;
+                            }
+                        }
                     }
                     Some(call)
                 }
@@ -294,6 +311,8 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     file::write(
         TESTS_DEBUG_SRC,
         quote! {
+            #![allow(clippy::match_wildcard_for_single_variants)]
+
             use super::{Lite, RefCast};
             use std::fmt::{self, Debug, Display};
 
