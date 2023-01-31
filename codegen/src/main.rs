@@ -14,7 +14,7 @@
     clippy::manual_let_else,
     clippy::match_like_matches_macro,
     clippy::too_many_lines,
-    clippy::uninlined_format_args,
+    clippy::uninlined_format_args
 )]
 
 mod cfg;

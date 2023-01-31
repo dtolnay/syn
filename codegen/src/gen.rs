@@ -27,9 +27,6 @@ pub fn traverse(
     let mut traits = TokenStream::new();
     let mut impls = TokenStream::new();
     for s in types {
-        if s.ident == "Reserved" {
-            continue;
-        }
         let features = cfg::features(&s.features);
         traits.extend(features.clone());
         impls.extend(features);

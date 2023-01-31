@@ -169,7 +169,7 @@ fn introspect_type(item: &syn::Type, lookup: &Lookup) -> types::Type {
                     while let Some(alias) = lookup.aliases.get(resolved) {
                         resolved = alias;
                     }
-                    if lookup.items.get(resolved).is_some() || resolved == "Reserved" {
+                    if lookup.items.get(resolved).is_some() {
                         types::Type::Syn(resolved.to_string())
                     } else {
                         unimplemented!("{}", resolved);
@@ -629,10 +629,8 @@ fn do_load_file(
 
                 // Record our features on the parsed AstItems.
                 if let Some(mut item) = found {
-                    if item.ast.ident != "Reserved" {
-                        item.features.extend(clone_features(&features));
-                        lookup.items.insert(item.ast.ident.clone(), item);
-                    }
+                    item.features.extend(clone_features(&features));
+                    lookup.items.insert(item.ast.ident.clone(), item);
                 }
             }
             Item::Struct(item) => {

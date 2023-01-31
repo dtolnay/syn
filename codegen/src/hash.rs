@@ -8,7 +8,6 @@ const HASH_SRC: &str = "src/gen/hash.rs";
 
 fn skip(field_type: &Type) -> bool {
     match field_type {
-        Type::Syn(node) => node == "Reserved",
         Type::Ext(ty) => ty == "Span",
         Type::Token(_) | Type::Group(_) => true,
         Type::Box(inner) => skip(inner),
