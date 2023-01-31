@@ -5772,13 +5772,6 @@ impl Debug for Lite<syn::Variant> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::VisPublic> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let _val = &self.value;
-        let mut formatter = formatter.debug_struct("VisPublic");
-        formatter.finish()
-    }
-}
 impl Debug for Lite<syn::VisRestricted> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
@@ -5804,8 +5797,8 @@ impl Debug for Lite<syn::Visibility> {
         let _val = &self.value;
         match _val {
             syn::Visibility::Public(_val) => {
-                let mut formatter = formatter.debug_struct("Visibility::Public");
-                formatter.finish()
+                formatter.write_str("Visibility::Public")?;
+                Ok(())
             }
             syn::Visibility::Restricted(_val) => {
                 let mut formatter = formatter.debug_struct("Visibility::Restricted");

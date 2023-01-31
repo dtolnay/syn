@@ -725,10 +725,6 @@ pub trait Visit<'ast> {
         visit_variant(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn visit_vis_public(&mut self, i: &'ast VisPublic) {
-        visit_vis_public(self, i);
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_vis_restricted(&mut self, i: &'ast VisRestricted) {
         visit_vis_restricted(self, i);
     }
@@ -3621,13 +3617,6 @@ where
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-pub fn visit_vis_public<'ast, V>(v: &mut V, node: &'ast VisPublic)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    tokens_helper(v, &node.pub_token.span);
-}
-#[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_vis_restricted<'ast, V>(v: &mut V, node: &'ast VisRestricted)
 where
     V: Visit<'ast> + ?Sized,
@@ -3646,7 +3635,7 @@ where
 {
     match node {
         Visibility::Public(_binding_0) => {
-            v.visit_vis_public(_binding_0);
+            tokens_helper(v, &_binding_0.span);
         }
         Visibility::Restricted(_binding_0) => {
             v.visit_vis_restricted(_binding_0);

@@ -2111,15 +2111,6 @@ impl Clone for Variant {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for VisPublic {
-    fn clone(&self) -> Self {
-        VisPublic {
-            pub_token: self.pub_token.clone(),
-        }
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for VisRestricted {
     fn clone(&self) -> Self {
         VisRestricted {

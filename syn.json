@@ -5290,20 +5290,6 @@
       }
     },
     {
-      "ident": "VisPublic",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "fields": {
-        "pub_token": {
-          "token": "Pub"
-        }
-      }
-    },
-    {
       "ident": "VisRestricted",
       "features": {
         "any": [
@@ -5341,7 +5327,7 @@
       "variants": {
         "Public": [
           {
-            "syn": "VisPublic"
+            "token": "Pub"
           }
         ],
         "Restricted": [

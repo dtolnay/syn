@@ -2703,14 +2703,6 @@ impl Hash for Variant {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for VisPublic {
-    fn hash<H>(&self, _state: &mut H)
-    where
-        H: Hasher,
-    {}
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for VisRestricted {
     fn hash<H>(&self, state: &mut H)
     where
@@ -2728,9 +2720,8 @@ impl Hash for Visibility {
         H: Hasher,
     {
         match self {
-            Visibility::Public(v0) => {
+            Visibility::Public(_) => {
                 state.write_u8(0u8);
-                v0.hash(state);
             }
             Visibility::Restricted(v0) => {
                 state.write_u8(1u8);

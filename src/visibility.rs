@@ -1,6 +1,6 @@
 use super::*;
 
-ast_enum_of_structs! {
+ast_enum! {
     /// The visibility level of an item: inherited or `pub` or
     /// `pub(restricted)`.
     ///
@@ -12,7 +12,7 @@ ast_enum_of_structs! {
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum Visibility {
         /// A public visibility level: `pub`.
-        Public(VisPublic),
+        Public(Token![pub]),
 
         /// A visibility level restricted to some path: `pub(self)` or
         /// `pub(super)` or `pub(crate)` or `pub(in some::module)`.
@@ -20,14 +20,6 @@ ast_enum_of_structs! {
 
         /// An inherited visibility, which usually means private.
         Inherited,
-    }
-}
-
-ast_struct! {
-    /// A public visibility level: `pub`.
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub struct VisPublic {
-        pub pub_token: Token![pub],
     }
 }
 
@@ -114,7 +106,7 @@ pub mod parsing {
                 }
             }
 
-            Ok(Visibility::Public(VisPublic { pub_token }))
+            Ok(Visibility::Public(pub_token))
         }
 
         #[cfg(feature = "full")]
@@ -134,9 +126,13 @@ mod printing {
     use quote::ToTokens;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for VisPublic {
+    impl ToTokens for Visibility {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            self.pub_token.to_tokens(tokens);
+            match self {
+                Visibility::Public(pub_token) => pub_token.to_tokens(tokens),
+                Visibility::Restricted(vis_restricted) => vis_restricted.to_tokens(tokens),
+                Visibility::Inherited => {}
+            }
         }
     }
 
