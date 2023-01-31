@@ -133,13 +133,13 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
     match &node.data {
         Data::Enum(variants) => {
             let arms = variants.iter().map(|(v, fields)| {
+                let path = format!("{}::{}", name, v);
                 let variant = Ident::new(v, Span::call_site());
                 if fields.is_empty() {
                     quote! {
-                        syn::#ident::#variant => formatter.write_str(#v),
+                        syn::#ident::#variant => formatter.write_str(#path),
                     }
                 } else if let Some(inner) = syntax_tree_enum(name, v, fields) {
-                    let path = format!("{}::{}", name, v);
                     let format = expand_impl_body(defs, lookup::node(defs, inner), &path);
                     quote! {
                         syn::#ident::#variant(_val) => {
@@ -166,7 +166,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                     };
                     quote! {
                         syn::#ident::#variant(_val) => {
-                            formatter.write_str(#v)?;
+                            formatter.write_str(#path)?;
                             #format
                             Ok(())
                         }
@@ -183,7 +183,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                     });
                     quote! {
                         syn::#ident::#variant(#(#pats),*) => {
-                            let mut formatter = formatter.debug_tuple(#v);
+                            let mut formatter = formatter.debug_tuple(#path);
                             #(#fields)*
                             formatter.finish()
                         }

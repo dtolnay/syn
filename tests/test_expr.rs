@@ -12,7 +12,7 @@ fn test_expr_parse() {
     let tokens = quote!(..100u32);
     snapshot!(tokens as Expr, @r###"
     Expr::Range {
-        limits: HalfOpen,
+        limits: RangeLimits::HalfOpen,
         end: Some(Expr::Lit {
             lit: 100u32,
         }),
@@ -22,7 +22,7 @@ fn test_expr_parse() {
     let tokens = quote!(..100u32);
     snapshot!(tokens as ExprRange, @r###"
     ExprRange {
-        limits: HalfOpen,
+        limits: RangeLimits::HalfOpen,
         end: Some(Expr::Lit {
             lit: 100u32,
         }),
@@ -42,7 +42,7 @@ fn test_await() {
                 segments: [
                     PathSegment {
                         ident: "fut",
-                        arguments: None,
+                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -62,16 +62,16 @@ fn test_tuple_multi_index() {
                     segments: [
                         PathSegment {
                             ident: "tuple",
-                            arguments: None,
+                            arguments: PathArguments::None,
                         },
                     ],
                 },
             },
-            member: Unnamed(Index {
+            member: Member::Unnamed(Index {
                 index: 0,
             }),
         },
-        member: Unnamed(Index {
+        member: Member::Unnamed(Index {
             index: 0,
         }),
     }
@@ -115,7 +115,7 @@ fn test_macro_variable_func() {
                     segments: [
                         PathSegment {
                             ident: "f",
-                            arguments: None,
+                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -135,12 +135,12 @@ fn test_macro_variable_func() {
     Expr::Call {
         attrs: [
             Attribute {
-                style: Outer,
-                meta: Path(Path {
+                style: AttrStyle::Outer,
+                meta: Meta::Path(Path {
                     segments: [
                         PathSegment {
                             ident: "outside",
-                            arguments: None,
+                            arguments: PathArguments::None,
                         },
                     ],
                 }),
@@ -150,12 +150,12 @@ fn test_macro_variable_func() {
             expr: Expr::Path {
                 attrs: [
                     Attribute {
-                        style: Outer,
-                        meta: Path(Path {
+                        style: AttrStyle::Outer,
+                        meta: Meta::Path(Path {
                             segments: [
                                 PathSegment {
                                     ident: "inside",
-                                    arguments: None,
+                                    arguments: PathArguments::None,
                                 },
                             ],
                         }),
@@ -165,7 +165,7 @@ fn test_macro_variable_func() {
                     segments: [
                         PathSegment {
                             ident: "f",
-                            arguments: None,
+                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -191,11 +191,11 @@ fn test_macro_variable_macro() {
                 segments: [
                     PathSegment {
                         ident: "m",
-                        arguments: None,
+                        arguments: PathArguments::None,
                     },
                 ],
             },
-            delimiter: Paren,
+            delimiter: MacroDelimiter::Paren,
             tokens: TokenStream(``),
         },
     }
@@ -216,7 +216,7 @@ fn test_macro_variable_struct() {
             segments: [
                 PathSegment {
                     ident: "S",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -248,7 +248,7 @@ fn test_macro_variable_match_arm() {
                 segments: [
                     PathSegment {
                         ident: "v",
-                        arguments: None,
+                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -260,12 +260,12 @@ fn test_macro_variable_match_arm() {
                     expr: Expr::Tuple {
                         attrs: [
                             Attribute {
-                                style: Outer,
-                                meta: Path(Path {
+                                style: AttrStyle::Outer,
+                                meta: Meta::Path(Path {
                                     segments: [
                                         PathSegment {
                                             ident: "a",
-                                            arguments: None,
+                                            arguments: PathArguments::None,
                                         },
                                     ],
                                 }),
@@ -287,9 +287,9 @@ fn test_closure_vs_rangefull() {
     snapshot!(tokens as Expr, @r###"
     Expr::MethodCall {
         receiver: Expr::Closure {
-            output: Default,
+            output: ReturnType::Default,
             body: Expr::Range {
-                limits: HalfOpen,
+                limits: RangeLimits::HalfOpen,
             },
         },
         method: "method",

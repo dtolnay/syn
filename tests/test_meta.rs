@@ -14,11 +14,11 @@ fn test_parse_meta_item_word() {
     let input = "hello";
 
     snapshot!(input as Meta, @r###"
-    Path(Path {
+    Meta::Path(Path {
         segments: [
             PathSegment {
                 ident: "hello",
-                arguments: None,
+                arguments: PathArguments::None,
             },
         ],
     })
@@ -36,7 +36,7 @@ fn test_parse_meta_name_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -52,7 +52,7 @@ fn test_parse_meta_name_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -76,11 +76,11 @@ fn test_parse_meta_item_list_lit() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
-        delimiter: Paren,
+        delimiter: MacroDelimiter::Paren,
         tokens: TokenStream(`5`),
     }
     "###);
@@ -91,11 +91,11 @@ fn test_parse_meta_item_list_lit() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
-        delimiter: Paren,
+        delimiter: MacroDelimiter::Paren,
         tokens: TokenStream(`5`),
     }
     "###);
@@ -114,11 +114,11 @@ fn test_parse_meta_item_multiple() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
-        delimiter: Paren,
+        delimiter: MacroDelimiter::Paren,
         tokens: TokenStream(`word , name = 5 , list (name2 = 6) , word2`),
     }
     "###);
@@ -129,11 +129,11 @@ fn test_parse_meta_item_multiple() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
-        delimiter: Paren,
+        delimiter: MacroDelimiter::Paren,
         tokens: TokenStream(`word , name = 5 , list (name2 = 6) , word2`),
     }
     "###);
@@ -145,16 +145,16 @@ fn test_parse_meta_item_multiple() {
 fn test_parse_path() {
     let input = "::serde::Serialize";
     snapshot!(input as Meta, @r###"
-    Path(Path {
+    Meta::Path(Path {
         leading_colon: Some,
         segments: [
             PathSegment {
                 ident: "serde",
-                arguments: None,
+                arguments: PathArguments::None,
             },
             PathSegment {
                 ident: "Serialize",
-                arguments: None,
+                arguments: PathArguments::None,
             },
         ],
     })

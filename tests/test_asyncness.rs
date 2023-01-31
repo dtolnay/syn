@@ -11,12 +11,12 @@ fn test_async_fn() {
 
     snapshot!(input as Item, @r###"
     Item::Fn {
-        vis: Inherited,
+        vis: Visibility::Inherited,
         sig: Signature {
             asyncness: Some,
             ident: "process",
             generics: Generics,
-            output: Default,
+            output: ReturnType::Default,
         },
         block: Block,
     }
@@ -30,7 +30,7 @@ fn test_async_closure() {
     snapshot!(input as Expr, @r###"
     Expr::Closure {
         asyncness: Some,
-        output: Default,
+        output: ReturnType::Default,
         body: Expr::Block {
             block: Block,
         },

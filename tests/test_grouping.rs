@@ -30,20 +30,20 @@ fn test_grouping() {
         left: Expr::Lit {
             lit: 1i32,
         },
-        op: Add,
+        op: BinOp::Add,
         right: Expr::Binary {
             left: Expr::Group {
                 expr: Expr::Binary {
                     left: Expr::Lit {
                         lit: 2i32,
                     },
-                    op: Add,
+                    op: BinOp::Add,
                     right: Expr::Lit {
                         lit: 3i32,
                     },
                 },
             },
-            op: Mul,
+            op: BinOp::Mul,
             right: Expr::Lit {
                 lit: 4i32,
             },

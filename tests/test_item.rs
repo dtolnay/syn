@@ -22,22 +22,22 @@ fn test_macro_variable_attr() {
     Item::Fn {
         attrs: [
             Attribute {
-                style: Outer,
-                meta: Path(Path {
+                style: AttrStyle::Outer,
+                meta: Meta::Path(Path {
                     segments: [
                         PathSegment {
                             ident: "test",
-                            arguments: None,
+                            arguments: PathArguments::None,
                         },
                     ],
                 }),
             },
         ],
-        vis: Inherited,
+        vis: Visibility::Inherited,
         sig: Signature {
             ident: "f",
             generics: Generics,
-            output: Default,
+            output: ReturnType::Default,
         },
         block: Block,
     }
@@ -69,7 +69,7 @@ fn test_negative_impl() {
     snapshot!(tokens as Item, @r###"
     Item::Impl {
         generics: Generics,
-        self_ty: Verbatim(`! Trait`),
+        self_ty: Type::Verbatim(`! Trait`),
     }
     "###);
 
@@ -87,7 +87,7 @@ fn test_negative_impl() {
                 segments: [
                     PathSegment {
                         ident: "Trait",
-                        arguments: None,
+                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -97,7 +97,7 @@ fn test_negative_impl() {
                 segments: [
                     PathSegment {
                         ident: "T",
-                        arguments: None,
+                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -114,7 +114,7 @@ fn test_negative_impl() {
     snapshot!(tokens as Item, @r###"
     Item::Impl {
         generics: Generics,
-        self_ty: Verbatim(`! !`),
+        self_ty: Type::Verbatim(`! !`),
     }
     "###);
 }
@@ -139,7 +139,7 @@ fn test_macro_variable_impl() {
                 segments: [
                     PathSegment {
                         ident: "Trait",
-                        arguments: None,
+                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -150,7 +150,7 @@ fn test_macro_variable_impl() {
                     segments: [
                         PathSegment {
                             ident: "Type",
-                            arguments: None,
+                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -168,7 +168,7 @@ fn test_supertraits() {
     let tokens = quote!(trait Trait where {});
     snapshot!(tokens as ItemTrait, @r###"
     ItemTrait {
-        vis: Inherited,
+        vis: Visibility::Inherited,
         ident: "Trait",
         generics: Generics {
             where_clause: Some(WhereClause),
@@ -180,7 +180,7 @@ fn test_supertraits() {
     let tokens = quote!(trait Trait: where {});
     snapshot!(tokens as ItemTrait, @r###"
     ItemTrait {
-        vis: Inherited,
+        vis: Visibility::Inherited,
         ident: "Trait",
         generics: Generics {
             where_clause: Some(WhereClause),
@@ -193,20 +193,20 @@ fn test_supertraits() {
     let tokens = quote!(trait Trait: Sized where {});
     snapshot!(tokens as ItemTrait, @r###"
     ItemTrait {
-        vis: Inherited,
+        vis: Visibility::Inherited,
         ident: "Trait",
         generics: Generics {
             where_clause: Some(WhereClause),
         },
         colon_token: Some,
         supertraits: [
-            Trait(TraitBound {
-                modifier: None,
+            TypeParamBound::Trait(TraitBound {
+                modifier: TraitBoundModifier::None,
                 path: Path {
                     segments: [
                         PathSegment {
                             ident: "Sized",
-                            arguments: None,
+                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -219,20 +219,20 @@ fn test_supertraits() {
     let tokens = quote!(trait Trait: Sized + where {});
     snapshot!(tokens as ItemTrait, @r###"
     ItemTrait {
-        vis: Inherited,
+        vis: Visibility::Inherited,
         ident: "Trait",
         generics: Generics {
             where_clause: Some(WhereClause),
         },
         colon_token: Some,
         supertraits: [
-            Trait(TraitBound {
-                modifier: None,
+            TypeParamBound::Trait(TraitBound {
+                modifier: TraitBoundModifier::None,
                 path: Path {
                     segments: [
                         PathSegment {
                             ident: "Sized",
-                            arguments: None,
+                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -253,7 +253,7 @@ fn test_type_empty_bounds() {
 
     snapshot!(tokens as ItemTrait, @r###"
     ItemTrait {
-        vis: Inherited,
+        vis: Visibility::Inherited,
         ident: "Foo",
         generics: Generics,
         items: [
@@ -273,7 +273,7 @@ fn test_impl_visibility() {
         pub default unsafe impl union {}
     };
 
-    snapshot!(tokens as Item, @"Verbatim(`pub default unsafe impl union { }`)");
+    snapshot!(tokens as Item, @"Item::Verbatim(`pub default unsafe impl union { }`)");
 }
 
 #[test]
@@ -288,7 +288,7 @@ fn test_impl_type_parameter_defaults() {
         generics: Generics {
             lt_token: Some,
             params: [
-                Type(TypeParam {
+                GenericParam::Type(TypeParam {
                     ident: "T",
                     eq_token: Some,
                     default: Some(Type::Tuple),
@@ -297,7 +297,8 @@ fn test_impl_type_parameter_defaults() {
             gt_token: Some,
         },
         self_ty: Type::Tuple,
-    }"###);
+    }
+    "###);
 }
 
 #[test]
@@ -308,20 +309,20 @@ fn test_impl_trait_trailing_plus() {
 
     snapshot!(tokens as Item, @r###"
     Item::Fn {
-        vis: Inherited,
+        vis: Visibility::Inherited,
         sig: Signature {
             ident: "f",
             generics: Generics,
-            output: Type(
+            output: ReturnType::Type(
                 Type::ImplTrait {
                     bounds: [
-                        Trait(TraitBound {
-                            modifier: None,
+                        TypeParamBound::Trait(TraitBound {
+                            modifier: TraitBoundModifier::None,
                             path: Path {
                                 segments: [
                                     PathSegment {
                                         ident: "Sized",
-                                        arguments: None,
+                                        arguments: PathArguments::None,
                                     },
                                 ],
                             },

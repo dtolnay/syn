@@ -16,10 +16,10 @@ fn test_raw_operator() {
     let stmt = syn::parse_str::<Stmt>("let _ = &raw const x;").unwrap();
 
     snapshot!(stmt, @r###"
-    Local(Local {
+    Stmt::Local(Local {
         pat: Pat::Wild,
         init: Some(LocalInit {
-            expr: Verbatim(`& raw const x`),
+            expr: Expr::Verbatim(`& raw const x`),
         }),
     })
     "###);
@@ -30,7 +30,7 @@ fn test_raw_variable() {
     let stmt = syn::parse_str::<Stmt>("let _ = &raw;").unwrap();
 
     snapshot!(stmt, @r###"
-    Local(Local {
+    Stmt::Local(Local {
         pat: Pat::Wild,
         init: Some(LocalInit {
             expr: Expr::Reference {
@@ -39,7 +39,7 @@ fn test_raw_variable() {
                         segments: [
                             PathSegment {
                                 ident: "raw",
-                                arguments: None,
+                                arguments: PathArguments::None,
                             },
                         ],
                     },
@@ -70,13 +70,13 @@ fn test_none_group() {
     ))]);
 
     snapshot!(tokens as Stmt, @r###"
-    Item(Item::Fn {
-        vis: Inherited,
+    Stmt::Item(Item::Fn {
+        vis: Visibility::Inherited,
         sig: Signature {
             asyncness: Some,
             ident: "f",
             generics: Generics,
-            output: Default,
+            output: ReturnType::Default,
         },
         block: Block,
     })
@@ -90,7 +90,7 @@ fn test_let_dot_dot() {
     };
 
     snapshot!(tokens as Stmt, @r###"
-    Local(Local {
+    Stmt::Local(Local {
         pat: Pat::Rest,
         init: Some(LocalInit {
             expr: Expr::Lit {
@@ -108,13 +108,13 @@ fn test_let_else() {
     };
 
     snapshot!(tokens as Stmt, @r###"
-    Local(Local {
+    Stmt::Local(Local {
         pat: Pat::TupleStruct {
             path: Path {
                 segments: [
                     PathSegment {
                         ident: "Some",
-                        arguments: None,
+                        arguments: PathArguments::None,
                     },
                 ],
             },
@@ -132,7 +132,7 @@ fn test_let_else() {
                     segments: [
                         PathSegment {
                             ident: "None",
-                            arguments: None,
+                            arguments: PathArguments::None,
                         },
                     ],
                 },
@@ -140,7 +140,7 @@ fn test_let_else() {
             diverge: Some(Expr::Block {
                 block: Block {
                     stmts: [
-                        Expr(
+                        Stmt::Expr(
                             Expr::Return {
                                 expr: Some(Expr::Lit {
                                     lit: 0,
@@ -168,27 +168,27 @@ fn test_macros() {
     };
 
     snapshot!(tokens as Stmt, @r###"
-    Item(Item::Fn {
-        vis: Inherited,
+    Stmt::Item(Item::Fn {
+        vis: Visibility::Inherited,
         sig: Signature {
             ident: "main",
             generics: Generics,
-            output: Default,
+            output: ReturnType::Default,
         },
         block: Block {
             stmts: [
-                Item(Item::Macro {
+                Stmt::Item(Item::Macro {
                     ident: Some("mac"),
                     mac: Macro {
                         path: Path {
                             segments: [
                                 PathSegment {
                                     ident: "macro_rules",
-                                    arguments: None,
+                                    arguments: PathArguments::None,
                                 },
                             ],
                         },
-                        delimiter: Brace,
+                        delimiter: MacroDelimiter::Brace,
                         tokens: TokenStream(``),
                     },
                 }),
@@ -198,11 +198,11 @@ fn test_macros() {
                             segments: [
                                 PathSegment {
                                     ident: "thread_local",
-                                    arguments: None,
+                                    arguments: PathArguments::None,
                                 },
                             ],
                         },
-                        delimiter: Brace,
+                        delimiter: MacroDelimiter::Brace,
                         tokens: TokenStream(`static FOO`),
                     },
                 },
@@ -212,11 +212,11 @@ fn test_macros() {
                             segments: [
                                 PathSegment {
                                     ident: "println",
-                                    arguments: None,
+                                    arguments: PathArguments::None,
                                 },
                             ],
                         },
-                        delimiter: Paren,
+                        delimiter: MacroDelimiter::Paren,
                         tokens: TokenStream(`""`),
                     },
                     semi_token: Some,
@@ -227,11 +227,11 @@ fn test_macros() {
                             segments: [
                                 PathSegment {
                                     ident: "vec",
-                                    arguments: None,
+                                    arguments: PathArguments::None,
                                 },
                             ],
                         },
-                        delimiter: Bracket,
+                        delimiter: MacroDelimiter::Bracket,
                         tokens: TokenStream(``),
                     },
                 },

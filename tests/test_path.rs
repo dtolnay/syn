@@ -23,11 +23,11 @@ fn parse_interpolated_leading_component() {
             segments: [
                 PathSegment {
                     ident: "first",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
                 PathSegment {
                     ident: "rest",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -40,11 +40,11 @@ fn parse_interpolated_leading_component() {
             segments: [
                 PathSegment {
                     ident: "first",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
                 PathSegment {
                     ident: "rest",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -115,7 +115,7 @@ fn parse_parenthesized_path_arguments_with_disambiguator() {
                 PathSegment {
                     ident: "FnOnce",
                     arguments: PathArguments::Parenthesized {
-                        output: Type(
+                        output: ReturnType::Type(
                             Type::Never,
                         ),
                     },
