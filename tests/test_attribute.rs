@@ -11,11 +11,11 @@ fn test_meta_item_word() {
     let meta = test("#[foo]");
 
     snapshot!(meta, @r###"
-    Path(Path {
+    Meta::Path(Path {
         segments: [
             PathSegment {
                 ident: "foo",
-                arguments: None,
+                arguments: PathArguments::None,
             },
         ],
     })
@@ -32,7 +32,7 @@ fn test_meta_item_name_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -53,7 +53,7 @@ fn test_meta_item_bool_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -73,7 +73,7 @@ fn test_meta_item_bool_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
@@ -96,11 +96,11 @@ fn test_meta_item_list_lit() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
-        delimiter: Paren,
+        delimiter: MacroDelimiter::Paren,
         tokens: TokenStream(`5`),
     }
     "###);
@@ -116,11 +116,11 @@ fn test_meta_item_list_word() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
-        delimiter: Paren,
+        delimiter: MacroDelimiter::Paren,
         tokens: TokenStream(`bar`),
     }
     "###);
@@ -136,11 +136,11 @@ fn test_meta_item_list_name_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
-        delimiter: Paren,
+        delimiter: MacroDelimiter::Paren,
         tokens: TokenStream(`bar = 5`),
     }
     "###);
@@ -156,11 +156,11 @@ fn test_meta_item_list_bool_value() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
-        delimiter: Paren,
+        delimiter: MacroDelimiter::Paren,
         tokens: TokenStream(`bar = true`),
     }
     "###);
@@ -176,11 +176,11 @@ fn test_meta_item_multiple() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
-        delimiter: Paren,
+        delimiter: MacroDelimiter::Paren,
         tokens: TokenStream(`word , name = 5 , list (name2 = 6) , word2`),
     }
     "###);
@@ -196,11 +196,11 @@ fn test_bool_lit() {
             segments: [
                 PathSegment {
                     ident: "foo",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
-        delimiter: Paren,
+        delimiter: MacroDelimiter::Paren,
         tokens: TokenStream(`true`),
     }
     "###);
@@ -216,11 +216,11 @@ fn test_negative_lit() {
             segments: [
                 PathSegment {
                     ident: "form",
-                    arguments: None,
+                    arguments: PathArguments::None,
                 },
             ],
         },
-        delimiter: Paren,
+        delimiter: MacroDelimiter::Paren,
         tokens: TokenStream(`min = - 1 , max = 200`),
     }
     "###);

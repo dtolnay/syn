@@ -124,14 +124,14 @@ fn test_empty_group_vis() {
 
     snapshot!(tokens as DeriveInput, @r###"
     DeriveInput {
-        vis: Inherited,
+        vis: Visibility::Inherited,
         ident: "S",
         generics: Generics,
         data: Data::Struct {
             fields: Fields::Named {
                 named: [
                     Field {
-                        vis: Inherited,
+                        vis: Visibility::Inherited,
                         ident: Some("f"),
                         colon_token: Some,
                         ty: Type::Tuple,
