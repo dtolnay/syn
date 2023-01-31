@@ -14,13 +14,13 @@ fn test_parse_meta_item_word() {
     let input = "hello";
 
     snapshot!(input as Meta, @r###"
-    Meta::Path(Path {
+    Meta::Path {
         segments: [
             PathSegment {
                 ident: "hello",
             },
         ],
-    })
+    }
     "###);
 }
 
@@ -138,7 +138,7 @@ fn test_parse_meta_item_multiple() {
 fn test_parse_path() {
     let input = "::serde::Serialize";
     snapshot!(input as Meta, @r###"
-    Meta::Path(Path {
+    Meta::Path {
         leading_colon: Some,
         segments: [
             PathSegment {
@@ -148,6 +148,6 @@ fn test_parse_path() {
                 ident: "Serialize",
             },
         ],
-    })
+    }
     "###);
 }

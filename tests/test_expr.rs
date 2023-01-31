@@ -133,13 +133,13 @@ fn test_macro_variable_func() {
         attrs: [
             Attribute {
                 style: AttrStyle::Outer,
-                meta: Meta::Path(Path {
+                meta: Meta::Path {
                     segments: [
                         PathSegment {
                             ident: "outside",
                         },
                     ],
-                }),
+                },
             },
         ],
         func: Expr::Group {
@@ -147,13 +147,13 @@ fn test_macro_variable_func() {
                 attrs: [
                     Attribute {
                         style: AttrStyle::Outer,
-                        meta: Meta::Path(Path {
+                        meta: Meta::Path {
                             segments: [
                                 PathSegment {
                                     ident: "inside",
                                 },
                             ],
-                        }),
+                        },
                     },
                 ],
                 path: Path {
@@ -252,13 +252,13 @@ fn test_macro_variable_match_arm() {
                         attrs: [
                             Attribute {
                                 style: AttrStyle::Outer,
-                                meta: Meta::Path(Path {
+                                meta: Meta::Path {
                                     segments: [
                                         PathSegment {
                                             ident: "a",
                                         },
                                     ],
-                                }),
+                                },
                             },
                         ],
                     },
