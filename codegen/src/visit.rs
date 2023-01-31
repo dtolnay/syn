@@ -176,12 +176,6 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
         }
         Data::Struct(fields) => {
             for (field, ty) in fields {
-                if let Type::Syn(ty) = ty {
-                    if ty == "Reserved" {
-                        continue;
-                    }
-                }
-
                 let id = Ident::new(field, Span::call_site());
                 let ref_toks = Owned(quote!(node.#id));
                 let visit_field = visit(ty, &s.features, defs, &ref_toks)

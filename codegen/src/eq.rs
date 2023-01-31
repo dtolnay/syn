@@ -8,7 +8,6 @@ const EQ_SRC: &str = "src/gen/eq.rs";
 
 fn always_eq(field_type: &Type) -> bool {
     match field_type {
-        Type::Syn(node) => node == "Reserved",
         Type::Ext(ty) => ty == "Span",
         Type::Token(_) | Type::Group(_) => true,
         Type::Box(inner) => always_eq(inner),
