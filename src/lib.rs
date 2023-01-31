@@ -460,9 +460,6 @@ mod print;
 
 pub mod punctuated;
 
-#[cfg(feature = "full")]
-mod reserved;
-
 mod sealed;
 
 mod span;
