@@ -508,6 +508,7 @@ impl<'a> FilterAttrs<'a> for &'a [Attribute] {
 #[cfg(feature = "parsing")]
 pub mod parsing {
     use super::*;
+    use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
 
     pub fn parse_inner(input: ParseStream, attrs: &mut Vec<Attribute>) -> Result<()> {
@@ -540,8 +541,13 @@ pub mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Meta {
         fn parse(input: ParseStream) -> Result<Self> {
-            let path = input.call(Path::parse_mod_style)?;
-            parse_meta_after_path(path, input)
+            if cfg!(feature = "full") && input.peek(Token![unsafe]) {
+                let unsafe_ident = Ident::parse_any(input)?;
+                parse_meta_list_after_path(Path::from(unsafe_ident), input).map(Meta::List)
+            } else {
+                let path = input.call(Path::parse_mod_style)?;
+                parse_meta_after_path(path, input)
+            }
         }
     }
 
