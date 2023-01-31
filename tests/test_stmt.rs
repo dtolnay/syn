@@ -16,12 +16,12 @@ fn test_raw_operator() {
     let stmt = syn::parse_str::<Stmt>("let _ = &raw const x;").unwrap();
 
     snapshot!(stmt, @r###"
-    Stmt::Local(Local {
+    Stmt::Local {
         pat: Pat::Wild,
         init: Some(LocalInit {
             expr: Expr::Verbatim(`& raw const x`),
         }),
-    })
+    }
     "###);
 }
 
@@ -30,7 +30,7 @@ fn test_raw_variable() {
     let stmt = syn::parse_str::<Stmt>("let _ = &raw;").unwrap();
 
     snapshot!(stmt, @r###"
-    Stmt::Local(Local {
+    Stmt::Local {
         pat: Pat::Wild,
         init: Some(LocalInit {
             expr: Expr::Reference {
@@ -45,7 +45,7 @@ fn test_raw_variable() {
                 },
             },
         }),
-    })
+    }
     "###);
 }
 
@@ -89,14 +89,14 @@ fn test_let_dot_dot() {
     };
 
     snapshot!(tokens as Stmt, @r###"
-    Stmt::Local(Local {
+    Stmt::Local {
         pat: Pat::Rest,
         init: Some(LocalInit {
             expr: Expr::Lit {
                 lit: 10,
             },
         }),
-    })
+    }
     "###);
 }
 
@@ -107,7 +107,7 @@ fn test_let_else() {
     };
 
     snapshot!(tokens as Stmt, @r###"
-    Stmt::Local(Local {
+    Stmt::Local {
         pat: Pat::TupleStruct {
             path: Path {
                 segments: [
@@ -149,7 +149,7 @@ fn test_let_else() {
                 },
             }),
         }),
-    })
+    }
     "###);
 }
 

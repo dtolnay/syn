@@ -215,13 +215,13 @@ fn test_enum() {
             },
             Attribute {
                 style: AttrStyle::Outer,
-                meta: Meta::Path(Path {
+                meta: Meta::Path {
                     segments: [
                         PathSegment {
                             ident: "must_use",
                         },
                     ],
-                }),
+                },
             },
         ],
         vis: Visibility::Public,
@@ -325,13 +325,13 @@ fn test_enum() {
                 lit: " See the std::result module documentation for details.",
             },
         },
-        Meta::Path(Path {
+        Meta::Path {
             segments: [
                 PathSegment {
                     ident: "must_use",
                 },
             ],
-        }),
+        },
     ]
     "###);
 }
@@ -358,7 +358,7 @@ fn test_attr_with_mod_style_path_with_self() {
         attrs: [
             Attribute {
                 style: AttrStyle::Outer,
-                meta: Meta::Path(Path {
+                meta: Meta::Path {
                     segments: [
                         PathSegment {
                             ident: "foo",
@@ -367,7 +367,7 @@ fn test_attr_with_mod_style_path_with_self() {
                             ident: "self",
                         },
                     ],
-                }),
+                },
             },
         ],
         vis: Visibility::Inherited,
@@ -381,7 +381,7 @@ fn test_attr_with_mod_style_path_with_self() {
     "###);
 
     snapshot!(&input.attrs[0].meta, @r###"
-    Meta::Path(Path {
+    Meta::Path {
         segments: [
             PathSegment {
                 ident: "foo",
@@ -390,7 +390,7 @@ fn test_attr_with_mod_style_path_with_self() {
                 ident: "self",
             },
         ],
-    })
+    }
     "###);
 }
 

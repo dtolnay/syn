@@ -23,13 +23,13 @@ fn test_macro_variable_attr() {
         attrs: [
             Attribute {
                 style: AttrStyle::Outer,
-                meta: Meta::Path(Path {
+                meta: Meta::Path {
                     segments: [
                         PathSegment {
                             ident: "test",
                         },
                     ],
-                }),
+                },
             },
         ],
         vis: Visibility::Inherited,

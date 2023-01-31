@@ -3744,11 +3744,23 @@ impl Debug for Lite<syn::Meta> {
         let _val = &self.value;
         match _val {
             syn::Meta::Path(_val) => {
-                formatter.write_str("Meta::Path")?;
-                formatter.write_str("(")?;
-                Debug::fmt(Lite(_val), formatter)?;
-                formatter.write_str(")")?;
-                Ok(())
+                let mut formatter = formatter.debug_struct("Meta::Path");
+                if let Some(val) = &_val.leading_colon {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::token::Colon2);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("leading_colon", Print::ref_cast(val));
+                }
+                if !_val.segments.is_empty() {
+                    formatter.field("segments", Lite(&_val.segments));
+                }
+                formatter.finish()
             }
             syn::Meta::List(_val) => {
                 let mut formatter = formatter.debug_struct("Meta::List");
@@ -4587,11 +4599,28 @@ impl Debug for Lite<syn::Stmt> {
         let _val = &self.value;
         match _val {
             syn::Stmt::Local(_val) => {
-                formatter.write_str("Stmt::Local")?;
-                formatter.write_str("(")?;
-                Debug::fmt(Lite(_val), formatter)?;
-                formatter.write_str(")")?;
-                Ok(())
+                let mut formatter = formatter.debug_struct("Stmt::Local");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                formatter.field("pat", Lite(&_val.pat));
+                if let Some(val) = &_val.init {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::LocalInit);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            let _val = &self.0;
+                            formatter.write_str("(")?;
+                            Debug::fmt(Lite(_val), formatter)?;
+                            formatter.write_str(")")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("init", Print::ref_cast(val));
+                }
+                formatter.finish()
             }
             syn::Stmt::Item(_val) => {
                 formatter.write_str("Stmt::Item")?;
@@ -5418,11 +5447,9 @@ impl Debug for Lite<syn::TypeParamBound> {
                 Ok(())
             }
             syn::TypeParamBound::Lifetime(_val) => {
-                formatter.write_str("TypeParamBound::Lifetime")?;
-                formatter.write_str("(")?;
-                Debug::fmt(Lite(_val), formatter)?;
-                formatter.write_str(")")?;
-                Ok(())
+                let mut formatter = formatter.debug_struct("TypeParamBound::Lifetime");
+                formatter.field("ident", Lite(&_val.ident));
+                formatter.finish()
             }
             syn::TypeParamBound::Verbatim(_val) => {
                 formatter.write_str("TypeParamBound::Verbatim")?;

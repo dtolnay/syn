@@ -11,13 +11,13 @@ fn test_meta_item_word() {
     let meta = test("#[foo]");
 
     snapshot!(meta, @r###"
-    Meta::Path(Path {
+    Meta::Path {
         segments: [
             PathSegment {
                 ident: "foo",
             },
         ],
-    })
+    }
     "###);
 }
 

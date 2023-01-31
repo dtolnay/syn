@@ -43,21 +43,21 @@ fn test_split_for_impl() {
                     attrs: [
                         Attribute {
                             style: AttrStyle::Outer,
-                            meta: Meta::Path(Path {
+                            meta: Meta::Path {
                                 segments: [
                                     PathSegment {
                                         ident: "may_dangle",
                                     },
                                 ],
-                            }),
+                            },
                         },
                     ],
                     ident: "T",
                     colon_token: Some,
                     bounds: [
-                        TypeParamBound::Lifetime(Lifetime {
+                        TypeParamBound::Lifetime {
                             ident: "a",
-                        }),
+                        },
                     ],
                     eq_token: Some,
                     default: Some(Type::Tuple),
@@ -127,16 +127,16 @@ fn test_split_for_impl() {
 fn test_ty_param_bound() {
     let tokens = quote!('a);
     snapshot!(tokens as TypeParamBound, @r###"
-    TypeParamBound::Lifetime(Lifetime {
+    TypeParamBound::Lifetime {
         ident: "a",
-    })
+    }
     "###);
 
     let tokens = quote!('_);
     snapshot!(tokens as TypeParamBound, @r###"
-    TypeParamBound::Lifetime(Lifetime {
+    TypeParamBound::Lifetime {
         ident: "_",
-    })
+    }
     "###);
 
     let tokens = quote!(Debug);

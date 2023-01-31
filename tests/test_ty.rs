@@ -245,9 +245,9 @@ fn test_trait_object() {
                     ],
                 },
             }),
-            TypeParamBound::Lifetime(Lifetime {
+            TypeParamBound::Lifetime {
                 ident: "static",
-            }),
+            },
         ],
     }
     "###);
@@ -257,9 +257,9 @@ fn test_trait_object() {
     Type::TraitObject {
         dyn_token: Some,
         bounds: [
-            TypeParamBound::Lifetime(Lifetime {
+            TypeParamBound::Lifetime {
                 ident: "a",
-            }),
+            },
             TypeParamBound::Trait(TraitBound {
                 path: Path {
                     segments: [

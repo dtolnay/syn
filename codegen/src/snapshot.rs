@@ -120,9 +120,19 @@ fn syntax_tree_enum<'a>(outer: &str, inner: &str, fields: &'a [Type]) -> Option<
     if fields.len() != 1 {
         return None;
     }
-    const WHITELIST: &[&str] = &["PathArguments", "Visibility"];
+    const WHITELIST: &[(&str, &str)] = &[
+        ("Meta", "Path"),
+        ("PathArguments", "AngleBracketed"),
+        ("PathArguments", "Parenthesized"),
+        ("Stmt", "Local"),
+        ("TypeParamBound", "Lifetime"),
+        ("Visibility", "Public"),
+        ("Visibility", "Restricted"),
+    ];
     match &fields[0] {
-        Type::Syn(ty) if WHITELIST.contains(&outer) || outer.to_owned() + inner == *ty => Some(ty),
+        Type::Syn(ty) if WHITELIST.contains(&(outer, inner)) || outer.to_owned() + inner == *ty => {
+            Some(ty)
+        }
         _ => None,
     }
 }
