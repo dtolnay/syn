@@ -311,6 +311,8 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     file::write(
         TESTS_DEBUG_SRC,
         quote! {
+            #![allow(clippy::match_wildcard_for_single_variants)]
+
             use super::{Lite, RefCast};
             use std::fmt::{self, Debug, Display};
 
