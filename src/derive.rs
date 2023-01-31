@@ -5,19 +5,10 @@ ast_struct! {
     /// Data structure sent to a `proc_macro_derive` macro.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "derive")))]
     pub struct DeriveInput {
-        /// Attributes tagged on the whole struct or enum.
         pub attrs: Vec<Attribute>,
-
-        /// Visibility of the struct or enum.
         pub vis: Visibility,
-
-        /// Name of the struct or enum.
         pub ident: Ident,
-
-        /// Generics required to complete the definition.
         pub generics: Generics,
-
-        /// Data within the struct or enum.
         pub data: Data,
     }
 }
@@ -32,13 +23,8 @@ ast_enum_of_structs! {
     /// [syntax tree enum]: Expr#syntax-tree-enums
     #[cfg_attr(doc_cfg, doc(cfg(feature = "derive")))]
     pub enum Data {
-        /// A struct input to a `proc_macro_derive` macro.
         Struct(DataStruct),
-
-        /// An enum input to a `proc_macro_derive` macro.
         Enum(DataEnum),
-
-        /// An untagged union input to a `proc_macro_derive` macro.
         Union(DataUnion),
     }
 

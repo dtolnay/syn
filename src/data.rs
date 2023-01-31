@@ -5,7 +5,6 @@ ast_struct! {
     /// An enum variant.
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Variant {
-        /// Attributes tagged on the variant.
         pub attrs: Vec<Attribute>,
 
         /// Name of the variant.
@@ -137,10 +136,8 @@ ast_struct! {
     /// A field of a struct or enum variant.
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Field {
-        /// Attributes tagged on the field.
         pub attrs: Vec<Attribute>,
 
-        /// Visibility of the field.
         pub vis: Visibility,
 
         /// Name of the field, if any.
@@ -150,7 +147,6 @@ ast_struct! {
 
         pub colon_token: Option<Token![:]>,
 
-        /// Type of the field.
         pub ty: Type,
     }
 }

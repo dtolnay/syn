@@ -861,17 +861,13 @@ ast_struct! {
     /// A field-value pair in a struct literal.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct FieldValue {
-        /// Attributes tagged on the field.
         pub attrs: Vec<Attribute>,
-
-        /// Name or index of the field.
         pub member: Member,
 
         /// The colon in `Struct { x: x }`. If written in shorthand like
         /// `Struct { x }`, there is no colon.
         pub colon_token: Option<Token![:]>,
 
-        /// Value of the field.
         pub expr: Expr,
     }
 }
