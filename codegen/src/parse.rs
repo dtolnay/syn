@@ -398,10 +398,6 @@ mod parsing {
             variants.push(content.call(eos_variant)?);
         }
 
-        if let Some(ident) = input.parse::<Option<Ident>>()? {
-            assert_eq!(ident, "do_not_generate_to_tokens");
-        }
-
         let enum_item = {
             let variants = variants.iter().map(|v| {
                 let attrs = &v.attrs;

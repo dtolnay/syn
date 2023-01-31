@@ -13,7 +13,7 @@ ast_struct! {
     }
 }
 
-ast_enum_of_structs! {
+ast_enum! {
     /// The storage of a struct, enum or union data structure.
     ///
     /// # Syntax tree enum
@@ -27,8 +27,6 @@ ast_enum_of_structs! {
         Enum(DataEnum),
         Union(DataUnion),
     }
-
-    do_not_generate_to_tokens
 }
 
 ast_struct! {
