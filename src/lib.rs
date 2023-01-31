@@ -327,9 +327,7 @@ mod custom_punctuation;
 #[cfg(any(feature = "full", feature = "derive"))]
 mod data;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use crate::data::{
-    Field, Fields, FieldsNamed, FieldsUnnamed, Variant, VisPublic, VisRestricted, Visibility,
-};
+pub use crate::data::{Field, Fields, FieldsNamed, FieldsUnnamed, Variant};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod derive;
@@ -494,6 +492,11 @@ pub use crate::ty::{
 
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "parsing"))]
 mod verbatim;
+
+#[cfg(any(feature = "full", feature = "derive"))]
+mod visibility;
+#[cfg(any(feature = "full", feature = "derive"))]
+pub use crate::visibility::{VisPublic, VisRestricted, Visibility};
 
 #[cfg(all(feature = "parsing", feature = "full"))]
 mod whitespace;
