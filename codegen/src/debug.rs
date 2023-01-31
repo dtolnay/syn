@@ -11,6 +11,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
     let ident = Ident::new(type_name, Span::call_site());
 
     match &node.data {
+        Data::Enum(variants) if variants.is_empty() => quote!(match *self {}),
         Data::Enum(variants) => {
             let arms = variants.iter().map(|(variant_name, fields)| {
                 let variant = Ident::new(variant_name, Span::call_site());
@@ -81,12 +82,16 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     let ident = Ident::new(&node.ident, Span::call_site());
     let cfg_features = cfg::features(&node.features);
     let body = expand_impl_body(defs, node);
+    let formatter = match &node.data {
+        Data::Enum(variants) if variants.is_empty() => quote!(_formatter),
+        _ => quote!(formatter),
+    };
 
     quote! {
         #cfg_features
         #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl Debug for #ident {
-            fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn fmt(&self, #formatter: &mut fmt::Formatter) -> fmt::Result {
                 #body
             }
         }
