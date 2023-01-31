@@ -13,6 +13,7 @@
     clippy::items_after_statements,
     clippy::manual_let_else,
     clippy::match_like_matches_macro,
+    clippy::similar_names,
     clippy::too_many_lines,
     clippy::uninlined_format_args
 )]
