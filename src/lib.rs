@@ -493,7 +493,7 @@ mod verbatim;
 #[cfg(any(feature = "full", feature = "derive"))]
 mod visibility;
 #[cfg(any(feature = "full", feature = "derive"))]
-pub use crate::visibility::{VisPublic, VisRestricted, Visibility};
+pub use crate::visibility::{VisRestricted, Visibility};
 
 #[cfg(all(feature = "parsing", feature = "full"))]
 mod whitespace;
