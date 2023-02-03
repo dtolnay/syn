@@ -3,6 +3,8 @@ use super::*;
 ast_struct! {
     /// A complete file of Rust source code.
     ///
+    /// Typically `File` objects are created with [`parse_file`].
+    ///
     /// # Example
     ///
     /// Parse a Rust source file into a `syn::File` and print out a debug
