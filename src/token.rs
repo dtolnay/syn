@@ -707,24 +707,24 @@ define_keywords! {
 }
 
 define_punctuation! {
-    "+"           pub struct Add/1        /// `+`
-    "+="          pub struct AddEq/2      /// `+=`
+    "+"           pub struct Plus/1       /// `+`
+    "+="          pub struct PlusEq/2     /// `+=`
     "&"           pub struct And/1        /// `&`
     "&&"          pub struct AndAnd/2     /// `&&`
     "&="          pub struct AndEq/2      /// `&=`
     "@"           pub struct At/1         /// `@`
-    "!"           pub struct Bang/1       /// `!`
+    "!"           pub struct Not/1        /// `!`
     "^"           pub struct Caret/1      /// `^`
     "^="          pub struct CaretEq/2    /// `^=`
     ":"           pub struct Colon/1      /// `:`
-    "::"          pub struct Colon2/2     /// `::`
+    "::"          pub struct PathSep/2    /// `::`
     ","           pub struct Comma/1      /// `,`
-    "/"           pub struct Div/1        /// `/`
-    "/="          pub struct DivEq/2      /// `/=`
+    "/"           pub struct Slash/1      /// `/`
+    "/="          pub struct SlashEq/2    /// `/=`
     "$"           pub struct Dollar/1     /// `$`
     "."           pub struct Dot/1        /// `.`
-    ".."          pub struct Dot2/2       /// `..`
-    "..."         pub struct Dot3/3       /// `...`
+    ".."          pub struct DotDot/2     /// `..`
+    "..."         pub struct DotDotDot/3  /// `...`
     "..="         pub struct DotDotEq/3   /// `..=`
     "="           pub struct Eq/1         /// `=`
     "=="          pub struct EqEq/2       /// `==`
@@ -734,7 +734,7 @@ define_punctuation! {
     "<-"          pub struct LArrow/2     /// `<-`
     "<="          pub struct Le/2         /// `<=`
     "<"           pub struct Lt/1         /// `<`
-    "*="          pub struct MulEq/2      /// `*=`
+    "*="          pub struct StarEq/2     /// `*=`
     "!="          pub struct Ne/2         /// `!=`
     "|"           pub struct Or/1         /// `|`
     "|="          pub struct OrEq/2       /// `|=`
@@ -742,16 +742,16 @@ define_punctuation! {
     "#"           pub struct Pound/1      /// `#`
     "?"           pub struct Question/1   /// `?`
     "->"          pub struct RArrow/2     /// `->`
-    "%"           pub struct Rem/1        /// `%`
-    "%="          pub struct RemEq/2      /// `%=`
+    "%"           pub struct Percent/1    /// `%`
+    "%="          pub struct PercentEq/2  /// `%=`
     ";"           pub struct Semi/1       /// `;`
     "<<"          pub struct Shl/2        /// `<<`
     "<<="         pub struct ShlEq/3      /// `<<=`
     ">>"          pub struct Shr/2        /// `>>`
     ">>="         pub struct ShrEq/3      /// `>>=`
     "*"           pub struct Star/1       /// `*`
-    "-"           pub struct Sub/1        /// `-`
-    "-="          pub struct SubEq/2      /// `-=`
+    "-"           pub struct Minus/1      /// `-`
+    "-="          pub struct MinusEq/2    /// `-=`
     "~"           pub struct Tilde/1      /// `~`
 }
 
@@ -824,24 +824,24 @@ macro_rules! Token {
     [where]       => { $crate::token::Where };
     [while]       => { $crate::token::While };
     [yield]       => { $crate::token::Yield };
-    [+]           => { $crate::token::Add };
-    [+=]          => { $crate::token::AddEq };
+    [+]           => { $crate::token::Plus };
+    [+=]          => { $crate::token::PlusEq };
     [&]           => { $crate::token::And };
     [&&]          => { $crate::token::AndAnd };
     [&=]          => { $crate::token::AndEq };
     [@]           => { $crate::token::At };
-    [!]           => { $crate::token::Bang };
+    [!]           => { $crate::token::Not };
     [^]           => { $crate::token::Caret };
     [^=]          => { $crate::token::CaretEq };
     [:]           => { $crate::token::Colon };
-    [::]          => { $crate::token::Colon2 };
+    [::]          => { $crate::token::PathSep };
     [,]           => { $crate::token::Comma };
-    [/]           => { $crate::token::Div };
-    [/=]          => { $crate::token::DivEq };
+    [/]           => { $crate::token::Slash };
+    [/=]          => { $crate::token::SlashEq };
     [$]           => { $crate::token::Dollar };
     [.]           => { $crate::token::Dot };
-    [..]          => { $crate::token::Dot2 };
-    [...]         => { $crate::token::Dot3 };
+    [..]          => { $crate::token::DotDot };
+    [...]         => { $crate::token::DotDotDot };
     [..=]         => { $crate::token::DotDotEq };
     [=]           => { $crate::token::Eq };
     [==]          => { $crate::token::EqEq };
@@ -851,7 +851,7 @@ macro_rules! Token {
     [<-]          => { $crate::token::LArrow };
     [<=]          => { $crate::token::Le };
     [<]           => { $crate::token::Lt };
-    [*=]          => { $crate::token::MulEq };
+    [*=]          => { $crate::token::StarEq };
     [!=]          => { $crate::token::Ne };
     [|]           => { $crate::token::Or };
     [|=]          => { $crate::token::OrEq };
@@ -859,16 +859,16 @@ macro_rules! Token {
     [#]           => { $crate::token::Pound };
     [?]           => { $crate::token::Question };
     [->]          => { $crate::token::RArrow };
-    [%]           => { $crate::token::Rem };
-    [%=]          => { $crate::token::RemEq };
+    [%]           => { $crate::token::Percent };
+    [%=]          => { $crate::token::PercentEq };
     [;]           => { $crate::token::Semi };
     [<<]          => { $crate::token::Shl };
     [<<=]         => { $crate::token::ShlEq };
     [>>]          => { $crate::token::Shr };
     [>>=]         => { $crate::token::ShrEq };
     [*]           => { $crate::token::Star };
-    [-]           => { $crate::token::Sub };
-    [-=]          => { $crate::token::SubEq };
+    [-]           => { $crate::token::Minus };
+    [-=]          => { $crate::token::MinusEq };
     [~]           => { $crate::token::Tilde };
     [_]           => { $crate::token::Underscore };
 }
