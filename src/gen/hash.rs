@@ -1007,9 +1007,24 @@ impl Hash for Field {
     {
         self.attrs.hash(state);
         self.vis.hash(state);
+        self.mutability.hash(state);
         self.ident.hash(state);
         self.colon_token.hash(state);
         self.ty.hash(state);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for FieldMutability {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            FieldMutability::None => {
+                state.write_u8(0u8);
+            }
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -1353,6 +1368,16 @@ impl Hash for ImplItemType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for ImplRestriction {
+    fn hash<H>(&self, _state: &mut H)
+    where
+        H: Hasher,
+    {
+        match *self {}
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for Item {
     fn hash<H>(&self, state: &mut H)
     where
@@ -1577,6 +1602,7 @@ impl Hash for ItemTrait {
         self.vis.hash(state);
         self.unsafety.hash(state);
         self.auto_token.hash(state);
+        self.restriction.hash(state);
         self.ident.hash(state);
         self.generics.hash(state);
         self.colon_token.hash(state);
@@ -2161,6 +2187,23 @@ impl Hash for Signature {
         self.inputs.hash(state);
         self.variadic.hash(state);
         self.output.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for StaticMutability {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            StaticMutability::Mut(_) => {
+                state.write_u8(0u8);
+            }
+            StaticMutability::None => {
+                state.write_u8(1u8);
+            }
+        }
     }
 }
 #[cfg(feature = "full")]

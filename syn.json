@@ -1966,6 +1966,9 @@
         "vis": {
           "syn": "Visibility"
         },
+        "mutability": {
+          "syn": "FieldMutability"
+        },
         "ident": {
           "option": {
             "proc_macro2": "Ident"
@@ -1980,6 +1983,19 @@
           "syn": "Type"
         }
       }
+    },
+    {
+      "ident": "FieldMutability",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "variants": {
+        "None": []
+      },
+      "exhaustive": false
     },
     {
       "ident": "FieldPat",
@@ -2249,9 +2265,7 @@
           "token": "Static"
         },
         "mutability": {
-          "option": {
-            "token": "Mut"
-          }
+          "syn": "StaticMutability"
         },
         "ident": {
           "proc_macro2": "Ident"
@@ -2572,6 +2586,16 @@
           "token": "Semi"
         }
       }
+    },
+    {
+      "ident": "ImplRestriction",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "variants": {},
+      "exhaustive": false
     },
     {
       "ident": "Index",
@@ -3011,9 +3035,7 @@
           "token": "Static"
         },
         "mutability": {
-          "option": {
-            "token": "Mut"
-          }
+          "syn": "StaticMutability"
         },
         "ident": {
           "proc_macro2": "Ident"
@@ -3098,6 +3120,11 @@
         "auto_token": {
           "option": {
             "token": "Auto"
+          }
+        },
+        "restriction": {
+          "option": {
+            "syn": "ImplRestriction"
           }
         },
         "trait_token": {
@@ -4310,6 +4337,23 @@
           "syn": "ReturnType"
         }
       }
+    },
+    {
+      "ident": "StaticMutability",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "variants": {
+        "Mut": [
+          {
+            "token": "Mut"
+          }
+        ],
+        "None": []
+      },
+      "exhaustive": false
     },
     {
       "ident": "Stmt",

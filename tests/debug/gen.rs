@@ -2057,6 +2057,12 @@ impl Debug for Lite<syn::Field> {
             formatter.field("attrs", Lite(&_val.attrs));
         }
         formatter.field("vis", Lite(&_val.vis));
+        match _val.mutability {
+            syn::FieldMutability::None => {}
+            _ => {
+                formatter.field("mutability", Lite(&_val.mutability));
+            }
+        }
         if let Some(val) = &_val.ident {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -2087,6 +2093,15 @@ impl Debug for Lite<syn::Field> {
         }
         formatter.field("ty", Lite(&_val.ty));
         formatter.finish()
+    }
+}
+impl Debug for Lite<syn::FieldMutability> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        match _val {
+            syn::FieldMutability::None => formatter.write_str("FieldMutability::None"),
+            _ => unreachable!(),
+        }
     }
 }
 impl Debug for Lite<syn::FieldPat> {
@@ -2248,17 +2263,11 @@ impl Debug for Lite<syn::ForeignItem> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
-                if let Some(val) = &_val.mutability {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Mut);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
+                match _val.mutability {
+                    syn::StaticMutability::None => {}
+                    _ => {
+                        formatter.field("mutability", Lite(&_val.mutability));
                     }
-                    formatter.field("mutability", Print::ref_cast(val));
                 }
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("ty", Lite(&_val.ty));
@@ -2347,17 +2356,11 @@ impl Debug for Lite<syn::ForeignItemStatic> {
             formatter.field("attrs", Lite(&_val.attrs));
         }
         formatter.field("vis", Lite(&_val.vis));
-        if let Some(val) = &_val.mutability {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Mut);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
+        match _val.mutability {
+            syn::StaticMutability::None => {}
+            _ => {
+                formatter.field("mutability", Lite(&_val.mutability));
             }
-            formatter.field("mutability", Print::ref_cast(val));
         }
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("ty", Lite(&_val.ty));
@@ -2708,6 +2711,12 @@ impl Debug for Lite<syn::ImplItemType> {
         formatter.finish()
     }
 }
+impl Debug for Lite<syn::ImplRestriction> {
+    fn fmt(&self, _formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        unreachable!()
+    }
+}
 impl Debug for Lite<syn::Index> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let _val = &self.value;
@@ -2947,17 +2956,11 @@ impl Debug for Lite<syn::Item> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
-                if let Some(val) = &_val.mutability {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::token::Mut);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some")?;
-                            Ok(())
-                        }
+                match _val.mutability {
+                    syn::StaticMutability::None => {}
+                    _ => {
+                        formatter.field("mutability", Lite(&_val.mutability));
                     }
-                    formatter.field("mutability", Print::ref_cast(val));
                 }
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("ty", Lite(&_val.ty));
@@ -3016,6 +3019,22 @@ impl Debug for Lite<syn::Item> {
                         }
                     }
                     formatter.field("auto_token", Print::ref_cast(val));
+                }
+                if let Some(val) = &_val.restriction {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::ImplRestriction);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some")?;
+                            let _val = &self.0;
+                            formatter.write_str("(")?;
+                            Debug::fmt(Lite(_val), formatter)?;
+                            formatter.write_str(")")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("restriction", Print::ref_cast(val));
                 }
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
@@ -3359,17 +3378,11 @@ impl Debug for Lite<syn::ItemStatic> {
             formatter.field("attrs", Lite(&_val.attrs));
         }
         formatter.field("vis", Lite(&_val.vis));
-        if let Some(val) = &_val.mutability {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::token::Mut);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some")?;
-                    Ok(())
-                }
+        match _val.mutability {
+            syn::StaticMutability::None => {}
+            _ => {
+                formatter.field("mutability", Lite(&_val.mutability));
             }
-            formatter.field("mutability", Print::ref_cast(val));
         }
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("ty", Lite(&_val.ty));
@@ -3434,6 +3447,22 @@ impl Debug for Lite<syn::ItemTrait> {
                 }
             }
             formatter.field("auto_token", Print::ref_cast(val));
+        }
+        if let Some(val) = &_val.restriction {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::ImplRestriction);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some")?;
+                    let _val = &self.0;
+                    formatter.write_str("(")?;
+                    Debug::fmt(Lite(_val), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("restriction", Print::ref_cast(val));
         }
         formatter.field("ident", Lite(&_val.ident));
         formatter.field("generics", Lite(&_val.generics));
@@ -4592,6 +4621,19 @@ impl Debug for Lite<syn::Signature> {
         }
         formatter.field("output", Lite(&_val.output));
         formatter.finish()
+    }
+}
+impl Debug for Lite<syn::StaticMutability> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let _val = &self.value;
+        match _val {
+            syn::StaticMutability::Mut(_val) => {
+                formatter.write_str("StaticMutability::Mut")?;
+                Ok(())
+            }
+            syn::StaticMutability::None => formatter.write_str("StaticMutability::None"),
+            _ => unreachable!(),
+        }
     }
 }
 impl Debug for Lite<syn::Stmt> {

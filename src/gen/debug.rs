@@ -1093,10 +1093,20 @@ impl Debug for Field {
         let mut formatter = formatter.debug_struct("Field");
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
+        formatter.field("mutability", &self.mutability);
         formatter.field("ident", &self.ident);
         formatter.field("colon_token", &self.colon_token);
         formatter.field("ty", &self.ty);
         formatter.finish()
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for FieldMutability {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            FieldMutability::None => formatter.write_str("None"),
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -1442,6 +1452,13 @@ impl Debug for ImplItemType {
         formatter.finish()
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for ImplRestriction {
+    fn fmt(&self, _formatter: &mut fmt::Formatter) -> fmt::Result {
+        match *self {}
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Index {
@@ -1697,6 +1714,7 @@ impl Debug for ItemTrait {
         formatter.field("vis", &self.vis);
         formatter.field("unsafety", &self.unsafety);
         formatter.field("auto_token", &self.auto_token);
+        formatter.field("restriction", &self.restriction);
         formatter.field("trait_token", &self.trait_token);
         formatter.field("ident", &self.ident);
         formatter.field("generics", &self.generics);
@@ -2319,6 +2337,20 @@ impl Debug for Signature {
         formatter.field("variadic", &self.variadic);
         formatter.field("output", &self.output);
         formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for StaticMutability {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            StaticMutability::Mut(v0) => {
+                let mut formatter = formatter.debug_tuple("Mut");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            StaticMutability::None => formatter.write_str("None"),
+        }
     }
 }
 #[cfg(feature = "full")]

@@ -270,6 +270,10 @@ pub trait Fold {
     fn fold_field(&mut self, i: Field) -> Field {
         fold_field(self, i)
     }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    fn fold_field_mutability(&mut self, i: FieldMutability) -> FieldMutability {
+        fold_field_mutability(self, i)
+    }
     #[cfg(feature = "full")]
     fn fold_field_pat(&mut self, i: FieldPat) -> FieldPat {
         fold_field_pat(self, i)
@@ -352,6 +356,10 @@ pub trait Fold {
     #[cfg(feature = "full")]
     fn fold_impl_item_type(&mut self, i: ImplItemType) -> ImplItemType {
         fold_impl_item_type(self, i)
+    }
+    #[cfg(feature = "full")]
+    fn fold_impl_restriction(&mut self, i: ImplRestriction) -> ImplRestriction {
+        fold_impl_restriction(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_index(&mut self, i: Index) -> Index {
@@ -581,6 +589,10 @@ pub trait Fold {
     }
     fn fold_span(&mut self, i: Span) -> Span {
         fold_span(self, i)
+    }
+    #[cfg(feature = "full")]
+    fn fold_static_mutability(&mut self, i: StaticMutability) -> StaticMutability {
+        fold_static_mutability(self, i)
     }
     #[cfg(feature = "full")]
     fn fold_stmt(&mut self, i: Stmt) -> Stmt {
@@ -1607,9 +1619,19 @@ where
     Field {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         vis: f.fold_visibility(node.vis),
+        mutability: f.fold_field_mutability(node.mutability),
         ident: (node.ident).map(|it| f.fold_ident(it)),
         colon_token: (node.colon_token).map(|it| Token![:](tokens_helper(f, &it.spans))),
         ty: f.fold_type(node.ty),
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+pub fn fold_field_mutability<F>(f: &mut F, node: FieldMutability) -> FieldMutability
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        FieldMutability::None => FieldMutability::None,
     }
 }
 #[cfg(feature = "full")]
@@ -1744,7 +1766,7 @@ where
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         vis: f.fold_visibility(node.vis),
         static_token: Token![static](tokens_helper(f, &node.static_token.span)),
-        mutability: (node.mutability).map(|it| Token![mut](tokens_helper(f, &it.span))),
+        mutability: f.fold_static_mutability(node.mutability),
         ident: f.fold_ident(node.ident),
         colon_token: Token![:](tokens_helper(f, &node.colon_token.spans)),
         ty: Box::new(f.fold_type(*node.ty)),
@@ -1907,6 +1929,13 @@ where
         ty: f.fold_type(node.ty),
         semi_token: Token![;](tokens_helper(f, &node.semi_token.spans)),
     }
+}
+#[cfg(feature = "full")]
+pub fn fold_impl_restriction<F>(f: &mut F, node: ImplRestriction) -> ImplRestriction
+where
+    F: Fold + ?Sized,
+{
+    match node {}
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_index<F>(f: &mut F, node: Index) -> Index
@@ -2086,7 +2115,7 @@ where
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         vis: f.fold_visibility(node.vis),
         static_token: Token![static](tokens_helper(f, &node.static_token.span)),
-        mutability: (node.mutability).map(|it| Token![mut](tokens_helper(f, &it.span))),
+        mutability: f.fold_static_mutability(node.mutability),
         ident: f.fold_ident(node.ident),
         colon_token: Token![:](tokens_helper(f, &node.colon_token.spans)),
         ty: Box::new(f.fold_type(*node.ty)),
@@ -2120,6 +2149,7 @@ where
         vis: f.fold_visibility(node.vis),
         unsafety: (node.unsafety).map(|it| Token![unsafe](tokens_helper(f, &it.span))),
         auto_token: (node.auto_token).map(|it| Token![auto](tokens_helper(f, &it.span))),
+        restriction: (node.restriction).map(|it| f.fold_impl_restriction(it)),
         trait_token: Token![trait](tokens_helper(f, &node.trait_token.span)),
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
@@ -2713,6 +2743,18 @@ where
     F: Fold + ?Sized,
 {
     node
+}
+#[cfg(feature = "full")]
+pub fn fold_static_mutability<F>(f: &mut F, node: StaticMutability) -> StaticMutability
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        StaticMutability::Mut(_binding_0) => {
+            StaticMutability::Mut(Token![mut](tokens_helper(f, &_binding_0.span)))
+        }
+        StaticMutability::None => StaticMutability::None,
+    }
 }
 #[cfg(feature = "full")]
 pub fn fold_stmt<F>(f: &mut F, node: Stmt) -> Stmt

@@ -381,11 +381,11 @@ mod item;
 #[cfg(feature = "full")]
 pub use crate::item::{
     FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
-    ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType, Item, ItemConst, ItemEnum,
-    ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct,
-    ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Signature, TraitItem,
-    TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob, UseGroup, UseName,
-    UsePath, UseRename, UseTree, Variadic,
+    ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType, ImplRestriction, Item,
+    ItemConst, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod,
+    ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
+    Signature, StaticMutability, TraitItem, TraitItemConst, TraitItemFn, TraitItemMacro,
+    TraitItemType, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
 };
 
 mod lifetime;
@@ -460,6 +460,11 @@ mod print;
 
 pub mod punctuated;
 
+#[cfg(any(feature = "full", feature = "derive"))]
+mod restriction;
+#[cfg(any(feature = "full", feature = "derive"))]
+pub use crate::restriction::{FieldMutability, VisRestricted, Visibility};
+
 mod sealed;
 
 mod span;
@@ -489,11 +494,6 @@ pub use crate::ty::{
 
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "parsing"))]
 mod verbatim;
-
-#[cfg(any(feature = "full", feature = "derive"))]
-mod visibility;
-#[cfg(any(feature = "full", feature = "derive"))]
-pub use crate::visibility::{VisRestricted, Visibility};
 
 #[cfg(all(feature = "parsing", feature = "full"))]
 mod whitespace;
