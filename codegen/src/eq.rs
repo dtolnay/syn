@@ -21,6 +21,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
     let ident = Ident::new(type_name, Span::call_site());
 
     match &node.data {
+        Data::Enum(variants) if variants.is_empty() => quote!(match *self {}),
         Data::Enum(variants) => {
             let arms = variants.iter().map(|(variant_name, fields)| {
                 let variant = Ident::new(variant_name, Span::call_site());
@@ -71,10 +72,15 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                     }
                 }
             });
+            let fallthrough = if variants.len() == 1 {
+                None
+            } else {
+                Some(quote!(_ => false,))
+            };
             quote! {
                 match (self, other) {
                     #(#arms)*
-                    _ => false,
+                    #fallthrough
                 }
             }
         }
@@ -122,10 +128,10 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     }
 
     let body = expand_impl_body(defs, node);
-    let other = if body.to_string() == "true" {
-        quote!(_other)
-    } else {
-        quote!(other)
+    let other = match &node.data {
+        Data::Enum(variants) if variants.is_empty() => quote!(_other),
+        Data::Struct(fields) if fields.iter().all(|(_f, ty)| always_eq(ty)) => quote!(_other),
+        _ => quote!(other),
     };
 
     quote! {
