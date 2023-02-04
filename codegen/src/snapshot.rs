@@ -141,6 +141,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
     let ident = Ident::new(&node.ident, Span::call_site());
 
     match &node.data {
+        Data::Enum(variants) if variants.is_empty() => quote!(unreachable!()),
         Data::Enum(variants) => {
             let arms = variants.iter().map(|(v, fields)| {
                 let path = format!("{}::{}", name, v);
