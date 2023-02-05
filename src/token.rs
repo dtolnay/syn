@@ -756,9 +756,9 @@ define_punctuation! {
 }
 
 define_delimiters! {
-    Brace         pub struct Brace        /// `{...}`
-    Bracket       pub struct Bracket      /// `[...]`
-    Parenthesis   pub struct Paren        /// `(...)`
+    Brace         pub struct Brace        /// `{`&hellip;`}`
+    Bracket       pub struct Bracket      /// `[`&hellip;`]`
+    Parenthesis   pub struct Paren        /// `(`&hellip;`)`
     None          pub struct Group        /// None-delimited group
 }
 
