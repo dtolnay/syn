@@ -130,7 +130,7 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     let body = expand_impl_body(defs, node);
     let other = match &node.data {
         Data::Enum(variants) if variants.is_empty() => quote!(_other),
-        Data::Struct(fields) if fields.iter().all(|(_f, ty)| always_eq(ty)) => quote!(_other),
+        Data::Struct(fields) if fields.values().all(always_eq) => quote!(_other),
         _ => quote!(other),
     };
 
