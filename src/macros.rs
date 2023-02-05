@@ -113,10 +113,6 @@ macro_rules! ast_enum_from_struct {
 }
 
 #[cfg(feature = "printing")]
-#[cfg_attr(
-    not(any(feature = "full", feature = "derive")),
-    allow(unknown_lints, unused_macro_rules)
-)]
 macro_rules! generate_to_tokens {
     (
         ($($arms:tt)*) $tokens:ident $name:ident {
