@@ -119,7 +119,7 @@ macro_rules! impl_parse_for_custom_punctuation {
             }
 
             fn display() -> &'static $crate::__private::str {
-                concat!("`", $crate::stringify_punct!($($tt)+), "`")
+                $crate::__private::concat!("`", $crate::stringify_punct!($($tt)+), "`")
             }
         }
 
@@ -196,7 +196,7 @@ macro_rules! impl_extra_traits_for_custom_punctuation {
     ($ident:ident, $($tt:tt)+) => {
         impl $crate::__private::Debug for $ident {
             fn fmt(&self, f: &mut $crate::__private::Formatter) -> $crate::__private::fmt::Result {
-                $crate::__private::Formatter::write_str(f, stringify!($ident))
+                $crate::__private::Formatter::write_str(f, $crate::__private::stringify!($ident))
             }
         }
 
@@ -297,6 +297,6 @@ macro_rules! custom_punctuation_unexpected {
 #[macro_export]
 macro_rules! stringify_punct {
     ($($tt:tt)+) => {
-        concat!($(stringify!($tt)),+)
+        $crate::__private::concat!($($crate::__private::stringify!($tt)),+)
     };
 }
