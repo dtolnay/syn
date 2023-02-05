@@ -149,7 +149,7 @@ macro_rules! impl_to_tokens_for_custom_punctuation {
     ($ident:ident, $($tt:tt)+) => {
         impl $crate::__private::ToTokens for $ident {
             fn to_tokens(&self, tokens: &mut $crate::__private::TokenStream2) {
-                $crate::token::printing::punct($crate::stringify_punct!($($tt)+), &self.spans, tokens)
+                $crate::__private::print_punct($crate::stringify_punct!($($tt)+), &self.spans, tokens)
             }
         }
     };

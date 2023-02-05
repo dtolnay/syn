@@ -959,7 +959,7 @@ pub(crate) mod parsing {
 // Not public API.
 #[doc(hidden)]
 #[cfg(feature = "printing")]
-pub mod printing {
+pub(crate) mod printing {
     use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream};
     use quote::TokenStreamExt;
 

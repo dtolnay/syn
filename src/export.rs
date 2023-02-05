@@ -22,6 +22,9 @@ pub use crate::span::IntoSpans;
 #[cfg(feature = "parsing")]
 pub use crate::token::parsing::{peek_punct, punct as parse_punct};
 
+#[cfg(feature = "printing")]
+pub use crate::token::printing::punct as print_punct;
+
 #[cfg(all(
     not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
     feature = "proc-macro"
