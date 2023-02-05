@@ -2,7 +2,8 @@
 // It is not intended for manual editing.
 
 #![allow(clippy::match_wildcard_for_single_variants)]
-use super::{Lite, Present, RefCast};
+use super::{Lite, Present};
+use ref_cast::RefCast;
 use std::fmt::{self, Debug, Display};
 impl Debug for Lite<syn::Abi> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

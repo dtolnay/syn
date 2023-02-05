@@ -326,7 +326,8 @@ pub fn generate(defs: &Definitions) -> Result<()> {
         quote! {
             #![allow(clippy::match_wildcard_for_single_variants)]
 
-            use super::{Lite, Present, RefCast};
+            use super::{Lite, Present};
+            use ref_cast::RefCast;
             use std::fmt::{self, Debug, Display};
 
             #impls
