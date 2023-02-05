@@ -886,7 +886,7 @@ pub mod parsing {
     use crate::span::FromSpans;
     use proc_macro2::{Spacing, Span};
 
-    pub fn keyword(input: ParseStream, token: &str) -> Result<Span> {
+    pub(crate) fn keyword(input: ParseStream, token: &str) -> Result<Span> {
         input.step(|cursor| {
             if let Some((ident, rest)) = cursor.ident() {
                 if ident == token {
@@ -897,7 +897,7 @@ pub mod parsing {
         })
     }
 
-    pub fn peek_keyword(cursor: Cursor, token: &str) -> bool {
+    pub(crate) fn peek_keyword(cursor: Cursor, token: &str) -> bool {
         if let Some((ident, _rest)) = cursor.ident() {
             ident == token
         } else {
@@ -982,11 +982,16 @@ pub mod printing {
         tokens.append(op);
     }
 
-    pub fn keyword(s: &str, span: Span, tokens: &mut TokenStream) {
+    pub(crate) fn keyword(s: &str, span: Span, tokens: &mut TokenStream) {
         tokens.append(Ident::new(s, span));
     }
 
-    pub fn delim(delim: Delimiter, span: Span, tokens: &mut TokenStream, inner: TokenStream) {
+    pub(crate) fn delim(
+        delim: Delimiter,
+        span: Span,
+        tokens: &mut TokenStream,
+        inner: TokenStream,
+    ) {
         let mut g = Group::new(delim, inner);
         g.set_span(span);
         tokens.append(g);

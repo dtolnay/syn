@@ -988,7 +988,7 @@ pub(crate) mod parsing {
     //
     // Struct literals are ambiguous in certain positions
     // https://github.com/rust-lang/rfcs/pull/92
-    pub struct AllowStruct(bool);
+    pub(crate) struct AllowStruct(bool);
 
     enum Precedence {
         Any,

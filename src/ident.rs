@@ -33,7 +33,7 @@ impl From<Token![_]> for Ident {
     }
 }
 
-pub fn xid_ok(symbol: &str) -> bool {
+pub(crate) fn xid_ok(symbol: &str) -> bool {
     let mut chars = symbol.chars();
     let first = chars.next().unwrap();
     if !(first == '_' || unicode_ident::is_xid_start(first)) {

@@ -59,7 +59,7 @@ ast_struct! {
 }
 
 #[cfg(feature = "parsing")]
-pub mod parsing {
+pub(crate) mod parsing {
     use super::*;
     use crate::parse::{Parse, ParseStream, Result};
 
@@ -132,7 +132,7 @@ pub mod parsing {
         }
     }
 
-    pub fn data_struct(
+    pub(crate) fn data_struct(
         input: ParseStream,
     ) -> Result<(Option<WhereClause>, Fields, Option<Token![;]>)> {
         let mut lookahead = input.lookahead1();
@@ -168,7 +168,7 @@ pub mod parsing {
         }
     }
 
-    pub fn data_enum(
+    pub(crate) fn data_enum(
         input: ParseStream,
     ) -> Result<(
         Option<WhereClause>,
@@ -184,7 +184,7 @@ pub mod parsing {
         Ok((where_clause, brace, variants))
     }
 
-    pub fn data_union(input: ParseStream) -> Result<(Option<WhereClause>, FieldsNamed)> {
+    pub(crate) fn data_union(input: ParseStream) -> Result<(Option<WhereClause>, FieldsNamed)> {
         let where_clause = input.parse()?;
         let fields = input.parse()?;
         Ok((where_clause, fields))

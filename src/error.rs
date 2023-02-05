@@ -302,7 +302,7 @@ impl ErrorMessage {
 }
 
 #[cfg(feature = "parsing")]
-pub fn new_at<T: Display>(scope: Span, cursor: Cursor, message: T) -> Error {
+pub(crate) fn new_at<T: Display>(scope: Span, cursor: Cursor, message: T) -> Error {
     if cursor.eof() {
         Error::new(scope, format!("unexpected end of input, {}", message))
     } else {
@@ -312,7 +312,7 @@ pub fn new_at<T: Display>(scope: Span, cursor: Cursor, message: T) -> Error {
 }
 
 #[cfg(all(feature = "parsing", any(feature = "full", feature = "derive")))]
-pub fn new2<T: Display>(start: Span, end: Span, message: T) -> Error {
+pub(crate) fn new2<T: Display>(start: Span, end: Span, message: T) -> Error {
     return new2(start, end, message.to_string());
 
     fn new2(start: Span, end: Span, message: String) -> Error {

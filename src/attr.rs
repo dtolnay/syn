@@ -474,7 +474,7 @@ impl Meta {
     }
 }
 
-pub trait FilterAttrs<'a> {
+pub(crate) trait FilterAttrs<'a> {
     type Ret: Iterator<Item = &'a Attribute>;
 
     fn outer(self) -> Self::Ret;
@@ -506,19 +506,19 @@ impl<'a> FilterAttrs<'a> for &'a [Attribute] {
 }
 
 #[cfg(feature = "parsing")]
-pub mod parsing {
+pub(crate) mod parsing {
     use super::*;
     use crate::ext::IdentExt;
     use crate::parse::{Parse, ParseStream, Result};
 
-    pub fn parse_inner(input: ParseStream, attrs: &mut Vec<Attribute>) -> Result<()> {
+    pub(crate) fn parse_inner(input: ParseStream, attrs: &mut Vec<Attribute>) -> Result<()> {
         while input.peek(Token![#]) && input.peek2(Token![!]) {
             attrs.push(input.call(parsing::single_parse_inner)?);
         }
         Ok(())
     }
 
-    pub fn single_parse_inner(input: ParseStream) -> Result<Attribute> {
+    pub(crate) fn single_parse_inner(input: ParseStream) -> Result<Attribute> {
         let content;
         Ok(Attribute {
             pound_token: input.parse()?,
@@ -528,7 +528,7 @@ pub mod parsing {
         })
     }
 
-    pub fn single_parse_outer(input: ParseStream) -> Result<Attribute> {
+    pub(crate) fn single_parse_outer(input: ParseStream) -> Result<Attribute> {
         let content;
         Ok(Attribute {
             pound_token: input.parse()?,
@@ -567,7 +567,7 @@ pub mod parsing {
         }
     }
 
-    pub fn parse_meta_after_path(path: Path, input: ParseStream) -> Result<Meta> {
+    pub(crate) fn parse_meta_after_path(path: Path, input: ParseStream) -> Result<Meta> {
         if input.peek(token::Paren) || input.peek(token::Bracket) || input.peek(token::Brace) {
             parse_meta_list_after_path(path, input).map(Meta::List)
         } else if input.peek(Token![=]) {

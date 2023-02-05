@@ -146,7 +146,7 @@ impl Macro {
 }
 
 #[cfg(feature = "parsing")]
-pub fn parse_delimiter(input: ParseStream) -> Result<(MacroDelimiter, TokenStream)> {
+pub(crate) fn parse_delimiter(input: ParseStream) -> Result<(MacroDelimiter, TokenStream)> {
     input.step(|cursor| {
         if let Some((TokenTree::Group(g), rest)) = cursor.token_tree() {
             let span = g.span();
@@ -166,7 +166,7 @@ pub fn parse_delimiter(input: ParseStream) -> Result<(MacroDelimiter, TokenStrea
 }
 
 #[cfg(feature = "parsing")]
-pub mod parsing {
+pub(crate) mod parsing {
     use super::*;
     use crate::parse::{Parse, ParseStream, Result};
 

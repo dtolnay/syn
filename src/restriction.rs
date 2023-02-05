@@ -54,7 +54,7 @@ ast_enum! {
 }
 
 #[cfg(feature = "parsing")]
-pub mod parsing {
+pub(crate) mod parsing {
     use super::*;
     use crate::ext::IdentExt;
     use crate::parse::discouraged::Speculative;

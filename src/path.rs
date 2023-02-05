@@ -200,7 +200,7 @@ ast_struct! {
 }
 
 #[cfg(feature = "parsing")]
-pub mod parsing {
+pub(crate) mod parsing {
     use super::*;
 
     use crate::ext::IdentExt;
@@ -300,7 +300,7 @@ pub mod parsing {
         }
     }
 
-    pub fn const_argument(input: ParseStream) -> Result<Expr> {
+    pub(crate) fn const_argument(input: ParseStream) -> Result<Expr> {
         let lookahead = input.lookahead1();
 
         if input.peek(Lit) {
@@ -581,7 +581,7 @@ pub mod parsing {
         }
     }
 
-    pub fn qpath(input: ParseStream, expr_style: bool) -> Result<(Option<QSelf>, Path)> {
+    pub(crate) fn qpath(input: ParseStream, expr_style: bool) -> Result<(Option<QSelf>, Path)> {
         if input.peek(Token![<]) {
             let lt_token: Token![<] = input.parse()?;
             let this: Type = input.parse()?;

@@ -728,7 +728,7 @@ pub fn Lit(marker: lookahead::TokenMarker) -> Lit {
 }
 
 #[cfg(feature = "parsing")]
-pub mod parsing {
+pub(crate) mod parsing {
     use super::*;
     use crate::buffer::Cursor;
     use crate::parse::{Parse, ParseStream, Result};
@@ -1063,7 +1063,7 @@ mod value {
 
     /// Get the byte at offset idx, or a default of `b'\0'` if we're looking
     /// past the end of the input buffer.
-    pub fn byte<S: AsRef<[u8]> + ?Sized>(s: &S, idx: usize) -> u8 {
+    pub(crate) fn byte<S: AsRef<[u8]> + ?Sized>(s: &S, idx: usize) -> u8 {
         let s = s.as_ref();
         if idx < s.len() {
             s[idx]
@@ -1077,7 +1077,7 @@ mod value {
     }
 
     // Returns (content, suffix).
-    pub fn parse_lit_str(s: &str) -> (Box<str>, Box<str>) {
+    pub(crate) fn parse_lit_str(s: &str) -> (Box<str>, Box<str>) {
         match byte(s, 0) {
             b'"' => parse_lit_str_cooked(s),
             b'r' => parse_lit_str_raw(s),
@@ -1169,7 +1169,7 @@ mod value {
     }
 
     // Returns (content, suffix).
-    pub fn parse_lit_byte_str(s: &str) -> (Vec<u8>, Box<str>) {
+    pub(crate) fn parse_lit_byte_str(s: &str) -> (Vec<u8>, Box<str>) {
         assert_eq!(byte(s, 0), b'b');
         match byte(s, 1) {
             b'"' => parse_lit_byte_str_cooked(s),
@@ -1246,7 +1246,7 @@ mod value {
     }
 
     // Returns (value, suffix).
-    pub fn parse_lit_byte(s: &str) -> (u8, Box<str>) {
+    pub(crate) fn parse_lit_byte(s: &str) -> (u8, Box<str>) {
         assert_eq!(byte(s, 0), b'b');
         assert_eq!(byte(s, 1), b'\'');
 
@@ -1285,7 +1285,7 @@ mod value {
     }
 
     // Returns (value, suffix).
-    pub fn parse_lit_char(mut s: &str) -> (char, Box<str>) {
+    pub(crate) fn parse_lit_char(mut s: &str) -> (char, Box<str>) {
         assert_eq!(byte(s, 0), b'\'');
         s = &s[1..];
 
@@ -1390,7 +1390,7 @@ mod value {
     }
 
     // Returns base 10 digits and suffix.
-    pub fn parse_lit_int(mut s: &str) -> Option<(Box<str>, Box<str>)> {
+    pub(crate) fn parse_lit_int(mut s: &str) -> Option<(Box<str>, Box<str>)> {
         let negative = byte(s, 0) == b'-';
         if negative {
             s = &s[1..];
@@ -1481,7 +1481,7 @@ mod value {
     }
 
     // Returns base 10 digits and suffix.
-    pub fn parse_lit_float(input: &str) -> Option<(Box<str>, Box<str>)> {
+    pub(crate) fn parse_lit_float(input: &str) -> Option<(Box<str>, Box<str>)> {
         // Rust's floating point literals are very similar to the ones parsed by
         // the standard library, except that rust's literals can contain
         // ignorable underscores. Let's remove those underscores.

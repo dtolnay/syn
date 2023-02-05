@@ -65,7 +65,7 @@ pub struct Lookahead1<'a> {
     comparisons: RefCell<Vec<&'static str>>,
 }
 
-pub fn new(scope: Span, cursor: Cursor) -> Lookahead1 {
+pub(crate) fn new(scope: Span, cursor: Cursor) -> Lookahead1 {
     Lookahead1 {
         scope,
         cursor,
@@ -162,7 +162,7 @@ impl<S> IntoSpans<S> for TokenMarker {
     }
 }
 
-pub fn is_delimiter(cursor: Cursor, delimiter: Delimiter) -> bool {
+pub(crate) fn is_delimiter(cursor: Cursor, delimiter: Delimiter) -> bool {
     cursor.group(delimiter).is_some()
 }
 

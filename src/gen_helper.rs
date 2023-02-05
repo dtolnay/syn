@@ -1,10 +1,10 @@
 #[cfg(feature = "fold")]
-pub mod fold {
+pub(crate) mod fold {
     use crate::fold::Fold;
     use crate::punctuated::{Pair, Punctuated};
     use proc_macro2::Span;
 
-    pub trait FoldHelper {
+    pub(crate) trait FoldHelper {
         type Item;
         fn lift<F>(self, f: F) -> Self
         where
@@ -34,11 +34,11 @@ pub mod fold {
         }
     }
 
-    pub fn tokens_helper<F: Fold + ?Sized, S: Spans>(folder: &mut F, spans: &S) -> S {
+    pub(crate) fn tokens_helper<F: Fold + ?Sized, S: Spans>(folder: &mut F, spans: &S) -> S {
         spans.fold(folder)
     }
 
-    pub trait Spans {
+    pub(crate) trait Spans {
         fn fold<F: Fold + ?Sized>(&self, folder: &mut F) -> Self;
     }
 
@@ -72,15 +72,18 @@ pub mod fold {
 }
 
 #[cfg(feature = "visit")]
-pub mod visit {
+pub(crate) mod visit {
     use crate::visit::Visit;
     use proc_macro2::Span;
 
-    pub fn tokens_helper<'ast, V: Visit<'ast> + ?Sized, S: Spans>(visitor: &mut V, spans: &S) {
+    pub(crate) fn tokens_helper<'ast, V: Visit<'ast> + ?Sized, S: Spans>(
+        visitor: &mut V,
+        spans: &S,
+    ) {
         spans.visit(visitor);
     }
 
-    pub trait Spans {
+    pub(crate) trait Spans {
         fn visit<'ast, V: Visit<'ast> + ?Sized>(&self, visitor: &mut V);
     }
 
@@ -113,15 +116,15 @@ pub mod visit {
 }
 
 #[cfg(feature = "visit-mut")]
-pub mod visit_mut {
+pub(crate) mod visit_mut {
     use crate::visit_mut::VisitMut;
     use proc_macro2::Span;
 
-    pub fn tokens_helper<V: VisitMut + ?Sized, S: Spans>(visitor: &mut V, spans: &mut S) {
+    pub(crate) fn tokens_helper<V: VisitMut + ?Sized, S: Spans>(visitor: &mut V, spans: &mut S) {
         spans.visit_mut(visitor);
     }
 
-    pub trait Spans {
+    pub(crate) trait Spans {
         fn visit_mut<V: VisitMut + ?Sized>(&mut self, visitor: &mut V);
     }
 
