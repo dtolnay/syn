@@ -131,3 +131,13 @@ impl Debug for Present {
         formatter.write_str("Some")
     }
 }
+
+struct Option {
+    present: bool,
+}
+
+impl Debug for Option {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str(if self.present { "Some" } else { "None" })
+    }
+}

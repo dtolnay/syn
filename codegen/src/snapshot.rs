@@ -66,35 +66,32 @@ fn format_field(val: &TokenStream, ty: &Type) -> Option<TokenStream> {
     let format = match ty {
         Type::Option(ty) => {
             let inner = quote!(_val);
-            let format = if let Some(format) = format_field(&inner, ty) {
-                quote! {
-                    match &self.0 {
-                        Some(#inner) => {
-                            formatter.write_str("Some(")?;
-                            Debug::fmt(#format, formatter)?;
-                            formatter.write_str(")")?;
-                            Ok(())
+            if let Some(format) = format_field(&inner, ty) {
+                let ty = rust_type(ty);
+                quote!({
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(Option<#ty>);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            match &self.0 {
+                                Some(#inner) => {
+                                    formatter.write_str("Some(")?;
+                                    Debug::fmt(#format, formatter)?;
+                                    formatter.write_str(")")?;
+                                    Ok(())
+                                }
+                                None => formatter.write_str("None"),
+                            }
                         }
-                        None => formatter.write_str("None"),
                     }
-                }
+                    Print::ref_cast(#val)
+                })
             } else {
                 quote! {
-                    formatter.write_str(if self.0.is_some() { "Some" } else { "None" })
+                    &super::Option { present: (#val).is_some() }
                 }
-            };
-            let ty = rust_type(ty);
-            quote!({
-                #[derive(RefCast)]
-                #[repr(transparent)]
-                struct Print(Option<#ty>);
-                impl Debug for Print {
-                    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                        #format
-                    }
-                }
-                Print::ref_cast(#val)
-            })
+            }
         }
         Type::Tuple(ty) => {
             let printable: Vec<TokenStream> = ty

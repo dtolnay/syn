@@ -2462,20 +2462,8 @@ impl Debug for Lite<syn::Item> {
                             formatter.write_str("Some(")?;
                             Debug::fmt(
                                 &(
-                                    {
-                                        #[derive(RefCast)]
-                                        #[repr(transparent)]
-                                        struct Print(Option<syn::token::Not>);
-                                        impl Debug for Print {
-                                            fn fmt(
-                                                &self,
-                                                formatter: &mut fmt::Formatter,
-                                            ) -> fmt::Result {
-                                                formatter
-                                                    .write_str(if self.0.is_some() { "Some" } else { "None" })
-                                            }
-                                        }
-                                        Print::ref_cast(&_val.0)
+                                    &super::Option {
+                                        present: (&_val.0).is_some(),
                                     },
                                     Lite(&_val.1),
                                 ),
@@ -2784,20 +2772,8 @@ impl Debug for Lite<syn::ItemImpl> {
                     formatter.write_str("Some(")?;
                     Debug::fmt(
                         &(
-                            {
-                                #[derive(RefCast)]
-                                #[repr(transparent)]
-                                struct Print(Option<syn::token::Not>);
-                                impl Debug for Print {
-                                    fn fmt(
-                                        &self,
-                                        formatter: &mut fmt::Formatter,
-                                    ) -> fmt::Result {
-                                        formatter
-                                            .write_str(if self.0.is_some() { "Some" } else { "None" })
-                                    }
-                                }
-                                Print::ref_cast(&_val.0)
+                            &super::Option {
+                                present: (&_val.0).is_some(),
                             },
                             Lite(&_val.1),
                         ),
@@ -3965,21 +3941,11 @@ impl Debug for Lite<syn::Stmt> {
                 let mut formatter = formatter.debug_tuple("Stmt::Expr");
                 formatter.field(Lite(_v0));
                 formatter
-                    .field({
-                        #[derive(RefCast)]
-                        #[repr(transparent)]
-                        struct Print(Option<syn::token::Semi>);
-                        impl Debug for Print {
-                            fn fmt(
-                                &self,
-                                formatter: &mut fmt::Formatter,
-                            ) -> fmt::Result {
-                                formatter
-                                    .write_str(if self.0.is_some() { "Some" } else { "None" })
-                            }
-                        }
-                        Print::ref_cast(_v1)
-                    });
+                    .field(
+                        &super::Option {
+                            present: (_v1).is_some(),
+                        },
+                    );
                 formatter.finish()
             }
             syn::Stmt::Macro(_val) => {
