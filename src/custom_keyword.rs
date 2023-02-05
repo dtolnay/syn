@@ -131,14 +131,14 @@ macro_rules! impl_parse_for_custom_keyword {
         impl $crate::token::CustomToken for $ident {
             fn peek(cursor: $crate::buffer::Cursor) -> $crate::__private::bool {
                 if let $crate::__private::Some((ident, _rest)) = cursor.ident() {
-                    ident == stringify!($ident)
+                    ident == $crate::__private::stringify!($ident)
                 } else {
                     false
                 }
             }
 
             fn display() -> &'static $crate::__private::str {
-                concat!("`", stringify!($ident), "`")
+                $crate::__private::concat!("`", $crate::__private::stringify!($ident), "`")
             }
         }
 
@@ -146,14 +146,14 @@ macro_rules! impl_parse_for_custom_keyword {
             fn parse(input: $crate::parse::ParseStream) -> $crate::parse::Result<$ident> {
                 input.step(|cursor| {
                     if let $crate::__private::Some((ident, rest)) = cursor.ident() {
-                        if ident == stringify!($ident) {
+                        if ident == $crate::__private::stringify!($ident) {
                             return $crate::__private::Ok(($ident { span: ident.span() }, rest));
                         }
                     }
-                    $crate::__private::Err(cursor.error(concat!(
+                    $crate::__private::Err(cursor.error($crate::__private::concat!(
                         "expected `",
-                        stringify!($ident),
-                        "`"
+                        $crate::__private::stringify!($ident),
+                        "`",
                     )))
                 })
             }
@@ -177,7 +177,7 @@ macro_rules! impl_to_tokens_for_custom_keyword {
     ($ident:ident) => {
         impl $crate::__private::ToTokens for $ident {
             fn to_tokens(&self, tokens: &mut $crate::__private::TokenStream2) {
-                let ident = $crate::Ident::new(stringify!($ident), self.span);
+                let ident = $crate::Ident::new($crate::__private::stringify!($ident), self.span);
                 $crate::__private::TokenStreamExt::append(tokens, ident);
             }
         }
@@ -227,7 +227,11 @@ macro_rules! impl_extra_traits_for_custom_keyword {
             fn fmt(&self, f: &mut $crate::__private::Formatter) -> $crate::__private::fmt::Result {
                 $crate::__private::Formatter::write_str(
                     f,
-                    concat!("Keyword [", stringify!($ident), "]"),
+                    $crate::__private::concat!(
+                        "Keyword [",
+                        $crate::__private::stringify!($ident),
+                        "]",
+                    ),
                 )
             }
         }
