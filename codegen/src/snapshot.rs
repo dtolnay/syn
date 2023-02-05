@@ -143,7 +143,7 @@ fn syntax_tree_enum<'a>(outer: &str, inner: &str, fields: &'a [Type]) -> Option<
     }
 }
 
-fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream {
+fn expand_impl_body(defs: &Definitions, node: &Node, name: &str, val: &Operand) -> TokenStream {
     let ident = Ident::new(&node.ident, Span::call_site());
 
     match &node.data {
@@ -157,7 +157,12 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                         syn::#ident::#variant => formatter.write_str(#path),
                     }
                 } else if let Some(inner) = syntax_tree_enum(name, v, fields) {
-                    let format = expand_impl_body(defs, lookup::node(defs, inner), &path);
+                    let format = expand_impl_body(
+                        defs,
+                        lookup::node(defs, inner),
+                        &path,
+                        &Borrowed(quote!(_val)),
+                    );
                     quote! {
                         syn::#ident::#variant(_val) => {
                             #format
@@ -212,8 +217,9 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
             } else {
                 Some(quote!(_ => unreachable!()))
             };
+            let val = val.ref_tokens();
             quote! {
-                match _val {
+                match #val {
                     #(#arms)*
                     #nonexhaustive
                 }
@@ -223,16 +229,16 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
             let fields = fields.iter().filter_map(|(f, ty)| {
                 let ident = Ident::new(f, Span::call_site());
                 if let Type::Option(ty) = ty {
-                    Some(if let Some(format) = format_field(&Borrowed(quote!(_val)), ty) {
+                    Some(if let Some(format) = format_field(&Owned(quote!(self.0)), ty) {
+                        let val = val.tokens();
                         let ty = rust_type(ty);
                         quote! {
-                            if let Some(val) = &_val.#ident {
+                            if let Some(val) = &#val.#ident {
                                 #[derive(RefCast)]
                                 #[repr(transparent)]
                                 struct Print(#ty);
                                 impl Debug for Print {
                                     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                                        let _val = &self.0;
                                         formatter.write_str("Some(")?;
                                         Debug::fmt(#format, formatter)?;
                                         formatter.write_str(")")?;
@@ -243,21 +249,23 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                             }
                         }
                     } else {
+                        let val = val.tokens();
                         quote! {
-                            if _val.#ident.is_some() {
+                            if #val.#ident.is_some() {
                                 formatter.field(#f, &Present);
                             }
                         }
                     })
                 } else {
-                    let val = Owned(quote!(_val.#ident));
-                    let format = format_field(&val, ty)?;
+                    let val = val.tokens();
+                    let inner = Owned(quote!(#val.#ident));
+                    let format = format_field(&inner, ty)?;
                     let mut call = quote! {
                         formatter.field(#f, #format);
                     };
                     if let Type::Vec(_) | Type::Punctuated(_) = ty {
                         call = quote! {
-                            if !_val.#ident.is_empty() {
+                            if !#val.#ident.is_empty() {
                                 #call
                             }
                         };
@@ -268,7 +276,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                                     if variants.get("None").map_or(false, Vec::is_empty) {
                                         let ty = rust_type(ty);
                                         call = quote! {
-                                            match _val.#ident {
+                                            match #val.#ident {
                                                 #ty::None => {}
                                                 _ => { #call }
                                             }
@@ -290,12 +298,14 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
         }
         Data::Private => {
             if node.ident == "LitInt" || node.ident == "LitFloat" {
+                let val = val.ref_tokens();
                 quote! {
-                    write!(formatter, "{}", _val)
+                    write!(formatter, "{}", #val)
                 }
             } else {
+                let val = val.tokens();
                 quote! {
-                    write!(formatter, "{:?}", _val.value())
+                    write!(formatter, "{:?}", #val.value())
                 }
             }
         }
@@ -304,7 +314,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
 
 fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     let ident = Ident::new(&node.ident, Span::call_site());
-    let body = expand_impl_body(defs, node, &node.ident);
+    let body = expand_impl_body(defs, node, &node.ident, &Owned(quote!(self.value)));
     let formatter = match &node.data {
         Data::Enum(variants) if variants.is_empty() => quote!(_formatter),
         _ => quote!(formatter),
@@ -313,7 +323,6 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     quote! {
         impl Debug for Lite<syn::#ident> {
             fn fmt(&self, #formatter: &mut fmt::Formatter) -> fmt::Result {
-                let _val = &self.value;
                 #body
             }
         }
