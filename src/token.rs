@@ -707,20 +707,14 @@ define_keywords! {
 }
 
 define_punctuation! {
-    "+"           pub struct Plus/1       /// `+`
-    "+="          pub struct PlusEq/2     /// `+=`
     "&"           pub struct And/1        /// `&`
     "&&"          pub struct AndAnd/2     /// `&&`
     "&="          pub struct AndEq/2      /// `&=`
     "@"           pub struct At/1         /// `@`
-    "!"           pub struct Not/1        /// `!`
     "^"           pub struct Caret/1      /// `^`
     "^="          pub struct CaretEq/2    /// `^=`
     ":"           pub struct Colon/1      /// `:`
-    "::"          pub struct PathSep/2    /// `::`
     ","           pub struct Comma/1      /// `,`
-    "/"           pub struct Slash/1      /// `/`
-    "/="          pub struct SlashEq/2    /// `/=`
     "$"           pub struct Dollar/1     /// `$`
     "."           pub struct Dot/1        /// `.`
     ".."          pub struct DotDot/2     /// `..`
@@ -734,24 +728,30 @@ define_punctuation! {
     "<-"          pub struct LArrow/2     /// `<-`
     "<="          pub struct Le/2         /// `<=`
     "<"           pub struct Lt/1         /// `<`
-    "*="          pub struct StarEq/2     /// `*=`
+    "-"           pub struct Minus/1      /// `-`
+    "-="          pub struct MinusEq/2    /// `-=`
     "!="          pub struct Ne/2         /// `!=`
+    "!"           pub struct Not/1        /// `!`
     "|"           pub struct Or/1         /// `|`
     "|="          pub struct OrEq/2       /// `|=`
     "||"          pub struct OrOr/2       /// `||`
+    "::"          pub struct PathSep/2    /// `::`
+    "%"           pub struct Percent/1    /// `%`
+    "%="          pub struct PercentEq/2  /// `%=`
+    "+"           pub struct Plus/1       /// `+`
+    "+="          pub struct PlusEq/2     /// `+=`
     "#"           pub struct Pound/1      /// `#`
     "?"           pub struct Question/1   /// `?`
     "->"          pub struct RArrow/2     /// `->`
-    "%"           pub struct Percent/1    /// `%`
-    "%="          pub struct PercentEq/2  /// `%=`
     ";"           pub struct Semi/1       /// `;`
     "<<"          pub struct Shl/2        /// `<<`
     "<<="         pub struct ShlEq/3      /// `<<=`
     ">>"          pub struct Shr/2        /// `>>`
     ">>="         pub struct ShrEq/3      /// `>>=`
+    "/"           pub struct Slash/1      /// `/`
+    "/="          pub struct SlashEq/2    /// `/=`
     "*"           pub struct Star/1       /// `*`
-    "-"           pub struct Minus/1      /// `-`
-    "-="          pub struct MinusEq/2    /// `-=`
+    "*="          pub struct StarEq/2     /// `*=`
     "~"           pub struct Tilde/1      /// `~`
 }
 
@@ -824,20 +824,14 @@ macro_rules! Token {
     [where]       => { $crate::token::Where };
     [while]       => { $crate::token::While };
     [yield]       => { $crate::token::Yield };
-    [+]           => { $crate::token::Plus };
-    [+=]          => { $crate::token::PlusEq };
     [&]           => { $crate::token::And };
     [&&]          => { $crate::token::AndAnd };
     [&=]          => { $crate::token::AndEq };
     [@]           => { $crate::token::At };
-    [!]           => { $crate::token::Not };
     [^]           => { $crate::token::Caret };
     [^=]          => { $crate::token::CaretEq };
     [:]           => { $crate::token::Colon };
-    [::]          => { $crate::token::PathSep };
     [,]           => { $crate::token::Comma };
-    [/]           => { $crate::token::Slash };
-    [/=]          => { $crate::token::SlashEq };
     [$]           => { $crate::token::Dollar };
     [.]           => { $crate::token::Dot };
     [..]          => { $crate::token::DotDot };
@@ -851,24 +845,30 @@ macro_rules! Token {
     [<-]          => { $crate::token::LArrow };
     [<=]          => { $crate::token::Le };
     [<]           => { $crate::token::Lt };
-    [*=]          => { $crate::token::StarEq };
+    [-]           => { $crate::token::Minus };
+    [-=]          => { $crate::token::MinusEq };
     [!=]          => { $crate::token::Ne };
+    [!]           => { $crate::token::Not };
     [|]           => { $crate::token::Or };
     [|=]          => { $crate::token::OrEq };
     [||]          => { $crate::token::OrOr };
+    [::]          => { $crate::token::PathSep };
+    [%]           => { $crate::token::Percent };
+    [%=]          => { $crate::token::PercentEq };
+    [+]           => { $crate::token::Plus };
+    [+=]          => { $crate::token::PlusEq };
     [#]           => { $crate::token::Pound };
     [?]           => { $crate::token::Question };
     [->]          => { $crate::token::RArrow };
-    [%]           => { $crate::token::Percent };
-    [%=]          => { $crate::token::PercentEq };
     [;]           => { $crate::token::Semi };
     [<<]          => { $crate::token::Shl };
     [<<=]         => { $crate::token::ShlEq };
     [>>]          => { $crate::token::Shr };
     [>>=]         => { $crate::token::ShrEq };
+    [/]           => { $crate::token::Slash };
+    [/=]          => { $crate::token::SlashEq };
     [*]           => { $crate::token::Star };
-    [-]           => { $crate::token::Minus };
-    [-=]          => { $crate::token::MinusEq };
+    [*=]          => { $crate::token::StarEq };
     [~]           => { $crate::token::Tilde };
     [_]           => { $crate::token::Underscore };
 }
