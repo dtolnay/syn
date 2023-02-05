@@ -141,7 +141,7 @@ mod private {
 
     /// Support writing `token.span` rather than `token.spans[0]` on tokens that
     /// hold a single span.
-    #[repr(C)]
+    #[repr(transparent)]
     pub struct WithSpan {
         pub span: Span,
     }
@@ -363,7 +363,7 @@ macro_rules! impl_deref_if_len_is_1 {
 macro_rules! define_punctuation_structs {
     ($($token:tt pub struct $name:ident/$len:tt #[$doc:meta])*) => {
         $(
-            #[repr(C)]
+            #[repr(transparent)]
             #[$doc]
             ///
             /// Don't try to remember the name of this type &mdash; use the
