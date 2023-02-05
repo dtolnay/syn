@@ -883,7 +883,6 @@ pub mod parsing {
     use crate::buffer::Cursor;
     use crate::error::{Error, Result};
     use crate::parse::ParseStream;
-    use crate::span::FromSpans;
     use proc_macro2::{Spacing, Span};
 
     pub(crate) fn keyword(input: ParseStream, token: &str) -> Result<Span> {
@@ -905,16 +904,16 @@ pub mod parsing {
         }
     }
 
-    pub fn punct<S: FromSpans>(input: ParseStream, token: &str) -> Result<S> {
-        let mut spans = [input.span(); 3];
+    pub fn punct<const N: usize>(input: ParseStream, token: &str) -> Result<[Span; N]> {
+        let mut spans = [input.span(); N];
         punct_helper(input, token, &mut spans)?;
-        Ok(S::from_spans(&spans))
+        Ok(spans)
     }
 
-    fn punct_helper(input: ParseStream, token: &str, spans: &mut [Span; 3]) -> Result<()> {
+    fn punct_helper(input: ParseStream, token: &str, spans: &mut [Span]) -> Result<()> {
         input.step(|cursor| {
             let mut cursor = *cursor;
-            assert!(token.len() <= spans.len());
+            assert_eq!(token.len(), spans.len());
 
             for (i, ch) in token.chars().enumerate() {
                 match cursor.punct() {
