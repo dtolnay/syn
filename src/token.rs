@@ -363,7 +363,7 @@ macro_rules! impl_deref_if_len_is_1 {
 macro_rules! define_punctuation_structs {
     ($($token:tt pub struct $name:ident/$len:tt #[$doc:meta])*) => {
         $(
-            #[repr(transparent)]
+            #[cfg_attr(not(doc), repr(transparent))]
             #[$doc]
             ///
             /// Don't try to remember the name of this type &mdash; use the
