@@ -163,7 +163,7 @@ fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
 }
 
 macro_rules! impl_token {
-    ($display:tt $name:ty) => {
+    ($display:literal $name:ty) => {
         #[cfg(feature = "parsing")]
         impl Token for $name {
             fn peek(cursor: Cursor) -> bool {
@@ -195,7 +195,7 @@ impl_token!("boolean literal" LitBool);
 impl_token!("group token" proc_macro2::Group);
 
 macro_rules! impl_low_level_token {
-    ($display:tt $ty:ident $get:ident) => {
+    ($display:literal $ty:ident $get:ident) => {
         #[cfg(feature = "parsing")]
         impl Token for $ty {
             fn peek(cursor: Cursor) -> bool {
@@ -239,7 +239,7 @@ impl<T: CustomToken> Token for T {
 }
 
 macro_rules! define_keywords {
-    ($($token:tt pub struct $name:ident #[$doc:meta])*) => {
+    ($($token:literal pub struct $name:ident #[$doc:meta])*) => {
         $(
             #[$doc]
             ///
@@ -357,11 +357,11 @@ macro_rules! impl_deref_if_len_is_1 {
         }
     };
 
-    ($name:ident/$len:tt) => {};
+    ($name:ident/$len:literal) => {};
 }
 
 macro_rules! define_punctuation_structs {
-    ($($token:tt pub struct $name:ident/$len:tt #[$doc:meta])*) => {
+    ($($token:literal pub struct $name:ident/$len:tt #[$doc:meta])*) => {
         $(
             #[cfg_attr(not(doc), repr(transparent))]
             #[$doc]
@@ -434,7 +434,7 @@ macro_rules! define_punctuation_structs {
 }
 
 macro_rules! define_punctuation {
-    ($($token:tt pub struct $name:ident/$len:tt #[$doc:meta])*) => {
+    ($($token:literal pub struct $name:ident/$len:tt #[$doc:meta])*) => {
         $(
             define_punctuation_structs! {
                 $token pub struct $name/$len #[$doc]
