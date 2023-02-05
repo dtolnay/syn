@@ -1,3 +1,4 @@
+use crate::operand::{Borrowed, Operand, Owned};
 use crate::{file, lookup};
 use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
@@ -59,15 +60,15 @@ fn is_printable(ty: &Type) -> bool {
     }
 }
 
-fn format_field(val: &TokenStream, ty: &Type) -> Option<TokenStream> {
+fn format_field(val: &Operand, ty: &Type) -> Option<TokenStream> {
     if !is_printable(ty) {
         return None;
     }
     let format = match ty {
         Type::Option(ty) => {
-            let inner = quote!(_val);
-            if let Some(format) = format_field(&inner, ty) {
+            if let Some(format) = format_field(&Borrowed(quote!(_val)), ty) {
                 let ty = rust_type(ty);
+                let val = val.ref_tokens();
                 quote!({
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -75,7 +76,7 @@ fn format_field(val: &TokenStream, ty: &Type) -> Option<TokenStream> {
                     impl Debug for Print {
                         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                             match &self.0 {
-                                Some(#inner) => {
+                                Some(_val) => {
                                     formatter.write_str("Some(")?;
                                     Debug::fmt(#format, formatter)?;
                                     formatter.write_str(")")?;
@@ -88,8 +89,9 @@ fn format_field(val: &TokenStream, ty: &Type) -> Option<TokenStream> {
                     Print::ref_cast(#val)
                 })
             } else {
+                let val = val.tokens();
                 quote! {
-                    &super::Option { present: (#val).is_some() }
+                    &super::Option { present: #val.is_some() }
                 }
             }
         }
@@ -99,8 +101,9 @@ fn format_field(val: &TokenStream, ty: &Type) -> Option<TokenStream> {
                 .enumerate()
                 .filter_map(|(i, ty)| {
                     let index = Index::from(i);
-                    let val = quote!(&#val.#index);
-                    format_field(&val, ty)
+                    let val = val.tokens();
+                    let inner = Owned(quote!(#val.#index));
+                    format_field(&inner, ty)
                 })
                 .collect();
             if printable.len() == 1 {
@@ -111,7 +114,10 @@ fn format_field(val: &TokenStream, ty: &Type) -> Option<TokenStream> {
                 }
             }
         }
-        _ => quote! { Lite(#val) },
+        _ => {
+            let val = val.ref_tokens();
+            quote! { Lite(#val) }
+        }
     };
     Some(format)
 }
@@ -167,7 +173,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                         })
                     } else {
                         let ty = &fields[0];
-                        format_field(&val, ty).map(|format| {
+                        format_field(&Borrowed(val), ty).map(|format| {
                             quote! {
                                 formatter.write_str("(")?;
                                 Debug::fmt(#format, formatter)?;
@@ -187,7 +193,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                     let fields = fields.iter().enumerate().filter_map(|(i, ty)| {
                         let index = format_ident!("_v{}", i);
                         let val = quote!(#index);
-                        let format = format_field(&val, ty)?;
+                        let format = format_field(&Borrowed(val), ty)?;
                         Some(quote! {
                             formatter.field(#format);
                         })
@@ -217,8 +223,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
             let fields = fields.iter().filter_map(|(f, ty)| {
                 let ident = Ident::new(f, Span::call_site());
                 if let Type::Option(ty) = ty {
-                    let inner = quote!(_val);
-                    Some(if let Some(format) = format_field(&inner, ty) {
+                    Some(if let Some(format) = format_field(&Borrowed(quote!(_val)), ty) {
                         let ty = rust_type(ty);
                         quote! {
                             if let Some(val) = &_val.#ident {
@@ -227,7 +232,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                                 struct Print(#ty);
                                 impl Debug for Print {
                                     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                                        let #inner = &self.0;
+                                        let _val = &self.0;
                                         formatter.write_str("Some(")?;
                                         Debug::fmt(#format, formatter)?;
                                         formatter.write_str(")")?;
@@ -245,7 +250,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                         }
                     })
                 } else {
-                    let val = quote!(&_val.#ident);
+                    let val = Owned(quote!(_val.#ident));
                     let format = format_field(&val, ty)?;
                     let mut call = quote! {
                         formatter.field(#f, #format);

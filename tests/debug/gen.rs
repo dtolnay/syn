@@ -2463,7 +2463,7 @@ impl Debug for Lite<syn::Item> {
                             Debug::fmt(
                                 &(
                                     &super::Option {
-                                        present: (&_val.0).is_some(),
+                                        present: _val.0.is_some(),
                                     },
                                     Lite(&_val.1),
                                 ),
@@ -2773,7 +2773,7 @@ impl Debug for Lite<syn::ItemImpl> {
                     Debug::fmt(
                         &(
                             &super::Option {
-                                present: (&_val.0).is_some(),
+                                present: _val.0.is_some(),
                             },
                             Lite(&_val.1),
                         ),
@@ -3943,7 +3943,7 @@ impl Debug for Lite<syn::Stmt> {
                 formatter
                     .field(
                         &super::Option {
-                            present: (_v1).is_some(),
+                            present: _v1.is_some(),
                         },
                     );
                 formatter.finish()
