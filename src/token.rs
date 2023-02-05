@@ -239,9 +239,9 @@ impl<T: CustomToken> Token for T {
 }
 
 macro_rules! define_keywords {
-    ($($token:literal pub struct $name:ident #[$doc:meta])*) => {
+    ($($token:literal pub struct $name:ident)*) => {
         $(
-            #[$doc]
+            #[doc = concat!('`', $token, '`')]
             ///
             /// Don't try to remember the name of this type &mdash; use the
             /// [`Token!`] macro instead.
@@ -361,10 +361,10 @@ macro_rules! impl_deref_if_len_is_1 {
 }
 
 macro_rules! define_punctuation_structs {
-    ($($token:literal pub struct $name:ident/$len:tt #[$doc:meta])*) => {
+    ($($token:literal pub struct $name:ident/$len:tt)*) => {
         $(
             #[cfg_attr(not(doc), repr(transparent))]
-            #[$doc]
+            #[doc = concat!('`', $token, '`')]
             ///
             /// Don't try to remember the name of this type &mdash; use the
             /// [`Token!`] macro instead.
@@ -434,10 +434,10 @@ macro_rules! define_punctuation_structs {
 }
 
 macro_rules! define_punctuation {
-    ($($token:literal pub struct $name:ident/$len:tt #[$doc:meta])*) => {
+    ($($token:literal pub struct $name:ident/$len:tt)*) => {
         $(
             define_punctuation_structs! {
-                $token pub struct $name/$len #[$doc]
+                $token pub struct $name/$len
             }
 
             #[cfg(feature = "printing")]
@@ -556,7 +556,7 @@ macro_rules! define_delimiters {
 }
 
 define_punctuation_structs! {
-    "_" pub struct Underscore/1 /// `_`
+    "_" pub struct Underscore/1
 }
 
 #[cfg(feature = "printing")]
@@ -652,107 +652,107 @@ impl Token for Group {
 }
 
 define_keywords! {
-    "abstract"    pub struct Abstract     /// `abstract`
-    "as"          pub struct As           /// `as`
-    "async"       pub struct Async        /// `async`
-    "auto"        pub struct Auto         /// `auto`
-    "await"       pub struct Await        /// `await`
-    "become"      pub struct Become       /// `become`
-    "box"         pub struct Box          /// `box`
-    "break"       pub struct Break        /// `break`
-    "const"       pub struct Const        /// `const`
-    "continue"    pub struct Continue     /// `continue`
-    "crate"       pub struct Crate        /// `crate`
-    "default"     pub struct Default      /// `default`
-    "do"          pub struct Do           /// `do`
-    "dyn"         pub struct Dyn          /// `dyn`
-    "else"        pub struct Else         /// `else`
-    "enum"        pub struct Enum         /// `enum`
-    "extern"      pub struct Extern       /// `extern`
-    "final"       pub struct Final        /// `final`
-    "fn"          pub struct Fn           /// `fn`
-    "for"         pub struct For          /// `for`
-    "if"          pub struct If           /// `if`
-    "impl"        pub struct Impl         /// `impl`
-    "in"          pub struct In           /// `in`
-    "let"         pub struct Let          /// `let`
-    "loop"        pub struct Loop         /// `loop`
-    "macro"       pub struct Macro        /// `macro`
-    "match"       pub struct Match        /// `match`
-    "mod"         pub struct Mod          /// `mod`
-    "move"        pub struct Move         /// `move`
-    "mut"         pub struct Mut          /// `mut`
-    "override"    pub struct Override     /// `override`
-    "priv"        pub struct Priv         /// `priv`
-    "pub"         pub struct Pub          /// `pub`
-    "ref"         pub struct Ref          /// `ref`
-    "return"      pub struct Return       /// `return`
-    "Self"        pub struct SelfType     /// `Self`
-    "self"        pub struct SelfValue    /// `self`
-    "static"      pub struct Static       /// `static`
-    "struct"      pub struct Struct       /// `struct`
-    "super"       pub struct Super        /// `super`
-    "trait"       pub struct Trait        /// `trait`
-    "try"         pub struct Try          /// `try`
-    "type"        pub struct Type         /// `type`
-    "typeof"      pub struct Typeof       /// `typeof`
-    "union"       pub struct Union        /// `union`
-    "unsafe"      pub struct Unsafe       /// `unsafe`
-    "unsized"     pub struct Unsized      /// `unsized`
-    "use"         pub struct Use          /// `use`
-    "virtual"     pub struct Virtual      /// `virtual`
-    "where"       pub struct Where        /// `where`
-    "while"       pub struct While        /// `while`
-    "yield"       pub struct Yield        /// `yield`
+    "abstract"    pub struct Abstract
+    "as"          pub struct As
+    "async"       pub struct Async
+    "auto"        pub struct Auto
+    "await"       pub struct Await
+    "become"      pub struct Become
+    "box"         pub struct Box
+    "break"       pub struct Break
+    "const"       pub struct Const
+    "continue"    pub struct Continue
+    "crate"       pub struct Crate
+    "default"     pub struct Default
+    "do"          pub struct Do
+    "dyn"         pub struct Dyn
+    "else"        pub struct Else
+    "enum"        pub struct Enum
+    "extern"      pub struct Extern
+    "final"       pub struct Final
+    "fn"          pub struct Fn
+    "for"         pub struct For
+    "if"          pub struct If
+    "impl"        pub struct Impl
+    "in"          pub struct In
+    "let"         pub struct Let
+    "loop"        pub struct Loop
+    "macro"       pub struct Macro
+    "match"       pub struct Match
+    "mod"         pub struct Mod
+    "move"        pub struct Move
+    "mut"         pub struct Mut
+    "override"    pub struct Override
+    "priv"        pub struct Priv
+    "pub"         pub struct Pub
+    "ref"         pub struct Ref
+    "return"      pub struct Return
+    "Self"        pub struct SelfType
+    "self"        pub struct SelfValue
+    "static"      pub struct Static
+    "struct"      pub struct Struct
+    "super"       pub struct Super
+    "trait"       pub struct Trait
+    "try"         pub struct Try
+    "type"        pub struct Type
+    "typeof"      pub struct Typeof
+    "union"       pub struct Union
+    "unsafe"      pub struct Unsafe
+    "unsized"     pub struct Unsized
+    "use"         pub struct Use
+    "virtual"     pub struct Virtual
+    "where"       pub struct Where
+    "while"       pub struct While
+    "yield"       pub struct Yield
 }
 
 define_punctuation! {
-    "&"           pub struct And/1        /// `&`
-    "&&"          pub struct AndAnd/2     /// `&&`
-    "&="          pub struct AndEq/2      /// `&=`
-    "@"           pub struct At/1         /// `@`
-    "^"           pub struct Caret/1      /// `^`
-    "^="          pub struct CaretEq/2    /// `^=`
-    ":"           pub struct Colon/1      /// `:`
-    ","           pub struct Comma/1      /// `,`
-    "$"           pub struct Dollar/1     /// `$`
-    "."           pub struct Dot/1        /// `.`
-    ".."          pub struct DotDot/2     /// `..`
-    "..."         pub struct DotDotDot/3  /// `...`
-    "..="         pub struct DotDotEq/3   /// `..=`
-    "="           pub struct Eq/1         /// `=`
-    "=="          pub struct EqEq/2       /// `==`
-    "=>"          pub struct FatArrow/2   /// `=>`
-    ">="          pub struct Ge/2         /// `>=`
-    ">"           pub struct Gt/1         /// `>`
-    "<-"          pub struct LArrow/2     /// `<-`
-    "<="          pub struct Le/2         /// `<=`
-    "<"           pub struct Lt/1         /// `<`
-    "-"           pub struct Minus/1      /// `-`
-    "-="          pub struct MinusEq/2    /// `-=`
-    "!="          pub struct Ne/2         /// `!=`
-    "!"           pub struct Not/1        /// `!`
-    "|"           pub struct Or/1         /// `|`
-    "|="          pub struct OrEq/2       /// `|=`
-    "||"          pub struct OrOr/2       /// `||`
-    "::"          pub struct PathSep/2    /// `::`
-    "%"           pub struct Percent/1    /// `%`
-    "%="          pub struct PercentEq/2  /// `%=`
-    "+"           pub struct Plus/1       /// `+`
-    "+="          pub struct PlusEq/2     /// `+=`
-    "#"           pub struct Pound/1      /// `#`
-    "?"           pub struct Question/1   /// `?`
-    "->"          pub struct RArrow/2     /// `->`
-    ";"           pub struct Semi/1       /// `;`
-    "<<"          pub struct Shl/2        /// `<<`
-    "<<="         pub struct ShlEq/3      /// `<<=`
-    ">>"          pub struct Shr/2        /// `>>`
-    ">>="         pub struct ShrEq/3      /// `>>=`
-    "/"           pub struct Slash/1      /// `/`
-    "/="          pub struct SlashEq/2    /// `/=`
-    "*"           pub struct Star/1       /// `*`
-    "*="          pub struct StarEq/2     /// `*=`
-    "~"           pub struct Tilde/1      /// `~`
+    "&"           pub struct And/1
+    "&&"          pub struct AndAnd/2
+    "&="          pub struct AndEq/2
+    "@"           pub struct At/1
+    "^"           pub struct Caret/1
+    "^="          pub struct CaretEq/2
+    ":"           pub struct Colon/1
+    ","           pub struct Comma/1
+    "$"           pub struct Dollar/1
+    "."           pub struct Dot/1
+    ".."          pub struct DotDot/2
+    "..."         pub struct DotDotDot/3
+    "..="         pub struct DotDotEq/3
+    "="           pub struct Eq/1
+    "=="          pub struct EqEq/2
+    "=>"          pub struct FatArrow/2
+    ">="          pub struct Ge/2
+    ">"           pub struct Gt/1
+    "<-"          pub struct LArrow/2
+    "<="          pub struct Le/2
+    "<"           pub struct Lt/1
+    "-"           pub struct Minus/1
+    "-="          pub struct MinusEq/2
+    "!="          pub struct Ne/2
+    "!"           pub struct Not/1
+    "|"           pub struct Or/1
+    "|="          pub struct OrEq/2
+    "||"          pub struct OrOr/2
+    "::"          pub struct PathSep/2
+    "%"           pub struct Percent/1
+    "%="          pub struct PercentEq/2
+    "+"           pub struct Plus/1
+    "+="          pub struct PlusEq/2
+    "#"           pub struct Pound/1
+    "?"           pub struct Question/1
+    "->"          pub struct RArrow/2
+    ";"           pub struct Semi/1
+    "<<"          pub struct Shl/2
+    "<<="         pub struct ShlEq/3
+    ">>"          pub struct Shr/2
+    ">>="         pub struct ShrEq/3
+    "/"           pub struct Slash/1
+    "/="          pub struct SlashEq/2
+    "*"           pub struct Star/1
+    "*="          pub struct StarEq/2
+    "~"           pub struct Tilde/1
 }
 
 define_delimiters! {
