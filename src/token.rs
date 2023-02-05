@@ -879,7 +879,7 @@ macro_rules! Token {
 // Not public API.
 #[doc(hidden)]
 #[cfg(feature = "parsing")]
-pub mod parsing {
+pub(crate) mod parsing {
     use crate::buffer::Cursor;
     use crate::error::{Error, Result};
     use crate::parse::ParseStream;

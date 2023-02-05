@@ -115,7 +115,7 @@ macro_rules! impl_parse_for_custom_punctuation {
     ($ident:ident, $($tt:tt)+) => {
         impl $crate::token::CustomToken for $ident {
             fn peek(cursor: $crate::buffer::Cursor) -> bool {
-                $crate::token::parsing::peek_punct(cursor, $crate::stringify_punct!($($tt)+))
+                $crate::__private::peek_punct(cursor, $crate::stringify_punct!($($tt)+))
             }
 
             fn display() -> &'static $crate::__private::str {
@@ -126,7 +126,7 @@ macro_rules! impl_parse_for_custom_punctuation {
         impl $crate::parse::Parse for $ident {
             fn parse(input: $crate::parse::ParseStream) -> $crate::parse::Result<$ident> {
                 let spans: $crate::custom_punctuation_repr!($($tt)+) =
-                    $crate::token::parsing::punct(input, $crate::stringify_punct!($($tt)+))?;
+                    $crate::__private::parse_punct(input, $crate::stringify_punct!($($tt)+))?;
                 Ok($ident(spans))
             }
         }
