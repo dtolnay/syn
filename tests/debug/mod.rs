@@ -123,3 +123,11 @@ where
             .finish()
     }
 }
+
+struct Present;
+
+impl Debug for Present {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Some")
+    }
+}

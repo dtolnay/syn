@@ -218,28 +218,30 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str) -> TokenStream 
                 let ident = Ident::new(f, Span::call_site());
                 if let Type::Option(ty) = ty {
                     let inner = quote!(_val);
-                    let format = format_field(&inner, ty).map(|format| {
+                    Some(if let Some(format) = format_field(&inner, ty) {
+                        let ty = rust_type(ty);
                         quote! {
-                            let #inner = &self.0;
-                            formatter.write_str("(")?;
-                            Debug::fmt(#format, formatter)?;
-                            formatter.write_str(")")?;
-                        }
-                    });
-                    let ty = rust_type(ty);
-                    Some(quote! {
-                        if let Some(val) = &_val.#ident {
-                            #[derive(RefCast)]
-                            #[repr(transparent)]
-                            struct Print(#ty);
-                            impl Debug for Print {
-                                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                                    formatter.write_str("Some")?;
-                                    #format
-                                    Ok(())
+                            if let Some(val) = &_val.#ident {
+                                #[derive(RefCast)]
+                                #[repr(transparent)]
+                                struct Print(#ty);
+                                impl Debug for Print {
+                                    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                                        let #inner = &self.0;
+                                        formatter.write_str("Some(")?;
+                                        Debug::fmt(#format, formatter)?;
+                                        formatter.write_str(")")?;
+                                        Ok(())
+                                    }
                                 }
+                                formatter.field(#f, Print::ref_cast(val));
                             }
-                            formatter.field(#f, Print::ref_cast(val));
+                        }
+                    } else {
+                        quote! {
+                            if _val.#ident.is_some() {
+                                formatter.field(#f, &Present);
+                            }
                         }
                     })
                 } else {
@@ -324,7 +326,7 @@ pub fn generate(defs: &Definitions) -> Result<()> {
         quote! {
             #![allow(clippy::match_wildcard_for_single_variants)]
 
-            use super::{Lite, RefCast};
+            use super::{Lite, Present, RefCast};
             use std::fmt::{self, Debug, Display};
 
             #impls
