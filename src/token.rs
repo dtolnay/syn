@@ -728,8 +728,10 @@ define_punctuation! {
     "..="         pub struct DotDotEq/3   /// `..=`
     "="           pub struct Eq/1         /// `=`
     "=="          pub struct EqEq/2       /// `==`
+    "=>"          pub struct FatArrow/2   /// `=>`
     ">="          pub struct Ge/2         /// `>=`
     ">"           pub struct Gt/1         /// `>`
+    "<-"          pub struct LArrow/2     /// `<-`
     "<="          pub struct Le/2         /// `<=`
     "<"           pub struct Lt/1         /// `<`
     "*="          pub struct MulEq/2      /// `*=`
@@ -740,10 +742,8 @@ define_punctuation! {
     "#"           pub struct Pound/1      /// `#`
     "?"           pub struct Question/1   /// `?`
     "->"          pub struct RArrow/2     /// `->`
-    "<-"          pub struct LArrow/2     /// `<-`
     "%"           pub struct Rem/1        /// `%`
     "%="          pub struct RemEq/2      /// `%=`
-    "=>"          pub struct FatArrow/2   /// `=>`
     ";"           pub struct Semi/1       /// `;`
     "<<"          pub struct Shl/2        /// `<<`
     "<<="         pub struct ShlEq/3      /// `<<=`
@@ -845,8 +845,10 @@ macro_rules! Token {
     [..=]         => { $crate::token::DotDotEq };
     [=]           => { $crate::token::Eq };
     [==]          => { $crate::token::EqEq };
+    [=>]          => { $crate::token::FatArrow };
     [>=]          => { $crate::token::Ge };
     [>]           => { $crate::token::Gt };
+    [<-]          => { $crate::token::LArrow };
     [<=]          => { $crate::token::Le };
     [<]           => { $crate::token::Lt };
     [*=]          => { $crate::token::MulEq };
@@ -857,10 +859,8 @@ macro_rules! Token {
     [#]           => { $crate::token::Pound };
     [?]           => { $crate::token::Question };
     [->]          => { $crate::token::RArrow };
-    [<-]          => { $crate::token::LArrow };
     [%]           => { $crate::token::Rem };
     [%=]          => { $crate::token::RemEq };
-    [=>]          => { $crate::token::FatArrow };
     [;]           => { $crate::token::Semi };
     [<<]          => { $crate::token::Shl };
     [<<=]         => { $crate::token::ShlEq };
