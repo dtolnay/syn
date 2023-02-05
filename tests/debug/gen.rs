@@ -2471,13 +2471,8 @@ impl Debug for Lite<syn::Item> {
                                                 &self,
                                                 formatter: &mut fmt::Formatter,
                                             ) -> fmt::Result {
-                                                match &self.0 {
-                                                    Some(_val) => {
-                                                        formatter.write_str("Some")?;
-                                                        Ok(())
-                                                    }
-                                                    None => formatter.write_str("None"),
-                                                }
+                                                formatter
+                                                    .write_str(if self.0.is_some() { "Some" } else { "None" })
                                             }
                                         }
                                         Print::ref_cast(&_val.0)
@@ -2798,13 +2793,8 @@ impl Debug for Lite<syn::ItemImpl> {
                                         &self,
                                         formatter: &mut fmt::Formatter,
                                     ) -> fmt::Result {
-                                        match &self.0 {
-                                            Some(_val) => {
-                                                formatter.write_str("Some")?;
-                                                Ok(())
-                                            }
-                                            None => formatter.write_str("None"),
-                                        }
+                                        formatter
+                                            .write_str(if self.0.is_some() { "Some" } else { "None" })
                                     }
                                 }
                                 Print::ref_cast(&_val.0)
@@ -3834,8 +3824,7 @@ impl Debug for Lite<syn::Receiver> {
                                 ) -> fmt::Result {
                                     match &self.0 {
                                         Some(_val) => {
-                                            formatter.write_str("Some")?;
-                                            formatter.write_str("(")?;
+                                            formatter.write_str("Some(")?;
                                             Debug::fmt(Lite(_val), formatter)?;
                                             formatter.write_str(")")?;
                                             Ok(())
@@ -3985,13 +3974,8 @@ impl Debug for Lite<syn::Stmt> {
                                 &self,
                                 formatter: &mut fmt::Formatter,
                             ) -> fmt::Result {
-                                match &self.0 {
-                                    Some(_val) => {
-                                        formatter.write_str("Some")?;
-                                        Ok(())
-                                    }
-                                    None => formatter.write_str("None"),
-                                }
+                                formatter
+                                    .write_str(if self.0.is_some() { "Some" } else { "None" })
                             }
                         }
                         Print::ref_cast(_v1)
