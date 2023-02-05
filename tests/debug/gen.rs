@@ -34,7 +34,7 @@ impl Debug for Lite<syn::AngleBracketedGenericArguments> {
         if let Some(val) = &_val.colon2_token {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print(syn::token::Colon2);
+            struct Print(syn::token::PathSep);
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some")?;
@@ -1104,7 +1104,7 @@ impl Debug for Lite<syn::Expr> {
                 if let Some(val) = &_val.dot2_token {
                     #[derive(RefCast)]
                     #[repr(transparent)]
-                    struct Print(syn::token::Dot2);
+                    struct Print(syn::token::DotDot);
                     impl Debug for Print {
                         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                             formatter.write_str("Some")?;
@@ -1909,7 +1909,7 @@ impl Debug for Lite<syn::ExprStruct> {
         if let Some(val) = &_val.dot2_token {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print(syn::token::Dot2);
+            struct Print(syn::token::DotDot);
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some")?;
@@ -2833,7 +2833,7 @@ impl Debug for Lite<syn::Item> {
                 if let Some(val) = &_val.trait_ {
                     #[derive(RefCast)]
                     #[repr(transparent)]
-                    struct Print((Option<syn::token::Bang>, syn::Path, syn::token::For));
+                    struct Print((Option<syn::token::Not>, syn::Path, syn::token::For));
                     impl Debug for Print {
                         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                             formatter.write_str("Some")?;
@@ -2844,7 +2844,7 @@ impl Debug for Lite<syn::Item> {
                                     {
                                         #[derive(RefCast)]
                                         #[repr(transparent)]
-                                        struct Print(Option<syn::token::Bang>);
+                                        struct Print(Option<syn::token::Not>);
                                         impl Debug for Print {
                                             fn fmt(
                                                 &self,
@@ -3102,7 +3102,7 @@ impl Debug for Lite<syn::Item> {
                 if let Some(val) = &_val.leading_colon {
                     #[derive(RefCast)]
                     #[repr(transparent)]
-                    struct Print(syn::token::Colon2);
+                    struct Print(syn::token::PathSep);
                     impl Debug for Print {
                         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                             formatter.write_str("Some")?;
@@ -3246,7 +3246,7 @@ impl Debug for Lite<syn::ItemImpl> {
         if let Some(val) = &_val.trait_ {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print((Option<syn::token::Bang>, syn::Path, syn::token::For));
+            struct Print((Option<syn::token::Not>, syn::Path, syn::token::For));
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some")?;
@@ -3257,7 +3257,7 @@ impl Debug for Lite<syn::ItemImpl> {
                             {
                                 #[derive(RefCast)]
                                 #[repr(transparent)]
-                                struct Print(Option<syn::token::Bang>);
+                                struct Print(Option<syn::token::Not>);
                                 impl Debug for Print {
                                     fn fmt(
                                         &self,
@@ -3542,7 +3542,7 @@ impl Debug for Lite<syn::ItemUse> {
         if let Some(val) = &_val.leading_colon {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print(syn::token::Colon2);
+            struct Print(syn::token::PathSep);
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some")?;
@@ -3777,7 +3777,7 @@ impl Debug for Lite<syn::Meta> {
                 if let Some(val) = &_val.leading_colon {
                     #[derive(RefCast)]
                     #[repr(transparent)]
-                    struct Print(syn::token::Colon2);
+                    struct Print(syn::token::PathSep);
                     impl Debug for Print {
                         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                             formatter.write_str("Some")?;
@@ -4326,7 +4326,7 @@ impl Debug for Lite<syn::Path> {
         if let Some(val) = &_val.leading_colon {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print(syn::token::Colon2);
+            struct Print(syn::token::PathSep);
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some")?;
@@ -4352,7 +4352,7 @@ impl Debug for Lite<syn::PathArguments> {
                 if let Some(val) = &_val.colon2_token {
                     #[derive(RefCast)]
                     #[repr(transparent)]
-                    struct Print(syn::token::Colon2);
+                    struct Print(syn::token::PathSep);
                     impl Debug for Print {
                         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                             formatter.write_str("Some")?;

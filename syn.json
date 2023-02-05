@@ -31,7 +31,7 @@
       "fields": {
         "colon2_token": {
           "option": {
-            "token": "Colon2"
+            "token": "PathSep"
           }
         },
         "lt_token": {
@@ -157,7 +157,7 @@
         "Outer": [],
         "Inner": [
           {
-            "token": "Bang"
+            "token": "Not"
           }
         ]
       }
@@ -243,7 +243,7 @@
           }
         },
         "dots": {
-          "token": "Dot3"
+          "token": "DotDotDot"
         },
         "comma": {
           "option": {
@@ -263,12 +263,12 @@
       "variants": {
         "Add": [
           {
-            "token": "Add"
+            "token": "Plus"
           }
         ],
         "Sub": [
           {
-            "token": "Sub"
+            "token": "Minus"
           }
         ],
         "Mul": [
@@ -278,12 +278,12 @@
         ],
         "Div": [
           {
-            "token": "Div"
+            "token": "Slash"
           }
         ],
         "Rem": [
           {
-            "token": "Rem"
+            "token": "Percent"
           }
         ],
         "And": [
@@ -353,27 +353,27 @@
         ],
         "AddEq": [
           {
-            "token": "AddEq"
+            "token": "PlusEq"
           }
         ],
         "SubEq": [
           {
-            "token": "SubEq"
+            "token": "MinusEq"
           }
         ],
         "MulEq": [
           {
-            "token": "MulEq"
+            "token": "StarEq"
           }
         ],
         "DivEq": [
           {
-            "token": "DivEq"
+            "token": "SlashEq"
           }
         ],
         "RemEq": [
           {
-            "token": "RemEq"
+            "token": "PercentEq"
           }
         ],
         "BitXorEq": [
@@ -512,7 +512,7 @@
             "element": {
               "syn": "TypeParamBound"
             },
-            "punct": "Add"
+            "punct": "Plus"
           }
         }
       }
@@ -1766,7 +1766,7 @@
         },
         "dot2_token": {
           "option": {
-            "token": "Dot2"
+            "token": "DotDot"
           }
         },
         "rest": {
@@ -2917,7 +2917,7 @@
             "tuple": [
               {
                 "option": {
-                  "token": "Bang"
+                  "token": "Not"
                 }
               },
               {
@@ -3146,7 +3146,7 @@
             "element": {
               "syn": "TypeParamBound"
             },
-            "punct": "Add"
+            "punct": "Plus"
           }
         },
         "brace_token": {
@@ -3192,7 +3192,7 @@
             "element": {
               "syn": "TypeParamBound"
             },
-            "punct": "Add"
+            "punct": "Plus"
           }
         },
         "semi_token": {
@@ -3289,7 +3289,7 @@
         },
         "leading_colon": {
           "option": {
-            "token": "Colon2"
+            "token": "PathSep"
           }
         },
         "tree": {
@@ -3357,7 +3357,7 @@
             "element": {
               "syn": "Lifetime"
             },
-            "punct": "Add"
+            "punct": "Plus"
           }
         }
       }
@@ -3535,7 +3535,7 @@
           "syn": "Path"
         },
         "bang_token": {
-          "token": "Bang"
+          "token": "Not"
         },
         "delimiter": {
           "syn": "MacroDelimiter"
@@ -3886,7 +3886,7 @@
           }
         },
         "dot2_token": {
-          "token": "Dot2"
+          "token": "DotDot"
         }
       }
     },
@@ -4064,7 +4064,7 @@
       "fields": {
         "leading_colon": {
           "option": {
-            "token": "Colon2"
+            "token": "PathSep"
           }
         },
         "segments": {
@@ -4072,7 +4072,7 @@
             "element": {
               "syn": "PathSegment"
             },
-            "punct": "Colon2"
+            "punct": "PathSep"
           }
         }
       }
@@ -4136,7 +4136,7 @@
             "element": {
               "syn": "Lifetime"
             },
-            "punct": "Add"
+            "punct": "Plus"
           }
         }
       }
@@ -4166,7 +4166,7 @@
             "element": {
               "syn": "TypeParamBound"
             },
-            "punct": "Add"
+            "punct": "Plus"
           }
         }
       }
@@ -4211,7 +4211,7 @@
       "variants": {
         "HalfOpen": [
           {
-            "token": "Dot2"
+            "token": "DotDot"
           }
         ],
         "Closed": [
@@ -4621,7 +4621,7 @@
             "element": {
               "syn": "TypeParamBound"
             },
-            "punct": "Add"
+            "punct": "Plus"
           }
         },
         "default": {
@@ -4837,7 +4837,7 @@
             "element": {
               "syn": "TypeParamBound"
             },
-            "punct": "Add"
+            "punct": "Plus"
           }
         }
       }
@@ -4880,7 +4880,7 @@
       },
       "fields": {
         "bang_token": {
-          "token": "Bang"
+          "token": "Not"
         }
       }
     },
@@ -4911,7 +4911,7 @@
             "element": {
               "syn": "TypeParamBound"
             },
-            "punct": "Add"
+            "punct": "Plus"
           }
         },
         "eq_token": {
@@ -5087,7 +5087,7 @@
             "element": {
               "syn": "TypeParamBound"
             },
-            "punct": "Add"
+            "punct": "Plus"
           }
         }
       }
@@ -5130,12 +5130,12 @@
         ],
         "Not": [
           {
-            "token": "Bang"
+            "token": "Not"
           }
         ],
         "Neg": [
           {
-            "token": "Sub"
+            "token": "Minus"
           }
         ]
       }
@@ -5199,7 +5199,7 @@
           "proc_macro2": "Ident"
         },
         "colon2_token": {
-          "token": "Colon2"
+          "token": "PathSep"
         },
         "tree": {
           "box": {
@@ -5290,7 +5290,7 @@
           }
         },
         "dots": {
-          "token": "Dot3"
+          "token": "DotDotDot"
         },
         "comma": {
           "option": {
@@ -5429,8 +5429,6 @@
   ],
   "tokens": {
     "Abstract": "abstract",
-    "Add": "+",
-    "AddEq": "+=",
     "And": "&",
     "AndAnd": "&&",
     "AndEq": "&=",
@@ -5439,26 +5437,22 @@
     "At": "@",
     "Auto": "auto",
     "Await": "await",
-    "Bang": "!",
     "Become": "become",
     "Box": "box",
     "Break": "break",
     "Caret": "^",
     "CaretEq": "^=",
     "Colon": ":",
-    "Colon2": "::",
     "Comma": ",",
     "Const": "const",
     "Continue": "continue",
     "Crate": "crate",
     "Default": "default",
-    "Div": "/",
-    "DivEq": "/=",
     "Do": "do",
     "Dollar": "$",
     "Dot": ".",
-    "Dot2": "..",
-    "Dot3": "...",
+    "DotDot": "..",
+    "DotDotDot": "...",
     "DotDotEq": "..=",
     "Dyn": "dyn",
     "Else": "else",
@@ -5482,23 +5476,28 @@
     "Lt": "<",
     "Macro": "macro",
     "Match": "match",
+    "Minus": "-",
+    "MinusEq": "-=",
     "Mod": "mod",
     "Move": "move",
-    "MulEq": "*=",
     "Mut": "mut",
     "Ne": "!=",
+    "Not": "!",
     "Or": "|",
     "OrEq": "|=",
     "OrOr": "||",
     "Override": "override",
+    "PathSep": "::",
+    "Percent": "%",
+    "PercentEq": "%=",
+    "Plus": "+",
+    "PlusEq": "+=",
     "Pound": "#",
     "Priv": "priv",
     "Pub": "pub",
     "Question": "?",
     "RArrow": "->",
     "Ref": "ref",
-    "Rem": "%",
-    "RemEq": "%=",
     "Return": "return",
     "SelfType": "Self",
     "SelfValue": "self",
@@ -5507,11 +5506,12 @@
     "ShlEq": "<<=",
     "Shr": ">>",
     "ShrEq": ">>=",
+    "Slash": "/",
+    "SlashEq": "/=",
     "Star": "*",
+    "StarEq": "*=",
     "Static": "static",
     "Struct": "struct",
-    "Sub": "-",
-    "SubEq": "-=",
     "Super": "super",
     "Tilde": "~",
     "Trait": "trait",
