@@ -1964,6 +1964,7 @@ where
     v.visit_visibility(&node.vis);
     tokens_helper(v, &node.type_token.span);
     v.visit_ident(&node.ident);
+    v.visit_generics(&node.generics);
     tokens_helper(v, &node.semi_token.spans);
 }
 #[cfg(any(feature = "derive", feature = "full"))]

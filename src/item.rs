@@ -560,6 +560,7 @@ ast_struct! {
         pub vis: Visibility,
         pub type_token: Token![type],
         pub ident: Ident,
+        pub generics: Generics,
         pub semi_token: Token![;],
     }
 }
@@ -1798,6 +1799,11 @@ pub(crate) mod parsing {
                 vis: input.parse()?,
                 type_token: input.parse()?,
                 ident: input.parse()?,
+                generics: {
+                    let mut generics: Generics = input.parse()?;
+                    generics.where_clause = input.parse()?;
+                    generics
+                },
                 semi_token: input.parse()?,
             })
         }
@@ -1816,12 +1822,7 @@ pub(crate) mod parsing {
             semi_token,
         } = FlexibleItemType::parse(input, WhereClauseLocation::Both)?;
 
-        if defaultness.is_some()
-            || generics.lt_token.is_some()
-            || generics.where_clause.is_some()
-            || colon_token.is_some()
-            || ty.is_some()
-        {
+        if defaultness.is_some() || colon_token.is_some() || ty.is_some() {
             Ok(ForeignItem::Verbatim(verbatim::between(begin, input)))
         } else {
             Ok(ForeignItem::Type(ForeignItemType {
@@ -1829,6 +1830,7 @@ pub(crate) mod parsing {
                 vis,
                 type_token,
                 ident,
+                generics,
                 semi_token,
             }))
         }
@@ -3161,6 +3163,8 @@ mod printing {
             self.vis.to_tokens(tokens);
             self.type_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }
