@@ -49,7 +49,9 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
             } else {
                 None
             };
+            let prefix = format!("{}::", type_name);
             quote! {
+                formatter.write_str(#prefix)?;
                 match self {
                     #(#arms)*
                     #nonexhaustive

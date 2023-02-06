@@ -67,6 +67,7 @@ impl Debug for AssocType {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for AttrStyle {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("AttrStyle::")?;
         match self {
             AttrStyle::Outer => formatter.write_str("Outer"),
             AttrStyle::Inner(v0) => {
@@ -116,6 +117,7 @@ impl Debug for BareVariadic {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for BinOp {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("BinOp::")?;
         match self {
             BinOp::Add(v0) => {
                 let mut formatter = formatter.debug_tuple("Add");
@@ -313,6 +315,7 @@ impl Debug for Constraint {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Data {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Data::")?;
         match self {
             Data::Struct(v0) => {
                 let mut formatter = formatter.debug_tuple("Struct");
@@ -381,6 +384,7 @@ impl Debug for DeriveInput {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Expr {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Expr::")?;
         match self {
             #[cfg(feature = "full")]
             Expr::Array(v0) => {
@@ -1104,6 +1108,7 @@ impl Debug for Field {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for FieldMutability {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("FieldMutability::")?;
         match self {
             FieldMutability::None => formatter.write_str("None"),
         }
@@ -1137,6 +1142,7 @@ impl Debug for FieldValue {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Fields {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Fields::")?;
         match self {
             Fields::Named(v0) => {
                 let mut formatter = formatter.debug_tuple("Named");
@@ -1187,6 +1193,7 @@ impl Debug for File {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for FnArg {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("FnArg::")?;
         match self {
             FnArg::Receiver(v0) => {
                 let mut formatter = formatter.debug_tuple("Receiver");
@@ -1205,6 +1212,7 @@ impl Debug for FnArg {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ForeignItem {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("ForeignItem::")?;
         match self {
             ForeignItem::Fn(v0) => {
                 let mut formatter = formatter.debug_tuple("Fn");
@@ -1290,6 +1298,7 @@ impl Debug for ForeignItemType {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for GenericArgument {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("GenericArgument::")?;
         match self {
             GenericArgument::Lifetime(v0) => {
                 let mut formatter = formatter.debug_tuple("Lifetime");
@@ -1328,6 +1337,7 @@ impl Debug for GenericArgument {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for GenericParam {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("GenericParam::")?;
         match self {
             GenericParam::Type(v0) => {
                 let mut formatter = formatter.debug_tuple("Type");
@@ -1363,6 +1373,7 @@ impl Debug for Generics {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ImplItem {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("ImplItem::")?;
         match self {
             ImplItem::Const(v0) => {
                 let mut formatter = formatter.debug_tuple("Const");
@@ -1473,6 +1484,7 @@ impl Debug for Index {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Item {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Item::")?;
         match self {
             Item::Const(v0) => {
                 let mut formatter = formatter.debug_tuple("Const");
@@ -1819,6 +1831,7 @@ impl Debug for LifetimeDef {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Lit {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Lit::")?;
         match self {
             Lit::Str(v0) => {
                 let mut formatter = formatter.debug_tuple("Str");
@@ -1903,6 +1916,7 @@ impl Debug for Macro {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for MacroDelimiter {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("MacroDelimiter::")?;
         match self {
             MacroDelimiter::Paren(v0) => {
                 let mut formatter = formatter.debug_tuple("Paren");
@@ -1926,6 +1940,7 @@ impl Debug for MacroDelimiter {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Member {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Member::")?;
         match self {
             Member::Named(v0) => {
                 let mut formatter = formatter.debug_tuple("Named");
@@ -1944,6 +1959,7 @@ impl Debug for Member {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Meta {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Meta::")?;
         match self {
             Meta::Path(v0) => {
                 let mut formatter = formatter.debug_tuple("Path");
@@ -2000,6 +2016,7 @@ impl Debug for ParenthesizedGenericArguments {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Pat {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Pat::")?;
         match self {
             Pat::Const(v0) => {
                 let mut formatter = formatter.debug_tuple("Const");
@@ -2214,6 +2231,7 @@ impl Debug for Path {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for PathArguments {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("PathArguments::")?;
         match self {
             PathArguments::None => formatter.write_str("None"),
             PathArguments::AngleBracketed(v0) => {
@@ -2279,6 +2297,7 @@ impl Debug for QSelf {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for RangeLimits {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("RangeLimits::")?;
         match self {
             RangeLimits::HalfOpen(v0) => {
                 let mut formatter = formatter.debug_tuple("HalfOpen");
@@ -2309,6 +2328,7 @@ impl Debug for Receiver {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ReturnType {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("ReturnType::")?;
         match self {
             ReturnType::Default => formatter.write_str("Default"),
             ReturnType::Type(v0, v1) => {
@@ -2343,6 +2363,7 @@ impl Debug for Signature {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for StaticMutability {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("StaticMutability::")?;
         match self {
             StaticMutability::Mut(v0) => {
                 let mut formatter = formatter.debug_tuple("Mut");
@@ -2357,6 +2378,7 @@ impl Debug for StaticMutability {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Stmt {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Stmt::")?;
         match self {
             Stmt::Local(v0) => {
                 let mut formatter = formatter.debug_tuple("Local");
@@ -2409,6 +2431,7 @@ impl Debug for TraitBound {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for TraitBoundModifier {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("TraitBoundModifier::")?;
         match self {
             TraitBoundModifier::None => formatter.write_str("None"),
             TraitBoundModifier::Maybe(v0) => {
@@ -2423,6 +2446,7 @@ impl Debug for TraitBoundModifier {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for TraitItem {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("TraitItem::")?;
         match self {
             TraitItem::Const(v0) => {
                 let mut formatter = formatter.debug_tuple("Const");
@@ -2511,6 +2535,7 @@ impl Debug for TraitItemType {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Type {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Type::")?;
         match self {
             Type::Array(v0) => {
                 let mut formatter = formatter.debug_tuple("Array");
@@ -2683,6 +2708,7 @@ impl Debug for TypeParam {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for TypeParamBound {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("TypeParamBound::")?;
         match self {
             TypeParamBound::Trait(v0) => {
                 let mut formatter = formatter.debug_tuple("Trait");
@@ -2780,6 +2806,7 @@ impl Debug for TypeTuple {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for UnOp {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("UnOp::")?;
         match self {
             UnOp::Deref(v0) => {
                 let mut formatter = formatter.debug_tuple("Deref");
@@ -2853,6 +2880,7 @@ impl Debug for UseRename {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for UseTree {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("UseTree::")?;
         match self {
             UseTree::Path(v0) => {
                 let mut formatter = formatter.debug_tuple("Path");
@@ -2922,6 +2950,7 @@ impl Debug for VisRestricted {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Visibility {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Visibility::")?;
         match self {
             Visibility::Public(v0) => {
                 let mut formatter = formatter.debug_tuple("Public");
@@ -2951,6 +2980,7 @@ impl Debug for WhereClause {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for WherePredicate {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("WherePredicate::")?;
         match self {
             WherePredicate::Type(v0) => {
                 let mut formatter = formatter.debug_tuple("Type");
