@@ -15,10 +15,9 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
         Data::Enum(variants) => {
             let arms = variants.iter().map(|(variant_name, fields)| {
                 let variant = Ident::new(variant_name, Span::call_site());
-                let enum_and_variant_name = format!("{}::{}", type_name, variant_name);
                 if fields.is_empty() {
                     quote! {
-                        #ident::#variant => formatter.write_str(#enum_and_variant_name),
+                        #ident::#variant => formatter.write_str(#variant_name),
                     }
                 } else {
                     let pats = (0..fields.len())
@@ -35,7 +34,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                     quote! {
                         #cfg
                         #ident::#variant(#(#pats),*) => {
-                            let mut formatter = formatter.debug_tuple(#enum_and_variant_name);
+                            let mut formatter = formatter.debug_tuple(#variant_name);
                             #(formatter.field(#pats);)*
                             formatter.finish()
                         }
@@ -50,7 +49,9 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
             } else {
                 None
             };
+            let prefix = format!("{}::", type_name);
             quote! {
+                formatter.write_str(#prefix)?;
                 match self {
                     #(#arms)*
                     #nonexhaustive

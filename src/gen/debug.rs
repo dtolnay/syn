@@ -67,10 +67,11 @@ impl Debug for AssocType {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for AttrStyle {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("AttrStyle::")?;
         match self {
-            AttrStyle::Outer => formatter.write_str("AttrStyle::Outer"),
+            AttrStyle::Outer => formatter.write_str("Outer"),
             AttrStyle::Inner(v0) => {
-                let mut formatter = formatter.debug_tuple("AttrStyle::Inner");
+                let mut formatter = formatter.debug_tuple("Inner");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -116,144 +117,145 @@ impl Debug for BareVariadic {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for BinOp {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("BinOp::")?;
         match self {
             BinOp::Add(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Add");
+                let mut formatter = formatter.debug_tuple("Add");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::Sub(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Sub");
+                let mut formatter = formatter.debug_tuple("Sub");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::Mul(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Mul");
+                let mut formatter = formatter.debug_tuple("Mul");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::Div(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Div");
+                let mut formatter = formatter.debug_tuple("Div");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::Rem(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Rem");
+                let mut formatter = formatter.debug_tuple("Rem");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::And(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::And");
+                let mut formatter = formatter.debug_tuple("And");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::Or(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Or");
+                let mut formatter = formatter.debug_tuple("Or");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::BitXor(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::BitXor");
+                let mut formatter = formatter.debug_tuple("BitXor");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::BitAnd(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::BitAnd");
+                let mut formatter = formatter.debug_tuple("BitAnd");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::BitOr(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::BitOr");
+                let mut formatter = formatter.debug_tuple("BitOr");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::Shl(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Shl");
+                let mut formatter = formatter.debug_tuple("Shl");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::Shr(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Shr");
+                let mut formatter = formatter.debug_tuple("Shr");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::Eq(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Eq");
+                let mut formatter = formatter.debug_tuple("Eq");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::Lt(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Lt");
+                let mut formatter = formatter.debug_tuple("Lt");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::Le(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Le");
+                let mut formatter = formatter.debug_tuple("Le");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::Ne(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Ne");
+                let mut formatter = formatter.debug_tuple("Ne");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::Ge(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Ge");
+                let mut formatter = formatter.debug_tuple("Ge");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::Gt(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::Gt");
+                let mut formatter = formatter.debug_tuple("Gt");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::AddEq(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::AddEq");
+                let mut formatter = formatter.debug_tuple("AddEq");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::SubEq(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::SubEq");
+                let mut formatter = formatter.debug_tuple("SubEq");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::MulEq(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::MulEq");
+                let mut formatter = formatter.debug_tuple("MulEq");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::DivEq(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::DivEq");
+                let mut formatter = formatter.debug_tuple("DivEq");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::RemEq(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::RemEq");
+                let mut formatter = formatter.debug_tuple("RemEq");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::BitXorEq(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::BitXorEq");
+                let mut formatter = formatter.debug_tuple("BitXorEq");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::BitAndEq(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::BitAndEq");
+                let mut formatter = formatter.debug_tuple("BitAndEq");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::BitOrEq(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::BitOrEq");
+                let mut formatter = formatter.debug_tuple("BitOrEq");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::ShlEq(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::ShlEq");
+                let mut formatter = formatter.debug_tuple("ShlEq");
                 formatter.field(v0);
                 formatter.finish()
             }
             BinOp::ShrEq(v0) => {
-                let mut formatter = formatter.debug_tuple("BinOp::ShrEq");
+                let mut formatter = formatter.debug_tuple("ShrEq");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -313,19 +315,20 @@ impl Debug for Constraint {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Data {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Data::")?;
         match self {
             Data::Struct(v0) => {
-                let mut formatter = formatter.debug_tuple("Data::Struct");
+                let mut formatter = formatter.debug_tuple("Struct");
                 formatter.field(v0);
                 formatter.finish()
             }
             Data::Enum(v0) => {
-                let mut formatter = formatter.debug_tuple("Data::Enum");
+                let mut formatter = formatter.debug_tuple("Enum");
                 formatter.field(v0);
                 formatter.finish()
             }
             Data::Union(v0) => {
-                let mut formatter = formatter.debug_tuple("Data::Union");
+                let mut formatter = formatter.debug_tuple("Union");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -381,234 +384,235 @@ impl Debug for DeriveInput {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Expr {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Expr::")?;
         match self {
             #[cfg(feature = "full")]
             Expr::Array(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Array");
+                let mut formatter = formatter.debug_tuple("Array");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Assign(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Assign");
+                let mut formatter = formatter.debug_tuple("Assign");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::AssignOp(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::AssignOp");
+                let mut formatter = formatter.debug_tuple("AssignOp");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Async(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Async");
+                let mut formatter = formatter.debug_tuple("Async");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Await(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Await");
+                let mut formatter = formatter.debug_tuple("Await");
                 formatter.field(v0);
                 formatter.finish()
             }
             Expr::Binary(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Binary");
+                let mut formatter = formatter.debug_tuple("Binary");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Block(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Block");
+                let mut formatter = formatter.debug_tuple("Block");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Break(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Break");
+                let mut formatter = formatter.debug_tuple("Break");
                 formatter.field(v0);
                 formatter.finish()
             }
             Expr::Call(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Call");
+                let mut formatter = formatter.debug_tuple("Call");
                 formatter.field(v0);
                 formatter.finish()
             }
             Expr::Cast(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Cast");
+                let mut formatter = formatter.debug_tuple("Cast");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Closure(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Closure");
+                let mut formatter = formatter.debug_tuple("Closure");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Const(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Const");
+                let mut formatter = formatter.debug_tuple("Const");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Continue(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Continue");
+                let mut formatter = formatter.debug_tuple("Continue");
                 formatter.field(v0);
                 formatter.finish()
             }
             Expr::Field(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Field");
+                let mut formatter = formatter.debug_tuple("Field");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::ForLoop(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::ForLoop");
+                let mut formatter = formatter.debug_tuple("ForLoop");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Group(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Group");
+                let mut formatter = formatter.debug_tuple("Group");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::If(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::If");
+                let mut formatter = formatter.debug_tuple("If");
                 formatter.field(v0);
                 formatter.finish()
             }
             Expr::Index(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Index");
+                let mut formatter = formatter.debug_tuple("Index");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Infer(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Infer");
+                let mut formatter = formatter.debug_tuple("Infer");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Let(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Let");
+                let mut formatter = formatter.debug_tuple("Let");
                 formatter.field(v0);
                 formatter.finish()
             }
             Expr::Lit(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Lit");
+                let mut formatter = formatter.debug_tuple("Lit");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Loop(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Loop");
+                let mut formatter = formatter.debug_tuple("Loop");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Macro(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Macro");
+                let mut formatter = formatter.debug_tuple("Macro");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Match(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Match");
+                let mut formatter = formatter.debug_tuple("Match");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::MethodCall(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::MethodCall");
+                let mut formatter = formatter.debug_tuple("MethodCall");
                 formatter.field(v0);
                 formatter.finish()
             }
             Expr::Paren(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Paren");
+                let mut formatter = formatter.debug_tuple("Paren");
                 formatter.field(v0);
                 formatter.finish()
             }
             Expr::Path(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Path");
+                let mut formatter = formatter.debug_tuple("Path");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Range(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Range");
+                let mut formatter = formatter.debug_tuple("Range");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Reference(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Reference");
+                let mut formatter = formatter.debug_tuple("Reference");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Repeat(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Repeat");
+                let mut formatter = formatter.debug_tuple("Repeat");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Return(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Return");
+                let mut formatter = formatter.debug_tuple("Return");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Struct(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Struct");
+                let mut formatter = formatter.debug_tuple("Struct");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Try(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Try");
+                let mut formatter = formatter.debug_tuple("Try");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::TryBlock(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::TryBlock");
+                let mut formatter = formatter.debug_tuple("TryBlock");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Tuple(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Tuple");
+                let mut formatter = formatter.debug_tuple("Tuple");
                 formatter.field(v0);
                 formatter.finish()
             }
             Expr::Unary(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Unary");
+                let mut formatter = formatter.debug_tuple("Unary");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Unsafe(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Unsafe");
+                let mut formatter = formatter.debug_tuple("Unsafe");
                 formatter.field(v0);
                 formatter.finish()
             }
             Expr::Verbatim(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Verbatim");
+                let mut formatter = formatter.debug_tuple("Verbatim");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::While(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::While");
+                let mut formatter = formatter.debug_tuple("While");
                 formatter.field(v0);
                 formatter.finish()
             }
             #[cfg(feature = "full")]
             Expr::Yield(v0) => {
-                let mut formatter = formatter.debug_tuple("Expr::Yield");
+                let mut formatter = formatter.debug_tuple("Yield");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -1104,8 +1108,9 @@ impl Debug for Field {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for FieldMutability {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("FieldMutability::")?;
         match self {
-            FieldMutability::None => formatter.write_str("FieldMutability::None"),
+            FieldMutability::None => formatter.write_str("None"),
         }
     }
 }
@@ -1137,18 +1142,19 @@ impl Debug for FieldValue {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Fields {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Fields::")?;
         match self {
             Fields::Named(v0) => {
-                let mut formatter = formatter.debug_tuple("Fields::Named");
+                let mut formatter = formatter.debug_tuple("Named");
                 formatter.field(v0);
                 formatter.finish()
             }
             Fields::Unnamed(v0) => {
-                let mut formatter = formatter.debug_tuple("Fields::Unnamed");
+                let mut formatter = formatter.debug_tuple("Unnamed");
                 formatter.field(v0);
                 formatter.finish()
             }
-            Fields::Unit => formatter.write_str("Fields::Unit"),
+            Fields::Unit => formatter.write_str("Unit"),
         }
     }
 }
@@ -1187,14 +1193,15 @@ impl Debug for File {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for FnArg {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("FnArg::")?;
         match self {
             FnArg::Receiver(v0) => {
-                let mut formatter = formatter.debug_tuple("FnArg::Receiver");
+                let mut formatter = formatter.debug_tuple("Receiver");
                 formatter.field(v0);
                 formatter.finish()
             }
             FnArg::Typed(v0) => {
-                let mut formatter = formatter.debug_tuple("FnArg::Typed");
+                let mut formatter = formatter.debug_tuple("Typed");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -1205,29 +1212,30 @@ impl Debug for FnArg {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ForeignItem {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("ForeignItem::")?;
         match self {
             ForeignItem::Fn(v0) => {
-                let mut formatter = formatter.debug_tuple("ForeignItem::Fn");
+                let mut formatter = formatter.debug_tuple("Fn");
                 formatter.field(v0);
                 formatter.finish()
             }
             ForeignItem::Static(v0) => {
-                let mut formatter = formatter.debug_tuple("ForeignItem::Static");
+                let mut formatter = formatter.debug_tuple("Static");
                 formatter.field(v0);
                 formatter.finish()
             }
             ForeignItem::Type(v0) => {
-                let mut formatter = formatter.debug_tuple("ForeignItem::Type");
+                let mut formatter = formatter.debug_tuple("Type");
                 formatter.field(v0);
                 formatter.finish()
             }
             ForeignItem::Macro(v0) => {
-                let mut formatter = formatter.debug_tuple("ForeignItem::Macro");
+                let mut formatter = formatter.debug_tuple("Macro");
                 formatter.field(v0);
                 formatter.finish()
             }
             ForeignItem::Verbatim(v0) => {
-                let mut formatter = formatter.debug_tuple("ForeignItem::Verbatim");
+                let mut formatter = formatter.debug_tuple("Verbatim");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -1290,34 +1298,35 @@ impl Debug for ForeignItemType {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for GenericArgument {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("GenericArgument::")?;
         match self {
             GenericArgument::Lifetime(v0) => {
-                let mut formatter = formatter.debug_tuple("GenericArgument::Lifetime");
+                let mut formatter = formatter.debug_tuple("Lifetime");
                 formatter.field(v0);
                 formatter.finish()
             }
             GenericArgument::Type(v0) => {
-                let mut formatter = formatter.debug_tuple("GenericArgument::Type");
+                let mut formatter = formatter.debug_tuple("Type");
                 formatter.field(v0);
                 formatter.finish()
             }
             GenericArgument::Const(v0) => {
-                let mut formatter = formatter.debug_tuple("GenericArgument::Const");
+                let mut formatter = formatter.debug_tuple("Const");
                 formatter.field(v0);
                 formatter.finish()
             }
             GenericArgument::AssocType(v0) => {
-                let mut formatter = formatter.debug_tuple("GenericArgument::AssocType");
+                let mut formatter = formatter.debug_tuple("AssocType");
                 formatter.field(v0);
                 formatter.finish()
             }
             GenericArgument::AssocConst(v0) => {
-                let mut formatter = formatter.debug_tuple("GenericArgument::AssocConst");
+                let mut formatter = formatter.debug_tuple("AssocConst");
                 formatter.field(v0);
                 formatter.finish()
             }
             GenericArgument::Constraint(v0) => {
-                let mut formatter = formatter.debug_tuple("GenericArgument::Constraint");
+                let mut formatter = formatter.debug_tuple("Constraint");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -1328,19 +1337,20 @@ impl Debug for GenericArgument {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for GenericParam {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("GenericParam::")?;
         match self {
             GenericParam::Type(v0) => {
-                let mut formatter = formatter.debug_tuple("GenericParam::Type");
+                let mut formatter = formatter.debug_tuple("Type");
                 formatter.field(v0);
                 formatter.finish()
             }
             GenericParam::Lifetime(v0) => {
-                let mut formatter = formatter.debug_tuple("GenericParam::Lifetime");
+                let mut formatter = formatter.debug_tuple("Lifetime");
                 formatter.field(v0);
                 formatter.finish()
             }
             GenericParam::Const(v0) => {
-                let mut formatter = formatter.debug_tuple("GenericParam::Const");
+                let mut formatter = formatter.debug_tuple("Const");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -1363,29 +1373,30 @@ impl Debug for Generics {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ImplItem {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("ImplItem::")?;
         match self {
             ImplItem::Const(v0) => {
-                let mut formatter = formatter.debug_tuple("ImplItem::Const");
+                let mut formatter = formatter.debug_tuple("Const");
                 formatter.field(v0);
                 formatter.finish()
             }
             ImplItem::Fn(v0) => {
-                let mut formatter = formatter.debug_tuple("ImplItem::Fn");
+                let mut formatter = formatter.debug_tuple("Fn");
                 formatter.field(v0);
                 formatter.finish()
             }
             ImplItem::Type(v0) => {
-                let mut formatter = formatter.debug_tuple("ImplItem::Type");
+                let mut formatter = formatter.debug_tuple("Type");
                 formatter.field(v0);
                 formatter.finish()
             }
             ImplItem::Macro(v0) => {
-                let mut formatter = formatter.debug_tuple("ImplItem::Macro");
+                let mut formatter = formatter.debug_tuple("Macro");
                 formatter.field(v0);
                 formatter.finish()
             }
             ImplItem::Verbatim(v0) => {
-                let mut formatter = formatter.debug_tuple("ImplItem::Verbatim");
+                let mut formatter = formatter.debug_tuple("Verbatim");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -1473,84 +1484,85 @@ impl Debug for Index {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Item {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Item::")?;
         match self {
             Item::Const(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::Const");
+                let mut formatter = formatter.debug_tuple("Const");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::Enum(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::Enum");
+                let mut formatter = formatter.debug_tuple("Enum");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::ExternCrate(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::ExternCrate");
+                let mut formatter = formatter.debug_tuple("ExternCrate");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::Fn(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::Fn");
+                let mut formatter = formatter.debug_tuple("Fn");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::ForeignMod(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::ForeignMod");
+                let mut formatter = formatter.debug_tuple("ForeignMod");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::Impl(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::Impl");
+                let mut formatter = formatter.debug_tuple("Impl");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::Macro(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::Macro");
+                let mut formatter = formatter.debug_tuple("Macro");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::Mod(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::Mod");
+                let mut formatter = formatter.debug_tuple("Mod");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::Static(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::Static");
+                let mut formatter = formatter.debug_tuple("Static");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::Struct(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::Struct");
+                let mut formatter = formatter.debug_tuple("Struct");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::Trait(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::Trait");
+                let mut formatter = formatter.debug_tuple("Trait");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::TraitAlias(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::TraitAlias");
+                let mut formatter = formatter.debug_tuple("TraitAlias");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::Type(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::Type");
+                let mut formatter = formatter.debug_tuple("Type");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::Union(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::Union");
+                let mut formatter = formatter.debug_tuple("Union");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::Use(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::Use");
+                let mut formatter = formatter.debug_tuple("Use");
                 formatter.field(v0);
                 formatter.finish()
             }
             Item::Verbatim(v0) => {
-                let mut formatter = formatter.debug_tuple("Item::Verbatim");
+                let mut formatter = formatter.debug_tuple("Verbatim");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -1819,44 +1831,45 @@ impl Debug for LifetimeDef {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Lit {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Lit::")?;
         match self {
             Lit::Str(v0) => {
-                let mut formatter = formatter.debug_tuple("Lit::Str");
+                let mut formatter = formatter.debug_tuple("Str");
                 formatter.field(v0);
                 formatter.finish()
             }
             Lit::ByteStr(v0) => {
-                let mut formatter = formatter.debug_tuple("Lit::ByteStr");
+                let mut formatter = formatter.debug_tuple("ByteStr");
                 formatter.field(v0);
                 formatter.finish()
             }
             Lit::Byte(v0) => {
-                let mut formatter = formatter.debug_tuple("Lit::Byte");
+                let mut formatter = formatter.debug_tuple("Byte");
                 formatter.field(v0);
                 formatter.finish()
             }
             Lit::Char(v0) => {
-                let mut formatter = formatter.debug_tuple("Lit::Char");
+                let mut formatter = formatter.debug_tuple("Char");
                 formatter.field(v0);
                 formatter.finish()
             }
             Lit::Int(v0) => {
-                let mut formatter = formatter.debug_tuple("Lit::Int");
+                let mut formatter = formatter.debug_tuple("Int");
                 formatter.field(v0);
                 formatter.finish()
             }
             Lit::Float(v0) => {
-                let mut formatter = formatter.debug_tuple("Lit::Float");
+                let mut formatter = formatter.debug_tuple("Float");
                 formatter.field(v0);
                 formatter.finish()
             }
             Lit::Bool(v0) => {
-                let mut formatter = formatter.debug_tuple("Lit::Bool");
+                let mut formatter = formatter.debug_tuple("Bool");
                 formatter.field(v0);
                 formatter.finish()
             }
             Lit::Verbatim(v0) => {
-                let mut formatter = formatter.debug_tuple("Lit::Verbatim");
+                let mut formatter = formatter.debug_tuple("Verbatim");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -1903,19 +1916,20 @@ impl Debug for Macro {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for MacroDelimiter {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("MacroDelimiter::")?;
         match self {
             MacroDelimiter::Paren(v0) => {
-                let mut formatter = formatter.debug_tuple("MacroDelimiter::Paren");
+                let mut formatter = formatter.debug_tuple("Paren");
                 formatter.field(v0);
                 formatter.finish()
             }
             MacroDelimiter::Brace(v0) => {
-                let mut formatter = formatter.debug_tuple("MacroDelimiter::Brace");
+                let mut formatter = formatter.debug_tuple("Brace");
                 formatter.field(v0);
                 formatter.finish()
             }
             MacroDelimiter::Bracket(v0) => {
-                let mut formatter = formatter.debug_tuple("MacroDelimiter::Bracket");
+                let mut formatter = formatter.debug_tuple("Bracket");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -1926,14 +1940,15 @@ impl Debug for MacroDelimiter {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Member {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Member::")?;
         match self {
             Member::Named(v0) => {
-                let mut formatter = formatter.debug_tuple("Member::Named");
+                let mut formatter = formatter.debug_tuple("Named");
                 formatter.field(v0);
                 formatter.finish()
             }
             Member::Unnamed(v0) => {
-                let mut formatter = formatter.debug_tuple("Member::Unnamed");
+                let mut formatter = formatter.debug_tuple("Unnamed");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -1944,19 +1959,20 @@ impl Debug for Member {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Meta {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Meta::")?;
         match self {
             Meta::Path(v0) => {
-                let mut formatter = formatter.debug_tuple("Meta::Path");
+                let mut formatter = formatter.debug_tuple("Path");
                 formatter.field(v0);
                 formatter.finish()
             }
             Meta::List(v0) => {
-                let mut formatter = formatter.debug_tuple("Meta::List");
+                let mut formatter = formatter.debug_tuple("List");
                 formatter.field(v0);
                 formatter.finish()
             }
             Meta::NameValue(v0) => {
-                let mut formatter = formatter.debug_tuple("Meta::NameValue");
+                let mut formatter = formatter.debug_tuple("NameValue");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -2000,84 +2016,85 @@ impl Debug for ParenthesizedGenericArguments {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Pat {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Pat::")?;
         match self {
             Pat::Const(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Const");
+                let mut formatter = formatter.debug_tuple("Const");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Ident(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Ident");
+                let mut formatter = formatter.debug_tuple("Ident");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Lit(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Lit");
+                let mut formatter = formatter.debug_tuple("Lit");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Macro(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Macro");
+                let mut formatter = formatter.debug_tuple("Macro");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Or(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Or");
+                let mut formatter = formatter.debug_tuple("Or");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Path(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Path");
+                let mut formatter = formatter.debug_tuple("Path");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Range(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Range");
+                let mut formatter = formatter.debug_tuple("Range");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Reference(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Reference");
+                let mut formatter = formatter.debug_tuple("Reference");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Rest(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Rest");
+                let mut formatter = formatter.debug_tuple("Rest");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Slice(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Slice");
+                let mut formatter = formatter.debug_tuple("Slice");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Struct(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Struct");
+                let mut formatter = formatter.debug_tuple("Struct");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Tuple(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Tuple");
+                let mut formatter = formatter.debug_tuple("Tuple");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::TupleStruct(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::TupleStruct");
+                let mut formatter = formatter.debug_tuple("TupleStruct");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Type(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Type");
+                let mut formatter = formatter.debug_tuple("Type");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Verbatim(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Verbatim");
+                let mut formatter = formatter.debug_tuple("Verbatim");
                 formatter.field(v0);
                 formatter.finish()
             }
             Pat::Wild(v0) => {
-                let mut formatter = formatter.debug_tuple("Pat::Wild");
+                let mut formatter = formatter.debug_tuple("Wild");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -2214,17 +2231,16 @@ impl Debug for Path {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for PathArguments {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("PathArguments::")?;
         match self {
-            PathArguments::None => formatter.write_str("PathArguments::None"),
+            PathArguments::None => formatter.write_str("None"),
             PathArguments::AngleBracketed(v0) => {
-                let mut formatter = formatter
-                    .debug_tuple("PathArguments::AngleBracketed");
+                let mut formatter = formatter.debug_tuple("AngleBracketed");
                 formatter.field(v0);
                 formatter.finish()
             }
             PathArguments::Parenthesized(v0) => {
-                let mut formatter = formatter
-                    .debug_tuple("PathArguments::Parenthesized");
+                let mut formatter = formatter.debug_tuple("Parenthesized");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -2281,14 +2297,15 @@ impl Debug for QSelf {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for RangeLimits {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("RangeLimits::")?;
         match self {
             RangeLimits::HalfOpen(v0) => {
-                let mut formatter = formatter.debug_tuple("RangeLimits::HalfOpen");
+                let mut formatter = formatter.debug_tuple("HalfOpen");
                 formatter.field(v0);
                 formatter.finish()
             }
             RangeLimits::Closed(v0) => {
-                let mut formatter = formatter.debug_tuple("RangeLimits::Closed");
+                let mut formatter = formatter.debug_tuple("Closed");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -2311,10 +2328,11 @@ impl Debug for Receiver {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ReturnType {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("ReturnType::")?;
         match self {
-            ReturnType::Default => formatter.write_str("ReturnType::Default"),
+            ReturnType::Default => formatter.write_str("Default"),
             ReturnType::Type(v0, v1) => {
-                let mut formatter = formatter.debug_tuple("ReturnType::Type");
+                let mut formatter = formatter.debug_tuple("Type");
                 formatter.field(v0);
                 formatter.field(v1);
                 formatter.finish()
@@ -2345,13 +2363,14 @@ impl Debug for Signature {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for StaticMutability {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("StaticMutability::")?;
         match self {
             StaticMutability::Mut(v0) => {
-                let mut formatter = formatter.debug_tuple("StaticMutability::Mut");
+                let mut formatter = formatter.debug_tuple("Mut");
                 formatter.field(v0);
                 formatter.finish()
             }
-            StaticMutability::None => formatter.write_str("StaticMutability::None"),
+            StaticMutability::None => formatter.write_str("None"),
         }
     }
 }
@@ -2359,25 +2378,26 @@ impl Debug for StaticMutability {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Stmt {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Stmt::")?;
         match self {
             Stmt::Local(v0) => {
-                let mut formatter = formatter.debug_tuple("Stmt::Local");
+                let mut formatter = formatter.debug_tuple("Local");
                 formatter.field(v0);
                 formatter.finish()
             }
             Stmt::Item(v0) => {
-                let mut formatter = formatter.debug_tuple("Stmt::Item");
+                let mut formatter = formatter.debug_tuple("Item");
                 formatter.field(v0);
                 formatter.finish()
             }
             Stmt::Expr(v0, v1) => {
-                let mut formatter = formatter.debug_tuple("Stmt::Expr");
+                let mut formatter = formatter.debug_tuple("Expr");
                 formatter.field(v0);
                 formatter.field(v1);
                 formatter.finish()
             }
             Stmt::Macro(v0) => {
-                let mut formatter = formatter.debug_tuple("Stmt::Macro");
+                let mut formatter = formatter.debug_tuple("Macro");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -2411,10 +2431,11 @@ impl Debug for TraitBound {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for TraitBoundModifier {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("TraitBoundModifier::")?;
         match self {
-            TraitBoundModifier::None => formatter.write_str("TraitBoundModifier::None"),
+            TraitBoundModifier::None => formatter.write_str("None"),
             TraitBoundModifier::Maybe(v0) => {
-                let mut formatter = formatter.debug_tuple("TraitBoundModifier::Maybe");
+                let mut formatter = formatter.debug_tuple("Maybe");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -2425,29 +2446,30 @@ impl Debug for TraitBoundModifier {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for TraitItem {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("TraitItem::")?;
         match self {
             TraitItem::Const(v0) => {
-                let mut formatter = formatter.debug_tuple("TraitItem::Const");
+                let mut formatter = formatter.debug_tuple("Const");
                 formatter.field(v0);
                 formatter.finish()
             }
             TraitItem::Fn(v0) => {
-                let mut formatter = formatter.debug_tuple("TraitItem::Fn");
+                let mut formatter = formatter.debug_tuple("Fn");
                 formatter.field(v0);
                 formatter.finish()
             }
             TraitItem::Type(v0) => {
-                let mut formatter = formatter.debug_tuple("TraitItem::Type");
+                let mut formatter = formatter.debug_tuple("Type");
                 formatter.field(v0);
                 formatter.finish()
             }
             TraitItem::Macro(v0) => {
-                let mut formatter = formatter.debug_tuple("TraitItem::Macro");
+                let mut formatter = formatter.debug_tuple("Macro");
                 formatter.field(v0);
                 formatter.finish()
             }
             TraitItem::Verbatim(v0) => {
-                let mut formatter = formatter.debug_tuple("TraitItem::Verbatim");
+                let mut formatter = formatter.debug_tuple("Verbatim");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -2513,79 +2535,80 @@ impl Debug for TraitItemType {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Type {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Type::")?;
         match self {
             Type::Array(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::Array");
+                let mut formatter = formatter.debug_tuple("Array");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::BareFn(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::BareFn");
+                let mut formatter = formatter.debug_tuple("BareFn");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::Group(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::Group");
+                let mut formatter = formatter.debug_tuple("Group");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::ImplTrait(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::ImplTrait");
+                let mut formatter = formatter.debug_tuple("ImplTrait");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::Infer(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::Infer");
+                let mut formatter = formatter.debug_tuple("Infer");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::Macro(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::Macro");
+                let mut formatter = formatter.debug_tuple("Macro");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::Never(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::Never");
+                let mut formatter = formatter.debug_tuple("Never");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::Paren(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::Paren");
+                let mut formatter = formatter.debug_tuple("Paren");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::Path(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::Path");
+                let mut formatter = formatter.debug_tuple("Path");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::Ptr(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::Ptr");
+                let mut formatter = formatter.debug_tuple("Ptr");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::Reference(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::Reference");
+                let mut formatter = formatter.debug_tuple("Reference");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::Slice(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::Slice");
+                let mut formatter = formatter.debug_tuple("Slice");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::TraitObject(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::TraitObject");
+                let mut formatter = formatter.debug_tuple("TraitObject");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::Tuple(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::Tuple");
+                let mut formatter = formatter.debug_tuple("Tuple");
                 formatter.field(v0);
                 formatter.finish()
             }
             Type::Verbatim(v0) => {
-                let mut formatter = formatter.debug_tuple("Type::Verbatim");
+                let mut formatter = formatter.debug_tuple("Verbatim");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -2685,19 +2708,20 @@ impl Debug for TypeParam {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for TypeParamBound {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("TypeParamBound::")?;
         match self {
             TypeParamBound::Trait(v0) => {
-                let mut formatter = formatter.debug_tuple("TypeParamBound::Trait");
+                let mut formatter = formatter.debug_tuple("Trait");
                 formatter.field(v0);
                 formatter.finish()
             }
             TypeParamBound::Lifetime(v0) => {
-                let mut formatter = formatter.debug_tuple("TypeParamBound::Lifetime");
+                let mut formatter = formatter.debug_tuple("Lifetime");
                 formatter.field(v0);
                 formatter.finish()
             }
             TypeParamBound::Verbatim(v0) => {
-                let mut formatter = formatter.debug_tuple("TypeParamBound::Verbatim");
+                let mut formatter = formatter.debug_tuple("Verbatim");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -2782,19 +2806,20 @@ impl Debug for TypeTuple {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for UnOp {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("UnOp::")?;
         match self {
             UnOp::Deref(v0) => {
-                let mut formatter = formatter.debug_tuple("UnOp::Deref");
+                let mut formatter = formatter.debug_tuple("Deref");
                 formatter.field(v0);
                 formatter.finish()
             }
             UnOp::Not(v0) => {
-                let mut formatter = formatter.debug_tuple("UnOp::Not");
+                let mut formatter = formatter.debug_tuple("Not");
                 formatter.field(v0);
                 formatter.finish()
             }
             UnOp::Neg(v0) => {
-                let mut formatter = formatter.debug_tuple("UnOp::Neg");
+                let mut formatter = formatter.debug_tuple("Neg");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -2855,29 +2880,30 @@ impl Debug for UseRename {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for UseTree {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("UseTree::")?;
         match self {
             UseTree::Path(v0) => {
-                let mut formatter = formatter.debug_tuple("UseTree::Path");
+                let mut formatter = formatter.debug_tuple("Path");
                 formatter.field(v0);
                 formatter.finish()
             }
             UseTree::Name(v0) => {
-                let mut formatter = formatter.debug_tuple("UseTree::Name");
+                let mut formatter = formatter.debug_tuple("Name");
                 formatter.field(v0);
                 formatter.finish()
             }
             UseTree::Rename(v0) => {
-                let mut formatter = formatter.debug_tuple("UseTree::Rename");
+                let mut formatter = formatter.debug_tuple("Rename");
                 formatter.field(v0);
                 formatter.finish()
             }
             UseTree::Glob(v0) => {
-                let mut formatter = formatter.debug_tuple("UseTree::Glob");
+                let mut formatter = formatter.debug_tuple("Glob");
                 formatter.field(v0);
                 formatter.finish()
             }
             UseTree::Group(v0) => {
-                let mut formatter = formatter.debug_tuple("UseTree::Group");
+                let mut formatter = formatter.debug_tuple("Group");
                 formatter.field(v0);
                 formatter.finish()
             }
@@ -2924,18 +2950,19 @@ impl Debug for VisRestricted {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Visibility {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Visibility::")?;
         match self {
             Visibility::Public(v0) => {
-                let mut formatter = formatter.debug_tuple("Visibility::Public");
+                let mut formatter = formatter.debug_tuple("Public");
                 formatter.field(v0);
                 formatter.finish()
             }
             Visibility::Restricted(v0) => {
-                let mut formatter = formatter.debug_tuple("Visibility::Restricted");
+                let mut formatter = formatter.debug_tuple("Restricted");
                 formatter.field(v0);
                 formatter.finish()
             }
-            Visibility::Inherited => formatter.write_str("Visibility::Inherited"),
+            Visibility::Inherited => formatter.write_str("Inherited"),
         }
     }
 }
@@ -2953,14 +2980,15 @@ impl Debug for WhereClause {
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for WherePredicate {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("WherePredicate::")?;
         match self {
             WherePredicate::Type(v0) => {
-                let mut formatter = formatter.debug_tuple("WherePredicate::Type");
+                let mut formatter = formatter.debug_tuple("Type");
                 formatter.field(v0);
                 formatter.finish()
             }
             WherePredicate::Lifetime(v0) => {
-                let mut formatter = formatter.debug_tuple("WherePredicate::Lifetime");
+                let mut formatter = formatter.debug_tuple("Lifetime");
                 formatter.field(v0);
                 formatter.finish()
             }
