@@ -192,3 +192,27 @@ impl<'a> Speculative for ParseBuffer<'a> {
             .set(unsafe { mem::transmute::<Cursor, Cursor<'static>>(fork.cursor()) });
     }
 }
+
+/// Extensions to the `ParseStream` API to support manipulating invisible
+/// delimiters the same as if they were visible.
+pub trait AnyDelimiter {
+    /// Returns the delimiter, the span of the delimiter token, and the nested
+    /// contents for further parsing.
+    fn parse_any_delimiter(&self) -> Result<(Delimiter, Span, ParseBuffer)>;
+}
+
+impl<'a> AnyDelimiter for ParseBuffer<'a> {
+    fn parse_any_delimiter(&self) -> Result<(Delimiter, Span, ParseBuffer)> {
+        self.step(|cursor| {
+            if let Some((content, delimiter, span, rest)) = cursor.any_group() {
+                let scope = crate::buffer::close_span_of_group(*cursor);
+                let nested = crate::parse::advance_step_cursor(cursor, content);
+                let unexpected = crate::parse::get_unexpected(self);
+                let content = crate::parse::new_parse_buffer(scope, nested, unexpected);
+                Ok(((delimiter, span, content), rest))
+            } else {
+                Err(cursor.error("expected any delimiter"))
+            }
+        })
+    }
+}
