@@ -3245,11 +3245,11 @@ where
     F: Fold + ?Sized,
 {
     match node {
-        WherePredicate::Type(_binding_0) => {
-            WherePredicate::Type(f.fold_predicate_type(_binding_0))
-        }
         WherePredicate::Lifetime(_binding_0) => {
             WherePredicate::Lifetime(f.fold_predicate_lifetime(_binding_0))
+        }
+        WherePredicate::Type(_binding_0) => {
+            WherePredicate::Type(f.fold_predicate_type(_binding_0))
         }
     }
 }

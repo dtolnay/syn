@@ -2794,11 +2794,11 @@ impl Hash for WherePredicate {
         H: Hasher,
     {
         match self {
-            WherePredicate::Type(v0) => {
+            WherePredicate::Lifetime(v0) => {
                 state.write_u8(0u8);
                 v0.hash(state);
             }
-            WherePredicate::Lifetime(v0) => {
+            WherePredicate::Type(v0) => {
                 state.write_u8(1u8);
                 v0.hash(state);
             }

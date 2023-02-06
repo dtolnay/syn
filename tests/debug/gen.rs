@@ -4622,15 +4622,15 @@ impl Debug for Lite<syn::WhereClause> {
 impl Debug for Lite<syn::WherePredicate> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match &self.value {
-            syn::WherePredicate::Type(_val) => {
-                formatter.write_str("WherePredicate::Type")?;
+            syn::WherePredicate::Lifetime(_val) => {
+                formatter.write_str("WherePredicate::Lifetime")?;
                 formatter.write_str("(")?;
                 Debug::fmt(Lite(_val), formatter)?;
                 formatter.write_str(")")?;
                 Ok(())
             }
-            syn::WherePredicate::Lifetime(_val) => {
-                formatter.write_str("WherePredicate::Lifetime")?;
+            syn::WherePredicate::Type(_val) => {
+                formatter.write_str("WherePredicate::Type")?;
                 formatter.write_str("(")?;
                 Debug::fmt(Lite(_val), formatter)?;
                 formatter.write_str(")")?;

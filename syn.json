@@ -5413,14 +5413,14 @@
         ]
       },
       "variants": {
-        "Type": [
-          {
-            "syn": "PredicateType"
-          }
-        ],
         "Lifetime": [
           {
             "syn": "PredicateLifetime"
+          }
+        ],
+        "Type": [
+          {
+            "syn": "PredicateType"
           }
         ]
       },

@@ -3706,11 +3706,11 @@ where
     V: VisitMut + ?Sized,
 {
     match node {
-        WherePredicate::Type(_binding_0) => {
-            v.visit_predicate_type_mut(_binding_0);
-        }
         WherePredicate::Lifetime(_binding_0) => {
             v.visit_predicate_lifetime_mut(_binding_0);
+        }
+        WherePredicate::Type(_binding_0) => {
+            v.visit_predicate_type_mut(_binding_0);
         }
     }
 }

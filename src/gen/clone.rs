@@ -2175,8 +2175,8 @@ impl Clone for WhereClause {
 impl Clone for WherePredicate {
     fn clone(&self) -> Self {
         match self {
-            WherePredicate::Type(v0) => WherePredicate::Type(v0.clone()),
             WherePredicate::Lifetime(v0) => WherePredicate::Lifetime(v0.clone()),
+            WherePredicate::Type(v0) => WherePredicate::Type(v0.clone()),
         }
     }
 }

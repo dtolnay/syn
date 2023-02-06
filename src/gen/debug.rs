@@ -3058,13 +3058,13 @@ impl Debug for WherePredicate {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("WherePredicate::")?;
         match self {
-            WherePredicate::Type(v0) => {
-                let mut formatter = formatter.debug_tuple("Type");
+            WherePredicate::Lifetime(v0) => {
+                let mut formatter = formatter.debug_tuple("Lifetime");
                 formatter.field(v0);
                 formatter.finish()
             }
-            WherePredicate::Lifetime(v0) => {
-                let mut formatter = formatter.debug_tuple("Lifetime");
+            WherePredicate::Type(v0) => {
+                let mut formatter = formatter.debug_tuple("Type");
                 formatter.field(v0);
                 formatter.finish()
             }

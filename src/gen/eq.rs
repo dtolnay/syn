@@ -2139,10 +2139,10 @@ impl Eq for WherePredicate {}
 impl PartialEq for WherePredicate {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (WherePredicate::Type(self0), WherePredicate::Type(other0)) => {
+            (WherePredicate::Lifetime(self0), WherePredicate::Lifetime(other0)) => {
                 self0 == other0
             }
-            (WherePredicate::Lifetime(self0), WherePredicate::Lifetime(other0)) => {
+            (WherePredicate::Type(self0), WherePredicate::Type(other0)) => {
                 self0 == other0
             }
             _ => false,
