@@ -238,17 +238,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// The variadic argument of a foreign function.
-    ///
-    /// ```rust
-    /// # struct c_char;
-    /// # struct c_int;
-    /// #
-    /// extern "C" {
-    ///     fn printf(format: *const c_char, ...) -> c_int;
-    ///     //                               ^^^
-    /// }
-    /// ```
+    /// The variadic argument of a function pointer like `fn(usize, ...)`.
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct BareVariadic {
         pub attrs: Vec<Attribute>,

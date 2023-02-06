@@ -847,6 +847,17 @@ impl Receiver {
 }
 
 ast_struct! {
+    /// The variadic argument of a foreign function.
+    ///
+    /// ```rust
+    /// # struct c_char;
+    /// # struct c_int;
+    /// #
+    /// extern "C" {
+    ///     fn printf(format: *const c_char, ...) -> c_int;
+    ///     //                               ^^^
+    /// }
+    /// ```
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct Variadic {
         pub attrs: Vec<Attribute>,
@@ -857,6 +868,7 @@ ast_struct! {
 }
 
 ast_enum! {
+    /// The mutability of an `Item::Static` or `ForeignItem::Static`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     #[non_exhaustive]
     pub enum StaticMutability {
@@ -866,6 +878,7 @@ ast_enum! {
 }
 
 ast_enum! {
+    /// Unused, but reserved for RFC 3323 restrictions.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     #[non_exhaustive]
     pub enum ImplRestriction {}

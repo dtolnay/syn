@@ -36,6 +36,8 @@ ast_struct! {
 }
 
 ast_enum! {
+    /// Unused, but reserved for RFC 3323 restrictions.
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     #[non_exhaustive]
     pub enum FieldMutability {
         None,
