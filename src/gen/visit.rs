@@ -2017,11 +2017,11 @@ where
     V: Visit<'ast> + ?Sized,
 {
     match node {
-        GenericParam::Type(_binding_0) => {
-            v.visit_type_param(_binding_0);
-        }
         GenericParam::Lifetime(_binding_0) => {
             v.visit_lifetime_param(_binding_0);
+        }
+        GenericParam::Type(_binding_0) => {
+            v.visit_type_param(_binding_0);
         }
         GenericParam::Const(_binding_0) => {
             v.visit_const_param(_binding_0);

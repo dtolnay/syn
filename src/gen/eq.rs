@@ -938,10 +938,10 @@ impl Eq for GenericParam {}
 impl PartialEq for GenericParam {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (GenericParam::Type(self0), GenericParam::Type(other0)) => self0 == other0,
             (GenericParam::Lifetime(self0), GenericParam::Lifetime(other0)) => {
                 self0 == other0
             }
+            (GenericParam::Type(self0), GenericParam::Type(other0)) => self0 == other0,
             (GenericParam::Const(self0), GenericParam::Const(other0)) => self0 == other0,
             _ => false,
         }
