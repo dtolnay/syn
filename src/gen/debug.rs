@@ -214,53 +214,53 @@ impl Debug for BinOp {
                 formatter.field(v0);
                 formatter.finish()
             }
-            BinOp::AddEq(v0) => {
-                let mut formatter = formatter.debug_tuple("AddEq");
+            BinOp::AddAssign(v0) => {
+                let mut formatter = formatter.debug_tuple("AddAssign");
                 formatter.field(v0);
                 formatter.finish()
             }
-            BinOp::SubEq(v0) => {
-                let mut formatter = formatter.debug_tuple("SubEq");
+            BinOp::SubAssign(v0) => {
+                let mut formatter = formatter.debug_tuple("SubAssign");
                 formatter.field(v0);
                 formatter.finish()
             }
-            BinOp::MulEq(v0) => {
-                let mut formatter = formatter.debug_tuple("MulEq");
+            BinOp::MulAssign(v0) => {
+                let mut formatter = formatter.debug_tuple("MulAssign");
                 formatter.field(v0);
                 formatter.finish()
             }
-            BinOp::DivEq(v0) => {
-                let mut formatter = formatter.debug_tuple("DivEq");
+            BinOp::DivAssign(v0) => {
+                let mut formatter = formatter.debug_tuple("DivAssign");
                 formatter.field(v0);
                 formatter.finish()
             }
-            BinOp::RemEq(v0) => {
-                let mut formatter = formatter.debug_tuple("RemEq");
+            BinOp::RemAssign(v0) => {
+                let mut formatter = formatter.debug_tuple("RemAssign");
                 formatter.field(v0);
                 formatter.finish()
             }
-            BinOp::BitXorEq(v0) => {
-                let mut formatter = formatter.debug_tuple("BitXorEq");
+            BinOp::BitXorAssign(v0) => {
+                let mut formatter = formatter.debug_tuple("BitXorAssign");
                 formatter.field(v0);
                 formatter.finish()
             }
-            BinOp::BitAndEq(v0) => {
-                let mut formatter = formatter.debug_tuple("BitAndEq");
+            BinOp::BitAndAssign(v0) => {
+                let mut formatter = formatter.debug_tuple("BitAndAssign");
                 formatter.field(v0);
                 formatter.finish()
             }
-            BinOp::BitOrEq(v0) => {
-                let mut formatter = formatter.debug_tuple("BitOrEq");
+            BinOp::BitOrAssign(v0) => {
+                let mut formatter = formatter.debug_tuple("BitOrAssign");
                 formatter.field(v0);
                 formatter.finish()
             }
-            BinOp::ShlEq(v0) => {
-                let mut formatter = formatter.debug_tuple("ShlEq");
+            BinOp::ShlAssign(v0) => {
+                let mut formatter = formatter.debug_tuple("ShlAssign");
                 formatter.field(v0);
                 formatter.finish()
             }
-            BinOp::ShrEq(v0) => {
-                let mut formatter = formatter.debug_tuple("ShrEq");
+            BinOp::ShrAssign(v0) => {
+                let mut formatter = formatter.debug_tuple("ShrAssign");
                 formatter.field(v0);
                 formatter.finish()
             }

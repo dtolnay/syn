@@ -941,34 +941,34 @@ where
         BinOp::Gt(_binding_0) => {
             tokens_helper(v, &mut _binding_0.spans);
         }
-        BinOp::AddEq(_binding_0) => {
+        BinOp::AddAssign(_binding_0) => {
             tokens_helper(v, &mut _binding_0.spans);
         }
-        BinOp::SubEq(_binding_0) => {
+        BinOp::SubAssign(_binding_0) => {
             tokens_helper(v, &mut _binding_0.spans);
         }
-        BinOp::MulEq(_binding_0) => {
+        BinOp::MulAssign(_binding_0) => {
             tokens_helper(v, &mut _binding_0.spans);
         }
-        BinOp::DivEq(_binding_0) => {
+        BinOp::DivAssign(_binding_0) => {
             tokens_helper(v, &mut _binding_0.spans);
         }
-        BinOp::RemEq(_binding_0) => {
+        BinOp::RemAssign(_binding_0) => {
             tokens_helper(v, &mut _binding_0.spans);
         }
-        BinOp::BitXorEq(_binding_0) => {
+        BinOp::BitXorAssign(_binding_0) => {
             tokens_helper(v, &mut _binding_0.spans);
         }
-        BinOp::BitAndEq(_binding_0) => {
+        BinOp::BitAndAssign(_binding_0) => {
             tokens_helper(v, &mut _binding_0.spans);
         }
-        BinOp::BitOrEq(_binding_0) => {
+        BinOp::BitOrAssign(_binding_0) => {
             tokens_helper(v, &mut _binding_0.spans);
         }
-        BinOp::ShlEq(_binding_0) => {
+        BinOp::ShlAssign(_binding_0) => {
             tokens_helper(v, &mut _binding_0.spans);
         }
-        BinOp::ShrEq(_binding_0) => {
+        BinOp::ShrAssign(_binding_0) => {
             tokens_helper(v, &mut _binding_0.spans);
         }
     }
