@@ -402,7 +402,7 @@ ast_struct! {
     pub struct BoundLifetimes {
         pub for_token: Token![for],
         pub lt_token: Token![<],
-        pub lifetimes: Punctuated<LifetimeParam, Token![,]>,
+        pub lifetimes: Punctuated<GenericParam, Token![,]>,
         pub gt_token: Token![>],
     }
 }
@@ -674,12 +674,12 @@ pub(crate) mod parsing {
                     while !input.peek(Token![>]) {
                         let attrs = input.call(Attribute::parse_outer)?;
                         let lifetime: Lifetime = input.parse()?;
-                        lifetimes.push_value(LifetimeParam {
+                        lifetimes.push_value(GenericParam::Lifetime(LifetimeParam {
                             attrs,
                             lifetime,
                             colon_token: None,
                             bounds: Punctuated::new(),
-                        });
+                        }));
                         if input.peek(Token![>]) {
                             break;
                         }

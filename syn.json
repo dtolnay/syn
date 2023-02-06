@@ -439,7 +439,7 @@
         "lifetimes": {
           "punctuated": {
             "element": {
-              "syn": "LifetimeParam"
+              "syn": "GenericParam"
             },
             "punct": "Comma"
           }

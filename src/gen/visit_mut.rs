@@ -992,7 +992,7 @@ where
     tokens_helper(v, &mut node.lt_token.spans);
     for el in Punctuated::pairs_mut(&mut node.lifetimes) {
         let (it, p) = el.into_tuple();
-        v.visit_lifetime_param_mut(it);
+        v.visit_generic_param_mut(it);
         if let Some(p) = p {
             tokens_helper(v, &mut p.spans);
         }
