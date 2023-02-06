@@ -14,10 +14,6 @@ const REVISION: &str = "afaf3e07aaa7ca9873bdb439caec53faffa4230c";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: impl ~const T {}
-    // https://github.com/dtolnay/syn/issues/1051
-    "tests/ui/rfc-2632-const-trait-impl/syntax.rs",
-
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "tests/ui/const-generics/early/closing-args-token.rs",
     "tests/ui/const-generics/early/const-expression-parameter.rs",
@@ -30,6 +26,9 @@ static EXCLUDE_FILES: &[&str] = &[
 
     // Lifetime bound inside for<>: `T: ~const ?for<'a: 'b> Trait<'a>`
     "tests/ui/rfc-2632-const-trait-impl/tilde-const-syntax.rs",
+
+    // Const impl that is not a trait impl: `impl ~const T {}`
+    "tests/ui/rfc-2632-const-trait-impl/syntax.rs",
 
     // Deprecated anonymous parameter syntax in traits
     "src/tools/rustfmt/tests/source/trait.rs",
