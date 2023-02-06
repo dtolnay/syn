@@ -3252,7 +3252,9 @@ impl Debug for Lite<syn::Pat> {
                     formatter.field("qself", Print::ref_cast(val));
                 }
                 formatter.field("path", Lite(&_val.path));
-                formatter.field("pat", Lite(&_val.pat));
+                if !_val.elems.is_empty() {
+                    formatter.field("elems", Lite(&_val.elems));
+                }
                 formatter.finish()
             }
             syn::Pat::Type(_val) => {
@@ -3435,7 +3437,9 @@ impl Debug for Lite<syn::PatTupleStruct> {
             formatter.field("qself", Print::ref_cast(val));
         }
         formatter.field("path", Lite(&self.value.path));
-        formatter.field("pat", Lite(&self.value.pat));
+        if !self.value.elems.is_empty() {
+            formatter.field("elems", Lite(&self.value.elems));
+        }
         formatter.finish()
     }
 }

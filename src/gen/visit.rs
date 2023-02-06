@@ -2913,7 +2913,14 @@ where
         v.visit_qself(it);
     }
     v.visit_path(&node.path);
-    v.visit_pat_tuple(&node.pat);
+    tokens_helper(v, &node.paren_token.span);
+    for el in Punctuated::pairs(&node.elems) {
+        let (it, p) = el.into_tuple();
+        v.visit_pat(it);
+        if let Some(p) = p {
+            tokens_helper(v, &p.spans);
+        }
+    }
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_type<'ast, V>(v: &mut V, node: &'ast PatType)

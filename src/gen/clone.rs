@@ -1576,7 +1576,8 @@ impl Clone for PatTupleStruct {
             attrs: self.attrs.clone(),
             qself: self.qself.clone(),
             path: self.path.clone(),
-            pat: self.pat.clone(),
+            paren_token: self.paren_token.clone(),
+            elems: self.elems.clone(),
         }
     }
 }

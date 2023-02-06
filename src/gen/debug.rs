@@ -2245,7 +2245,8 @@ impl Debug for PatTupleStruct {
                 formatter.field("attrs", &self.attrs);
                 formatter.field("qself", &self.qself);
                 formatter.field("path", &self.path);
-                formatter.field("pat", &self.pat);
+                formatter.field("paren_token", &self.paren_token);
+                formatter.field("elems", &self.elems);
                 formatter.finish()
             }
         }

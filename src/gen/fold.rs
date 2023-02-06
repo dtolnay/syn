@@ -2570,7 +2570,8 @@ where
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         qself: (node.qself).map(|it| f.fold_qself(it)),
         path: f.fold_path(node.path),
-        pat: f.fold_pat_tuple(node.pat),
+        paren_token: Paren(tokens_helper(f, &node.paren_token.span)),
+        elems: FoldHelper::lift(node.elems, |it| f.fold_pat(it)),
     }
 }
 #[cfg(feature = "full")]
