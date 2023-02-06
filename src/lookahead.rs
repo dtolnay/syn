@@ -24,7 +24,7 @@ use std::cell::RefCell;
 /// # Example
 ///
 /// ```
-/// use syn::{ConstParam, Ident, Lifetime, LifetimeDef, Result, Token, TypeParam};
+/// use syn::{ConstParam, Ident, Lifetime, LifetimeParam, Result, Token, TypeParam};
 /// use syn::parse::{Parse, ParseStream};
 ///
 /// // A generic parameter, a single one of the comma-separated elements inside
@@ -40,7 +40,7 @@ use std::cell::RefCell;
 /// //       |          ^
 /// enum GenericParam {
 ///     Type(TypeParam),
-///     Lifetime(LifetimeDef),
+///     Lifetime(LifetimeParam),
 ///     Const(ConstParam),
 /// }
 ///

@@ -439,7 +439,7 @@
         "lifetimes": {
           "punctuated": {
             "element": {
-              "syn": "LifetimeDef"
+              "syn": "LifetimeParam"
             },
             "punct": "Comma"
           }
@@ -2367,7 +2367,7 @@
         ],
         "Lifetime": [
           {
-            "syn": "LifetimeDef"
+            "syn": "LifetimeParam"
           }
         ],
         "Const": [
@@ -3331,7 +3331,7 @@
       }
     },
     {
-      "ident": "LifetimeDef",
+      "ident": "LifetimeParam",
       "features": {
         "any": [
           "derive",

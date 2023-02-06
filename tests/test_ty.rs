@@ -223,7 +223,7 @@ fn test_trait_object() {
             TypeParamBound::Trait(TraitBound {
                 lifetimes: Some(BoundLifetimes {
                     lifetimes: [
-                        LifetimeDef {
+                        LifetimeParam {
                             lifetime: Lifetime {
                                 ident: "a",
                             },

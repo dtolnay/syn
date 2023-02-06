@@ -437,8 +437,8 @@ pub trait Fold {
         fold_lifetime(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn fold_lifetime_def(&mut self, i: LifetimeDef) -> LifetimeDef {
-        fold_lifetime_def(self, i)
+    fn fold_lifetime_param(&mut self, i: LifetimeParam) -> LifetimeParam {
+        fold_lifetime_param(self, i)
     }
     fn fold_lit(&mut self, i: Lit) -> Lit {
         fold_lit(self, i)
@@ -987,7 +987,7 @@ where
     BoundLifetimes {
         for_token: Token![for](tokens_helper(f, &node.for_token.span)),
         lt_token: Token![<](tokens_helper(f, &node.lt_token.spans)),
-        lifetimes: FoldHelper::lift(node.lifetimes, |it| f.fold_lifetime_def(it)),
+        lifetimes: FoldHelper::lift(node.lifetimes, |it| f.fold_lifetime_param(it)),
         gt_token: Token![>](tokens_helper(f, &node.gt_token.spans)),
     }
 }
@@ -1822,7 +1822,7 @@ where
             GenericParam::Type(f.fold_type_param(_binding_0))
         }
         GenericParam::Lifetime(_binding_0) => {
-            GenericParam::Lifetime(f.fold_lifetime_def(_binding_0))
+            GenericParam::Lifetime(f.fold_lifetime_param(_binding_0))
         }
         GenericParam::Const(_binding_0) => {
             GenericParam::Const(f.fold_const_param(_binding_0))
@@ -2243,11 +2243,11 @@ where
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-pub fn fold_lifetime_def<F>(f: &mut F, node: LifetimeDef) -> LifetimeDef
+pub fn fold_lifetime_param<F>(f: &mut F, node: LifetimeParam) -> LifetimeParam
 where
     F: Fold + ?Sized,
 {
-    LifetimeDef {
+    LifetimeParam {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         lifetime: f.fold_lifetime(node.lifetime),
         colon_token: (node.colon_token).map(|it| Token![:](tokens_helper(f, &it.spans))),

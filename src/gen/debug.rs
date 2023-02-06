@@ -1895,9 +1895,9 @@ impl Debug for Lifetime {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for LifetimeDef {
+impl Debug for LifetimeParam {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("LifetimeDef");
+        let mut formatter = formatter.debug_struct("LifetimeParam");
         formatter.field("attrs", &self.attrs);
         formatter.field("lifetime", &self.lifetime);
         formatter.field("colon_token", &self.colon_token);

@@ -1327,9 +1327,9 @@ impl Clone for Label {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for LifetimeDef {
+impl Clone for LifetimeParam {
     fn clone(&self) -> Self {
-        LifetimeDef {
+        LifetimeParam {
             attrs: self.attrs.clone(),
             lifetime: self.lifetime.clone(),
             colon_token: self.colon_token.clone(),

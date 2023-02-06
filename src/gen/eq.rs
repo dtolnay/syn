@@ -1249,10 +1249,10 @@ impl PartialEq for Label {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for LifetimeDef {}
+impl Eq for LifetimeParam {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for LifetimeDef {
+impl PartialEq for LifetimeParam {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.lifetime == other.lifetime
             && self.colon_token == other.colon_token && self.bounds == other.bounds
