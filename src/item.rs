@@ -147,6 +147,7 @@ ast_struct! {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ItemForeignMod {
         pub attrs: Vec<Attribute>,
+        pub unsafety: Option<Token![unsafe]>,
         pub abi: Abi,
         pub brace_token: token::Brace,
         pub items: Vec<ForeignItem>,
@@ -190,6 +191,7 @@ ast_struct! {
     pub struct ItemMod {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        pub unsafety: Option<Token![unsafe]>,
         pub mod_token: Token![mod],
         pub ident: Ident,
         pub content: Option<(token::Brace, Vec<Item>)>,
@@ -1012,15 +1014,9 @@ pub(crate) mod parsing {
                         Ok(Item::Verbatim(verbatim::between(begin, input)))
                     }
                 } else if lookahead.peek(Token![extern]) {
-                    input.parse::<Visibility>()?;
-                    input.parse::<Token![unsafe]>()?;
-                    input.parse::<ItemForeignMod>()?;
-                    Ok(Item::Verbatim(verbatim::between(begin, input)))
+                    input.parse().map(Item::ForeignMod)
                 } else if lookahead.peek(Token![mod]) {
-                    input.parse::<Visibility>()?;
-                    input.parse::<Token![unsafe]>()?;
-                    input.parse::<ItemMod>()?;
-                    Ok(Item::Verbatim(verbatim::between(begin, input)))
+                    input.parse().map(Item::Mod)
                 } else {
                     Err(lookahead.error())
                 }
@@ -1618,6 +1614,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let mut attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
+            let unsafety: Option<Token![unsafe]> = input.parse()?;
             let mod_token: Token![mod] = input.parse()?;
             let ident: Ident = input.parse()?;
 
@@ -1626,6 +1623,7 @@ pub(crate) mod parsing {
                 Ok(ItemMod {
                     attrs,
                     vis,
+                    unsafety,
                     mod_token,
                     ident,
                     content: None,
@@ -1644,6 +1642,7 @@ pub(crate) mod parsing {
                 Ok(ItemMod {
                     attrs,
                     vis,
+                    unsafety,
                     mod_token,
                     ident,
                     content: Some((brace_token, items)),
@@ -1659,6 +1658,7 @@ pub(crate) mod parsing {
     impl Parse for ItemForeignMod {
         fn parse(input: ParseStream) -> Result<Self> {
             let mut attrs = input.call(Attribute::parse_outer)?;
+            let unsafety: Option<Token![unsafe]> = input.parse()?;
             let abi: Abi = input.parse()?;
 
             let content;
@@ -1671,6 +1671,7 @@ pub(crate) mod parsing {
 
             Ok(ItemForeignMod {
                 attrs,
+                unsafety,
                 abi,
                 brace_token,
                 items,
@@ -2784,6 +2785,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
+            self.unsafety.to_tokens(tokens);
             self.mod_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             if let Some((brace, items)) = &self.content {
@@ -2801,6 +2803,7 @@ mod printing {
     impl ToTokens for ItemForeignMod {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
+            self.unsafety.to_tokens(tokens);
             self.abi.to_tokens(tokens);
             self.brace_token.surround(tokens, |tokens| {
                 tokens.append_all(self.attrs.inner());

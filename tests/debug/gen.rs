@@ -2283,6 +2283,9 @@ impl Debug for Lite<syn::Item> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
+                if _val.unsafety.is_some() {
+                    formatter.field("unsafety", &Present);
+                }
                 formatter.field("abi", Lite(&_val.abi));
                 if !_val.items.is_empty() {
                     formatter.field("items", Lite(&_val.items));
@@ -2360,6 +2363,9 @@ impl Debug for Lite<syn::Item> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
+                if _val.unsafety.is_some() {
+                    formatter.field("unsafety", &Present);
+                }
                 formatter.field("ident", Lite(&_val.ident));
                 if let Some(val) = &_val.content {
                     #[derive(RefCast)]
@@ -2580,6 +2586,9 @@ impl Debug for Lite<syn::ItemForeignMod> {
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
+        if self.value.unsafety.is_some() {
+            formatter.field("unsafety", &Present);
+        }
         formatter.field("abi", Lite(&self.value.abi));
         if !self.value.items.is_empty() {
             formatter.field("items", Lite(&self.value.items));
@@ -2663,6 +2672,9 @@ impl Debug for Lite<syn::ItemMod> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
+        if self.value.unsafety.is_some() {
+            formatter.field("unsafety", &Present);
+        }
         formatter.field("ident", Lite(&self.value.ident));
         if let Some(val) = &self.value.content {
             #[derive(RefCast)]
