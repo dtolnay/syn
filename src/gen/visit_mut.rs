@@ -515,6 +515,10 @@ pub trait VisitMut {
         visit_pat_or_mut(self, i);
     }
     #[cfg(feature = "full")]
+    fn visit_pat_paren_mut(&mut self, i: &mut PatParen) {
+        visit_pat_paren_mut(self, i);
+    }
+    #[cfg(feature = "full")]
     fn visit_pat_reference_mut(&mut self, i: &mut PatReference) {
         visit_pat_reference_mut(self, i);
     }
@@ -2736,6 +2740,9 @@ where
         Pat::Or(_binding_0) => {
             v.visit_pat_or_mut(_binding_0);
         }
+        Pat::Paren(_binding_0) => {
+            v.visit_pat_paren_mut(_binding_0);
+        }
         Pat::Path(_binding_0) => {
             v.visit_expr_path_mut(_binding_0);
         }
@@ -2809,6 +2816,17 @@ where
             tokens_helper(v, &mut p.spans);
         }
     }
+}
+#[cfg(feature = "full")]
+pub fn visit_pat_paren_mut<V>(v: &mut V, node: &mut PatParen)
+where
+    V: VisitMut + ?Sized,
+{
+    for it in &mut node.attrs {
+        v.visit_attribute_mut(it);
+    }
+    tokens_helper(v, &mut node.paren_token.span);
+    v.visit_pat_mut(&mut *node.pat);
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_reference_mut<V>(v: &mut V, node: &mut PatReference)

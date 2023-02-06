@@ -1393,6 +1393,7 @@ impl PartialEq for Pat {
             (Pat::Lit(self0), Pat::Lit(other0)) => self0 == other0,
             (Pat::Macro(self0), Pat::Macro(other0)) => self0 == other0,
             (Pat::Or(self0), Pat::Or(other0)) => self0 == other0,
+            (Pat::Paren(self0), Pat::Paren(other0)) => self0 == other0,
             (Pat::Path(self0), Pat::Path(other0)) => self0 == other0,
             (Pat::Range(self0), Pat::Range(other0)) => self0 == other0,
             (Pat::Reference(self0), Pat::Reference(other0)) => self0 == other0,
@@ -1431,6 +1432,16 @@ impl PartialEq for PatOr {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.leading_vert == other.leading_vert
             && self.cases == other.cases
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for PatParen {}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for PatParen {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs && self.pat == other.pat
     }
 }
 #[cfg(feature = "full")]

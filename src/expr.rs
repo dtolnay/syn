@@ -2308,6 +2308,7 @@ pub(crate) mod parsing {
                 Pat::Lit(pat) => pat.attrs = attrs,
                 Pat::Macro(pat) => pat.attrs = attrs,
                 Pat::Or(pat) => pat.attrs = attrs,
+                Pat::Paren(pat) => pat.attrs = attrs,
                 Pat::Path(pat) => pat.attrs = attrs,
                 Pat::Range(pat) => pat.attrs = attrs,
                 Pat::Reference(pat) => pat.attrs = attrs,

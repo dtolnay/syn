@@ -512,6 +512,10 @@ pub trait Fold {
         fold_pat_or(self, i)
     }
     #[cfg(feature = "full")]
+    fn fold_pat_paren(&mut self, i: PatParen) -> PatParen {
+        fold_pat_paren(self, i)
+    }
+    #[cfg(feature = "full")]
     fn fold_pat_reference(&mut self, i: PatReference) -> PatReference {
         fold_pat_reference(self, i)
     }
@@ -2443,6 +2447,7 @@ where
         Pat::Lit(_binding_0) => Pat::Lit(f.fold_expr_lit(_binding_0)),
         Pat::Macro(_binding_0) => Pat::Macro(f.fold_expr_macro(_binding_0)),
         Pat::Or(_binding_0) => Pat::Or(f.fold_pat_or(_binding_0)),
+        Pat::Paren(_binding_0) => Pat::Paren(f.fold_pat_paren(_binding_0)),
         Pat::Path(_binding_0) => Pat::Path(f.fold_expr_path(_binding_0)),
         Pat::Range(_binding_0) => Pat::Range(f.fold_expr_range(_binding_0)),
         Pat::Reference(_binding_0) => Pat::Reference(f.fold_pat_reference(_binding_0)),
@@ -2485,6 +2490,17 @@ where
         leading_vert: (node.leading_vert)
             .map(|it| Token![|](tokens_helper(f, &it.spans))),
         cases: FoldHelper::lift(node.cases, |it| f.fold_pat(it)),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_pat_paren<F>(f: &mut F, node: PatParen) -> PatParen
+where
+    F: Fold + ?Sized,
+{
+    PatParen {
+        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        paren_token: Paren(tokens_helper(f, &node.paren_token.span)),
+        pat: Box::new(f.fold_pat(*node.pat)),
     }
 }
 #[cfg(feature = "full")]

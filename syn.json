@@ -3697,6 +3697,11 @@
             "syn": "PatOr"
           }
         ],
+        "Paren": [
+          {
+            "syn": "PatParen"
+          }
+        ],
         "Path": [
           {
             "syn": "ExprPath"
@@ -3821,6 +3826,29 @@
               "syn": "Pat"
             },
             "punct": "Or"
+          }
+        }
+      }
+    },
+    {
+      "ident": "PatParen",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "paren_token": {
+          "group": "Paren"
+        },
+        "pat": {
+          "box": {
+            "syn": "Pat"
           }
         }
       }

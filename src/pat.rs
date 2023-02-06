@@ -29,6 +29,9 @@ ast_enum_of_structs! {
         /// A pattern that matches any one of a set of cases.
         Or(PatOr),
 
+        /// A parenthesized pattern: `(A | B)`.
+        Paren(PatParen),
+
         /// A path pattern like `Color::Red`, optionally qualified with a
         /// self-type.
         ///
@@ -109,6 +112,15 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub leading_vert: Option<Token![|]>,
         pub cases: Punctuated<Pat, Token![|]>,
+    }
+}
+
+ast_struct! {
+    /// A parenthesized pattern: `(A | B)`.
+    pub struct PatParen {
+        pub attrs: Vec<Attribute>,
+        pub paren_token: token::Paren,
+        pub pat: Box<Pat>,
     }
 }
 
@@ -283,7 +295,7 @@ pub(crate) mod parsing {
             } else if lookahead.peek(Token![&]) {
                 input.call(pat_reference).map(Pat::Reference)
             } else if lookahead.peek(token::Paren) {
-                input.call(pat_tuple).map(Pat::Tuple)
+                input.call(pat_paren_or_tuple)
             } else if lookahead.peek(token::Bracket) {
                 input.call(pat_slice).map(Pat::Slice)
             } else if lookahead.peek(Token![..]) && !input.peek(Token![...]) {
@@ -450,7 +462,20 @@ pub(crate) mod parsing {
         qself: Option<QSelf>,
         path: Path,
     ) -> Result<PatTupleStruct> {
-        let (paren_token, elems) = pat_tuple_elements(input)?;
+        let content;
+        let paren_token = parenthesized!(content in input);
+
+        let mut elems = Punctuated::new();
+        while !content.is_empty() {
+            let value = Pat::parse_multi_with_leading_vert(&content)?;
+            elems.push_value(value);
+            if content.is_empty() {
+                break;
+            }
+            let punct = content.parse()?;
+            elems.push_punct(punct);
+        }
+
         Ok(PatTupleStruct {
             attrs: Vec::new(),
             qself,
@@ -588,33 +613,34 @@ pub(crate) mod parsing {
         }
     }
 
-    fn pat_tuple(input: ParseStream) -> Result<PatTuple> {
-        let (paren_token, elems) = pat_tuple_elements(input)?;
-        Ok(PatTuple {
-            attrs: Vec::new(),
-            paren_token,
-            elems,
-        })
-    }
-
-    fn pat_tuple_elements(
-        input: ParseStream,
-    ) -> Result<(token::Paren, Punctuated<Pat, Token![,]>)> {
+    fn pat_paren_or_tuple(input: ParseStream) -> Result<Pat> {
         let content;
         let paren_token = parenthesized!(content in input);
 
         let mut elems = Punctuated::new();
         while !content.is_empty() {
             let value = Pat::parse_multi_with_leading_vert(&content)?;
-            elems.push_value(value);
             if content.is_empty() {
+                if elems.is_empty() && !matches!(value, Pat::Rest(_)) {
+                    return Ok(Pat::Paren(PatParen {
+                        attrs: Vec::new(),
+                        paren_token,
+                        pat: Box::new(value),
+                    }));
+                }
+                elems.push_value(value);
                 break;
             }
+            elems.push_value(value);
             let punct = content.parse()?;
             elems.push_punct(punct);
         }
 
-        Ok((paren_token, elems))
+        Ok(Pat::Tuple(PatTuple {
+            attrs: Vec::new(),
+            paren_token,
+            elems,
+        }))
     }
 
     fn pat_reference(input: ParseStream) -> Result<PatReference> {
@@ -762,6 +788,16 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.leading_vert.to_tokens(tokens);
             self.cases.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for PatParen {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.paren_token.surround(tokens, |tokens| {
+                self.pat.to_tokens(tokens);
+            });
         }
     }
 
