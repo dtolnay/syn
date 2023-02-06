@@ -918,6 +918,7 @@ impl Clone for ForeignItemType {
             vis: self.vis.clone(),
             type_token: self.type_token.clone(),
             ident: self.ident.clone(),
+            generics: self.generics.clone(),
             semi_token: self.semi_token.clone(),
         }
     }

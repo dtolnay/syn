@@ -1187,6 +1187,7 @@ impl Hash for ForeignItemType {
         self.attrs.hash(state);
         self.vis.hash(state);
         self.ident.hash(state);
+        self.generics.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

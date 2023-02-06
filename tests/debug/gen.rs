@@ -1896,6 +1896,7 @@ impl Debug for Lite<syn::ForeignItem> {
                 }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("ident", Lite(&_val.ident));
+                formatter.field("generics", Lite(&_val.generics));
                 formatter.finish()
             }
             syn::ForeignItem::Macro(_val) => {
@@ -1970,6 +1971,7 @@ impl Debug for Lite<syn::ForeignItemType> {
         }
         formatter.field("vis", Lite(&self.value.vis));
         formatter.field("ident", Lite(&self.value.ident));
+        formatter.field("generics", Lite(&self.value.generics));
         formatter.finish()
     }
 }

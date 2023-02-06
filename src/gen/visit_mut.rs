@@ -1965,6 +1965,7 @@ where
     v.visit_visibility_mut(&mut node.vis);
     tokens_helper(v, &mut node.type_token.span);
     v.visit_ident_mut(&mut node.ident);
+    v.visit_generics_mut(&mut node.generics);
     tokens_helper(v, &mut node.semi_token.spans);
 }
 #[cfg(any(feature = "derive", feature = "full"))]

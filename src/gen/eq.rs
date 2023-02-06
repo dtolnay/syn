@@ -885,6 +885,7 @@ impl Eq for ForeignItemType {}
 impl PartialEq for ForeignItemType {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis && self.ident == other.ident
+            && self.generics == other.generics
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

@@ -1321,6 +1321,7 @@ impl Debug for ForeignItemType {
                 formatter.field("vis", &self.vis);
                 formatter.field("type_token", &self.type_token);
                 formatter.field("ident", &self.ident);
+                formatter.field("generics", &self.generics);
                 formatter.field("semi_token", &self.semi_token);
                 formatter.finish()
             }

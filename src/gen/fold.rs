@@ -1764,6 +1764,7 @@ where
         vis: f.fold_visibility(node.vis),
         type_token: Token![type](tokens_helper(f, &node.type_token.span)),
         ident: f.fold_ident(node.ident),
+        generics: f.fold_generics(node.generics),
         semi_token: Token![;](tokens_helper(f, &node.semi_token.spans)),
     }
 }
