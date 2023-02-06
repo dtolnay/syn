@@ -14,9 +14,6 @@ const REVISION: &str = "afaf3e07aaa7ca9873bdb439caec53faffa4230c";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: precedence
-    "tests/ui/closures/supertrait-hint-cycle.rs",
-
     // TODO: impl ~const T {}
     // https://github.com/dtolnay/syn/issues/1051
     "tests/ui/rfc-2632-const-trait-impl/syntax.rs",
