@@ -2020,7 +2020,7 @@ impl Hash for PatTupleStruct {
         self.attrs.hash(state);
         self.qself.hash(state);
         self.path.hash(state);
-        self.pat.hash(state);
+        self.elems.hash(state);
     }
 }
 #[cfg(feature = "full")]

@@ -2916,7 +2916,14 @@ where
         v.visit_qself_mut(it);
     }
     v.visit_path_mut(&mut node.path);
-    v.visit_pat_tuple_mut(&mut node.pat);
+    tokens_helper(v, &mut node.paren_token.span);
+    for el in Punctuated::pairs_mut(&mut node.elems) {
+        let (it, p) = el.into_tuple();
+        v.visit_pat_mut(it);
+        if let Some(p) = p {
+            tokens_helper(v, &mut p.spans);
+        }
+    }
 }
 #[cfg(feature = "full")]
 pub fn visit_pat_type_mut<V>(v: &mut V, node: &mut PatType)

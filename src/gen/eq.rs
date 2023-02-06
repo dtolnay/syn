@@ -1503,7 +1503,7 @@ impl Eq for PatTupleStruct {}
 impl PartialEq for PatTupleStruct {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.qself == other.qself && self.path == other.path
-            && self.pat == other.pat
+            && self.elems == other.elems
     }
 }
 #[cfg(feature = "full")]

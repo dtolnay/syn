@@ -59,11 +59,9 @@ fn test_group() {
                 },
             ],
         },
-        pat: PatTuple {
-            elems: [
-                Pat::Wild,
-            ],
-        },
+        elems: [
+            Pat::Wild,
+        ],
     }
     "###);
 }

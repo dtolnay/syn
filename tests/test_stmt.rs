@@ -116,13 +116,11 @@ fn test_let_else() {
                     },
                 ],
             },
-            pat: PatTuple {
-                elems: [
-                    Pat::Ident {
-                        ident: "x",
-                    },
-                ],
-            },
+            elems: [
+                Pat::Ident {
+                    ident: "x",
+                },
+            ],
         },
         init: Some(LocalInit {
             expr: Expr::Path {

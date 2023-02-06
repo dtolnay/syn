@@ -172,7 +172,8 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub qself: Option<QSelf>,
         pub path: Path,
-        pub pat: PatTuple,
+        pub paren_token: token::Paren,
+        pub elems: Punctuated<Pat, Token![,]>,
     }
 }
 
@@ -449,11 +450,13 @@ pub(crate) mod parsing {
         qself: Option<QSelf>,
         path: Path,
     ) -> Result<PatTupleStruct> {
+        let (paren_token, elems) = pat_tuple_elements(input)?;
         Ok(PatTupleStruct {
             attrs: Vec::new(),
             qself,
             path,
-            pat: input.call(pat_tuple)?,
+            paren_token,
+            elems,
         })
     }
 
@@ -586,6 +589,17 @@ pub(crate) mod parsing {
     }
 
     fn pat_tuple(input: ParseStream) -> Result<PatTuple> {
+        let (paren_token, elems) = pat_tuple_elements(input)?;
+        Ok(PatTuple {
+            attrs: Vec::new(),
+            paren_token,
+            elems,
+        })
+    }
+
+    fn pat_tuple_elements(
+        input: ParseStream,
+    ) -> Result<(token::Paren, Punctuated<Pat, Token![,]>)> {
         let content;
         let paren_token = parenthesized!(content in input);
 
@@ -600,11 +614,7 @@ pub(crate) mod parsing {
             elems.push_punct(punct);
         }
 
-        Ok(PatTuple {
-            attrs: Vec::new(),
-            paren_token,
-            elems,
-        })
+        Ok((paren_token, elems))
     }
 
     fn pat_reference(input: ParseStream) -> Result<PatReference> {
@@ -814,7 +824,9 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             path::printing::print_path(tokens, &self.qself, &self.path);
-            self.pat.to_tokens(tokens);
+            self.paren_token.surround(tokens, |tokens| {
+                self.elems.to_tokens(tokens);
+            });
         }
     }
 

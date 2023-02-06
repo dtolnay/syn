@@ -4002,8 +4002,16 @@
         "path": {
           "syn": "Path"
         },
-        "pat": {
-          "syn": "PatTuple"
+        "paren_token": {
+          "group": "Paren"
+        },
+        "elems": {
+          "punctuated": {
+            "element": {
+              "syn": "Pat"
+            },
+            "punct": "Comma"
+          }
         }
       }
     },
