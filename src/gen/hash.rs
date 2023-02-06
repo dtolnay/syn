@@ -178,34 +178,34 @@ impl Hash for BinOp {
             BinOp::Gt(_) => {
                 state.write_u8(17u8);
             }
-            BinOp::AddEq(_) => {
+            BinOp::AddAssign(_) => {
                 state.write_u8(18u8);
             }
-            BinOp::SubEq(_) => {
+            BinOp::SubAssign(_) => {
                 state.write_u8(19u8);
             }
-            BinOp::MulEq(_) => {
+            BinOp::MulAssign(_) => {
                 state.write_u8(20u8);
             }
-            BinOp::DivEq(_) => {
+            BinOp::DivAssign(_) => {
                 state.write_u8(21u8);
             }
-            BinOp::RemEq(_) => {
+            BinOp::RemAssign(_) => {
                 state.write_u8(22u8);
             }
-            BinOp::BitXorEq(_) => {
+            BinOp::BitXorAssign(_) => {
                 state.write_u8(23u8);
             }
-            BinOp::BitAndEq(_) => {
+            BinOp::BitAndAssign(_) => {
                 state.write_u8(24u8);
             }
-            BinOp::BitOrEq(_) => {
+            BinOp::BitOrAssign(_) => {
                 state.write_u8(25u8);
             }
-            BinOp::ShlEq(_) => {
+            BinOp::ShlAssign(_) => {
                 state.write_u8(26u8);
             }
-            BinOp::ShrEq(_) => {
+            BinOp::ShrAssign(_) => {
                 state.write_u8(27u8);
             }
         }

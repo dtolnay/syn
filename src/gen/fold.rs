@@ -937,35 +937,35 @@ where
         BinOp::Gt(_binding_0) => {
             BinOp::Gt(Token![>](tokens_helper(f, &_binding_0.spans)))
         }
-        BinOp::AddEq(_binding_0) => {
-            BinOp::AddEq(Token![+=](tokens_helper(f, &_binding_0.spans)))
+        BinOp::AddAssign(_binding_0) => {
+            BinOp::AddAssign(Token![+=](tokens_helper(f, &_binding_0.spans)))
         }
-        BinOp::SubEq(_binding_0) => {
-            BinOp::SubEq(Token![-=](tokens_helper(f, &_binding_0.spans)))
+        BinOp::SubAssign(_binding_0) => {
+            BinOp::SubAssign(Token![-=](tokens_helper(f, &_binding_0.spans)))
         }
-        BinOp::MulEq(_binding_0) => {
-            BinOp::MulEq(Token![*=](tokens_helper(f, &_binding_0.spans)))
+        BinOp::MulAssign(_binding_0) => {
+            BinOp::MulAssign(Token![*=](tokens_helper(f, &_binding_0.spans)))
         }
-        BinOp::DivEq(_binding_0) => {
-            BinOp::DivEq(Token![/=](tokens_helper(f, &_binding_0.spans)))
+        BinOp::DivAssign(_binding_0) => {
+            BinOp::DivAssign(Token![/=](tokens_helper(f, &_binding_0.spans)))
         }
-        BinOp::RemEq(_binding_0) => {
-            BinOp::RemEq(Token![%=](tokens_helper(f, &_binding_0.spans)))
+        BinOp::RemAssign(_binding_0) => {
+            BinOp::RemAssign(Token![%=](tokens_helper(f, &_binding_0.spans)))
         }
-        BinOp::BitXorEq(_binding_0) => {
-            BinOp::BitXorEq(Token![^=](tokens_helper(f, &_binding_0.spans)))
+        BinOp::BitXorAssign(_binding_0) => {
+            BinOp::BitXorAssign(Token![^=](tokens_helper(f, &_binding_0.spans)))
         }
-        BinOp::BitAndEq(_binding_0) => {
-            BinOp::BitAndEq(Token![&=](tokens_helper(f, &_binding_0.spans)))
+        BinOp::BitAndAssign(_binding_0) => {
+            BinOp::BitAndAssign(Token![&=](tokens_helper(f, &_binding_0.spans)))
         }
-        BinOp::BitOrEq(_binding_0) => {
-            BinOp::BitOrEq(Token![|=](tokens_helper(f, &_binding_0.spans)))
+        BinOp::BitOrAssign(_binding_0) => {
+            BinOp::BitOrAssign(Token![|=](tokens_helper(f, &_binding_0.spans)))
         }
-        BinOp::ShlEq(_binding_0) => {
-            BinOp::ShlEq(Token![<<=](tokens_helper(f, &_binding_0.spans)))
+        BinOp::ShlAssign(_binding_0) => {
+            BinOp::ShlAssign(Token![<<=](tokens_helper(f, &_binding_0.spans)))
         }
-        BinOp::ShrEq(_binding_0) => {
-            BinOp::ShrEq(Token![>>=](tokens_helper(f, &_binding_0.spans)))
+        BinOp::ShrAssign(_binding_0) => {
+            BinOp::ShrAssign(Token![>>=](tokens_helper(f, &_binding_0.spans)))
         }
     }
 }

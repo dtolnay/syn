@@ -253,44 +253,44 @@ impl Debug for Lite<syn::BinOp> {
                 formatter.write_str("BinOp::Gt")?;
                 Ok(())
             }
-            syn::BinOp::AddEq(_val) => {
-                formatter.write_str("BinOp::AddEq")?;
+            syn::BinOp::AddAssign(_val) => {
+                formatter.write_str("BinOp::AddAssign")?;
                 Ok(())
             }
-            syn::BinOp::SubEq(_val) => {
-                formatter.write_str("BinOp::SubEq")?;
+            syn::BinOp::SubAssign(_val) => {
+                formatter.write_str("BinOp::SubAssign")?;
                 Ok(())
             }
-            syn::BinOp::MulEq(_val) => {
-                formatter.write_str("BinOp::MulEq")?;
+            syn::BinOp::MulAssign(_val) => {
+                formatter.write_str("BinOp::MulAssign")?;
                 Ok(())
             }
-            syn::BinOp::DivEq(_val) => {
-                formatter.write_str("BinOp::DivEq")?;
+            syn::BinOp::DivAssign(_val) => {
+                formatter.write_str("BinOp::DivAssign")?;
                 Ok(())
             }
-            syn::BinOp::RemEq(_val) => {
-                formatter.write_str("BinOp::RemEq")?;
+            syn::BinOp::RemAssign(_val) => {
+                formatter.write_str("BinOp::RemAssign")?;
                 Ok(())
             }
-            syn::BinOp::BitXorEq(_val) => {
-                formatter.write_str("BinOp::BitXorEq")?;
+            syn::BinOp::BitXorAssign(_val) => {
+                formatter.write_str("BinOp::BitXorAssign")?;
                 Ok(())
             }
-            syn::BinOp::BitAndEq(_val) => {
-                formatter.write_str("BinOp::BitAndEq")?;
+            syn::BinOp::BitAndAssign(_val) => {
+                formatter.write_str("BinOp::BitAndAssign")?;
                 Ok(())
             }
-            syn::BinOp::BitOrEq(_val) => {
-                formatter.write_str("BinOp::BitOrEq")?;
+            syn::BinOp::BitOrAssign(_val) => {
+                formatter.write_str("BinOp::BitOrAssign")?;
                 Ok(())
             }
-            syn::BinOp::ShlEq(_val) => {
-                formatter.write_str("BinOp::ShlEq")?;
+            syn::BinOp::ShlAssign(_val) => {
+                formatter.write_str("BinOp::ShlAssign")?;
                 Ok(())
             }
-            syn::BinOp::ShrEq(_val) => {
-                formatter.write_str("BinOp::ShrEq")?;
+            syn::BinOp::ShrAssign(_val) => {
+                formatter.write_str("BinOp::ShrAssign")?;
                 Ok(())
             }
         }

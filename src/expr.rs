@@ -1023,16 +1023,16 @@ pub(crate) mod parsing {
                 | BinOp::Ne(_)
                 | BinOp::Ge(_)
                 | BinOp::Gt(_) => Precedence::Compare,
-                BinOp::AddEq(_)
-                | BinOp::SubEq(_)
-                | BinOp::MulEq(_)
-                | BinOp::DivEq(_)
-                | BinOp::RemEq(_)
-                | BinOp::BitXorEq(_)
-                | BinOp::BitAndEq(_)
-                | BinOp::BitOrEq(_)
-                | BinOp::ShlEq(_)
-                | BinOp::ShrEq(_) => Precedence::Assign,
+                BinOp::AddAssign(_)
+                | BinOp::SubAssign(_)
+                | BinOp::MulAssign(_)
+                | BinOp::DivAssign(_)
+                | BinOp::RemAssign(_)
+                | BinOp::BitXorAssign(_)
+                | BinOp::BitAndAssign(_)
+                | BinOp::BitOrAssign(_)
+                | BinOp::ShlAssign(_)
+                | BinOp::ShrAssign(_) => Precedence::Assign,
             }
         }
     }

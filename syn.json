@@ -351,52 +351,52 @@
             "token": "Gt"
           }
         ],
-        "AddEq": [
+        "AddAssign": [
           {
             "token": "PlusEq"
           }
         ],
-        "SubEq": [
+        "SubAssign": [
           {
             "token": "MinusEq"
           }
         ],
-        "MulEq": [
+        "MulAssign": [
           {
             "token": "StarEq"
           }
         ],
-        "DivEq": [
+        "DivAssign": [
           {
             "token": "SlashEq"
           }
         ],
-        "RemEq": [
+        "RemAssign": [
           {
             "token": "PercentEq"
           }
         ],
-        "BitXorEq": [
+        "BitXorAssign": [
           {
             "token": "CaretEq"
           }
         ],
-        "BitAndEq": [
+        "BitAndAssign": [
           {
             "token": "AndEq"
           }
         ],
-        "BitOrEq": [
+        "BitOrAssign": [
           {
             "token": "OrEq"
           }
         ],
-        "ShlEq": [
+        "ShlAssign": [
           {
             "token": "ShlEq"
           }
         ],
-        "ShrEq": [
+        "ShrAssign": [
           {
             "token": "ShrEq"
           }
