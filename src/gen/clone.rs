@@ -1139,6 +1139,7 @@ impl Clone for ItemForeignMod {
     fn clone(&self) -> Self {
         ItemForeignMod {
             attrs: self.attrs.clone(),
+            unsafety: self.unsafety.clone(),
             abi: self.abi.clone(),
             brace_token: self.brace_token.clone(),
             items: self.items.clone(),
@@ -1181,6 +1182,7 @@ impl Clone for ItemMod {
         ItemMod {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
+            unsafety: self.unsafety.clone(),
             mod_token: self.mod_token.clone(),
             ident: self.ident.clone(),
             content: self.content.clone(),

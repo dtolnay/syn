@@ -2276,6 +2276,9 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
+    if let Some(it) = &node.unsafety {
+        tokens_helper(v, &it.span);
+    }
     v.visit_abi(&node.abi);
     tokens_helper(v, &node.brace_token.span);
     for it in &node.items {
@@ -2336,6 +2339,9 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
+    if let Some(it) = &node.unsafety {
+        tokens_helper(v, &it.span);
+    }
     tokens_helper(v, &node.mod_token.span);
     v.visit_ident(&node.ident);
     if let Some(it) = &node.content {

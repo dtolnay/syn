@@ -2029,6 +2029,7 @@ where
 {
     ItemForeignMod {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        unsafety: (node.unsafety).map(|it| Token![unsafe](tokens_helper(f, &it.span))),
         abi: f.fold_abi(node.abi),
         brace_token: Brace(tokens_helper(f, &node.brace_token.span)),
         items: FoldHelper::lift(node.items, |it| f.fold_foreign_item(it)),
@@ -2077,6 +2078,7 @@ where
     ItemMod {
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         vis: f.fold_visibility(node.vis),
+        unsafety: (node.unsafety).map(|it| Token![unsafe](tokens_helper(f, &it.span))),
         mod_token: Token![mod](tokens_helper(f, &node.mod_token.span)),
         ident: f.fold_ident(node.ident),
         content: (node.content)

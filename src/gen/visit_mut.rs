@@ -2279,6 +2279,9 @@ where
     for it in &mut node.attrs {
         v.visit_attribute_mut(it);
     }
+    if let Some(it) = &mut node.unsafety {
+        tokens_helper(v, &mut it.span);
+    }
     v.visit_abi_mut(&mut node.abi);
     tokens_helper(v, &mut node.brace_token.span);
     for it in &mut node.items {
@@ -2339,6 +2342,9 @@ where
         v.visit_attribute_mut(it);
     }
     v.visit_visibility_mut(&mut node.vis);
+    if let Some(it) = &mut node.unsafety {
+        tokens_helper(v, &mut it.span);
+    }
     tokens_helper(v, &mut node.mod_token.span);
     v.visit_ident_mut(&mut node.ident);
     if let Some(it) = &mut node.content {

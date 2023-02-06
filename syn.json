@@ -2838,6 +2838,11 @@
             "syn": "Attribute"
           }
         },
+        "unsafety": {
+          "option": {
+            "token": "Unsafe"
+          }
+        },
         "abi": {
           "syn": "Abi"
         },
@@ -2955,6 +2960,11 @@
         },
         "vis": {
           "syn": "Visibility"
+        },
+        "unsafety": {
+          "option": {
+            "token": "Unsafe"
+          }
         },
         "mod_token": {
           "token": "Mod"
