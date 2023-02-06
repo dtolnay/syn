@@ -1392,13 +1392,13 @@ impl Debug for GenericParam {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("GenericParam::")?;
         match self {
-            GenericParam::Type(v0) => {
-                let mut formatter = formatter.debug_tuple("Type");
+            GenericParam::Lifetime(v0) => {
+                let mut formatter = formatter.debug_tuple("Lifetime");
                 formatter.field(v0);
                 formatter.finish()
             }
-            GenericParam::Lifetime(v0) => {
-                let mut formatter = formatter.debug_tuple("Lifetime");
+            GenericParam::Type(v0) => {
+                let mut formatter = formatter.debug_tuple("Type");
                 formatter.field(v0);
                 formatter.finish()
             }

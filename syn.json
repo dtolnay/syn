@@ -2360,14 +2360,14 @@
         ]
       },
       "variants": {
-        "Type": [
-          {
-            "syn": "TypeParam"
-          }
-        ],
         "Lifetime": [
           {
             "syn": "LifetimeParam"
+          }
+        ],
+        "Type": [
+          {
+            "syn": "TypeParam"
           }
         ],
         "Const": [

@@ -36,14 +36,25 @@ ast_enum_of_structs! {
     /// [syntax tree enum]: Expr#syntax-tree-enums
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum GenericParam {
+        /// A lifetime parameter: `'a: 'b + 'c + 'd`.
+        Lifetime(LifetimeParam),
+
         /// A generic type parameter: `T: Into<String>`.
         Type(TypeParam),
 
-        /// A lifetime definition: `'a: 'b + 'c + 'd`.
-        Lifetime(LifetimeParam),
-
         /// A const generic parameter: `const LENGTH: usize`.
         Const(ConstParam),
+    }
+}
+
+ast_struct! {
+    /// A lifetime definition: `'a: 'b + 'c + 'd`.
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    pub struct LifetimeParam {
+        pub attrs: Vec<Attribute>,
+        pub lifetime: Lifetime,
+        pub colon_token: Option<Token![:]>,
+        pub bounds: Punctuated<Lifetime, Token![+]>,
     }
 }
 
@@ -57,17 +68,6 @@ ast_struct! {
         pub bounds: Punctuated<TypeParamBound, Token![+]>,
         pub eq_token: Option<Token![=]>,
         pub default: Option<Type>,
-    }
-}
-
-ast_struct! {
-    /// A lifetime definition: `'a: 'b + 'c + 'd`.
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub struct LifetimeParam {
-        pub attrs: Vec<Attribute>,
-        pub lifetime: Lifetime,
-        pub colon_token: Option<Token![:]>,
-        pub bounds: Punctuated<Lifetime, Token![+]>,
     }
 }
 
@@ -100,28 +100,6 @@ impl Generics {
     /// Returns an
     /// <code
     ///   style="padding-right:0;">Iterator&lt;Item = &amp;</code><a
-    ///   href="struct.TypeParam.html"><code
-    ///   style="padding-left:0;padding-right:0;">TypeParam</code></a><code
-    ///   style="padding-left:0;">&gt;</code>
-    /// over the type parameters in `self.params`.
-    pub fn type_params(&self) -> TypeParams {
-        TypeParams(self.params.iter())
-    }
-
-    /// Returns an
-    /// <code
-    ///   style="padding-right:0;">Iterator&lt;Item = &amp;mut </code><a
-    ///   href="struct.TypeParam.html"><code
-    ///   style="padding-left:0;padding-right:0;">TypeParam</code></a><code
-    ///   style="padding-left:0;">&gt;</code>
-    /// over the type parameters in `self.params`.
-    pub fn type_params_mut(&mut self) -> TypeParamsMut {
-        TypeParamsMut(self.params.iter_mut())
-    }
-
-    /// Returns an
-    /// <code
-    ///   style="padding-right:0;">Iterator&lt;Item = &amp;</code><a
     ///   href="struct.LifetimeParam.html"><code
     ///   style="padding-left:0;padding-right:0;">LifetimeParam</code></a><code
     ///   style="padding-left:0;">&gt;</code>
@@ -139,6 +117,28 @@ impl Generics {
     /// over the lifetime parameters in `self.params`.
     pub fn lifetimes_mut(&mut self) -> LifetimesMut {
         LifetimesMut(self.params.iter_mut())
+    }
+
+    /// Returns an
+    /// <code
+    ///   style="padding-right:0;">Iterator&lt;Item = &amp;</code><a
+    ///   href="struct.TypeParam.html"><code
+    ///   style="padding-left:0;padding-right:0;">TypeParam</code></a><code
+    ///   style="padding-left:0;">&gt;</code>
+    /// over the type parameters in `self.params`.
+    pub fn type_params(&self) -> TypeParams {
+        TypeParams(self.params.iter())
+    }
+
+    /// Returns an
+    /// <code
+    ///   style="padding-right:0;">Iterator&lt;Item = &amp;mut </code><a
+    ///   href="struct.TypeParam.html"><code
+    ///   style="padding-left:0;padding-right:0;">TypeParam</code></a><code
+    ///   style="padding-left:0;">&gt;</code>
+    /// over the type parameters in `self.params`.
+    pub fn type_params_mut(&mut self) -> TypeParamsMut {
+        TypeParamsMut(self.params.iter_mut())
     }
 
     /// Returns an
@@ -172,42 +172,6 @@ impl Generics {
     }
 }
 
-pub struct TypeParams<'a>(Iter<'a, GenericParam>);
-
-impl<'a> Iterator for TypeParams<'a> {
-    type Item = &'a TypeParam;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let next = match self.0.next() {
-            Some(item) => item,
-            None => return None,
-        };
-        if let GenericParam::Type(type_param) = next {
-            Some(type_param)
-        } else {
-            self.next()
-        }
-    }
-}
-
-pub struct TypeParamsMut<'a>(IterMut<'a, GenericParam>);
-
-impl<'a> Iterator for TypeParamsMut<'a> {
-    type Item = &'a mut TypeParam;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let next = match self.0.next() {
-            Some(item) => item,
-            None => return None,
-        };
-        if let GenericParam::Type(type_param) = next {
-            Some(type_param)
-        } else {
-            self.next()
-        }
-    }
-}
-
 pub struct Lifetimes<'a>(Iter<'a, GenericParam>);
 
 impl<'a> Iterator for Lifetimes<'a> {
@@ -238,6 +202,42 @@ impl<'a> Iterator for LifetimesMut<'a> {
         };
         if let GenericParam::Lifetime(lifetime) = next {
             Some(lifetime)
+        } else {
+            self.next()
+        }
+    }
+}
+
+pub struct TypeParams<'a>(Iter<'a, GenericParam>);
+
+impl<'a> Iterator for TypeParams<'a> {
+    type Item = &'a TypeParam;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = match self.0.next() {
+            Some(item) => item,
+            None => return None,
+        };
+        if let GenericParam::Type(type_param) = next {
+            Some(type_param)
+        } else {
+            self.next()
+        }
+    }
+}
+
+pub struct TypeParamsMut<'a>(IterMut<'a, GenericParam>);
+
+impl<'a> Iterator for TypeParamsMut<'a> {
+    type Item = &'a mut TypeParam;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = match self.0.next() {
+            Some(item) => item,
+            None => return None,
+        };
+        if let GenericParam::Type(type_param) = next {
+            Some(type_param)
         } else {
             self.next()
         }

@@ -2045,15 +2045,15 @@ impl Debug for Lite<syn::GenericArgument> {
 impl Debug for Lite<syn::GenericParam> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match &self.value {
-            syn::GenericParam::Type(_val) => {
-                formatter.write_str("GenericParam::Type")?;
+            syn::GenericParam::Lifetime(_val) => {
+                formatter.write_str("GenericParam::Lifetime")?;
                 formatter.write_str("(")?;
                 Debug::fmt(Lite(_val), formatter)?;
                 formatter.write_str(")")?;
                 Ok(())
             }
-            syn::GenericParam::Lifetime(_val) => {
-                formatter.write_str("GenericParam::Lifetime")?;
+            syn::GenericParam::Type(_val) => {
+                formatter.write_str("GenericParam::Type")?;
                 formatter.write_str("(")?;
                 Debug::fmt(Lite(_val), formatter)?;
                 formatter.write_str(")")?;

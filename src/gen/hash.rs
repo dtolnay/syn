@@ -1250,11 +1250,11 @@ impl Hash for GenericParam {
         H: Hasher,
     {
         match self {
-            GenericParam::Type(v0) => {
+            GenericParam::Lifetime(v0) => {
                 state.write_u8(0u8);
                 v0.hash(state);
             }
-            GenericParam::Lifetime(v0) => {
+            GenericParam::Type(v0) => {
                 state.write_u8(1u8);
                 v0.hash(state);
             }

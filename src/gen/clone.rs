@@ -955,8 +955,8 @@ impl Clone for GenericArgument {
 impl Clone for GenericParam {
     fn clone(&self) -> Self {
         match self {
-            GenericParam::Type(v0) => GenericParam::Type(v0.clone()),
             GenericParam::Lifetime(v0) => GenericParam::Lifetime(v0.clone()),
+            GenericParam::Type(v0) => GenericParam::Type(v0.clone()),
             GenericParam::Const(v0) => GenericParam::Const(v0.clone()),
         }
     }

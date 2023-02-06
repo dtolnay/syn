@@ -1818,11 +1818,11 @@ where
     F: Fold + ?Sized,
 {
     match node {
-        GenericParam::Type(_binding_0) => {
-            GenericParam::Type(f.fold_type_param(_binding_0))
-        }
         GenericParam::Lifetime(_binding_0) => {
             GenericParam::Lifetime(f.fold_lifetime_param(_binding_0))
+        }
+        GenericParam::Type(_binding_0) => {
+            GenericParam::Type(f.fold_type_param(_binding_0))
         }
         GenericParam::Const(_binding_0) => {
             GenericParam::Const(f.fold_const_param(_binding_0))
