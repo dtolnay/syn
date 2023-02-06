@@ -13,7 +13,7 @@
 //!         attrs: [
 //!             Attribute {
 //!                 pound_token: Pound,
-//!                 style: Inner(
+//!                 style: AttrStyle::Inner(
 //!         ...
 //!     }
 
