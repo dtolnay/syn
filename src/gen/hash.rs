@@ -1864,48 +1864,52 @@ impl Hash for Pat {
                 state.write_u8(4u8);
                 v0.hash(state);
             }
-            Pat::Path(v0) => {
+            Pat::Paren(v0) => {
                 state.write_u8(5u8);
                 v0.hash(state);
             }
-            Pat::Range(v0) => {
+            Pat::Path(v0) => {
                 state.write_u8(6u8);
                 v0.hash(state);
             }
-            Pat::Reference(v0) => {
+            Pat::Range(v0) => {
                 state.write_u8(7u8);
                 v0.hash(state);
             }
-            Pat::Rest(v0) => {
+            Pat::Reference(v0) => {
                 state.write_u8(8u8);
                 v0.hash(state);
             }
-            Pat::Slice(v0) => {
+            Pat::Rest(v0) => {
                 state.write_u8(9u8);
                 v0.hash(state);
             }
-            Pat::Struct(v0) => {
+            Pat::Slice(v0) => {
                 state.write_u8(10u8);
                 v0.hash(state);
             }
-            Pat::Tuple(v0) => {
+            Pat::Struct(v0) => {
                 state.write_u8(11u8);
                 v0.hash(state);
             }
-            Pat::TupleStruct(v0) => {
+            Pat::Tuple(v0) => {
                 state.write_u8(12u8);
                 v0.hash(state);
             }
-            Pat::Type(v0) => {
+            Pat::TupleStruct(v0) => {
                 state.write_u8(13u8);
                 v0.hash(state);
             }
-            Pat::Verbatim(v0) => {
+            Pat::Type(v0) => {
                 state.write_u8(14u8);
+                v0.hash(state);
+            }
+            Pat::Verbatim(v0) => {
+                state.write_u8(15u8);
                 TokenStreamHelper(v0).hash(state);
             }
             Pat::Wild(v0) => {
-                state.write_u8(15u8);
+                state.write_u8(16u8);
                 v0.hash(state);
             }
         }
@@ -1935,6 +1939,17 @@ impl Hash for PatOr {
         self.attrs.hash(state);
         self.leading_vert.hash(state);
         self.cases.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for PatParen {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.attrs.hash(state);
+        self.pat.hash(state);
     }
 }
 #[cfg(feature = "full")]

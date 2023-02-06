@@ -2076,6 +2076,7 @@ impl Debug for Pat {
                 formatter.finish()
             }
             Pat::Or(v0) => v0.debug(formatter, "Or"),
+            Pat::Paren(v0) => v0.debug(formatter, "Paren"),
             Pat::Path(v0) => {
                 let mut formatter = formatter.debug_tuple("Path");
                 formatter.field(v0);
@@ -2134,6 +2135,22 @@ impl Debug for PatOr {
             }
         }
         self.debug(formatter, "PatOr")
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for PatParen {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        impl PatParen {
+            fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
+                let mut formatter = formatter.debug_struct(name);
+                formatter.field("attrs", &self.attrs);
+                formatter.field("paren_token", &self.paren_token);
+                formatter.field("pat", &self.pat);
+                formatter.finish()
+            }
+        }
+        self.debug(formatter, "PatParen")
     }
 }
 #[cfg(feature = "full")]

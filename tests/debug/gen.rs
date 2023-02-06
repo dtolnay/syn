@@ -3134,6 +3134,14 @@ impl Debug for Lite<syn::Pat> {
                 }
                 formatter.finish()
             }
+            syn::Pat::Paren(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::Paren");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                formatter.field("pat", Lite(&_val.pat));
+                formatter.finish()
+            }
             syn::Pat::Path(_val) => {
                 formatter.write_str("Pat::Path")?;
                 formatter.write_str("(")?;
@@ -3319,6 +3327,16 @@ impl Debug for Lite<syn::PatOr> {
         if !self.value.cases.is_empty() {
             formatter.field("cases", Lite(&self.value.cases));
         }
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::PatParen> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("PatParen");
+        if !self.value.attrs.is_empty() {
+            formatter.field("attrs", Lite(&self.value.attrs));
+        }
+        formatter.field("pat", Lite(&self.value.pat));
         formatter.finish()
     }
 }

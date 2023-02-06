@@ -442,7 +442,7 @@ pub use crate::expr::{
 };
 #[cfg(feature = "full")]
 pub use crate::pat::{
-    FieldPat, Pat, PatIdent, PatOr, PatReference, PatRest, PatSlice, PatStruct, PatTuple,
+    FieldPat, Pat, PatIdent, PatOr, PatParen, PatReference, PatRest, PatSlice, PatStruct, PatTuple,
     PatTupleStruct, PatType, PatWild,
 };
 

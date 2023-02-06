@@ -1461,6 +1461,7 @@ impl Clone for Pat {
             Pat::Lit(v0) => Pat::Lit(v0.clone()),
             Pat::Macro(v0) => Pat::Macro(v0.clone()),
             Pat::Or(v0) => Pat::Or(v0.clone()),
+            Pat::Paren(v0) => Pat::Paren(v0.clone()),
             Pat::Path(v0) => Pat::Path(v0.clone()),
             Pat::Range(v0) => Pat::Range(v0.clone()),
             Pat::Reference(v0) => Pat::Reference(v0.clone()),
@@ -1496,6 +1497,17 @@ impl Clone for PatOr {
             attrs: self.attrs.clone(),
             leading_vert: self.leading_vert.clone(),
             cases: self.cases.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for PatParen {
+    fn clone(&self) -> Self {
+        PatParen {
+            attrs: self.attrs.clone(),
+            paren_token: self.paren_token.clone(),
+            pat: self.pat.clone(),
         }
     }
 }
