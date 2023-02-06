@@ -318,7 +318,6 @@ pub(crate) mod parsing {
         loop {
             attr_target = match attr_target {
                 Expr::Assign(e) => &mut e.left,
-                Expr::AssignOp(e) => &mut e.left,
                 Expr::Binary(e) => &mut e.left,
                 Expr::Cast(e) => &mut e.expr,
                 Expr::Array(_)

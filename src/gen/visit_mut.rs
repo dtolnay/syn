@@ -122,10 +122,6 @@ pub trait VisitMut {
         visit_expr_assign_mut(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_expr_assign_op_mut(&mut self, i: &mut ExprAssignOp) {
-        visit_expr_assign_op_mut(self, i);
-    }
-    #[cfg(feature = "full")]
     fn visit_expr_async_mut(&mut self, i: &mut ExprAsync) {
         visit_expr_async_mut(self, i);
     }
@@ -1112,9 +1108,6 @@ where
         Expr::Assign(_binding_0) => {
             full!(v.visit_expr_assign_mut(_binding_0));
         }
-        Expr::AssignOp(_binding_0) => {
-            full!(v.visit_expr_assign_op_mut(_binding_0));
-        }
         Expr::Async(_binding_0) => {
             full!(v.visit_expr_async_mut(_binding_0));
         }
@@ -1255,18 +1248,6 @@ where
     }
     v.visit_expr_mut(&mut *node.left);
     tokens_helper(v, &mut node.eq_token.spans);
-    v.visit_expr_mut(&mut *node.right);
-}
-#[cfg(feature = "full")]
-pub fn visit_expr_assign_op_mut<V>(v: &mut V, node: &mut ExprAssignOp)
-where
-    V: VisitMut + ?Sized,
-{
-    for it in &mut node.attrs {
-        v.visit_attribute_mut(it);
-    }
-    v.visit_expr_mut(&mut *node.left);
-    v.visit_bin_op_mut(&mut node.op);
     v.visit_expr_mut(&mut *node.right);
 }
 #[cfg(feature = "full")]

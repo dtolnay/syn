@@ -121,10 +121,6 @@ pub trait Visit<'ast> {
         visit_expr_assign(self, i);
     }
     #[cfg(feature = "full")]
-    fn visit_expr_assign_op(&mut self, i: &'ast ExprAssignOp) {
-        visit_expr_assign_op(self, i);
-    }
-    #[cfg(feature = "full")]
     fn visit_expr_async(&mut self, i: &'ast ExprAsync) {
         visit_expr_async(self, i);
     }
@@ -1111,9 +1107,6 @@ where
         Expr::Assign(_binding_0) => {
             full!(v.visit_expr_assign(_binding_0));
         }
-        Expr::AssignOp(_binding_0) => {
-            full!(v.visit_expr_assign_op(_binding_0));
-        }
         Expr::Async(_binding_0) => {
             full!(v.visit_expr_async(_binding_0));
         }
@@ -1254,18 +1247,6 @@ where
     }
     v.visit_expr(&*node.left);
     tokens_helper(v, &node.eq_token.spans);
-    v.visit_expr(&*node.right);
-}
-#[cfg(feature = "full")]
-pub fn visit_expr_assign_op<'ast, V>(v: &mut V, node: &'ast ExprAssignOp)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it);
-    }
-    v.visit_expr(&*node.left);
-    v.visit_bin_op(&node.op);
     v.visit_expr(&*node.right);
 }
 #[cfg(feature = "full")]

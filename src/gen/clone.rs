@@ -233,8 +233,6 @@ impl Clone for Expr {
             #[cfg(feature = "full")]
             Expr::Assign(v0) => Expr::Assign(v0.clone()),
             #[cfg(feature = "full")]
-            Expr::AssignOp(v0) => Expr::AssignOp(v0.clone()),
-            #[cfg(feature = "full")]
             Expr::Async(v0) => Expr::Async(v0.clone()),
             #[cfg(feature = "full")]
             Expr::Await(v0) => Expr::Await(v0.clone()),
@@ -322,18 +320,6 @@ impl Clone for ExprAssign {
             attrs: self.attrs.clone(),
             left: self.left.clone(),
             eq_token: self.eq_token.clone(),
-            right: self.right.clone(),
-        }
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
-impl Clone for ExprAssignOp {
-    fn clone(&self) -> Self {
-        ExprAssignOp {
-            attrs: self.attrs.clone(),
-            left: self.left.clone(),
-            op: self.op.clone(),
             right: self.right.clone(),
         }
     }

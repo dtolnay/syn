@@ -119,10 +119,6 @@ pub trait Fold {
         fold_expr_assign(self, i)
     }
     #[cfg(feature = "full")]
-    fn fold_expr_assign_op(&mut self, i: ExprAssignOp) -> ExprAssignOp {
-        fold_expr_assign_op(self, i)
-    }
-    #[cfg(feature = "full")]
     fn fold_expr_async(&mut self, i: ExprAsync) -> ExprAsync {
         fold_expr_async(self, i)
     }
@@ -1082,9 +1078,6 @@ where
     match node {
         Expr::Array(_binding_0) => Expr::Array(full!(f.fold_expr_array(_binding_0))),
         Expr::Assign(_binding_0) => Expr::Assign(full!(f.fold_expr_assign(_binding_0))),
-        Expr::AssignOp(_binding_0) => {
-            Expr::AssignOp(full!(f.fold_expr_assign_op(_binding_0)))
-        }
         Expr::Async(_binding_0) => Expr::Async(full!(f.fold_expr_async(_binding_0))),
         Expr::Await(_binding_0) => Expr::Await(full!(f.fold_expr_await(_binding_0))),
         Expr::Binary(_binding_0) => Expr::Binary(f.fold_expr_binary(_binding_0)),
@@ -1156,18 +1149,6 @@ where
         attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
         left: Box::new(f.fold_expr(*node.left)),
         eq_token: Token![=](tokens_helper(f, &node.eq_token.spans)),
-        right: Box::new(f.fold_expr(*node.right)),
-    }
-}
-#[cfg(feature = "full")]
-pub fn fold_expr_assign_op<F>(f: &mut F, node: ExprAssignOp) -> ExprAssignOp
-where
-    F: Fold + ?Sized,
-{
-    ExprAssignOp {
-        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
-        left: Box::new(f.fold_expr(*node.left)),
-        op: f.fold_bin_op(node.op),
         right: Box::new(f.fold_expr(*node.right)),
     }
 }

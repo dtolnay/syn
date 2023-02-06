@@ -344,183 +344,178 @@ impl Hash for Expr {
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::AssignOp(v0) => {
+            Expr::Async(v0) => {
                 state.write_u8(2u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            Expr::Async(v0) => {
+            Expr::Await(v0) => {
                 state.write_u8(3u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
-            Expr::Await(v0) => {
-                state.write_u8(4u8);
-                v0.hash(state);
-            }
             Expr::Binary(v0) => {
-                state.write_u8(5u8);
+                state.write_u8(4u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Block(v0) => {
-                state.write_u8(6u8);
+                state.write_u8(5u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Break(v0) => {
-                state.write_u8(7u8);
+                state.write_u8(6u8);
                 v0.hash(state);
             }
             Expr::Call(v0) => {
-                state.write_u8(8u8);
+                state.write_u8(7u8);
                 v0.hash(state);
             }
             Expr::Cast(v0) => {
-                state.write_u8(9u8);
+                state.write_u8(8u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Closure(v0) => {
-                state.write_u8(10u8);
+                state.write_u8(9u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Const(v0) => {
-                state.write_u8(11u8);
+                state.write_u8(10u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Continue(v0) => {
-                state.write_u8(12u8);
+                state.write_u8(11u8);
                 v0.hash(state);
             }
             Expr::Field(v0) => {
-                state.write_u8(13u8);
+                state.write_u8(12u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::ForLoop(v0) => {
-                state.write_u8(14u8);
+                state.write_u8(13u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Group(v0) => {
-                state.write_u8(15u8);
+                state.write_u8(14u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::If(v0) => {
-                state.write_u8(16u8);
+                state.write_u8(15u8);
                 v0.hash(state);
             }
             Expr::Index(v0) => {
-                state.write_u8(17u8);
+                state.write_u8(16u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Infer(v0) => {
-                state.write_u8(18u8);
+                state.write_u8(17u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Let(v0) => {
-                state.write_u8(19u8);
+                state.write_u8(18u8);
                 v0.hash(state);
             }
             Expr::Lit(v0) => {
-                state.write_u8(20u8);
+                state.write_u8(19u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Loop(v0) => {
-                state.write_u8(21u8);
+                state.write_u8(20u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Macro(v0) => {
-                state.write_u8(22u8);
+                state.write_u8(21u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Match(v0) => {
-                state.write_u8(23u8);
+                state.write_u8(22u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::MethodCall(v0) => {
-                state.write_u8(24u8);
+                state.write_u8(23u8);
                 v0.hash(state);
             }
             Expr::Paren(v0) => {
-                state.write_u8(25u8);
+                state.write_u8(24u8);
                 v0.hash(state);
             }
             Expr::Path(v0) => {
-                state.write_u8(26u8);
+                state.write_u8(25u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Range(v0) => {
-                state.write_u8(27u8);
+                state.write_u8(26u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Reference(v0) => {
-                state.write_u8(28u8);
+                state.write_u8(27u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Repeat(v0) => {
-                state.write_u8(29u8);
+                state.write_u8(28u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Return(v0) => {
-                state.write_u8(30u8);
+                state.write_u8(29u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Struct(v0) => {
-                state.write_u8(31u8);
+                state.write_u8(30u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Try(v0) => {
-                state.write_u8(32u8);
+                state.write_u8(31u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::TryBlock(v0) => {
-                state.write_u8(33u8);
+                state.write_u8(32u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Tuple(v0) => {
-                state.write_u8(34u8);
+                state.write_u8(33u8);
                 v0.hash(state);
             }
             Expr::Unary(v0) => {
-                state.write_u8(35u8);
+                state.write_u8(34u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Unsafe(v0) => {
-                state.write_u8(36u8);
+                state.write_u8(35u8);
                 v0.hash(state);
             }
             Expr::Verbatim(v0) => {
-                state.write_u8(37u8);
+                state.write_u8(36u8);
                 TokenStreamHelper(v0).hash(state);
             }
             #[cfg(feature = "full")]
             Expr::While(v0) => {
-                state.write_u8(38u8);
+                state.write_u8(37u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             Expr::Yield(v0) => {
-                state.write_u8(39u8);
+                state.write_u8(38u8);
                 v0.hash(state);
             }
             #[cfg(not(feature = "full"))]
@@ -548,19 +543,6 @@ impl Hash for ExprAssign {
     {
         self.attrs.hash(state);
         self.left.hash(state);
-        self.right.hash(state);
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for ExprAssignOp {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.attrs.hash(state);
-        self.left.hash(state);
-        self.op.hash(state);
         self.right.hash(state);
     }
 }

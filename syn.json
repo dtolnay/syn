@@ -649,11 +649,6 @@
             "syn": "ExprAssign"
           }
         ],
-        "AssignOp": [
-          {
-            "syn": "ExprAssignOp"
-          }
-        ],
         "Async": [
           {
             "syn": "ExprAsync"
@@ -888,34 +883,6 @@
         },
         "eq_token": {
           "token": "Eq"
-        },
-        "right": {
-          "box": {
-            "syn": "Expr"
-          }
-        }
-      }
-    },
-    {
-      "ident": "ExprAssignOp",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "left": {
-          "box": {
-            "syn": "Expr"
-          }
-        },
-        "op": {
-          "syn": "BinOp"
         },
         "right": {
           "box": {
