@@ -1677,7 +1677,7 @@ impl Hash for Label {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Hash for LifetimeDef {
+impl Hash for LifetimeParam {
     fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,

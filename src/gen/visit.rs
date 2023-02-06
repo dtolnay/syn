@@ -439,8 +439,8 @@ pub trait Visit<'ast> {
         visit_lifetime(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
-    fn visit_lifetime_def(&mut self, i: &'ast LifetimeDef) {
-        visit_lifetime_def(self, i);
+    fn visit_lifetime_param(&mut self, i: &'ast LifetimeParam) {
+        visit_lifetime_param(self, i);
     }
     fn visit_lit(&mut self, i: &'ast Lit) {
         visit_lit(self, i);
@@ -991,7 +991,7 @@ where
     tokens_helper(v, &node.lt_token.spans);
     for el in Punctuated::pairs(&node.lifetimes) {
         let (it, p) = el.into_tuple();
-        v.visit_lifetime_def(it);
+        v.visit_lifetime_param(it);
         if let Some(p) = p {
             tokens_helper(v, &p.spans);
         }
@@ -2021,7 +2021,7 @@ where
             v.visit_type_param(_binding_0);
         }
         GenericParam::Lifetime(_binding_0) => {
-            v.visit_lifetime_def(_binding_0);
+            v.visit_lifetime_param(_binding_0);
         }
         GenericParam::Const(_binding_0) => {
             v.visit_const_param(_binding_0);
@@ -2522,7 +2522,7 @@ where
     v.visit_ident(&node.ident);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-pub fn visit_lifetime_def<'ast, V>(v: &mut V, node: &'ast LifetimeDef)
+pub fn visit_lifetime_param<'ast, V>(v: &mut V, node: &'ast LifetimeParam)
 where
     V: Visit<'ast> + ?Sized,
 {

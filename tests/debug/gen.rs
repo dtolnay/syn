@@ -2850,9 +2850,9 @@ impl Debug for Lite<syn::Lifetime> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::LifetimeDef> {
+impl Debug for Lite<syn::LifetimeParam> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("LifetimeDef");
+        let mut formatter = formatter.debug_struct("LifetimeParam");
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }

@@ -23,12 +23,12 @@ fn test_split_for_impl() {
         generics: Generics {
             lt_token: Some,
             params: [
-                GenericParam::Lifetime(LifetimeDef {
+                GenericParam::Lifetime(LifetimeParam {
                     lifetime: Lifetime {
                         ident: "a",
                     },
                 }),
-                GenericParam::Lifetime(LifetimeDef {
+                GenericParam::Lifetime(LifetimeParam {
                     lifetime: Lifetime {
                         ident: "b",
                     },

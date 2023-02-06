@@ -40,7 +40,7 @@ ast_enum_of_structs! {
         Type(TypeParam),
 
         /// A lifetime definition: `'a: 'b + 'c + 'd`.
-        Lifetime(LifetimeDef),
+        Lifetime(LifetimeParam),
 
         /// A const generic parameter: `const LENGTH: usize`.
         Const(ConstParam),
@@ -63,7 +63,7 @@ ast_struct! {
 ast_struct! {
     /// A lifetime definition: `'a: 'b + 'c + 'd`.
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub struct LifetimeDef {
+    pub struct LifetimeParam {
         pub attrs: Vec<Attribute>,
         pub lifetime: Lifetime,
         pub colon_token: Option<Token![:]>,
@@ -122,8 +122,8 @@ impl Generics {
     /// Returns an
     /// <code
     ///   style="padding-right:0;">Iterator&lt;Item = &amp;</code><a
-    ///   href="struct.LifetimeDef.html"><code
-    ///   style="padding-left:0;padding-right:0;">LifetimeDef</code></a><code
+    ///   href="struct.LifetimeParam.html"><code
+    ///   style="padding-left:0;padding-right:0;">LifetimeParam</code></a><code
     ///   style="padding-left:0;">&gt;</code>
     /// over the lifetime parameters in `self.params`.
     pub fn lifetimes(&self) -> Lifetimes {
@@ -133,8 +133,8 @@ impl Generics {
     /// Returns an
     /// <code
     ///   style="padding-right:0;">Iterator&lt;Item = &amp;mut </code><a
-    ///   href="struct.LifetimeDef.html"><code
-    ///   style="padding-left:0;padding-right:0;">LifetimeDef</code></a><code
+    ///   href="struct.LifetimeParam.html"><code
+    ///   style="padding-left:0;padding-right:0;">LifetimeParam</code></a><code
     ///   style="padding-left:0;">&gt;</code>
     /// over the lifetime parameters in `self.params`.
     pub fn lifetimes_mut(&mut self) -> LifetimesMut {
@@ -211,7 +211,7 @@ impl<'a> Iterator for TypeParamsMut<'a> {
 pub struct Lifetimes<'a>(Iter<'a, GenericParam>);
 
 impl<'a> Iterator for Lifetimes<'a> {
-    type Item = &'a LifetimeDef;
+    type Item = &'a LifetimeParam;
 
     fn next(&mut self) -> Option<Self::Item> {
         let next = match self.0.next() {
@@ -229,7 +229,7 @@ impl<'a> Iterator for Lifetimes<'a> {
 pub struct LifetimesMut<'a>(IterMut<'a, GenericParam>);
 
 impl<'a> Iterator for LifetimesMut<'a> {
-    type Item = &'a mut LifetimeDef;
+    type Item = &'a mut LifetimeParam;
 
     fn next(&mut self) -> Option<Self::Item> {
         let next = match self.0.next() {
@@ -402,7 +402,7 @@ ast_struct! {
     pub struct BoundLifetimes {
         pub for_token: Token![for],
         pub lt_token: Token![<],
-        pub lifetimes: Punctuated<LifetimeDef, Token![,]>,
+        pub lifetimes: Punctuated<LifetimeParam, Token![,]>,
         pub gt_token: Token![>],
     }
 }
@@ -418,9 +418,9 @@ impl Default for BoundLifetimes {
     }
 }
 
-impl LifetimeDef {
+impl LifetimeParam {
     pub fn new(lifetime: Lifetime) -> Self {
-        LifetimeDef {
+        LifetimeParam {
             attrs: Vec::new(),
             lifetime,
             colon_token: None,
@@ -553,7 +553,7 @@ pub(crate) mod parsing {
                 let attrs = input.call(Attribute::parse_outer)?;
                 let lookahead = input.lookahead1();
                 if lookahead.peek(Lifetime) {
-                    params.push_value(GenericParam::Lifetime(LifetimeDef {
+                    params.push_value(GenericParam::Lifetime(LifetimeParam {
                         attrs,
                         ..input.parse()?
                     }));
@@ -610,7 +610,7 @@ pub(crate) mod parsing {
                     ..input.parse()?
                 }))
             } else if lookahead.peek(Lifetime) {
-                Ok(GenericParam::Lifetime(LifetimeDef {
+                Ok(GenericParam::Lifetime(LifetimeParam {
                     attrs,
                     ..input.parse()?
                 }))
@@ -626,10 +626,10 @@ pub(crate) mod parsing {
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-    impl Parse for LifetimeDef {
+    impl Parse for LifetimeParam {
         fn parse(input: ParseStream) -> Result<Self> {
             let has_colon;
-            Ok(LifetimeDef {
+            Ok(LifetimeParam {
                 attrs: input.call(Attribute::parse_outer)?,
                 lifetime: input.parse()?,
                 colon_token: {
@@ -1122,7 +1122,7 @@ mod printing {
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for LifetimeDef {
+    impl ToTokens for LifetimeParam {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.lifetime.to_tokens(tokens);
