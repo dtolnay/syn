@@ -31,6 +31,9 @@ static EXCLUDE_FILES: &[&str] = &[
     // Need at least one trait in impl Trait, no such type as impl 'static
     "tests/ui/type-alias-impl-trait/generic_type_does_not_live_long_enough.rs",
 
+    // Lifetime bound inside for<>: `T: ~const ?for<'a: 'b> Trait<'a>`
+    "tests/ui/rfc-2632-const-trait-impl/tilde-const-syntax.rs",
+
     // Deprecated anonymous parameter syntax in traits
     "src/tools/rustfmt/tests/source/trait.rs",
     "src/tools/rustfmt/tests/target/trait.rs",
