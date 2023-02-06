@@ -1,6 +1,7 @@
 ast_enum! {
     /// A binary operator: `+`, `+=`, `&`.
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[non_exhaustive]
     pub enum BinOp {
         /// The `+` operator (addition)
         Add(Token![+]),
@@ -64,6 +65,7 @@ ast_enum! {
 ast_enum! {
     /// A unary operator: `*`, `!`, `-`.
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[non_exhaustive]
     pub enum UnOp {
         /// The `*` operator for dereferencing
         Deref(Token![*]),

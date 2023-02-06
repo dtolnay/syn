@@ -401,7 +401,8 @@
             "token": "ShrEq"
           }
         ]
-      }
+      },
+      "exhaustive": false
     },
     {
       "ident": "Block",
@@ -5113,7 +5114,8 @@
             "token": "Minus"
           }
         ]
-      }
+      },
+      "exhaustive": false
     },
     {
       "ident": "UseGlob",

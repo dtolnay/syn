@@ -293,6 +293,7 @@ impl Debug for Lite<syn::BinOp> {
                 formatter.write_str("BinOp::ShrAssign")?;
                 Ok(())
             }
+            _ => unreachable!(),
         }
     }
 }
@@ -4430,6 +4431,7 @@ impl Debug for Lite<syn::UnOp> {
                 formatter.write_str("UnOp::Neg")?;
                 Ok(())
             }
+            _ => unreachable!(),
         }
     }
 }
