@@ -987,7 +987,7 @@ where
     BoundLifetimes {
         for_token: Token![for](tokens_helper(f, &node.for_token.span)),
         lt_token: Token![<](tokens_helper(f, &node.lt_token.spans)),
-        lifetimes: FoldHelper::lift(node.lifetimes, |it| f.fold_lifetime_param(it)),
+        lifetimes: FoldHelper::lift(node.lifetimes, |it| f.fold_generic_param(it)),
         gt_token: Token![>](tokens_helper(f, &node.gt_token.spans)),
     }
 }
