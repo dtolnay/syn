@@ -672,8 +672,14 @@ pub(crate) mod parsing {
                 lifetimes: {
                     let mut lifetimes = Punctuated::new();
                     while !input.peek(Token![>]) {
-                        let lifetime: LifetimeParam = input.parse()?;
-                        lifetimes.push_value(lifetime);
+                        let attrs = input.call(Attribute::parse_outer)?;
+                        let lifetime: Lifetime = input.parse()?;
+                        lifetimes.push_value(LifetimeParam {
+                            attrs,
+                            lifetime,
+                            colon_token: None,
+                            bounds: Punctuated::new(),
+                        });
                         if input.peek(Token![>]) {
                             break;
                         }
