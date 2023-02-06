@@ -453,16 +453,6 @@ impl Debug for Lite<syn::Expr> {
                 formatter.field("right", Lite(&_val.right));
                 formatter.finish()
             }
-            syn::Expr::AssignOp(_val) => {
-                let mut formatter = formatter.debug_struct("Expr::AssignOp");
-                if !_val.attrs.is_empty() {
-                    formatter.field("attrs", Lite(&_val.attrs));
-                }
-                formatter.field("left", Lite(&_val.left));
-                formatter.field("op", Lite(&_val.op));
-                formatter.field("right", Lite(&_val.right));
-                formatter.finish()
-            }
             syn::Expr::Async(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Async");
                 if !_val.attrs.is_empty() {
@@ -1066,18 +1056,6 @@ impl Debug for Lite<syn::ExprAssign> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("left", Lite(&self.value.left));
-        formatter.field("right", Lite(&self.value.right));
-        formatter.finish()
-    }
-}
-impl Debug for Lite<syn::ExprAssignOp> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("ExprAssignOp");
-        if !self.value.attrs.is_empty() {
-            formatter.field("attrs", Lite(&self.value.attrs));
-        }
-        formatter.field("left", Lite(&self.value.left));
-        formatter.field("op", Lite(&self.value.op));
         formatter.field("right", Lite(&self.value.right));
         formatter.finish()
     }

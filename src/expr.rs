@@ -93,16 +93,13 @@ ast_enum_of_structs! {
         /// An assignment expression: `a = compute()`.
         Assign(ExprAssign),
 
-        /// A compound assignment expression: `counter += 1`.
-        AssignOp(ExprAssignOp),
-
         /// An async block: `async { ... }`.
         Async(ExprAsync),
 
         /// An await expression: `fut.await`.
         Await(ExprAwait),
 
-        /// A binary operation: `a + b`, `a * b`.
+        /// A binary operation: `a + b`, `a += b`.
         Binary(ExprBinary),
 
         /// A blocked scope: `{ ... }`.
@@ -264,17 +261,6 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A compound assignment expression: `counter += 1`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct ExprAssignOp #full {
-        pub attrs: Vec<Attribute>,
-        pub left: Box<Expr>,
-        pub op: BinOp,
-        pub right: Box<Expr>,
-    }
-}
-
-ast_struct! {
     /// An async block: `async { ... }`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprAsync #full {
@@ -297,7 +283,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A binary operation: `a + b`, `a * b`.
+    /// A binary operation: `a + b`, `a += b`.
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct ExprBinary {
         pub attrs: Vec<Attribute>,
@@ -702,7 +688,6 @@ impl Expr {
         match self {
             Expr::Array(ExprArray { attrs, .. })
             | Expr::Assign(ExprAssign { attrs, .. })
-            | Expr::AssignOp(ExprAssignOp { attrs, .. })
             | Expr::Async(ExprAsync { attrs, .. })
             | Expr::Await(ExprAwait { attrs, .. })
             | Expr::Binary(ExprBinary { attrs, .. })
@@ -939,7 +924,6 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
         | Expr::Const(_) => false,
         Expr::Array(_)
         | Expr::Assign(_)
-        | Expr::AssignOp(_)
         | Expr::Async(_)
         | Expr::Await(_)
         | Expr::Binary(_)
@@ -1186,21 +1170,12 @@ pub(crate) mod parsing {
                         break;
                     }
                 }
-                lhs = if precedence == Precedence::Assign {
-                    Expr::AssignOp(ExprAssignOp {
-                        attrs: Vec::new(),
-                        left: Box::new(lhs),
-                        op,
-                        right: Box::new(rhs),
-                    })
-                } else {
-                    Expr::Binary(ExprBinary {
-                        attrs: Vec::new(),
-                        left: Box::new(lhs),
-                        op,
-                        right: Box::new(rhs),
-                    })
-                };
+                lhs = Expr::Binary(ExprBinary {
+                    attrs: Vec::new(),
+                    left: Box::new(lhs),
+                    op,
+                    right: Box::new(rhs),
+                });
             } else if Precedence::Assign >= base
                 && input.peek(Token![=])
                 && !input.peek(Token![==])
@@ -2132,7 +2107,6 @@ pub(crate) mod parsing {
 
     impl_by_parsing_expr! {
         ExprAssign, Assign, "expected assignment expression",
-        ExprAssignOp, AssignOp, "expected compound assignment expression",
         ExprAwait, Await, "expected await expression",
         ExprBinary, Binary, "expected binary operation",
         ExprCall, Call, "expected function call expression",
@@ -2818,17 +2792,6 @@ pub(crate) mod printing {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.left.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
-            self.right.to_tokens(tokens);
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
-    impl ToTokens for ExprAssignOp {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.left.to_tokens(tokens);
-            self.op.to_tokens(tokens);
             self.right.to_tokens(tokens);
         }
     }

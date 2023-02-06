@@ -252,8 +252,6 @@ impl PartialEq for Expr {
             #[cfg(feature = "full")]
             (Expr::Assign(self0), Expr::Assign(other0)) => self0 == other0,
             #[cfg(feature = "full")]
-            (Expr::AssignOp(self0), Expr::AssignOp(other0)) => self0 == other0,
-            #[cfg(feature = "full")]
             (Expr::Async(self0), Expr::Async(other0)) => self0 == other0,
             #[cfg(feature = "full")]
             (Expr::Await(self0), Expr::Await(other0)) => self0 == other0,
@@ -341,17 +339,6 @@ impl Eq for ExprAssign {}
 impl PartialEq for ExprAssign {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.left == other.left && self.right == other.right
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Eq for ExprAssignOp {}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for ExprAssignOp {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.left == other.left && self.op == other.op
-            && self.right == other.right
     }
 }
 #[cfg(feature = "full")]

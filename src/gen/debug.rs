@@ -399,8 +399,6 @@ impl Debug for Expr {
             #[cfg(feature = "full")]
             Expr::Assign(v0) => v0.debug(formatter, "Assign"),
             #[cfg(feature = "full")]
-            Expr::AssignOp(v0) => v0.debug(formatter, "AssignOp"),
-            #[cfg(feature = "full")]
             Expr::Async(v0) => v0.debug(formatter, "Async"),
             #[cfg(feature = "full")]
             Expr::Await(v0) => v0.debug(formatter, "Await"),
@@ -504,23 +502,6 @@ impl Debug for ExprAssign {
             }
         }
         self.debug(formatter, "ExprAssign")
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
-impl Debug for ExprAssignOp {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        impl ExprAssignOp {
-            fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
-                let mut formatter = formatter.debug_struct(name);
-                formatter.field("attrs", &self.attrs);
-                formatter.field("left", &self.left);
-                formatter.field("op", &self.op);
-                formatter.field("right", &self.right);
-                formatter.finish()
-            }
-        }
-        self.debug(formatter, "ExprAssignOp")
     }
 }
 #[cfg(feature = "full")]
