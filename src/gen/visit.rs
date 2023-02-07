@@ -3067,6 +3067,10 @@ where
         tokens_helper(v, &it.span);
     }
     tokens_helper(v, &node.self_token.span);
+    if let Some(it) = &node.colon_token {
+        tokens_helper(v, &it.spans);
+    }
+    v.visit_type(&*node.ty);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_return_type<'ast, V>(v: &mut V, node: &'ast ReturnType)

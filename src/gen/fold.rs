@@ -2703,6 +2703,8 @@ where
             )),
         mutability: (node.mutability).map(|it| Token![mut](tokens_helper(f, &it.span))),
         self_token: Token![self](tokens_helper(f, &node.self_token.span)),
+        colon_token: (node.colon_token).map(|it| Token![:](tokens_helper(f, &it.spans))),
+        ty: Box::new(f.fold_type(*node.ty)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

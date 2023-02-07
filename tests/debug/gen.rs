@@ -3632,6 +3632,10 @@ impl Debug for Lite<syn::Receiver> {
         if self.value.mutability.is_some() {
             formatter.field("mutability", &Present);
         }
+        if self.value.colon_token.is_some() {
+            formatter.field("colon_token", &Present);
+        }
+        formatter.field("ty", Lite(&self.value.ty));
         formatter.finish()
     }
 }
