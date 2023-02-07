@@ -3070,6 +3070,10 @@ where
         tokens_helper(v, &mut it.span);
     }
     tokens_helper(v, &mut node.self_token.span);
+    if let Some(it) = &mut node.colon_token {
+        tokens_helper(v, &mut it.spans);
+    }
+    v.visit_type_mut(&mut *node.ty);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_return_type_mut<V>(v: &mut V, node: &mut ReturnType)

@@ -4272,6 +4272,16 @@
         },
         "self_token": {
           "token": "SelfValue"
+        },
+        "colon_token": {
+          "option": {
+            "token": "Colon"
+          }
+        },
+        "ty": {
+          "box": {
+            "syn": "Type"
+          }
         }
       }
     },

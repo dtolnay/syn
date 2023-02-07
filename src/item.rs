@@ -793,18 +793,11 @@ ast_struct! {
 
 impl Signature {
     /// A method's `self` receiver, such as `&self` or `self: Box<Self>`.
-    pub fn receiver(&self) -> Option<&FnArg> {
+    pub fn receiver(&self) -> Option<&Receiver> {
         let arg = self.inputs.first()?;
         match arg {
-            FnArg::Receiver(_) => Some(arg),
-            FnArg::Typed(PatType { pat, .. }) => {
-                if let Pat::Ident(PatIdent { ident, .. }) = &**pat {
-                    if ident == "self" {
-                        return Some(arg);
-                    }
-                }
-                None
-            }
+            FnArg::Receiver(receiver) => Some(receiver),
+            FnArg::Typed(_) => None,
         }
     }
 }
@@ -813,11 +806,7 @@ ast_enum_of_structs! {
     /// An argument in a function signature: the `n: usize` in `fn f(n: usize)`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub enum FnArg {
-        /// The `self` argument of an associated method, whether taken by value
-        /// or by reference.
-        ///
-        /// Note that `self` receivers with a specified type, such as `self:
-        /// Box<Self>`, are parsed as a `FnArg::Typed`.
+        /// The `self` argument of an associated method.
         Receiver(Receiver),
 
         /// A function argument accepted by pattern and type.
@@ -826,17 +815,21 @@ ast_enum_of_structs! {
 }
 
 ast_struct! {
-    /// The `self` argument of an associated method, whether taken by value
-    /// or by reference.
+    /// The `self` argument of an associated method.
     ///
-    /// Note that `self` receivers with a specified type, such as `self:
-    /// Box<Self>`, are parsed as a `FnArg::Typed`.
+    /// If `colon_token` is present, the receiver is written with an explicit
+    /// type such as `self: Box<Self>`. If `colon_token` is absent, the receiver
+    /// is written in shorthand such as `self` or `&self` or `&mut self`. In the
+    /// shorthand case, the type in `ty` is reconstructed as one of `Self`,
+    /// `&Self`, or `&mut Self`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct Receiver {
         pub attrs: Vec<Attribute>,
         pub reference: Option<(Token![&], Option<Lifetime>)>,
         pub mutability: Option<Token![mut]>,
         pub self_token: Token![self],
+        pub colon_token: Option<Token![:]>,
+        pub ty: Box<Type>,
     }
 }
 
@@ -1491,11 +1484,9 @@ pub(crate) mod parsing {
     ) -> Result<FnArgOrVariadic> {
         let ahead = input.fork();
         if let Ok(mut receiver) = ahead.parse::<Receiver>() {
-            if !ahead.peek(Token![:]) {
-                input.advance_to(&ahead);
-                receiver.attrs = attrs;
-                return Ok(FnArgOrVariadic::FnArg(FnArg::Receiver(receiver)));
-            }
+            input.advance_to(&ahead);
+            receiver.attrs = attrs;
+            return Ok(FnArgOrVariadic::FnArg(FnArg::Receiver(receiver)));
         }
 
         // Hack to parse pre-2018 syntax in
@@ -1539,17 +1530,44 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Receiver {
         fn parse(input: ParseStream) -> Result<Self> {
+            let reference = if input.peek(Token![&]) {
+                let ampersand: Token![&] = input.parse()?;
+                let lifetime: Option<Lifetime> = input.parse()?;
+                Some((ampersand, lifetime))
+            } else {
+                None
+            };
+            let mutability: Option<Token![mut]> = input.parse()?;
+            let self_token: Token![self] = input.parse()?;
+            let colon_token: Option<Token![:]> = if reference.is_some() {
+                None
+            } else {
+                input.parse()?
+            };
+            let ty: Type = if colon_token.is_some() {
+                input.parse()?
+            } else {
+                let mut ty = Type::Path(TypePath {
+                    qself: None,
+                    path: Path::from(Ident::new("Self", self_token.span)),
+                });
+                if let Some((ampersand, lifetime)) = reference.as_ref() {
+                    ty = Type::Reference(TypeReference {
+                        and_token: Token![&](ampersand.span),
+                        lifetime: lifetime.clone(),
+                        mutability: mutability.as_ref().map(|m| Token![mut](m.span)),
+                        elem: Box::new(ty),
+                    });
+                }
+                ty
+            };
             Ok(Receiver {
                 attrs: Vec::new(),
-                reference: {
-                    if input.peek(Token![&]) {
-                        Some((input.parse()?, input.parse()?))
-                    } else {
-                        None
-                    }
-                },
-                mutability: input.parse()?,
-                self_token: input.parse()?,
+                reference,
+                mutability,
+                self_token,
+                colon_token,
+                ty: Box::new(ty),
             })
         }
     }
@@ -3225,6 +3243,26 @@ mod printing {
             }
             self.mutability.to_tokens(tokens);
             self.self_token.to_tokens(tokens);
+            if let Some(colon_token) = &self.colon_token {
+                colon_token.to_tokens(tokens);
+                self.ty.to_tokens(tokens);
+            } else {
+                let consistent = match (&self.reference, &self.mutability, &*self.ty) {
+                    (Some(_), mutability, Type::Reference(ty)) => {
+                        mutability.is_some() == ty.mutability.is_some()
+                            && match &*ty.elem {
+                                Type::Path(ty) => ty.qself.is_none() && ty.path.is_ident("Self"),
+                                _ => false,
+                            }
+                    }
+                    (None, _, Type::Path(ty)) => ty.qself.is_none() && ty.path.is_ident("Self"),
+                    _ => false,
+                };
+                if !consistent {
+                    <Token![:]>::default().to_tokens(tokens);
+                    self.ty.to_tokens(tokens);
+                }
+            }
         }
     }
 

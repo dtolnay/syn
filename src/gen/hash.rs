@@ -2151,6 +2151,8 @@ impl Hash for Receiver {
         self.attrs.hash(state);
         self.reference.hash(state);
         self.mutability.hash(state);
+        self.colon_token.hash(state);
+        self.ty.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

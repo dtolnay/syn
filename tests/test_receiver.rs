@@ -11,10 +11,8 @@ fn test_by_value() {
         fn by_value(self: Self);
     };
     snapshot!(&sig.inputs[0], @r###"
-    FnArg::Typed(PatType {
-        pat: Pat::Ident {
-            ident: "self",
-        },
+    FnArg::Receiver(Receiver {
+        colon_token: Some,
         ty: Type::Path {
             path: Path {
                 segments: [
@@ -34,11 +32,9 @@ fn test_by_mut_value() {
         fn by_mut(mut self: Self);
     };
     snapshot!(&sig.inputs[0], @r###"
-    FnArg::Typed(PatType {
-        pat: Pat::Ident {
-            mutability: Some,
-            ident: "self",
-        },
+    FnArg::Receiver(Receiver {
+        mutability: Some,
+        colon_token: Some,
         ty: Type::Path {
             path: Path {
                 segments: [
@@ -58,10 +54,8 @@ fn test_by_ref() {
         fn by_ref(self: &Self);
     };
     snapshot!(&sig.inputs[0], @r###"
-    FnArg::Typed(PatType {
-        pat: Pat::Ident {
-            ident: "self",
-        },
+    FnArg::Receiver(Receiver {
+        colon_token: Some,
         ty: Type::Reference {
             elem: Type::Path {
                 path: Path {
@@ -83,10 +77,8 @@ fn test_by_box() {
         fn by_box(self: Box<Self>);
     };
     snapshot!(&sig.inputs[0], @r###"
-    FnArg::Typed(PatType {
-        pat: Pat::Ident {
-            ident: "self",
-        },
+    FnArg::Receiver(Receiver {
+        colon_token: Some,
         ty: Type::Path {
             path: Path {
                 segments: [
@@ -119,10 +111,8 @@ fn test_by_pin() {
         fn by_pin(self: Pin<Self>);
     };
     snapshot!(&sig.inputs[0], @r###"
-    FnArg::Typed(PatType {
-        pat: Pat::Ident {
-            ident: "self",
-        },
+    FnArg::Receiver(Receiver {
+        colon_token: Some,
         ty: Type::Path {
             path: Path {
                 segments: [
@@ -155,10 +145,8 @@ fn test_explicit_type() {
         fn explicit_type(self: Pin<MyType>);
     };
     snapshot!(&sig.inputs[0], @r###"
-    FnArg::Typed(PatType {
-        pat: Pat::Ident {
-            ident: "self",
-        },
+    FnArg::Receiver(Receiver {
+        colon_token: Some,
         ty: Type::Path {
             path: Path {
                 segments: [
@@ -190,7 +178,19 @@ fn test_value_shorthand() {
     let TraitItemFn { sig, .. } = parse_quote! {
         fn value_shorthand(self);
     };
-    snapshot!(&sig.inputs[0], @"FnArg::Receiver(Receiver)");
+    snapshot!(&sig.inputs[0], @r###"
+    FnArg::Receiver(Receiver {
+        ty: Type::Path {
+            path: Path {
+                segments: [
+                    PathSegment {
+                        ident: "Self",
+                    },
+                ],
+            },
+        },
+    })
+    "###);
 }
 
 #[test]
@@ -201,6 +201,15 @@ fn test_mut_value_shorthand() {
     snapshot!(&sig.inputs[0], @r###"
     FnArg::Receiver(Receiver {
         mutability: Some,
+        ty: Type::Path {
+            path: Path {
+                segments: [
+                    PathSegment {
+                        ident: "Self",
+                    },
+                ],
+            },
+        },
     })
     "###);
 }
@@ -213,6 +222,17 @@ fn test_ref_shorthand() {
     snapshot!(&sig.inputs[0], @r###"
     FnArg::Receiver(Receiver {
         reference: Some(None),
+        ty: Type::Reference {
+            elem: Type::Path {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "Self",
+                        },
+                    ],
+                },
+            },
+        },
     })
     "###);
 }
@@ -227,6 +247,20 @@ fn test_ref_shorthand_with_lifetime() {
         reference: Some(Some(Lifetime {
             ident: "a",
         })),
+        ty: Type::Reference {
+            lifetime: Some(Lifetime {
+                ident: "a",
+            }),
+            elem: Type::Path {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "Self",
+                        },
+                    ],
+                },
+            },
+        },
     })
     "###);
 }
@@ -240,6 +274,18 @@ fn test_ref_mut_shorthand() {
     FnArg::Receiver(Receiver {
         reference: Some(None),
         mutability: Some,
+        ty: Type::Reference {
+            mutability: Some,
+            elem: Type::Path {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "Self",
+                        },
+                    ],
+                },
+            },
+        },
     })
     "###);
 }
@@ -255,6 +301,21 @@ fn test_ref_mut_shorthand_with_lifetime() {
             ident: "a",
         })),
         mutability: Some,
+        ty: Type::Reference {
+            lifetime: Some(Lifetime {
+                ident: "a",
+            }),
+            mutability: Some,
+            elem: Type::Path {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "Self",
+                        },
+                    ],
+                },
+            },
+        },
     })
     "###);
 }

@@ -1623,6 +1623,7 @@ impl PartialEq for Receiver {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.reference == other.reference
             && self.mutability == other.mutability
+            && self.colon_token == other.colon_token && self.ty == other.ty
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

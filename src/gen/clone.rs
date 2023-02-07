@@ -1692,6 +1692,8 @@ impl Clone for Receiver {
             reference: self.reference.clone(),
             mutability: self.mutability.clone(),
             self_token: self.self_token.clone(),
+            colon_token: self.colon_token.clone(),
+            ty: self.ty.clone(),
         }
     }
 }

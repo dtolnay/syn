@@ -2387,6 +2387,8 @@ impl Debug for Receiver {
         formatter.field("reference", &self.reference);
         formatter.field("mutability", &self.mutability);
         formatter.field("self_token", &self.self_token);
+        formatter.field("colon_token", &self.colon_token);
+        formatter.field("ty", &self.ty);
         formatter.finish()
     }
 }
