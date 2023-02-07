@@ -1199,11 +1199,12 @@ pub(crate) mod parsing {
                 });
             } else if Precedence::Range >= base && input.peek(Token![..]) {
                 let limits: RangeLimits = input.parse()?;
-                let rhs = if input.is_empty()
-                    || input.peek(Token![,])
-                    || input.peek(Token![;])
-                    || input.peek(Token![.]) && !input.peek(Token![..])
-                    || !allow_struct.0 && input.peek(token::Brace)
+                let rhs = if matches!(limits, RangeLimits::HalfOpen(_))
+                    && (input.is_empty()
+                        || input.peek(Token![,])
+                        || input.peek(Token![;])
+                        || input.peek(Token![.]) && !input.peek(Token![..])
+                        || !allow_struct.0 && input.peek(token::Brace))
                 {
                     None
                 } else {
@@ -2571,23 +2572,24 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     fn expr_range(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprRange> {
+        let limits: RangeLimits = input.parse()?;
+        let end = if matches!(limits, RangeLimits::HalfOpen(_))
+            && (input.is_empty()
+                || input.peek(Token![,])
+                || input.peek(Token![;])
+                || input.peek(Token![.]) && !input.peek(Token![..])
+                || !allow_struct.0 && input.peek(token::Brace))
+        {
+            None
+        } else {
+            let to = ambiguous_expr(input, allow_struct)?;
+            Some(Box::new(to))
+        };
         Ok(ExprRange {
             attrs: Vec::new(),
             start: None,
-            limits: input.parse()?,
-            end: {
-                if input.is_empty()
-                    || input.peek(Token![,])
-                    || input.peek(Token![;])
-                    || input.peek(Token![.]) && !input.peek(Token![..])
-                    || !allow_struct.0 && input.peek(token::Brace)
-                {
-                    None
-                } else {
-                    let to = ambiguous_expr(input, allow_struct)?;
-                    Some(Box::new(to))
-                }
-            },
+            limits,
+            end,
         })
     }
 
@@ -2596,12 +2598,32 @@ pub(crate) mod parsing {
     impl Parse for RangeLimits {
         fn parse(input: ParseStream) -> Result<Self> {
             let lookahead = input.lookahead1();
-            if lookahead.peek(Token![..=]) {
+            let dot_dot = lookahead.peek(Token![..]);
+            let dot_dot_eq = dot_dot && lookahead.peek(Token![..=]);
+            let dot_dot_dot = dot_dot && input.peek(Token![...]);
+            if dot_dot_eq {
                 input.parse().map(RangeLimits::Closed)
-            } else if lookahead.peek(Token![...]) {
+            } else if dot_dot && !dot_dot_dot {
+                input.parse().map(RangeLimits::HalfOpen)
+            } else {
+                Err(lookahead.error())
+            }
+        }
+    }
+
+    #[cfg(feature = "full")]
+    impl RangeLimits {
+        pub(crate) fn parse_obsolete(input: ParseStream) -> Result<Self> {
+            let lookahead = input.lookahead1();
+            let dot_dot = lookahead.peek(Token![..]);
+            let dot_dot_eq = dot_dot && lookahead.peek(Token![..=]);
+            let dot_dot_dot = dot_dot && input.peek(Token![...]);
+            if dot_dot_eq {
+                input.parse().map(RangeLimits::Closed)
+            } else if dot_dot_dot {
                 let dot3: Token![...] = input.parse()?;
                 Ok(RangeLimits::Closed(Token![..=](dot3.spans)))
-            } else if lookahead.peek(Token![..]) {
+            } else if dot_dot {
                 input.parse().map(RangeLimits::HalfOpen)
             } else {
                 Err(lookahead.error())

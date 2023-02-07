@@ -70,7 +70,7 @@ fn test_group() {
 fn test_ranges() {
     Pat::parse_single.parse_str("..").unwrap();
     Pat::parse_single.parse_str("..hi").unwrap();
-    Pat::parse_single.parse_str("lo..").unwrap_err(); // FIXME
+    Pat::parse_single.parse_str("lo..").unwrap();
     Pat::parse_single.parse_str("lo..hi").unwrap();
 
     Pat::parse_single.parse_str("..=").unwrap_err();

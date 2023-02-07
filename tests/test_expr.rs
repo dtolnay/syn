@@ -300,13 +300,13 @@ fn test_ranges() {
     syn::parse_str::<Expr>("lo..").unwrap();
     syn::parse_str::<Expr>("lo..hi").unwrap();
 
-    syn::parse_str::<Expr>("..=").unwrap(); // FIXME
+    syn::parse_str::<Expr>("..=").unwrap_err();
     syn::parse_str::<Expr>("..=hi").unwrap();
-    syn::parse_str::<Expr>("lo..=").unwrap(); // FIXME
+    syn::parse_str::<Expr>("lo..=").unwrap_err();
     syn::parse_str::<Expr>("lo..=hi").unwrap();
 
-    syn::parse_str::<Expr>("...").unwrap(); // FIXME
-    syn::parse_str::<Expr>("...hi").unwrap(); // FIXME
-    syn::parse_str::<Expr>("lo...").unwrap(); // FIXME
-    syn::parse_str::<Expr>("lo...hi").unwrap(); // FIXME
+    syn::parse_str::<Expr>("...").unwrap_err();
+    syn::parse_str::<Expr>("...hi").unwrap_err();
+    syn::parse_str::<Expr>("lo...").unwrap_err();
+    syn::parse_str::<Expr>("lo...hi").unwrap_err();
 }
