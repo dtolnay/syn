@@ -65,3 +65,21 @@ fn test_group() {
     }
     "###);
 }
+
+#[test]
+fn test_ranges() {
+    Pat::parse_single.parse_str("..").unwrap();
+    Pat::parse_single.parse_str("..hi").unwrap();
+    Pat::parse_single.parse_str("lo..").unwrap_err(); // FIXME
+    Pat::parse_single.parse_str("lo..hi").unwrap();
+
+    Pat::parse_single.parse_str("..=").unwrap_err();
+    Pat::parse_single.parse_str("..=hi").unwrap();
+    Pat::parse_single.parse_str("lo..=").unwrap_err();
+    Pat::parse_single.parse_str("lo..=hi").unwrap();
+
+    Pat::parse_single.parse_str("...").unwrap_err();
+    Pat::parse_single.parse_str("...hi").unwrap_err();
+    Pat::parse_single.parse_str("lo...").unwrap_err();
+    Pat::parse_single.parse_str("lo...hi").unwrap();
+}

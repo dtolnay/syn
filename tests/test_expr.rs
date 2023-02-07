@@ -292,3 +292,21 @@ fn test_postfix_operator_after_cast() {
     syn::parse_str::<Expr>("|| &x as T[0]").unwrap_err();
     syn::parse_str::<Expr>("|| () as ()()").unwrap_err();
 }
+
+#[test]
+fn test_ranges() {
+    syn::parse_str::<Expr>("..").unwrap();
+    syn::parse_str::<Expr>("..hi").unwrap();
+    syn::parse_str::<Expr>("lo..").unwrap();
+    syn::parse_str::<Expr>("lo..hi").unwrap();
+
+    syn::parse_str::<Expr>("..=").unwrap(); // FIXME
+    syn::parse_str::<Expr>("..=hi").unwrap();
+    syn::parse_str::<Expr>("lo..=").unwrap(); // FIXME
+    syn::parse_str::<Expr>("lo..=hi").unwrap();
+
+    syn::parse_str::<Expr>("...").unwrap(); // FIXME
+    syn::parse_str::<Expr>("...hi").unwrap(); // FIXME
+    syn::parse_str::<Expr>("lo...").unwrap(); // FIXME
+    syn::parse_str::<Expr>("lo...hi").unwrap(); // FIXME
+}
