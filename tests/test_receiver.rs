@@ -218,6 +218,20 @@ fn test_ref_shorthand() {
 }
 
 #[test]
+fn test_ref_shorthand_with_lifetime() {
+    let TraitItemFn { sig, .. } = parse_quote! {
+        fn ref_shorthand(&'a self);
+    };
+    snapshot!(&sig.inputs[0], @r###"
+    FnArg::Receiver(Receiver {
+        reference: Some(Some(Lifetime {
+            ident: "a",
+        })),
+    })
+    "###);
+}
+
+#[test]
 fn test_ref_mut_shorthand() {
     let TraitItemFn { sig, .. } = parse_quote! {
         fn ref_mut_shorthand(&mut self);
@@ -225,6 +239,21 @@ fn test_ref_mut_shorthand() {
     snapshot!(&sig.inputs[0], @r###"
     FnArg::Receiver(Receiver {
         reference: Some(None),
+        mutability: Some,
+    })
+    "###);
+}
+
+#[test]
+fn test_ref_mut_shorthand_with_lifetime() {
+    let TraitItemFn { sig, .. } = parse_quote! {
+        fn ref_mut_shorthand(&'a mut self);
+    };
+    snapshot!(&sig.inputs[0], @r###"
+    FnArg::Receiver(Receiver {
+        reference: Some(Some(Lifetime {
+            ident: "a",
+        })),
         mutability: Some,
     })
     "###);
