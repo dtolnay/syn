@@ -24,6 +24,65 @@ where
     }
 }
 
+impl Path {
+    /// Determines whether this is a path of length 1 equal to the given
+    /// ident.
+    ///
+    /// For them to compare equal, it must be the case that:
+    ///
+    /// - the path has no leading colon,
+    /// - the number of path segments is 1,
+    /// - the first path segment has no angle bracketed or parenthesized
+    ///   path arguments, and
+    /// - the ident of the first path segment is equal to the given one.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use proc_macro2::TokenStream;
+    /// use syn::{Attribute, Error, Meta, Result};
+    ///
+    /// fn get_serde_meta_item(attr: &Attribute) -> Result<Option<&TokenStream>> {
+    ///     if attr.path().is_ident("serde") {
+    ///         match &attr.meta {
+    ///             Meta::List(meta) => Ok(Some(&meta.tokens)),
+    ///             bad => Err(Error::new_spanned(bad, "unrecognized attribute")),
+    ///         }
+    ///     } else {
+    ///         Ok(None)
+    ///     }
+    /// }
+    /// ```
+    pub fn is_ident<I: ?Sized>(&self, ident: &I) -> bool
+    where
+        Ident: PartialEq<I>,
+    {
+        match self.get_ident() {
+            Some(id) => id == ident,
+            None => false,
+        }
+    }
+
+    /// If this path consists of a single ident, returns the ident.
+    ///
+    /// A path is considered an ident if:
+    ///
+    /// - the path has no leading colon,
+    /// - the number of path segments is 1, and
+    /// - the first path segment has no angle bracketed or parenthesized
+    ///   path arguments.
+    pub fn get_ident(&self) -> Option<&Ident> {
+        if self.leading_colon.is_none()
+            && self.segments.len() == 1
+            && self.segments[0].arguments.is_none()
+        {
+            Some(&self.segments[0].ident)
+        } else {
+            None
+        }
+    }
+}
+
 ast_struct! {
     /// A segment of a path together with any path arguments on that segment.
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
@@ -491,65 +550,6 @@ pub(crate) mod parsing {
                     segments
                 },
             })
-        }
-
-        /// Determines whether this is a path of length 1 equal to the given
-        /// ident.
-        ///
-        /// For them to compare equal, it must be the case that:
-        ///
-        /// - the path has no leading colon,
-        /// - the number of path segments is 1,
-        /// - the first path segment has no angle bracketed or parenthesized
-        ///   path arguments, and
-        /// - the ident of the first path segment is equal to the given one.
-        ///
-        /// # Example
-        ///
-        /// ```
-        /// use proc_macro2::TokenStream;
-        /// use syn::{Attribute, Error, Meta, Result};
-        ///
-        /// fn get_serde_meta_item(attr: &Attribute) -> Result<Option<&TokenStream>> {
-        ///     if attr.path().is_ident("serde") {
-        ///         match &attr.meta {
-        ///             Meta::List(meta) => Ok(Some(&meta.tokens)),
-        ///             bad => Err(Error::new_spanned(bad, "unrecognized attribute")),
-        ///         }
-        ///     } else {
-        ///         Ok(None)
-        ///     }
-        /// }
-        /// ```
-        #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-        pub fn is_ident<I: ?Sized>(&self, ident: &I) -> bool
-        where
-            Ident: PartialEq<I>,
-        {
-            match self.get_ident() {
-                Some(id) => id == ident,
-                None => false,
-            }
-        }
-
-        /// If this path consists of a single ident, returns the ident.
-        ///
-        /// A path is considered an ident if:
-        ///
-        /// - the path has no leading colon,
-        /// - the number of path segments is 1, and
-        /// - the first path segment has no angle bracketed or parenthesized
-        ///   path arguments.
-        #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
-        pub fn get_ident(&self) -> Option<&Ident> {
-            if self.leading_colon.is_none()
-                && self.segments.len() == 1
-                && self.segments[0].arguments.is_none()
-            {
-                Some(&self.segments[0].ident)
-            } else {
-                None
-            }
         }
 
         pub(crate) fn parse_helper(input: ParseStream, expr_style: bool) -> Result<Self> {
