@@ -50,9 +50,13 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/source/type-ascription.rs",
     "src/tools/rustfmt/tests/target/type-ascription.rs",
 
+    // Invalid unparenthesized range pattern inside slice pattern: `[1..]`
+    "tests/ui/consts/miri_unleashed/const_refers_to_static_cross_crate.rs",
+
     // Various extensions to Rust syntax made up by rust-analyzer
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0012_type_item_where_clause.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0040_crate_keyword_vis.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0058_range_pat.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0123_param_list_vararg.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0131_existential_type.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0156_fn_def_param.rs",
@@ -64,6 +68,7 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0055_dot_dot_dot.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0068_item_modifiers.rs",
     "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0031_block_inner_attrs.rs",
+    "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0038_endless_inclusive_range.rs",
     "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0045_ambiguous_trait_object.rs",
     "src/tools/rust-analyzer/crates/syntax/test_data/parser/validation/0046_mutable_const_item.rs",
 

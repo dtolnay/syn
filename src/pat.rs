@@ -259,20 +259,14 @@ pub(crate) mod parsing {
         pub fn parse_single(input: ParseStream) -> Result<Self> {
             let begin = input.fork();
             let lookahead = input.lookahead1();
-            if {
-                let ahead = input.fork();
-                ahead.parse::<Option<Ident>>()?.is_some()
-                    && (ahead.peek(Token![::])
-                        || ahead.peek(Token![!])
-                        || ahead.peek(token::Brace)
-                        || ahead.peek(token::Paren)
-                        || ahead.peek(Token![..])
-                            && ahead.parse::<RangeLimits>().is_ok()
-                            && !(ahead.is_empty() || ahead.peek(Token![,])))
-            } || {
-                let ahead = input.fork();
-                ahead.parse::<Option<Token![self]>>()?.is_some() && ahead.peek(Token![::])
-            } || lookahead.peek(Token![::])
+            if lookahead.peek(Ident)
+                && (input.peek2(Token![::])
+                    || input.peek2(Token![!])
+                    || input.peek2(token::Brace)
+                    || input.peek2(token::Paren)
+                    || input.peek2(Token![..]))
+                || input.peek(Token![self]) && input.peek2(Token![::])
+                || lookahead.peek(Token![::])
                 || lookahead.peek(Token![<])
                 || input.peek(Token![Self])
                 || input.peek(Token![super])
@@ -578,8 +572,11 @@ pub(crate) mod parsing {
     }
 
     fn pat_range(input: ParseStream, qself: Option<QSelf>, path: Path) -> Result<Pat> {
-        let limits: RangeLimits = input.parse()?;
+        let limits = RangeLimits::parse_obsolete(input)?;
         let end = input.call(pat_range_bound)?;
+        if let (RangeLimits::Closed(_), None) = (&limits, &end) {
+            return Err(input.error("expected range upper bound"));
+        }
         Ok(Pat::Range(ExprRange {
             attrs: Vec::new(),
             start: Some(Box::new(Expr::Path(ExprPath {
@@ -655,8 +652,11 @@ pub(crate) mod parsing {
     fn pat_lit_or_range(input: ParseStream) -> Result<Pat> {
         let start = input.call(pat_range_bound)?.unwrap();
         if input.peek(Token![..]) {
-            let limits: RangeLimits = input.parse()?;
+            let limits = RangeLimits::parse_obsolete(input)?;
             let end = input.call(pat_range_bound)?;
+            if let (RangeLimits::Closed(_), None) = (&limits, &end) {
+                return Err(input.error("expected range upper bound"));
+            }
             Ok(Pat::Range(ExprRange {
                 attrs: Vec::new(),
                 start: Some(start.into_expr()),
@@ -733,6 +733,19 @@ pub(crate) mod parsing {
         let mut elems = Punctuated::new();
         while !content.is_empty() {
             let value = Pat::parse_multi_with_leading_vert(&content)?;
+            match value {
+                Pat::Range(pat) if pat.start.is_none() || pat.end.is_none() => {
+                    let (start, end) = match pat.limits {
+                        RangeLimits::HalfOpen(dot_dot) => (dot_dot.spans[0], dot_dot.spans[1]),
+                        RangeLimits::Closed(dot_dot_eq) => {
+                            (dot_dot_eq.spans[0], dot_dot_eq.spans[2])
+                        }
+                    };
+                    let msg = "range pattern is not allowed unparenthesized inside slice pattern";
+                    return Err(error::new2(start, end, msg));
+                }
+                _ => {}
+            }
             elems.push_value(value);
             if content.is_empty() {
                 break;
