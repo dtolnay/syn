@@ -733,6 +733,19 @@ pub(crate) mod parsing {
         let mut elems = Punctuated::new();
         while !content.is_empty() {
             let value = Pat::parse_multi_with_leading_vert(&content)?;
+            match value {
+                Pat::Range(pat) if pat.start.is_none() || pat.end.is_none() => {
+                    let (start, end) = match pat.limits {
+                        RangeLimits::HalfOpen(dot_dot) => (dot_dot.spans[0], dot_dot.spans[1]),
+                        RangeLimits::Closed(dot_dot_eq) => {
+                            (dot_dot_eq.spans[0], dot_dot_eq.spans[2])
+                        }
+                    };
+                    let msg = "range pattern is not allowed unparenthesized inside slice pattern";
+                    return Err(error::new2(start, end, msg));
+                }
+                _ => {}
+            }
             elems.push_value(value);
             if content.is_empty() {
                 break;
