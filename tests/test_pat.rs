@@ -82,4 +82,12 @@ fn test_ranges() {
     Pat::parse_single.parse_str("...hi").unwrap_err();
     Pat::parse_single.parse_str("lo...").unwrap_err();
     Pat::parse_single.parse_str("lo...hi").unwrap();
+
+    Pat::parse_single.parse_str("[lo..]").unwrap(); // FIXME
+    Pat::parse_single.parse_str("[..=hi]").unwrap(); // FIXME
+    Pat::parse_single.parse_str("[lo..=hi]").unwrap();
+
+    Pat::parse_single.parse_str("[_, lo.., _]").unwrap(); // FIXME
+    Pat::parse_single.parse_str("[_, ..=hi, _]").unwrap(); // FIXME
+    Pat::parse_single.parse_str("[_, lo..=hi, _]").unwrap();
 }
