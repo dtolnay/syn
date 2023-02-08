@@ -17,6 +17,11 @@ fn syntax_tree_enum<'a>(
     }
     const WHITELIST: &[(&str, &str)] = &[
         ("Meta", "Path"),
+        ("Pat", "Const"),
+        ("Pat", "Lit"),
+        ("Pat", "Macro"),
+        ("Pat", "Path"),
+        ("Pat", "Range"),
         ("PathArguments", "AngleBracketed"),
         ("PathArguments", "Parenthesized"),
         ("Stmt", "Local"),

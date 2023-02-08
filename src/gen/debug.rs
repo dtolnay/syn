@@ -2059,34 +2059,14 @@ impl Debug for Pat {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("Pat::")?;
         match self {
-            Pat::Const(v0) => {
-                let mut formatter = formatter.debug_tuple("Const");
-                formatter.field(v0);
-                formatter.finish()
-            }
+            Pat::Const(v0) => v0.debug(formatter, "Const"),
             Pat::Ident(v0) => v0.debug(formatter, "Ident"),
-            Pat::Lit(v0) => {
-                let mut formatter = formatter.debug_tuple("Lit");
-                formatter.field(v0);
-                formatter.finish()
-            }
-            Pat::Macro(v0) => {
-                let mut formatter = formatter.debug_tuple("Macro");
-                formatter.field(v0);
-                formatter.finish()
-            }
+            Pat::Lit(v0) => v0.debug(formatter, "Lit"),
+            Pat::Macro(v0) => v0.debug(formatter, "Macro"),
             Pat::Or(v0) => v0.debug(formatter, "Or"),
             Pat::Paren(v0) => v0.debug(formatter, "Paren"),
-            Pat::Path(v0) => {
-                let mut formatter = formatter.debug_tuple("Path");
-                formatter.field(v0);
-                formatter.finish()
-            }
-            Pat::Range(v0) => {
-                let mut formatter = formatter.debug_tuple("Range");
-                formatter.field(v0);
-                formatter.finish()
-            }
+            Pat::Path(v0) => v0.debug(formatter, "Path"),
+            Pat::Range(v0) => v0.debug(formatter, "Range"),
             Pat::Reference(v0) => v0.debug(formatter, "Reference"),
             Pat::Rest(v0) => v0.debug(formatter, "Rest"),
             Pat::Slice(v0) => v0.debug(formatter, "Slice"),
