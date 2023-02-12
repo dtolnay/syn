@@ -160,6 +160,13 @@ impl ParseQuote for Pat {
     }
 }
 
+#[cfg(feature = "full")]
+impl ParseQuote for Box<Pat> {
+    fn parse(input: ParseStream) -> Result<Self> {
+        <Pat as ParseQuote>::parse(input).map(Box::new)
+    }
+}
+
 impl<T: Parse, P: Parse> ParseQuote for Punctuated<T, P> {
     fn parse(input: ParseStream) -> Result<Self> {
         Self::parse_terminated(input)
