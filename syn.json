@@ -2320,7 +2320,8 @@
             "syn": "Constraint"
           }
         ]
-      }
+      },
+      "exhaustive": false
     },
     {
       "ident": "GenericParam",

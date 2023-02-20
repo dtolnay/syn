@@ -2020,6 +2020,7 @@ impl Debug for Lite<syn::GenericArgument> {
                 formatter.write_str(")")?;
                 Ok(())
             }
+            _ => unreachable!(),
         }
     }
 }
