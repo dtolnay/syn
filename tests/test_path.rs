@@ -103,21 +103,26 @@ fn print_incomplete_qpath() {
 #[test]
 fn parse_parenthesized_path_arguments_with_disambiguator() {
     #[rustfmt::skip]
-    let tokens = quote!(FnOnce::() -> !);
+    let tokens = quote!(dyn FnOnce::() -> !);
     snapshot!(tokens as Type, @r###"
-    Type::Path {
-        path: Path {
-            segments: [
-                PathSegment {
-                    ident: "FnOnce",
-                    arguments: PathArguments::Parenthesized {
-                        output: ReturnType::Type(
-                            Type::Never,
-                        ),
-                    },
+    Type::TraitObject {
+        dyn_token: Some,
+        bounds: [
+            TypeParamBound::Trait(TraitBound {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "FnOnce",
+                            arguments: PathArguments::Parenthesized {
+                                output: ReturnType::Type(
+                                    Type::Never,
+                                ),
+                            },
+                        },
+                    ],
                 },
-            ],
-        },
+            }),
+        ],
     }
     "###);
 }
