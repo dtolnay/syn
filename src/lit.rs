@@ -1182,9 +1182,9 @@ mod value {
                         b'\'' => '\'',
                         b'"' => '"',
                         b'\r' | b'\n' => loop {
-                            let ch = next_chr(s);
-                            if ch.is_whitespace() {
-                                s = &s[ch.len_utf8()..];
+                            let b = byte(s, 0);
+                            if matches!(b, b' ' | b'\t' | b'\n' | b'\r') {
+                                s = &s[1..];
                             } else {
                                 continue 'outer;
                             }
