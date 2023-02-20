@@ -150,6 +150,7 @@ impl PathArguments {
 ast_enum! {
     /// An individual generic argument, like `'a`, `T`, or `Item = T`.
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[non_exhaustive]
     pub enum GenericArgument {
         /// A lifetime argument.
         Lifetime(Lifetime),
