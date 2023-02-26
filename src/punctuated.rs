@@ -140,7 +140,7 @@ impl<T, P> Punctuated<T, P> {
     }
 
     /// Appends a syntax tree node onto the end of this punctuated sequence. The
-    /// sequence must previously have a trailing punctuation.
+    /// sequence must be empty or previously have a trailing punctuation.
     ///
     /// Use [`push`] instead if the punctuated sequence may or may not already
     /// have trailing punctuation.
@@ -149,8 +149,8 @@ impl<T, P> Punctuated<T, P> {
     ///
     /// # Panics
     ///
-    /// Panics if the sequence does not already have a trailing punctuation when
-    /// this method is called.
+    /// Panics if the sequence is nonempty and does not already have a trailing
+    /// punctuation when this method is called.
     pub fn push_value(&mut self, value: T) {
         assert!(
             self.empty_or_trailing(),
