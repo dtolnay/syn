@@ -267,6 +267,7 @@
     clippy::inherent_to_string,
     clippy::items_after_statements,
     clippy::large_enum_variant,
+    clippy::let_underscore_untyped, // https://github.com/rust-lang/rust-clippy/issues/10410
     clippy::manual_assert,
     clippy::manual_let_else,
     clippy::match_like_matches_macro,

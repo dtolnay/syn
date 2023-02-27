@@ -1,4 +1,4 @@
-#![allow(clippy::manual_let_else)]
+#![allow(clippy::let_underscore_untyped, clippy::manual_let_else)]
 
 use std::env;
 use std::process::Command;
