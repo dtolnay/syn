@@ -4,6 +4,7 @@
 #![feature(rustc_private)]
 #![allow(
     clippy::explicit_deref_methods,
+    clippy::let_underscore_untyped,
     clippy::manual_assert,
     clippy::manual_let_else,
     clippy::match_like_matches_macro,
@@ -317,15 +318,15 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
         // types yet. We'll look into comparing those in the future. For now
         // focus on expressions appearing in other places.
         fn visit_pat(&mut self, pat: &mut P<Pat>) {
-            _ = pat;
+            let _ = pat;
         }
 
         fn visit_ty(&mut self, ty: &mut P<Ty>) {
-            _ = ty;
+            let _ = ty;
         }
 
         fn visit_attribute(&mut self, attr: &mut Attribute) {
-            _ = attr;
+            let _ = attr;
         }
     }
 

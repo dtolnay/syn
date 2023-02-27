@@ -1,4 +1,8 @@
-#![allow(clippy::toplevel_ref_arg, clippy::uninlined_format_args)]
+#![allow(
+    clippy::let_underscore_untyped,
+    clippy::toplevel_ref_arg,
+    clippy::uninlined_format_args
+)]
 
 use proc_macro::TokenStream;
 use std::io::Write;
@@ -23,31 +27,31 @@ pub fn check(_input: TokenStream) -> TokenStream {
 
     if cfg!(debug_assertions) {
         let yellow = ColorSpec::new().set_fg(Some(Color::Yellow)).clone();
-        _ = writeln!(stderr);
-        _ = stderr.set_color(yellow.clone().set_bold(true));
-        _ = write!(stderr, "NOTE");
+        let _ = writeln!(stderr);
+        let _ = stderr.set_color(yellow.clone().set_bold(true));
+        let _ = write!(stderr, "NOTE");
         for line in DEBUG_NOTE.lines() {
-            _ = stderr.set_color(&yellow);
-            _ = writeln!(stderr, "{}", line);
+            let _ = stderr.set_color(&yellow);
+            let _ = writeln!(stderr, "{}", line);
         }
-        _ = stderr.reset();
-        _ = writeln!(stderr);
+        let _ = stderr.reset();
+        let _ = writeln!(stderr);
         needs_newline = false;
     }
 
     if cfg!(not(feature = "all-features")) {
         let red = ColorSpec::new().set_fg(Some(Color::Red)).clone();
         if needs_newline {
-            _ = writeln!(stderr);
+            let _ = writeln!(stderr);
         }
-        _ = stderr.set_color(red.clone().set_bold(true));
-        _ = write!(stderr, "ERROR");
+        let _ = stderr.set_color(red.clone().set_bold(true));
+        let _ = write!(stderr, "ERROR");
         for line in FEATURES_ERROR.lines() {
-            _ = stderr.set_color(&red);
-            _ = writeln!(stderr, "{}", line);
+            let _ = stderr.set_color(&red);
+            let _ = writeln!(stderr, "{}", line);
         }
-        _ = stderr.reset();
-        _ = writeln!(stderr);
+        let _ = stderr.reset();
+        let _ = writeln!(stderr);
         process::exit(1);
     }
 

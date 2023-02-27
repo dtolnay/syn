@@ -7,6 +7,7 @@
 #![recursion_limit = "1024"]
 #![allow(
     clippy::cast_lossless,
+    clippy::let_underscore_untyped,
     clippy::manual_let_else,
     clippy::match_like_matches_macro,
     clippy::uninlined_format_args,
@@ -98,7 +99,7 @@ mod librustc_parse {
 #[cfg(not(syn_only))]
 mod read_from_disk {
     pub fn bench(content: &str) -> Result<(), ()> {
-        _ = content;
+        let _ = content;
         Ok(())
     }
 }
