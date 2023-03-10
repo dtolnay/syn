@@ -189,7 +189,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_ast::mut_visit::{
         noop_visit_generic_arg, noop_visit_local, noop_visit_param_bound, MutVisitor,
     };
-    use rustc_data_structures::map_in_place::MapInPlace;
+    use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
     use rustc_span::DUMMY_SP;
     use std::mem;
     use std::ops::DerefMut;
