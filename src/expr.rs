@@ -1665,6 +1665,8 @@ pub(crate) mod parsing {
             || input.peek(Token![crate])
         {
             input.parse().map(Expr::Path)
+        } else if input.is_empty() {
+            Err(input.error("expected an expression"))
         } else {
             Err(input.error("unsupported expression; enable syn's features=[\"full\"]"))
         }
