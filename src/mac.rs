@@ -31,7 +31,7 @@ ast_enum! {
 }
 
 #[cfg(feature = "parsing")]
-fn delimiter_span_close(macro_delimiter: &MacroDelimiter) -> Span {
+pub(crate) fn delimiter_span_close(macro_delimiter: &MacroDelimiter) -> Span {
     let delimiter = match macro_delimiter {
         MacroDelimiter::Paren(_) => Delimiter::Parenthesis,
         MacroDelimiter::Brace(_) => Delimiter::Brace,

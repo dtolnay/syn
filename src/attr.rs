@@ -256,7 +256,10 @@ impl Attribute {
                 let msg = format!("expected parentheses: {}", expected);
                 Err(Error::new(meta.eq_token.span, msg))
             }
-            Meta::List(meta) => parser.parse2(meta.tokens.clone()),
+            Meta::List(meta) => {
+                let scope = crate::mac::delimiter_span_close(&meta.delimiter);
+                crate::parse::parse_scoped(parser, scope, meta.tokens.clone())
+            }
         }
     }
 
