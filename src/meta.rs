@@ -1,6 +1,7 @@
 //! Facility for interpreting structured content inside of an `Attribute`.
 
 use crate::ext::IdentExt;
+use crate::lit::Lit;
 use crate::parse::{Error, ParseStream, Parser, Result};
 use crate::path::{Path, PathSegment};
 use crate::punctuated::Punctuated;
@@ -403,14 +404,19 @@ fn parse_meta_path(input: ParseStream) -> Result<Path> {
         leading_colon: input.parse()?,
         segments: {
             let mut segments = Punctuated::new();
-            loop {
+            if input.peek(Ident::peek_any) {
                 let ident = Ident::parse_any(input)?;
                 segments.push_value(PathSegment::from(ident));
-                if !input.peek(Token![::]) {
-                    break;
-                }
+            } else if input.peek(Lit) {
+                return Err(input.error("unexpected literal in nested attribute, expected ident"));
+            } else {
+                return Err(input.error("unexpected token in nested attribute, expected ident"));
+            }
+            while input.peek(Token![::]) {
                 let punct = input.parse()?;
                 segments.push_punct(punct);
+                let ident = Ident::parse_any(input)?;
+                segments.push_value(PathSegment::from(ident));
             }
             segments
         },
