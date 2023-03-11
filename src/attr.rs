@@ -246,8 +246,8 @@ impl Attribute {
                 let expected = expected_parentheses(&self.style, path);
                 let msg = format!("expected attribute arguments in parentheses: {}", expected);
                 Err(crate::error::new2(
-                    self.pound_token.span,
-                    self.bracket_token.span,
+                    path.segments.first().unwrap().ident.span(),
+                    path.segments.last().unwrap().ident.span(),
                     msg,
                 ))
             }
