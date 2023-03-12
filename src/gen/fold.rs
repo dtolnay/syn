@@ -2,7 +2,7 @@
 // It is not intended for manual editing.
 
 #![allow(unreachable_code, unused_variables)]
-#![allow(clippy::match_wildcard_for_single_variants)]
+#![allow(clippy::match_wildcard_for_single_variants, clippy::needless_match)]
 #[cfg(any(feature = "full", feature = "derive"))]
 use crate::gen::helper::fold::*;
 use crate::*;
