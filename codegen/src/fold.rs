@@ -62,25 +62,6 @@ fn visit(
                 (#code)
             })
         }
-        Type::Token(t) => {
-            let repr = &defs.tokens[t];
-            let is_keyword = repr.chars().next().unwrap().is_alphabetic();
-            let spans = if is_keyword {
-                quote!(span)
-            } else {
-                quote!(spans)
-            };
-            let token: TokenStream = syn::parse_str(repr).unwrap();
-            Some(quote! {
-                Token![#token](tokens_helper(f, &#name.#spans))
-            })
-        }
-        Type::Group(t) => {
-            let ty = Ident::new(t, Span::call_site());
-            Some(quote! {
-                #ty(tokens_helper(f, &#name.span))
-            })
-        }
         Type::Syn(t) => {
             fn requires_full(features: &Features) -> bool {
                 features.any.contains("full") && features.any.len() == 1
@@ -93,7 +74,7 @@ fn visit(
             Some(res)
         }
         Type::Ext(t) if gen::TERMINAL_TYPES.contains(&&t[..]) => Some(simple_visit(t, name)),
-        Type::Ext(_) | Type::Std(_) => None,
+        Type::Ext(_) | Type::Std(_) | Type::Token(_) | Type::Group(_) => None,
     }
 }
 
@@ -239,8 +220,6 @@ pub fn generate(defs: &Definitions) -> Result<()> {
 
             #[cfg(any(feature = "full", feature = "derive"))]
             use crate::gen::helper::fold::*;
-            #[cfg(any(feature = "full", feature = "derive"))]
-            use crate::token::{Brace, Bracket, Group, Paren};
             use crate::*;
             use proc_macro2::Span;
 

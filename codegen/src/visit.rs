@@ -51,11 +51,8 @@ fn visit(
             let name = name.ref_tokens();
             Some(quote! {
                 for el in Punctuated::pairs(#name) {
-                    let (it, p) = el.into_tuple();
+                    let it = el.value();
                     #val;
-                    if let Some(p) = p {
-                        tokens_helper(v, &p.spans);
-                    }
                 }
             })
         }
@@ -81,25 +78,6 @@ fn visit(
             }
             Some(code)
         }
-        Type::Token(t) => {
-            let name = name.tokens();
-            let repr = &defs.tokens[t];
-            let is_keyword = repr.chars().next().unwrap().is_alphabetic();
-            let spans = if is_keyword {
-                quote!(span)
-            } else {
-                quote!(spans)
-            };
-            Some(quote! {
-                tokens_helper(v, &#name.#spans);
-            })
-        }
-        Type::Group(_) => {
-            let name = name.tokens();
-            Some(quote! {
-                tokens_helper(v, &#name.span);
-            })
-        }
         Type::Syn(t) => {
             fn requires_full(features: &Features) -> bool {
                 features.any.contains("full") && features.any.len() == 1
@@ -112,7 +90,7 @@ fn visit(
             Some(res)
         }
         Type::Ext(t) if gen::TERMINAL_TYPES.contains(&&t[..]) => Some(simple_visit(t, name)),
-        Type::Ext(_) | Type::Std(_) => None,
+        Type::Ext(_) | Type::Std(_) | Type::Token(_) | Type::Group(_) => None,
     }
 }
 
@@ -224,8 +202,6 @@ pub fn generate(defs: &Definitions) -> Result<()> {
         quote! {
             #![allow(unused_variables)]
 
-            #[cfg(any(feature = "full", feature = "derive"))]
-            use crate::gen::helper::visit::*;
             #[cfg(any(feature = "full", feature = "derive"))]
             use crate::punctuated::Punctuated;
             use crate::*;
