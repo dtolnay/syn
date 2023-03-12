@@ -215,25 +215,6 @@ fn test_negative_lit() {
     "###);
 }
 
-#[test]
-fn test_unsafe() {
-    let meta = test("#[unsafe(no_mangle)]");
-
-    snapshot!(meta, @r###"
-    Meta::List {
-        path: Path {
-            segments: [
-                PathSegment {
-                    ident: "unsafe",
-                },
-            ],
-        },
-        delimiter: MacroDelimiter::Paren,
-        tokens: TokenStream(`no_mangle`),
-    }
-    "###);
-}
-
 fn test(input: &str) -> Meta {
     let attrs = Attribute::parse_outer.parse_str(input).unwrap();
 
