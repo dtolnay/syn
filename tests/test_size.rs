@@ -1,3 +1,5 @@
+// Assumes proc-macro2's "span-locations" feature is off.
+
 #![cfg(target_pointer_width = "64")]
 
 use std::mem;
