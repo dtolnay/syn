@@ -93,7 +93,7 @@ use quote::spanned::Spanned as ToTokens;
 /// See the [module documentation] for an example.
 ///
 /// [module documentation]: self
-pub trait Spanned {
+pub trait Spanned: private::Sealed {
     /// Returns a `Span` covering the complete contents of this syntax tree
     /// node, or [`Span::call_site()`] if this node is empty.
     ///
@@ -105,4 +105,11 @@ impl<T: ?Sized + ToTokens> Spanned for T {
     fn span(&self) -> Span {
         self.__span()
     }
+}
+
+mod private {
+    use super::*;
+
+    pub trait Sealed {}
+    impl<T: ?Sized + ToTokens> Sealed for T {}
 }
