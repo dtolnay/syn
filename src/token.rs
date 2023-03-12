@@ -102,6 +102,7 @@ use crate::lookahead;
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream};
 use crate::span::IntoSpans;
+use proc_macro2::extra::DelimSpan;
 use proc_macro2::Span;
 #[cfg(feature = "printing")]
 use proc_macro2::TokenStream;
@@ -483,12 +484,12 @@ macro_rules! define_delimiters {
         $(
             #[$doc]
             pub struct $name {
-                pub span: Span,
+                pub span: DelimSpan,
             }
 
             #[doc(hidden)]
             #[allow(non_snake_case)]
-            pub fn $name<S: IntoSpans<Span>>(span: S) -> $name {
+            pub fn $name<S: IntoSpans<DelimSpan>>(span: S) -> $name {
                 $name {
                     span: span.into_spans(),
                 }
@@ -496,9 +497,7 @@ macro_rules! define_delimiters {
 
             impl std::default::Default for $name {
                 fn default() -> Self {
-                    $name {
-                        span: Span::call_site(),
-                    }
+                    $name(Span::call_site())
                 }
             }
 
@@ -548,7 +547,7 @@ macro_rules! define_delimiters {
                 {
                     let mut inner = TokenStream::new();
                     f(&mut inner);
-                    printing::delim(Delimiter::$delim, self.span, tokens, inner);
+                    printing::delim(Delimiter::$delim, self.span.join(), tokens, inner);
                 }
             }
 

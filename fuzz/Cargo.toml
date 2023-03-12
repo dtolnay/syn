@@ -10,7 +10,7 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
-proc-macro2 = "1"
+proc-macro2 = "1.0.52"
 syn = { path = "..", default-features = false, features = ["full", "parsing"] }
 
 [[bin]]

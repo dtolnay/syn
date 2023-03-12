@@ -11,6 +11,7 @@
 ))]
 use crate::proc_macro as pm;
 use crate::Lifetime;
+use proc_macro2::extra::DelimSpan;
 use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::cmp::Ordering;
 use std::marker::PhantomData;
@@ -188,7 +189,7 @@ impl<'a> Cursor<'a> {
 
     /// If the cursor is pointing at a `Group` with the given delimiter, returns
     /// a cursor into that group and one pointing to the next `TokenTree`.
-    pub fn group(mut self, delim: Delimiter) -> Option<(Cursor<'a>, Span, Cursor<'a>)> {
+    pub fn group(mut self, delim: Delimiter) -> Option<(Cursor<'a>, DelimSpan, Cursor<'a>)> {
         // If we're not trying to enter a none-delimited group, we want to
         // ignore them. We have to make sure to _not_ ignore them when we want
         // to enter them, of course. For obvious reasons.
@@ -198,7 +199,7 @@ impl<'a> Cursor<'a> {
 
         if let Entry::Group(group, end_offset) = self.entry() {
             if group.delimiter() == delim {
-                let span = group.span();
+                let span = group.delim_span();
                 let end_of_group = unsafe { self.ptr.add(*end_offset) };
                 let inside_of_group = unsafe { Cursor::create(self.ptr.add(1), end_of_group) };
                 let after_group = unsafe { Cursor::create(end_of_group, self.scope) };
@@ -209,10 +210,10 @@ impl<'a> Cursor<'a> {
         None
     }
 
-    pub(crate) fn any_group(self) -> Option<(Cursor<'a>, Delimiter, Span, Cursor<'a>)> {
+    pub(crate) fn any_group(self) -> Option<(Cursor<'a>, Delimiter, DelimSpan, Cursor<'a>)> {
         if let Entry::Group(group, end_offset) = self.entry() {
             let delimiter = group.delimiter();
-            let span = group.span();
+            let span = group.delim_span();
             let end_of_group = unsafe { self.ptr.add(*end_offset) };
             let inside_of_group = unsafe { Cursor::create(self.ptr.add(1), end_of_group) };
             let after_group = unsafe { Cursor::create(end_of_group, self.scope) };
