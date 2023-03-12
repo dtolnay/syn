@@ -610,6 +610,80 @@ impl Token for Underscore {
 #[cfg(feature = "parsing")]
 impl private::Sealed for Underscore {}
 
+/// None-delimited group
+pub struct Group {
+    pub span: Span,
+}
+
+#[doc(hidden)]
+#[allow(non_snake_case)]
+pub fn Group<S: IntoSpans<Span>>(span: S) -> Group {
+    Group {
+        span: span.into_spans(),
+    }
+}
+
+impl std::default::Default for Group {
+    fn default() -> Self {
+        Group {
+            span: Span::call_site(),
+        }
+    }
+}
+
+#[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Copy for Group {}
+
+#[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for Group {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for Group {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str("Group")
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl cmp::Eq for Group {}
+
+#[cfg(feature = "extra-traits")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for Group {
+    fn eq(&self, _other: &Group) -> bool {
+        true
+    }
+}
+
+#[cfg(feature = "extra-traits")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Hash for Group {
+    fn hash<H: Hasher>(&self, _state: &mut H) {}
+}
+
+impl Group {
+    #[cfg(feature = "printing")]
+    pub fn surround<F>(&self, tokens: &mut TokenStream, f: F)
+    where
+        F: FnOnce(&mut TokenStream),
+    {
+        let mut inner = TokenStream::new();
+        f(&mut inner);
+        printing::delim(Delimiter::None, self.span, tokens, inner);
+    }
+}
+
+#[cfg(feature = "parsing")]
+impl private::Sealed for Group {}
+
 #[cfg(feature = "parsing")]
 impl Token for Paren {
     fn peek(cursor: Cursor) -> bool {
@@ -762,7 +836,6 @@ define_delimiters! {
     Brace         pub struct Brace        /// `{`&hellip;`}`
     Bracket       pub struct Bracket      /// `[`&hellip;`]`
     Parenthesis   pub struct Paren        /// `(`&hellip;`)`
-    None          pub struct Group        /// None-delimited group
 }
 
 /// A type-macro that expands to the name of the Rust type representation of a
