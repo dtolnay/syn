@@ -95,9 +95,6 @@ impl TokenBuffer {
 ///
 /// An empty `Cursor` can be created directly, or one may create a `TokenBuffer`
 /// object and get a cursor to its first token with `begin()`.
-///
-/// Two cursors are equal if they have the same location in the same input
-/// stream, and have the same scope.
 pub struct Cursor<'a> {
     // The current entry which the `Cursor` is pointing at.
     ptr: *const Entry,
