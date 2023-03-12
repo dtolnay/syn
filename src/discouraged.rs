@@ -1,6 +1,7 @@
 //! Extensions to the parsing API with niche applicability.
 
 use super::*;
+use proc_macro2::extra::DelimSpan;
 
 /// Extensions to the `ParseStream` API to support speculative parsing.
 pub trait Speculative {
@@ -198,11 +199,11 @@ impl<'a> Speculative for ParseBuffer<'a> {
 pub trait AnyDelimiter {
     /// Returns the delimiter, the span of the delimiter token, and the nested
     /// contents for further parsing.
-    fn parse_any_delimiter(&self) -> Result<(Delimiter, Span, ParseBuffer)>;
+    fn parse_any_delimiter(&self) -> Result<(Delimiter, DelimSpan, ParseBuffer)>;
 }
 
 impl<'a> AnyDelimiter for ParseBuffer<'a> {
-    fn parse_any_delimiter(&self) -> Result<(Delimiter, Span, ParseBuffer)> {
+    fn parse_any_delimiter(&self) -> Result<(Delimiter, DelimSpan, ParseBuffer)> {
         self.step(|cursor| {
             if let Some((content, delimiter, span, rest)) = cursor.any_group() {
                 let scope = crate::buffer::close_span_of_group(*cursor);

@@ -4,7 +4,7 @@ use crate::token::{Brace, Bracket, Paren};
 use proc_macro2::Delimiter;
 use proc_macro2::TokenStream;
 #[cfg(feature = "parsing")]
-use proc_macro2::{Group, Span, TokenTree};
+use proc_macro2::{Span, TokenTree};
 
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream, Parser, Result};
@@ -32,18 +32,12 @@ ast_enum! {
 
 #[cfg(feature = "parsing")]
 pub(crate) fn delimiter_span_close(macro_delimiter: &MacroDelimiter) -> Span {
-    let delimiter = match macro_delimiter {
-        MacroDelimiter::Paren(_) => Delimiter::Parenthesis,
-        MacroDelimiter::Brace(_) => Delimiter::Brace,
-        MacroDelimiter::Bracket(_) => Delimiter::Bracket,
+    let delim_span = match macro_delimiter {
+        MacroDelimiter::Paren(token) => &token.span,
+        MacroDelimiter::Brace(token) => &token.span,
+        MacroDelimiter::Bracket(token) => &token.span,
     };
-    let mut group = Group::new(delimiter, TokenStream::new());
-    group.set_span(match macro_delimiter {
-        MacroDelimiter::Paren(token) => token.span,
-        MacroDelimiter::Brace(token) => token.span,
-        MacroDelimiter::Bracket(token) => token.span,
-    });
-    group.span_close()
+    delim_span.close()
 }
 
 impl Macro {
@@ -149,7 +143,7 @@ impl Macro {
 pub(crate) fn parse_delimiter(input: ParseStream) -> Result<(MacroDelimiter, TokenStream)> {
     input.step(|cursor| {
         if let Some((TokenTree::Group(g), rest)) = cursor.token_tree() {
-            let span = g.span();
+            let span = g.delim_span();
             let delimiter = match g.delimiter() {
                 Delimiter::Parenthesis => MacroDelimiter::Paren(Paren(span)),
                 Delimiter::Brace => MacroDelimiter::Brace(Brace(span)),
@@ -201,7 +195,7 @@ mod printing {
                 MacroDelimiter::Brace(brace) => (Delimiter::Brace, brace.span),
                 MacroDelimiter::Bracket(bracket) => (Delimiter::Bracket, bracket.span),
             };
-            token::printing::delim(delim, span, tokens, inner);
+            token::printing::delim(delim, span.join(), tokens, inner);
         }
     }
 
