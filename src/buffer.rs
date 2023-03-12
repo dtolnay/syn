@@ -222,6 +222,16 @@ impl<'a> Cursor<'a> {
         None
     }
 
+    pub(crate) fn any_group_token(self) -> Option<(Group, Cursor<'a>)> {
+        if let Entry::Group(group, end_offset) = self.entry() {
+            let end_of_group = unsafe { self.ptr.add(*end_offset) };
+            let after_group = unsafe { Cursor::create(end_of_group, self.scope) };
+            return Some((group.clone(), after_group));
+        }
+
+        None
+    }
+
     /// If the cursor is pointing at a `Ident`, returns it along with a cursor
     /// pointing at the next `TokenTree`.
     pub fn ident(mut self) -> Option<(Ident, Cursor<'a>)> {

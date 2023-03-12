@@ -1150,10 +1150,8 @@ impl Parse for TokenTree {
 impl Parse for Group {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| {
-            if let Some((inside, delimiter, span, rest)) = cursor.any_group() {
-                if delimiter != Delimiter::None {
-                    let mut group = Group::new(delimiter, inside.token_stream());
-                    group.set_span(span);
+            if let Some((group, rest)) = cursor.any_group_token() {
+                if group.delimiter() != Delimiter::None {
                     return Ok((group, rest));
                 }
             }
