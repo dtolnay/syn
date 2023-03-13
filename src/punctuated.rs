@@ -238,6 +238,23 @@ impl<T, P> Punctuated<T, P> {
         }
     }
 
+    /// Removes and returns the punctuated pair at position `index`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `index` is out of bounds.
+    pub fn remove(&mut self, index: usize) -> Pair<T, P> {
+        assert!(index < self.len(), "Punctuated::remove: index out of range");
+
+        if index == self.inner.len() {
+            let t = self.last.take().unwrap();
+            Pair::End(*t)
+        } else {
+            let (t, p) = self.inner.remove(index);
+            Pair::Punctuated(t, p)
+        }
+    }
+
     /// Clears the sequence of all values and punctuation, making it empty.
     pub fn clear(&mut self) {
         self.inner.clear();
