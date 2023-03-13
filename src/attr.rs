@@ -257,7 +257,7 @@ impl Attribute {
                 Err(Error::new(meta.eq_token.span, msg))
             }
             Meta::List(meta) => {
-                let scope = crate::mac::delimiter_span_close(&meta.delimiter);
+                let scope = meta.delimiter.span().close();
                 crate::parse::parse_scoped(parser, scope, meta.tokens.clone())
             }
         }
