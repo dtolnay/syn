@@ -1,10 +1,11 @@
 use super::*;
 use crate::token::{Brace, Bracket, Paren};
+use proc_macro2::extra::DelimSpan;
 #[cfg(any(feature = "parsing", feature = "printing"))]
 use proc_macro2::Delimiter;
 use proc_macro2::TokenStream;
 #[cfg(feature = "parsing")]
-use proc_macro2::{Span, TokenTree};
+use proc_macro2::TokenTree;
 
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream, Parser, Result};
@@ -30,14 +31,14 @@ ast_enum! {
     }
 }
 
-#[cfg(feature = "parsing")]
-pub(crate) fn delimiter_span_close(macro_delimiter: &MacroDelimiter) -> Span {
-    let delim_span = match macro_delimiter {
-        MacroDelimiter::Paren(token) => &token.span,
-        MacroDelimiter::Brace(token) => &token.span,
-        MacroDelimiter::Bracket(token) => &token.span,
-    };
-    delim_span.close()
+impl MacroDelimiter {
+    pub fn span(&self) -> &DelimSpan {
+        match self {
+            MacroDelimiter::Paren(token) => &token.span,
+            MacroDelimiter::Brace(token) => &token.span,
+            MacroDelimiter::Bracket(token) => &token.span,
+        }
+    }
 }
 
 impl Macro {
@@ -134,7 +135,7 @@ impl Macro {
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_body_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
-        let scope = delimiter_span_close(&self.delimiter);
+        let scope = self.delimiter.span().close();
         crate::parse::parse_scoped(parser, scope, self.tokens.clone())
     }
 }
