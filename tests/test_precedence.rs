@@ -228,7 +228,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     fn noop_visit_expr<T: MutVisitor>(e: &mut Expr, vis: &mut T) {
         use rustc_ast::mut_visit::{noop_visit_expr, visit_attrs};
         match &mut e.kind {
-            ExprKind::AddrOf(BorrowKind::Raw, ..) | ExprKind::Box(..) => {}
+            ExprKind::AddrOf(BorrowKind::Raw, ..) => {}
             ExprKind::Struct(expr) => {
                 let StructExpr {
                     qself,

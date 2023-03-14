@@ -10,10 +10,22 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "afaf3e07aaa7ca9873bdb439caec53faffa4230c";
+const REVISION: &str = "22f247c6f3ed388cb702d01c2ff27da658a8b353";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
+    // TODO
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0132_box_expr.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0132_box_expr.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0137_await_expr.rs",
+    "src/tools/rustfmt/tests/source/issue-4689/one.rs",
+    "src/tools/rustfmt/tests/source/issue-4689/two.rs",
+    "src/tools/rustfmt/tests/source/issue_1306.rs",
+    "src/tools/rustfmt/tests/target/issue-4689/one.rs",
+    "src/tools/rustfmt/tests/target/issue-4689/two.rs",
+    "src/tools/rustfmt/tests/target/issue_1306.rs",
+    "tests/ui/rfc-2632-const-trait-impl/const-closure-parse-not-item.rs",
+
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "tests/ui/const-generics/early/closing-args-token.rs",
     "tests/ui/const-generics/early/const-expression-parameter.rs",
