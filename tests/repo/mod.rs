@@ -14,16 +14,10 @@ const REVISION: &str = "22f247c6f3ed388cb702d01c2ff27da658a8b353";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0132_box_expr.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0132_box_expr.rs",
+    // TODO: `x.0. await`
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0137_await_expr.rs",
-    "src/tools/rustfmt/tests/source/issue-4689/one.rs",
-    "src/tools/rustfmt/tests/source/issue-4689/two.rs",
-    "src/tools/rustfmt/tests/source/issue_1306.rs",
-    "src/tools/rustfmt/tests/target/issue-4689/one.rs",
-    "src/tools/rustfmt/tests/target/issue-4689/two.rs",
-    "src/tools/rustfmt/tests/target/issue_1306.rs",
+
+    // TODO: `const move || {}`
     "tests/ui/rfc-2632-const-trait-impl/const-closure-parse-not-item.rs",
 
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
@@ -67,6 +61,8 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/source/existential_type.rs",
     "src/tools/rustfmt/tests/source/fn-simple.rs",
     "src/tools/rustfmt/tests/source/fn_args_layout-vertical.rs",
+    "src/tools/rustfmt/tests/source/issue-4689/one.rs",
+    "src/tools/rustfmt/tests/source/issue-4689/two.rs",
     "src/tools/rustfmt/tests/source/paths.rs",
     "src/tools/rustfmt/tests/source/structs.rs",
     "src/tools/rustfmt/tests/target/attrib.rs",
@@ -75,6 +71,8 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/target/fn-simple.rs",
     "src/tools/rustfmt/tests/target/fn.rs",
     "src/tools/rustfmt/tests/target/fn_args_layout-vertical.rs",
+    "src/tools/rustfmt/tests/target/issue-4689/one.rs",
+    "src/tools/rustfmt/tests/target/issue-4689/two.rs",
     "src/tools/rustfmt/tests/target/paths.rs",
     "src/tools/rustfmt/tests/target/structs.rs",
     "tests/codegen-units/item-collection/non-generic-closures.rs",
@@ -93,6 +91,9 @@ static EXCLUDE_FILES: &[&str] = &[
     // Old type ascription expression syntax
     "src/tools/rustfmt/tests/source/type-ascription.rs",
     "src/tools/rustfmt/tests/target/type-ascription.rs",
+
+    // Obsolete box syntax
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0132_box_expr.rs",
 
     // Invalid unparenthesized range pattern inside slice pattern: `[1..]`
     "tests/ui/consts/miri_unleashed/const_refers_to_static_cross_crate.rs",
@@ -131,10 +132,12 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/source/configs/indent_style/block_call.rs",
     "src/tools/rustfmt/tests/source/configs/use_try_shorthand/false.rs",
     "src/tools/rustfmt/tests/source/configs/use_try_shorthand/true.rs",
+    "src/tools/rustfmt/tests/source/issue_1306.rs",
     "src/tools/rustfmt/tests/source/try-conversion.rs",
     "src/tools/rustfmt/tests/target/configs/indent_style/block_call.rs",
     "src/tools/rustfmt/tests/target/configs/use_try_shorthand/false.rs",
     "src/tools/rustfmt/tests/target/issue-1681.rs",
+    "src/tools/rustfmt/tests/target/issue_1306.rs",
     "tests/ui/dyn-keyword/dyn-2015-no-warnings-without-lints.rs",
     "tests/ui/editions/edition-keywords-2015-2015.rs",
     "tests/ui/editions/edition-keywords-2015-2018.rs",
