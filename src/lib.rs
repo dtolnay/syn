@@ -420,14 +420,12 @@ pub use crate::op::{BinOp, UnOp};
 #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 pub mod parse;
 
-// Not public API except the `parse_macro_input!` macro.
 #[cfg(all(
     not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
     feature = "parsing",
     feature = "proc-macro"
 ))]
-#[doc(hidden)]
-pub mod parse_macro_input;
+mod parse_macro_input;
 
 #[cfg(all(feature = "parsing", feature = "printing"))]
 mod parse_quote;
