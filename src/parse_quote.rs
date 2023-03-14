@@ -24,9 +24,8 @@
 /// }
 /// ```
 ///
-/// *This macro is available only if Syn is built with the `"parsing"` feature,
-/// although interpolation of syntax tree nodes into the quoted tokens is only
-/// supported if Syn is built with the `"printing"` feature as well.*
+/// *This macro is available only if Syn is built with both the `"parsing"` and
+/// `"printing"` features.*
 ///
 /// # Example
 ///
