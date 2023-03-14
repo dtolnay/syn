@@ -430,7 +430,7 @@ pub mod parse;
 pub mod parse_macro_input;
 
 // Not public API except the `parse_quote!` macro.
-#[cfg(feature = "parsing")]
+#[cfg(all(feature = "parsing", feature = "printing"))]
 #[doc(hidden)]
 pub mod parse_quote;
 
