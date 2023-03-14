@@ -14,9 +14,6 @@ const REVISION: &str = "22f247c6f3ed388cb702d01c2ff27da658a8b353";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: `x.0. await`
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0137_await_expr.rs",
-
     // TODO: `const move || {}`
     "tests/ui/rfc-2632-const-trait-impl/const-closure-parse-not-item.rs",
 

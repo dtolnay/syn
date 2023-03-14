@@ -1439,6 +1439,13 @@ pub(crate) mod parsing {
             {
                 let mut dot_token: Token![.] = input.parse()?;
 
+                let float_token: Option<LitFloat> = input.parse()?;
+                if let Some(float_token) = float_token {
+                    if multi_index(&mut e, &mut dot_token, float_token)? {
+                        continue;
+                    }
+                }
+
                 let await_token: Option<Token![await]> = input.parse()?;
                 if let Some(await_token) = await_token {
                     e = Expr::Await(ExprAwait {
@@ -1448,13 +1455,6 @@ pub(crate) mod parsing {
                         await_token,
                     });
                     continue;
-                }
-
-                let float_token: Option<LitFloat> = input.parse()?;
-                if let Some(float_token) = float_token {
-                    if multi_index(&mut e, &mut dot_token, float_token)? {
-                        continue;
-                    }
                 }
 
                 let member: Member = input.parse()?;
