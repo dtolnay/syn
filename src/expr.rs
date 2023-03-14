@@ -1868,7 +1868,7 @@ pub(crate) mod parsing {
             Expr::TryBlock(input.parse()?)
         } else if input.peek(Token![unsafe]) {
             Expr::Unsafe(input.parse()?)
-        } else if input.peek(Token![const]) {
+        } else if input.peek(Token![const]) && input.peek2(token::Brace) {
             Expr::Const(input.parse()?)
         } else if input.peek(token::Brace) {
             Expr::Block(input.parse()?)
