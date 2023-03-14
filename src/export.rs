@@ -19,6 +19,9 @@ pub use crate::group::{parse_braces, parse_brackets, parse_parens};
 
 pub use crate::span::IntoSpans;
 
+#[cfg(all(feature = "parsing", feature = "printing"))]
+pub use crate::parse_quote::parse as parse_quote;
+
 #[cfg(feature = "parsing")]
 pub use crate::token::parsing::{peek_punct, punct as parse_punct};
 

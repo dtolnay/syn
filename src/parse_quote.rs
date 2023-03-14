@@ -68,7 +68,7 @@
 #[macro_export]
 macro_rules! parse_quote {
     ($($tt:tt)*) => {
-        $crate::parse_quote::parse($crate::__private::quote::quote!($($tt)*))
+        $crate::__private::parse_quote($crate::__private::quote::quote!($($tt)*))
     };
 }
 
@@ -100,7 +100,7 @@ macro_rules! parse_quote {
 #[macro_export]
 macro_rules! parse_quote_spanned {
     ($span:expr=> $($tt:tt)*) => {
-        $crate::parse_quote::parse($crate::__private::quote::quote_spanned!($span=> $($tt)*))
+        $crate::__private::parse_quote($crate::__private::quote::quote_spanned!($span=> $($tt)*))
     };
 }
 
@@ -120,8 +120,6 @@ pub fn parse<T: ParseQuote>(token_stream: TokenStream) -> T {
     }
 }
 
-// Not public API.
-#[doc(hidden)]
 pub trait ParseQuote: Sized {
     fn parse(input: ParseStream) -> Result<Self>;
 }
