@@ -1287,6 +1287,7 @@ pub(crate) mod parsing {
             || lookahead.peek(Token![self])
             || lookahead.peek(Token![super])
             || lookahead.peek(Token![crate])
+            || lookahead.peek(Token![try])
         {
             let ident = input.call(Ident::parse_any)?;
             if input.peek(Token![::]) {
@@ -1648,7 +1649,11 @@ pub(crate) mod parsing {
             let vis: Visibility = input.parse()?;
             let unsafety: Option<Token![unsafe]> = input.parse()?;
             let mod_token: Token![mod] = input.parse()?;
-            let ident: Ident = input.parse()?;
+            let ident: Ident = if input.peek(Token![try]) {
+                input.call(Ident::parse_any)
+            } else {
+                input.parse()
+            }?;
 
             let lookahead = input.lookahead1();
             if lookahead.peek(Token![;]) {

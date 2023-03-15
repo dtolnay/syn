@@ -465,7 +465,11 @@ pub(crate) mod parsing {
 
     impl PathSegment {
         fn parse_helper(input: ParseStream, expr_style: bool) -> Result<Self> {
-            if input.peek(Token![super]) || input.peek(Token![self]) || input.peek(Token![crate]) {
+            if input.peek(Token![super])
+                || input.peek(Token![self])
+                || input.peek(Token![crate])
+                || cfg!(feature = "full") && input.peek(Token![try])
+            {
                 let ident = input.call(Ident::parse_any)?;
                 return Ok(PathSegment::from(ident));
             }
