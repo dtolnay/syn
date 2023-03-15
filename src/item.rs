@@ -2707,7 +2707,7 @@ pub(crate) mod parsing {
     }
 
     impl Visibility {
-        fn is_inherited(&self) -> bool {
+        const fn is_inherited(&self) -> bool {
             match self {
                 Visibility::Inherited => true,
                 _ => false,
@@ -2716,7 +2716,7 @@ pub(crate) mod parsing {
     }
 
     impl MacroDelimiter {
-        pub(crate) fn is_brace(&self) -> bool {
+        pub(crate) const fn is_brace(&self) -> bool {
             match self {
                 MacroDelimiter::Brace(_) => true,
                 MacroDelimiter::Paren(_) | MacroDelimiter::Bracket(_) => false,

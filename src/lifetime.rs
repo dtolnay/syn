@@ -115,7 +115,7 @@ impl Hash for Lifetime {
 #[cfg(feature = "parsing")]
 #[doc(hidden)]
 #[allow(non_snake_case)]
-pub fn Lifetime(marker: lookahead::TokenMarker) -> Lifetime {
+pub const fn Lifetime(marker: lookahead::TokenMarker) -> Lifetime {
     match marker {}
 }
 

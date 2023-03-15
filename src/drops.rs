@@ -8,7 +8,7 @@ use std::slice;
 pub(crate) struct NoDrop<T: ?Sized>(ManuallyDrop<T>);
 
 impl<T> NoDrop<T> {
-    pub(crate) fn new(value: T) -> Self
+    pub(crate) const fn new(value: T) -> Self
     where
         T: TrivialDrop,
     {

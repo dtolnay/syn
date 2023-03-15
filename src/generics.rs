@@ -391,7 +391,7 @@ generics_wrapper_impls!(Turbofish);
 #[cfg(feature = "printing")]
 impl<'a> TypeGenerics<'a> {
     /// Turn a type's generics like `<X, Y>` into a turbofish like `::<X, Y>`.
-    pub fn as_turbofish(&self) -> Turbofish {
+    pub const fn as_turbofish(&self) -> Turbofish {
         Turbofish(self.0)
     }
 }
@@ -419,7 +419,7 @@ impl Default for BoundLifetimes {
 }
 
 impl LifetimeParam {
-    pub fn new(lifetime: Lifetime) -> Self {
+    pub const fn new(lifetime: Lifetime) -> Self {
         LifetimeParam {
             attrs: Vec::new(),
             lifetime,

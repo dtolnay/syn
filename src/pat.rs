@@ -515,7 +515,7 @@ pub(crate) mod parsing {
     }
 
     impl Member {
-        fn is_unnamed(&self) -> bool {
+        const fn is_unnamed(&self) -> bool {
             match self {
                 Member::Named(_) => false,
                 Member::Unnamed(_) => true,

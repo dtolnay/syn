@@ -6,7 +6,7 @@ pub(crate) struct BigInt {
 }
 
 impl BigInt {
-    pub(crate) fn new() -> Self {
+    pub(crate) const fn new() -> Self {
         BigInt { digits: Vec::new() }
     }
 

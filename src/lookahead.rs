@@ -65,7 +65,7 @@ pub struct Lookahead1<'a> {
     comparisons: RefCell<Vec<&'static str>>,
 }
 
-pub(crate) fn new(scope: Span, cursor: Cursor) -> Lookahead1 {
+pub(crate) const fn new(scope: Span, cursor: Cursor) -> Lookahead1 {
     Lookahead1 {
         scope,
         cursor,

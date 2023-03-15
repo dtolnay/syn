@@ -239,7 +239,7 @@ impl LitStr {
         self.repr.token.set_span(span);
     }
 
-    pub fn suffix(&self) -> &str {
+    pub const fn suffix(&self) -> &str {
         &self.repr.suffix
     }
 
@@ -274,7 +274,7 @@ impl LitByteStr {
         self.repr.token.set_span(span);
     }
 
-    pub fn suffix(&self) -> &str {
+    pub const fn suffix(&self) -> &str {
         &self.repr.suffix
     }
 
@@ -309,7 +309,7 @@ impl LitByte {
         self.repr.token.set_span(span);
     }
 
-    pub fn suffix(&self) -> &str {
+    pub const fn suffix(&self) -> &str {
         &self.repr.suffix
     }
 
@@ -344,7 +344,7 @@ impl LitChar {
         self.repr.token.set_span(span);
     }
 
-    pub fn suffix(&self) -> &str {
+    pub const fn suffix(&self) -> &str {
         &self.repr.suffix
     }
 
@@ -371,7 +371,7 @@ impl LitInt {
         }
     }
 
-    pub fn base10_digits(&self) -> &str {
+    pub const fn base10_digits(&self) -> &str {
         &self.repr.digits
     }
 
@@ -407,7 +407,7 @@ impl LitInt {
             .map_err(|err| Error::new(self.span(), err))
     }
 
-    pub fn suffix(&self) -> &str {
+    pub const fn suffix(&self) -> &str {
         &self.repr.suffix
     }
 
@@ -465,7 +465,7 @@ impl LitFloat {
         }
     }
 
-    pub fn base10_digits(&self) -> &str {
+    pub const fn base10_digits(&self) -> &str {
         &self.repr.digits
     }
 
@@ -479,7 +479,7 @@ impl LitFloat {
             .map_err(|err| Error::new(self.span(), err))
     }
 
-    pub fn suffix(&self) -> &str {
+    pub const fn suffix(&self) -> &str {
         &self.repr.suffix
     }
 
@@ -520,15 +520,15 @@ impl Display for LitFloat {
 }
 
 impl LitBool {
-    pub fn new(value: bool, span: Span) -> Self {
+    pub const fn new(value: bool, span: Span) -> Self {
         LitBool { value, span }
     }
 
-    pub fn value(&self) -> bool {
+    pub const fn value(&self) -> bool {
         self.value
     }
 
-    pub fn span(&self) -> Span {
+    pub const fn span(&self) -> Span {
         self.span
     }
 
@@ -750,7 +750,7 @@ macro_rules! lit_extra_traits {
         #[cfg(feature = "parsing")]
         #[doc(hidden)]
         #[allow(non_snake_case)]
-        pub fn $ty(marker: lookahead::TokenMarker) -> $ty {
+        pub const fn $ty(marker: lookahead::TokenMarker) -> $ty {
             match marker {}
         }
     };
@@ -766,7 +766,7 @@ lit_extra_traits!(LitFloat);
 #[cfg(feature = "parsing")]
 #[doc(hidden)]
 #[allow(non_snake_case)]
-pub fn LitBool(marker: lookahead::TokenMarker) -> LitBool {
+pub const fn LitBool(marker: lookahead::TokenMarker) -> LitBool {
     match marker {}
 }
 
@@ -786,7 +786,7 @@ ast_enum! {
 #[cfg(feature = "parsing")]
 #[doc(hidden)]
 #[allow(non_snake_case)]
-pub fn Lit(marker: lookahead::TokenMarker) -> Lit {
+pub const fn Lit(marker: lookahead::TokenMarker) -> Lit {
     match marker {}
 }
 
@@ -1085,7 +1085,7 @@ mod value {
             panic!("Unrecognized literal: `{}`", repr);
         }
 
-        pub fn suffix(&self) -> &str {
+        pub const fn suffix(&self) -> &str {
             match self {
                 Lit::Str(lit) => lit.suffix(),
                 Lit::ByteStr(lit) => lit.suffix(),

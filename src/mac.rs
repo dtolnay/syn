@@ -32,7 +32,7 @@ ast_enum! {
 }
 
 impl MacroDelimiter {
-    pub fn span(&self) -> &DelimSpan {
+    pub const fn span(&self) -> &DelimSpan {
         match self {
             MacroDelimiter::Paren(token) => &token.span,
             MacroDelimiter::Brace(token) => &token.span,

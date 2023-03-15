@@ -197,7 +197,7 @@ impl<T, P> Punctuated<T, P> {
     /// punctuation.
     ///
     /// Equivalent to `punctuated.is_empty() || punctuated.trailing_punct()`.
-    pub fn empty_or_trailing(&self) -> bool {
+    pub const fn empty_or_trailing(&self) -> bool {
         self.last.is_none()
     }
 
@@ -922,7 +922,7 @@ impl<T, P> Pair<T, P> {
     }
 
     /// Borrows the syntax tree node from this punctuated pair.
-    pub fn value(&self) -> &T {
+    pub const fn value(&self) -> &T {
         match self {
             Pair::Punctuated(t, _) | Pair::End(t) => t,
         }
@@ -937,7 +937,7 @@ impl<T, P> Pair<T, P> {
 
     /// Borrows the punctuation from this punctuated pair, unless this pair is
     /// the final one and there is no trailing punctuation.
-    pub fn punct(&self) -> Option<&P> {
+    pub const fn punct(&self) -> Option<&P> {
         match self {
             Pair::Punctuated(_, p) => Some(p),
             Pair::End(_) => None,

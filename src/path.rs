@@ -139,7 +139,7 @@ impl PathArguments {
         }
     }
 
-    pub fn is_none(&self) -> bool {
+    pub const fn is_none(&self) -> bool {
         match self {
             PathArguments::None => true,
             PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => false,

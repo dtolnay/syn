@@ -911,7 +911,7 @@ ast_enum! {
 
 #[cfg(any(feature = "parsing", feature = "printing"))]
 #[cfg(feature = "full")]
-pub(crate) fn requires_terminator(expr: &Expr) -> bool {
+pub(crate) const fn requires_terminator(expr: &Expr) -> bool {
     // see https://github.com/rust-lang/rust/blob/9a19e7604/compiler/rustc_ast/src/util/classify.rs#L7-L26
     match expr {
         Expr::If(_)
@@ -991,7 +991,7 @@ pub(crate) mod parsing {
     }
 
     impl Precedence {
-        fn of(op: &BinOp) -> Self {
+        const fn of(op: &BinOp) -> Self {
             match op {
                 BinOp::Add(_) | BinOp::Sub(_) => Precedence::Arithmetic,
                 BinOp::Mul(_) | BinOp::Div(_) | BinOp::Rem(_) => Precedence::Term,
@@ -2734,7 +2734,7 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     impl Member {
-        fn is_named(&self) -> bool {
+        const fn is_named(&self) -> bool {
             match self {
                 Member::Named(_) => true,
                 Member::Unnamed(_) => false,
