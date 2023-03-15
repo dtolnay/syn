@@ -1370,8 +1370,6 @@ pub(crate) mod parsing {
                     expr,
                 }))
             }
-        } else if input.peek(Token![box]) {
-            expr_box(begin, input, allow_struct)
         } else if input.peek(Token![*]) || input.peek(Token![!]) || input.peek(Token![-]) {
             expr_unary(input, attrs, allow_struct).map(Expr::Unary)
         } else {
@@ -2120,13 +2118,6 @@ pub(crate) mod parsing {
         ExprRange, Range, "expected range expression",
         ExprTry, Try, "expected try expression",
         ExprTuple, Tuple, "expected tuple expression",
-    }
-
-    #[cfg(feature = "full")]
-    fn expr_box(begin: ParseBuffer, input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        input.parse::<Token![box]>()?;
-        unary_expr(input, allow_struct)?;
-        Ok(Expr::Verbatim(verbatim::between(begin, input)))
     }
 
     #[cfg(feature = "full")]
