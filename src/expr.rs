@@ -1586,7 +1586,7 @@ pub(crate) mod parsing {
             || input.peek(Token![Self])
             || input.peek(Token![super])
             || input.peek(Token![crate])
-            || input.peek(Token![try]) && input.peek2(Token![::])
+            || input.peek(Token![try]) && (input.peek2(Token![!]) || input.peek2(Token![::]))
         {
             path_or_macro_or_struct(input, allow_struct)
         } else if input.peek(token::Paren) {
