@@ -256,10 +256,7 @@ impl Attribute {
                 let msg = format!("expected parentheses: {}", expected);
                 Err(Error::new(meta.eq_token.span, msg))
             }
-            Meta::List(meta) => {
-                let scope = meta.delimiter.span().close();
-                crate::parse::parse_scoped(parser, scope, meta.tokens.clone())
-            }
+            Meta::List(meta) => meta.parse_args_with(parser),
         }
     }
 
@@ -474,6 +471,33 @@ impl Meta {
             Meta::List(meta) => &meta.path,
             Meta::NameValue(meta) => &meta.path,
         }
+    }
+}
+
+impl MetaList {
+    /// See [`Attribute::parse_args`].
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    pub fn parse_args<T: Parse>(&self) -> Result<T> {
+        self.parse_args_with(T::parse)
+    }
+
+    /// See [`Attribute::parse_args_with`].
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    pub fn parse_args_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
+        let scope = self.delimiter.span().close();
+        crate::parse::parse_scoped(parser, scope, self.tokens.clone())
+    }
+
+    /// See [`Attribute::parse_nested_meta`].
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    pub fn parse_nested_meta(
+        &self,
+        logic: impl FnMut(ParseNestedMeta) -> Result<()>,
+    ) -> Result<()> {
+        self.parse_args_with(meta::parser(logic))
     }
 }
 
