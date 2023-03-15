@@ -608,10 +608,15 @@ pub(crate) mod parsing {
     }
 
     fn parse_meta_name_value_after_path(path: Path, input: ParseStream) -> Result<MetaNameValue> {
+        let eq_token: Token![=] = input.parse()?;
+        if input.peek(Token![#]) && input.peek2(token::Bracket) {
+            return Err(input.error("unexpected attribute inside of attribute"));
+        }
+        let value: Expr = input.parse()?;
         Ok(MetaNameValue {
             path,
-            eq_token: input.parse()?,
-            value: input.parse()?,
+            eq_token,
+            value,
         })
     }
 }
