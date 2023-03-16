@@ -170,7 +170,6 @@ impl<'a> ParseNestedMeta<'a> {
     /// # Example
     ///
     /// ```
-    /// # fn example() -> syn::Result<()> {
     /// use syn::{parse_quote, Attribute, LitStr};
     ///
     /// let attr: Attribute = parse_quote! {
@@ -191,8 +190,7 @@ impl<'a> ParseNestedMeta<'a> {
     ///         }
     ///     })?;
     /// }
-    /// # Ok(())
-    /// # }
+    /// # anyhow::Ok(())
     /// ```
     pub fn value(&self) -> Result<ParseStream<'a>> {
         self.input.parse::<Token![=]>()?;
@@ -206,7 +204,6 @@ impl<'a> ParseNestedMeta<'a> {
     /// # Example
     ///
     /// ```
-    /// # fn example() -> syn::Result<()> {
     /// use syn::{parse_quote, Attribute};
     ///
     /// let attr: Attribute = parse_quote! {
@@ -231,8 +228,7 @@ impl<'a> ParseNestedMeta<'a> {
     ///         }
     ///     })?;
     /// }
-    /// # Ok(())
-    /// # }
+    /// # anyhow::Ok(())
     /// ```
     ///
     /// # Counterexample
@@ -244,7 +240,6 @@ impl<'a> ParseNestedMeta<'a> {
     /// `parse_nested_meta` is not what you want.
     ///
     /// ```
-    /// # fn example() -> syn::Result<()> {
     /// use syn::{parenthesized, parse_quote, Attribute, LitInt};
     ///
     /// let attr: Attribute = parse_quote! {
@@ -264,8 +259,7 @@ impl<'a> ParseNestedMeta<'a> {
     ///         }
     ///     })?;
     /// }
-    /// # Ok(())
-    /// # }
+    /// # anyhow::Ok(())
     /// ```
     pub fn parse_nested_meta(
         &self,

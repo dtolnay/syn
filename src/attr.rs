@@ -199,7 +199,6 @@ impl Attribute {
     /// # Example
     ///
     /// ```
-    /// # fn example() -> syn::Result<()> {
     /// use syn::{parse_quote, Attribute, Expr};
     ///
     /// let attr: Attribute = parse_quote! {
@@ -210,8 +209,7 @@ impl Attribute {
     ///     let precondition: Expr = attr.parse_args()?;
     ///     // ...
     /// }
-    /// # Ok(())
-    /// # }
+    /// # anyhow::Ok(())
     /// ```
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -224,7 +222,6 @@ impl Attribute {
     /// # Example
     ///
     /// ```
-    /// # fn example() -> syn::Result<()> {
     /// use syn::{parse_quote, Attribute};
     ///
     /// let attr: Attribute = parse_quote! {
@@ -235,8 +232,7 @@ impl Attribute {
     ///
     /// // Attribute does not have a Parse impl, so we couldn't directly do:
     /// // let bwom: Attribute = attr.parse_args()?;
-    /// # Ok(())
-    /// # }
+    /// # anyhow::Ok(())
     /// ```
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -276,7 +272,6 @@ impl Attribute {
     /// syntax.
     ///
     /// ```
-    /// # fn example() -> syn::Result<()> {
     /// use syn::{parenthesized, parse_quote, token, ItemStruct, LitInt};
     ///
     /// let input: ItemStruct = parse_quote! {
@@ -331,8 +326,7 @@ impl Attribute {
     ///         })?;
     ///     }
     /// }
-    /// # Ok(())
-    /// # }
+    /// # anyhow::Ok(())
     /// ```
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
