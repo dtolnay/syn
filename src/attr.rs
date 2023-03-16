@@ -291,21 +291,30 @@ impl Attribute {
     /// for attr in &input.attrs {
     ///     if attr.path().is_ident("repr") {
     ///         attr.parse_nested_meta(|meta| {
+    ///             // #[repr(C)]
     ///             if meta.path.is_ident("C") {
-    ///                 // #[repr(C)]
     ///                 repr_c = true;
-    ///             } else if meta.path.is_ident("transparent") {
-    ///                 // #[repr(transparent)]
+    ///                 return Ok(());
+    ///             }
+    ///
+    ///             // #[repr(transparent)]
+    ///             if meta.path.is_ident("transparent") {
     ///                 repr_transparent = true;
-    ///             } else if meta.path.is_ident("align") {
-    ///                 // #[repr(align(N))]
+    ///                 return Ok(());
+    ///             }
+    ///
+    ///             // #[repr(align(N))]
+    ///             if meta.path.is_ident("align") {
     ///                 let content;
     ///                 parenthesized!(content in meta.input);
     ///                 let lit: LitInt = content.parse()?;
     ///                 let n: usize = lit.base10_parse()?;
     ///                 repr_align = Some(n);
-    ///             } else if meta.path.is_ident("packed") {
-    ///                 // #[repr(packed)] or #[repr(packed(N))], omitted N means 1
+    ///                 return Ok(());
+    ///             }
+    ///
+    ///             // #[repr(packed)] or #[repr(packed(N))], omitted N means 1
+    ///             if meta.path.is_ident("packed") {
     ///                 if meta.input.peek(token::Paren) {
     ///                     let content;
     ///                     parenthesized!(content in meta.input);
@@ -315,10 +324,10 @@ impl Attribute {
     ///                 } else {
     ///                     repr_packed = Some(1);
     ///                 }
-    ///             } else {
-    ///                 return Err(meta.error("unrecognized repr"));
+    ///                 return Ok(());
     ///             }
-    ///             Ok(())
+    ///
+    ///             Err(meta.error("unrecognized repr"))
     ///         })?;
     ///     }
     /// }
