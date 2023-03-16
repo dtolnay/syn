@@ -17,10 +17,9 @@ extern crate test;
 #[path = "../tests/macros/mod.rs"]
 mod macros;
 
-#[path = "../tests/common/mod.rs"]
-mod common;
+#[allow(dead_code)]
 #[path = "../tests/repo/mod.rs"]
-pub mod repo;
+mod repo;
 
 use proc_macro2::{Span, TokenStream};
 use std::fs;

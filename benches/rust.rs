@@ -18,8 +18,6 @@
 #[path = "../tests/macros/mod.rs"]
 mod macros;
 
-#[path = "../tests/common/mod.rs"]
-mod common;
 #[path = "../tests/repo/mod.rs"]
 mod repo;
 
