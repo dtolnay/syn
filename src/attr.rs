@@ -328,6 +328,55 @@ impl Attribute {
     /// }
     /// # anyhow::Ok(())
     /// ```
+    ///
+    /// # Alternatives
+    ///
+    /// In some cases, for attributes which have nested layers of structured
+    /// content, the following less flexible approach might be more convenient:
+    ///
+    /// ```
+    /// # use syn::{parse_quote, ItemStruct};
+    /// #
+    /// # let input: ItemStruct = parse_quote! {
+    /// #     #[repr(C, align(4))]
+    /// #     pub struct MyStruct(u16, u32);
+    /// # };
+    /// #
+    /// use syn::punctuated::Punctuated;
+    /// use syn::{parenthesized, token, Error, LitInt, Meta, Token};
+    ///
+    /// let mut repr_c = false;
+    /// let mut repr_transparent = false;
+    /// let mut repr_align = None::<usize>;
+    /// let mut repr_packed = None::<usize>;
+    /// for attr in &input.attrs {
+    ///     if attr.path().is_ident("repr") {
+    ///         let nested = attr.parse_args_with(Punctuated::<Meta, Token![,]>::parse_terminated)?;
+    ///         for meta in nested {
+    ///             match meta {
+    ///                 // #[repr(C)]
+    ///                 Meta::Path(path) if path.is_ident("C") => {
+    ///                     repr_c = true;
+    ///                 }
+    ///
+    ///                 // #[repr(align(N))]
+    ///                 Meta::List(meta) if meta.path.is_ident("align") => {
+    ///                     let lit: LitInt = meta.parse_args()?;
+    ///                     let n: usize = lit.base10_parse()?;
+    ///                     repr_align = Some(n);
+    ///                 }
+    ///
+    ///                 /* ... */
+    ///
+    ///                 _ => {
+    ///                     return Err(Error::new_spanned(meta, "unrecognized repr"));
+    ///                 }
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// # Ok(())
+    /// ```
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_nested_meta(
