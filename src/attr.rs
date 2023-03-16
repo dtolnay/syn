@@ -535,6 +535,7 @@ impl<'a> FilterAttrs<'a> for &'a [Attribute] {
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use super::*;
+    use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
 
     pub(crate) fn parse_inner(input: ParseStream, attrs: &mut Vec<Attribute>) -> Result<()> {
@@ -609,10 +610,19 @@ pub(crate) mod parsing {
 
     fn parse_meta_name_value_after_path(path: Path, input: ParseStream) -> Result<MetaNameValue> {
         let eq_token: Token![=] = input.parse()?;
-        if input.peek(Token![#]) && input.peek2(token::Bracket) {
+        let ahead = input.fork();
+        let lit: Option<Lit> = ahead.parse()?;
+        let value = if let (Some(lit), true) = (lit, ahead.is_empty()) {
+            input.advance_to(&ahead);
+            Expr::Lit(ExprLit {
+                attrs: Vec::new(),
+                lit,
+            })
+        } else if input.peek(Token![#]) && input.peek2(token::Bracket) {
             return Err(input.error("unexpected attribute inside of attribute"));
-        }
-        let value: Expr = input.parse()?;
+        } else {
+            input.parse()?
+        };
         Ok(MetaNameValue {
             path,
             eq_token,
