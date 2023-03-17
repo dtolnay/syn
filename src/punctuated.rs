@@ -37,8 +37,8 @@ use crate::parse::{Parse, ParseStream, Result};
 #[cfg(feature = "parsing")]
 use crate::token::Token;
 
-/// A punctuated sequence of syntax tree nodes of type `T` separated by
-/// punctuation of type `P`.
+/// **A punctuated sequence of syntax tree nodes of type `T` separated by
+/// punctuation of type `P`.**
 ///
 /// Refer to the [module documentation] for details about punctuated sequences.
 ///
