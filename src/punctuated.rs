@@ -43,7 +43,7 @@ use crate::token::Token;
 /// Refer to the [module documentation] for details about punctuated sequences.
 ///
 /// [module documentation]: self
-pub struct Punctuated<T, P>(Box<PunctuatedInner<T, P>>);
+pub struct Punctuated<T, P>(Option<Box<PunctuatedInner<T, P>>>);
 
 struct PunctuatedInner<T, P> {
     inner: Vec<(T, P)>,
@@ -52,17 +52,17 @@ struct PunctuatedInner<T, P> {
 
 impl<T, P> Punctuated<T, P> {
     /// Creates an empty punctuated sequence.
-    pub fn new() -> Self {
-        Punctuated(Box::new(PunctuatedInner {
-            inner: Vec::new(),
-            last: None,
-        }))
+    pub const fn new() -> Self {
+        Punctuated(None)
     }
 
     /// Determines whether this punctuated sequence is empty, meaning it
     /// contains no syntax tree nodes or punctuation.
     pub fn is_empty(&self) -> bool {
-        self.0.inner.len() == 0 && self.0.last.is_none()
+        match &self.0 {
+            None => true,
+            Some(inner) => inner.inner.len() == 0 && inner.last.is_none(),
+        }
     }
 
     /// Returns the number of syntax tree nodes in this punctuated sequence.
@@ -70,7 +70,10 @@ impl<T, P> Punctuated<T, P> {
     /// This is the number of nodes of type `T`, not counting the punctuation of
     /// type `P`.
     pub fn len(&self) -> usize {
-        self.0.inner.len() + if self.0.last.is_some() { 1 } else { 0 }
+        match &self.0 {
+            None => 0,
+            Some(inner) => inner.len(),
+        }
     }
 
     /// Borrows the first element in this sequence.
@@ -96,9 +99,15 @@ impl<T, P> Punctuated<T, P> {
     /// Returns an iterator over borrowed syntax tree nodes of type `&T`.
     pub fn iter(&self) -> Iter<T> {
         Iter {
-            inner: Box::new(NoDrop::new(PrivateIter {
-                inner: self.0.inner.iter(),
-                last: self.0.last.as_ref().map(Box::as_ref).into_iter(),
+            inner: Box::new(NoDrop::new(match &self.0 {
+                None => PrivateIter {
+                    inner: [].iter(),
+                    last: None.into_iter(),
+                },
+                Some(inner) => PrivateIter {
+                    inner: inner.inner.iter(),
+                    last: inner.last.as_ref().map(Box::as_ref).into_iter(),
+                },
             })),
         }
     }
@@ -107,9 +116,15 @@ impl<T, P> Punctuated<T, P> {
     /// `&mut T`.
     pub fn iter_mut(&mut self) -> IterMut<T> {
         IterMut {
-            inner: Box::new(NoDrop::new(PrivateIterMut {
-                inner: self.0.inner.iter_mut(),
-                last: self.0.last.as_mut().map(Box::as_mut).into_iter(),
+            inner: Box::new(NoDrop::new(match &mut self.0 {
+                None => PrivateIterMut {
+                    inner: [].iter_mut(),
+                    last: None.into_iter(),
+                },
+                Some(inner) => PrivateIterMut {
+                    inner: inner.inner.iter_mut(),
+                    last: inner.last.as_mut().map(Box::as_mut).into_iter(),
+                },
             })),
         }
     }
@@ -117,27 +132,45 @@ impl<T, P> Punctuated<T, P> {
     /// Returns an iterator over the contents of this sequence as borrowed
     /// punctuated pairs.
     pub fn pairs(&self) -> Pairs<T, P> {
-        Pairs {
-            inner: self.0.inner.iter(),
-            last: self.0.last.as_ref().map(Box::as_ref).into_iter(),
+        match &self.0 {
+            None => Pairs {
+                inner: [].iter(),
+                last: None.into_iter(),
+            },
+            Some(inner) => Pairs {
+                inner: inner.inner.iter(),
+                last: inner.last.as_ref().map(Box::as_ref).into_iter(),
+            },
         }
     }
 
     /// Returns an iterator over the contents of this sequence as mutably
     /// borrowed punctuated pairs.
     pub fn pairs_mut(&mut self) -> PairsMut<T, P> {
-        PairsMut {
-            inner: self.0.inner.iter_mut(),
-            last: self.0.last.as_mut().map(Box::as_mut).into_iter(),
+        match &mut self.0 {
+            None => PairsMut {
+                inner: [].iter_mut(),
+                last: None.into_iter(),
+            },
+            Some(inner) => PairsMut {
+                inner: inner.inner.iter_mut(),
+                last: inner.last.as_mut().map(Box::as_mut).into_iter(),
+            },
         }
     }
 
     /// Returns an iterator over the contents of this sequence as owned
     /// punctuated pairs.
     pub fn into_pairs(self) -> IntoPairs<T, P> {
-        IntoPairs {
-            inner: self.0.inner.into_iter(),
-            last: self.0.last.map(|t| *t).into_iter(),
+        match self.0 {
+            None => IntoPairs {
+                inner: Vec::new().into_iter(),
+                last: None.into_iter(),
+            },
+            Some(inner) => IntoPairs {
+                inner: inner.inner.into_iter(),
+                last: inner.last.map(|t| *t).into_iter(),
+            },
         }
     }
 
@@ -154,12 +187,7 @@ impl<T, P> Punctuated<T, P> {
     /// Panics if the sequence is nonempty and does not already have a trailing
     /// punctuation.
     pub fn push_value(&mut self, value: T) {
-        assert!(
-            self.empty_or_trailing(),
-            "Punctuated::push_value: cannot push value if Punctuated is missing trailing punctuation",
-        );
-
-        self.0.last = Some(Box::new(value));
+        self.make_nonempty().push_value(value);
     }
 
     /// Appends a trailing punctuation onto the end of this punctuated sequence.
@@ -170,29 +198,28 @@ impl<T, P> Punctuated<T, P> {
     ///
     /// Panics if the sequence is empty or already has a trailing punctuation.
     pub fn push_punct(&mut self, punctuation: P) {
-        assert!(
-            self.0.last.is_some(),
-            "Punctuated::push_punct: cannot push punctuation if Punctuated is empty or already has trailing punctuation",
-        );
-
-        let last = self.0.last.take().unwrap();
-        self.0.inner.push((*last, punctuation));
+        self.make_nonempty().push_punct(punctuation);
     }
 
     /// Removes the last punctuated pair from this sequence, or `None` if the
     /// sequence is empty.
     pub fn pop(&mut self) -> Option<Pair<T, P>> {
-        if self.0.last.is_some() {
-            self.0.last.take().map(|t| Pair::End(*t))
+        let inner = self.make_nonempty();
+
+        if inner.last.is_some() {
+            inner.last.take().map(|t| Pair::End(*t))
         } else {
-            self.0.inner.pop().map(|(t, p)| Pair::Punctuated(t, p))
+            inner.inner.pop().map(|(t, p)| Pair::Punctuated(t, p))
         }
     }
 
     /// Determines whether this punctuated sequence ends with a trailing
     /// punctuation.
     pub fn trailing_punct(&self) -> bool {
-        self.0.last.is_none() && !self.is_empty()
+        match &self.0 {
+            None => false,
+            Some(inner) => inner.last.is_none() && !inner.inner.is_empty(),
+        }
     }
 
     /// Returns true if either this `Punctuated` is empty, or it has a trailing
@@ -200,7 +227,10 @@ impl<T, P> Punctuated<T, P> {
     ///
     /// Equivalent to `punctuated.is_empty() || punctuated.trailing_punct()`.
     pub fn empty_or_trailing(&self) -> bool {
-        self.0.last.is_none()
+        match &self.0 {
+            None => true,
+            Some(inner) => inner.empty_or_trailing(),
+        }
     }
 
     /// Appends a syntax tree node onto the end of this punctuated sequence.
@@ -212,10 +242,7 @@ impl<T, P> Punctuated<T, P> {
     where
         P: Default,
     {
-        if !self.empty_or_trailing() {
-            self.push_punct(Default::default());
-        }
-        self.push_value(value);
+        self.make_nonempty().push(value);
     }
 
     /// Inserts an element at position `index`.
@@ -228,22 +255,26 @@ impl<T, P> Punctuated<T, P> {
     where
         P: Default,
     {
+        let inner = self.make_nonempty();
+
         assert!(
-            index <= self.len(),
+            index <= inner.len(),
             "Punctuated::insert: index out of range",
         );
 
-        if index == self.len() {
-            self.push(value);
+        if index == inner.len() {
+            inner.push(value);
         } else {
-            self.0.inner.insert(index, (value, Default::default()));
+            inner.inner.insert(index, (value, Default::default()));
         }
     }
 
     /// Clears the sequence of all values and punctuation, making it empty.
     pub fn clear(&mut self) {
-        self.0.inner.clear();
-        self.0.last = None;
+        if let Some(inner) = &mut self.0 {
+            inner.inner.clear();
+            inner.last = None;
+        }
     }
 
     /// Parses zero or more occurrences of `T` separated by punctuation of type
@@ -344,6 +375,54 @@ impl<T, P> Punctuated<T, P> {
 
         Ok(punctuated)
     }
+
+    fn make_nonempty(&mut self) -> &mut PunctuatedInner<T, P> {
+        self.0.get_or_insert_with(|| {
+            Box::new(PunctuatedInner {
+                inner: Vec::new(),
+                last: None,
+            })
+        })
+    }
+}
+
+impl<T, P> PunctuatedInner<T, P> {
+    fn len(&self) -> usize {
+        self.inner.len() + if self.last.is_some() { 1 } else { 0 }
+    }
+
+    fn empty_or_trailing(&self) -> bool {
+        self.last.is_none()
+    }
+
+    fn push_value(&mut self, value: T) {
+        assert!(
+            self.empty_or_trailing(),
+            "Punctuated::push_value: cannot push value if Punctuated is missing trailing punctuation",
+        );
+
+        self.last = Some(Box::new(value));
+    }
+
+    fn push_punct(&mut self, punctuation: P) {
+        assert!(
+            self.last.is_some(),
+            "Punctuated::push_punct: cannot push punctuation if Punctuated is empty or already has trailing punctuation",
+        );
+
+        let last = self.last.take().unwrap();
+        self.inner.push((*last, punctuation));
+    }
+
+    fn push(&mut self, value: T)
+    where
+        P: Default,
+    {
+        if !self.empty_or_trailing() {
+            self.push_punct(Default::default());
+        }
+        self.push_value(value);
+    }
 }
 
 #[cfg(feature = "clone-impls")]
@@ -354,10 +433,13 @@ where
     P: Clone,
 {
     fn clone(&self) -> Self {
-        Punctuated(Box::new(PunctuatedInner {
-            inner: self.0.inner.clone(),
-            last: self.0.last.clone(),
-        }))
+        match &self.0 {
+            None => Punctuated(None),
+            Some(inner) => Punctuated(Some(Box::new(PunctuatedInner {
+                inner: inner.inner.clone(),
+                last: inner.last.clone(),
+            }))),
+        }
     }
 }
 
@@ -378,8 +460,15 @@ where
     P: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
-        let PunctuatedInner { inner, last } = self.0.as_ref();
-        *inner == other.0.inner && *last == other.0.last
+        let (inner, last) = match &self.0 {
+            None => (&[][..], &None),
+            Some(inner) => (inner.inner.as_slice(), &inner.last),
+        };
+        let (other_inner, other_last) = match &other.0 {
+            None => (&[][..], &None),
+            Some(inner) => (inner.inner.as_slice(), &inner.last),
+        };
+        inner == other_inner && last == other_last
     }
 }
 
@@ -391,7 +480,10 @@ where
     P: Hash,
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let PunctuatedInner { inner, last } = self.0.as_ref();
+        let (inner, last) = match &self.0 {
+            None => (&[][..], &None),
+            Some(inner) => (inner.inner.as_slice(), &inner.last),
+        };
         inner.hash(state);
         last.hash(state);
     }
@@ -401,12 +493,16 @@ where
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl<T: Debug, P: Debug> Debug for Punctuated<T, P> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let (inner, last) = match &self.0 {
+            None => (&[][..], &None),
+            Some(inner) => (inner.inner.as_slice(), &inner.last),
+        };
         let mut list = f.debug_list();
-        for (t, p) in &self.0.inner {
+        for (t, p) in inner {
             list.entry(t);
             list.entry(p);
         }
-        if let Some(last) = &self.0.last {
+        if let Some(last) = last {
             list.entry(last);
         }
         list.finish()
@@ -464,10 +560,11 @@ where
         if nomore {
             panic!("Punctuated extended with items after a Pair::End");
         }
+        let inner = punctuated.make_nonempty();
         match pair {
-            Pair::Punctuated(a, b) => punctuated.0.inner.push((a, b)),
+            Pair::Punctuated(a, b) => inner.inner.push((a, b)),
             Pair::End(a) => {
-                punctuated.0.last = Some(Box::new(a));
+                inner.last = Some(Box::new(a));
                 nomore = true;
             }
         }
@@ -480,8 +577,11 @@ impl<T, P> IntoIterator for Punctuated<T, P> {
 
     fn into_iter(self) -> Self::IntoIter {
         let mut elements = Vec::with_capacity(self.len());
-        elements.extend(self.0.inner.into_iter().map(|pair| pair.0));
-        elements.extend(self.0.last.map(|t| *t));
+        if let Some(inner) = self.0 {
+            let inner = *inner;
+            elements.extend(inner.inner.into_iter().map(|pair| pair.0));
+            elements.extend(inner.last.map(|t| *t));
+        }
 
         IntoIter {
             inner: elements.into_iter(),
@@ -1033,26 +1133,36 @@ impl<T, P> Index<usize> for Punctuated<T, P> {
     type Output = T;
 
     fn index(&self, index: usize) -> &Self::Output {
-        if index == self.len() - 1 {
-            match &self.0.last {
-                Some(t) => t,
-                None => &self.0.inner[index].0,
+        match &self.0 {
+            None => panic!("Punctuated index out of bounds"),
+            Some(inner) => {
+                if index == inner.len() - 1 {
+                    match &inner.last {
+                        Some(t) => t,
+                        None => &inner.inner[index].0,
+                    }
+                } else {
+                    &inner.inner[index].0
+                }
             }
-        } else {
-            &self.0.inner[index].0
         }
     }
 }
 
 impl<T, P> IndexMut<usize> for Punctuated<T, P> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        if index == self.len() - 1 {
-            match &mut self.0.last {
-                Some(t) => t,
-                None => &mut self.0.inner[index].0,
+        match &mut self.0 {
+            None => panic!("Punctuated index out of bounds"),
+            Some(inner) => {
+                if index == inner.len() - 1 {
+                    match &mut inner.last {
+                        Some(t) => t,
+                        None => &mut inner.inner[index].0,
+                    }
+                } else {
+                    &mut inner.inner[index].0
+                }
             }
-        } else {
-            &mut self.0.inner[index].0
         }
     }
 }
