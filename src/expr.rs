@@ -673,16 +673,6 @@ ast_struct! {
 }
 
 impl Expr {
-    #[cfg(feature = "parsing")]
-    const DUMMY: Self = Expr::Path(ExprPath {
-        attrs: Vec::new(),
-        qself: None,
-        path: Path {
-            leading_colon: None,
-            segments: Punctuated::new(),
-        },
-    });
-
     #[cfg(all(feature = "parsing", feature = "full"))]
     pub(crate) fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
         match self {
@@ -2710,15 +2700,26 @@ pub(crate) mod parsing {
         if trailing_dot {
             float_repr.truncate(float_repr.len() - 1);
         }
+        let mut dummy = Expr::Path(ExprPath {
+            attrs: Vec::new(),
+            qself: None,
+            path: Path {
+                leading_colon: None,
+                segments: Punctuated::new(),
+            },
+        });
         for part in float_repr.split('.') {
             let index = crate::parse_str(part).map_err(|err| Error::new(float.span(), err))?;
-            let base = mem::replace(e, Expr::DUMMY);
-            *e = Expr::Field(ExprField {
-                attrs: Vec::new(),
-                base: Box::new(base),
-                dot_token: Token![.](dot_token.span),
-                member: Member::Unnamed(index),
-            });
+            let base = mem::replace(e, dummy);
+            dummy = mem::replace(
+                e,
+                Expr::Field(ExprField {
+                    attrs: Vec::new(),
+                    base: Box::new(base),
+                    dot_token: Token![.](dot_token.span),
+                    member: Member::Unnamed(index),
+                }),
+            );
             *dot_token = Token![.](float.span());
         }
         Ok(!trailing_dot)

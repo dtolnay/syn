@@ -43,24 +43,26 @@ use crate::token::Token;
 /// Refer to the [module documentation] for details about punctuated sequences.
 ///
 /// [module documentation]: self
-pub struct Punctuated<T, P> {
+pub struct Punctuated<T, P>(Box<PunctuatedInner<T, P>>);
+
+struct PunctuatedInner<T, P> {
     inner: Vec<(T, P)>,
     last: Option<Box<T>>,
 }
 
 impl<T, P> Punctuated<T, P> {
     /// Creates an empty punctuated sequence.
-    pub const fn new() -> Self {
-        Punctuated {
+    pub fn new() -> Self {
+        Punctuated(Box::new(PunctuatedInner {
             inner: Vec::new(),
             last: None,
-        }
+        }))
     }
 
     /// Determines whether this punctuated sequence is empty, meaning it
     /// contains no syntax tree nodes or punctuation.
     pub fn is_empty(&self) -> bool {
-        self.inner.len() == 0 && self.last.is_none()
+        self.0.inner.len() == 0 && self.0.last.is_none()
     }
 
     /// Returns the number of syntax tree nodes in this punctuated sequence.
@@ -68,7 +70,7 @@ impl<T, P> Punctuated<T, P> {
     /// This is the number of nodes of type `T`, not counting the punctuation of
     /// type `P`.
     pub fn len(&self) -> usize {
-        self.inner.len() + if self.last.is_some() { 1 } else { 0 }
+        self.0.inner.len() + if self.0.last.is_some() { 1 } else { 0 }
     }
 
     /// Borrows the first element in this sequence.
@@ -95,8 +97,8 @@ impl<T, P> Punctuated<T, P> {
     pub fn iter(&self) -> Iter<T> {
         Iter {
             inner: Box::new(NoDrop::new(PrivateIter {
-                inner: self.inner.iter(),
-                last: self.last.as_ref().map(Box::as_ref).into_iter(),
+                inner: self.0.inner.iter(),
+                last: self.0.last.as_ref().map(Box::as_ref).into_iter(),
             })),
         }
     }
@@ -106,8 +108,8 @@ impl<T, P> Punctuated<T, P> {
     pub fn iter_mut(&mut self) -> IterMut<T> {
         IterMut {
             inner: Box::new(NoDrop::new(PrivateIterMut {
-                inner: self.inner.iter_mut(),
-                last: self.last.as_mut().map(Box::as_mut).into_iter(),
+                inner: self.0.inner.iter_mut(),
+                last: self.0.last.as_mut().map(Box::as_mut).into_iter(),
             })),
         }
     }
@@ -116,8 +118,8 @@ impl<T, P> Punctuated<T, P> {
     /// punctuated pairs.
     pub fn pairs(&self) -> Pairs<T, P> {
         Pairs {
-            inner: self.inner.iter(),
-            last: self.last.as_ref().map(Box::as_ref).into_iter(),
+            inner: self.0.inner.iter(),
+            last: self.0.last.as_ref().map(Box::as_ref).into_iter(),
         }
     }
 
@@ -125,8 +127,8 @@ impl<T, P> Punctuated<T, P> {
     /// borrowed punctuated pairs.
     pub fn pairs_mut(&mut self) -> PairsMut<T, P> {
         PairsMut {
-            inner: self.inner.iter_mut(),
-            last: self.last.as_mut().map(Box::as_mut).into_iter(),
+            inner: self.0.inner.iter_mut(),
+            last: self.0.last.as_mut().map(Box::as_mut).into_iter(),
         }
     }
 
@@ -134,8 +136,8 @@ impl<T, P> Punctuated<T, P> {
     /// punctuated pairs.
     pub fn into_pairs(self) -> IntoPairs<T, P> {
         IntoPairs {
-            inner: self.inner.into_iter(),
-            last: self.last.map(|t| *t).into_iter(),
+            inner: self.0.inner.into_iter(),
+            last: self.0.last.map(|t| *t).into_iter(),
         }
     }
 
@@ -157,7 +159,7 @@ impl<T, P> Punctuated<T, P> {
             "Punctuated::push_value: cannot push value if Punctuated is missing trailing punctuation",
         );
 
-        self.last = Some(Box::new(value));
+        self.0.last = Some(Box::new(value));
     }
 
     /// Appends a trailing punctuation onto the end of this punctuated sequence.
@@ -169,28 +171,28 @@ impl<T, P> Punctuated<T, P> {
     /// Panics if the sequence is empty or already has a trailing punctuation.
     pub fn push_punct(&mut self, punctuation: P) {
         assert!(
-            self.last.is_some(),
+            self.0.last.is_some(),
             "Punctuated::push_punct: cannot push punctuation if Punctuated is empty or already has trailing punctuation",
         );
 
-        let last = self.last.take().unwrap();
-        self.inner.push((*last, punctuation));
+        let last = self.0.last.take().unwrap();
+        self.0.inner.push((*last, punctuation));
     }
 
     /// Removes the last punctuated pair from this sequence, or `None` if the
     /// sequence is empty.
     pub fn pop(&mut self) -> Option<Pair<T, P>> {
-        if self.last.is_some() {
-            self.last.take().map(|t| Pair::End(*t))
+        if self.0.last.is_some() {
+            self.0.last.take().map(|t| Pair::End(*t))
         } else {
-            self.inner.pop().map(|(t, p)| Pair::Punctuated(t, p))
+            self.0.inner.pop().map(|(t, p)| Pair::Punctuated(t, p))
         }
     }
 
     /// Determines whether this punctuated sequence ends with a trailing
     /// punctuation.
     pub fn trailing_punct(&self) -> bool {
-        self.last.is_none() && !self.is_empty()
+        self.0.last.is_none() && !self.is_empty()
     }
 
     /// Returns true if either this `Punctuated` is empty, or it has a trailing
@@ -198,7 +200,7 @@ impl<T, P> Punctuated<T, P> {
     ///
     /// Equivalent to `punctuated.is_empty() || punctuated.trailing_punct()`.
     pub fn empty_or_trailing(&self) -> bool {
-        self.last.is_none()
+        self.0.last.is_none()
     }
 
     /// Appends a syntax tree node onto the end of this punctuated sequence.
@@ -234,14 +236,14 @@ impl<T, P> Punctuated<T, P> {
         if index == self.len() {
             self.push(value);
         } else {
-            self.inner.insert(index, (value, Default::default()));
+            self.0.inner.insert(index, (value, Default::default()));
         }
     }
 
     /// Clears the sequence of all values and punctuation, making it empty.
     pub fn clear(&mut self) {
-        self.inner.clear();
-        self.last = None;
+        self.0.inner.clear();
+        self.0.last = None;
     }
 
     /// Parses zero or more occurrences of `T` separated by punctuation of type
@@ -352,10 +354,10 @@ where
     P: Clone,
 {
     fn clone(&self) -> Self {
-        Punctuated {
-            inner: self.inner.clone(),
-            last: self.last.clone(),
-        }
+        Punctuated(Box::new(PunctuatedInner {
+            inner: self.0.inner.clone(),
+            last: self.0.last.clone(),
+        }))
     }
 }
 
@@ -376,8 +378,8 @@ where
     P: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
-        let Punctuated { inner, last } = self;
-        *inner == other.inner && *last == other.last
+        let PunctuatedInner { inner, last } = self.0.as_ref();
+        *inner == other.0.inner && *last == other.0.last
     }
 }
 
@@ -389,7 +391,7 @@ where
     P: Hash,
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let Punctuated { inner, last } = self;
+        let PunctuatedInner { inner, last } = self.0.as_ref();
         inner.hash(state);
         last.hash(state);
     }
@@ -400,11 +402,11 @@ where
 impl<T: Debug, P: Debug> Debug for Punctuated<T, P> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut list = f.debug_list();
-        for (t, p) in &self.inner {
+        for (t, p) in &self.0.inner {
             list.entry(t);
             list.entry(p);
         }
-        if let Some(last) = &self.last {
+        if let Some(last) = &self.0.last {
             list.entry(last);
         }
         list.finish()
@@ -463,9 +465,9 @@ where
             panic!("Punctuated extended with items after a Pair::End");
         }
         match pair {
-            Pair::Punctuated(a, b) => punctuated.inner.push((a, b)),
+            Pair::Punctuated(a, b) => punctuated.0.inner.push((a, b)),
             Pair::End(a) => {
-                punctuated.last = Some(Box::new(a));
+                punctuated.0.last = Some(Box::new(a));
                 nomore = true;
             }
         }
@@ -478,8 +480,8 @@ impl<T, P> IntoIterator for Punctuated<T, P> {
 
     fn into_iter(self) -> Self::IntoIter {
         let mut elements = Vec::with_capacity(self.len());
-        elements.extend(self.inner.into_iter().map(|pair| pair.0));
-        elements.extend(self.last.map(|t| *t));
+        elements.extend(self.0.inner.into_iter().map(|pair| pair.0));
+        elements.extend(self.0.last.map(|t| *t));
 
         IntoIter {
             inner: elements.into_iter(),
@@ -1032,12 +1034,12 @@ impl<T, P> Index<usize> for Punctuated<T, P> {
 
     fn index(&self, index: usize) -> &Self::Output {
         if index == self.len() - 1 {
-            match &self.last {
+            match &self.0.last {
                 Some(t) => t,
-                None => &self.inner[index].0,
+                None => &self.0.inner[index].0,
             }
         } else {
-            &self.inner[index].0
+            &self.0.inner[index].0
         }
     }
 }
@@ -1045,12 +1047,12 @@ impl<T, P> Index<usize> for Punctuated<T, P> {
 impl<T, P> IndexMut<usize> for Punctuated<T, P> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         if index == self.len() - 1 {
-            match &mut self.last {
+            match &mut self.0.last {
                 Some(t) => t,
-                None => &mut self.inner[index].0,
+                None => &mut self.0.inner[index].0,
             }
         } else {
-            &mut self.inner[index].0
+            &mut self.0.inner[index].0
         }
     }
 }
