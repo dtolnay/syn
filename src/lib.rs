@@ -62,7 +62,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! syn = "1.0"
+//! syn = "2.0"
 //! quote = "1.0"
 //!
 //! [lib]
@@ -249,7 +249,7 @@
 //!   dynamic library libproc_macro from rustc toolchain.
 
 // Syn types in rustdoc of other crates get linked to here.
-#![doc(html_root_url = "https://docs.rs/syn/1.0.109")]
+#![doc(html_root_url = "https://docs.rs/syn/2.0.0")]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(non_camel_case_types)]
 #![allow(
@@ -548,7 +548,7 @@ mod gen {
     /// ```
     /// // [dependencies]
     /// // quote = "1.0"
-    /// // syn = { version = "1.0", features = ["fold", "full"] }
+    /// // syn = { version = "2.0", features = ["fold", "full"] }
     ///
     /// use quote::quote;
     /// use syn::fold::{fold_expr, Fold};
@@ -630,7 +630,7 @@ mod gen {
     /// ```
     /// // [dependencies]
     /// // quote = "1.0"
-    /// // syn = { version = "1.0", features = ["full", "visit"] }
+    /// // syn = { version = "2.0", features = ["full", "visit"] }
     ///
     /// use quote::quote;
     /// use syn::visit::{self, Visit};
@@ -750,7 +750,7 @@ mod gen {
     /// ```
     /// // [dependencies]
     /// // quote = "1.0"
-    /// // syn = { version = "1.0", features = ["full", "visit-mut"] }
+    /// // syn = { version = "2.0", features = ["full", "visit-mut"] }
     ///
     /// use quote::quote;
     /// use syn::visit_mut::{self, VisitMut};

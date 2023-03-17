@@ -76,7 +76,7 @@ tokens back to the compiler to compile into the user's crate.
 
 ```toml
 [dependencies]
-syn = "1.0"
+syn = "2.0"
 quote = "1.0"
 
 [lib]
