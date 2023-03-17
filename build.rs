@@ -15,7 +15,7 @@ fn main() {
         None => return,
     };
 
-    // Note: remove exclude=["build.rs"] from Cargo.toml if adding any
+    // Note: add "/build.rs" to package.include in Cargo.toml if adding any
     // conditional compilation within the library.
     let _ = compiler.minor;
 
