@@ -320,8 +320,8 @@ pub(crate) mod parsing {
         /// ```
         /// # let wat = None;
         /// match wat {
-        ///     |None |Some(false) => {}
-        ///     |Some(true) => {}
+        ///     | None | Some(false) => {}
+        ///     | Some(true) => {}
         /// }
         /// ```
         ///
