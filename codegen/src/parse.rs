@@ -197,11 +197,11 @@ fn introspect_features(attrs: &[Attribute]) -> types::Features {
     let mut ret = types::Features::default();
 
     for attr in attrs {
-        if !attr.path.is_ident("cfg") {
+        if !attr.path().is_ident("cfg") {
             continue;
         }
 
-        let features = parsing::parse_features.parse2(attr.tokens.clone()).unwrap();
+        let features = attr.parse_args_with(parsing::parse_features).unwrap();
 
         if ret.any.is_empty() {
             ret = features;
@@ -225,7 +225,7 @@ fn is_pub(vis: &Visibility) -> bool {
 
 fn is_non_exhaustive(attrs: &[Attribute]) -> bool {
     for attr in attrs {
-        if attr.path.is_ident("non_exhaustive") {
+        if attr.path().is_ident("non_exhaustive") {
             return true;
         }
     }
@@ -234,11 +234,7 @@ fn is_non_exhaustive(attrs: &[Attribute]) -> bool {
 
 fn is_doc_hidden(attrs: &[Attribute]) -> bool {
     for attr in attrs {
-        if attr.path.is_ident("doc")
-            && parsing::parse_doc_hidden_attr
-                .parse2(attr.tokens.clone())
-                .is_ok()
-        {
+        if attr.path().is_ident("doc") && attr.parse_args::<parsing::kw::hidden>().is_ok() {
             return true;
         }
     }
@@ -282,9 +278,10 @@ mod parsing {
     use proc_macro2::TokenStream;
     use quote::quote;
     use std::collections::{BTreeMap, BTreeSet};
-    use syn::parse::{ParseStream, Parser, Result};
+    use syn::parse::{ParseStream, Result};
     use syn::{
-        braced, bracketed, parenthesized, parse_quote, token, Attribute, Ident, LitStr, Path, Token,
+        braced, bracketed, parenthesized, parse_quote, token, Attribute, Expr, Ident, Lit, LitStr,
+        Path, Token,
     };
     use syn_codegen as types;
 
@@ -421,7 +418,7 @@ mod parsing {
         })
     }
 
-    mod kw {
+    pub mod kw {
         syn::custom_keyword!(hidden);
         syn::custom_keyword!(macro_rules);
         syn::custom_keyword!(Token);
@@ -458,55 +455,42 @@ mod parsing {
     pub fn parse_features(input: ParseStream) -> Result<types::Features> {
         let mut features = BTreeSet::new();
 
-        let level_1;
-        parenthesized!(level_1 in input);
-
-        let i: Ident = level_1.fork().parse()?;
+        let i: Ident = input.fork().parse()?;
 
         if i == "any" {
-            level_1.parse::<Ident>()?;
+            input.parse::<Ident>()?;
 
-            let level_2;
-            parenthesized!(level_2 in level_1);
+            let nested;
+            parenthesized!(nested in input);
 
-            while !level_2.is_empty() {
-                features.insert(parse_feature(&level_2)?);
+            while !nested.is_empty() {
+                features.insert(parse_feature(&nested)?);
 
-                if !level_2.is_empty() {
-                    level_2.parse::<Token![,]>()?;
+                if !nested.is_empty() {
+                    nested.parse::<Token![,]>()?;
                 }
             }
         } else if i == "feature" {
-            features.insert(parse_feature(&level_1)?);
-            assert!(level_1.is_empty());
+            features.insert(parse_feature(input)?);
+            assert!(input.is_empty());
         } else {
             panic!("{:?}", i);
         }
 
-        assert!(input.is_empty());
-
         Ok(types::Features { any: features })
     }
 
-    pub fn path_attr(attrs: &[Attribute]) -> Result<Option<LitStr>> {
+    pub fn path_attr(attrs: &[Attribute]) -> Result<Option<&LitStr>> {
         for attr in attrs {
-            if attr.path.is_ident("path") {
-                fn parser(input: ParseStream) -> Result<LitStr> {
-                    input.parse::<Token![=]>()?;
-                    input.parse()
+            if attr.path().is_ident("path") {
+                if let Expr::Lit(expr) = &attr.meta.require_name_value()?.value {
+                    if let Lit::Str(lit) = &expr.lit {
+                        return Ok(Some(lit));
+                    }
                 }
-                let filename = parser.parse2(attr.tokens.clone())?;
-                return Ok(Some(filename));
             }
         }
         Ok(None)
-    }
-
-    pub fn parse_doc_hidden_attr(input: ParseStream) -> Result<()> {
-        let content;
-        parenthesized!(content in input);
-        content.parse::<kw::hidden>()?;
-        Ok(())
     }
 }
 
@@ -518,7 +502,7 @@ fn get_features(attrs: &[Attribute], base: &[Attribute]) -> Vec<Attribute> {
     let mut ret = clone_features(base);
 
     for attr in attrs {
-        if attr.path.is_ident("cfg") {
+        if attr.path().is_ident("cfg") {
             ret.push(parse_quote!(#attr));
         }
     }
