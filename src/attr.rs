@@ -239,7 +239,7 @@ impl Attribute {
     pub fn parse_args_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
         match &self.meta {
             Meta::Path(path) => {
-                let expected = expected_parentheses(&self.style, path);
+                let expected = parsing::expected_parentheses(&self.style, path);
                 let msg = format!("expected attribute arguments in parentheses: {}", expected);
                 Err(crate::error::new2(
                     path.segments.first().unwrap().ident.span(),
@@ -248,7 +248,7 @@ impl Attribute {
                 ))
             }
             Meta::NameValue(meta) => {
-                let expected = expected_parentheses(&self.style, &meta.path);
+                let expected = parsing::expected_parentheses(&self.style, &meta.path);
                 let msg = format!("expected parentheses: {}", expected);
                 Err(Error::new(meta.eq_token.span, msg))
             }
@@ -415,26 +415,6 @@ impl Attribute {
         parsing::parse_inner(input, &mut attrs)?;
         Ok(attrs)
     }
-}
-
-#[cfg(feature = "parsing")]
-fn expected_parentheses(style: &AttrStyle, path: &Path) -> String {
-    let mut suggestion = String::new();
-    match style {
-        AttrStyle::Outer => suggestion.push('#'),
-        AttrStyle::Inner(_) => suggestion.push_str("#!"),
-    }
-    suggestion.push('[');
-
-    for (i, segment) in path.segments.iter().enumerate() {
-        if i > 0 || path.leading_colon.is_some() {
-            suggestion.push_str("::");
-        }
-        write!(suggestion, "{}", segment.ident).unwrap();
-    }
-
-    suggestion.push_str("(...)]");
-    suggestion
 }
 
 ast_enum! {
@@ -680,6 +660,25 @@ pub(crate) mod parsing {
             eq_token,
             value,
         })
+    }
+
+    pub(super) fn expected_parentheses(style: &AttrStyle, path: &Path) -> String {
+        let mut suggestion = String::new();
+        match style {
+            AttrStyle::Outer => suggestion.push('#'),
+            AttrStyle::Inner(_) => suggestion.push_str("#!"),
+        }
+        suggestion.push('[');
+
+        for (i, segment) in path.segments.iter().enumerate() {
+            if i > 0 || path.leading_colon.is_some() {
+                suggestion.push_str("::");
+            }
+            write!(suggestion, "{}", segment.ident).unwrap();
+        }
+
+        suggestion.push_str("(...)]");
+        suggestion
     }
 }
 
