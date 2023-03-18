@@ -7,8 +7,6 @@ use std::slice;
 use crate::meta::{self, ParseNestedMeta};
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream, Parser, Result};
-#[cfg(feature = "parsing")]
-use std::fmt::Write;
 
 ast_struct! {
     /// An attribute, like `#[repr(transparent)]`.
@@ -238,20 +236,23 @@ impl Attribute {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn parse_args_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
         match &self.meta {
-            Meta::Path(path) => {
-                let expected = parsing::expected_parentheses(&self.style, path);
-                let msg = format!("expected attribute arguments in parentheses: {}", expected);
-                Err(crate::error::new2(
-                    path.segments.first().unwrap().ident.span(),
-                    path.segments.last().unwrap().ident.span(),
-                    msg,
-                ))
-            }
-            Meta::NameValue(meta) => {
-                let expected = parsing::expected_parentheses(&self.style, &meta.path);
-                let msg = format!("expected parentheses: {}", expected);
-                Err(Error::new(meta.eq_token.span, msg))
-            }
+            Meta::Path(path) => Err(crate::error::new2(
+                path.segments.first().unwrap().ident.span(),
+                path.segments.last().unwrap().ident.span(),
+                format!(
+                    "expected attribute arguments in parentheses: {}[{}(...)]",
+                    parsing::DisplayAttrStyle(&self.style),
+                    parsing::DisplayPath(path),
+                ),
+            )),
+            Meta::NameValue(meta) => Err(Error::new(
+                meta.eq_token.span,
+                format_args!(
+                    "expected parentheses: {}[{}(...)]",
+                    parsing::DisplayAttrStyle(&self.style),
+                    parsing::DisplayPath(&meta.path),
+                ),
+            )),
             Meta::List(meta) => meta.parse_args_with(parser),
         }
     }
@@ -569,6 +570,7 @@ pub(crate) mod parsing {
     use super::*;
     use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
+    use std::fmt::{self, Display};
 
     pub(crate) fn parse_inner(input: ParseStream, attrs: &mut Vec<Attribute>) -> Result<()> {
         while input.peek(Token![#]) && input.peek2(Token![!]) {
@@ -662,23 +664,29 @@ pub(crate) mod parsing {
         })
     }
 
-    pub(super) fn expected_parentheses(style: &AttrStyle, path: &Path) -> String {
-        let mut suggestion = String::new();
-        match style {
-            AttrStyle::Outer => suggestion.push('#'),
-            AttrStyle::Inner(_) => suggestion.push_str("#!"),
-        }
-        suggestion.push('[');
+    pub(super) struct DisplayAttrStyle<'a>(pub &'a AttrStyle);
 
-        for (i, segment) in path.segments.iter().enumerate() {
-            if i > 0 || path.leading_colon.is_some() {
-                suggestion.push_str("::");
+    impl<'a> Display for DisplayAttrStyle<'a> {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str(match self.0 {
+                AttrStyle::Outer => "#",
+                AttrStyle::Inner(_) => "#!",
+            })
+        }
+    }
+
+    pub(super) struct DisplayPath<'a>(pub &'a Path);
+
+    impl<'a> Display for DisplayPath<'a> {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            for (i, segment) in self.0.segments.iter().enumerate() {
+                if i > 0 || self.0.leading_colon.is_some() {
+                    formatter.write_str("::")?;
+                }
+                write!(formatter, "{}", segment.ident)?;
             }
-            write!(suggestion, "{}", segment.ident).unwrap();
+            Ok(())
         }
-
-        suggestion.push_str("(...)]");
-        suggestion
     }
 }
 
