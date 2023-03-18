@@ -26,8 +26,8 @@ ast_enum! {
         /// A macro invocation in statement position.
         ///
         /// Syntactically it's ambiguous which other kind of statement this
-        /// macro would expand to. It can be an of local variable (`let`), item,
-        /// or expression.
+        /// macro would expand to. It can be any of local variable (`let`),
+        /// item, or expression.
         Macro(StmtMacro),
     }
 }
@@ -62,7 +62,7 @@ ast_struct! {
     /// A macro invocation in statement position.
     ///
     /// Syntactically it's ambiguous which other kind of statement this macro
-    /// would expand to. It can be an of local variable (`let`), item, or
+    /// would expand to. It can be any of local variable (`let`), item, or
     /// expression.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct StmtMacro {
