@@ -26,7 +26,8 @@ use std::fmt::{self, Debug};
 use std::hash::{Hash, Hasher};
 #[cfg(any(feature = "full", feature = "derive"))]
 use std::iter;
-use std::ops::{Index, IndexMut};
+use std::iter::FusedIterator;
+use std::ops::{Index, IndexMut, RangeBounds};
 use std::option;
 use std::slice;
 use std::vec;
@@ -137,6 +138,73 @@ impl<T, P> Punctuated<T, P> {
             inner: self.inner.into_iter(),
             last: self.last.map(|t| *t).into_iter(),
         }
+    }
+
+    /// Removes the specified range from the punctuated in bulk, returning all
+    /// removed elements as an iterator. If the iterator is dropped before
+    /// being fully consumed, it drops the remaining removed elements.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the starting point is greater than the end point or if
+    /// the end point is greater than the length of the punctuated.
+    ///
+    /// # Leaking
+    ///
+    /// If the returned iterator goes out of scope without being dropped (due to
+    /// [`mem::forget`], for example), the punctuated may have lost and leaked
+    /// elements arbitrarily, including elements outside the range.
+    pub fn drain<R>(&mut self, range: R) -> Drain<T, P>
+    where
+        R: RangeBounds<usize>,
+    {
+        let len = self.len();
+
+        // FIXME: use std::slice::range when stabilized
+        // let mut range = std::slice::range(range, ..len);
+        let mut range = {
+            use std::ops::{Bound, Range};
+
+            let start = range.start_bound();
+            let start = match start {
+                Bound::Included(&start) => start,
+                Bound::Excluded(start) => start
+                    .checked_add(1)
+                    .unwrap_or_else(|| panic!("attempted to index slice from after maximum usize")),
+                Bound::Unbounded => 0,
+            };
+
+            let end = range.end_bound();
+            let end = match end {
+                Bound::Included(end) => end
+                    .checked_add(1)
+                    .unwrap_or_else(|| panic!("attempted to index slice up to maximum usize")),
+                Bound::Excluded(&end) => end,
+                Bound::Unbounded => len,
+            };
+
+            if start > end {
+                panic!("slice index starts at {start} but ends at {end}");
+            }
+            if end > len {
+                panic!("range end index {end} out of range for slice of length {len}");
+            }
+
+            Range { start, end }
+        };
+
+        let last;
+
+        if range.end == len && self.last.is_some() {
+            last = self.last.take();
+            range.end -= 1;
+        } else {
+            last = None;
+        }
+
+        let inner = self.inner.drain(range);
+
+        Drain { inner, last }
     }
 
     /// Appends a syntax tree node onto the end of this punctuated sequence. The
@@ -900,6 +968,45 @@ where
     I: DoubleEndedIterator<Item = &'a mut T> + ExactSizeIterator<Item = &'a mut T> + 'a,
 {
 }
+
+/// A draining iterator for `Punctuated<T, P>`.
+///
+/// This `struct` is created by [`Punctuated::drain`].
+/// See its documentation for more.
+pub struct Drain<'a, T, P> {
+    inner: vec::Drain<'a, (T, P)>,
+    last: Option<Box<T>>,
+}
+
+impl<'a, T, P> Iterator for Drain<'a, T, P> {
+    type Item = Pair<T, P>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner
+            .next()
+            .map(|(t, p)| Pair::Punctuated(t, p))
+            .or_else(|| self.last.take().map(|t| Pair::End(*t)))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        // Note: vector's maximum capacity is `isize::MAX`, so this sum will never overflow
+        let len = self.inner.len() + (if self.last.is_some() { 1 } else { 0 });
+        (len, Some(len))
+    }
+}
+
+impl<'a, T, P> DoubleEndedIterator for Drain<'a, T, P> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.last
+            .take()
+            .map(|t| Pair::End(*t))
+            .or_else(|| self.inner.next_back().map(|(t, p)| Pair::Punctuated(t, p)))
+    }
+}
+
+impl<'a, T, P> ExactSizeIterator for Drain<'a, T, P> {}
+
+impl<'a, T, P> FusedIterator for Drain<'a, T, P> {}
 
 /// A single syntax tree node of type `T` followed by its trailing punctuation
 /// of type `P` if any.
