@@ -184,10 +184,18 @@ impl<T, P> Punctuated<T, P> {
             };
 
             if start > end {
-                panic!("slice index starts at {start} but ends at {end}");
+                panic!(
+                    "slice index starts at {start} but ends at {end}",
+                    start = start,
+                    end = end
+                );
             }
             if end > len {
-                panic!("range end index {end} out of range for slice of length {len}");
+                panic!(
+                    "range end index {end} out of range for slice of length {len}",
+                    end = end,
+                    len = len
+                );
             }
 
             Range { start, end }
