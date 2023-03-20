@@ -1263,6 +1263,7 @@
       "ident": "ExprGroup",
       "features": {
         "any": [
+          "derive",
           "full"
         ]
       },

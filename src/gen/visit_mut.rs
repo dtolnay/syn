@@ -167,7 +167,7 @@ pub trait VisitMut {
     fn visit_expr_for_loop_mut(&mut self, i: &mut ExprForLoop) {
         visit_expr_for_loop_mut(self, i);
     }
-    #[cfg(feature = "full")]
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_expr_group_mut(&mut self, i: &mut ExprGroup) {
         visit_expr_group_mut(self, i);
     }
@@ -1125,7 +1125,7 @@ where
             full!(v.visit_expr_for_loop_mut(_binding_0));
         }
         Expr::Group(_binding_0) => {
-            full!(v.visit_expr_group_mut(_binding_0));
+            v.visit_expr_group_mut(_binding_0);
         }
         Expr::If(_binding_0) => {
             full!(v.visit_expr_if_mut(_binding_0));
@@ -1396,7 +1396,7 @@ where
     v.visit_expr_mut(&mut *node.expr);
     v.visit_block_mut(&mut node.body);
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr_group_mut<V>(v: &mut V, node: &mut ExprGroup)
 where
     V: VisitMut + ?Sized,

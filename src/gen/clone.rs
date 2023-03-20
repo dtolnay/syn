@@ -252,7 +252,6 @@ impl Clone for Expr {
             Expr::Field(v0) => Expr::Field(v0.clone()),
             #[cfg(feature = "full")]
             Expr::ForLoop(v0) => Expr::ForLoop(v0.clone()),
-            #[cfg(feature = "full")]
             Expr::Group(v0) => Expr::Group(v0.clone()),
             #[cfg(feature = "full")]
             Expr::If(v0) => Expr::If(v0.clone()),
@@ -475,7 +474,7 @@ impl Clone for ExprForLoop {
         }
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for ExprGroup {
     fn clone(&self) -> Self {

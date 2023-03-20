@@ -407,7 +407,7 @@ ast_struct! {
     /// of expressions and is related to `None`-delimited spans in a
     /// `TokenStream`.
     #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct ExprGroup #full {
+    pub struct ExprGroup {
         pub attrs: Vec<Attribute>,
         pub group_token: token::Group,
         pub expr: Box<Expr>,
@@ -1651,7 +1651,13 @@ pub(crate) mod parsing {
 
     #[cfg(not(feature = "full"))]
     fn atom_expr(input: ParseStream, _allow_struct: AllowStruct) -> Result<Expr> {
-        if input.peek(Lit) {
+        if input.peek(token::Group)
+            && !input.peek2(Token![::])
+            && !input.peek2(Token![!])
+            && !input.peek2(token::Brace)
+        {
+            input.call(expr_group).map(Expr::Group)
+        } else if input.peek(Lit) {
             input.parse().map(Expr::Lit)
         } else if input.peek(token::Paren) {
             input.call(expr_paren).map(Expr::Paren)
@@ -1906,7 +1912,6 @@ pub(crate) mod parsing {
         }
     }
 
-    #[cfg(feature = "full")]
     fn expr_group(input: ParseStream) -> Result<ExprGroup> {
         let group = crate::group::parse_group(input)?;
         Ok(ExprGroup {
@@ -2958,7 +2963,6 @@ pub(crate) mod printing {
         }
     }
 
-    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprGroup {
         fn to_tokens(&self, tokens: &mut TokenStream) {

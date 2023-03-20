@@ -418,7 +418,6 @@ impl Debug for Expr {
             Expr::Field(v0) => v0.debug(formatter, "Field"),
             #[cfg(feature = "full")]
             Expr::ForLoop(v0) => v0.debug(formatter, "ForLoop"),
-            #[cfg(feature = "full")]
             Expr::Group(v0) => v0.debug(formatter, "Group"),
             #[cfg(feature = "full")]
             Expr::If(v0) => v0.debug(formatter, "If"),
@@ -715,7 +714,7 @@ impl Debug for ExprForLoop {
         self.debug(formatter, "ExprForLoop")
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ExprGroup {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
