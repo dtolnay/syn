@@ -166,7 +166,7 @@ pub trait Visit<'ast> {
     fn visit_expr_for_loop(&mut self, i: &'ast ExprForLoop) {
         visit_expr_for_loop(self, i);
     }
-    #[cfg(feature = "full")]
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_expr_group(&mut self, i: &'ast ExprGroup) {
         visit_expr_group(self, i);
     }
@@ -1124,7 +1124,7 @@ where
             full!(v.visit_expr_for_loop(_binding_0));
         }
         Expr::Group(_binding_0) => {
-            full!(v.visit_expr_group(_binding_0));
+            v.visit_expr_group(_binding_0);
         }
         Expr::If(_binding_0) => {
             full!(v.visit_expr_if(_binding_0));
@@ -1395,7 +1395,7 @@ where
     v.visit_expr(&*node.expr);
     v.visit_block(&node.body);
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr_group<'ast, V>(v: &mut V, node: &'ast ExprGroup)
 where
     V: Visit<'ast> + ?Sized,

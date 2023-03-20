@@ -164,7 +164,7 @@ pub trait Fold {
     fn fold_expr_for_loop(&mut self, i: ExprForLoop) -> ExprForLoop {
         fold_expr_for_loop(self, i)
     }
-    #[cfg(feature = "full")]
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_expr_group(&mut self, i: ExprGroup) -> ExprGroup {
         fold_expr_group(self, i)
     }
@@ -1027,7 +1027,7 @@ where
         Expr::ForLoop(_binding_0) => {
             Expr::ForLoop(full!(f.fold_expr_for_loop(_binding_0)))
         }
-        Expr::Group(_binding_0) => Expr::Group(full!(f.fold_expr_group(_binding_0))),
+        Expr::Group(_binding_0) => Expr::Group(f.fold_expr_group(_binding_0)),
         Expr::If(_binding_0) => Expr::If(full!(f.fold_expr_if(_binding_0))),
         Expr::Index(_binding_0) => Expr::Index(f.fold_expr_index(_binding_0)),
         Expr::Infer(_binding_0) => Expr::Infer(full!(f.fold_expr_infer(_binding_0))),
@@ -1234,7 +1234,7 @@ where
         body: f.fold_block(node.body),
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_expr_group<F>(f: &mut F, node: ExprGroup) -> ExprGroup
 where
     F: Fold + ?Sized,

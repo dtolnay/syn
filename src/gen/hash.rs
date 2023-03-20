@@ -399,7 +399,6 @@ impl Hash for Expr {
                 state.write_u8(13u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
             Expr::Group(v0) => {
                 state.write_u8(14u8);
                 v0.hash(state);
@@ -696,7 +695,7 @@ impl Hash for ExprForLoop {
         self.body.hash(state);
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for ExprGroup {
     fn hash<H>(&self, state: &mut H)
