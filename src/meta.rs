@@ -393,7 +393,7 @@ pub(crate) fn parse_nested_meta(
 }
 
 // Like Path::parse_mod_style, but accepts keywords in the path.
-fn parse_meta_path(input: ParseStream) -> Result<Path> {
+pub(crate) fn parse_meta_path(input: ParseStream) -> Result<Path> {
     Ok(Path {
         leading_colon: input.parse()?,
         segments: {

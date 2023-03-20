@@ -650,7 +650,7 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Meta {
         fn parse(input: ParseStream) -> Result<Self> {
-            let path = input.call(Path::parse_mod_style)?;
+            let path = input.call(meta::parse_meta_path)?;
             parse_meta_after_path(path, input)
         }
     }
@@ -658,7 +658,7 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for MetaList {
         fn parse(input: ParseStream) -> Result<Self> {
-            let path = input.call(Path::parse_mod_style)?;
+            let path = input.call(meta::parse_meta_path)?;
             parse_meta_list_after_path(path, input)
         }
     }
@@ -666,7 +666,7 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for MetaNameValue {
         fn parse(input: ParseStream) -> Result<Self> {
-            let path = input.call(Path::parse_mod_style)?;
+            let path = input.call(meta::parse_meta_path)?;
             parse_meta_name_value_after_path(path, input)
         }
     }
