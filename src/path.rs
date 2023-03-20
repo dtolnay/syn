@@ -531,7 +531,7 @@ pub(crate) mod parsing {
                 segments: {
                     let mut segments = Punctuated::new();
                     loop {
-                        if !input.peek(Ident)
+                        if !input.peek(Ident::peek_any)
                             && !input.peek(Token![super])
                             && !input.peek(Token![self])
                             && !input.peek(Token![Self])
