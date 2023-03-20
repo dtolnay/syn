@@ -76,10 +76,16 @@ mod parsing {
             input.step(|cursor| {
                 if let Some((ident, rest)) = cursor.ident() {
                     if accept_as_ident(&ident) {
-                        return Ok((ident, rest));
+                        Ok((ident, rest))
+                    } else {
+                        Err(cursor.error(format_args!(
+                            "expected identifier, found keyword `{}`",
+                            ident,
+                        )))
                     }
+                } else {
+                    Err(cursor.error("expected identifier"))
                 }
-                Err(cursor.error("expected identifier"))
             })
         }
     }
