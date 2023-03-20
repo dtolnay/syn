@@ -548,9 +548,9 @@ pub(crate) mod parsing {
                         segments.push_punct(punct);
                     }
                     if segments.is_empty() {
-                        return Err(input.error("expected path"));
+                        return Err(input.parse::<Ident>().unwrap_err());
                     } else if segments.trailing_punct() {
-                        return Err(input.error("expected path segment"));
+                        return Err(input.error("expected path segment after `::`"));
                     }
                     segments
                 },
