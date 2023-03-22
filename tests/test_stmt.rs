@@ -213,19 +213,22 @@ fn test_macros() {
                     },
                     semi_token: Some,
                 },
-                Stmt::Macro {
-                    mac: Macro {
-                        path: Path {
-                            segments: [
-                                PathSegment {
-                                    ident: "vec",
-                                },
-                            ],
+                Stmt::Expr(
+                    Expr::Macro {
+                        mac: Macro {
+                            path: Path {
+                                segments: [
+                                    PathSegment {
+                                        ident: "vec",
+                                    },
+                                ],
+                            },
+                            delimiter: MacroDelimiter::Bracket,
+                            tokens: TokenStream(``),
                         },
-                        delimiter: MacroDelimiter::Bracket,
-                        tokens: TokenStream(``),
                     },
-                },
+                    None,
+                ),
             ],
         },
     })
