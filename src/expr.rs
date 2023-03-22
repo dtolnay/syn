@@ -972,6 +972,7 @@ pub(crate) mod parsing {
     //
     // Struct literals are ambiguous in certain positions
     // https://github.com/rust-lang/rfcs/pull/92
+    #[cfg(feature = "full")]
     pub(crate) struct AllowStruct(bool);
 
     enum Precedence {
@@ -1024,7 +1025,11 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Expr {
         fn parse(input: ParseStream) -> Result<Self> {
-            ambiguous_expr(input, AllowStruct(true))
+            ambiguous_expr(
+                input,
+                #[cfg(feature = "full")]
+                AllowStruct(true),
+            )
         }
     }
 
@@ -1116,8 +1121,10 @@ pub(crate) mod parsing {
         }
     }
 
+    #[cfg(feature = "full")]
     impl Copy for AllowStruct {}
 
+    #[cfg(feature = "full")]
     impl Clone for AllowStruct {
         fn clone(&self) -> Self {
             *self
@@ -1245,12 +1252,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(not(feature = "full"))]
-    fn parse_expr(
-        input: ParseStream,
-        mut lhs: Expr,
-        allow_struct: AllowStruct,
-        base: Precedence,
-    ) -> Result<Expr> {
+    fn parse_expr(input: ParseStream, mut lhs: Expr, base: Precedence) -> Result<Expr> {
         loop {
             let ahead = input.fork();
             if let Some(op) = match ahead.parse::<BinOp>() {
@@ -1259,11 +1261,11 @@ pub(crate) mod parsing {
             } {
                 input.advance_to(&ahead);
                 let precedence = Precedence::of(&op);
-                let mut rhs = unary_expr(input, allow_struct)?;
+                let mut rhs = unary_expr(input)?;
                 loop {
                     let next = peek_precedence(input);
                     if next > precedence || next == precedence && precedence == Precedence::Assign {
-                        rhs = parse_expr(input, rhs, allow_struct, next)?;
+                        rhs = parse_expr(input, rhs, next)?;
                     } else {
                         break;
                     }
@@ -1310,9 +1312,22 @@ pub(crate) mod parsing {
     }
 
     // Parse an arbitrary expression.
-    fn ambiguous_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        let lhs = unary_expr(input, allow_struct)?;
-        parse_expr(input, lhs, allow_struct, Precedence::Any)
+    fn ambiguous_expr(
+        input: ParseStream,
+        #[cfg(feature = "full")] allow_struct: AllowStruct,
+    ) -> Result<Expr> {
+        let lhs = unary_expr(
+            input,
+            #[cfg(feature = "full")]
+            allow_struct,
+        )?;
+        parse_expr(
+            input,
+            lhs,
+            #[cfg(feature = "full")]
+            allow_struct,
+            Precedence::Any,
+        )
     }
 
     #[cfg(feature = "full")]
@@ -1378,15 +1393,15 @@ pub(crate) mod parsing {
     }
 
     #[cfg(not(feature = "full"))]
-    fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
+    fn unary_expr(input: ParseStream) -> Result<Expr> {
         if input.peek(Token![*]) || input.peek(Token![!]) || input.peek(Token![-]) {
             Ok(Expr::Unary(ExprUnary {
                 attrs: Vec::new(),
                 op: input.parse()?,
-                expr: Box::new(unary_expr(input, allow_struct)?),
+                expr: Box::new(unary_expr(input)?),
             }))
         } else {
-            trailer_expr(input, allow_struct)
+            trailer_expr(input)
         }
     }
 
@@ -1506,8 +1521,8 @@ pub(crate) mod parsing {
     }
 
     #[cfg(not(feature = "full"))]
-    fn trailer_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        let mut e = atom_expr(input, allow_struct)?;
+    fn trailer_expr(input: ParseStream) -> Result<Expr> {
+        let mut e = atom_expr(input)?;
 
         loop {
             if input.peek(token::Paren) {
@@ -1650,7 +1665,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(not(feature = "full"))]
-    fn atom_expr(input: ParseStream, _allow_struct: AllowStruct) -> Result<Expr> {
+    fn atom_expr(input: ParseStream) -> Result<Expr> {
         if input.peek(token::Group)
             && !input.peek2(Token![::])
             && !input.peek2(Token![!])
