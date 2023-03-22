@@ -477,14 +477,7 @@ pub(crate) mod parsing {
                 return Ok(Type::Path(ty));
             }
 
-            if input.peek(Token![!])
-                && !input.peek(Token![!=])
-                && ty
-                    .path
-                    .segments
-                    .iter()
-                    .all(|segment| segment.arguments.is_none())
-            {
+            if input.peek(Token![!]) && !input.peek(Token![!=]) && ty.path.is_mod_style() {
                 let bang_token: Token![!] = input.parse()?;
                 let (delimiter, tokens) = mac::parse_delimiter(input)?;
                 return Ok(Type::Macro(TypeMacro {

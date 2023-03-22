@@ -584,6 +584,12 @@ pub(crate) mod parsing {
             }
             Ok(())
         }
+
+        pub(crate) fn is_mod_style(&self) -> bool {
+            self.segments
+                .iter()
+                .all(|segment| segment.arguments.is_none())
+        }
     }
 
     pub(crate) fn qpath(input: ParseStream, expr_style: bool) -> Result<(Option<QSelf>, Path)> {

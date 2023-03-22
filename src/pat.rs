@@ -382,10 +382,7 @@ pub(crate) mod parsing {
         if qself.is_none()
             && input.peek(Token![!])
             && !input.peek(Token![!=])
-            && path
-                .segments
-                .iter()
-                .all(|segment| segment.arguments.is_none())
+            && path.is_mod_style()
         {
             let bang_token: Token![!] = input.parse()?;
             let (delimiter, tokens) = mac::parse_delimiter(input)?;
