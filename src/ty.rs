@@ -917,7 +917,7 @@ pub(crate) mod parsing {
         }
 
         let mut has_self = false;
-        let name = if (input.peek(Ident) || input.peek(Token![_]) || {
+        let mut name = if (input.peek(Ident) || input.peek(Token![_]) || {
             has_self = allow_self && input.peek(Token![self]);
             has_self
         }) && input.peek2(Token![:])
@@ -945,7 +945,10 @@ pub(crate) mod parsing {
 
         let ty = match ty {
             Some(ty) if !has_mut_self => ty,
-            _ => Type::Verbatim(verbatim::between(begin, input)),
+            _ => {
+                name = None;
+                Type::Verbatim(verbatim::between(begin, input))
+            }
         };
 
         Ok(BareFnArg { attrs, name, ty })
