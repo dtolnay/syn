@@ -371,14 +371,17 @@ pub(crate) mod parsing {
 
         let semi_token: Option<Token![;]> = input.parse()?;
 
-        if allow_nosemi.0 || semi_token.is_some() {
-            if let Expr::Macro(ExprMacro { attrs, mac }) = e {
+        match e {
+            Expr::Macro(ExprMacro { attrs, mac })
+                if semi_token.is_some() || mac.delimiter.is_brace() =>
+            {
                 return Ok(Stmt::Macro(StmtMacro {
                     attrs,
                     mac,
                     semi_token,
                 }));
             }
+            _ => {}
         }
 
         if semi_token.is_some() {
