@@ -1252,7 +1252,7 @@ pub(crate) mod parsing {
         let vis: Visibility = input.parse()?;
         let use_token: Token![use] = input.parse()?;
         let leading_colon: Option<Token![::]> = input.parse()?;
-        let tree = parse_use_tree(input, allow_crate_root_in_path)?;
+        let tree = parse_use_tree(input, allow_crate_root_in_path && leading_colon.is_none())?;
         let semi_token: Token![;] = input.parse()?;
 
         let tree = match tree {
