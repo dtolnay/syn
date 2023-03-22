@@ -195,7 +195,7 @@ pub trait VisitMut {
     fn visit_expr_loop_mut(&mut self, i: &mut ExprLoop) {
         visit_expr_loop_mut(self, i);
     }
-    #[cfg(feature = "full")]
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_expr_macro_mut(&mut self, i: &mut ExprMacro) {
         visit_expr_macro_mut(self, i);
     }
@@ -1146,7 +1146,7 @@ where
             full!(v.visit_expr_loop_mut(_binding_0));
         }
         Expr::Macro(_binding_0) => {
-            full!(v.visit_expr_macro_mut(_binding_0));
+            v.visit_expr_macro_mut(_binding_0);
         }
         Expr::Match(_binding_0) => {
             full!(v.visit_expr_match_mut(_binding_0));
@@ -1482,7 +1482,7 @@ where
     skip!(node.loop_token);
     v.visit_block_mut(&mut node.body);
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr_macro_mut<V>(v: &mut V, node: &mut ExprMacro)
 where
     V: VisitMut + ?Sized,

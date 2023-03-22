@@ -194,7 +194,7 @@ pub trait Visit<'ast> {
     fn visit_expr_loop(&mut self, i: &'ast ExprLoop) {
         visit_expr_loop(self, i);
     }
-    #[cfg(feature = "full")]
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_expr_macro(&mut self, i: &'ast ExprMacro) {
         visit_expr_macro(self, i);
     }
@@ -1145,7 +1145,7 @@ where
             full!(v.visit_expr_loop(_binding_0));
         }
         Expr::Macro(_binding_0) => {
-            full!(v.visit_expr_macro(_binding_0));
+            v.visit_expr_macro(_binding_0);
         }
         Expr::Match(_binding_0) => {
             full!(v.visit_expr_match(_binding_0));
@@ -1481,7 +1481,7 @@ where
     skip!(node.loop_token);
     v.visit_block(&node.body);
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr_macro<'ast, V>(v: &mut V, node: &'ast ExprMacro)
 where
     V: Visit<'ast> + ?Sized,

@@ -263,7 +263,6 @@ impl Clone for Expr {
             Expr::Lit(v0) => Expr::Lit(v0.clone()),
             #[cfg(feature = "full")]
             Expr::Loop(v0) => Expr::Loop(v0.clone()),
-            #[cfg(feature = "full")]
             Expr::Macro(v0) => Expr::Macro(v0.clone()),
             #[cfg(feature = "full")]
             Expr::Match(v0) => Expr::Match(v0.clone()),
@@ -555,7 +554,7 @@ impl Clone for ExprLoop {
         }
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for ExprMacro {
     fn clone(&self) -> Self {

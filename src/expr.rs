@@ -483,8 +483,7 @@ ast_struct! {
 
 ast_struct! {
     /// A macro invocation expression: `format!("{}", q)`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct ExprMacro #full {
+    pub struct ExprMacro {
         pub attrs: Vec<Attribute>,
         pub mac: Macro,
     }
@@ -1684,7 +1683,7 @@ pub(crate) mod parsing {
             || input.peek(Token![super])
             || input.peek(Token![crate])
         {
-            input.parse().map(Expr::Path)
+            path_or_macro_or_struct(input)
         } else if input.is_empty() {
             Err(input.error("expected an expression"))
         } else {
@@ -1692,8 +1691,10 @@ pub(crate) mod parsing {
         }
     }
 
-    #[cfg(feature = "full")]
-    fn path_or_macro_or_struct(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
+    fn path_or_macro_or_struct(
+        input: ParseStream,
+        #[cfg(feature = "full")] allow_struct: AllowStruct,
+    ) -> Result<Expr> {
         let (qself, path) = path::parsing::qpath(input, true)?;
 
         if qself.is_none()
@@ -1714,18 +1715,18 @@ pub(crate) mod parsing {
             }));
         }
 
+        #[cfg(feature = "full")]
         if allow_struct.0 && input.peek(token::Brace) {
-            expr_struct_helper(input, qself, path).map(Expr::Struct)
-        } else {
-            Ok(Expr::Path(ExprPath {
-                attrs: Vec::new(),
-                qself,
-                path,
-            }))
+            return expr_struct_helper(input, qself, path).map(Expr::Struct);
         }
+
+        Ok(Expr::Path(ExprPath {
+            attrs: Vec::new(),
+            qself,
+            path,
+        }))
     }
 
-    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprMacro {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -3054,7 +3055,6 @@ pub(crate) mod printing {
         }
     }
 
-    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprMacro {
         fn to_tokens(&self, tokens: &mut TokenStream) {

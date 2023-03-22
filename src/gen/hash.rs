@@ -431,7 +431,6 @@ impl Hash for Expr {
                 state.write_u8(20u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
             Expr::Macro(v0) => {
                 state.write_u8(21u8);
                 v0.hash(state);
@@ -776,7 +775,7 @@ impl Hash for ExprLoop {
         self.body.hash(state);
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for ExprMacro {
     fn hash<H>(&self, state: &mut H)
