@@ -429,7 +429,6 @@ impl Debug for Expr {
             Expr::Lit(v0) => v0.debug(formatter, "Lit"),
             #[cfg(feature = "full")]
             Expr::Loop(v0) => v0.debug(formatter, "Loop"),
-            #[cfg(feature = "full")]
             Expr::Macro(v0) => v0.debug(formatter, "Macro"),
             #[cfg(feature = "full")]
             Expr::Match(v0) => v0.debug(formatter, "Match"),
@@ -830,7 +829,7 @@ impl Debug for ExprLoop {
         self.debug(formatter, "ExprLoop")
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ExprMacro {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

@@ -1450,6 +1450,7 @@
       "ident": "ExprMacro",
       "features": {
         "any": [
+          "derive",
           "full"
         ]
       },

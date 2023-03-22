@@ -192,7 +192,7 @@ pub trait Fold {
     fn fold_expr_loop(&mut self, i: ExprLoop) -> ExprLoop {
         fold_expr_loop(self, i)
     }
-    #[cfg(feature = "full")]
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_expr_macro(&mut self, i: ExprMacro) -> ExprMacro {
         fold_expr_macro(self, i)
     }
@@ -1034,7 +1034,7 @@ where
         Expr::Let(_binding_0) => Expr::Let(full!(f.fold_expr_let(_binding_0))),
         Expr::Lit(_binding_0) => Expr::Lit(f.fold_expr_lit(_binding_0)),
         Expr::Loop(_binding_0) => Expr::Loop(full!(f.fold_expr_loop(_binding_0))),
-        Expr::Macro(_binding_0) => Expr::Macro(full!(f.fold_expr_macro(_binding_0))),
+        Expr::Macro(_binding_0) => Expr::Macro(f.fold_expr_macro(_binding_0)),
         Expr::Match(_binding_0) => Expr::Match(full!(f.fold_expr_match(_binding_0))),
         Expr::MethodCall(_binding_0) => {
             Expr::MethodCall(full!(f.fold_expr_method_call(_binding_0)))
@@ -1316,7 +1316,7 @@ where
         body: f.fold_block(node.body),
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_expr_macro<F>(f: &mut F, node: ExprMacro) -> ExprMacro
 where
     F: Fold + ?Sized,
