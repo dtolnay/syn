@@ -1681,30 +1681,25 @@ pub(crate) mod parsing {
     fn path_or_macro_or_struct(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         let (qself, path) = path::parsing::qpath(input, true)?;
 
-        if qself.is_none() && input.peek(Token![!]) && !input.peek(Token![!=]) {
-            let mut contains_arguments = false;
-            for segment in &path.segments {
-                match segment.arguments {
-                    PathArguments::None => {}
-                    PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                        contains_arguments = true;
-                    }
-                }
-            }
-
-            if !contains_arguments {
-                let bang_token: Token![!] = input.parse()?;
-                let (delimiter, tokens) = mac::parse_delimiter(input)?;
-                return Ok(Expr::Macro(ExprMacro {
-                    attrs: Vec::new(),
-                    mac: Macro {
-                        path,
-                        bang_token,
-                        delimiter,
-                        tokens,
-                    },
-                }));
-            }
+        if qself.is_none()
+            && input.peek(Token![!])
+            && !input.peek(Token![!=])
+            && path
+                .segments
+                .iter()
+                .all(|segment| segment.arguments.is_none())
+        {
+            let bang_token: Token![!] = input.parse()?;
+            let (delimiter, tokens) = mac::parse_delimiter(input)?;
+            return Ok(Expr::Macro(ExprMacro {
+                attrs: Vec::new(),
+                mac: Macro {
+                    path,
+                    bang_token,
+                    delimiter,
+                    tokens,
+                },
+            }));
         }
 
         if allow_struct.0 && input.peek(token::Brace) {

@@ -322,7 +322,7 @@ pub(crate) mod parsing {
             {
                 if let Type::Path(mut ty) = *group.elem {
                     let arguments = &mut ty.path.segments.last_mut().unwrap().arguments;
-                    if let PathArguments::None = arguments {
+                    if arguments.is_none() {
                         *arguments = PathArguments::AngleBracketed(input.parse()?);
                         Path::parse_rest(input, &mut ty.path, false)?;
                         return Ok(Type::Path(ty));
@@ -477,29 +477,24 @@ pub(crate) mod parsing {
                 return Ok(Type::Path(ty));
             }
 
-            if input.peek(Token![!]) && !input.peek(Token![!=]) {
-                let mut contains_arguments = false;
-                for segment in &ty.path.segments {
-                    match segment.arguments {
-                        PathArguments::None => {}
-                        PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                            contains_arguments = true;
-                        }
-                    }
-                }
-
-                if !contains_arguments {
-                    let bang_token: Token![!] = input.parse()?;
-                    let (delimiter, tokens) = mac::parse_delimiter(input)?;
-                    return Ok(Type::Macro(TypeMacro {
-                        mac: Macro {
-                            path: ty.path,
-                            bang_token,
-                            delimiter,
-                            tokens,
-                        },
-                    }));
-                }
+            if input.peek(Token![!])
+                && !input.peek(Token![!=])
+                && ty
+                    .path
+                    .segments
+                    .iter()
+                    .all(|segment| segment.arguments.is_none())
+            {
+                let bang_token: Token![!] = input.parse()?;
+                let (delimiter, tokens) = mac::parse_delimiter(input)?;
+                return Ok(Type::Macro(TypeMacro {
+                    mac: Macro {
+                        path: ty.path,
+                        bang_token,
+                        delimiter,
+                        tokens,
+                    },
+                }));
             }
 
             if lifetimes.is_some() || allow_plus && input.peek(Token![+]) {
