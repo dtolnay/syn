@@ -153,7 +153,7 @@ pub(crate) mod parsing {
                 if input.is_empty() {
                     break;
                 } else if requires_semicolon {
-                    return Err(input.error("unexpected token"));
+                    return Err(input.error("unexpected token, expected `;`"));
                 }
             }
             Ok(stmts)
