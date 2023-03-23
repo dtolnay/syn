@@ -188,7 +188,7 @@ pub(crate) mod parsing {
         let mut is_item_macro = false;
         if let Ok(path) = ahead.call(Path::parse_mod_style) {
             if ahead.peek(Token![!]) {
-                if ahead.peek2(Ident) {
+                if ahead.peek2(Ident) || ahead.peek2(Token![try]) {
                     is_item_macro = true;
                 } else if ahead.peek2(token::Brace)
                     && !(ahead.peek3(Token![.]) || ahead.peek3(Token![?]))

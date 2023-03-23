@@ -1159,7 +1159,11 @@ pub(crate) mod parsing {
             let attrs = input.call(Attribute::parse_outer)?;
             let path = input.call(Path::parse_mod_style)?;
             let bang_token: Token![!] = input.parse()?;
-            let ident: Option<Ident> = input.parse()?;
+            let ident: Option<Ident> = if input.peek(Token![try]) {
+                input.call(Ident::parse_any).map(Some)
+            } else {
+                input.parse()
+            }?;
             let (delimiter, tokens) = input.call(mac::parse_delimiter)?;
             let semi_token: Option<Token![;]> = if !delimiter.is_brace() {
                 Some(input.parse()?)
