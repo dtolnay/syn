@@ -906,7 +906,7 @@ pub(crate) mod parsing {
             let vis: Visibility = ahead.parse()?;
 
             let lookahead = ahead.lookahead1();
-            let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead) {
+            let mut item = if peek_signature(&ahead) {
                 let vis: Visibility = input.parse()?;
                 let sig: Signature = input.parse()?;
                 if input.peek(Token![;]) {
@@ -1729,7 +1729,7 @@ pub(crate) mod parsing {
             let vis: Visibility = ahead.parse()?;
 
             let lookahead = ahead.lookahead1();
-            let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead) {
+            let mut item = if peek_signature(&ahead) {
                 let vis: Visibility = input.parse()?;
                 let sig: Signature = input.parse()?;
                 if input.peek(token::Brace) {
@@ -2184,7 +2184,7 @@ pub(crate) mod parsing {
             let ahead = input.fork();
 
             let lookahead = ahead.lookahead1();
-            let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead) {
+            let mut item = if peek_signature(&ahead) {
                 input.parse().map(TraitItem::Fn)
             } else if lookahead.peek(Token![const]) {
                 ahead.parse::<Token![const]>()?;
@@ -2511,7 +2511,7 @@ pub(crate) mod parsing {
                 None
             };
 
-            let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead) {
+            let mut item = if peek_signature(&ahead) {
                 input.parse().map(ImplItem::Fn)
             } else if lookahead.peek(Token![const]) {
                 let const_token: Token![const] = ahead.parse()?;
