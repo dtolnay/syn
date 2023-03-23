@@ -971,40 +971,32 @@ pub(crate) mod parsing {
                     }
                 }
             } else if lookahead.peek(Token![const]) {
-                ahead.parse::<Token![const]>()?;
-                let lookahead = ahead.lookahead1();
-                if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
-                    let vis = input.parse()?;
-                    let const_token = input.parse()?;
-                    let ident = {
-                        let lookahead = input.lookahead1();
-                        if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
-                            input.call(Ident::parse_any)?
-                        } else {
-                            return Err(lookahead.error());
-                        }
-                    };
-                    let colon_token = input.parse()?;
-                    let ty = input.parse()?;
-                    if input.peek(Token![;]) {
-                        input.parse::<Token![;]>()?;
-                        Ok(Item::Verbatim(verbatim::between(begin, input)))
-                    } else {
-                        Ok(Item::Const(ItemConst {
-                            attrs: Vec::new(),
-                            vis,
-                            const_token,
-                            ident,
-                            generics: Generics::default(),
-                            colon_token,
-                            ty,
-                            eq_token: input.parse()?,
-                            expr: input.parse()?,
-                            semi_token: input.parse()?,
-                        }))
-                    }
+                let vis = input.parse()?;
+                let const_token: Token![const] = input.parse()?;
+                let lookahead = input.lookahead1();
+                let ident = if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                    input.call(Ident::parse_any)?
                 } else {
-                    Err(lookahead.error())
+                    return Err(lookahead.error());
+                };
+                let colon_token = input.parse()?;
+                let ty = input.parse()?;
+                if input.peek(Token![;]) {
+                    input.parse::<Token![;]>()?;
+                    Ok(Item::Verbatim(verbatim::between(begin, input)))
+                } else {
+                    Ok(Item::Const(ItemConst {
+                        attrs: Vec::new(),
+                        vis,
+                        const_token,
+                        ident,
+                        generics: Generics::default(),
+                        colon_token,
+                        ty,
+                        eq_token: input.parse()?,
+                        expr: input.parse()?,
+                        semi_token: input.parse()?,
+                    }))
                 }
             } else if lookahead.peek(Token![unsafe]) {
                 ahead.parse::<Token![unsafe]>()?;
@@ -2514,33 +2506,33 @@ pub(crate) mod parsing {
             let mut item = if peek_signature(&ahead) {
                 input.parse().map(ImplItem::Fn)
             } else if lookahead.peek(Token![const]) {
-                let const_token: Token![const] = ahead.parse()?;
-                let lookahead = ahead.lookahead1();
-                if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
-                    input.advance_to(&ahead);
-                    let ident: Ident = input.call(Ident::parse_any)?;
-                    let colon_token: Token![:] = input.parse()?;
-                    let ty: Type = input.parse()?;
-                    if let Some(eq_token) = input.parse()? {
-                        return Ok(ImplItem::Const(ImplItemConst {
-                            attrs,
-                            vis,
-                            defaultness,
-                            const_token,
-                            ident,
-                            generics: Generics::default(),
-                            colon_token,
-                            ty,
-                            eq_token,
-                            expr: input.parse()?,
-                            semi_token: input.parse()?,
-                        }));
-                    } else {
-                        input.parse::<Token![;]>()?;
-                        return Ok(ImplItem::Verbatim(verbatim::between(begin, input)));
-                    }
+                input.advance_to(&ahead);
+                let const_token: Token![const] = input.parse()?;
+                let lookahead = input.lookahead1();
+                let ident = if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                    input.call(Ident::parse_any)?
                 } else {
-                    Err(lookahead.error())
+                    return Err(lookahead.error());
+                };
+                let colon_token: Token![:] = input.parse()?;
+                let ty: Type = input.parse()?;
+                if let Some(eq_token) = input.parse()? {
+                    return Ok(ImplItem::Const(ImplItemConst {
+                        attrs,
+                        vis,
+                        defaultness,
+                        const_token,
+                        ident,
+                        generics: Generics::default(),
+                        colon_token,
+                        ty,
+                        eq_token,
+                        expr: input.parse()?,
+                        semi_token: input.parse()?,
+                    }));
+                } else {
+                    input.parse::<Token![;]>()?;
+                    return Ok(ImplItem::Verbatim(verbatim::between(begin, input)));
                 }
             } else if lookahead.peek(Token![type]) {
                 parse_impl_item_type(begin, input)
