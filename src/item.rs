@@ -2518,7 +2518,7 @@ pub(crate) mod parsing {
                 None
             };
 
-            let mut item = if lookahead.peek(Token![fn]) && peek_signature(&ahead) {
+            let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead) {
                 let allow_omitted_body = true;
                 if let Some(item) = parse_impl_item_fn(input, allow_omitted_body)? {
                     Ok(ImplItem::Fn(item))
