@@ -1075,6 +1075,11 @@ pub(crate) mod parsing {
         semi_token: Token![;],
     }
 
+    enum TypeDefaultness {
+        Optional,
+        Disallowed,
+    }
+
     enum WhereClauseLocation {
         // type Ty<T> where T: 'static = T;
         BeforeEq,
@@ -1085,9 +1090,16 @@ pub(crate) mod parsing {
     }
 
     impl FlexibleItemType {
-        fn parse(input: ParseStream, where_clause_location: WhereClauseLocation) -> Result<Self> {
+        fn parse(
+            input: ParseStream,
+            allow_defaultness: TypeDefaultness,
+            where_clause_location: WhereClauseLocation,
+        ) -> Result<Self> {
             let vis: Visibility = input.parse()?;
-            let defaultness: Option<Token![default]> = input.parse()?;
+            let defaultness: Option<Token![default]> = match allow_defaultness {
+                TypeDefaultness::Optional => input.parse()?,
+                TypeDefaultness::Disallowed => None,
+            };
             let type_token: Token![type] = input.parse()?;
             let ident: Ident = input.parse()?;
             let mut generics: Generics = input.parse()?;
@@ -1844,7 +1856,7 @@ pub(crate) mod parsing {
     fn parse_foreign_item_type(begin: ParseBuffer, input: ParseStream) -> Result<ForeignItem> {
         let FlexibleItemType {
             vis,
-            defaultness,
+            defaultness: _,
             type_token,
             ident,
             generics,
@@ -1852,9 +1864,13 @@ pub(crate) mod parsing {
             bounds: _,
             ty,
             semi_token,
-        } = FlexibleItemType::parse(input, WhereClauseLocation::Both)?;
+        } = FlexibleItemType::parse(
+            input,
+            TypeDefaultness::Disallowed,
+            WhereClauseLocation::Both,
+        )?;
 
-        if defaultness.is_some() || colon_token.is_some() || ty.is_some() {
+        if colon_token.is_some() || ty.is_some() {
             Ok(ForeignItem::Verbatim(verbatim::between(begin, input)))
         } else {
             Ok(ForeignItem::Type(ForeignItemType {
@@ -1909,7 +1925,7 @@ pub(crate) mod parsing {
     fn parse_item_type(begin: ParseBuffer, input: ParseStream) -> Result<Item> {
         let FlexibleItemType {
             vis,
-            defaultness,
+            defaultness: _,
             type_token,
             ident,
             generics,
@@ -1917,23 +1933,27 @@ pub(crate) mod parsing {
             bounds: _,
             ty,
             semi_token,
-        } = FlexibleItemType::parse(input, WhereClauseLocation::BeforeEq)?;
+        } = FlexibleItemType::parse(
+            input,
+            TypeDefaultness::Disallowed,
+            WhereClauseLocation::BeforeEq,
+        )?;
 
-        if defaultness.is_some() || colon_token.is_some() || ty.is_none() {
-            Ok(Item::Verbatim(verbatim::between(begin, input)))
-        } else {
-            let (eq_token, ty) = ty.unwrap();
-            Ok(Item::Type(ItemType {
-                attrs: Vec::new(),
-                vis,
-                type_token,
-                ident,
-                generics,
-                eq_token,
-                ty: Box::new(ty),
-                semi_token,
-            }))
-        }
+        let (eq_token, ty) = match ty {
+            Some(ty) if colon_token.is_none() => ty,
+            _ => return Ok(Item::Verbatim(verbatim::between(begin, input))),
+        };
+
+        Ok(Item::Type(ItemType {
+            attrs: Vec::new(),
+            vis,
+            type_token,
+            ident,
+            generics,
+            eq_token,
+            ty: Box::new(ty),
+            semi_token,
+        }))
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -2330,7 +2350,7 @@ pub(crate) mod parsing {
     fn parse_trait_item_type(begin: ParseBuffer, input: ParseStream) -> Result<TraitItem> {
         let FlexibleItemType {
             vis,
-            defaultness,
+            defaultness: _,
             type_token,
             ident,
             generics,
@@ -2338,9 +2358,13 @@ pub(crate) mod parsing {
             bounds,
             ty,
             semi_token,
-        } = FlexibleItemType::parse(input, WhereClauseLocation::AfterEq)?;
+        } = FlexibleItemType::parse(
+            input,
+            TypeDefaultness::Disallowed,
+            WhereClauseLocation::AfterEq,
+        )?;
 
-        if defaultness.is_some() || vis.is_some() {
+        if vis.is_some() {
             Ok(TraitItem::Verbatim(verbatim::between(begin, input)))
         } else {
             Ok(TraitItem::Type(TraitItemType {
@@ -2669,24 +2693,28 @@ pub(crate) mod parsing {
             bounds: _,
             ty,
             semi_token,
-        } = FlexibleItemType::parse(input, WhereClauseLocation::AfterEq)?;
+        } = FlexibleItemType::parse(
+            input,
+            TypeDefaultness::Optional,
+            WhereClauseLocation::AfterEq,
+        )?;
 
-        if colon_token.is_some() || ty.is_none() {
-            Ok(ImplItem::Verbatim(verbatim::between(begin, input)))
-        } else {
-            let (eq_token, ty) = ty.unwrap();
-            Ok(ImplItem::Type(ImplItemType {
-                attrs: Vec::new(),
-                vis,
-                defaultness,
-                type_token,
-                ident,
-                generics,
-                eq_token,
-                ty,
-                semi_token,
-            }))
-        }
+        let (eq_token, ty) = match ty {
+            Some(ty) if colon_token.is_none() => ty,
+            _ => return Ok(ImplItem::Verbatim(verbatim::between(begin, input))),
+        };
+
+        Ok(ImplItem::Type(ImplItemType {
+            attrs: Vec::new(),
+            vis,
+            defaultness,
+            type_token,
+            ident,
+            generics,
+            eq_token,
+            ty,
+            semi_token,
+        }))
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
