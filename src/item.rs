@@ -1103,21 +1103,7 @@ pub(crate) mod parsing {
             let type_token: Token![type] = input.parse()?;
             let ident: Ident = input.parse()?;
             let mut generics: Generics = input.parse()?;
-            let colon_token: Option<Token![:]> = input.parse()?;
-
-            let mut bounds = Punctuated::new();
-            if colon_token.is_some() {
-                loop {
-                    if input.peek(Token![where]) || input.peek(Token![=]) || input.peek(Token![;]) {
-                        break;
-                    }
-                    bounds.push_value(input.parse::<TypeParamBound>()?);
-                    if input.peek(Token![where]) || input.peek(Token![=]) || input.peek(Token![;]) {
-                        break;
-                    }
-                    bounds.push_punct(input.parse::<Token![+]>()?);
-                }
-            }
+            let (colon_token, bounds) = Self::parse_optional_bounds(input)?;
 
             match where_clause_location {
                 WhereClauseLocation::BeforeEq | WhereClauseLocation::Both => {
@@ -1126,11 +1112,7 @@ pub(crate) mod parsing {
                 WhereClauseLocation::AfterEq => {}
             }
 
-            let ty = if let Some(eq_token) = input.parse()? {
-                Some((eq_token, input.parse::<Type>()?))
-            } else {
-                None
-            };
+            let ty = Self::parse_optional_definition(input)?;
 
             match where_clause_location {
                 WhereClauseLocation::AfterEq | WhereClauseLocation::Both
@@ -1154,6 +1136,38 @@ pub(crate) mod parsing {
                 ty,
                 semi_token,
             })
+        }
+
+        fn parse_optional_bounds(
+            input: ParseStream,
+        ) -> Result<(Option<Token![:]>, Punctuated<TypeParamBound, Token![+]>)> {
+            let colon_token: Option<Token![:]> = input.parse()?;
+
+            let mut bounds = Punctuated::new();
+            if colon_token.is_some() {
+                loop {
+                    if input.peek(Token![where]) || input.peek(Token![=]) || input.peek(Token![;]) {
+                        break;
+                    }
+                    bounds.push_value(input.parse::<TypeParamBound>()?);
+                    if input.peek(Token![where]) || input.peek(Token![=]) || input.peek(Token![;]) {
+                        break;
+                    }
+                    bounds.push_punct(input.parse::<Token![+]>()?);
+                }
+            }
+
+            Ok((colon_token, bounds))
+        }
+
+        fn parse_optional_definition(input: ParseStream) -> Result<Option<(Token![=], Type)>> {
+            let eq_token: Option<Token![=]> = input.parse()?;
+            if let Some(eq_token) = eq_token {
+                let definition: Type = input.parse()?;
+                Ok(Some((eq_token, definition)))
+            } else {
+                Ok(None)
+            }
         }
     }
 
@@ -2310,30 +2324,10 @@ pub(crate) mod parsing {
             let type_token: Token![type] = input.parse()?;
             let ident: Ident = input.parse()?;
             let mut generics: Generics = input.parse()?;
-            let colon_token: Option<Token![:]> = input.parse()?;
-
-            let mut bounds = Punctuated::new();
-            if colon_token.is_some() {
-                while !input.peek(Token![where]) && !input.peek(Token![=]) && !input.peek(Token![;])
-                {
-                    if !bounds.is_empty() {
-                        bounds.push_punct(input.parse()?);
-                    }
-                    bounds.push_value(input.parse()?);
-                }
-            }
-
-            let default = if input.peek(Token![=]) {
-                let eq_token: Token![=] = input.parse()?;
-                let default: Type = input.parse()?;
-                Some((eq_token, default))
-            } else {
-                None
-            };
-
+            let (colon_token, bounds) = FlexibleItemType::parse_optional_bounds(input)?;
+            let default = FlexibleItemType::parse_optional_definition(input)?;
             generics.where_clause = input.parse()?;
             let semi_token: Token![;] = input.parse()?;
-
             Ok(TraitItemType {
                 attrs,
                 type_token,
