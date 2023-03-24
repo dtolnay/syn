@@ -543,17 +543,17 @@ pub(crate) mod parsing {
             Member::Unnamed(_) => unreachable!(),
         };
 
-        let mut pat = Pat::Ident(PatIdent {
-            attrs: Vec::new(),
-            by_ref,
-            mutability,
-            ident: ident.clone(),
-            subpat: None,
-        });
-
-        if boxed.is_some() {
-            pat = Pat::Verbatim(verbatim::between(begin, input));
-        }
+        let pat = if boxed.is_some() {
+            Pat::Verbatim(verbatim::between(begin, input))
+        } else {
+            Pat::Ident(PatIdent {
+                attrs: Vec::new(),
+                by_ref,
+                mutability,
+                ident: ident.clone(),
+                subpat: None,
+            })
+        };
 
         Ok(FieldPat {
             attrs: Vec::new(),
