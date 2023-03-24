@@ -893,9 +893,6 @@ pub(crate) mod parsing {
     use crate::ext::IdentExt;
     use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseBuffer, ParseStream, Result};
-    use crate::token::Brace;
-    use proc_macro2::{Punct, Spacing, TokenTree};
-    use std::iter::FromIterator;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Item {
@@ -2522,7 +2519,12 @@ pub(crate) mod parsing {
             };
 
             let mut item = if peek_signature(&ahead) {
-                input.parse().map(ImplItem::Fn)
+                let allow_omitted_body = true;
+                if let Some(item) = parse_impl_item_fn(input, allow_omitted_body)? {
+                    Ok(ImplItem::Fn(item))
+                } else {
+                    Ok(ImplItem::Verbatim(verbatim::between(begin, input)))
+                }
             } else if lookahead.peek(Token![const]) {
                 input.advance_to(&ahead);
                 let const_token: Token![const] = input.parse()?;
@@ -2612,41 +2614,42 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ImplItemFn {
         fn parse(input: ParseStream) -> Result<Self> {
-            let mut attrs = input.call(Attribute::parse_outer)?;
-            let vis: Visibility = input.parse()?;
-            let defaultness: Option<Token![default]> = input.parse()?;
-            let sig: Signature = input.parse()?;
-
-            let block = if let Some(semi) = input.parse::<Option<Token![;]>>()? {
-                // Accept functions without a body in an impl block because
-                // rustc's *parser* does not reject them (the compilation error
-                // is emitted later than parsing) and it can be useful for macro
-                // DSLs.
-                let mut punct = Punct::new(';', Spacing::Alone);
-                punct.set_span(semi.span);
-                let tokens = TokenStream::from_iter(vec![TokenTree::Punct(punct)]);
-                Block {
-                    brace_token: Brace(semi.span),
-                    stmts: vec![Stmt::Item(Item::Verbatim(tokens))],
-                }
-            } else {
-                let content;
-                let brace_token = braced!(content in input);
-                attrs.extend(content.call(Attribute::parse_inner)?);
-                Block {
-                    brace_token,
-                    stmts: content.call(Block::parse_within)?,
-                }
-            };
-
-            Ok(ImplItemFn {
-                attrs,
-                vis,
-                defaultness,
-                sig,
-                block,
-            })
+            let allow_omitted_body = false;
+            parse_impl_item_fn(input, allow_omitted_body).map(Option::unwrap)
         }
+    }
+
+    fn parse_impl_item_fn(
+        input: ParseStream,
+        allow_omitted_body: bool,
+    ) -> Result<Option<ImplItemFn>> {
+        let mut attrs = input.call(Attribute::parse_outer)?;
+        let vis: Visibility = input.parse()?;
+        let defaultness: Option<Token![default]> = input.parse()?;
+        let sig: Signature = input.parse()?;
+
+        // Accept functions without a body in an impl block because rustc's
+        // *parser* does not reject them (the compilation error is emitted later
+        // than parsing) and it can be useful for macro DSLs.
+        if allow_omitted_body && input.parse::<Option<Token![;]>>()?.is_some() {
+            return Ok(None);
+        }
+
+        let content;
+        let brace_token = braced!(content in input);
+        attrs.extend(content.call(Attribute::parse_inner)?);
+        let block = Block {
+            brace_token,
+            stmts: content.call(Block::parse_within)?,
+        };
+
+        Ok(Some(ImplItemFn {
+            attrs,
+            vis,
+            defaultness,
+            sig,
+            block,
+        }))
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
