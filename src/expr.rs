@@ -1301,9 +1301,7 @@ pub(crate) mod parsing {
             Precedence::Assign
         } else if input.peek(Token![..]) {
             Precedence::Range
-        } else if input.peek(Token![as])
-            || cfg!(feature = "full") && input.peek(Token![:]) && !input.peek(Token![::])
-        {
+        } else if input.peek(Token![as]) {
             Precedence::Cast
         } else {
             Precedence::Any
