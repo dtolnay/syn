@@ -23,3 +23,5 @@ thiserror = "1"
 toml = "0.5"
 
 [workspace]
+[patch.crates-io]
+syn = { path = ".." }
