@@ -9,7 +9,7 @@ publish = false
 path = "lib.rs"
 
 [dependencies]
-syn-test-suite-feature-check = { path = "macro" }
+build-alert = "0.1"
 
 [features]
-all-features = ["syn-test-suite-feature-check/all-features"]
+all-features = []
