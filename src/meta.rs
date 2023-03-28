@@ -401,6 +401,8 @@ fn parse_meta_path(input: ParseStream) -> Result<Path> {
             if input.peek(Ident::peek_any) {
                 let ident = Ident::parse_any(input)?;
                 segments.push_value(PathSegment::from(ident));
+            } else if input.is_empty() {
+                return Err(input.error("expected nested attribute"));
             } else if input.peek(Lit) {
                 return Err(input.error("unexpected literal in nested attribute, expected ident"));
             } else {
