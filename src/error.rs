@@ -278,8 +278,19 @@ impl ErrorMessage {
             None => (Span::call_site(), Span::call_site()),
         };
 
-        // compile_error!($message)
+        // std::compile_error!($message)
         TokenStream::from_iter(vec![
+            TokenTree::Ident(Ident::new("std", start)),
+            TokenTree::Punct({
+                let mut punct = Punct::new(':', Spacing::Joint);
+                punct.set_span(start);
+                punct
+            }),
+            TokenTree::Punct({
+                let mut punct = Punct::new(':', Spacing::Alone);
+                punct.set_span(start);
+                punct
+            }),
             TokenTree::Ident(Ident::new("compile_error", start)),
             TokenTree::Punct({
                 let mut punct = Punct::new('!', Spacing::Alone);
