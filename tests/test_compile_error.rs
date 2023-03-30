@@ -13,6 +13,6 @@ fn parse_crate_root_custom_inner_attribute() {
     let error = syn::parse2::<Item>(tokens).unwrap_err();
     assert_eq!(
         error.to_compile_error().to_string(),
-        r#"std :: compile_error ! { "expected square brackets" }"#
+        r#"core :: compile_error ! { "expected square brackets" }"#
     );
 }
