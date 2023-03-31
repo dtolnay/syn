@@ -2716,13 +2716,21 @@ pub(crate) mod parsing {
     }
 
     fn multi_index(e: &mut Expr, dot_token: &mut Token![.], float: LitFloat) -> Result<bool> {
-        let mut float_repr = float.to_string();
+        let float_token = float.token();
+        let float_span = float_token.span();
+        let mut float_repr = float_token.to_string();
         let trailing_dot = float_repr.ends_with('.');
         if trailing_dot {
             float_repr.truncate(float_repr.len() - 1);
         }
+
+        let mut offset = 0;
         for part in float_repr.split('.') {
-            let index = crate::parse_str(part).map_err(|err| Error::new(float.span(), err))?;
+            let mut index: Index =
+                crate::parse_str(part).map_err(|err| Error::new(float_span, err))?;
+            let part_end = offset + part.len();
+            index.span = float_token.subspan(offset..part_end).unwrap_or(float_span);
+
             let base = mem::replace(e, Expr::DUMMY);
             *e = Expr::Field(ExprField {
                 attrs: Vec::new(),
@@ -2730,8 +2738,14 @@ pub(crate) mod parsing {
                 dot_token: Token![.](dot_token.span),
                 member: Member::Unnamed(index),
             });
-            *dot_token = Token![.](float.span());
+
+            let dot_span = float_token
+                .subspan(part_end..part_end + 1)
+                .unwrap_or(float_span);
+            *dot_token = Token![.](dot_span);
+            offset = part_end + 1;
         }
+
         Ok(!trailing_dot)
     }
 
