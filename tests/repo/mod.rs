@@ -5,10 +5,11 @@ mod progress;
 use self::progress::Progress;
 use anyhow::Result;
 use flate2::read::GzDecoder;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::fs;
 use std::path::Path;
 use tar::Archive;
-use walkdir::DirEntry;
+use walkdir::{DirEntry, WalkDir};
 
 const REVISION: &str = "5e1d3299a290026b85787bc9c7e72bcc53ac283f";
 
@@ -198,6 +199,17 @@ static EXCLUDE_DIRS: &[&str] = &[
     "src/tools/rust-analyzer/crates/syntax/test_data/parser/fuzz-failures",
     "src/tools/rust-analyzer/crates/syntax/test_data/reparse/fuzz-failures",
 ];
+
+pub fn for_each_rust_file(for_each: impl Fn(DirEntry) + Sync + Send) {
+    WalkDir::new("tests/rust")
+        .sort_by_file_name()
+        .into_iter()
+        .filter_entry(base_dir_filter)
+        .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
+        .unwrap()
+        .into_par_iter()
+        .for_each(for_each);
+}
 
 pub fn base_dir_filter(entry: &DirEntry) -> bool {
     let path = entry.path();

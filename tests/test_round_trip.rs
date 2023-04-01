@@ -22,7 +22,6 @@ extern crate rustc_span;
 
 use crate::common::eq::SpanlessEq;
 use quote::quote;
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rustc_ast::ast::{
     AngleBracketedArg, AngleBracketedArgs, Crate, GenericArg, GenericParamKind, Generics,
     WhereClause,
@@ -40,7 +39,6 @@ use std::path::Path;
 use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
-use walkdir::{DirEntry, WalkDir};
 
 #[macro_use]
 mod macros;
@@ -61,19 +59,12 @@ fn test_round_trip() {
 
     let failed = AtomicUsize::new(0);
 
-    WalkDir::new("tests/rust")
-        .sort_by_file_name()
-        .into_iter()
-        .filter_entry(repo::base_dir_filter)
-        .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
-        .unwrap()
-        .into_par_iter()
-        .for_each(|entry| {
-            let path = entry.path();
-            if !path.is_dir() {
-                test(path, &failed, abort_after);
-            }
-        });
+    repo::for_each_rust_file(|entry| {
+        let path = entry.path();
+        if !path.is_dir() {
+            test(path, &failed, abort_after);
+        }
+    });
 
     let failed = failed.load(Ordering::Relaxed);
     if failed > 0 {

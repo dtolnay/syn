@@ -35,7 +35,6 @@ extern crate thin_vec;
 use crate::common::eq::SpanlessEq;
 use crate::common::parse;
 use quote::quote;
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use regex::Regex;
 use rustc_ast::ast;
 use rustc_ast::ptr::P;
@@ -45,7 +44,6 @@ use std::fs;
 use std::path::Path;
 use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use walkdir::{DirEntry, WalkDir};
 
 #[macro_use]
 mod macros;
@@ -70,48 +68,41 @@ fn test_rustc_precedence() {
     // 2018 edition is hard
     let edition_regex = Regex::new(r"\b(async|try)[!(]").unwrap();
 
-    WalkDir::new("tests/rust")
-        .sort_by_file_name()
-        .into_iter()
-        .filter_entry(repo::base_dir_filter)
-        .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
-        .unwrap()
-        .into_par_iter()
-        .for_each(|entry| {
-            let path = entry.path();
-            if path.is_dir() {
-                return;
+    repo::for_each_rust_file(|entry| {
+        let path = entry.path();
+        if path.is_dir() {
+            return;
+        }
+
+        let content = fs::read_to_string(path).unwrap();
+        let content = edition_regex.replace_all(&content, "_$0");
+
+        let (l_passed, l_failed) = match syn::parse_file(&content) {
+            Ok(file) => {
+                let edition = repo::edition(path).parse().unwrap();
+                let exprs = collect_exprs(file);
+                let (l_passed, l_failed) = test_expressions(path, edition, exprs);
+                errorf!(
+                    "=== {}: {} passed | {} failed\n",
+                    path.display(),
+                    l_passed,
+                    l_failed,
+                );
+                (l_passed, l_failed)
             }
-
-            let content = fs::read_to_string(path).unwrap();
-            let content = edition_regex.replace_all(&content, "_$0");
-
-            let (l_passed, l_failed) = match syn::parse_file(&content) {
-                Ok(file) => {
-                    let edition = repo::edition(path).parse().unwrap();
-                    let exprs = collect_exprs(file);
-                    let (l_passed, l_failed) = test_expressions(path, edition, exprs);
-                    errorf!(
-                        "=== {}: {} passed | {} failed\n",
-                        path.display(),
-                        l_passed,
-                        l_failed,
-                    );
-                    (l_passed, l_failed)
-                }
-                Err(msg) => {
-                    errorf!("\nFAIL {} - syn failed to parse: {}\n", path.display(), msg);
-                    (0, 1)
-                }
-            };
-
-            passed.fetch_add(l_passed, Ordering::Relaxed);
-            let prev_failed = failed.fetch_add(l_failed, Ordering::Relaxed);
-
-            if prev_failed + l_failed >= abort_after {
-                process::exit(1);
+            Err(msg) => {
+                errorf!("\nFAIL {} - syn failed to parse: {}\n", path.display(), msg);
+                (0, 1)
             }
-        });
+        };
+
+        passed.fetch_add(l_passed, Ordering::Relaxed);
+        let prev_failed = failed.fetch_add(l_failed, Ordering::Relaxed);
+
+        if prev_failed + l_failed >= abort_after {
+            process::exit(1);
+        }
+    });
 
     let passed = passed.load(Ordering::Relaxed);
     let failed = failed.load(Ordering::Relaxed);
