@@ -107,9 +107,13 @@ fn exec(mut codepath: impl FnMut(&str) -> Result<(), ()>) -> Duration {
     let mut success = 0;
     let mut total = 0;
 
-    walkdir::WalkDir::new("tests/rust/src")
-        .into_iter()
-        .filter_entry(repo::base_dir_filter)
+    ["tests/rust/compiler", "tests/rust/library"]
+        .iter()
+        .flat_map(|dir| {
+            walkdir::WalkDir::new(dir)
+                .into_iter()
+                .filter_entry(repo::base_dir_filter)
+        })
         .for_each(|entry| {
             let entry = entry.unwrap();
             let path = entry.path();
