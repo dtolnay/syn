@@ -71,7 +71,7 @@ fn test_rustc_precedence() {
     let edition_regex = Regex::new(r"\b(async|try)[!(]").unwrap();
 
     WalkDir::new("tests/rust")
-        .sort_by(|a, b| a.file_name().cmp(b.file_name()))
+        .sort_by_file_name()
         .into_iter()
         .filter_entry(repo::base_dir_filter)
         .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
