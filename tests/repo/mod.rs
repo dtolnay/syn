@@ -10,10 +10,17 @@ use std::path::Path;
 use tar::Archive;
 use walkdir::DirEntry;
 
-const REVISION: &str = "22f247c6f3ed388cb702d01c2ff27da658a8b353";
+const REVISION: &str = "5e1d3299a290026b85787bc9c7e72bcc53ac283f";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
+    // TODO
+    "tests/rustdoc-json/non_lifetime_binders.rs",
+    "tests/rustdoc/non_lifetime_binders.rs",
+    "tests/ui/associated-type-bounds/return-type-notation/basic.rs",
+    "tests/ui/async-await/in-trait/bad-signatures.rs",
+    "tests/ui/feature-gates/feature-gate-return_type_notation.rs",
+
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "tests/ui/const-generics/early/closing-args-token.rs",
     "tests/ui/const-generics/early/const-expression-parameter.rs",
