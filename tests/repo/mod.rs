@@ -18,10 +18,12 @@ const REVISION: &str = "5e1d3299a290026b85787bc9c7e72bcc53ac283f";
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
+    // https://github.com/dtolnay/syn/issues/1435
     "tests/rustdoc-json/non_lifetime_binders.rs",
     "tests/rustdoc/non_lifetime_binders.rs",
 
     // TODO: return type notation: `where T: Trait<method(): Send>`
+    // https://github.com/dtolnay/syn/issues/1434
     "tests/ui/associated-type-bounds/return-type-notation/basic.rs",
     "tests/ui/feature-gates/feature-gate-return_type_notation.rs",
 
