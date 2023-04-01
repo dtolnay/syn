@@ -14,11 +14,15 @@ const REVISION: &str = "5e1d3299a290026b85787bc9c7e72bcc53ac283f";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO
+    // TODO: has multiple stderr revisions .{current,next}.stderr but should get ignored
+    "tests/ui/async-await/in-trait/bad-signatures.rs",
+
+    // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
     "tests/rustdoc-json/non_lifetime_binders.rs",
     "tests/rustdoc/non_lifetime_binders.rs",
+
+    // TODO: return type notation: `where T: Trait<method(): Send>`
     "tests/ui/associated-type-bounds/return-type-notation/basic.rs",
-    "tests/ui/async-await/in-trait/bad-signatures.rs",
     "tests/ui/feature-gates/feature-gate-return_type_notation.rs",
 
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
