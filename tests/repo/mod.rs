@@ -6,6 +6,8 @@ use self::progress::Progress;
 use anyhow::Result;
 use flate2::read::GzDecoder;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use std::collections::BTreeSet;
+use std::ffi::OsStr;
 use std::fs;
 use std::path::{Path, PathBuf};
 use tar::Archive;
@@ -15,9 +17,6 @@ const REVISION: &str = "5e1d3299a290026b85787bc9c7e72bcc53ac283f";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: has multiple stderr revisions .{current,next}.stderr but should get ignored
-    "tests/ui/async-await/in-trait/bad-signatures.rs",
-
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
     "tests/rustdoc-json/non_lifetime_binders.rs",
     "tests/rustdoc/non_lifetime_binders.rs",
@@ -200,24 +199,40 @@ static EXCLUDE_DIRS: &[&str] = &[
     "src/tools/rust-analyzer/crates/syntax/test_data/reparse/fuzz-failures",
 ];
 
-pub fn for_each_rust_file(for_each: impl Fn(&Path) + Sync + Send) {
-    let mut dir_entries = Vec::new();
+// Directories in which a .stderr implies the corresponding .rs is not expected
+// to work.
+static UI_TEST_DIRS: &[&str] = &["tests/ui", "tests/rustdoc-ui"];
 
-    for entry in WalkDir::new("tests/rust")
-        .sort_by_file_name()
+pub fn for_each_rust_file(for_each: impl Fn(&Path) + Sync + Send) {
+    let mut rs_files = BTreeSet::new();
+
+    let repo_dir = Path::new("tests/rust");
+    for entry in WalkDir::new(repo_dir)
         .into_iter()
         .filter_entry(base_dir_filter)
     {
         let entry = entry.unwrap();
         if !entry.file_type().is_dir() {
-            dir_entries.push(entry.into_path());
+            rs_files.insert(entry.into_path());
         }
     }
 
-    dir_entries
-        .par_iter()
-        .map(PathBuf::as_path)
-        .for_each(for_each);
+    for ui_test_dir in UI_TEST_DIRS {
+        for entry in WalkDir::new(repo_dir.join(ui_test_dir)) {
+            let mut path = entry.unwrap().into_path();
+            if path.extension() == Some(OsStr::new("stderr")) {
+                loop {
+                    rs_files.remove(&path.with_extension("rs"));
+                    path = path.with_extension("");
+                    if path.extension().is_none() {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    rs_files.par_iter().map(PathBuf::as_path).for_each(for_each);
 }
 
 pub fn base_dir_filter(entry: &DirEntry) -> bool {
@@ -239,16 +254,8 @@ pub fn base_dir_filter(entry: &DirEntry) -> bool {
         return !EXCLUDE_DIRS.contains(&path_string);
     }
 
-    if path.extension().map_or(true, |e| e != "rs") {
+    if path.extension() != Some(OsStr::new("rs")) {
         return false;
-    }
-
-    if path_string.starts_with("tests/ui") || path_string.starts_with("tests/rustdoc-ui") {
-        let stderr_path = path.with_extension("stderr");
-        if stderr_path.exists() {
-            // Expected to fail in some way
-            return false;
-        }
     }
 
     !EXCLUDE_FILES.contains(&path_string)
