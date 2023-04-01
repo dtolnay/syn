@@ -5,9 +5,9 @@ mod progress;
 use self::progress::Progress;
 use anyhow::Result;
 use flate2::read::GzDecoder;
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tar::Archive;
 use walkdir::{DirEntry, WalkDir};
 
@@ -200,14 +200,23 @@ static EXCLUDE_DIRS: &[&str] = &[
     "src/tools/rust-analyzer/crates/syntax/test_data/reparse/fuzz-failures",
 ];
 
-pub fn for_each_rust_file(for_each: impl Fn(DirEntry) + Sync + Send) {
-    WalkDir::new("tests/rust")
+pub fn for_each_rust_file(for_each: impl Fn(&Path) + Sync + Send) {
+    let mut dir_entries = Vec::new();
+
+    for entry in WalkDir::new("tests/rust")
         .sort_by_file_name()
         .into_iter()
         .filter_entry(base_dir_filter)
-        .collect::<Result<Vec<DirEntry>, walkdir::Error>>()
-        .unwrap()
-        .into_par_iter()
+    {
+        let entry = entry.unwrap();
+        if !entry.file_type().is_dir() {
+            dir_entries.push(entry.into_path());
+        }
+    }
+
+    dir_entries
+        .par_iter()
+        .map(PathBuf::as_path)
         .for_each(for_each);
 }
 

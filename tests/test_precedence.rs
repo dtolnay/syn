@@ -68,12 +68,7 @@ fn test_rustc_precedence() {
     // 2018 edition is hard
     let edition_regex = Regex::new(r"\b(async|try)[!(]").unwrap();
 
-    repo::for_each_rust_file(|entry| {
-        let path = entry.path();
-        if path.is_dir() {
-            return;
-        }
-
+    repo::for_each_rust_file(|path| {
         let content = fs::read_to_string(path).unwrap();
         let content = edition_regex.replace_all(&content, "_$0");
 

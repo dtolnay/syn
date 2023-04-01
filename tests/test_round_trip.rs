@@ -59,12 +59,7 @@ fn test_round_trip() {
 
     let failed = AtomicUsize::new(0);
 
-    repo::for_each_rust_file(|entry| {
-        let path = entry.path();
-        if !path.is_dir() {
-            test(path, &failed, abort_after);
-        }
-    });
+    repo::for_each_rust_file(|path| test(path, &failed, abort_after));
 
     let failed = failed.load(Ordering::Relaxed);
     if failed > 0 {
