@@ -1,6 +1,6 @@
 [package]
 name = "syn-codegen"
-version = "0.3.0" # also update html_root_url
+version = "0.3.1" # also update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 categories = ["development-tools::procedural-macro-helpers"]
 description = "Syntax tree describing Syn's syntax tree"

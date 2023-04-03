@@ -44,7 +44,7 @@
 //! }
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/syn-codegen/0.3.0")]
+#![doc(html_root_url = "https://docs.rs/syn-codegen/0.3.1")]
 
 use indexmap::IndexMap;
 use semver::Version;
