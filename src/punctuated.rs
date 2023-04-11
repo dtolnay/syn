@@ -187,6 +187,18 @@ impl<T, P> Punctuated<T, P> {
         }
     }
 
+    /// Removes the trailing punctuation from this punctuated sequence, or
+    /// `None` if there isn't any.
+    pub fn pop_punct(&mut self) -> Option<P> {
+        if self.last.is_some() {
+            None
+        } else {
+            let (t, p) = self.inner.pop()?;
+            self.last = Some(Box::new(t));
+            Some(p)
+        }
+    }
+
     /// Determines whether this punctuated sequence ends with a trailing
     /// punctuation.
     pub fn trailing_punct(&self) -> bool {
