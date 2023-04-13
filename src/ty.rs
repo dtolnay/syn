@@ -1076,6 +1076,11 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.paren_token.surround(tokens, |tokens| {
                 self.elems.to_tokens(tokens);
+                // If we only have one argument, we need a trailing comma to
+                // distinguish TypeTuple from TypeParen.
+                if self.elems.len() == 1 && !self.elems.trailing_punct() {
+                    <Token![,]>::default().to_tokens(tokens);
+                }
             });
         }
     }
