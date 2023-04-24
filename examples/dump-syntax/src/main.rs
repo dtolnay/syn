@@ -99,11 +99,7 @@ fn render_location(
     let start = err.span().start();
     let mut end = err.span().end();
 
-    if start.line == end.line && start.column == end.column {
-        return render_fallback(formatter, err);
-    }
-
-    let code_line = match code.lines().nth(start.line - 1) {
+    let code_line = match start.line.checked_sub(1).and_then(|n| code.lines().nth(n)) {
         Some(line) => line,
         None => return render_fallback(formatter, err),
     };
@@ -138,7 +134,7 @@ fn render_location(
         label = start.line.to_string().blue().bold(),
         code = code_line.trim_end(),
         offset = " ".repeat(start.column),
-        underline = "^".repeat(end.column - start.column).red().bold(),
+        underline = "^".repeat(end.column.saturating_sub(start.column).max(1)).red().bold(),
         message = err.to_string().red(),
     )
 }
