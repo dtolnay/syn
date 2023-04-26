@@ -96,7 +96,7 @@ pub struct Node {
 /// Content of a syntax tree data structure.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Data {
-    /// This is an opaque type with no publicy accessible structure.
+    /// This is an opaque type with no publicly accessible structure.
     Private,
 
     /// This type is a braced struct with named fields.
