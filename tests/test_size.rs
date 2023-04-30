@@ -17,16 +17,16 @@ fn test_item_size() {
     assert_eq!(mem::size_of::<Item>(), 360);
 }
 
-#[rustversion::attr(before(2022-11-24), ignore)]
+#[rustversion::attr(before(2023-04-29), ignore)]
 #[test]
 fn test_type_size() {
-    assert_eq!(mem::size_of::<Type>(), 240);
+    assert_eq!(mem::size_of::<Type>(), 232);
 }
 
-#[rustversion::attr(before(2021-10-11), ignore)]
+#[rustversion::attr(before(2023-04-29), ignore)]
 #[test]
 fn test_pat_size() {
-    assert_eq!(mem::size_of::<Pat>(), 192);
+    assert_eq!(mem::size_of::<Pat>(), 184);
 }
 
 #[rustversion::attr(before(2022-09-09), ignore)]
