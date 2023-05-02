@@ -33,6 +33,7 @@ clone-impls = []
 extra-traits = []
 proc-macro = ["proc-macro2/proc-macro", "quote/proc-macro"]
 test = ["syn-test-suite/all-features"]
+span-locations = ["proc-macro2/span-locations"]
 
 [dependencies]
 proc-macro2 = { version = "1.0.55", default-features = false }
