@@ -134,7 +134,10 @@ fn render_location(
         label = start.line.to_string().blue().bold(),
         code = code_line.trim_end(),
         offset = " ".repeat(start.column),
-        underline = "^".repeat(end.column.saturating_sub(start.column).max(1)).red().bold(),
+        underline = "^"
+            .repeat(end.column.saturating_sub(start.column).max(1))
+            .red()
+            .bold(),
         message = err.to_string().red(),
     )
 }
