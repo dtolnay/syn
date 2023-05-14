@@ -964,7 +964,9 @@ pub(crate) mod parsing {
     use crate::path;
     use std::cmp::Ordering;
 
-    crate::custom_keyword!(raw);
+    mod kw {
+        crate::custom_keyword!(raw);
+    }
 
     // When we're parsing expressions which occur before blocks, like in an if
     // statement's condition, we cannot parse a struct literal.
@@ -1361,12 +1363,13 @@ pub(crate) mod parsing {
         let attrs = input.call(expr_attrs)?;
         if input.peek(Token![&]) {
             let and_token: Token![&] = input.parse()?;
-            let raw: Option<raw> =
-                if input.peek(raw) && (input.peek2(Token![mut]) || input.peek2(Token![const])) {
-                    Some(input.parse()?)
-                } else {
-                    None
-                };
+            let raw: Option<kw::raw> = if input.peek(kw::raw)
+                && (input.peek2(Token![mut]) || input.peek2(Token![const]))
+            {
+                Some(input.parse()?)
+            } else {
+                None
+            };
             let mutability: Option<Token![mut]> = input.parse()?;
             if raw.is_some() && mutability.is_none() {
                 input.parse::<Token![const]>()?;
