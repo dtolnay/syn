@@ -965,6 +965,7 @@ pub(crate) mod parsing {
     use std::cmp::Ordering;
 
     mod kw {
+        crate::custom_keyword!(builtin);
         crate::custom_keyword!(raw);
     }
 
@@ -1594,6 +1595,8 @@ pub(crate) mod parsing {
             || input.peek(Token![async]) && (input.peek2(Token![|]) || input.peek2(Token![move]))
         {
             expr_closure(input, allow_struct).map(Expr::Closure)
+        } else if input.peek(kw::builtin) && input.peek2(Token![#]) {
+            expr_builtin(input)
         } else if input.peek(Ident)
             || input.peek(Token![::])
             || input.peek(Token![<])
@@ -1690,6 +1693,21 @@ pub(crate) mod parsing {
         } else {
             Err(input.error("unsupported expression; enable syn's features=[\"full\"]"))
         }
+    }
+
+    #[cfg(feature = "full")]
+    fn expr_builtin(input: ParseStream) -> Result<Expr> {
+        let begin = input.fork();
+
+        input.parse::<kw::builtin>()?;
+        input.parse::<Token![#]>()?;
+        input.parse::<Ident>()?;
+
+        let args;
+        parenthesized!(args in input);
+        args.parse::<TokenStream>()?;
+
+        Ok(Expr::Verbatim(verbatim::between(begin, input)))
     }
 
     fn path_or_macro_or_struct(
