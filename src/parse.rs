@@ -185,10 +185,7 @@ pub mod discouraged;
 use crate::buffer::{Cursor, TokenBuffer};
 use crate::error;
 use crate::lookahead;
-#[cfg(all(
-    not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
-    feature = "proc-macro"
-))]
+#[cfg(feature = "proc-macro")]
 use crate::proc_macro;
 use crate::punctuated::Punctuated;
 use crate::token::Token;
@@ -1198,10 +1195,7 @@ pub trait Parser: Sized {
     ///
     /// This function will check that the input is fully parsed. If there are
     /// any unparsed tokens at the end of the stream, an error is returned.
-    #[cfg(all(
-        not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
-        feature = "proc-macro"
-    ))]
+    #[cfg(feature = "proc-macro")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "proc-macro")))]
     fn parse(self, tokens: proc_macro::TokenStream) -> Result<Self::Output> {
         self.parse2(proc_macro2::TokenStream::from(tokens))

@@ -296,10 +296,7 @@
     clippy::wildcard_imports,
 )]
 
-#[cfg(all(
-    not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
-    feature = "proc-macro"
-))]
+#[cfg(feature = "proc-macro")]
 extern crate proc_macro;
 
 #[macro_use]
@@ -422,11 +419,7 @@ pub use crate::op::{BinOp, UnOp};
 #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 pub mod parse;
 
-#[cfg(all(
-    not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
-    feature = "parsing",
-    feature = "proc-macro"
-))]
+#[cfg(all(feature = "parsing", feature = "proc-macro"))]
 mod parse_macro_input;
 
 #[cfg(all(feature = "parsing", feature = "printing"))]
@@ -860,11 +853,7 @@ pub mod __private;
 ///     expanded.into()
 /// }
 /// ```
-#[cfg(all(
-    not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
-    feature = "parsing",
-    feature = "proc-macro"
-))]
+#[cfg(all(feature = "parsing", feature = "proc-macro"))]
 #[cfg_attr(doc_cfg, doc(cfg(all(feature = "parsing", feature = "proc-macro"))))]
 pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
     parse::Parser::parse(T::parse, tokens)
