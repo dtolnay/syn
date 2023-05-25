@@ -5,8 +5,6 @@
 // Syn, and caution should be used when editing it. The public-facing interface
 // is 100% safe but the implementation is fragile internally.
 
-#[cfg(feature = "proc-macro")]
-use crate::proc_macro as pm;
 use crate::Lifetime;
 use proc_macro2::extra::DelimSpan;
 use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
@@ -59,7 +57,7 @@ impl TokenBuffer {
     /// `proc_macro::TokenStream`.
     #[cfg(feature = "proc-macro")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "proc-macro")))]
-    pub fn new(stream: pm::TokenStream) -> Self {
+    pub fn new(stream: proc_macro::TokenStream) -> Self {
         Self::new2(stream.into())
     }
 
