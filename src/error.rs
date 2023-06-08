@@ -273,7 +273,7 @@ impl Error {
 
 impl ErrorMessage {
     fn to_compile_error(&self) -> TokenStream {
-        let (mut start, mut end) = (Span::mixed_site(), Span::mixed_site());
+        let (mut start, mut end) = (Span::call_site(), Span::call_site());
         if let Some(range) = self.span.get() {
             start = start.located_at(range.start);
             end = end.located_at(range.end);
