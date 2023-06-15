@@ -273,10 +273,9 @@ impl Error {
 
 impl ErrorMessage {
     fn to_compile_error(&self) -> TokenStream {
-        let (mut start, mut end) = (Span::call_site(), Span::call_site());
-        if let Some(range) = self.span.get() {
-            start = start.located_at(range.start);
-            end = end.located_at(range.end);
+        let (start, end) = match self.span.get() {
+            Some(range) => (range.start, range.end),
+            None => (Span::call_site(), Span::call_site()),
         };
 
         // ::core::compile_error!($message)
