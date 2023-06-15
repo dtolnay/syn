@@ -1,7 +1,7 @@
 use crate::workspace_path;
 use anyhow::Result;
 use semver::Version;
-use serde::Deserialize;
+use serde_derive::Deserialize;
 use std::fs;
 
 pub fn get() -> Result<Version> {

@@ -48,7 +48,8 @@
 
 use indexmap::IndexMap;
 use semver::Version;
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::de::{Deserialize, Deserializer};
+use serde_derive::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Top-level content of the syntax tree description.
