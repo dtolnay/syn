@@ -17,7 +17,8 @@ const REVISION: &str = "fe7454bf439c93cbe9ac8a8f7fcfacd5a40244c2";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO
+    // TODO: c"string" CStr literals
+    // https://github.com/rust-lang/rust/issues/105723
     "compiler/rustc_codegen_llvm/src/allocator.rs",
     "compiler/rustc_codegen_llvm/src/back/lto.rs",
     "compiler/rustc_codegen_llvm/src/back/write.rs",
@@ -37,11 +38,10 @@ static EXCLUDE_FILES: &[&str] = &[
     "library/std/src/sys/windows/compat.rs",
     "library/std/src/sys/windows/mod.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0085_expr_literals.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0208_associated_return_type_bounds.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0209_bare_dyn_types_with_paren_as_generic_args.rs",
-    "src/tools/rustfmt/tests/target/negative-bounds.rs",
     "tests/ui/rfcs/rfc-3348-c-string-literals/basic.rs",
     "tests/ui/rfcs/rfc-3348-c-string-literals/non-ascii.rs",
+
+    // TODO: `use {{::{core}}};`
     "tests/ui/weird-exprs.rs",
 
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
@@ -51,6 +51,7 @@ static EXCLUDE_FILES: &[&str] = &[
 
     // TODO: return type notation: `where T: Trait<method(): Send>`
     // https://github.com/dtolnay/syn/issues/1434
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0208_associated_return_type_bounds.rs",
     "tests/ui/associated-type-bounds/return-type-notation/basic.rs",
     "tests/ui/feature-gates/feature-gate-return_type_notation.rs",
 
@@ -63,6 +64,9 @@ static EXCLUDE_FILES: &[&str] = &[
 
     // Need at least one trait in impl Trait, no such type as impl 'static
     "tests/ui/type-alias-impl-trait/generic_type_does_not_live_long_enough.rs",
+
+    // Negative polarity trait bound: `where T: !Copy`
+    "src/tools/rustfmt/tests/target/negative-bounds.rs",
 
     // Lifetime bound inside for<>: `T: ~const ?for<'a: 'b> Trait<'a>`
     "tests/ui/rfcs/rfc-2632-const-trait-impl/tilde-const-syntax.rs",
@@ -90,6 +94,7 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0004_value_parameters_no_patterns.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0104_path_fn_trait_args.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0202_typepathfn_with_coloncolon.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0209_bare_dyn_types_with_paren_as_generic_args.rs",
     "src/tools/rustfmt/tests/source/attrib.rs",
     "src/tools/rustfmt/tests/source/closure.rs",
     "src/tools/rustfmt/tests/source/existential_type.rs",
