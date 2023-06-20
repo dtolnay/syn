@@ -1340,22 +1340,28 @@ pub(crate) mod parsing {
             let content;
             let brace_token = braced!(content in input);
             let mut items = Punctuated::new();
-            let mut has_crate_root_in_path = false;
+            let mut has_any_crate_root_in_path = false;
             loop {
                 if content.is_empty() {
                     break;
                 }
-                has_crate_root_in_path |=
+                let this_tree_starts_with_crate_root =
                     allow_crate_root_in_path && content.parse::<Option<Token![::]>>()?.is_some();
-                let tree: UseTree = content.parse()?;
-                items.push_value(tree);
+                has_any_crate_root_in_path |= this_tree_starts_with_crate_root;
+                match parse_use_tree(
+                    &content,
+                    allow_crate_root_in_path && !this_tree_starts_with_crate_root,
+                )? {
+                    Some(tree) => items.push_value(tree),
+                    None => has_any_crate_root_in_path = true,
+                }
                 if content.is_empty() {
                     break;
                 }
                 let comma: Token![,] = content.parse()?;
                 items.push_punct(comma);
             }
-            if has_crate_root_in_path {
+            if has_any_crate_root_in_path {
                 Ok(None)
             } else {
                 Ok(Some(UseTree::Group(UseGroup { brace_token, items })))

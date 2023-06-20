@@ -41,9 +41,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/rfcs/rfc-3348-c-string-literals/basic.rs",
     "tests/ui/rfcs/rfc-3348-c-string-literals/non-ascii.rs",
 
-    // TODO: `use {{::{core}}};`
-    "tests/ui/weird-exprs.rs",
-
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
     // https://github.com/dtolnay/syn/issues/1435
     "tests/rustdoc-json/non_lifetime_binders.rs",
