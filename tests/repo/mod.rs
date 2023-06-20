@@ -13,10 +13,37 @@ use std::path::{Path, PathBuf};
 use tar::Archive;
 use walkdir::{DirEntry, WalkDir};
 
-const REVISION: &str = "5e1d3299a290026b85787bc9c7e72bcc53ac283f";
+const REVISION: &str = "fe7454bf439c93cbe9ac8a8f7fcfacd5a40244c2";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
+    // TODO
+    "compiler/rustc_codegen_llvm/src/allocator.rs",
+    "compiler/rustc_codegen_llvm/src/back/lto.rs",
+    "compiler/rustc_codegen_llvm/src/back/write.rs",
+    "compiler/rustc_codegen_llvm/src/base.rs",
+    "compiler/rustc_codegen_llvm/src/builder.rs",
+    "compiler/rustc_codegen_llvm/src/consts.rs",
+    "compiler/rustc_codegen_llvm/src/context.rs",
+    "compiler/rustc_codegen_llvm/src/debuginfo/gdb.rs",
+    "compiler/rustc_codegen_llvm/src/debuginfo/metadata.rs",
+    "compiler/rustc_codegen_llvm/src/debuginfo/mod.rs",
+    "library/std/src/sys/unix/args.rs",
+    "library/std/src/sys/unix/fs.rs",
+    "library/std/src/sys/unix/mod.rs",
+    "library/std/src/sys/unix/process/process_common.rs",
+    "library/std/src/sys/unix/thread.rs",
+    "library/std/src/sys/windows/c.rs",
+    "library/std/src/sys/windows/compat.rs",
+    "library/std/src/sys/windows/mod.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0085_expr_literals.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0208_associated_return_type_bounds.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0209_bare_dyn_types_with_paren_as_generic_args.rs",
+    "src/tools/rustfmt/tests/target/negative-bounds.rs",
+    "tests/ui/rfcs/rfc-3348-c-string-literals/basic.rs",
+    "tests/ui/rfcs/rfc-3348-c-string-literals/non-ascii.rs",
+    "tests/ui/weird-exprs.rs",
+
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
     // https://github.com/dtolnay/syn/issues/1435
     "tests/rustdoc-json/non_lifetime_binders.rs",
@@ -38,10 +65,10 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/type-alias-impl-trait/generic_type_does_not_live_long_enough.rs",
 
     // Lifetime bound inside for<>: `T: ~const ?for<'a: 'b> Trait<'a>`
-    "tests/ui/rfc-2632-const-trait-impl/tilde-const-syntax.rs",
+    "tests/ui/rfcs/rfc-2632-const-trait-impl/tilde-const-syntax.rs",
 
     // Const impl that is not a trait impl: `impl ~const T {}`
-    "tests/ui/rfc-2632-const-trait-impl/syntax.rs",
+    "tests/ui/rfcs/rfc-2632-const-trait-impl/syntax.rs",
 
     // Deprecated anonymous parameter syntax in traits
     "src/tools/rustfmt/tests/source/trait.rs",
@@ -85,8 +112,8 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/codegen-units/item-collection/non-generic-closures.rs",
     "tests/debuginfo/recursive-enum.rs",
     "tests/pretty/closure-reform-pretty.rs",
-    "tests/run-make-fulldeps/reproducible-build-2/reproducible-build.rs",
-    "tests/run-make-fulldeps/reproducible-build/reproducible-build.rs",
+    "tests/run-make/reproducible-build-2/reproducible-build.rs",
+    "tests/run-make/reproducible-build/reproducible-build.rs",
     "tests/ui/auxiliary/typeid-intrinsic-aux1.rs",
     "tests/ui/auxiliary/typeid-intrinsic-aux2.rs",
     "tests/ui/impl-trait/generic-with-implicit-hrtb-without-dyn.rs",
@@ -94,10 +121,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/lifetimes/bare-trait-object-borrowck.rs",
     "tests/ui/lifetimes/bare-trait-object.rs",
     "tests/ui/parser/bounds-obj-parens.rs",
-
-    // Old type ascription expression syntax
-    "src/tools/rustfmt/tests/source/type-ascription.rs",
-    "src/tools/rustfmt/tests/target/type-ascription.rs",
 
     // Obsolete box syntax
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0132_box_expr.rs",
