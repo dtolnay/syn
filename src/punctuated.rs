@@ -222,7 +222,7 @@ impl<T, P> Punctuated<T, P> {
     where
         P: Default,
     {
-        if !self.empty_or_trailing() {
+        if self.last.is_some() {
             self.push_punct(Default::default());
         }
         self.push_value(value);
@@ -439,8 +439,19 @@ where
     P: Default,
 {
     fn extend<I: IntoIterator<Item = T>>(&mut self, i: I) {
-        for value in i {
-            self.push(value);
+        let mut i = i.into_iter();
+
+        // Don't call `push_punct` if the iterator is empty.
+        if let Some(first_value) = i.next() {
+            prepare_extend(self, &i);
+
+            self.push_value(first_value);
+
+            for value in i {
+                self.push_punct(Default::default());
+
+                self.push_value(value)
+            }
         }
     }
 }
@@ -458,10 +469,29 @@ where
     P: Default,
 {
     fn extend<I: IntoIterator<Item = Pair<T, P>>>(&mut self, i: I) {
-        if !self.empty_or_trailing() {
-            self.push_punct(P::default());
-        }
-        do_extend(self, i.into_iter());
+        let i = i.into_iter();
+
+        prepare_extend(self, &i);
+
+        do_extend(self, i);
+    }
+}
+
+// Reserves capacity and calls `push_punct` if `last` is Some.
+fn prepare_extend<T, P, I>(punctuated: &mut Punctuated<T, P>, i: &I)
+where
+    I: Iterator,
+    P: Default,
+{
+    let (lower, _) = i.size_hint();
+
+    if punctuated.last.is_some() {
+        // Reserve one more because of `push_punct`.
+        punctuated.inner.reserve(lower.saturating_add(1));
+
+        punctuated.push_punct(P::default());
+    } else {
+        punctuated.inner.reserve(lower);
     }
 }
 
