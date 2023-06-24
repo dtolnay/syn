@@ -17,30 +17,6 @@ const REVISION: &str = "fe7454bf439c93cbe9ac8a8f7fcfacd5a40244c2";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: c"string" CStr literals
-    // https://github.com/rust-lang/rust/issues/105723
-    "compiler/rustc_codegen_llvm/src/allocator.rs",
-    "compiler/rustc_codegen_llvm/src/back/lto.rs",
-    "compiler/rustc_codegen_llvm/src/back/write.rs",
-    "compiler/rustc_codegen_llvm/src/base.rs",
-    "compiler/rustc_codegen_llvm/src/builder.rs",
-    "compiler/rustc_codegen_llvm/src/consts.rs",
-    "compiler/rustc_codegen_llvm/src/context.rs",
-    "compiler/rustc_codegen_llvm/src/debuginfo/gdb.rs",
-    "compiler/rustc_codegen_llvm/src/debuginfo/metadata.rs",
-    "compiler/rustc_codegen_llvm/src/debuginfo/mod.rs",
-    "library/std/src/sys/unix/args.rs",
-    "library/std/src/sys/unix/fs.rs",
-    "library/std/src/sys/unix/mod.rs",
-    "library/std/src/sys/unix/process/process_common.rs",
-    "library/std/src/sys/unix/thread.rs",
-    "library/std/src/sys/windows/c.rs",
-    "library/std/src/sys/windows/compat.rs",
-    "library/std/src/sys/windows/mod.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0085_expr_literals.rs",
-    "tests/ui/rfcs/rfc-3348-c-string-literals/basic.rs",
-    "tests/ui/rfcs/rfc-3348-c-string-literals/non-ascii.rs",
-
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
     // https://github.com/dtolnay/syn/issues/1435
     "tests/rustdoc-json/non_lifetime_binders.rs",
