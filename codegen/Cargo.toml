@@ -9,7 +9,7 @@ publish = false # this is an internal crate which should never be published
 [dependencies]
 anyhow = "1"
 color-backtrace = "0.4"
-indexmap = { version = "1", features = ["serde-1"] }
+indexmap = { version = "2", features = ["serde"] }
 inflections = "1.1"
 prettyplease = "0.2.3"
 proc-macro2 = { version = "1.0.20", features = ["span-locations"] }

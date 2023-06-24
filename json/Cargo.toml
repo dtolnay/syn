@@ -11,7 +11,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/dtolnay/syn"
 
 [dependencies]
-indexmap = { version = "1", features = ["serde-1", "std"] }
+indexmap = { version = "2", features = ["serde"] }
 semver = { version = "1", features = ["serde"] }
 serde = "1.0.88"
 serde_derive = "1.0.88"
