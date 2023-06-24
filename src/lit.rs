@@ -1273,8 +1273,7 @@ mod value {
                         b'"' => b'"',
                         b'\r' | b'\n' => loop {
                             let byte = byte(v, 0);
-                            let ch = char::from_u32(u32::from(byte)).unwrap();
-                            if ch.is_whitespace() {
+                            if matches!(byte, b' ' | b'\t' | b'\n' | b'\r') {
                                 v = &v[1..];
                             } else {
                                 continue 'outer;
