@@ -15,11 +15,7 @@ macro_rules! errorf {
 
 macro_rules! punctuated {
     ($($e:expr,)+) => {{
-        let mut seq = ::syn::punctuated::Punctuated::new();
-        $(
-            seq.push($e);
-        )+
-        seq
+        ::syn::punctuated::Punctuated::from_iter([$($e),+])
     }};
 
     ($($e:expr),+) => {
