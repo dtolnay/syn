@@ -222,10 +222,14 @@ impl<T, P> Punctuated<T, P> {
     where
         P: Default,
     {
-        if self.last.is_some() {
-            self.push_punct(Default::default());
+        if let Some(last) = self.last.as_mut() {
+            // Recycle the allocated Box by replacing its content instead of allocating a new one.
+            let last = std::mem::replace(last.as_mut(), value);
+
+            self.inner.push((last, P::default()));
+        } else {
+            self.last = Some(Box::new(value));
         }
-        self.push_value(value);
     }
 
     /// Inserts an element at position `index`.
