@@ -521,8 +521,8 @@ unsafe fn extending_push_and_replace_last<T, P, I>(
     I: Iterator,
     P: Default,
 {
-    // Safety: The caller is responsible for making sure that `last` is not `None`.
-    let last = unsafe { punctuated.last.as_mut().unwrap_unchecked() };
+    // Unwrap: The caller is responsible for making sure that `last` is not `None`.
+    let last = punctuated.last.as_mut().unwrap();
 
     // Recycle the allocated Box by replacing its content instead of allocating a new one.
     let last = core::mem::replace(last.as_mut(), item);
