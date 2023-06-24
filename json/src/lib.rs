@@ -13,9 +13,9 @@
 //!   of the [`visit`], [`visit_mut`], and [`fold`] modules can be generated
 //!   programmatically from a description of the syntax tree.
 //!
-//!   [`visit`]: https://docs.rs/syn/1.0/syn/visit/index.html
-//!   [`visit_mut`]: https://docs.rs/syn/1.0/syn/visit_mut/index.html
-//!   [`fold`]: https://docs.rs/syn/1.0/syn/fold/index.html
+//!   [`visit`]: https://docs.rs/syn/2.0/syn/visit/index.html
+//!   [`visit_mut`]: https://docs.rs/syn/2.0/syn/visit_mut/index.html
+//!   [`fold`]: https://docs.rs/syn/2.0/syn/fold/index.html
 //!
 //! To make this type of code as easy as possible to implement in any language,
 //! every Syn release comes with a machine-readable description of that version
@@ -44,7 +44,7 @@
 //! }
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/syn-codegen/0.3.1")]
+#![doc(html_root_url = "https://docs.rs/syn-codegen/0.4.0")]
 
 use indexmap::IndexMap;
 use semver::Version;
