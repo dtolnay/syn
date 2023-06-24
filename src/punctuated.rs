@@ -428,7 +428,7 @@ where
     P: Default,
 {
     fn from_iter<I: IntoIterator<Item = T>>(i: I) -> Self {
-        let mut ret = Punctuated::new();
+        let mut ret = Self::new();
         ret.extend(i);
         ret
     }
@@ -441,16 +441,21 @@ where
     fn extend<I: IntoIterator<Item = T>>(&mut self, i: I) {
         let mut i = i.into_iter();
 
-        // Don't call `push_punct` if the iterator is empty.
         if let Some(first_value) = i.next() {
-            prepare_extend(self, &i);
+            if self.last.is_some() {
+                // Safety: `last` being `Some` is the if-condition.
+                unsafe {
+                    extending_push_and_replace_last(self, first_value, &i);
+                }
+            } else {
+                self.last = Some(Box::new(first_value));
+            }
 
-            self.push_value(first_value);
-
-            for value in i {
-                self.push_punct(Default::default());
-
-                self.push_value(value)
+            while let Some(value) = i.next() {
+                // Safety: The else-block above sets `last` to the first value if it is `None`.
+                unsafe {
+                    extending_push_and_replace_last(self, value, &i);
+                }
             }
         }
     }
@@ -458,7 +463,7 @@ where
 
 impl<T, P> FromIterator<Pair<T, P>> for Punctuated<T, P> {
     fn from_iter<I: IntoIterator<Item = Pair<T, P>>>(i: I) -> Self {
-        let mut ret = Punctuated::new();
+        let mut ret = Self::new();
         do_extend(&mut ret, i.into_iter());
         ret
     }
@@ -471,44 +476,76 @@ where
     fn extend<I: IntoIterator<Item = Pair<T, P>>>(&mut self, i: I) {
         let i = i.into_iter();
 
-        prepare_extend(self, &i);
+        // TODO: In a future breaking release, the following block should only be called
+        // if the iterator has at least one pair. This would be consistent with
+        // `extend` from an iterator of items and would avoid a possible unneeded allocation.
+        if let Some(last) = self.last.take() {
+            extending_push(self, (*last, P::default()), &i);
+        }
 
         do_extend(self, i);
     }
 }
 
-// Reserves capacity and calls `push_punct` if `last` is Some.
-fn prepare_extend<T, P, I>(punctuated: &mut Punctuated<T, P>, i: &I)
+/// Push a pair bypassing last while reserving capacity for it and the next items in the iterators.
+fn extending_push<T, P, I>(punctuated: &mut Punctuated<T, P>, pair: (T, P), i: &I)
 where
     I: Iterator,
-    P: Default,
 {
-    let (lower, _) = i.size_hint();
+    let len = punctuated.inner.len();
 
-    if punctuated.last.is_some() {
-        // Reserve one more because of `push_punct`.
+    if len == punctuated.inner.capacity() {
+        let (lower, _) = i.size_hint();
         punctuated.inner.reserve(lower.saturating_add(1));
+    }
 
-        punctuated.push_punct(P::default());
-    } else {
-        punctuated.inner.reserve(lower);
+    // Safety: Reserved capacity for at least one additional pair above.
+    unsafe {
+        let end = punctuated.inner.as_mut_ptr().add(len);
+        core::ptr::write(end, pair);
+        punctuated.inner.set_len(len + 1);
     }
 }
 
-fn do_extend<T, P, I>(punctuated: &mut Punctuated<T, P>, i: I)
+// Push `last` and replace it with `item` while reserving enough capacity
+// for the pushed `last` and the next items in the iterator.
+//
+// # Safety:
+// This function assumes that `last` is `Some`.
+// Calling it with `last` being `None` is undefined behavior.
+unsafe fn extending_push_and_replace_last<T, P, I>(
+    punctuated: &mut Punctuated<T, P>,
+    item: T,
+    i: &I,
+) where
+    I: Iterator,
+    P: Default,
+{
+    // Safety: The caller is responsible for making sure that `last` is not `None`.
+    let last = unsafe { punctuated.last.as_mut().unwrap_unchecked() };
+
+    // Recycle the allocated Box by replacing its content instead of allocating a new one.
+    let last = core::mem::replace(last.as_mut(), item);
+
+    extending_push(punctuated, (last, P::default()), i);
+}
+
+// Assumes that `last` is `None`.
+fn do_extend<T, P, I>(punctuated: &mut Punctuated<T, P>, mut i: I)
 where
     I: Iterator<Item = Pair<T, P>>,
 {
-    let mut nomore = false;
-    for pair in i {
-        if nomore {
-            panic!("Punctuated extended with items after a Pair::End");
-        }
+    while let Some(pair) = i.next() {
         match pair {
-            Pair::Punctuated(a, b) => punctuated.inner.push((a, b)),
+            Pair::Punctuated(a, b) => {
+                extending_push(punctuated, (a, b), &i);
+            }
             Pair::End(a) => {
                 punctuated.last = Some(Box::new(a));
-                nomore = true;
+
+                if i.next().is_some() {
+                    panic!("Punctuated extended with items after a Pair::End");
+                }
             }
         }
     }
