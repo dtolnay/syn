@@ -506,7 +506,7 @@ where
     // Safety: Reserved capacity for at least one additional pair above.
     unsafe {
         let end = punctuated.inner.as_mut_ptr().add(len);
-        core::ptr::write(end, pair);
+        std::ptr::write(end, pair);
         punctuated.inner.set_len(len + 1);
     }
 }
@@ -529,7 +529,7 @@ unsafe fn extending_push_and_replace_last<T, P, I>(
     let last = punctuated.last.as_mut().unwrap();
 
     // Recycle the allocated Box by replacing its content instead of allocating a new one.
-    let last = core::mem::replace(last.as_mut(), item);
+    let last = std::mem::replace(last.as_mut(), item);
 
     extending_push(punctuated, (last, P::default()), i);
 }
