@@ -1691,6 +1691,16 @@ pub(crate) mod parsing {
         } else if input.is_empty() {
             Err(input.error("expected an expression"))
         } else {
+            if input.peek(token::Brace) {
+                let scan = input.fork();
+                let content;
+                braced!(content in scan);
+                if content.parse::<Expr>().is_ok() && content.is_empty() {
+                    let expr_block = verbatim::between(input, &scan);
+                    input.advance_to(&scan);
+                    return Ok(Expr::Verbatim(expr_block));
+                }
+            }
             Err(input.error("unsupported expression; enable syn's features=[\"full\"]"))
         }
     }
