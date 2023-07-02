@@ -1377,7 +1377,7 @@ pub(crate) mod parsing {
             }
             let expr = Box::new(unary_expr(input, allow_struct)?);
             if raw.is_some() {
-                Ok(Expr::Verbatim(verbatim::between(begin, input)))
+                Ok(Expr::Verbatim(verbatim::between(&begin, input)))
             } else {
                 Ok(Expr::Reference(ExprReference {
                     attrs,
@@ -1423,7 +1423,7 @@ pub(crate) mod parsing {
         let mut e = trailer_helper(input, atom)?;
 
         if let Expr::Verbatim(tokens) = &mut e {
-            *tokens = verbatim::between(begin, input);
+            *tokens = verbatim::between(&begin, input);
         } else {
             let inner_attrs = e.replace_attrs(Vec::new());
             attrs.extend(inner_attrs);
@@ -1707,7 +1707,7 @@ pub(crate) mod parsing {
         parenthesized!(args in input);
         args.parse::<TokenStream>()?;
 
-        Ok(Expr::Verbatim(verbatim::between(begin, input)))
+        Ok(Expr::Verbatim(verbatim::between(&begin, input)))
     }
 
     fn path_or_macro_or_struct(

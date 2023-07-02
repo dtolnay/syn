@@ -917,7 +917,7 @@ pub(crate) mod parsing {
             let sig: Signature = input.parse()?;
             if input.peek(Token![;]) {
                 input.parse::<Token![;]>()?;
-                Ok(Item::Verbatim(verbatim::between(begin, input)))
+                Ok(Item::Verbatim(verbatim::between(&begin, input)))
             } else {
                 parse_rest_of_fn(input, Vec::new(), vis, sig).map(Item::Fn)
             }
@@ -943,7 +943,7 @@ pub(crate) mod parsing {
             let allow_crate_root_in_path = true;
             match parse_item_use(input, allow_crate_root_in_path)? {
                 Some(item_use) => Ok(Item::Use(item_use)),
-                None => Ok(Item::Verbatim(verbatim::between(begin, input))),
+                None => Ok(Item::Verbatim(verbatim::between(&begin, input))),
             }
         } else if lookahead.peek(Token![static]) {
             let vis = input.parse()?;
@@ -954,13 +954,13 @@ pub(crate) mod parsing {
                 input.parse::<Token![=]>()?;
                 input.parse::<Expr>()?;
                 input.parse::<Token![;]>()?;
-                Ok(Item::Verbatim(verbatim::between(begin, input)))
+                Ok(Item::Verbatim(verbatim::between(&begin, input)))
             } else {
                 let colon_token = input.parse()?;
                 let ty = input.parse()?;
                 if input.peek(Token![;]) {
                     input.parse::<Token![;]>()?;
-                    Ok(Item::Verbatim(verbatim::between(begin, input)))
+                    Ok(Item::Verbatim(verbatim::between(&begin, input)))
                 } else {
                     Ok(Item::Static(ItemStatic {
                         attrs: Vec::new(),
@@ -989,7 +989,7 @@ pub(crate) mod parsing {
             let ty = input.parse()?;
             if input.peek(Token![;]) {
                 input.parse::<Token![;]>()?;
-                Ok(Item::Verbatim(verbatim::between(begin, input)))
+                Ok(Item::Verbatim(verbatim::between(&begin, input)))
             } else {
                 Ok(Item::Const(ItemConst {
                     attrs: Vec::new(),
@@ -1016,7 +1016,7 @@ pub(crate) mod parsing {
                 if let Some(item) = parse_impl(input, allow_verbatim_impl)? {
                     Ok(Item::Impl(item))
                 } else {
-                    Ok(Item::Verbatim(verbatim::between(begin, input)))
+                    Ok(Item::Verbatim(verbatim::between(&begin, input)))
                 }
             } else if lookahead.peek(Token![extern]) {
                 input.parse().map(Item::ForeignMod)
@@ -1046,7 +1046,7 @@ pub(crate) mod parsing {
             if let Some(item) = parse_impl(input, allow_verbatim_impl)? {
                 Ok(Item::Impl(item))
             } else {
-                Ok(Item::Verbatim(verbatim::between(begin, input)))
+                Ok(Item::Verbatim(verbatim::between(&begin, input)))
             }
         } else if lookahead.peek(Token![macro]) {
             input.advance_to(&ahead);
@@ -1227,7 +1227,7 @@ pub(crate) mod parsing {
             return Err(lookahead.error());
         }
 
-        Ok(Item::Verbatim(verbatim::between(begin, input)))
+        Ok(Item::Verbatim(verbatim::between(&begin, input)))
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -1767,7 +1767,7 @@ pub(crate) mod parsing {
                     content.call(Attribute::parse_inner)?;
                     content.call(Block::parse_within)?;
 
-                    Ok(ForeignItem::Verbatim(verbatim::between(begin, input)))
+                    Ok(ForeignItem::Verbatim(verbatim::between(&begin, input)))
                 } else {
                     Ok(ForeignItem::Fn(ForeignItemFn {
                         attrs: Vec::new(),
@@ -1787,7 +1787,7 @@ pub(crate) mod parsing {
                     input.parse::<Token![=]>()?;
                     input.parse::<Expr>()?;
                     input.parse::<Token![;]>()?;
-                    Ok(ForeignItem::Verbatim(verbatim::between(begin, input)))
+                    Ok(ForeignItem::Verbatim(verbatim::between(&begin, input)))
                 } else {
                     Ok(ForeignItem::Static(ForeignItemStatic {
                         attrs: Vec::new(),
@@ -1896,7 +1896,7 @@ pub(crate) mod parsing {
         )?;
 
         if colon_token.is_some() || ty.is_some() {
-            Ok(ForeignItem::Verbatim(verbatim::between(begin, input)))
+            Ok(ForeignItem::Verbatim(verbatim::between(&begin, input)))
         } else {
             Ok(ForeignItem::Type(ForeignItemType {
                 attrs: Vec::new(),
@@ -1966,7 +1966,7 @@ pub(crate) mod parsing {
 
         let (eq_token, ty) = match ty {
             Some(ty) if colon_token.is_none() => ty,
-            _ => return Ok(Item::Verbatim(verbatim::between(begin, input))),
+            _ => return Ok(Item::Verbatim(verbatim::between(&begin, input))),
         };
 
         Ok(Item::Type(ItemType {
@@ -2254,7 +2254,7 @@ pub(crate) mod parsing {
 
             match (vis, defaultness) {
                 (Visibility::Inherited, None) => {}
-                _ => return Ok(TraitItem::Verbatim(verbatim::between(begin, input))),
+                _ => return Ok(TraitItem::Verbatim(verbatim::between(&begin, input))),
             }
 
             let item_attrs = match &mut item {
@@ -2372,7 +2372,7 @@ pub(crate) mod parsing {
         )?;
 
         if vis.is_some() {
-            Ok(TraitItem::Verbatim(verbatim::between(begin, input)))
+            Ok(TraitItem::Verbatim(verbatim::between(&begin, input)))
         } else {
             Ok(TraitItem::Type(TraitItemType {
                 attrs: Vec::new(),
@@ -2485,7 +2485,7 @@ pub(crate) mod parsing {
             self_ty = if polarity.is_none() {
                 first_ty
             } else {
-                Type::Verbatim(verbatim::between(begin, input))
+                Type::Verbatim(verbatim::between(&begin, input))
             };
         }
 
@@ -2539,7 +2539,7 @@ pub(crate) mod parsing {
                 if let Some(item) = parse_impl_item_fn(input, allow_omitted_body)? {
                     Ok(ImplItem::Fn(item))
                 } else {
-                    Ok(ImplItem::Verbatim(verbatim::between(begin, input)))
+                    Ok(ImplItem::Verbatim(verbatim::between(&begin, input)))
                 }
             } else if lookahead.peek(Token![const]) {
                 input.advance_to(&ahead);
@@ -2568,7 +2568,7 @@ pub(crate) mod parsing {
                     }));
                 } else {
                     input.parse::<Token![;]>()?;
-                    return Ok(ImplItem::Verbatim(verbatim::between(begin, input)));
+                    return Ok(ImplItem::Verbatim(verbatim::between(&begin, input)));
                 }
             } else if lookahead.peek(Token![type]) {
                 parse_impl_item_type(begin, input)
@@ -2714,7 +2714,7 @@ pub(crate) mod parsing {
 
         let (eq_token, ty) = match ty {
             Some(ty) if colon_token.is_none() => ty,
-            _ => return Ok(ImplItem::Verbatim(verbatim::between(begin, input))),
+            _ => return Ok(ImplItem::Verbatim(verbatim::between(&begin, input))),
         };
 
         Ok(ImplItem::Type(ImplItemType {

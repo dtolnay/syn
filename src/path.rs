@@ -391,7 +391,7 @@ pub(crate) mod parsing {
                 let content;
                 braced!(content in input);
                 content.parse::<Expr>()?;
-                let verbatim = verbatim::between(begin, input);
+                let verbatim = verbatim::between(&begin, input);
                 return Ok(Expr::Verbatim(verbatim));
             }
         }
