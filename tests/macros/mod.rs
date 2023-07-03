@@ -38,6 +38,7 @@ macro_rules! snapshot_impl {
         let $expr = crate::macros::Tokens::parse::<$t>($expr).unwrap();
         let debug = crate::macros::debug::Lite(&$expr);
         if !cfg!(miri) {
+            #[allow(clippy::needless_raw_string_hashes)]
             insta::assert_debug_snapshot!(debug, @$snapshot);
         }
     };
@@ -45,6 +46,7 @@ macro_rules! snapshot_impl {
         let syntax_tree = crate::macros::Tokens::parse::<$t>($($expr)*).unwrap();
         let debug = crate::macros::debug::Lite(&syntax_tree);
         if !cfg!(miri) {
+            #[allow(clippy::needless_raw_string_hashes)]
             insta::assert_debug_snapshot!(debug, @$snapshot);
         }
         syntax_tree
@@ -53,6 +55,7 @@ macro_rules! snapshot_impl {
         let syntax_tree = $($expr)*;
         let debug = crate::macros::debug::Lite(&syntax_tree);
         if !cfg!(miri) {
+            #[allow(clippy::needless_raw_string_hashes)]
             insta::assert_debug_snapshot!(debug, @$snapshot);
         }
         syntax_tree
