@@ -10,6 +10,6 @@ colored = "2"
 proc-macro2 = { version = "1", features = ["span-locations"] }
 
 [dependencies.syn]
-path = "../.."
 default-features = false
-features = ["parsing", "full", "extra-traits"]
+features = ["extra-traits", "full", "parsing"]
+path = "../.."

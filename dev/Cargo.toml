@@ -17,6 +17,6 @@ name = "syn-dev"
 quote = "1"
 
 [dependencies.syn]
-path = ".."
 default-features = false
-features = ["parsing", "full", "extra-traits", "proc-macro"]
+features = ["extra-traits", "full", "parsing", "proc-macro"]
+path = ".."

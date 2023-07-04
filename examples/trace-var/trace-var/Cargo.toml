@@ -11,4 +11,4 @@ proc-macro = true
 [dependencies]
 proc-macro2 = { version = "1", features = ["nightly"] }
 quote = "1"
-syn = { path = "../../../", features = ["full", "fold"] }
+syn = { path = "../../../", features = ["fold", "full"] }
