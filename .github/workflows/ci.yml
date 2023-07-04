@@ -118,7 +118,7 @@ jobs:
       - run: cargo run --manifest-path codegen/Cargo.toml
       - run: git diff --exit-code
 
-  msrv:
+  minimal:
     name: Minimal versions
     needs: pre_ci
     if: needs.pre_ci.outputs.continue
@@ -127,8 +127,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@nightly
-      - run: cargo update -Z minimal-versions
-      - run: cargo check --all-features
+      - run: cargo generate-lockfile -Z minimal-versions
+      - run: cargo check --all-features --locked
 
   fuzz:
     name: Fuzz
