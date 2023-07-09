@@ -697,6 +697,9 @@ pub(crate) mod printing {
                     #[cfg(feature = "full")]
                     Expr::Block(_) => expr.to_tokens(tokens),
 
+                    #[cfg(not(feature = "full"))]
+                    Expr::Verbatim(_) => expr.to_tokens(tokens),
+
                     // ERROR CORRECTION: Add braces to make sure that the
                     // generated code is valid.
                     _ => token::Brace::default().surround(tokens, |tokens| {
