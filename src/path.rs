@@ -368,7 +368,6 @@ pub(crate) mod parsing {
             return Ok(Expr::Lit(lit));
         }
 
-        #[cfg(feature = "full")]
         if input.peek(Ident) {
             let ident: Ident = input.parse()?;
             return Ok(Expr::Path(ExprPath {
@@ -693,6 +692,14 @@ pub(crate) mod printing {
                 GenericArgument::Type(ty) => ty.to_tokens(tokens),
                 GenericArgument::Const(expr) => match expr {
                     Expr::Lit(expr) => expr.to_tokens(tokens),
+
+                    Expr::Path(expr)
+                        if expr.attrs.is_empty()
+                            && expr.qself.is_none()
+                            && expr.path.get_ident().is_some() =>
+                    {
+                        expr.to_tokens(tokens);
+                    }
 
                     #[cfg(feature = "full")]
                     Expr::Block(expr) => expr.to_tokens(tokens),
