@@ -692,13 +692,13 @@ pub(crate) mod printing {
                 GenericArgument::Lifetime(lt) => lt.to_tokens(tokens),
                 GenericArgument::Type(ty) => ty.to_tokens(tokens),
                 GenericArgument::Const(expr) => match expr {
-                    Expr::Lit(_) => expr.to_tokens(tokens),
+                    Expr::Lit(expr) => expr.to_tokens(tokens),
 
                     #[cfg(feature = "full")]
-                    Expr::Block(_) => expr.to_tokens(tokens),
+                    Expr::Block(expr) => expr.to_tokens(tokens),
 
                     #[cfg(not(feature = "full"))]
-                    Expr::Verbatim(_) => expr.to_tokens(tokens),
+                    Expr::Verbatim(expr) => expr.to_tokens(tokens),
 
                     // ERROR CORRECTION: Add braces to make sure that the
                     // generated code is valid.
