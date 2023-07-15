@@ -53,8 +53,9 @@ impl Path {
     ///     }
     /// }
     /// ```
-    pub fn is_ident<I: ?Sized>(&self, ident: &I) -> bool
+    pub fn is_ident<I>(&self, ident: &I) -> bool
     where
+        I: ?Sized,
         Ident: PartialEq<I>,
     {
         match self.get_ident() {
