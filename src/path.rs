@@ -648,6 +648,10 @@ pub(crate) mod parsing {
 pub(crate) mod printing {
     use super::*;
     use crate::print::TokensOrDefault;
+    #[cfg(feature = "parsing")]
+    use crate::spanned::Spanned;
+    #[cfg(feature = "parsing")]
+    use proc_macro2::Span;
     use proc_macro2::TokenStream;
     use quote::ToTokens;
     use std::cmp;
@@ -834,6 +838,23 @@ pub(crate) mod printing {
         }
         for segment in segments {
             segment.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(doc_cfg, doc(cfg(all(feature = "parsing", feature = "printing"))))]
+    impl Spanned for QSelf {
+        fn span(&self) -> Span {
+            struct QSelfDelimiters<'a>(&'a QSelf);
+
+            impl<'a> ToTokens for QSelfDelimiters<'a> {
+                fn to_tokens(&self, tokens: &mut TokenStream) {
+                    self.0.lt_token.to_tokens(tokens);
+                    self.0.gt_token.to_tokens(tokens);
+                }
+            }
+
+            QSelfDelimiters(self).span()
         }
     }
 }
