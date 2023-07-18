@@ -93,7 +93,7 @@ use quote::spanned::Spanned as ToTokens;
 /// See the [module documentation] for an example.
 ///
 /// [module documentation]: self
-pub trait Spanned: private::Sealed {
+pub trait Spanned {
     /// Returns a `Span` covering the complete contents of this syntax tree
     /// node, or [`Span::call_site()`] if this node is empty.
     ///
