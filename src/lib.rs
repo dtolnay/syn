@@ -373,6 +373,7 @@ pub use crate::generics::{
 pub use crate::generics::{ImplGenerics, Turbofish, TypeGenerics};
 
 mod ident;
+#[doc(inline)]
 pub use crate::ident::Ident;
 
 #[cfg(feature = "full")]
@@ -388,9 +389,11 @@ pub use crate::item::{
 };
 
 mod lifetime;
+#[doc(inline)]
 pub use crate::lifetime::Lifetime;
 
 mod lit;
+#[doc(inline)]
 pub use crate::lit::{
     Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr, StrStyle,
 };
