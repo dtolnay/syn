@@ -69,7 +69,7 @@ required-features = ["full", "parsing"]
 [package.metadata.docs.rs]
 all-features = true
 targets = ["x86_64-unknown-linux-gnu"]
-rustdoc-args = ["--cfg", "doc_cfg"]
+rustdoc-args = ["--cfg", "doc_cfg", "--generate-link-to-definition"]
 
 [package.metadata.playground]
 features = ["full", "visit", "visit-mut", "fold", "extra-traits"]
