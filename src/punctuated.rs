@@ -447,19 +447,13 @@ where
 
         if let Some(first_value) = i.next() {
             if self.last.is_some() {
-                // Safety: `last` being `Some` is the if-condition.
-                unsafe {
-                    extending_push_and_replace_last(self, first_value, &i);
-                }
+                extending_push_and_replace_last(self, first_value, &i);
             } else {
                 self.last = Some(Box::new(first_value));
             }
 
             while let Some(value) = i.next() {
-                // Safety: The else-block above sets `last` to the first value if it is `None`.
-                unsafe {
-                    extending_push_and_replace_last(self, value, &i);
-                }
+                extending_push_and_replace_last(self, value, &i);
             }
         }
     }
@@ -491,7 +485,9 @@ where
     }
 }
 
-/// Push a pair bypassing last while reserving capacity for it and the next items in the iterators.
+/// Push a pair while reserving capacity for it and the next items in the iterators.
+///
+/// Assumes that `last` is `None`.
 fn extending_push<T, P, I>(punctuated: &mut Punctuated<T, P>, pair: (T, P), i: &I)
 where
     I: Iterator,
@@ -514,14 +510,11 @@ where
 // Push `last` and replace it with `item` while reserving enough capacity
 // for the pushed `last` and the next items in the iterator.
 //
-// # Safety:
+// # Panics
 // This function assumes that `last` is `Some`.
-// Calling it with `last` being `None` is undefined behavior.
-unsafe fn extending_push_and_replace_last<T, P, I>(
-    punctuated: &mut Punctuated<T, P>,
-    item: T,
-    i: &I,
-) where
+// Calling it with `last` being `None` causes a panic.
+fn extending_push_and_replace_last<T, P, I>(punctuated: &mut Punctuated<T, P>, item: T, i: &I)
+where
     I: Iterator,
     P: Default,
 {
