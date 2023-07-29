@@ -457,7 +457,7 @@ spanless_eq_struct!(BareFnTy; unsafety ext generic_params decl decl_span);
 spanless_eq_struct!(BindingAnnotation; 0 1);
 spanless_eq_struct!(Block; stmts id rules span tokens could_be_bare_literal);
 spanless_eq_struct!(Closure; binder capture_clause constness asyncness movability fn_decl body !fn_decl_span !fn_arg_span);
-spanless_eq_struct!(ConstItem; defaultness ty expr);
+spanless_eq_struct!(ConstItem; defaultness generics ty expr);
 spanless_eq_struct!(Crate; attrs items spans id is_placeholder);
 spanless_eq_struct!(DelimArgs; dspan delim tokens);
 spanless_eq_struct!(EnumDef; variants);
