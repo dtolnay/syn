@@ -1663,7 +1663,7 @@ pub(crate) mod parsing {
             }
             Ok(expr)
         } else {
-            Err(input.error("expected expression"))
+            Err(input.error("expected an expression"))
         }
     }
 
