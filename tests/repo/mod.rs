@@ -17,16 +17,6 @@ const REVISION: &str = "9f5fc1bd443f59583e7af0d94d289f95fe1e20c4";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: generic const items
-    // https://github.com/dtolnay/syn/issues/1497
-    "tests/rustdoc/generic-const-items.rs",
-    "tests/rustdoc/inline_cross/auxiliary/generic-const-items.rs",
-    "tests/ui/generic-const-items/associated-const-equality.rs",
-    "tests/ui/generic-const-items/basic.rs",
-    "tests/ui/generic-const-items/recursive.rs",
-    "tests/ui/object-safety/assoc_const_bounds.rs",
-    "tests/ui/object-safety/assoc_const_bounds_sized.rs",
-
     // CStr literals (c"…") are not yet supported by rustc's lexer
     // https://github.com/rust-lang/rust/issues/113333
     "src/tools/clippy/tests/ui/needless_raw_string_hashes.rs",
