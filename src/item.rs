@@ -988,15 +988,15 @@ pub(crate) mod parsing {
             let mut generics: Generics = input.parse()?;
             let colon_token = input.parse()?;
             let ty = input.parse()?;
-            if input.peek(Token![;]) {
-                input.parse::<Option<WhereClause>>()?;
-                input.parse::<Token![;]>()?;
-                Ok(Item::Verbatim(verbatim::between(&begin, input)))
-            } else {
-                let eq_token: Token![=] = input.parse()?;
+            let value = if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
                 let expr: Expr = input.parse()?;
-                generics.where_clause = input.parse()?;
-                let semi_token: Token![;] = input.parse()?;
+                Some((eq_token, expr))
+            } else {
+                None
+            };
+            generics.where_clause = input.parse()?;
+            let semi_token: Token![;] = input.parse()?;
+            if let Some((eq_token, expr)) = value {
                 Ok(Item::Const(ItemConst {
                     attrs: Vec::new(),
                     vis,
@@ -1009,6 +1009,8 @@ pub(crate) mod parsing {
                     expr: Box::new(expr),
                     semi_token,
                 }))
+            } else {
+                Ok(Item::Verbatim(verbatim::between(&begin, input)))
             }
         } else if lookahead.peek(Token![unsafe]) {
             ahead.parse::<Token![unsafe]>()?;
@@ -2579,11 +2581,16 @@ pub(crate) mod parsing {
                 let mut generics: Generics = input.parse()?;
                 let colon_token: Token![:] = input.parse()?;
                 let ty: Type = input.parse()?;
-                if let Some(eq_token) = input.parse()? {
+                let value = if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
                     let expr: Expr = input.parse()?;
-                    generics.where_clause = input.parse()?;
-                    let semi_token: Token![;] = input.parse()?;
-                    return Ok(ImplItem::Const(ImplItemConst {
+                    Some((eq_token, expr))
+                } else {
+                    None
+                };
+                generics.where_clause = input.parse()?;
+                let semi_token: Token![;] = input.parse()?;
+                return if let Some((eq_token, expr)) = value {
+                    Ok(ImplItem::Const(ImplItemConst {
                         attrs,
                         vis,
                         defaultness,
@@ -2595,12 +2602,10 @@ pub(crate) mod parsing {
                         eq_token,
                         expr,
                         semi_token,
-                    }));
+                    }))
                 } else {
-                    input.parse::<Option<WhereClause>>()?;
-                    input.parse::<Token![;]>()?;
-                    return Ok(ImplItem::Verbatim(verbatim::between(&begin, input)));
-                }
+                    Ok(ImplItem::Verbatim(verbatim::between(&begin, input)))
+                };
             } else if lookahead.peek(Token![type]) {
                 parse_impl_item_type(begin, input)
             } else if vis.is_inherited()
