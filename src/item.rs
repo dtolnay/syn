@@ -996,21 +996,24 @@ pub(crate) mod parsing {
             };
             generics.where_clause = input.parse()?;
             let semi_token: Token![;] = input.parse()?;
-            if let Some((eq_token, expr)) = value {
-                Ok(Item::Const(ItemConst {
-                    attrs: Vec::new(),
-                    vis,
-                    const_token,
-                    ident,
-                    generics,
-                    colon_token,
-                    ty,
-                    eq_token,
-                    expr: Box::new(expr),
-                    semi_token,
-                }))
-            } else {
-                Ok(Item::Verbatim(verbatim::between(&begin, input)))
+            match value {
+                Some((eq_token, expr))
+                    if generics.lt_token.is_none() && generics.where_clause.is_none() =>
+                {
+                    Ok(Item::Const(ItemConst {
+                        attrs: Vec::new(),
+                        vis,
+                        const_token,
+                        ident,
+                        generics,
+                        colon_token,
+                        ty,
+                        eq_token,
+                        expr: Box::new(expr),
+                        semi_token,
+                    }))
+                }
+                _ => Ok(Item::Verbatim(verbatim::between(&begin, input))),
             }
         } else if lookahead.peek(Token![unsafe]) {
             ahead.parse::<Token![unsafe]>()?;
@@ -1419,12 +1422,10 @@ pub(crate) mod parsing {
                 return Err(lookahead.error());
             };
 
-            let mut generics: Generics = input.parse()?;
             let colon_token: Token![:] = input.parse()?;
             let ty: Type = input.parse()?;
             let eq_token: Token![=] = input.parse()?;
             let expr: Expr = input.parse()?;
-            generics.where_clause = input.parse()?;
             let semi_token: Token![;] = input.parse()?;
 
             Ok(ItemConst {
@@ -1432,7 +1433,7 @@ pub(crate) mod parsing {
                 vis,
                 const_token,
                 ident,
-                generics,
+                generics: Generics::default(),
                 colon_token,
                 ty: Box::new(ty),
                 eq_token,
@@ -2244,10 +2245,36 @@ pub(crate) mod parsing {
             let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead) {
                 input.parse().map(TraitItem::Fn)
             } else if lookahead.peek(Token![const]) {
-                ahead.parse::<Token![const]>()?;
+                let const_token: Token![const] = ahead.parse()?;
                 let lookahead = ahead.lookahead1();
                 if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
-                    input.parse().map(TraitItem::Const)
+                    input.advance_to(&ahead);
+                    let ident = input.call(Ident::parse_any)?;
+                    let mut generics: Generics = input.parse()?;
+                    let colon_token: Token![:] = input.parse()?;
+                    let ty: Type = input.parse()?;
+                    let default = if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
+                        let expr: Expr = input.parse()?;
+                        Some((eq_token, expr))
+                    } else {
+                        None
+                    };
+                    generics.where_clause = input.parse()?;
+                    let semi_token: Token![;] = input.parse()?;
+                    if generics.lt_token.is_none() && generics.where_clause.is_none() {
+                        Ok(TraitItem::Const(TraitItemConst {
+                            attrs: Vec::new(),
+                            const_token,
+                            ident,
+                            generics,
+                            colon_token,
+                            ty,
+                            default,
+                            semi_token,
+                        }))
+                    } else {
+                        return Ok(TraitItem::Verbatim(verbatim::between(&begin, input)));
+                    }
                 } else if lookahead.peek(Token![async])
                     || lookahead.peek(Token![unsafe])
                     || lookahead.peek(Token![extern])
@@ -2303,7 +2330,6 @@ pub(crate) mod parsing {
                 return Err(lookahead.error());
             };
 
-            let mut generics: Generics = input.parse()?;
             let colon_token: Token![:] = input.parse()?;
             let ty: Type = input.parse()?;
             let default = if input.peek(Token![=]) {
@@ -2313,14 +2339,13 @@ pub(crate) mod parsing {
             } else {
                 None
             };
-            generics.where_clause = input.parse()?;
             let semi_token: Token![;] = input.parse()?;
 
             Ok(TraitItemConst {
                 attrs,
                 const_token,
                 ident,
-                generics,
+                generics: Generics::default(),
                 colon_token,
                 ty,
                 default,
@@ -2589,22 +2614,25 @@ pub(crate) mod parsing {
                 };
                 generics.where_clause = input.parse()?;
                 let semi_token: Token![;] = input.parse()?;
-                return if let Some((eq_token, expr)) = value {
-                    Ok(ImplItem::Const(ImplItemConst {
-                        attrs,
-                        vis,
-                        defaultness,
-                        const_token,
-                        ident,
-                        generics,
-                        colon_token,
-                        ty,
-                        eq_token,
-                        expr,
-                        semi_token,
-                    }))
-                } else {
-                    Ok(ImplItem::Verbatim(verbatim::between(&begin, input)))
+                return match value {
+                    Some((eq_token, expr))
+                        if generics.lt_token.is_none() && generics.where_clause.is_none() =>
+                    {
+                        Ok(ImplItem::Const(ImplItemConst {
+                            attrs,
+                            vis,
+                            defaultness,
+                            const_token,
+                            ident,
+                            generics,
+                            colon_token,
+                            ty,
+                            eq_token,
+                            expr,
+                            semi_token,
+                        }))
+                    }
+                    _ => Ok(ImplItem::Verbatim(verbatim::between(&begin, input))),
                 };
             } else if lookahead.peek(Token![type]) {
                 parse_impl_item_type(begin, input)
@@ -2652,12 +2680,10 @@ pub(crate) mod parsing {
                 return Err(lookahead.error());
             };
 
-            let mut generics: Generics = input.parse()?;
             let colon_token: Token![:] = input.parse()?;
             let ty: Type = input.parse()?;
             let eq_token: Token![=] = input.parse()?;
             let expr: Expr = input.parse()?;
-            generics.where_clause = input.parse()?;
             let semi_token: Token![;] = input.parse()?;
 
             Ok(ImplItemConst {
@@ -2666,7 +2692,7 @@ pub(crate) mod parsing {
                 defaultness,
                 const_token,
                 ident,
-                generics,
+                generics: Generics::default(),
                 colon_token,
                 ty,
                 eq_token,
@@ -2883,12 +2909,10 @@ mod printing {
             self.vis.to_tokens(tokens);
             self.const_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            self.generics.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
-            self.generics.where_clause.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }
@@ -3135,14 +3159,12 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.const_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            self.generics.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
             if let Some((eq_token, default)) = &self.default {
                 eq_token.to_tokens(tokens);
                 default.to_tokens(tokens);
             }
-            self.generics.where_clause.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }
@@ -3203,12 +3225,10 @@ mod printing {
             self.defaultness.to_tokens(tokens);
             self.const_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
-            self.generics.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
-            self.generics.where_clause.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }

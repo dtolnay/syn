@@ -30,6 +30,7 @@ extern crate rustc_ast_pretty;
 extern crate rustc_data_structures;
 extern crate rustc_driver;
 extern crate rustc_span;
+extern crate smallvec;
 extern crate thin_vec;
 
 use crate::common::eq::SpanlessEq;
@@ -168,15 +169,17 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// This method operates on librustc objects.
 fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_ast::ast::{
-        Attribute, BinOpKind, Block, BorrowKind, Expr, ExprField, ExprKind, GenericArg,
-        GenericBound, Local, LocalKind, Pat, Stmt, StmtKind, StructExpr, StructRest,
-        TraitBoundModifier, Ty,
+        AssocItem, AssocItemKind, Attribute, BinOpKind, Block, BorrowKind, Expr, ExprField,
+        ExprKind, GenericArg, GenericBound, ItemKind, Local, LocalKind, Pat, Stmt, StmtKind,
+        StructExpr, StructRest, TraitBoundModifier, Ty,
     };
     use rustc_ast::mut_visit::{
-        noop_visit_generic_arg, noop_visit_local, noop_visit_param_bound, MutVisitor,
+        noop_flat_map_assoc_item, noop_visit_generic_arg, noop_visit_item_kind, noop_visit_local,
+        noop_visit_param_bound, MutVisitor,
     };
     use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
     use rustc_span::DUMMY_SP;
+    use smallvec::SmallVec;
     use std::mem;
     use std::ops::DerefMut;
     use thin_vec::ThinVec;
@@ -297,6 +300,39 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
             match local.kind {
                 LocalKind::InitElse(..) => {}
                 _ => noop_visit_local(local, self),
+            }
+        }
+
+        fn visit_item_kind(&mut self, item: &mut ItemKind) {
+            match item {
+                ItemKind::Const(const_item)
+                    if !const_item.generics.params.is_empty()
+                        || !const_item.generics.where_clause.predicates.is_empty() => {}
+                _ => noop_visit_item_kind(item, self),
+            }
+        }
+
+        fn flat_map_trait_item(&mut self, item: P<AssocItem>) -> SmallVec<[P<AssocItem>; 1]> {
+            match &item.kind {
+                AssocItemKind::Const(const_item)
+                    if !const_item.generics.params.is_empty()
+                        || !const_item.generics.where_clause.predicates.is_empty() =>
+                {
+                    SmallVec::from([item])
+                }
+                _ => noop_flat_map_assoc_item(item, self),
+            }
+        }
+
+        fn flat_map_impl_item(&mut self, item: P<AssocItem>) -> SmallVec<[P<AssocItem>; 1]> {
+            match &item.kind {
+                AssocItemKind::Const(const_item)
+                    if !const_item.generics.params.is_empty()
+                        || !const_item.generics.where_clause.predicates.is_empty() =>
+                {
+                    SmallVec::from([item])
+                }
+                _ => noop_flat_map_assoc_item(item, self),
             }
         }
 
