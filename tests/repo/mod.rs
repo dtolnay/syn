@@ -21,7 +21,6 @@ static EXCLUDE_FILES: &[&str] = &[
     // https://github.com/rust-lang/rust/issues/113333
     "src/tools/clippy/tests/ui/needless_raw_string_hashes.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0085_expr_literals.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0085_expr_literals.rs",
     "tests/ui/explicit-tail-calls/return-lifetime-sub.rs",
 
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
@@ -287,21 +286,38 @@ pub fn clone_rust() {
     if needs_clone {
         download_and_unpack().unwrap();
     }
+
     let mut missing = String::new();
     let test_src = Path::new("tests/rust");
+
+    let mut exclude_files_set = BTreeSet::new();
     for exclude in EXCLUDE_FILES {
+        if !exclude_files_set.insert(exclude) {
+            panic!("duplicate path in EXCLUDE_FILES: {}", exclude);
+        }
+        for dir in EXCLUDE_DIRS {
+            if Path::new(exclude).starts_with(dir) {
+                panic!("excluded file {} is inside an excluded dir", exclude);
+            }
+        }
         if !test_src.join(exclude).is_file() {
             missing += "\ntests/rust/";
             missing += exclude;
         }
     }
+
+    let mut exclude_dirs_set = BTreeSet::new();
     for exclude in EXCLUDE_DIRS {
+        if !exclude_dirs_set.insert(exclude) {
+            panic!("duplicate path in EXCLUDE_DIRS: {}", exclude);
+        }
         if !test_src.join(exclude).is_dir() {
             missing += "\ntests/rust/";
             missing += exclude;
             missing += "/";
         }
     }
+
     if !missing.is_empty() {
         panic!("excluded test file does not exist:{}\n", missing);
     }
