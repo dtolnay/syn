@@ -17,9 +17,8 @@ const REVISION: &str = "9f5fc1bd443f59583e7af0d94d289f95fe1e20c4";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // CStr literals (c"…") are not yet supported by rustc's lexer
-    // https://github.com/rust-lang/rust/issues/113333
-    "src/tools/clippy/tests/ui/needless_raw_string_hashes.rs",
+    // TODO: CStr literals: c"…", cr"…"
+    // https://github.com/dtolnay/syn/issues/1502
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0085_expr_literals.rs",
 
     // TODO: explicit tail calls: `become _g()`
