@@ -21,6 +21,9 @@ static EXCLUDE_FILES: &[&str] = &[
     // https://github.com/rust-lang/rust/issues/113333
     "src/tools/clippy/tests/ui/needless_raw_string_hashes.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0085_expr_literals.rs",
+
+    // TODO: explicit tail calls: `become _g()`
+    // https://github.com/dtolnay/syn/issues/1501
     "tests/ui/explicit-tail-calls/return-lifetime-sub.rs",
 
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
