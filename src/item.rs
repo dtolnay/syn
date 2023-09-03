@@ -2877,10 +2877,12 @@ mod printing {
             self.vis.to_tokens(tokens);
             self.const_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }
@@ -3127,12 +3129,14 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.const_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
             if let Some((eq_token, default)) = &self.default {
                 eq_token.to_tokens(tokens);
                 default.to_tokens(tokens);
             }
+            self.generics.where_clause.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }
@@ -3193,10 +3197,12 @@ mod printing {
             self.defaultness.to_tokens(tokens);
             self.const_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
             self.expr.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
         }
     }
