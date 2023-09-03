@@ -295,6 +295,11 @@ pub fn clone_rust() {
         if !exclude_files_set.insert(exclude) {
             panic!("duplicate path in EXCLUDE_FILES: {}", exclude);
         }
+        for dir in EXCLUDE_DIRS {
+            if Path::new(exclude).starts_with(dir) {
+                panic!("excluded file {} is inside an excluded dir", exclude);
+            }
+        }
         if !test_src.join(exclude).is_file() {
             missing += "\ntests/rust/";
             missing += exclude;
