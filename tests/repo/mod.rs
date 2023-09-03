@@ -13,10 +13,20 @@ use std::path::{Path, PathBuf};
 use tar::Archive;
 use walkdir::{DirEntry, WalkDir};
 
-const REVISION: &str = "85bf07972a1041b9e25393b803d0e006bec3eaaf";
+const REVISION: &str = "9f5fc1bd443f59583e7af0d94d289f95fe1e20c4";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
+    // TODO
+    "src/tools/rustfmt/tests/target/anonymous-types.rs",
+    "tests/rustdoc/generic-const-items.rs",
+    "tests/rustdoc/inline_cross/auxiliary/generic-const-items.rs",
+    "tests/ui/generic-const-items/associated-const-equality.rs",
+    "tests/ui/generic-const-items/basic.rs",
+    "tests/ui/generic-const-items/recursive.rs",
+    "tests/ui/object-safety/assoc_const_bounds.rs",
+    "tests/ui/object-safety/assoc_const_bounds_sized.rs",
+
     // CStr literals (c"…") are not yet supported by rustc's lexer
     // https://github.com/rust-lang/rust/issues/113333
     "src/tools/clippy/tests/ui/needless_raw_string_hashes.rs",
@@ -115,7 +125,6 @@ static EXCLUDE_FILES: &[&str] = &[
 
     // Various extensions to Rust syntax made up by rust-analyzer
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0012_type_item_where_clause.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0040_crate_keyword_vis.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0058_range_pat.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0123_param_list_vararg.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0131_existential_type.rs",
