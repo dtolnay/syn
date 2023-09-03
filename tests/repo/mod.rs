@@ -17,10 +17,6 @@ const REVISION: &str = "9f5fc1bd443f59583e7af0d94d289f95fe1e20c4";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: anonymous union and struct
-    // https://github.com/dtolnay/syn/issues/1049
-    "src/tools/rustfmt/tests/target/anonymous-types.rs",
-
     // TODO: generic const items
     // https://github.com/dtolnay/syn/issues/1497
     "tests/rustdoc/generic-const-items.rs",
