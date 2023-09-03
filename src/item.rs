@@ -989,6 +989,7 @@ pub(crate) mod parsing {
             let colon_token = input.parse()?;
             let ty = input.parse()?;
             if input.peek(Token![;]) {
+                input.parse::<Option<WhereClause>>()?;
                 input.parse::<Token![;]>()?;
                 Ok(Item::Verbatim(verbatim::between(&begin, input)))
             } else {
