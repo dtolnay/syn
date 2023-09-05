@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: llvm-tools, rustc-dev
@@ -54,7 +54,7 @@ jobs:
       target: ${{matrix.target && format('--target={0}', matrix.target)}}
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
       - run: cargo check --manifest-path examples/dump-syntax/Cargo.toml
       - run: cargo check --manifest-path examples/heapsize/example/Cargo.toml
@@ -101,7 +101,7 @@ jobs:
       RUSTDOCFLAGS: --cfg=doc_cfg -Dbroken_intra_doc_links
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
       - run: cargo test --all-features --doc
       - run: cargo doc --all-features
@@ -113,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo run --manifest-path codegen/Cargo.toml
       - run: git diff --exit-code
@@ -125,7 +125,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
       - run: cargo generate-lockfile -Z minimal-versions
       - run: cargo check --all-features --locked
@@ -137,7 +137,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
       - uses: dtolnay/install@cargo-fuzz
       - run: cargo fuzz check
@@ -149,7 +149,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@miri
       - run: cargo miri setup
       - run: cargo miri test --all-features
@@ -162,7 +162,7 @@ jobs:
     if: github.event_name != 'pull_request'
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: clippy,rustc-dev
@@ -175,7 +175,7 @@ jobs:
     if: github.event_name != 'pull_request'
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/install@cargo-outdated
       - run: cargo outdated --workspace --exit-code 1
       - run: cargo outdated --manifest-path fuzz/Cargo.toml --exit-code 1
