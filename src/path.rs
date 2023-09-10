@@ -83,14 +83,7 @@ impl Path {
         }
     }
 
-    /// Error if this does not contain only one segment.
-    ///
-    /// A path is considered an ident if:
-    ///
-    /// - the path has no leading colon,
-    /// - the number of path segments is 1, and
-    /// - the first path segment has no angle bracketed or parenthesized
-    ///   path arguments.
+    /// An error if this path is not a single ident, as defined in `get_ident`.
     #[cfg(feature = "parsing")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     pub fn require_ident(&self) -> Result<&Ident> {
