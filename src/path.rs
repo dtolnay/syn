@@ -82,6 +82,26 @@ impl Path {
             None
         }
     }
+
+    /// Error if this does not contain only one segment.
+    ///
+    /// A path is considered an ident if:
+    ///
+    /// - the path has no leading colon,
+    /// - the number of path segments is 1, and
+    /// - the first path segment has no angle bracketed or parenthesized
+    ///   path arguments.
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    pub fn require_ident(&self) -> Result<&Ident> {
+        self.get_ident().ok_or_else(|| {
+            crate::error::new2(
+                self.segments.first().unwrap().ident.span(),
+                self.segments.last().unwrap().ident.span(),
+                "expected this path to be an identifier",
+            )
+        })
+    }
 }
 
 ast_struct! {
