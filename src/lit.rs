@@ -1089,6 +1089,7 @@ mod value {
                 // c"...", cr"...", cr#"..."#
                 // TODO: add a Lit::CStr variant?
                 b'c' => return Lit::Verbatim(token),
+                b'(' if repr == "(/*ERROR*/)" => return Lit::Verbatim(token),
                 _ => {}
             }
 
