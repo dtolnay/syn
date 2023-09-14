@@ -840,9 +840,25 @@ define_delimiters! {
 /// A type-macro that expands to the name of the Rust type representation of a
 /// given token.
 ///
-/// See the [token module] documentation for details and examples.
+/// It can expand to the token type and be used to construct a token from a [`Span`]:
+/// ```
+/// # use syn::{Token};
+/// use proc_macro2::Span;
+///
+/// let fn_token: Token![fn] = Token![fn](Span::call_site());
+/// ```
+/// It can be used with [`ParseBuffer::peek`]:
+/// ```
+/// # use syn::{Token, parse::ParseStream};
+/// # fn parser(input: ParseStream) {
+/// input.peek(Token![<<]);
+/// # }
+/// ```
+///
+/// See the [token module] documentation for details and more examples.
 ///
 /// [token module]: crate::token
+/// [`ParseBuffer::peek`]: crate::parse::ParseBuffer::peek
 #[macro_export]
 macro_rules! Token {
     [abstract]    => { $crate::token::Abstract };
