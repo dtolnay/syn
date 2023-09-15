@@ -376,6 +376,14 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
 
     struct ParenthesizeEveryExpr;
 
+    fn parenthesize(expr: Expr) -> Expr {
+        Expr::Paren(ExprParen {
+            attrs: Vec::new(),
+            expr: Box::new(expr),
+            paren_token: token::Paren::default(),
+        })
+    }
+
     fn needs_paren(expr: &Expr) -> bool {
         match expr {
             Expr::Group(_) => unreachable!(),
@@ -399,11 +407,7 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
     impl Fold for ParenthesizeEveryExpr {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
             if needs_paren(&expr) {
-                Expr::Paren(ExprParen {
-                    attrs: Vec::new(),
-                    expr: Box::new(fold_expr(self, expr)),
-                    paren_token: token::Paren::default(),
-                })
+                parenthesize(fold_expr(self, expr))
             } else {
                 fold_expr(self, expr)
             }
