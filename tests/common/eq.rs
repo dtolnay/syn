@@ -156,7 +156,7 @@ use rustc_ast::tokenstream::{
 use rustc_data_structures::sync::Lrc;
 use rustc_span::source_map::Spanned;
 use rustc_span::symbol::{sym, Ident};
-use rustc_span::{Span, Symbol, SyntaxContext, DUMMY_SP};
+use rustc_span::{ErrorGuaranteed, Span, Symbol, SyntaxContext, DUMMY_SP};
 use std::collections::HashMap;
 use std::hash::{BuildHasher, Hash};
 use thin_vec::ThinVec;
@@ -296,6 +296,7 @@ spanless_eq_partial_eq!(CommentKind);
 spanless_eq_partial_eq!(Delimiter);
 spanless_eq_partial_eq!(InlineAsmOptions);
 spanless_eq_partial_eq!(token::LitKind);
+spanless_eq_partial_eq!(ErrorGuaranteed);
 
 macro_rules! spanless_eq_struct {
     {
@@ -579,7 +580,7 @@ spanless_eq_enum!(VariantData; Struct(0 1) Tuple(0 1) Unit(0));
 spanless_eq_enum!(VisibilityKind; Public Restricted(path id shorthand) Inherited);
 spanless_eq_enum!(WherePredicate; BoundPredicate(0) RegionPredicate(0) EqPredicate(0));
 spanless_eq_enum!(ExprKind; Array(0) ConstBlock(0) Call(0 1) MethodCall(0)
-    Tup(0) Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1) Type(0 1) Let(0 1 2)
+    Tup(0) Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1) Type(0 1) Let(0 1 2 3)
     If(0 1 2) While(0 1 2) ForLoop(0 1 2 3) Loop(0 1 2) Match(0 1) Closure(0)
     Block(0 1) Async(0 1) Await(0 1) TryBlock(0) Assign(0 1 2) AssignOp(0 1 2)
     Field(0 1) Index(0 1 2) Underscore Range(0 1 2) Path(0 1) AddrOf(0 1 2)
