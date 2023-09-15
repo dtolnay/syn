@@ -840,25 +840,70 @@ define_delimiters! {
 /// A type-macro that expands to the name of the Rust type representation of a
 /// given token.
 ///
-/// It can expand to the token type and be used to construct a token from a [`Span`]:
-/// ```
-/// # use syn::{Token};
-/// use proc_macro2::Span;
+/// As a type, `Token!` is commonly used in the type of struct fields, the type
+/// of a `let` statement, or in turbofish for a `parse` function.
 ///
-/// let fn_token: Token![fn] = Token![fn](Span::call_site());
 /// ```
-/// It can be used with [`ParseBuffer::peek`]:
+/// use syn::{Ident, Token};
+/// use syn::parse::{Parse, ParseStream, Result};
+///
+/// // `struct Foo;`
+/// pub struct UnitStruct {
+///     struct_token: Token![struct],
+///     ident: Ident,
+///     semi_token: Token![;],
+/// }
+///
+/// impl Parse for UnitStruct {
+///     fn parse(input: ParseStream) -> Result<Self> {
+///         let struct_token: Token![struct] = input.parse()?;
+///         let ident: Ident = input.parse()?;
+///         let semi_token = input.parse::<Token![;]>()?;
+///         Ok(UnitStruct { struct_token, ident, semi_token })
+///     }
+/// }
 /// ```
-/// # use syn::{Token, parse::ParseStream};
-/// # fn parser(input: ParseStream) {
-/// input.peek(Token![<<]);
+///
+/// As an expression, `Token!` is used for peeking tokens or instantiating
+/// tokens from a span.
+///
+/// ```
+/// # use syn::{Ident, Token};
+/// # use syn::parse::{Parse, ParseStream, Result};
+/// #
+/// # struct UnitStruct {
+/// #     struct_token: Token![struct],
+/// #     ident: Ident,
+/// #     semi_token: Token![;],
+/// # }
+/// #
+/// # impl Parse for UnitStruct {
+/// #     fn parse(input: ParseStream) -> Result<Self> {
+/// #         unimplemented!()
+/// #     }
+/// # }
+/// #
+/// fn make_unit_struct(name: Ident) -> UnitStruct {
+///     let span = name.span();
+///     UnitStruct {
+///         struct_token: Token![struct](span),
+///         ident: name,
+///         semi_token: Token![;](span),
+///     }
+/// }
+///
+/// # fn parse(input: ParseStream) -> Result<()> {
+/// if input.peek(Token![struct]) {
+///     let unit_struct: UnitStruct = input.parse()?;
+///     /* ... */
+/// }
+/// # Ok(())
 /// # }
 /// ```
 ///
-/// See the [token module] documentation for details and more examples.
+/// See the [token module] documentation for details and examples.
 ///
 /// [token module]: crate::token
-/// [`ParseBuffer::peek`]: crate::parse::ParseBuffer::peek
 #[macro_export]
 macro_rules! Token {
     [abstract]    => { $crate::token::Abstract };
