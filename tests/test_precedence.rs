@@ -406,10 +406,12 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
 
     impl Fold for ParenthesizeEveryExpr {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
-            if needs_paren(&expr) {
-                parenthesize(fold_expr(self, expr))
+            let needs_paren = needs_paren(&expr);
+            let folded = fold_expr(self, expr);
+            if needs_paren {
+                parenthesize(folded)
             } else {
-                fold_expr(self, expr)
+                folded
             }
         }
 
