@@ -188,6 +188,17 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
         failed: bool,
     }
 
+    fn contains_let_chain(expr: &Expr) -> bool {
+        match &expr.kind {
+            ExprKind::Let(..) => true,
+            ExprKind::Binary(binop, left, right) => {
+                binop.node == BinOpKind::And
+                    && (contains_let_chain(left) || contains_let_chain(right))
+            }
+            _ => false,
+        }
+    }
+
     fn flat_map_field<T: MutVisitor>(mut f: ExprField, vis: &mut T) -> Vec<ExprField> {
         if f.is_shorthand {
             noop_visit_expr(&mut f.expr, vis);
@@ -244,12 +255,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
             noop_visit_expr(e, self);
             match e.kind {
                 ExprKind::Block(..) | ExprKind::If(..) | ExprKind::Let(..) => {}
-                ExprKind::Binary(binop, ref left, ref right)
-                    if match (&left.kind, binop.node, &right.kind) {
-                        (ExprKind::Let(..), BinOpKind::And, _)
-                        | (_, BinOpKind::And, ExprKind::Let(..)) => true,
-                        _ => false,
-                    } => {}
+                ExprKind::Binary(..) if contains_let_chain(e) => {}
                 _ => {
                     let inner = mem::replace(
                         e,
@@ -374,11 +380,19 @@ fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
         match expr {
             Expr::Group(_) => unreachable!(),
             Expr::If(_) | Expr::Unsafe(_) | Expr::Block(_) | Expr::Let(_) => false,
-            Expr::Binary(bin) => match (&*bin.left, bin.op, &*bin.right) {
-                (Expr::Let(_), BinOp::And(_), _) | (_, BinOp::And(_), Expr::Let(_)) => false,
-                _ => true,
-            },
+            Expr::Binary(_) => !contains_let_chain(expr),
             _ => true,
+        }
+    }
+
+    fn contains_let_chain(expr: &Expr) -> bool {
+        match expr {
+            Expr::Let(_) => true,
+            Expr::Binary(expr) => {
+                matches!(expr.op, BinOp::And(_))
+                    && (contains_let_chain(&expr.left) || contains_let_chain(&expr.right))
+            }
+            _ => false,
         }
     }
 
