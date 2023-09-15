@@ -4,6 +4,7 @@ use crate::lookahead;
 pub use proc_macro2::Ident;
 
 #[cfg(feature = "parsing")]
+#[cfg(not(doc))] // Rustdoc bug: does not respect the doc(hidden)
 #[doc(hidden)]
 #[allow(non_snake_case)]
 pub fn Ident(marker: lookahead::TokenMarker) -> Ident {
