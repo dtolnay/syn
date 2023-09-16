@@ -758,11 +758,12 @@ macro_rules! lit_extra_traits {
         }
 
         #[cfg(feature = "parsing")]
-        #[cfg(not(doc))] // Rustdoc bug: does not respect the doc(hidden)
-        #[doc(hidden)]
-        #[allow(non_snake_case)]
-        pub fn $ty(marker: lookahead::TokenMarker) -> $ty {
-            match marker {}
+        pub_if_not_doc! {
+            #[doc(hidden)]
+            #[allow(non_snake_case)]
+            pub fn $ty(marker: lookahead::TokenMarker) -> $ty {
+                match marker {}
+            }
         }
     };
 }
@@ -775,11 +776,12 @@ lit_extra_traits!(LitInt);
 lit_extra_traits!(LitFloat);
 
 #[cfg(feature = "parsing")]
-#[cfg(not(doc))] // Rustdoc bug: does not respect the doc(hidden)
-#[doc(hidden)]
-#[allow(non_snake_case)]
-pub fn LitBool(marker: lookahead::TokenMarker) -> LitBool {
-    match marker {}
+pub_if_not_doc! {
+    #[doc(hidden)]
+    #[allow(non_snake_case)]
+    pub fn LitBool(marker: lookahead::TokenMarker) -> LitBool {
+        match marker {}
+    }
 }
 
 ast_enum! {
@@ -796,11 +798,12 @@ ast_enum! {
 }
 
 #[cfg(feature = "parsing")]
-#[cfg(not(doc))] // Rustdoc bug: does not respect the doc(hidden)
-#[doc(hidden)]
-#[allow(non_snake_case)]
-pub fn Lit(marker: lookahead::TokenMarker) -> Lit {
-    match marker {}
+pub_if_not_doc! {
+    #[doc(hidden)]
+    #[allow(non_snake_case)]
+    pub fn Lit(marker: lookahead::TokenMarker) -> Lit {
+        match marker {}
+    }
 }
 
 #[cfg(feature = "parsing")]

@@ -113,11 +113,12 @@ impl Hash for Lifetime {
 }
 
 #[cfg(feature = "parsing")]
-#[cfg(not(doc))] // Rustdoc bug: does not respect the doc(hidden)
-#[doc(hidden)]
-#[allow(non_snake_case)]
-pub fn Lifetime(marker: lookahead::TokenMarker) -> Lifetime {
-    match marker {}
+pub_if_not_doc! {
+    #[doc(hidden)]
+    #[allow(non_snake_case)]
+    pub fn Lifetime(marker: lookahead::TokenMarker) -> Lifetime {
+        match marker {}
+    }
 }
 
 #[cfg(feature = "parsing")]
