@@ -252,7 +252,6 @@
 #![doc(html_root_url = "https://docs.rs/syn/2.0.36")]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(non_camel_case_types)]
-#![allow(repr_transparent_external_private_fields)] // False positive: https://github.com/rust-lang/rust/issues/78586#issuecomment-1722680482
 #![allow(
     clippy::bool_to_int_with_if,
     clippy::cast_lossless,
