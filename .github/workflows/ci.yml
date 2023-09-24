@@ -92,19 +92,21 @@ jobs:
       - run: cargo check --manifest-path examples/lazy-static/example/Cargo.toml
       - run: cargo check --manifest-path examples/trace-var/example/Cargo.toml
 
-  docs:
-    name: Docs
+  doc:
+    name: Documentation
     needs: pre_ci
     if: needs.pre_ci.outputs.continue
     runs-on: ubuntu-latest
-    env:
-      RUSTDOCFLAGS: --cfg=doc_cfg -Dbroken_intra_doc_links
     timeout-minutes: 45
+    env:
+      RUSTDOCFLAGS: -Dwarnings
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/install@cargo-docs-rs
+      - run: cargo docs-rs
+      - run: cargo docs-rs --manifest-path json/Cargo.toml
       - run: cargo test --all-features --doc
-      - run: cargo doc --all-features
 
   codegen:
     name: Codegen
