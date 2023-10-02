@@ -20,7 +20,7 @@ fn lit(s: &str) -> Lit {
             assert!(tokens.next().is_none());
             Lit::new(lit)
         }
-        _ => panic!(),
+        wrong => panic!("{:?}", wrong),
     }
 }
 
