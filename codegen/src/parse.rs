@@ -143,11 +143,11 @@ fn introspect_type(item: &syn::Type, lookup: &Lookup) -> types::Type {
                 }
                 "Punctuated" => {
                     let nested = introspect_type(first_arg(&last.arguments), lookup);
-                    let punct = match introspect_type(last_arg(&last.arguments), lookup) {
-                        types::Type::Token(s) => s,
-                        _ => panic!(),
+                    let types::Type::Token(punct) =
+                        introspect_type(last_arg(&last.arguments), lookup)
+                    else {
+                        panic!()
                     };
-
                     types::Type::Punctuated(types::Punctuated {
                         element: Box::new(nested),
                         punct,
