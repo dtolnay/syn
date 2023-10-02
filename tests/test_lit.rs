@@ -1,6 +1,7 @@
 #![allow(
     clippy::float_cmp,
     clippy::non_ascii_literal,
+    clippy::single_match_else,
     clippy::uninlined_format_args
 )]
 
