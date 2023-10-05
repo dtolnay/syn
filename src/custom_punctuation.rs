@@ -114,7 +114,7 @@ macro_rules! custom_punctuation {
 macro_rules! impl_parse_for_custom_punctuation {
     ($ident:ident, $($tt:tt)+) => {
         impl $crate::token::CustomToken for $ident {
-            fn peek(cursor: $crate::buffer::Cursor) -> bool {
+            fn peek(cursor: $crate::buffer::Cursor) -> $crate::__private::bool {
                 $crate::__private::peek_punct(cursor, $crate::stringify_punct!($($tt)+))
             }
 
