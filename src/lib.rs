@@ -265,6 +265,7 @@
     clippy::explicit_auto_deref,
     clippy::if_not_else,
     clippy::inherent_to_string,
+    clippy::into_iter_without_iter,
     clippy::items_after_statements,
     clippy::large_enum_variant,
     clippy::let_underscore_untyped, // https://github.com/rust-lang/rust-clippy/issues/10410
