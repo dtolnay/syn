@@ -1552,7 +1552,7 @@ pub(crate) mod parsing {
                     member: input.parse()?,
                 });
             } else if input.peek(token::Bracket) {
-                let Brackets { token: bracket_token, content } = parse_braces(input)?;
+                let Brackets { token: bracket_token, content } = parse_brackets(input)?;
                 e = Expr::Index(ExprIndex {
                     attrs: Vec::new(),
                     expr: Box::new(e),
