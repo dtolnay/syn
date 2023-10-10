@@ -163,9 +163,9 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Block {
         fn parse(input: ParseStream) -> Result<Self> {
-            let content;
+            let Braces { token: brace_token, content } = parse_braces(input)?;
             Ok(Block {
-                brace_token: braced!(content in input),
+                brace_token,
                 stmts: content.call(Block::parse_within)?,
             })
         }

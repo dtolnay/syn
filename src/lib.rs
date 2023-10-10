@@ -306,6 +306,8 @@ mod macros;
 #[cfg(feature = "parsing")]
 #[macro_use]
 mod group;
+#[cfg(feature = "parsing")]
+pub use crate::group::{Parens, Braces, Brackets, parse_parens, parse_braces, parse_brackets};
 
 #[macro_use]
 pub mod token;

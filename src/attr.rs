@@ -628,21 +628,24 @@ pub(crate) mod parsing {
     }
 
     pub(crate) fn single_parse_inner(input: ParseStream) -> Result<Attribute> {
-        let content;
+        let pound_token = input.parse()?;
+        let style = AttrStyle::Inner(input.parse()?);
+        let Brackets { token: bracket_token, content } = parse_brackets(input)?;
         Ok(Attribute {
-            pound_token: input.parse()?,
-            style: AttrStyle::Inner(input.parse()?),
-            bracket_token: bracketed!(content in input),
+            pound_token,
+            style,
+            bracket_token,
             meta: content.parse()?,
         })
     }
 
     pub(crate) fn single_parse_outer(input: ParseStream) -> Result<Attribute> {
-        let content;
+        let pound_token = input.parse()?;
+        let Brackets { token: bracket_token, content } = parse_brackets(input)?;
         Ok(Attribute {
-            pound_token: input.parse()?,
+            pound_token,
             style: AttrStyle::Outer,
-            bracket_token: bracketed!(content in input),
+            bracket_token,
             meta: content.parse()?,
         })
     }

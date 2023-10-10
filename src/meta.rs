@@ -7,6 +7,7 @@ use crate::path::{Path, PathSegment};
 use crate::punctuated::Punctuated;
 use proc_macro2::Ident;
 use std::fmt::Display;
+use crate::group::{Parens, parse_parens};
 
 /// Make a parser that is usable with `parse_macro_input!` in a
 /// `#[proc_macro_attribute]` macro.
@@ -271,8 +272,7 @@ impl<'a> ParseNestedMeta<'a> {
         &self,
         logic: impl FnMut(ParseNestedMeta) -> Result<()>,
     ) -> Result<()> {
-        let content;
-        parenthesized!(content in self.input);
+        let Parens { token: _, content } = parse_parens(self.input)?;
         parse_nested_meta(&content, logic)
     }
 

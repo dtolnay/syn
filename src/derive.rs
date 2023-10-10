@@ -177,8 +177,7 @@ pub(crate) mod parsing {
     )> {
         let where_clause = input.parse()?;
 
-        let content;
-        let brace = braced!(content in input);
+        let Braces { token: brace, content } = parse_braces(input)?;
         let variants = content.parse_terminated(Variant::parse, Token![,])?;
 
         Ok((where_clause, brace, variants))

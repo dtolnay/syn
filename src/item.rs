@@ -891,6 +891,7 @@ ast_enum! {
 pub(crate) mod parsing {
     use super::*;
     use crate::ext::IdentExt;
+    use crate::group::{Parens, parse_parens};
     use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseBuffer, ParseStream, Result};
 
@@ -1224,15 +1225,13 @@ pub(crate) mod parsing {
 
         let mut lookahead = input.lookahead1();
         if lookahead.peek(token::Paren) {
-            let paren_content;
-            parenthesized!(paren_content in input);
+            let Parens { token: _, content: paren_content } = parse_parens(input)?;
             paren_content.parse::<TokenStream>()?;
             lookahead = input.lookahead1();
         }
 
         if lookahead.peek(token::Brace) {
-            let brace_content;
-            braced!(brace_content in input);
+            let Braces { token: _, content: brace_content } = parse_braces(input)?;
             brace_content.parse::<TokenStream>()?;
         } else {
             return Err(lookahead.error());
@@ -1356,8 +1355,7 @@ pub(crate) mod parsing {
                 star_token: input.parse()?,
             })))
         } else if lookahead.peek(token::Brace) {
-            let content;
-            let brace_token = braced!(content in input);
+            let Braces { token: brace_token, content } = parse_braces(input)?;
             let mut items = Punctuated::new();
             let mut has_any_crate_root_in_path = false;
             loop {
@@ -1463,8 +1461,7 @@ pub(crate) mod parsing {
             let ident: Ident = input.parse()?;
             let mut generics: Generics = input.parse()?;
 
-            let content;
-            let paren_token = parenthesized!(content in input);
+            let Parens { token: paren_token, content } = parse_parens(input)?;
             let (inputs, variadic) = parse_fn_args(&content)?;
 
             let output: ReturnType = input.parse()?;
@@ -1502,8 +1499,7 @@ pub(crate) mod parsing {
         vis: Visibility,
         sig: Signature,
     ) -> Result<ItemFn> {
-        let content;
-        let brace_token = braced!(content in input);
+        let Braces { token: brace_token, content } = parse_braces(input)?;
         attr::parsing::parse_inner(&content, &mut attrs)?;
         let stmts = content.call(Block::parse_within)?;
 
@@ -1721,8 +1717,7 @@ pub(crate) mod parsing {
                     semi: Some(input.parse()?),
                 })
             } else if lookahead.peek(token::Brace) {
-                let content;
-                let brace_token = braced!(content in input);
+                let Braces { token: brace_token, content } = parse_braces(input)?;
                 attr::parsing::parse_inner(&content, &mut attrs)?;
 
                 let mut items = Vec::new();
@@ -1752,8 +1747,7 @@ pub(crate) mod parsing {
             let unsafety: Option<Token![unsafe]> = input.parse()?;
             let abi: Abi = input.parse()?;
 
-            let content;
-            let brace_token = braced!(content in input);
+            let Braces { token: brace_token, content } = parse_braces(input)?;
             attr::parsing::parse_inner(&content, &mut attrs)?;
             let mut items = Vec::new();
             while !content.is_empty() {
@@ -1783,8 +1777,7 @@ pub(crate) mod parsing {
                 let vis: Visibility = input.parse()?;
                 let sig: Signature = input.parse()?;
                 if input.peek(token::Brace) {
-                    let content;
-                    braced!(content in input);
+                    let Braces { token: _, content } = parse_braces(input)?;
                     content.call(Attribute::parse_inner)?;
                     content.call(Block::parse_within)?;
 
@@ -2152,8 +2145,7 @@ pub(crate) mod parsing {
 
         generics.where_clause = input.parse()?;
 
-        let content;
-        let brace_token = braced!(content in input);
+        let Braces { token: brace_token, content } = parse_braces(input)?;
         attr::parsing::parse_inner(&content, &mut attrs)?;
         let mut items = Vec::new();
         while !content.is_empty() {
@@ -2362,8 +2354,7 @@ pub(crate) mod parsing {
 
             let lookahead = input.lookahead1();
             let (brace_token, stmts, semi_token) = if lookahead.peek(token::Brace) {
-                let content;
-                let brace_token = braced!(content in input);
+                let Braces { token: brace_token, content } = parse_braces(input)?;
                 attr::parsing::parse_inner(&content, &mut attrs)?;
                 let stmts = content.call(Block::parse_within)?;
                 (Some(brace_token), stmts, None)
@@ -2544,8 +2535,7 @@ pub(crate) mod parsing {
 
         generics.where_clause = input.parse()?;
 
-        let content;
-        let brace_token = braced!(content in input);
+        let Braces { token: brace_token, content } = parse_braces(input)?;
         attr::parsing::parse_inner(&content, &mut attrs)?;
 
         let mut items = Vec::new();
@@ -2726,8 +2716,7 @@ pub(crate) mod parsing {
             return Ok(None);
         }
 
-        let content;
-        let brace_token = braced!(content in input);
+        let Braces { token: brace_token, content } = parse_braces(input)?;
         attrs.extend(content.call(Attribute::parse_inner)?);
         let block = Block {
             brace_token,

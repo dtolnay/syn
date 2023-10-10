@@ -963,7 +963,7 @@ pub(crate) mod parsing {
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
     use std::cmp::Ordering;
-
+    use crate::group::{Parens, parse_parens};
     mod kw {
         crate::custom_keyword!(builtin);
         crate::custom_keyword!(raw);
@@ -1437,11 +1437,11 @@ pub(crate) mod parsing {
     fn trailer_helper(input: ParseStream, mut e: Expr) -> Result<Expr> {
         loop {
             if input.peek(token::Paren) {
-                let content;
+                let Parens { token: paren_token, content } = parse_parens(input)?;
                 e = Expr::Call(ExprCall {
                     attrs: Vec::new(),
                     func: Box::new(e),
-                    paren_token: parenthesized!(content in input),
+                    paren_token,
                     args: content.parse_terminated(Expr::parse, Token![,])?,
                 });
             } else if input.peek(Token![.])
@@ -1480,14 +1480,14 @@ pub(crate) mod parsing {
 
                 if turbofish.is_some() || input.peek(token::Paren) {
                     if let Member::Named(method) = member {
-                        let content;
+                        let Parens { token: paren_token, content } = parse_parens(input)?;
                         e = Expr::MethodCall(ExprMethodCall {
                             attrs: Vec::new(),
                             receiver: Box::new(e),
                             dot_token,
                             method,
                             turbofish,
-                            paren_token: parenthesized!(content in input),
+                            paren_token,
                             args: content.parse_terminated(Expr::parse, Token![,])?,
                         });
                         continue;
@@ -1501,11 +1501,11 @@ pub(crate) mod parsing {
                     member,
                 });
             } else if input.peek(token::Bracket) {
-                let content;
+                let Brackets { token: bracket_token, content } = parse_brackets(input)?;
                 e = Expr::Index(ExprIndex {
                     attrs: Vec::new(),
                     expr: Box::new(e),
-                    bracket_token: bracketed!(content in input),
+                    bracket_token,
                     index: content.parse()?,
                 });
             } else if input.peek(Token![?]) {
@@ -1527,11 +1527,11 @@ pub(crate) mod parsing {
 
         loop {
             if input.peek(token::Paren) {
-                let content;
+                let Parens { token: paren_token, content } = parse_parens(input)?;
                 e = Expr::Call(ExprCall {
                     attrs: Vec::new(),
                     func: Box::new(e),
-                    paren_token: parenthesized!(content in input),
+                    paren_token,
                     args: content.parse_terminated(Expr::parse, Token![,])?,
                 });
             } else if input.peek(Token![.])
@@ -1552,11 +1552,11 @@ pub(crate) mod parsing {
                     member: input.parse()?,
                 });
             } else if input.peek(token::Bracket) {
-                let content;
+                let Brackets { token: bracket_token, content } = parse_braces(input)?;
                 e = Expr::Index(ExprIndex {
                     attrs: Vec::new(),
                     expr: Box::new(e),
-                    bracket_token: bracketed!(content in input),
+                    bracket_token,
                     index: content.parse()?,
                 });
             } else {
@@ -1693,8 +1693,7 @@ pub(crate) mod parsing {
         } else {
             if input.peek(token::Brace) {
                 let scan = input.fork();
-                let content;
-                braced!(content in scan);
+                let Braces { token: _, content } = parse_braces(&scan)?;
                 if content.parse::<Expr>().is_ok() && content.is_empty() {
                     let expr_block = verbatim::between(input, &scan);
                     input.advance_to(&scan);
@@ -1713,8 +1712,7 @@ pub(crate) mod parsing {
         input.parse::<Token![#]>()?;
         input.parse::<Ident>()?;
 
-        let args;
-        parenthesized!(args in input);
+        let Parens { token: _, content: args } = parse_parens(input)?;
         args.parse::<TokenStream>()?;
 
         Ok(Expr::Verbatim(verbatim::between(&begin, input)))
@@ -1768,8 +1766,7 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     fn paren_or_tuple(input: ParseStream) -> Result<Expr> {
-        let content;
-        let paren_token = parenthesized!(content in input);
+        let Parens { token: paren_token, content } = parse_parens(input)?;
         if content.is_empty() {
             return Ok(Expr::Tuple(ExprTuple {
                 attrs: Vec::new(),
@@ -1807,8 +1804,7 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     fn array_or_repeat(input: ParseStream) -> Result<Expr> {
-        let content;
-        let bracket_token = bracketed!(content in input);
+        let Brackets { token: bracket_token, content } = parse_brackets(input)?;
         if content.is_empty() {
             return Ok(Expr::Array(ExprArray {
                 attrs: Vec::new(),
@@ -1854,8 +1850,7 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprArray {
         fn parse(input: ParseStream) -> Result<Self> {
-            let content;
-            let bracket_token = bracketed!(content in input);
+            let Brackets { token: bracket_token, content } = parse_brackets(input)?;
             let mut elems = Punctuated::new();
 
             while !content.is_empty() {
@@ -1880,9 +1875,9 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprRepeat {
         fn parse(input: ParseStream) -> Result<Self> {
-            let content;
+            let Brackets { token: bracket_token, content } = parse_brackets(input)?;
             Ok(ExprRepeat {
-                bracket_token: bracketed!(content in input),
+                bracket_token,
                 attrs: Vec::new(),
                 expr: content.parse()?,
                 semi_token: content.parse()?,
@@ -1967,10 +1962,10 @@ pub(crate) mod parsing {
     }
 
     fn expr_paren(input: ParseStream) -> Result<ExprParen> {
-        let content;
+        let Parens { token: paren_token, content } = parse_parens(input)?;
         Ok(ExprParen {
             attrs: Vec::new(),
-            paren_token: parenthesized!(content in input),
+            paren_token,
             expr: content.parse()?,
         })
     }
@@ -2058,8 +2053,7 @@ pub(crate) mod parsing {
             let in_token: Token![in] = input.parse()?;
             let expr: Expr = input.call(Expr::parse_without_eager_brace)?;
 
-            let content;
-            let brace_token = braced!(content in input);
+            let Braces { token: brace_token, content } = parse_braces(input)?;
             attr::parsing::parse_inner(&content, &mut attrs)?;
             let stmts = content.call(Block::parse_within)?;
 
@@ -2083,8 +2077,7 @@ pub(crate) mod parsing {
             let label: Option<Label> = input.parse()?;
             let loop_token: Token![loop] = input.parse()?;
 
-            let content;
-            let brace_token = braced!(content in input);
+            let Braces { token: brace_token, content } = parse_braces(input)?;
             attr::parsing::parse_inner(&content, &mut attrs)?;
             let stmts = content.call(Block::parse_within)?;
 
@@ -2105,8 +2098,7 @@ pub(crate) mod parsing {
             let match_token: Token![match] = input.parse()?;
             let expr = Expr::parse_without_eager_brace(input)?;
 
-            let content;
-            let brace_token = braced!(content in input);
+            let Braces { token: brace_token, content } = parse_braces(input)?;
             attr::parsing::parse_inner(&content, &mut attrs)?;
 
             let mut arms = Vec::new();
@@ -2371,8 +2363,7 @@ pub(crate) mod parsing {
             let while_token: Token![while] = input.parse()?;
             let cond = Expr::parse_without_eager_brace(input)?;
 
-            let content;
-            let brace_token = braced!(content in input);
+            let Braces { token: brace_token, content } = parse_braces(input)?;
             attr::parsing::parse_inner(&content, &mut attrs)?;
             let stmts = content.call(Block::parse_within)?;
 
@@ -2392,8 +2383,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let const_token: Token![const] = input.parse()?;
 
-            let content;
-            let brace_token = braced!(content in input);
+            let Braces { token: brace_token, content } = parse_braces(input)?;
             let inner_attrs = content.call(Attribute::parse_inner)?;
             let stmts = content.call(Block::parse_within)?;
 
@@ -2527,8 +2517,7 @@ pub(crate) mod parsing {
         qself: Option<QSelf>,
         path: Path,
     ) -> Result<ExprStruct> {
-        let content;
-        let brace_token = braced!(content in input);
+        let Braces { token: brace_token, content } = parse_braces(input)?;
 
         let mut fields = Punctuated::new();
         while !content.is_empty() {
@@ -2573,8 +2562,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let unsafe_token: Token![unsafe] = input.parse()?;
 
-            let content;
-            let brace_token = braced!(content in input);
+            let Braces { token: brace_token, content } = parse_braces(input)?;
             let inner_attrs = content.call(Attribute::parse_inner)?;
             let stmts = content.call(Block::parse_within)?;
 
@@ -2593,8 +2581,7 @@ pub(crate) mod parsing {
             let mut attrs = input.call(Attribute::parse_outer)?;
             let label: Option<Label> = input.parse()?;
 
-            let content;
-            let brace_token = braced!(content in input);
+            let Braces { token: brace_token, content } = parse_braces(input)?;
             attr::parsing::parse_inner(&content, &mut attrs)?;
             let stmts = content.call(Block::parse_within)?;
 

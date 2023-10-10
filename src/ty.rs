@@ -268,6 +268,7 @@ pub(crate) mod parsing {
     use crate::parse::{Parse, ParseStream, Result};
     use crate::path;
     use proc_macro2::Span;
+    use crate::group::{Parens, parse_parens};
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Type {
@@ -354,8 +355,7 @@ pub(crate) mod parsing {
         }
 
         if lookahead.peek(token::Paren) {
-            let content;
-            let paren_token = parenthesized!(content in input);
+            let Parens { token: paren_token, content } = parse_parens(input)?;
             if content.is_empty() {
                 return Ok(Type::Tuple(TypeTuple {
                     paren_token,
@@ -533,8 +533,7 @@ pub(crate) mod parsing {
                 })
             });
         } else if lookahead.peek(token::Bracket) {
-            let content;
-            let bracket_token = bracketed!(content in input);
+            let Brackets { token: bracket_token, content } = parse_brackets(input)?;
             let elem: Type = content.parse()?;
             if content.peek(Token![;]) {
                 Ok(Type::Array(TypeArray {
@@ -569,9 +568,9 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeSlice {
         fn parse(input: ParseStream) -> Result<Self> {
-            let content;
+            let Brackets { token: bracket_token, content } = parse_brackets(input)?;
             Ok(TypeSlice {
-                bracket_token: bracketed!(content in input),
+                bracket_token,
                 elem: content.parse()?,
             })
         }
@@ -580,9 +579,9 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeArray {
         fn parse(input: ParseStream) -> Result<Self> {
-            let content;
+            let Brackets { token: bracket_token, content } = parse_brackets(input)?;
             Ok(TypeArray {
-                bracket_token: bracketed!(content in input),
+                bracket_token,
                 elem: content.parse()?,
                 semi_token: content.parse()?,
                 len: content.parse()?,
@@ -629,15 +628,19 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeBareFn {
         fn parse(input: ParseStream) -> Result<Self> {
-            let args;
+            let lifetimes = input.parse()?;
+            let unsafety = input.parse()?;
+            let abi = input.parse()?;
+            let fn_token = input.parse()?;
+            let Parens { token: paren_token, content: args } = parse_parens(input)?;
             let mut variadic = None;
 
             Ok(TypeBareFn {
-                lifetimes: input.parse()?,
-                unsafety: input.parse()?,
-                abi: input.parse()?,
-                fn_token: input.parse()?,
-                paren_token: parenthesized!(args in input),
+                lifetimes,
+                unsafety,
+                abi,
+                fn_token,
+                paren_token,
                 inputs: {
                     let mut inputs = Punctuated::new();
 
@@ -694,8 +697,7 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for TypeTuple {
         fn parse(input: ParseStream) -> Result<Self> {
-            let content;
-            let paren_token = parenthesized!(content in input);
+            let Parens { token: paren_token, content } = parse_parens(input)?;
 
             if content.is_empty() {
                 return Ok(TypeTuple {
@@ -887,9 +889,9 @@ pub(crate) mod parsing {
 
     impl TypeParen {
         fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
-            let content;
+            let Parens { token: paren_token, content } = parse_parens(input)?;
             Ok(TypeParen {
-                paren_token: parenthesized!(content in input),
+                paren_token,
                 elem: Box::new({
                     let allow_group_generic = true;
                     ambig_ty(&content, allow_plus, allow_group_generic)?

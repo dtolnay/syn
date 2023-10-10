@@ -157,6 +157,7 @@ ast_struct! {
 pub(crate) mod parsing {
     use super::*;
     use crate::ext::IdentExt;
+    use crate::group::{Parens, parse_parens};
     use crate::parse::{Parse, ParseStream, Result};
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -191,9 +192,9 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for FieldsNamed {
         fn parse(input: ParseStream) -> Result<Self> {
-            let content;
+            let Braces { token: brace_token, content } = parse_braces(input)?;
             Ok(FieldsNamed {
-                brace_token: braced!(content in input),
+                brace_token,
                 named: content.parse_terminated(Field::parse_named, Token![,])?,
             })
         }
@@ -202,9 +203,9 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for FieldsUnnamed {
         fn parse(input: ParseStream) -> Result<Self> {
-            let content;
+            let Parens { token: paren_token, content } = parse_parens(input)?;
             Ok(FieldsUnnamed {
-                paren_token: parenthesized!(content in input),
+                paren_token,
                 unnamed: content.parse_terminated(Field::parse_unnamed, Token![,])?,
             })
         }

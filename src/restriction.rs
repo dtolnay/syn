@@ -59,6 +59,7 @@ ast_enum! {
 pub(crate) mod parsing {
     use super::*;
     use crate::ext::IdentExt;
+    use crate::group::{Parens, parse_parens};
     use crate::parse::discouraged::Speculative;
     use crate::parse::{Parse, ParseStream, Result};
 
@@ -91,8 +92,7 @@ pub(crate) mod parsing {
             if input.peek(token::Paren) {
                 let ahead = input.fork();
 
-                let content;
-                let paren_token = parenthesized!(content in ahead);
+                let Parens { token: paren_token, content } = parse_parens(&ahead)?;
                 if content.peek(Token![crate])
                     || content.peek(Token![self])
                     || content.peek(Token![super])

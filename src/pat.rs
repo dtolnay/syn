@@ -227,6 +227,7 @@ ast_struct! {
 pub(crate) mod parsing {
     use super::*;
     use crate::ext::IdentExt;
+    use crate::group::{Parens, parse_parens};
     use crate::parse::{ParseBuffer, ParseStream, Result};
     use crate::path;
 
@@ -448,8 +449,7 @@ pub(crate) mod parsing {
         qself: Option<QSelf>,
         path: Path,
     ) -> Result<PatTupleStruct> {
-        let content;
-        let paren_token = parenthesized!(content in input);
+        let Parens { token: paren_token, content } = parse_parens(input)?;
 
         let mut elems = Punctuated::new();
         while !content.is_empty() {
@@ -472,8 +472,7 @@ pub(crate) mod parsing {
     }
 
     fn pat_struct(input: ParseStream, qself: Option<QSelf>, path: Path) -> Result<PatStruct> {
-        let content;
-        let brace_token = braced!(content in input);
+        let Braces { token: brace_token, content } = parse_braces(input)?;
 
         let mut fields = Punctuated::new();
         let mut rest = None;
@@ -603,8 +602,7 @@ pub(crate) mod parsing {
     }
 
     fn pat_paren_or_tuple(input: ParseStream) -> Result<Pat> {
-        let content;
-        let paren_token = parenthesized!(content in input);
+        let Parens { token: paren_token, content } = parse_parens(input)?;
 
         let mut elems = Punctuated::new();
         while !content.is_empty() {
@@ -719,8 +717,7 @@ pub(crate) mod parsing {
     }
 
     fn pat_slice(input: ParseStream) -> Result<PatSlice> {
-        let content;
-        let bracket_token = bracketed!(content in input);
+        let Brackets { token: bracket_token, content } = parse_brackets(input)?;
 
         let mut elems = Punctuated::new();
         while !content.is_empty() {
@@ -757,8 +754,7 @@ pub(crate) mod parsing {
         let begin = input.fork();
         input.parse::<Token![const]>()?;
 
-        let content;
-        braced!(content in input);
+        let Braces { token: _, content } = parse_braces(input)?;
         content.call(Attribute::parse_inner)?;
         content.call(Block::parse_within)?;
 

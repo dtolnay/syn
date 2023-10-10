@@ -278,6 +278,7 @@ pub(crate) mod parsing {
     use super::*;
 
     use crate::ext::IdentExt;
+    use crate::group::{Parens, parse_parens};
     use crate::parse::{Parse, ParseStream, Result};
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -401,8 +402,7 @@ pub(crate) mod parsing {
             #[cfg(not(feature = "full"))]
             {
                 let begin = input.fork();
-                let content;
-                braced!(content in input);
+                let Braces { token: _, content } = parse_braces(input)?;
                 content.parse::<Expr>()?;
                 let verbatim = verbatim::between(&begin, input);
                 return Ok(Expr::Verbatim(verbatim));
@@ -460,9 +460,9 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ParenthesizedGenericArguments {
         fn parse(input: ParseStream) -> Result<Self> {
-            let content;
+            let Parens { token: paren_token, content } = parse_parens(input)?;
             Ok(ParenthesizedGenericArguments {
-                paren_token: parenthesized!(content in input),
+                paren_token,
                 inputs: content.parse_terminated(Type::parse, Token![,])?,
                 output: input.call(ReturnType::without_plus)?,
             })

@@ -533,6 +533,7 @@ ast_struct! {
 pub(crate) mod parsing {
     use super::*;
     use crate::ext::IdentExt;
+    use crate::group::{Parens, parse_parens};
     use crate::parse::{Parse, ParseStream, Result};
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -755,7 +756,9 @@ pub(crate) mod parsing {
 
             let content;
             let (paren_token, content) = if input.peek(token::Paren) {
-                (Some(parenthesized!(content in input)), &content)
+                let Parens { token, content: parens_content } = parse_parens(input)?;
+                content = parens_content;
+                (Some(token), &content)
             } else {
                 (None, input)
             };

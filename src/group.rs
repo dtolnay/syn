@@ -4,7 +4,6 @@ use crate::token;
 use proc_macro2::extra::DelimSpan;
 use proc_macro2::Delimiter;
 
-// Not public API.
 #[doc(hidden)]
 pub struct Parens<'a> {
     #[doc(hidden)]
@@ -13,7 +12,6 @@ pub struct Parens<'a> {
     pub content: ParseBuffer<'a>,
 }
 
-// Not public API.
 #[doc(hidden)]
 pub struct Braces<'a> {
     #[doc(hidden)]
@@ -22,7 +20,6 @@ pub struct Braces<'a> {
     pub content: ParseBuffer<'a>,
 }
 
-// Not public API.
 #[doc(hidden)]
 pub struct Brackets<'a> {
     #[doc(hidden)]
@@ -41,7 +38,6 @@ pub struct Group<'a> {
     pub content: ParseBuffer<'a>,
 }
 
-// Not public API.
 #[doc(hidden)]
 pub fn parse_parens<'a>(input: &ParseBuffer<'a>) -> Result<Parens<'a>> {
     parse_delimited(input, Delimiter::Parenthesis).map(|(span, content)| Parens {
@@ -50,7 +46,6 @@ pub fn parse_parens<'a>(input: &ParseBuffer<'a>) -> Result<Parens<'a>> {
     })
 }
 
-// Not public API.
 #[doc(hidden)]
 pub fn parse_braces<'a>(input: &ParseBuffer<'a>) -> Result<Braces<'a>> {
     parse_delimited(input, Delimiter::Brace).map(|(span, content)| Braces {
@@ -59,7 +54,6 @@ pub fn parse_braces<'a>(input: &ParseBuffer<'a>) -> Result<Braces<'a>> {
     })
 }
 
-// Not public API.
 #[doc(hidden)]
 pub fn parse_brackets<'a>(input: &ParseBuffer<'a>) -> Result<Brackets<'a>> {
     parse_delimited(input, Delimiter::Bracket).map(|(span, content)| Brackets {
