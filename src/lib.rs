@@ -812,6 +812,8 @@ mod gen {
     #[path = "../gen_helper.rs"]
     mod helper;
 }
+
+#[cfg(any(feature = "fold", feature = "visit", feature = "visit-mut"))]
 pub use crate::gen::*;
 
 // Not public API.
