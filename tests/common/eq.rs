@@ -65,6 +65,7 @@ use rustc_ast::ast::FormatOptions;
 use rustc_ast::ast::FormatPlaceholder;
 use rustc_ast::ast::FormatSign;
 use rustc_ast::ast::FormatTrait;
+use rustc_ast::ast::GenBlockKind;
 use rustc_ast::ast::GenericArg;
 use rustc_ast::ast::GenericArgs;
 use rustc_ast::ast::GenericBound;
@@ -545,6 +546,7 @@ spanless_eq_enum!(FormatCount; Literal(0) Argument(0));
 spanless_eq_enum!(FormatDebugHex; Lower Upper);
 spanless_eq_enum!(FormatSign; Plus Minus);
 spanless_eq_enum!(FormatTrait; Display Debug LowerExp UpperExp Octal Pointer Binary LowerHex UpperHex);
+spanless_eq_enum!(GenBlockKind; Async Gen);
 spanless_eq_enum!(GenericArg; Lifetime(0) Type(0) Const(0));
 spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0));
 spanless_eq_enum!(GenericBound; Trait(0 1) Outlives(0));
@@ -582,7 +584,7 @@ spanless_eq_enum!(WherePredicate; BoundPredicate(0) RegionPredicate(0) EqPredica
 spanless_eq_enum!(ExprKind; Array(0) ConstBlock(0) Call(0 1) MethodCall(0)
     Tup(0) Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1) Type(0 1) Let(0 1 2 3)
     If(0 1 2) While(0 1 2) ForLoop(0 1 2 3) Loop(0 1 2) Match(0 1) Closure(0)
-    Block(0 1) Async(0 1) Await(0 1) TryBlock(0) Assign(0 1 2) AssignOp(0 1 2)
+    Block(0 1) Gen(0 1 2) Await(0 1) TryBlock(0) Assign(0 1 2) AssignOp(0 1 2)
     Field(0 1) Index(0 1 2) Underscore Range(0 1 2) Path(0 1) AddrOf(0 1 2)
     Break(0 1) Continue(0) Ret(0) InlineAsm(0) OffsetOf(0 1) MacCall(0)
     Struct(0) Repeat(0 1) Paren(0) Try(0) Yield(0) Yeet(0) Become(0)
