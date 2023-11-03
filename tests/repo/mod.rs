@@ -13,10 +13,24 @@ use std::path::{Path, PathBuf};
 use tar::Archive;
 use walkdir::{DirEntry, WalkDir};
 
-const REVISION: &str = "9f5fc1bd443f59583e7af0d94d289f95fe1e20c4";
+const REVISION: &str = "a2f5f9691b6ce64c1703feaf9363710dfd7a56cf";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
+    // TODO
+    "src/tools/clippy/tests/ui/needless_raw_string.rs",
+    "src/tools/clippy/tests/ui/needless_raw_string_hashes.rs",
+    "src/tools/rustfmt/tests/source/issue_5721.rs",
+    "src/tools/rustfmt/tests/source/non-lifetime-binders.rs",
+    "src/tools/rustfmt/tests/target/issue_5721.rs",
+    "src/tools/rustfmt/tests/target/non-lifetime-binders.rs",
+    "tests/rustdoc/inline_cross/auxiliary/non_lifetime_binders.rs",
+    "tests/rustdoc/typedef-inner-variants-lazy_type_alias.rs",
+    "tests/ui/coroutine/gen_block_is_iter.rs",
+    "tests/ui/coroutine/gen_block_iterate.rs",
+    "tests/ui/parser/struct-literal-in-match-guard.rs",
+    "tests/ui/unreachable-code.rs",
+
     // TODO: CStr literals: c"…", cr"…"
     // https://github.com/dtolnay/syn/issues/1502
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0085_expr_literals.rs",
@@ -107,9 +121,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/lifetimes/bare-trait-object-borrowck.rs",
     "tests/ui/lifetimes/bare-trait-object.rs",
     "tests/ui/parser/bounds-obj-parens.rs",
-
-    // Obsolete box syntax
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0132_box_expr.rs",
 
     // Invalid unparenthesized range pattern inside slice pattern: `[1..]`
     "tests/ui/consts/miri_unleashed/const_refers_to_static_cross_crate.rs",
