@@ -88,6 +88,8 @@
 //! [Printing]: https://docs.rs/quote/1.0/quote/trait.ToTokens.html
 //! [`Span`]: https://docs.rs/proc-macro2/1.0/proc_macro2/struct.Span.html
 
+#[cfg(feature = "parsing")]
+pub(crate) use self::private::CustomToken;
 use self::private::WithSpan;
 #[cfg(feature = "parsing")]
 use crate::buffer::Cursor;
@@ -134,7 +136,9 @@ pub trait Token: private::Sealed {
     fn display() -> &'static str;
 }
 
-mod private {
+pub(crate) mod private {
+    #[cfg(feature = "parsing")]
+    use crate::buffer::Cursor;
     use proc_macro2::Span;
 
     #[cfg(feature = "parsing")]
@@ -146,6 +150,14 @@ mod private {
     #[allow(unknown_lints, repr_transparent_external_private_fields)] // False positive: https://github.com/rust-lang/rust/issues/78586#issuecomment-1722680482
     pub struct WithSpan {
         pub span: Span,
+    }
+
+    // Not public API.
+    #[doc(hidden)]
+    #[cfg(feature = "parsing")]
+    pub trait CustomToken {
+        fn peek(cursor: Cursor) -> bool;
+        fn display() -> &'static str;
     }
 }
 
@@ -217,14 +229,6 @@ macro_rules! impl_low_level_token {
 impl_low_level_token!("punctuation token" Punct punct);
 impl_low_level_token!("literal" Literal literal);
 impl_low_level_token!("token" TokenTree token_tree);
-
-// Not public API.
-#[doc(hidden)]
-#[cfg(feature = "parsing")]
-pub trait CustomToken {
-    fn peek(cursor: Cursor) -> bool;
-    fn display() -> &'static str;
-}
 
 #[cfg(feature = "parsing")]
 impl<T: CustomToken> private::Sealed for T {}
