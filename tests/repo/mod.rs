@@ -44,16 +44,20 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/feature-gates/feature-gate-return_type_notation.rs",
 
     // TODO: lazy type alias syntax with where-clause in trailing position
+    // https://github.com/dtolnay/syn/issues/1525
     "tests/rustdoc/typedef-inner-variants-lazy_type_alias.rs",
 
     // TODO: gen blocks and functions
+    // https://github.com/dtolnay/syn/issues/1526
     "tests/ui/coroutine/gen_block_is_iter.rs",
     "tests/ui/coroutine/gen_block_iterate.rs",
 
     // TODO: struct literal in match guard
+    // https://github.com/dtolnay/syn/issues/1527
     "tests/ui/parser/struct-literal-in-match-guard.rs",
 
     // TODO: precedence of return in match guard
+    // https://github.com/dtolnay/syn/issues/1528
     "tests/ui/unreachable-code.rs",
 
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
