@@ -13,12 +13,14 @@ use std::path::{Path, PathBuf};
 use tar::Archive;
 use walkdir::{DirEntry, WalkDir};
 
-const REVISION: &str = "9f5fc1bd443f59583e7af0d94d289f95fe1e20c4";
+const REVISION: &str = "a2f5f9691b6ce64c1703feaf9363710dfd7a56cf";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
     // TODO: CStr literals: c"…", cr"…"
     // https://github.com/dtolnay/syn/issues/1502
+    "src/tools/clippy/tests/ui/needless_raw_string.rs",
+    "src/tools/clippy/tests/ui/needless_raw_string_hashes.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0085_expr_literals.rs",
 
     // TODO: explicit tail calls: `become _g()`
@@ -27,7 +29,12 @@ static EXCLUDE_FILES: &[&str] = &[
 
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
     // https://github.com/dtolnay/syn/issues/1435
+    "src/tools/rustfmt/tests/source/issue_5721.rs",
+    "src/tools/rustfmt/tests/source/non-lifetime-binders.rs",
+    "src/tools/rustfmt/tests/target/issue_5721.rs",
+    "src/tools/rustfmt/tests/target/non-lifetime-binders.rs",
     "tests/rustdoc-json/non_lifetime_binders.rs",
+    "tests/rustdoc/inline_cross/auxiliary/non_lifetime_binders.rs",
     "tests/rustdoc/non_lifetime_binders.rs",
 
     // TODO: return type notation: `where T: Trait<method(): Send>`
@@ -35,6 +42,23 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0208_associated_return_type_bounds.rs",
     "tests/ui/associated-type-bounds/return-type-notation/basic.rs",
     "tests/ui/feature-gates/feature-gate-return_type_notation.rs",
+
+    // TODO: lazy type alias syntax with where-clause in trailing position
+    // https://github.com/dtolnay/syn/issues/1525
+    "tests/rustdoc/typedef-inner-variants-lazy_type_alias.rs",
+
+    // TODO: gen blocks and functions
+    // https://github.com/dtolnay/syn/issues/1526
+    "tests/ui/coroutine/gen_block_is_iter.rs",
+    "tests/ui/coroutine/gen_block_iterate.rs",
+
+    // TODO: struct literal in match guard
+    // https://github.com/dtolnay/syn/issues/1527
+    "tests/ui/parser/struct-literal-in-match-guard.rs",
+
+    // TODO: precedence of return in match guard
+    // https://github.com/dtolnay/syn/issues/1528
+    "tests/ui/unreachable-code.rs",
 
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "tests/ui/const-generics/early/closing-args-token.rs",
@@ -107,9 +131,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/lifetimes/bare-trait-object-borrowck.rs",
     "tests/ui/lifetimes/bare-trait-object.rs",
     "tests/ui/parser/bounds-obj-parens.rs",
-
-    // Obsolete box syntax
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0132_box_expr.rs",
 
     // Invalid unparenthesized range pattern inside slice pattern: `[1..]`
     "tests/ui/consts/miri_unleashed/const_refers_to_static_cross_crate.rs",
