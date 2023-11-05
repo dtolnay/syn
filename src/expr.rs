@@ -1614,7 +1614,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![continue]) {
             input.parse().map(Expr::Continue)
         } else if input.peek(Token![return]) {
-            expr_ret(input, allow_struct).map(Expr::Return)
+            expr_return(input, allow_struct).map(Expr::Return)
         } else if input.peek(token::Bracket) {
             array_or_repeat(input)
         } else if input.peek(Token![let]) {
@@ -2223,7 +2223,7 @@ pub(crate) mod parsing {
     impl Parse for ExprReturn {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_struct = AllowStruct(true);
-            expr_ret(input, allow_struct)
+            expr_return(input, allow_struct)
         }
     }
 
@@ -2462,7 +2462,7 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
-    fn expr_ret(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprReturn> {
+    fn expr_return(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprReturn> {
         Ok(ExprReturn {
             attrs: Vec::new(),
             return_token: input.parse()?,
