@@ -56,10 +56,6 @@ static EXCLUDE_FILES: &[&str] = &[
     // https://github.com/dtolnay/syn/issues/1527
     "tests/ui/parser/struct-literal-in-match-guard.rs",
 
-    // TODO: precedence of return in match guard
-    // https://github.com/dtolnay/syn/issues/1528
-    "tests/ui/unreachable-code.rs",
-
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "tests/ui/const-generics/early/closing-args-token.rs",
     "tests/ui/const-generics/early/const-expression-parameter.rs",
