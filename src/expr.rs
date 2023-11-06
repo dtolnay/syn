@@ -2463,18 +2463,36 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     fn expr_break(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprBreak> {
+        let break_token: Token![break] = input.parse()?;
+
+        let ahead = input.fork();
+        let label: Option<Lifetime> = ahead.parse()?;
+        if label.is_some() && ahead.peek(Token![:]) {
+            // Not allowed: `break 'label: loop {...}`
+            // Parentheses are required. `break ('label: loop {...})`
+            let _ = ambiguous_expr(input, allow_struct)?;
+            let start_span = label.unwrap().apostrophe;
+            let end_span = input.cursor().prev_span();
+            return Err(crate::error::new2(
+                start_span,
+                end_span,
+                "parentheses required",
+            ));
+        }
+
+        input.advance_to(&ahead);
+        let expr = if can_begin_expr(input) && (allow_struct.0 || !input.peek(token::Brace)) {
+            let expr = ambiguous_expr(input, allow_struct)?;
+            Some(Box::new(expr))
+        } else {
+            None
+        };
+
         Ok(ExprBreak {
             attrs: Vec::new(),
-            break_token: input.parse()?,
-            label: input.parse()?,
-            expr: {
-                if can_begin_expr(input) && (allow_struct.0 || !input.peek(token::Brace)) {
-                    let expr = ambiguous_expr(input, allow_struct)?;
-                    Some(Box::new(expr))
-                } else {
-                    None
-                }
-            },
+            break_token,
+            label,
+            expr,
         })
     }
 
