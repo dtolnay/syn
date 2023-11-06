@@ -31,6 +31,7 @@ visit-mut = []
 fold = []
 clone-impls = []
 extra-traits = []
+span-locations = ["proc-macro2/span-locations"]
 proc-macro = ["proc-macro2/proc-macro", "quote/proc-macro"]
 test = ["syn-test-suite/all-features"]
 
