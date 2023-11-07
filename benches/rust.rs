@@ -6,6 +6,7 @@
 #![cfg_attr(not(syn_only), feature(rustc_private))]
 #![recursion_limit = "1024"]
 #![allow(
+    clippy::arc_with_non_send_sync,
     clippy::cast_lossless,
     clippy::let_underscore_untyped,
     clippy::manual_let_else,
