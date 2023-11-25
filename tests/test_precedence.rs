@@ -288,7 +288,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
             match bound {
                 GenericBound::Trait(
                     _,
-                    TraitBoundModifier::MaybeConst | TraitBoundModifier::MaybeConstMaybe,
+                    TraitBoundModifier::MaybeConst(_) | TraitBoundModifier::MaybeConstMaybe,
                 ) => {}
                 _ => noop_visit_param_bound(bound, self),
             }

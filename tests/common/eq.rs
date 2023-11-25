@@ -571,7 +571,7 @@ spanless_eq_enum!(StrStyle; Cooked Raw(0));
 spanless_eq_enum!(StructRest; Base(0) Rest(0) None);
 spanless_eq_enum!(Term; Ty(0) Const(0));
 spanless_eq_enum!(TokenTree; Token(0 1) Delimited(0 1 2));
-spanless_eq_enum!(TraitBoundModifier; None Negative Maybe MaybeConst MaybeConstNegative MaybeConstMaybe);
+spanless_eq_enum!(TraitBoundModifier; None Negative Maybe MaybeConst(0) MaybeConstNegative MaybeConstMaybe);
 spanless_eq_enum!(TraitObjectSyntax; Dyn DynStar None);
 spanless_eq_enum!(UintTy; Usize U8 U16 U32 U64 U128);
 spanless_eq_enum!(UnOp; Deref Not Neg);
