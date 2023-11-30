@@ -13,10 +13,13 @@ use std::path::{Path, PathBuf};
 use tar::Archive;
 use walkdir::{DirEntry, WalkDir};
 
-const REVISION: &str = "a2f5f9691b6ce64c1703feaf9363710dfd7a56cf";
+const REVISION: &str = "b10cfcd65fd7f7b1ab9beb34798b2108de003452";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
+    // TODO: `gen { yield; }`
+    "compiler/rustc_codegen_cranelift/example/gen_block_iterate.rs",
+
     // TODO: CStr literals: c"…", cr"…"
     // https://github.com/dtolnay/syn/issues/1502
     "src/tools/clippy/tests/ui/needless_raw_string.rs",
