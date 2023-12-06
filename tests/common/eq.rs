@@ -13,7 +13,6 @@ use rustc_ast::ast::Arm;
 use rustc_ast::ast::AssocConstraint;
 use rustc_ast::ast::AssocConstraintKind;
 use rustc_ast::ast::AssocItemKind;
-use rustc_ast::ast::Async;
 use rustc_ast::ast::AttrArgs;
 use rustc_ast::ast::AttrArgsEq;
 use rustc_ast::ast::AttrId;
@@ -34,6 +33,7 @@ use rustc_ast::ast::Closure;
 use rustc_ast::ast::ClosureBinder;
 use rustc_ast::ast::Const;
 use rustc_ast::ast::ConstItem;
+use rustc_ast::ast::CoroutineKind;
 use rustc_ast::ast::Crate;
 use rustc_ast::ast::Defaultness;
 use rustc_ast::ast::DelimArgs;
@@ -457,7 +457,7 @@ spanless_eq_struct!(AttributesData; attrs tokens);
 spanless_eq_struct!(BareFnTy; unsafety ext generic_params decl decl_span);
 spanless_eq_struct!(BindingAnnotation; 0 1);
 spanless_eq_struct!(Block; stmts id rules span tokens could_be_bare_literal);
-spanless_eq_struct!(Closure; binder capture_clause constness asyncness movability fn_decl body !fn_decl_span !fn_arg_span);
+spanless_eq_struct!(Closure; binder capture_clause constness coro_kind movability fn_decl body !fn_decl_span !fn_arg_span);
 spanless_eq_struct!(ConstItem; defaultness generics ty expr);
 spanless_eq_struct!(Crate; attrs items spans id is_placeholder);
 spanless_eq_struct!(DelimArgs; dspan delim tokens);
@@ -467,7 +467,7 @@ spanless_eq_struct!(ExprField; attrs id span ident expr is_shorthand is_placehol
 spanless_eq_struct!(FieldDef; attrs id span vis ident ty is_placeholder);
 spanless_eq_struct!(Fn; defaultness generics sig body);
 spanless_eq_struct!(FnDecl; inputs output);
-spanless_eq_struct!(FnHeader; constness asyncness unsafety ext);
+spanless_eq_struct!(FnHeader; constness coro_kind unsafety ext);
 spanless_eq_struct!(FnSig; header decl span);
 spanless_eq_struct!(ForeignMod; unsafety abi items);
 spanless_eq_struct!(FormatArgPosition; index kind span);
@@ -520,7 +520,6 @@ spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
 spanless_eq_enum!(AssocConstraintKind; Equality(term) Bound(bounds));
 spanless_eq_enum!(AssocItemKind; Const(0) Fn(0) Type(0) MacCall(0));
-spanless_eq_enum!(Async; Yes(span closure_id return_impl_trait_id) No);
 spanless_eq_enum!(AttrArgs; Empty Delimited(0) Eq(0 1));
 spanless_eq_enum!(AttrArgsEq; Ast(0) Hir(0));
 spanless_eq_enum!(AttrStyle; Outer Inner);
@@ -581,6 +580,8 @@ spanless_eq_enum!(UseTreeKind; Simple(0) Nested(0) Glob);
 spanless_eq_enum!(VariantData; Struct(0 1) Tuple(0 1) Unit(0));
 spanless_eq_enum!(VisibilityKind; Public Restricted(path id shorthand) Inherited);
 spanless_eq_enum!(WherePredicate; BoundPredicate(0) RegionPredicate(0) EqPredicate(0));
+spanless_eq_enum!(CoroutineKind; Async(span closure_id return_impl_trait_id)
+    Gen(span closure_id return_impl_trait_id));
 spanless_eq_enum!(ExprKind; Array(0) ConstBlock(0) Call(0 1) MethodCall(0)
     Tup(0) Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1) Type(0 1) Let(0 1 2 3)
     If(0 1 2) While(0 1 2) ForLoop(0 1 2 3) Loop(0 1 2) Match(0 1) Closure(0)
