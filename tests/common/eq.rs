@@ -457,7 +457,7 @@ spanless_eq_struct!(AttributesData; attrs tokens);
 spanless_eq_struct!(BareFnTy; unsafety ext generic_params decl decl_span);
 spanless_eq_struct!(BindingAnnotation; 0 1);
 spanless_eq_struct!(Block; stmts id rules span tokens could_be_bare_literal);
-spanless_eq_struct!(Closure; binder capture_clause constness coro_kind movability fn_decl body !fn_decl_span !fn_arg_span);
+spanless_eq_struct!(Closure; binder capture_clause constness coroutine_kind movability fn_decl body !fn_decl_span !fn_arg_span);
 spanless_eq_struct!(ConstItem; defaultness generics ty expr);
 spanless_eq_struct!(Crate; attrs items spans id is_placeholder);
 spanless_eq_struct!(DelimArgs; dspan delim tokens);
@@ -467,7 +467,7 @@ spanless_eq_struct!(ExprField; attrs id span ident expr is_shorthand is_placehol
 spanless_eq_struct!(FieldDef; attrs id span vis ident ty is_placeholder);
 spanless_eq_struct!(Fn; defaultness generics sig body);
 spanless_eq_struct!(FnDecl; inputs output);
-spanless_eq_struct!(FnHeader; constness coro_kind unsafety ext);
+spanless_eq_struct!(FnHeader; constness coroutine_kind unsafety ext);
 spanless_eq_struct!(FnSig; header decl span);
 spanless_eq_struct!(ForeignMod; unsafety abi items);
 spanless_eq_struct!(FormatArgPosition; index kind span);
@@ -545,7 +545,7 @@ spanless_eq_enum!(FormatCount; Literal(0) Argument(0));
 spanless_eq_enum!(FormatDebugHex; Lower Upper);
 spanless_eq_enum!(FormatSign; Plus Minus);
 spanless_eq_enum!(FormatTrait; Display Debug LowerExp UpperExp Octal Pointer Binary LowerHex UpperHex);
-spanless_eq_enum!(GenBlockKind; Async Gen);
+spanless_eq_enum!(GenBlockKind; Async Gen AsyncGen);
 spanless_eq_enum!(GenericArg; Lifetime(0) Type(0) Const(0));
 spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0));
 spanless_eq_enum!(GenericBound; Trait(0 1) Outlives(0));
@@ -581,7 +581,8 @@ spanless_eq_enum!(VariantData; Struct(0 1) Tuple(0 1) Unit(0));
 spanless_eq_enum!(VisibilityKind; Public Restricted(path id shorthand) Inherited);
 spanless_eq_enum!(WherePredicate; BoundPredicate(0) RegionPredicate(0) EqPredicate(0));
 spanless_eq_enum!(CoroutineKind; Async(span closure_id return_impl_trait_id)
-    Gen(span closure_id return_impl_trait_id));
+    Gen(span closure_id return_impl_trait_id)
+    AsyncGen(span closure_id return_impl_trait_id));
 spanless_eq_enum!(ExprKind; Array(0) ConstBlock(0) Call(0 1) MethodCall(0)
     Tup(0) Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1) Type(0 1) Let(0 1 2 3)
     If(0 1 2) While(0 1 2) ForLoop(0 1 2 3) Loop(0 1 2) Match(0 1) Closure(0)
