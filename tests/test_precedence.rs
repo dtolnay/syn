@@ -364,7 +364,7 @@ fn syn_parenthesize(syn_expr: syn::Expr) -> syn::Expr {
     use syn::fold::{fold_expr, fold_generic_argument, Fold};
     use syn::{token, BinOp, Expr, ExprParen, GenericArgument, MetaNameValue, Pat, Stmt, Type};
 
-    struct ParenthesizeEveryExpr;
+    struct FullyParenthesize;
 
     fn parenthesize(expr: Expr) -> Expr {
         Expr::Paren(ExprParen {
@@ -394,7 +394,7 @@ fn syn_parenthesize(syn_expr: syn::Expr) -> syn::Expr {
         }
     }
 
-    impl Fold for ParenthesizeEveryExpr {
+    impl Fold for FullyParenthesize {
         fn fold_expr(&mut self, expr: Expr) -> Expr {
             let needs_paren = needs_paren(&expr);
             let folded = fold_expr(self, expr);
@@ -442,7 +442,7 @@ fn syn_parenthesize(syn_expr: syn::Expr) -> syn::Expr {
         }
     }
 
-    let mut folder = ParenthesizeEveryExpr;
+    let mut folder = FullyParenthesize;
     folder.fold_expr(syn_expr)
 }
 
