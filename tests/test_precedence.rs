@@ -39,7 +39,6 @@ extern crate thin_vec;
 use crate::common::eq::SpanlessEq;
 use crate::common::parse;
 use quote::quote;
-use regex::Regex;
 use rustc_ast::ast;
 use rustc_ast::ptr::P;
 use rustc_ast_pretty::pprust;
