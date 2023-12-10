@@ -160,11 +160,6 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
     parse::librustc_expr(input).and_then(librustc_parenthesize)
 }
 
-/// Wrap every expression which is not already wrapped in parens with parens, to
-/// reveal the precedence of the parsed expressions, and produce a stringified
-/// form of the resulting expression.
-///
-/// This method operates on librustc objects.
 fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_ast::ast::{
         AssocItem, AssocItemKind, Attribute, BinOpKind, Block, BorrowKind, Expr, ExprField,
@@ -365,9 +360,6 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>
     }
 }
 
-/// Wrap every expression which is not already wrapped in parens with parens, to
-/// reveal the precedence of the parsed expressions, and produce a stringified
-/// form of the resulting expression.
 fn syn_parenthesize(syn_expr: syn::Expr) -> syn::Expr {
     use syn::fold::{fold_expr, fold_generic_argument, Fold};
     use syn::{token, BinOp, Expr, ExprParen, GenericArgument, MetaNameValue, Pat, Stmt, Type};
