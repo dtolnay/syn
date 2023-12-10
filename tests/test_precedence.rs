@@ -125,13 +125,13 @@ fn test_expressions(path: &Path, edition: Edition, exprs: Vec<syn::Expr>) -> (us
                 continue;
             };
 
-            let syn_expr = syn_brackets(expr);
+            let syn_expr = syn_parenthesize(expr);
             let syn_ast = if let Some(e) = parse::librustc_expr(&quote!(#syn_expr).to_string()) {
                 e
             } else {
                 failed += 1;
                 errorf!(
-                    "\nFAIL {} - librustc failed to parse bracketed\n",
+                    "\nFAIL {} - librustc failed to parse parenthesized\n",
                     path.display(),
                 );
                 continue;
@@ -157,7 +157,7 @@ fn test_expressions(path: &Path, edition: Edition, exprs: Vec<syn::Expr>) -> (us
 }
 
 fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
-    parse::librustc_expr(input).and_then(librustc_brackets)
+    parse::librustc_expr(input).and_then(librustc_parenthesize)
 }
 
 /// Wrap every expression which is not already wrapped in parens with parens, to
@@ -165,7 +165,7 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 /// form of the resulting expression.
 ///
 /// This method operates on librustc objects.
-fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
+fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use rustc_ast::ast::{
         AssocItem, AssocItemKind, Attribute, BinOpKind, Block, BorrowKind, Expr, ExprField,
         ExprKind, GenericArg, GenericBound, ItemKind, Local, LocalKind, Pat, Stmt, StmtKind,
@@ -182,7 +182,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
     use std::ops::DerefMut;
     use thin_vec::ThinVec;
 
-    struct BracketsVisitor {
+    struct FullyParenthesize {
         failed: bool,
     }
 
@@ -248,7 +248,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
         }
     }
 
-    impl MutVisitor for BracketsVisitor {
+    impl MutVisitor for FullyParenthesize {
         fn visit_expr(&mut self, e: &mut P<Expr>) {
             noop_visit_expr(e, self);
             match e.kind {
@@ -356,7 +356,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
         }
     }
 
-    let mut folder = BracketsVisitor { failed: false };
+    let mut folder = FullyParenthesize { failed: false };
     folder.visit_expr(&mut librustc_expr);
     if folder.failed {
         None
@@ -368,7 +368,7 @@ fn librustc_brackets(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
 /// Wrap every expression which is not already wrapped in parens with parens, to
 /// reveal the precedence of the parsed expressions, and produce a stringified
 /// form of the resulting expression.
-fn syn_brackets(syn_expr: syn::Expr) -> syn::Expr {
+fn syn_parenthesize(syn_expr: syn::Expr) -> syn::Expr {
     use syn::fold::{fold_expr, fold_generic_argument, Fold};
     use syn::{token, BinOp, Expr, ExprParen, GenericArgument, MetaNameValue, Pat, Stmt, Type};
 
