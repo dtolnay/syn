@@ -1,3 +1,15 @@
+//! The tests in this module do the following:
+//!
+//! 1. Parse a given expression in both `syn` and `librustc`.
+//! 2. Fold over the expression adding brackets around each subexpression (with
+//!    some complications - see the `syn_brackets` and `librustc_brackets`
+//!    methods).
+//! 3. Serialize the `syn` expression back into a string, and re-parse it with
+//!    `librustc`.
+//! 4. Respan all of the expressions, replacing the spans with the default
+//!    spans.
+//! 5. Compare the expressions with one another, if they are not equal fail.
+
 #![cfg(not(syn_disable_nightly_tests))]
 #![cfg(not(miri))]
 #![recursion_limit = "1024"]
@@ -12,18 +24,6 @@
     clippy::too_many_lines,
     clippy::uninlined_format_args
 )]
-
-//! The tests in this module do the following:
-//!
-//! 1. Parse a given expression in both `syn` and `librustc`.
-//! 2. Fold over the expression adding brackets around each subexpression (with
-//!    some complications - see the `syn_brackets` and `librustc_brackets`
-//!    methods).
-//! 3. Serialize the `syn` expression back into a string, and re-parse it with
-//!    `librustc`.
-//! 4. Respan all of the expressions, replacing the spans with the default
-//!    spans.
-//! 5. Compare the expressions with one another, if they are not equal fail.
 
 extern crate rustc_ast;
 extern crate rustc_ast_pretty;
