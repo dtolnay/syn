@@ -39,7 +39,7 @@ extern crate thin_vec;
 
 use crate::common::eq::SpanlessEq;
 use crate::common::parse;
-use quote::quote;
+use quote::ToTokens;
 use rustc_ast::ast;
 use rustc_ast::ptr::P;
 use rustc_ast_pretty::pprust;
@@ -116,18 +116,20 @@ fn test_expressions(path: &Path, edition: Edition, exprs: Vec<syn::Expr>) -> (us
 
     rustc_span::create_session_if_not_set_then(edition, |_| {
         for expr in exprs {
-            let raw = quote!(#expr).to_string();
-
-            let librustc_ast = if let Some(e) = librustc_parse_and_rewrite(&raw) {
+            let source_code = expr.to_token_stream().to_string();
+            let librustc_ast = if let Some(e) = librustc_parse_and_rewrite(&source_code) {
                 e
             } else {
                 failed += 1;
-                errorf!("\nFAIL {} - librustc failed to parse raw\n", path.display());
+                errorf!(
+                    "\nFAIL {} - librustc failed to parse original\n",
+                    path.display(),
+                );
                 continue;
             };
 
-            let syn_expr = syn_parenthesize(expr);
-            let syn_ast = if let Some(e) = parse::librustc_expr(&quote!(#syn_expr).to_string()) {
+            let syn_parenthesized_code = syn_parenthesize(expr).to_token_stream().to_string();
+            let syn_ast = if let Some(e) = parse::librustc_expr(&syn_parenthesized_code) {
                 e
             } else {
                 failed += 1;
@@ -142,13 +144,13 @@ fn test_expressions(path: &Path, edition: Edition, exprs: Vec<syn::Expr>) -> (us
                 passed += 1;
             } else {
                 failed += 1;
-                let syn_program = pprust::expr_to_string(&syn_ast);
-                let librustc_program = pprust::expr_to_string(&librustc_ast);
+                let syn_pretty = pprust::expr_to_string(&syn_ast);
+                let librustc_pretty = pprust::expr_to_string(&librustc_ast);
                 errorf!(
                     "\nFAIL {}\n{}\nsyn != rustc\n{}\n",
                     path.display(),
-                    syn_program,
-                    librustc_program,
+                    syn_pretty,
+                    librustc_pretty,
                 );
             }
         }
