@@ -69,12 +69,8 @@ fn test_rustc_precedence() {
     let passed = AtomicUsize::new(0);
     let failed = AtomicUsize::new(0);
 
-    // 2018 edition is hard
-    let edition_regex = Regex::new(r"\b(async|try)[!(]").unwrap();
-
     repo::for_each_rust_file(|path| {
         let content = fs::read_to_string(path).unwrap();
-        let content = edition_regex.replace_all(&content, "_$0");
 
         let (l_passed, l_failed) = match syn::parse_file(&content) {
             Ok(file) => {
