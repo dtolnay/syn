@@ -18,6 +18,7 @@
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
 #![allow(
+    clippy::doc_markdown,
     clippy::explicit_deref_methods,
     clippy::let_underscore_untyped,
     clippy::manual_assert,
