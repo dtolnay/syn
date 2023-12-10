@@ -158,10 +158,10 @@ fn test_expressions(path: &Path, edition: Edition, exprs: Vec<syn::Expr>) -> (us
 }
 
 fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
-    parse::librustc_expr(input).and_then(librustc_parenthesize)
+    parse::librustc_expr(input).map(librustc_parenthesize)
 }
 
-fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
+fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
     use rustc_ast::ast::{
         AssocItem, AssocItemKind, Attribute, BinOpKind, Block, BorrowKind, Expr, ExprField,
         ExprKind, GenericArg, GenericBound, ItemKind, Local, LocalKind, Pat, Stmt, StmtKind,
@@ -178,9 +178,7 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>
     use std::ops::DerefMut;
     use thin_vec::ThinVec;
 
-    struct FullyParenthesize {
-        failed: bool,
-    }
+    struct FullyParenthesize;
 
     fn contains_let_chain(expr: &Expr) -> bool {
         match &expr.kind {
@@ -352,13 +350,9 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> Option<P<ast::Expr>
         }
     }
 
-    let mut folder = FullyParenthesize { failed: false };
+    let mut folder = FullyParenthesize;
     folder.visit_expr(&mut librustc_expr);
-    if folder.failed {
-        None
-    } else {
-        Some(librustc_expr)
-    }
+    librustc_expr
 }
 
 fn syn_parenthesize(syn_expr: syn::Expr) -> syn::Expr {
