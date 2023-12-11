@@ -8,7 +8,7 @@
 mod macros;
 
 use proc_macro2::{Delimiter, Group, Ident, Span, TokenStream, TokenTree};
-use quote::quote;
+use quote::{quote, ToTokens as _};
 use syn::parse::Parser as _;
 use syn::{Block, Stmt};
 
@@ -68,7 +68,6 @@ fn test_none_group() {
             TokenTree::Group(Group::new(Delimiter::Brace, TokenStream::new())),
         ]),
     ))]);
-
     snapshot!(tokens as Stmt, @r###"
     Stmt::Item(Item::Fn {
         vis: Visibility::Inherited,
@@ -82,6 +81,33 @@ fn test_none_group() {
             stmts: [],
         },
     })
+    "###);
+
+    let tokens = Group::new(Delimiter::None, quote!(let None = None)).to_token_stream();
+    let stmts = Block::parse_within.parse2(tokens).unwrap();
+    // FIXME
+    snapshot!(stmts, @r###"
+    [
+        Stmt::Expr(
+            Expr::Group {
+                expr: Expr::Let {
+                    pat: Pat::Ident {
+                        ident: "None",
+                    },
+                    expr: Expr::Path {
+                        path: Path {
+                            segments: [
+                                PathSegment {
+                                    ident: "None",
+                                },
+                            ],
+                        },
+                    },
+                },
+            },
+            None,
+        ),
+    ]
     "###);
 }
 
