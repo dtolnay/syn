@@ -272,7 +272,6 @@ fn test_macro_variable_match_arm() {
 
     let expr = Group::new(Delimiter::None, quote!(loop {} + 1));
     let tokens = quote!(match v { _ => #expr });
-    // FIXME
     snapshot!(tokens as Expr, @r###"
     Expr::Match {
         expr: Expr::Path {

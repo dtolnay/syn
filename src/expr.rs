@@ -1915,7 +1915,15 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     pub(crate) fn expr_early(input: ParseStream) -> Result<Expr> {
         let mut attrs = input.call(expr_attrs)?;
-        let mut expr = if input.peek(Token![if]) {
+        let mut expr = if input.peek(token::Group) {
+            let allow_struct = AllowStruct(true);
+            let atom = expr_group(input, allow_struct)?;
+            if continue_parsing_early(&atom) {
+                trailer_helper(input, atom)?
+            } else {
+                atom
+            }
+        } else if input.peek(Token![if]) {
             Expr::If(input.parse()?)
         } else if input.peek(Token![while]) {
             Expr::While(input.parse()?)
@@ -1939,13 +1947,16 @@ pub(crate) mod parsing {
             atom_labeled(input)?
         } else {
             let allow_struct = AllowStruct(true);
-            let mut expr = unary_expr(input, allow_struct)?;
+            unary_expr(input, allow_struct)?
+        };
 
+        if continue_parsing_early(&expr) {
             attrs.extend(expr.replace_attrs(Vec::new()));
             expr.replace_attrs(attrs);
 
+            let allow_struct = AllowStruct(true);
             return parse_expr(input, expr, allow_struct, Precedence::Any);
-        };
+        }
 
         if input.peek(Token![.]) && !input.peek(Token![..]) || input.peek(Token![?]) {
             expr = trailer_helper(input, expr)?;
@@ -1960,6 +1971,25 @@ pub(crate) mod parsing {
         attrs.extend(expr.replace_attrs(Vec::new()));
         expr.replace_attrs(attrs);
         Ok(expr)
+    }
+
+    #[cfg(feature = "full")]
+    fn continue_parsing_early(mut expr: &Expr) -> bool {
+        while let Expr::Group(group) = expr {
+            expr = &group.expr;
+        }
+        match expr {
+            Expr::If(_)
+            | Expr::While(_)
+            | Expr::ForLoop(_)
+            | Expr::Loop(_)
+            | Expr::Match(_)
+            | Expr::TryBlock(_)
+            | Expr::Unsafe(_)
+            | Expr::Const(_)
+            | Expr::Block(_) => false,
+            _ => true,
+        }
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
