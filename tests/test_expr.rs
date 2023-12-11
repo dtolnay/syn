@@ -3,7 +3,7 @@
 #[macro_use]
 mod macros;
 
-use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Group};
 use quote::quote;
 use syn::{Expr, ExprRange, Stmt};
 
@@ -100,10 +100,8 @@ fn test_tuple_multi_index() {
 #[test]
 fn test_macro_variable_func() {
     // mimics the token stream corresponding to `$fn()`
-    let tokens = TokenStream::from_iter(vec![
-        TokenTree::Group(Group::new(Delimiter::None, quote! { f })),
-        TokenTree::Group(Group::new(Delimiter::Parenthesis, TokenStream::new())),
-    ]);
+    let path = Group::new(Delimiter::None, quote!(f));
+    let tokens = quote!(#path());
 
     snapshot!(tokens as Expr, @r###"
     Expr::Call {
@@ -121,12 +119,8 @@ fn test_macro_variable_func() {
     }
     "###);
 
-    let tokens = TokenStream::from_iter(vec![
-        TokenTree::Punct(Punct::new('#', Spacing::Alone)),
-        TokenTree::Group(Group::new(Delimiter::Bracket, quote! { outside })),
-        TokenTree::Group(Group::new(Delimiter::None, quote! { #[inside] f })),
-        TokenTree::Group(Group::new(Delimiter::Parenthesis, TokenStream::new())),
-    ]);
+    let path = Group::new(Delimiter::None, quote! { #[inside] f });
+    let tokens = quote!(#[outside] #path());
 
     snapshot!(tokens as Expr, @r###"
     Expr::Call {
@@ -172,11 +166,8 @@ fn test_macro_variable_func() {
 #[test]
 fn test_macro_variable_macro() {
     // mimics the token stream corresponding to `$macro!()`
-    let tokens = TokenStream::from_iter(vec![
-        TokenTree::Group(Group::new(Delimiter::None, quote! { m })),
-        TokenTree::Punct(Punct::new('!', Spacing::Alone)),
-        TokenTree::Group(Group::new(Delimiter::Parenthesis, TokenStream::new())),
-    ]);
+    let mac = Group::new(Delimiter::None, quote!(m));
+    let tokens = quote!(#mac!());
 
     snapshot!(tokens as Expr, @r###"
     Expr::Macro {
@@ -198,10 +189,8 @@ fn test_macro_variable_macro() {
 #[test]
 fn test_macro_variable_struct() {
     // mimics the token stream corresponding to `$struct {}`
-    let tokens = TokenStream::from_iter(vec![
-        TokenTree::Group(Group::new(Delimiter::None, quote! { S })),
-        TokenTree::Group(Group::new(Delimiter::Brace, TokenStream::new())),
-    ]);
+    let s = Group::new(Delimiter::None, quote! { S });
+    let tokens = quote!(#s {});
 
     snapshot!(tokens as Expr, @r###"
     Expr::Struct {
@@ -244,19 +233,8 @@ fn test_macro_variable_unary() {
 #[test]
 fn test_macro_variable_match_arm() {
     // mimics the token stream corresponding to `match v { _ => $expr }`
-    let tokens = TokenStream::from_iter(vec![
-        TokenTree::Ident(Ident::new("match", Span::call_site())),
-        TokenTree::Ident(Ident::new("v", Span::call_site())),
-        TokenTree::Group(Group::new(
-            Delimiter::Brace,
-            TokenStream::from_iter(vec![
-                TokenTree::Punct(Punct::new('_', Spacing::Alone)),
-                TokenTree::Punct(Punct::new('=', Spacing::Joint)),
-                TokenTree::Punct(Punct::new('>', Spacing::Alone)),
-                TokenTree::Group(Group::new(Delimiter::None, quote! { #[a] () })),
-            ]),
-        )),
-    ]);
+    let expr = Group::new(Delimiter::None, quote! { #[a] () });
+    let tokens = quote!(match v { _ => #expr });
 
     snapshot!(tokens as Expr, @r###"
     Expr::Match {
