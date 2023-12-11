@@ -1354,23 +1354,8 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     fn expr_attrs(input: ParseStream) -> Result<Vec<Attribute>> {
         let mut attrs = Vec::new();
-        loop {
-            if input.peek(token::Group) {
-                let ahead = input.fork();
-                let group = crate::group::parse_group(&ahead)?;
-                if !group.content.peek(Token![#]) || group.content.peek2(Token![!]) {
-                    break;
-                }
-                let attr = group.content.call(attr::parsing::single_parse_outer)?;
-                if !group.content.is_empty() {
-                    break;
-                }
-                attrs.push(attr);
-            } else if input.peek(Token![#]) {
-                attrs.push(input.call(attr::parsing::single_parse_outer)?);
-            } else {
-                break;
-            }
+        while !input.peek(token::Group) && input.peek(Token![#]) {
+            attrs.push(input.call(attr::parsing::single_parse_outer)?);
         }
         Ok(attrs)
     }
