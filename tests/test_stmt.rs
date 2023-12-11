@@ -269,20 +269,21 @@ fn test_early_parse_loop() {
 
     let stmts = Block::parse_within.parse2(tokens).unwrap();
 
-    // FIXME
     snapshot!(stmts, @r###"
     [
         Stmt::Expr(
-            Expr::Call {
-                func: Expr::Loop {
-                    label: Some(Label {
-                        name: Lifetime {
-                            ident: "a",
-                        },
-                    }),
-                    body: Block,
-                },
+            Expr::Loop {
+                label: Some(Label {
+                    name: Lifetime {
+                        ident: "a",
+                    },
+                }),
+                body: Block,
             },
+            None,
+        ),
+        Stmt::Expr(
+            Expr::Tuple,
             None,
         ),
     ]
