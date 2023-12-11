@@ -128,7 +128,8 @@ fn test_expressions(path: &Path, edition: Edition, exprs: Vec<syn::Expr>) -> (us
                 continue;
             };
 
-            let syn_parenthesized_code = syn_parenthesize(expr).to_token_stream().to_string();
+            let syn_parenthesized_code =
+                syn_parenthesize(expr.clone()).to_token_stream().to_string();
             let syn_ast = if let Some(e) = parse::librustc_expr(&syn_parenthesized_code) {
                 e
             } else {
@@ -140,9 +141,7 @@ fn test_expressions(path: &Path, edition: Edition, exprs: Vec<syn::Expr>) -> (us
                 continue;
             };
 
-            if SpanlessEq::eq(&syn_ast, &librustc_ast) {
-                passed += 1;
-            } else {
+            if !SpanlessEq::eq(&syn_ast, &librustc_ast) {
                 failed += 1;
                 let syn_pretty = pprust::expr_to_string(&syn_ast);
                 let librustc_pretty = pprust::expr_to_string(&librustc_ast);
@@ -152,7 +151,30 @@ fn test_expressions(path: &Path, edition: Edition, exprs: Vec<syn::Expr>) -> (us
                     syn_pretty,
                     librustc_pretty,
                 );
+                continue;
             }
+
+            let expr_invisible = make_parens_invisible(expr);
+            let Ok(reparsed_expr_invisible) = syn::parse2(expr_invisible.to_token_stream()) else {
+                failed += 1;
+                errorf!(
+                    "\nFAIL {} - syn failed to parse invisible delimiters\n{}\n",
+                    path.display(),
+                    source_code,
+                );
+                continue;
+            };
+            if expr_invisible != reparsed_expr_invisible {
+                failed += 1;
+                errorf!(
+                    "\nFAIL {} - mismatch after parsing invisible delimiters\n{}\n",
+                    path.display(),
+                    source_code,
+                );
+                continue;
+            }
+
+            passed += 1;
         }
     });
 
@@ -441,6 +463,44 @@ fn syn_parenthesize(syn_expr: syn::Expr) -> syn::Expr {
 
     let mut folder = FullyParenthesize;
     folder.fold_expr(syn_expr)
+}
+
+fn make_parens_invisible(expr: syn::Expr) -> syn::Expr {
+    use syn::fold::{fold_expr, fold_stmt, Fold};
+    use syn::{token, Expr, ExprGroup, ExprParen, Stmt};
+
+    struct MakeParensInvisible;
+
+    impl Fold for MakeParensInvisible {
+        fn fold_expr(&mut self, mut expr: Expr) -> Expr {
+            if let Expr::Paren(paren) = expr {
+                expr = Expr::Group(ExprGroup {
+                    attrs: paren.attrs,
+                    group_token: token::Group(paren.paren_token.span.join()),
+                    expr: paren.expr,
+                });
+            }
+            fold_expr(self, expr)
+        }
+
+        fn fold_stmt(&mut self, stmt: Stmt) -> Stmt {
+            if let Stmt::Expr(expr @ (Expr::Binary(_) | Expr::Cast(_)), None) = stmt {
+                Stmt::Expr(
+                    Expr::Paren(ExprParen {
+                        attrs: Vec::new(),
+                        paren_token: token::Paren::default(),
+                        expr: Box::new(fold_expr(self, expr)),
+                    }),
+                    None,
+                )
+            } else {
+                fold_stmt(self, stmt)
+            }
+        }
+    }
+
+    let mut folder = MakeParensInvisible;
+    folder.fold_expr(expr)
 }
 
 /// Walk through a crate collecting all expressions we can find in it.
