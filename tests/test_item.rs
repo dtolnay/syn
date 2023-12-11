@@ -38,7 +38,9 @@ fn test_macro_variable_attr() {
             generics: Generics,
             output: ReturnType::Default,
         },
-        block: Block,
+        block: Block {
+            stmts: [],
+        },
     }
     "###);
 }
@@ -320,7 +322,9 @@ fn test_impl_trait_trailing_plus() {
                 },
             ),
         },
-        block: Block,
+        block: Block {
+            stmts: [],
+        },
     }
     "###);
 }
