@@ -339,3 +339,64 @@ fn test_ambiguous_label() {
         syn::parse2::<Stmt>(stmt).unwrap_err();
     }
 }
+
+#[test]
+fn test_extended_interpolated_path() {
+    let path = Group::new(Delimiter::None, quote!(a::b));
+
+    let tokens = quote!(if #path {});
+    snapshot!(tokens as Expr, @r###"
+    Expr::If {
+        cond: Expr::Path {
+            path: Path {
+                segments: [
+                    PathSegment {
+                        ident: "a",
+                    },
+                    PathSegment {
+                        ident: "b",
+                    },
+                ],
+            },
+        },
+        then_branch: Block {
+            stmts: [],
+        },
+    }
+    "###);
+
+    let tokens = quote!(#path {});
+    snapshot!(tokens as Expr, @r###"
+    Expr::Struct {
+        path: Path {
+            segments: [
+                PathSegment {
+                    ident: "a",
+                },
+                PathSegment {
+                    ident: "b",
+                },
+            ],
+        },
+    }
+    "###);
+
+    let tokens = quote!(#path :: c);
+    snapshot!(tokens as Expr, @r###"
+    Expr::Path {
+        path: Path {
+            segments: [
+                PathSegment {
+                    ident: "a",
+                },
+                PathSegment {
+                    ident: "b",
+                },
+                PathSegment {
+                    ident: "c",
+                },
+            ],
+        },
+    }
+    "###);
+}
