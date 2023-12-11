@@ -221,21 +221,22 @@ fn test_macro_variable_unary() {
     // mimics the token stream corresponding to `$expr.method()` where expr is `&self`
     let inner = Group::new(Delimiter::None, quote!(&self));
     let tokens = quote!(#inner.method());
-    // FIXME
     snapshot!(tokens as Expr, @r###"
-    Expr::Reference {
-        expr: Expr::MethodCall {
-            receiver: Expr::Path {
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "self",
-                        },
-                    ],
+    Expr::MethodCall {
+        receiver: Expr::Group {
+            expr: Expr::Reference {
+                expr: Expr::Path {
+                    path: Path {
+                        segments: [
+                            PathSegment {
+                                ident: "self",
+                            },
+                        ],
+                    },
                 },
             },
-            method: "method",
         },
+        method: "method",
     }
     "###);
 }
