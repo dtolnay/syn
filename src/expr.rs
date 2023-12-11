@@ -1663,29 +1663,34 @@ pub(crate) mod parsing {
         } else if input.peek(Token![_]) {
             input.parse().map(Expr::Infer)
         } else if input.peek(Lifetime) {
-            let the_label: Label = input.parse()?;
-            let mut expr = if input.peek(Token![while]) {
-                Expr::While(input.parse()?)
-            } else if input.peek(Token![for]) {
-                Expr::ForLoop(input.parse()?)
-            } else if input.peek(Token![loop]) {
-                Expr::Loop(input.parse()?)
-            } else if input.peek(token::Brace) {
-                Expr::Block(input.parse()?)
-            } else {
-                return Err(input.error("expected loop or block expression"));
-            };
-            match &mut expr {
-                Expr::While(ExprWhile { label, .. })
-                | Expr::ForLoop(ExprForLoop { label, .. })
-                | Expr::Loop(ExprLoop { label, .. })
-                | Expr::Block(ExprBlock { label, .. }) => *label = Some(the_label),
-                _ => unreachable!(),
-            }
-            Ok(expr)
+            atom_labeled(input)
         } else {
             Err(input.error("expected an expression"))
         }
+    }
+
+    #[cfg(feature = "full")]
+    fn atom_labeled(input: ParseStream) -> Result<Expr> {
+        let the_label: Label = input.parse()?;
+        let mut expr = if input.peek(Token![while]) {
+            Expr::While(input.parse()?)
+        } else if input.peek(Token![for]) {
+            Expr::ForLoop(input.parse()?)
+        } else if input.peek(Token![loop]) {
+            Expr::Loop(input.parse()?)
+        } else if input.peek(token::Brace) {
+            Expr::Block(input.parse()?)
+        } else {
+            return Err(input.error("expected loop or block expression"));
+        };
+        match &mut expr {
+            Expr::While(ExprWhile { label, .. })
+            | Expr::ForLoop(ExprForLoop { label, .. })
+            | Expr::Loop(ExprLoop { label, .. })
+            | Expr::Block(ExprBlock { label, .. }) => *label = Some(the_label),
+            _ => unreachable!(),
+        }
+        Ok(expr)
     }
 
     #[cfg(not(feature = "full"))]
@@ -1935,6 +1940,8 @@ pub(crate) mod parsing {
             Expr::Const(input.parse()?)
         } else if input.peek(token::Brace) {
             Expr::Block(input.parse()?)
+        } else if input.peek(Lifetime) {
+            atom_labeled(input)?
         } else {
             let allow_struct = AllowStruct(true);
             let mut expr = unary_expr(input, allow_struct)?;

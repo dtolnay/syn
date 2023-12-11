@@ -9,7 +9,8 @@ mod macros;
 
 use proc_macro2::{Delimiter, Group, Ident, Span, TokenStream, TokenTree};
 use quote::quote;
-use syn::Stmt;
+use syn::parse::Parser as _;
+use syn::{Block, Stmt};
 
 #[test]
 fn test_raw_operator() {
@@ -232,5 +233,59 @@ fn test_macros() {
             ],
         },
     })
+    "###);
+}
+
+#[test]
+fn test_early_parse_loop() {
+    // The following is an Expr::Loop followed by Expr::Tuple. It is not an
+    // Expr::Call.
+    let tokens = quote! {
+        loop {}
+        ()
+    };
+
+    let stmts = Block::parse_within.parse2(tokens).unwrap();
+
+    snapshot!(stmts, @r###"
+    [
+        Stmt::Expr(
+            Expr::Loop {
+                body: Block,
+            },
+            None,
+        ),
+        Stmt::Expr(
+            Expr::Tuple,
+            None,
+        ),
+    ]
+    "###);
+
+    let tokens = quote! {
+        'a: loop {}
+        ()
+    };
+
+    let stmts = Block::parse_within.parse2(tokens).unwrap();
+
+    snapshot!(stmts, @r###"
+    [
+        Stmt::Expr(
+            Expr::Loop {
+                label: Some(Label {
+                    name: Lifetime {
+                        ident: "a",
+                    },
+                }),
+                body: Block,
+            },
+            None,
+        ),
+        Stmt::Expr(
+            Expr::Tuple,
+            None,
+        ),
+    ]
     "###);
 }
