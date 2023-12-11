@@ -200,7 +200,7 @@ pub(crate) mod parsing {
             }
         }
 
-        if input.peek(Token![let]) {
+        if input.peek(Token![let]) && !input.peek(token::Group) {
             stmt_local(input, attrs).map(Stmt::Local)
         } else if input.peek(Token![pub])
             || input.peek(Token![crate]) && !input.peek2(Token![::])
