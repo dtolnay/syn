@@ -301,9 +301,7 @@ impl Debug for Lite<syn::BinOp> {
 impl Debug for Lite<syn::Block> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("Block");
-        if !self.value.stmts.is_empty() {
-            formatter.field("stmts", Lite(&self.value.stmts));
-        }
+        formatter.field("stmts", Lite(&self.value.stmts));
         formatter.finish()
     }
 }

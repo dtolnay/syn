@@ -243,7 +243,9 @@ fn test_fn_precedence_in_where_clause() {
             },
             output: ReturnType::Default,
         },
-        block: Block,
+        block: Block {
+            stmts: [],
+        },
     }
     "###);
 

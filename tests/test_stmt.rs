@@ -78,7 +78,9 @@ fn test_none_group() {
             generics: Generics,
             output: ReturnType::Default,
         },
-        block: Block,
+        block: Block {
+            stmts: [],
+        },
     })
     "###);
 }
@@ -251,7 +253,9 @@ fn test_early_parse_loop() {
     [
         Stmt::Expr(
             Expr::Loop {
-                body: Block,
+                body: Block {
+                    stmts: [],
+                },
             },
             None,
         ),
@@ -278,7 +282,9 @@ fn test_early_parse_loop() {
                         ident: "a",
                     },
                 }),
-                body: Block,
+                body: Block {
+                    stmts: [],
+                },
             },
             None,
         ),

@@ -263,7 +263,9 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str, val: &Operand) 
                     let mut call = quote! {
                         formatter.field(#f, #format);
                     };
-                    if let Type::Vec(_) | Type::Punctuated(_) = ty {
+                    if node.ident == "Block" && f == "stmts" {
+                        // Format regardless of whether is_empty().
+                    } else if let Type::Vec(_) | Type::Punctuated(_) = ty {
                         call = quote! {
                             if !#val.#ident.is_empty() {
                                 #call
