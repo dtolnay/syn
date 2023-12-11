@@ -85,7 +85,6 @@ fn test_none_group() {
 
     let tokens = Group::new(Delimiter::None, quote!(let None = None)).to_token_stream();
     let stmts = Block::parse_within.parse2(tokens).unwrap();
-    // FIXME
     snapshot!(stmts, @r###"
     [
         Stmt::Expr(
