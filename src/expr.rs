@@ -1368,6 +1368,10 @@ pub(crate) mod parsing {
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
         let begin = input.fork();
         let attrs = input.call(expr_attrs)?;
+        if input.peek(token::Group) {
+            return trailer_expr(begin, attrs, input, allow_struct);
+        }
+
         if input.peek(Token![&]) {
             let and_token: Token![&] = input.parse()?;
             let raw: Option<kw::raw> = if input.peek(kw::raw)
