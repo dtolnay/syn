@@ -1577,12 +1577,8 @@ pub(crate) mod parsing {
     // interactions, as they are fully contained.
     #[cfg(feature = "full")]
     fn atom_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        if input.peek(token::Group)
-            && !input.peek2(Token![::])
-            && !input.peek2(Token![!])
-            && !input.peek2(token::Brace)
-        {
-            input.call(expr_group).map(Expr::Group)
+        if input.peek(token::Group) {
+            expr_group(input, allow_struct)
         } else if input.peek(Lit) {
             input.parse().map(Expr::Lit)
         } else if input.peek(Token![async])
@@ -1680,12 +1676,8 @@ pub(crate) mod parsing {
 
     #[cfg(not(feature = "full"))]
     fn atom_expr(input: ParseStream) -> Result<Expr> {
-        if input.peek(token::Group)
-            && !input.peek2(Token![::])
-            && !input.peek2(Token![!])
-            && !input.peek2(token::Brace)
-        {
-            input.call(expr_group).map(Expr::Group)
+        if input.peek(token::Group) {
+            expr_group(input)
         } else if input.peek(Lit) {
             input.parse().map(Expr::Lit)
         } else if input.peek(token::Paren) {
@@ -1736,7 +1728,21 @@ pub(crate) mod parsing {
         #[cfg(feature = "full")] allow_struct: AllowStruct,
     ) -> Result<Expr> {
         let (qself, path) = path::parsing::qpath(input, true)?;
+        rest_of_path_or_macro_or_struct(
+            qself,
+            path,
+            input,
+            #[cfg(feature = "full")]
+            allow_struct,
+        )
+    }
 
+    fn rest_of_path_or_macro_or_struct(
+        qself: Option<QSelf>,
+        path: Path,
+        input: ParseStream,
+        #[cfg(feature = "full")] allow_struct: AllowStruct,
+    ) -> Result<Expr> {
         if qself.is_none()
             && input.peek(Token![!])
             && !input.peek(Token![!=])
@@ -1962,13 +1968,38 @@ pub(crate) mod parsing {
         }
     }
 
-    fn expr_group(input: ParseStream) -> Result<ExprGroup> {
+    fn expr_group(
+        input: ParseStream,
+        #[cfg(feature = "full")] allow_struct: AllowStruct,
+    ) -> Result<Expr> {
         let group = crate::group::parse_group(input)?;
-        Ok(ExprGroup {
+        let mut inner: Expr = group.content.parse()?;
+
+        match inner {
+            Expr::Path(mut expr) if expr.attrs.is_empty() => {
+                let grouped_len = expr.path.segments.len();
+                Path::parse_rest(input, &mut expr.path, true)?;
+                match rest_of_path_or_macro_or_struct(
+                    expr.qself,
+                    expr.path,
+                    input,
+                    #[cfg(feature = "full")]
+                    allow_struct,
+                )? {
+                    Expr::Path(expr) if expr.path.segments.len() == grouped_len => {
+                        inner = Expr::Path(expr);
+                    }
+                    extended => return Ok(extended),
+                }
+            }
+            _ => {}
+        }
+
+        Ok(Expr::Group(ExprGroup {
             attrs: Vec::new(),
             group_token: group.token,
-            expr: group.content.parse()?,
-        })
+            expr: Box::new(inner),
+        }))
     }
 
     #[cfg(feature = "full")]

@@ -339,3 +339,106 @@ fn test_ambiguous_label() {
         syn::parse2::<Stmt>(stmt).unwrap_err();
     }
 }
+
+#[test]
+fn test_extended_interpolated_path() {
+    let path = Group::new(Delimiter::None, quote!(a::b));
+
+    let tokens = quote!(if #path {});
+    snapshot!(tokens as Expr, @r###"
+    Expr::If {
+        cond: Expr::Group {
+            expr: Expr::Path {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "a",
+                        },
+                        PathSegment {
+                            ident: "b",
+                        },
+                    ],
+                },
+            },
+        },
+        then_branch: Block {
+            stmts: [],
+        },
+    }
+    "###);
+
+    let tokens = quote!(#path {});
+    snapshot!(tokens as Expr, @r###"
+    Expr::Struct {
+        path: Path {
+            segments: [
+                PathSegment {
+                    ident: "a",
+                },
+                PathSegment {
+                    ident: "b",
+                },
+            ],
+        },
+    }
+    "###);
+
+    let tokens = quote!(#path :: c);
+    snapshot!(tokens as Expr, @r###"
+    Expr::Path {
+        path: Path {
+            segments: [
+                PathSegment {
+                    ident: "a",
+                },
+                PathSegment {
+                    ident: "b",
+                },
+                PathSegment {
+                    ident: "c",
+                },
+            ],
+        },
+    }
+    "###);
+
+    let nested = Group::new(Delimiter::None, quote!(a::b || true));
+    let tokens = quote!(if #nested && false {});
+    snapshot!(tokens as Expr, @r###"
+    Expr::If {
+        cond: Expr::Binary {
+            left: Expr::Group {
+                expr: Expr::Binary {
+                    left: Expr::Path {
+                        path: Path {
+                            segments: [
+                                PathSegment {
+                                    ident: "a",
+                                },
+                                PathSegment {
+                                    ident: "b",
+                                },
+                            ],
+                        },
+                    },
+                    op: BinOp::Or,
+                    right: Expr::Lit {
+                        lit: Lit::Bool {
+                            value: true,
+                        },
+                    },
+                },
+            },
+            op: BinOp::And,
+            right: Expr::Lit {
+                lit: Lit::Bool {
+                    value: false,
+                },
+            },
+        },
+        then_branch: Block {
+            stmts: [],
+        },
+    }
+    "###);
+}
