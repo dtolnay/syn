@@ -235,7 +235,6 @@ fn test_macro_variable_match_arm() {
     // mimics the token stream corresponding to `match v { _ => $expr }`
     let expr = Group::new(Delimiter::None, quote! { #[a] () });
     let tokens = quote!(match v { _ => #expr });
-
     snapshot!(tokens as Expr, @r###"
     Expr::Match {
         expr: Expr::Path {
@@ -264,6 +263,40 @@ fn test_macro_variable_match_arm() {
                                 },
                             },
                         ],
+                    },
+                },
+            },
+        ],
+    }
+    "###);
+
+    let expr = Group::new(Delimiter::None, quote!(loop {} + 1));
+    let tokens = quote!(match v { _ => #expr });
+    snapshot!(tokens as Expr, @r###"
+    Expr::Match {
+        expr: Expr::Path {
+            path: Path {
+                segments: [
+                    PathSegment {
+                        ident: "v",
+                    },
+                ],
+            },
+        },
+        arms: [
+            Arm {
+                pat: Pat::Wild,
+                body: Expr::Group {
+                    expr: Expr::Binary {
+                        left: Expr::Loop {
+                            body: Block {
+                                stmts: [],
+                            },
+                        },
+                        op: BinOp::Add,
+                        right: Expr::Lit {
+                            lit: 1,
+                        },
                     },
                 },
             },
