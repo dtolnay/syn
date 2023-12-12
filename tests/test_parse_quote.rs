@@ -2,7 +2,7 @@
 mod macros;
 
 use syn::punctuated::Punctuated;
-use syn::{parse_quote, Attribute, Lit, Pat, Stmt, Token};
+use syn::{parse_quote, Attribute, Field, Lit, Pat, Stmt, Token};
 
 #[test]
 fn test_attribute() {
@@ -30,6 +30,46 @@ fn test_attribute() {
                     ident: "no_std",
                 },
             ],
+        },
+    }
+    "###);
+}
+
+#[test]
+fn test_field() {
+    let field: Field = parse_quote!(pub enabled: bool);
+    snapshot!(field, @r###"
+    Field {
+        vis: Visibility::Public,
+        ident: Some("enabled"),
+        colon_token: Some,
+        ty: Type::Path {
+            path: Path {
+                segments: [
+                    PathSegment {
+                        ident: "bool",
+                    },
+                ],
+            },
+        },
+    }
+    "###);
+
+    let field: Field = parse_quote!(primitive::bool);
+    snapshot!(field, @r###"
+    Field {
+        vis: Visibility::Inherited,
+        ty: Type::Path {
+            path: Path {
+                segments: [
+                    PathSegment {
+                        ident: "primitive",
+                    },
+                    PathSegment {
+                        ident: "bool",
+                    },
+                ],
+            },
         },
     }
     "###);
