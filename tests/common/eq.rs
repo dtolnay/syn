@@ -151,8 +151,8 @@ use rustc_ast::ast::WhereRegionPredicate;
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, Delimiter, Lit, Nonterminal, Token, TokenKind};
 use rustc_ast::tokenstream::{
-    AttrTokenStream, AttrTokenTree, AttributesData, DelimSpan, LazyAttrTokenStream, Spacing,
-    TokenStream, TokenTree,
+    AttrTokenStream, AttrTokenTree, AttributesData, DelimSpacing, DelimSpan, LazyAttrTokenStream,
+    Spacing, TokenStream, TokenTree,
 };
 use rustc_data_structures::sync::Lrc;
 use rustc_span::source_map::Spanned;
@@ -461,6 +461,7 @@ spanless_eq_struct!(Closure; binder capture_clause constness coroutine_kind mova
 spanless_eq_struct!(ConstItem; defaultness generics ty expr);
 spanless_eq_struct!(Crate; attrs items spans id is_placeholder);
 spanless_eq_struct!(DelimArgs; dspan delim tokens);
+spanless_eq_struct!(DelimSpacing; open close);
 spanless_eq_struct!(EnumDef; variants);
 spanless_eq_struct!(Expr; id kind span attrs !tokens);
 spanless_eq_struct!(ExprField; attrs id span ident expr is_shorthand is_placeholder);
@@ -523,7 +524,7 @@ spanless_eq_enum!(AssocItemKind; Const(0) Fn(0) Type(0) MacCall(0));
 spanless_eq_enum!(AttrArgs; Empty Delimited(0) Eq(0 1));
 spanless_eq_enum!(AttrArgsEq; Ast(0) Hir(0));
 spanless_eq_enum!(AttrStyle; Outer Inner);
-spanless_eq_enum!(AttrTokenTree; Token(0 1) Delimited(0 1 2) Attributes(0));
+spanless_eq_enum!(AttrTokenTree; Token(0 1) Delimited(0 1 2 3) Attributes(0));
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
 spanless_eq_enum!(BlockCheckMode; Default Unsafe(0));
 spanless_eq_enum!(BorrowKind; Ref Raw);
@@ -569,7 +570,7 @@ spanless_eq_enum!(StmtKind; Local(0) Item(0) Expr(0) Semi(0) Empty MacCall(0));
 spanless_eq_enum!(StrStyle; Cooked Raw(0));
 spanless_eq_enum!(StructRest; Base(0) Rest(0) None);
 spanless_eq_enum!(Term; Ty(0) Const(0));
-spanless_eq_enum!(TokenTree; Token(0 1) Delimited(0 1 2));
+spanless_eq_enum!(TokenTree; Token(0 1) Delimited(0 1 2 3));
 spanless_eq_enum!(TraitBoundModifier; None Negative Maybe MaybeConst(0) MaybeConstNegative MaybeConstMaybe);
 spanless_eq_enum!(TraitObjectSyntax; Dyn DynStar None);
 spanless_eq_enum!(UintTy; Usize U8 U16 U32 U64 U128);
@@ -730,7 +731,7 @@ fn doc_comment<'a>(
         }
     }
     let stream = match trees.next() {
-        Some(TokenTree::Delimited(_span, Delimiter::Bracket, stream)) => stream,
+        Some(TokenTree::Delimited(_span, _spacing, Delimiter::Bracket, stream)) => stream,
         _ => return false,
     };
     let mut trees = stream.trees();
