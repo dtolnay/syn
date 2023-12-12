@@ -1,0 +1,122 @@
+#[macro_use]
+mod macros;
+
+use syn::punctuated::Punctuated;
+use syn::{parse_quote, Attribute, Lit, Pat, Stmt, Token};
+
+#[test]
+fn test_attribute() {
+    let attr: Attribute = parse_quote!(#[test]);
+    snapshot!(attr, @r###"
+    Attribute {
+        style: AttrStyle::Outer,
+        meta: Meta::Path {
+            segments: [
+                PathSegment {
+                    ident: "test",
+                },
+            ],
+        },
+    }
+    "###);
+
+    let attr: Attribute = parse_quote!(#![no_std]);
+    snapshot!(attr, @r###"
+    Attribute {
+        style: AttrStyle::Inner,
+        meta: Meta::Path {
+            segments: [
+                PathSegment {
+                    ident: "no_std",
+                },
+            ],
+        },
+    }
+    "###);
+}
+
+#[test]
+fn test_pat() {
+    let pat: Pat = parse_quote!(Some(false) | None);
+    snapshot!(&pat, @r###"
+    Pat::Or {
+        cases: [
+            Pat::TupleStruct {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "Some",
+                        },
+                    ],
+                },
+                elems: [
+                    Pat::Lit(ExprLit {
+                        lit: Lit::Bool {
+                            value: false,
+                        },
+                    }),
+                ],
+            },
+            Pat::Ident {
+                ident: "None",
+            },
+        ],
+    }
+    "###);
+
+    let boxed_pat: Box<Pat> = parse_quote!(Some(false) | None);
+    assert_eq!(*boxed_pat, pat);
+}
+
+#[test]
+fn test_punctuated() {
+    let punctuated: Punctuated<Lit, Token![|]> = parse_quote!(true | true);
+    snapshot!(punctuated.pairs(), @r###"
+    [
+        Lit::Bool {
+            value: true,
+        },
+        Or,
+        Lit::Bool {
+            value: true,
+        },
+    ]
+    "###);
+
+    let punctuated: Punctuated<Lit, Token![|]> = parse_quote!(true | true |);
+    snapshot!(punctuated.pairs(), @r###"
+    [
+        Lit::Bool {
+            value: true,
+        },
+        Or,
+        Lit::Bool {
+            value: true,
+        },
+        Or,
+    ]
+    "###);
+}
+
+#[test]
+fn test_vec_stmt() {
+    let stmts: Vec<Stmt> = parse_quote! {
+        let _;
+        true
+    };
+    snapshot!(stmts, @r###"
+    [
+        Stmt::Local {
+            pat: Pat::Wild,
+        },
+        Stmt::Expr(
+            Expr::Lit {
+                lit: Lit::Bool {
+                    value: true,
+                },
+            },
+            None,
+        ),
+    ]
+    "###);
+}
