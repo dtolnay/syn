@@ -3,6 +3,7 @@
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
 #![allow(
+    clippy::blocks_in_conditions,
     clippy::manual_assert,
     clippy::manual_let_else,
     clippy::match_like_matches_macro,
