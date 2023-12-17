@@ -290,6 +290,7 @@
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::trivially_copy_pass_by_ref,
+    clippy::uninhabited_references,
     clippy::uninlined_format_args,
     clippy::unnecessary_box_returns,
     clippy::unnecessary_unwrap,
