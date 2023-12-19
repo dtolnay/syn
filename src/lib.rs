@@ -348,7 +348,7 @@ pub use crate::expr::{Arm, FieldValue, Label, RangeLimits};
 #[cfg(any(feature = "full", feature = "derive"))]
 pub use crate::expr::{
     Expr, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBinary, ExprBlock, ExprBreak, ExprCall,
-    ExprCast, ExprClosure, ExprConst, ExprContinue, ExprField, ExprForLoop, ExprGroup, ExprIf,
+    ExprCast, ExprClosure, ExprConst, ExprContinue, ExprField, ExprForLoop, ExprGen, ExprGroup, ExprIf,
     ExprIndex, ExprInfer, ExprLet, ExprLit, ExprLoop, ExprMacro, ExprMatch, ExprMethodCall,
     ExprParen, ExprPath, ExprRange, ExprReference, ExprRepeat, ExprReturn, ExprStruct, ExprTry,
     ExprTryBlock, ExprTuple, ExprUnary, ExprUnsafe, ExprWhile, ExprYield, Index, Member,
@@ -494,7 +494,7 @@ mod verbatim;
 #[cfg(all(feature = "parsing", feature = "full"))]
 mod whitespace;
 
-mod gen {
+mod r#gen {
     /// Syntax tree traversal to transform the nodes of an owned syntax tree.
     ///
     /// Each method of the [`Fold`] trait is a hook that can be overridden to
@@ -815,7 +815,7 @@ mod gen {
 }
 
 #[cfg(any(feature = "fold", feature = "visit", feature = "visit-mut"))]
-pub use crate::gen::*;
+pub use crate::r#gen::*;
 
 // Not public API.
 #[doc(hidden)]

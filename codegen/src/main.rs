@@ -25,7 +25,7 @@ mod eq;
 mod file;
 mod fold;
 mod full;
-mod gen;
+mod r#gen;
 mod hash;
 mod json;
 mod lookup;

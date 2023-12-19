@@ -8,7 +8,7 @@
     clippy::needless_pass_by_ref_mut,
 )]
 #[cfg(any(feature = "full", feature = "derive"))]
-use crate::gen::helper::fold::*;
+use crate::r#gen::helper::fold::*;
 use crate::*;
 use proc_macro2::Span;
 #[cfg(feature = "full")]
@@ -167,6 +167,10 @@ pub trait Fold {
     #[cfg(feature = "full")]
     fn fold_expr_for_loop(&mut self, i: ExprForLoop) -> ExprForLoop {
         fold_expr_for_loop(self, i)
+    }
+    #[cfg(feature = "full")]
+    fn fold_expr_gen(&mut self, i: ExprGen) -> ExprGen {
+        fold_expr_gen(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_expr_group(&mut self, i: ExprGroup) -> ExprGroup {
@@ -1031,6 +1035,7 @@ where
         Expr::ForLoop(_binding_0) => {
             Expr::ForLoop(full!(f.fold_expr_for_loop(_binding_0)))
         }
+        Expr::Gen(_binding_0) => Expr::Gen(full!(f.fold_expr_gen(_binding_0))),
         Expr::Group(_binding_0) => Expr::Group(f.fold_expr_group(_binding_0)),
         Expr::If(_binding_0) => Expr::If(full!(f.fold_expr_if(_binding_0))),
         Expr::Index(_binding_0) => Expr::Index(f.fold_expr_index(_binding_0)),
@@ -1236,6 +1241,19 @@ where
         in_token: node.in_token,
         expr: Box::new(f.fold_expr(*node.expr)),
         body: f.fold_block(node.body),
+    }
+}
+#[cfg(feature = "full")]
+pub fn fold_expr_gen<F>(f: &mut F, node: ExprGen) -> ExprGen
+where
+    F: Fold + ?Sized,
+{
+    ExprGen {
+        attrs: FoldHelper::lift(node.attrs, |it| f.fold_attribute(it)),
+        async_token: node.async_token,
+        gen_token: node.gen_token,
+        capture: node.capture,
+        block: f.fold_block(node.block),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2614,6 +2632,7 @@ where
     Signature {
         constness: node.constness,
         asyncness: node.asyncness,
+        generator: node.generator,
         unsafety: node.unsafety,
         abi: (node.abi).map(|it| f.fold_abi(it)),
         fn_token: node.fn_token,

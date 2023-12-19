@@ -754,6 +754,7 @@ define_keywords! {
     "final"       pub struct Final
     "fn"          pub struct Fn
     "for"         pub struct For
+    "gen"         pub struct Gen
     "if"          pub struct If
     "impl"        pub struct Impl
     "in"          pub struct In
@@ -933,6 +934,7 @@ macro_rules! Token {
     [fn]          => { $crate::token::Fn };
     [for]         => { $crate::token::For };
     [if]          => { $crate::token::If };
+    [gen]         => { $crate::token::Gen };
     [impl]        => { $crate::token::Impl };
     [in]          => { $crate::token::In };
     [let]         => { $crate::token::Let };

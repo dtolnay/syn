@@ -14,7 +14,7 @@ fn test_expr_size() {
 #[rustversion::attr(before(2022-09-09), ignore)]
 #[test]
 fn test_item_size() {
-    assert_eq!(mem::size_of::<Item>(), 360);
+    assert_eq!(mem::size_of::<Item>(), 368);
 }
 
 #[rustversion::attr(before(2023-04-29), ignore)]

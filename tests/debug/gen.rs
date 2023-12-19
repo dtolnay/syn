@@ -659,6 +659,20 @@ impl Debug for Lite<syn::Expr> {
                 formatter.field("body", Lite(&_val.body));
                 formatter.finish()
             }
+            syn::Expr::Gen(_val) => {
+                let mut formatter = formatter.debug_struct("Expr::Gen");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                if _val.async_token.is_some() {
+                    formatter.field("async_token", &Present);
+                }
+                if _val.capture.is_some() {
+                    formatter.field("capture", &Present);
+                }
+                formatter.field("block", Lite(&_val.block));
+                formatter.finish()
+            }
             syn::Expr::Group(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Group");
                 if !_val.attrs.is_empty() {
@@ -1287,6 +1301,22 @@ impl Debug for Lite<syn::ExprForLoop> {
         formatter.field("pat", Lite(&self.value.pat));
         formatter.field("expr", Lite(&self.value.expr));
         formatter.field("body", Lite(&self.value.body));
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::ExprGen> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ExprGen");
+        if !self.value.attrs.is_empty() {
+            formatter.field("attrs", Lite(&self.value.attrs));
+        }
+        if self.value.async_token.is_some() {
+            formatter.field("async_token", &Present);
+        }
+        if self.value.capture.is_some() {
+            formatter.field("capture", &Present);
+        }
+        formatter.field("block", Lite(&self.value.block));
         formatter.finish()
     }
 }
@@ -3659,6 +3689,9 @@ impl Debug for Lite<syn::Signature> {
         }
         if self.value.asyncness.is_some() {
             formatter.field("asyncness", &Present);
+        }
+        if self.value.generator.is_some() {
+            formatter.field("generator", &Present);
         }
         if self.value.unsafety.is_some() {
             formatter.field("unsafety", &Present);

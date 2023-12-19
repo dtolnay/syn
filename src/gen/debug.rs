@@ -418,6 +418,8 @@ impl Debug for Expr {
             Expr::Field(v0) => v0.debug(formatter, "Field"),
             #[cfg(feature = "full")]
             Expr::ForLoop(v0) => v0.debug(formatter, "ForLoop"),
+            #[cfg(feature = "full")]
+            Expr::Gen(v0) => v0.debug(formatter, "Gen"),
             Expr::Group(v0) => v0.debug(formatter, "Group"),
             #[cfg(feature = "full")]
             Expr::If(v0) => v0.debug(formatter, "If"),
@@ -711,6 +713,24 @@ impl Debug for ExprForLoop {
             }
         }
         self.debug(formatter, "ExprForLoop")
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Debug for ExprGen {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        impl ExprGen {
+            fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
+                let mut formatter = formatter.debug_struct(name);
+                formatter.field("attrs", &self.attrs);
+                formatter.field("async_token", &self.async_token);
+                formatter.field("gen_token", &self.gen_token);
+                formatter.field("capture", &self.capture);
+                formatter.field("block", &self.block);
+                formatter.finish()
+            }
+        }
+        self.debug(formatter, "ExprGen")
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2393,6 +2413,7 @@ impl Debug for Signature {
         let mut formatter = formatter.debug_struct("Signature");
         formatter.field("constness", &self.constness);
         formatter.field("asyncness", &self.asyncness);
+        formatter.field("generator", &self.generator);
         formatter.field("unsafety", &self.unsafety);
         formatter.field("abi", &self.abi);
         formatter.field("fn_token", &self.fn_token);

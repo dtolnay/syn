@@ -779,6 +779,7 @@ ast_struct! {
     pub struct Signature {
         pub constness: Option<Token![const]>,
         pub asyncness: Option<Token![async]>,
+        pub generator: Option<Token![gen]>,
         pub unsafety: Option<Token![unsafe]>,
         pub abi: Option<Abi>,
         pub fn_token: Token![fn],
@@ -1447,6 +1448,7 @@ pub(crate) mod parsing {
         let fork = input.fork();
         fork.parse::<Option<Token![const]>>().is_ok()
             && fork.parse::<Option<Token![async]>>().is_ok()
+            && fork.parse::<Option<Token![gen]>>().is_ok()
             && fork.parse::<Option<Token![unsafe]>>().is_ok()
             && fork.parse::<Option<Abi>>().is_ok()
             && fork.peek(Token![fn])
@@ -1457,6 +1459,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let constness: Option<Token![const]> = input.parse()?;
             let asyncness: Option<Token![async]> = input.parse()?;
+            let generator: Option<Token![gen]> = input.parse()?;
             let unsafety: Option<Token![unsafe]> = input.parse()?;
             let abi: Option<Abi> = input.parse()?;
             let fn_token: Token![fn] = input.parse()?;
@@ -1473,6 +1476,7 @@ pub(crate) mod parsing {
             Ok(Signature {
                 constness,
                 asyncness,
+                generator,
                 unsafety,
                 abi,
                 fn_token,
@@ -2276,6 +2280,7 @@ pub(crate) mod parsing {
                         return Ok(TraitItem::Verbatim(verbatim::between(&begin, input)));
                     }
                 } else if lookahead.peek(Token![async])
+                    || lookahead.peek(Token![gen])
                     || lookahead.peek(Token![unsafe])
                     || lookahead.peek(Token![extern])
                     || lookahead.peek(Token![fn])
@@ -3323,6 +3328,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.constness.to_tokens(tokens);
             self.asyncness.to_tokens(tokens);
+            self.generator.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
             self.abi.to_tokens(tokens);
             self.fn_token.to_tokens(tokens);

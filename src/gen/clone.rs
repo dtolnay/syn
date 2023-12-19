@@ -252,6 +252,8 @@ impl Clone for Expr {
             Expr::Field(v0) => Expr::Field(v0.clone()),
             #[cfg(feature = "full")]
             Expr::ForLoop(v0) => Expr::ForLoop(v0.clone()),
+            #[cfg(feature = "full")]
+            Expr::Gen(v0) => Expr::Gen(v0.clone()),
             Expr::Group(v0) => Expr::Group(v0.clone()),
             #[cfg(feature = "full")]
             Expr::If(v0) => Expr::If(v0.clone()),
@@ -470,6 +472,19 @@ impl Clone for ExprForLoop {
             in_token: self.in_token.clone(),
             expr: self.expr.clone(),
             body: self.body.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for ExprGen {
+    fn clone(&self) -> Self {
+        ExprGen {
+            attrs: self.attrs.clone(),
+            async_token: self.async_token.clone(),
+            gen_token: self.gen_token.clone(),
+            capture: self.capture.clone(),
+            block: self.block.clone(),
         }
     }
 }
@@ -1712,6 +1727,7 @@ impl Clone for Signature {
         Signature {
             constness: self.constness.clone(),
             asyncness: self.asyncness.clone(),
+            generator: self.generator.clone(),
             unsafety: self.unsafety.clone(),
             abi: self.abi.clone(),
             fn_token: self.fn_token.clone(),

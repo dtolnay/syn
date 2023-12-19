@@ -5,7 +5,7 @@
 )]
 
 #[rustfmt::skip]
-mod gen;
+mod r#gen;
 
 use proc_macro2::{Ident, Literal, TokenStream};
 use ref_cast::RefCast;

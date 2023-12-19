@@ -168,6 +168,10 @@ pub trait VisitMut {
     fn visit_expr_for_loop_mut(&mut self, i: &mut ExprForLoop) {
         visit_expr_for_loop_mut(self, i);
     }
+    #[cfg(feature = "full")]
+    fn visit_expr_gen_mut(&mut self, i: &mut ExprGen) {
+        visit_expr_gen_mut(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_expr_group_mut(&mut self, i: &mut ExprGroup) {
         visit_expr_group_mut(self, i);
@@ -1125,6 +1129,9 @@ where
         Expr::ForLoop(_binding_0) => {
             full!(v.visit_expr_for_loop_mut(_binding_0));
         }
+        Expr::Gen(_binding_0) => {
+            full!(v.visit_expr_gen_mut(_binding_0));
+        }
         Expr::Group(_binding_0) => {
             v.visit_expr_group_mut(_binding_0);
         }
@@ -1396,6 +1403,19 @@ where
     skip!(node.in_token);
     v.visit_expr_mut(&mut *node.expr);
     v.visit_block_mut(&mut node.body);
+}
+#[cfg(feature = "full")]
+pub fn visit_expr_gen_mut<V>(v: &mut V, node: &mut ExprGen)
+where
+    V: VisitMut + ?Sized,
+{
+    for it in &mut node.attrs {
+        v.visit_attribute_mut(it);
+    }
+    skip!(node.async_token);
+    skip!(node.gen_token);
+    skip!(node.capture);
+    v.visit_block_mut(&mut node.block);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr_group_mut<V>(v: &mut V, node: &mut ExprGroup)
@@ -2930,6 +2950,7 @@ where
 {
     skip!(node.constness);
     skip!(node.asyncness);
+    skip!(node.generator);
     skip!(node.unsafety);
     if let Some(it) = &mut node.abi {
         v.visit_abi_mut(it);

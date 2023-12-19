@@ -61,7 +61,7 @@ mod parsing {
             // Based on https://doc.rust-lang.org/1.65.0/reference/keywords.html
             "abstract" | "as" | "async" | "await" | "become" | "box" | "break" |
             "const" | "continue" | "crate" | "do" | "dyn" | "else" | "enum" |
-            "extern" | "false" | "final" | "fn" | "for" | "if" | "impl" | "in" |
+            "extern" | "false" | "final" | "fn" | "for" | "gen" | "if" | "impl" | "in" |
             "let" | "loop" | "macro" | "match" | "mod" | "move" | "mut" |
             "override" | "priv" | "pub" | "ref" | "return" | "Self" | "self" |
             "static" | "struct" | "super" | "trait" | "true" | "try" | "type" |

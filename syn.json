@@ -710,6 +710,11 @@
             "syn": "ExprForLoop"
           }
         ],
+        "Gen": [
+          {
+            "syn": "ExprGen"
+          }
+        ],
         "Group": [
           {
             "syn": "ExprGroup"
@@ -1255,6 +1260,37 @@
           }
         },
         "body": {
+          "syn": "Block"
+        }
+      }
+    },
+    {
+      "ident": "ExprGen",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "async_token": {
+          "option": {
+            "token": "Async"
+          }
+        },
+        "gen_token": {
+          "token": "Gen"
+        },
+        "capture": {
+          "option": {
+            "token": "Move"
+          }
+        },
+        "block": {
           "syn": "Block"
         }
       }
@@ -4328,6 +4364,11 @@
             "token": "Async"
           }
         },
+        "generator": {
+          "option": {
+            "token": "Gen"
+          }
+        },
         "unsafety": {
           "option": {
             "token": "Unsafe"
@@ -5496,6 +5537,7 @@
     "Fn": "fn",
     "For": "for",
     "Ge": ">=",
+    "Gen": "gen",
     "Gt": ">",
     "If": "if",
     "Impl": "impl",

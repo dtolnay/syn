@@ -131,6 +131,9 @@ ast_enum_of_structs! {
         /// A for loop: `for pat in expr { ... }`.
         ForLoop(ExprForLoop),
 
+        /// A gen block: `gen { }`.
+        Gen(ExprGen),
+
         /// An expression contained within invisible delimiters.
         ///
         /// This variant is important for faithfully representing the precedence
@@ -397,6 +400,18 @@ ast_struct! {
         pub in_token: Token![in],
         pub expr: Box<Expr>,
         pub body: Block,
+    }
+}
+
+ast_struct! {
+    /// A gen block: `gen { }`.
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    pub struct ExprGen #full {
+        pub attrs: Vec<Attribute>,
+        pub async_token: Option<Token![async]>,
+        pub gen_token: Token![gen],
+        pub capture: Option<Token![move]>,
+        pub block: Block,
     }
 }
 
@@ -699,6 +714,7 @@ impl Expr {
             | Expr::Continue(ExprContinue { attrs, .. })
             | Expr::Field(ExprField { attrs, .. })
             | Expr::ForLoop(ExprForLoop { attrs, .. })
+            | Expr::Gen(ExprGen { attrs, .. })
             | Expr::Group(ExprGroup { attrs, .. })
             | Expr::If(ExprIf { attrs, .. })
             | Expr::Index(ExprIndex { attrs, .. })
@@ -932,6 +948,7 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
         | Expr::Closure(_)
         | Expr::Continue(_)
         | Expr::Field(_)
+        | Expr::Gen(_)
         | Expr::Group(_)
         | Expr::Index(_)
         | Expr::Infer(_)
@@ -1589,6 +1606,12 @@ pub(crate) mod parsing {
             && (input.peek2(token::Brace) || input.peek2(Token![move]) && input.peek3(token::Brace))
         {
             input.parse().map(Expr::Async)
+        } else if (input.peek(Token![async])
+            && input.peek2(Token![gen])
+            && (input.peek3(token::Brace) || input.peek3(Token![move]) && input.peek4(token::Brace)))
+            || (input.peek(Token![gen]) && (input.peek2(token::Brace) || input.peek2(Token![move]) && input.peek3(token::Brace)))
+        {
+            input.parse().map(Expr::Gen)
         } else if input.peek(Token![try]) && input.peek2(token::Brace) {
             input.parse().map(Expr::TryBlock)
         } else if input.peek(Token![|])
@@ -2405,6 +2428,20 @@ pub(crate) mod parsing {
     }
 
     #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprGen {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(ExprGen {
+                attrs: Vec::new(),
+                async_token: input.parse()?,
+                gen_token: input.parse()?,
+                capture: input.parse()?,
+                block: input.parse()?,
+            })
+        }
+    }
+
+    #[cfg(feature = "full")]
     fn closure_arg(input: ParseStream) -> Result<Pat> {
         let attrs = input.call(Attribute::parse_outer)?;
         let mut pat = Pat::parse_single(input)?;
@@ -3103,6 +3140,18 @@ pub(crate) mod printing {
                 inner_attrs_to_tokens(&self.attrs, tokens);
                 tokens.append_all(&self.body.stmts);
             });
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprGen {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            outer_attrs_to_tokens(&self.attrs, tokens);
+            self.async_token.to_tokens(tokens);
+            self.gen_token.to_tokens(tokens);
+            self.capture.to_tokens(tokens);
+            self.block.to_tokens(tokens);
         }
     }
 

@@ -271,6 +271,8 @@ impl PartialEq for Expr {
             (Expr::Field(self0), Expr::Field(other0)) => self0 == other0,
             #[cfg(feature = "full")]
             (Expr::ForLoop(self0), Expr::ForLoop(other0)) => self0 == other0,
+            #[cfg(feature = "full")]
+            (Expr::Gen(self0), Expr::Gen(other0)) => self0 == other0,
             (Expr::Group(self0), Expr::Group(other0)) => self0 == other0,
             #[cfg(feature = "full")]
             (Expr::If(self0), Expr::If(other0)) => self0 == other0,
@@ -466,6 +468,17 @@ impl PartialEq for ExprForLoop {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.label == other.label && self.pat == other.pat
             && self.expr == other.expr && self.body == other.body
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for ExprGen {}
+#[cfg(feature = "full")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for ExprGen {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs && self.async_token == other.async_token
+            && self.capture == other.capture && self.block == other.block
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1646,10 +1659,10 @@ impl Eq for Signature {}
 impl PartialEq for Signature {
     fn eq(&self, other: &Self) -> bool {
         self.constness == other.constness && self.asyncness == other.asyncness
-            && self.unsafety == other.unsafety && self.abi == other.abi
-            && self.ident == other.ident && self.generics == other.generics
-            && self.inputs == other.inputs && self.variadic == other.variadic
-            && self.output == other.output
+            && self.generator == other.generator && self.unsafety == other.unsafety
+            && self.abi == other.abi && self.ident == other.ident
+            && self.generics == other.generics && self.inputs == other.inputs
+            && self.variadic == other.variadic && self.output == other.output
     }
 }
 #[cfg(feature = "full")]

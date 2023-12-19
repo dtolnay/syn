@@ -1,4 +1,4 @@
-use crate::{file, full, gen};
+use crate::{file, full, r#gen};
 use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
@@ -8,7 +8,7 @@ use syn_codegen::{Data, Definitions, Features, Node, Type};
 const FOLD_SRC: &str = "src/gen/fold.rs";
 
 fn simple_visit(item: &str, name: &TokenStream) -> TokenStream {
-    let ident = gen::under_name(item);
+    let ident = r#gen::under_name(item);
     let method = format_ident!("fold_{}", ident);
     quote! {
         f.#method(#name)
@@ -73,13 +73,13 @@ fn visit(
             }
             Some(res)
         }
-        Type::Ext(t) if gen::TERMINAL_TYPES.contains(&&t[..]) => Some(simple_visit(t, name)),
+        Type::Ext(t) if r#gen::TERMINAL_TYPES.contains(&&t[..]) => Some(simple_visit(t, name)),
         Type::Ext(_) | Type::Std(_) | Type::Token(_) | Type::Group(_) => None,
     }
 }
 
 fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Definitions) {
-    let under_name = gen::under_name(&s.ident);
+    let under_name = r#gen::under_name(&s.ident);
     let ty = Ident::new(&s.ident, Span::call_site());
     let fold_fn = format_ident!("fold_{}", under_name);
 
@@ -182,7 +182,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
     }
 
     let fold_span_only =
-        s.data == Data::Private && !gen::TERMINAL_TYPES.contains(&s.ident.as_str());
+        s.data == Data::Private && !r#gen::TERMINAL_TYPES.contains(&s.ident.as_str());
     if fold_span_only {
         fold_impl = quote! {
             let span = f.fold_span(node.span());
@@ -209,7 +209,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
 }
 
 pub fn generate(defs: &Definitions) -> Result<()> {
-    let (traits, impls) = gen::traverse(defs, node);
+    let (traits, impls) = r#gen::traverse(defs, node);
     let full_macro = full::get_macro();
     file::write(
         FOLD_SRC,
@@ -223,7 +223,7 @@ pub fn generate(defs: &Definitions) -> Result<()> {
             )]
 
             #[cfg(any(feature = "full", feature = "derive"))]
-            use crate::gen::helper::fold::*;
+            use crate::r#gen::helper::fold::*;
             use crate::*;
             use proc_macro2::Span;
 

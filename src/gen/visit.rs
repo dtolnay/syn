@@ -167,6 +167,10 @@ pub trait Visit<'ast> {
     fn visit_expr_for_loop(&mut self, i: &'ast ExprForLoop) {
         visit_expr_for_loop(self, i);
     }
+    #[cfg(feature = "full")]
+    fn visit_expr_gen(&mut self, i: &'ast ExprGen) {
+        visit_expr_gen(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_expr_group(&mut self, i: &'ast ExprGroup) {
         visit_expr_group(self, i);
@@ -1124,6 +1128,9 @@ where
         Expr::ForLoop(_binding_0) => {
             full!(v.visit_expr_for_loop(_binding_0));
         }
+        Expr::Gen(_binding_0) => {
+            full!(v.visit_expr_gen(_binding_0));
+        }
         Expr::Group(_binding_0) => {
             v.visit_expr_group(_binding_0);
         }
@@ -1395,6 +1402,19 @@ where
     skip!(node.in_token);
     v.visit_expr(&*node.expr);
     v.visit_block(&node.body);
+}
+#[cfg(feature = "full")]
+pub fn visit_expr_gen<'ast, V>(v: &mut V, node: &'ast ExprGen)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    skip!(node.async_token);
+    skip!(node.gen_token);
+    skip!(node.capture);
+    v.visit_block(&node.block);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr_group<'ast, V>(v: &mut V, node: &'ast ExprGroup)
@@ -2927,6 +2947,7 @@ where
 {
     skip!(node.constness);
     skip!(node.asyncness);
+    skip!(node.generator);
     skip!(node.unsafety);
     if let Some(it) = &node.abi {
         v.visit_abi(it);
