@@ -389,7 +389,7 @@ impl<'a> PartialEq for Cursor<'a> {
 impl<'a> PartialOrd for Cursor<'a> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         if same_buffer(*self, *other) {
-            Some(self.ptr.cmp(&other.ptr))
+            Some(cmp_assuming_same_buffer(*self, *other))
         } else {
             None
         }
@@ -413,7 +413,6 @@ fn start_of_buffer(cursor: Cursor) -> *const Entry {
     }
 }
 
-#[cfg(any(feature = "full", feature = "derive"))]
 pub(crate) fn cmp_assuming_same_buffer(a: Cursor, b: Cursor) -> Ordering {
     a.ptr.cmp(&b.ptr)
 }
