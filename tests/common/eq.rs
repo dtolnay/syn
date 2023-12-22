@@ -578,7 +578,7 @@ spanless_eq_enum!(UnOp; Deref Not Neg);
 spanless_eq_enum!(Unsafe; Yes(0) No);
 spanless_eq_enum!(UnsafeSource; CompilerGenerated UserProvided);
 spanless_eq_enum!(UseTreeKind; Simple(0) Nested(0) Glob);
-spanless_eq_enum!(VariantData; Struct(0 1) Tuple(0 1) Unit(0));
+spanless_eq_enum!(VariantData; Struct(fields recovered) Tuple(0 1) Unit(0));
 spanless_eq_enum!(VisibilityKind; Public Restricted(path id shorthand) Inherited);
 spanless_eq_enum!(WherePredicate; BoundPredicate(0) RegionPredicate(0) EqPredicate(0));
 spanless_eq_enum!(CoroutineKind; Async(span closure_id return_impl_trait_id)
