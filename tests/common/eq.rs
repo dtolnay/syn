@@ -26,6 +26,7 @@ use rustc_ast::ast::BindingAnnotation;
 use rustc_ast::ast::Block;
 use rustc_ast::ast::BlockCheckMode;
 use rustc_ast::ast::BorrowKind;
+use rustc_ast::ast::BoundConstness;
 use rustc_ast::ast::BoundPolarity;
 use rustc_ast::ast::ByRef;
 use rustc_ast::ast::CaptureBy;
@@ -49,6 +50,7 @@ use rustc_ast::ast::FnDecl;
 use rustc_ast::ast::FnHeader;
 use rustc_ast::ast::FnRetTy;
 use rustc_ast::ast::FnSig;
+use rustc_ast::ast::ForLoopKind;
 use rustc_ast::ast::ForeignItemKind;
 use rustc_ast::ast::ForeignMod;
 use rustc_ast::ast::FormatAlignment;
@@ -126,7 +128,7 @@ use rustc_ast::ast::StructExpr;
 use rustc_ast::ast::StructRest;
 use rustc_ast::ast::Term;
 use rustc_ast::ast::Trait;
-use rustc_ast::ast::TraitBoundModifier;
+use rustc_ast::ast::TraitBoundModifiers;
 use rustc_ast::ast::TraitObjectSyntax;
 use rustc_ast::ast::TraitRef;
 use rustc_ast::ast::Ty;
@@ -507,6 +509,7 @@ spanless_eq_struct!(StrLit; symbol suffix symbol_unescaped style span);
 spanless_eq_struct!(StructExpr; qself path fields rest);
 spanless_eq_struct!(Token; kind span);
 spanless_eq_struct!(Trait; unsafety is_auto generics bounds items);
+spanless_eq_struct!(TraitBoundModifiers; constness polarity);
 spanless_eq_struct!(TraitRef; path ref_id);
 spanless_eq_struct!(Ty; id kind span tokens);
 spanless_eq_struct!(TyAlias; defaultness generics where_clauses !where_predicates_split bounds ty);
@@ -528,6 +531,7 @@ spanless_eq_enum!(AttrTokenTree; Token(0 1) Delimited(0 1 2 3) Attributes(0));
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
 spanless_eq_enum!(BlockCheckMode; Default Unsafe(0));
 spanless_eq_enum!(BorrowKind; Ref Raw);
+spanless_eq_enum!(BoundConstness; Never Maybe(0));
 spanless_eq_enum!(BoundPolarity; Positive Negative(0) Maybe(0));
 spanless_eq_enum!(ByRef; Yes No);
 spanless_eq_enum!(CaptureBy; Value(move_kw) Ref);
@@ -537,6 +541,7 @@ spanless_eq_enum!(Defaultness; Default(0) Final);
 spanless_eq_enum!(Extern; None Implicit(0) Explicit(0 1));
 spanless_eq_enum!(FloatTy; F32 F64);
 spanless_eq_enum!(FnRetTy; Default(0) Ty(0));
+spanless_eq_enum!(ForLoopKind; For ForAwait);
 spanless_eq_enum!(ForeignItemKind; Static(0 1 2) Fn(0) TyAlias(0) MacCall(0));
 spanless_eq_enum!(FormatAlignment; Left Right Center);
 spanless_eq_enum!(FormatArgPositionKind; Implicit Number Named);
@@ -571,7 +576,6 @@ spanless_eq_enum!(StrStyle; Cooked Raw(0));
 spanless_eq_enum!(StructRest; Base(0) Rest(0) None);
 spanless_eq_enum!(Term; Ty(0) Const(0));
 spanless_eq_enum!(TokenTree; Token(0 1) Delimited(0 1 2 3));
-spanless_eq_enum!(TraitBoundModifier; None Negative Maybe MaybeConst(0) MaybeConstNegative MaybeConstMaybe);
 spanless_eq_enum!(TraitObjectSyntax; Dyn DynStar None);
 spanless_eq_enum!(UintTy; Usize U8 U16 U32 U64 U128);
 spanless_eq_enum!(UnOp; Deref Not Neg);
@@ -586,12 +590,12 @@ spanless_eq_enum!(CoroutineKind; Async(span closure_id return_impl_trait_id)
     AsyncGen(span closure_id return_impl_trait_id));
 spanless_eq_enum!(ExprKind; Array(0) ConstBlock(0) Call(0 1) MethodCall(0)
     Tup(0) Binary(0 1 2) Unary(0 1) Lit(0) Cast(0 1) Type(0 1) Let(0 1 2 3)
-    If(0 1 2) While(0 1 2) ForLoop(0 1 2 3) Loop(0 1 2) Match(0 1) Closure(0)
-    Block(0 1) Gen(0 1 2) Await(0 1) TryBlock(0) Assign(0 1 2) AssignOp(0 1 2)
-    Field(0 1) Index(0 1 2) Underscore Range(0 1 2) Path(0 1) AddrOf(0 1 2)
-    Break(0 1) Continue(0) Ret(0) InlineAsm(0) OffsetOf(0 1) MacCall(0)
-    Struct(0) Repeat(0 1) Paren(0) Try(0) Yield(0) Yeet(0) Become(0)
-    IncludedBytes(0) FormatArgs(0) Err);
+    If(0 1 2) While(0 1 2) ForLoop(pat iter body label kind) Loop(0 1 2)
+    Match(0 1) Closure(0) Block(0 1) Gen(0 1 2) Await(0 1) TryBlock(0)
+    Assign(0 1 2) AssignOp(0 1 2) Field(0 1) Index(0 1 2) Underscore
+    Range(0 1 2) Path(0 1) AddrOf(0 1 2) Break(0 1) Continue(0) Ret(0)
+    InlineAsm(0) OffsetOf(0 1) MacCall(0) Struct(0) Repeat(0 1) Paren(0) Try(0)
+    Yield(0) Yeet(0) Become(0) IncludedBytes(0) FormatArgs(0) Err);
 spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
     InOut(reg late expr) SplitInOut(reg late in_expr out_expr) Const(anon_const)
     Sym(sym));

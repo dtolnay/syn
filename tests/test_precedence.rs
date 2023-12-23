@@ -188,9 +188,9 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 
 fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
     use rustc_ast::ast::{
-        AssocItem, AssocItemKind, Attribute, BinOpKind, Block, BorrowKind, Expr, ExprField,
-        ExprKind, GenericArg, GenericBound, ItemKind, Local, LocalKind, Pat, Stmt, StmtKind,
-        StructExpr, StructRest, TraitBoundModifier, Ty,
+        AssocItem, AssocItemKind, Attribute, BinOpKind, Block, BorrowKind, BoundConstness, Expr,
+        ExprField, ExprKind, GenericArg, GenericBound, ItemKind, Local, LocalKind, Pat, Stmt,
+        StmtKind, StructExpr, StructRest, TraitBoundModifiers, Ty,
     };
     use rustc_ast::mut_visit::{
         noop_flat_map_assoc_item, noop_visit_generic_arg, noop_visit_item_kind, noop_visit_local,
@@ -305,7 +305,10 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
             match bound {
                 GenericBound::Trait(
                     _,
-                    TraitBoundModifier::MaybeConst(_) | TraitBoundModifier::MaybeConstMaybe,
+                    TraitBoundModifiers {
+                        constness: BoundConstness::Maybe(_),
+                        ..
+                    },
                 ) => {}
                 _ => noop_visit_param_bound(bound, self),
             }
