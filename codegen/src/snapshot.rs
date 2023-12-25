@@ -331,10 +331,26 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     }
 }
 
+fn expand_token_impl(name: &str, symbol: &str) -> TokenStream {
+    let ident = Ident::new(name, Span::call_site());
+    let repr = format!("Token![{}]", symbol);
+
+    quote! {
+        impl Debug for Lite<syn::token::#ident> {
+            fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str(#repr)
+            }
+        }
+    }
+}
+
 pub fn generate(defs: &Definitions) -> Result<()> {
     let mut impls = TokenStream::new();
     for node in &defs.types {
         impls.extend(expand_impl(defs, node));
+    }
+    for (name, symbol) in &defs.tokens {
+        impls.extend(expand_token_impl(name, symbol));
     }
 
     file::write(
