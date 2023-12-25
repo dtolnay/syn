@@ -11,7 +11,7 @@ use proc_macro2::{Ident, Literal, TokenStream};
 use ref_cast::RefCast;
 use std::fmt::{self, Debug};
 use std::ops::Deref;
-use syn::punctuated::{self, Punctuated};
+use syn::punctuated::Punctuated;
 
 #[derive(RefCast)]
 #[repr(transparent)]
@@ -115,23 +115,11 @@ where
 impl<T, P> Debug for Lite<Punctuated<T, P>>
 where
     Lite<T>: Debug,
-{
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter
-            .debug_list()
-            .entries(self.value.iter().map(Lite))
-            .finish()
-    }
-}
-
-impl<'a, T, P> Debug for Lite<punctuated::Pairs<'a, T, P>>
-where
-    Lite<T>: Debug,
     Lite<P>: Debug,
 {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut list = formatter.debug_list();
-        for pair in self.value.clone() {
+        for pair in self.pairs() {
             let (node, punct) = pair.into_tuple();
             list.entry(Lite(node));
             list.entries(punct.map(Lite));

@@ -170,6 +170,7 @@ fn test_group_colons() {
                         ],
                     },
                 },
+                Token![::],
                 PathSegment {
                     ident: "Item",
                 },
@@ -245,6 +246,7 @@ fn test_trait_object() {
                     ],
                 },
             }),
+            Token![+],
             TypeParamBound::Lifetime {
                 ident: "static",
             },
@@ -260,6 +262,7 @@ fn test_trait_object() {
             TypeParamBound::Lifetime {
                 ident: "a",
             },
+            Token![+],
             TypeParamBound::Trait(TraitBound {
                 path: Path {
                     segments: [
@@ -294,6 +297,7 @@ fn test_trailing_plus() {
                     ],
                 },
             }),
+            Token![+],
         ],
     }
     "###);
@@ -313,6 +317,7 @@ fn test_trailing_plus() {
                     ],
                 },
             }),
+            Token![+],
         ],
     }
     "###);
@@ -331,6 +336,7 @@ fn test_trailing_plus() {
                     ],
                 },
             }),
+            Token![+],
         ],
     }
     "###);

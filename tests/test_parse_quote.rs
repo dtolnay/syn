@@ -65,6 +65,7 @@ fn test_field() {
                     PathSegment {
                         ident: "primitive",
                     },
+                    Token![::],
                     PathSegment {
                         ident: "bool",
                     },
@@ -97,6 +98,7 @@ fn test_pat() {
                     }),
                 ],
             },
+            Token![|],
             Pat::Ident {
                 ident: "None",
             },
@@ -111,7 +113,7 @@ fn test_pat() {
 #[test]
 fn test_punctuated() {
     let punctuated: Punctuated<Lit, Token![|]> = parse_quote!(true | true);
-    snapshot!(punctuated.pairs(), @r###"
+    snapshot!(punctuated, @r###"
     [
         Lit::Bool {
             value: true,
@@ -124,7 +126,7 @@ fn test_punctuated() {
     "###);
 
     let punctuated: Punctuated<Lit, Token![|]> = parse_quote!(true | true |);
-    snapshot!(punctuated.pairs(), @r###"
+    snapshot!(punctuated, @r###"
     [
         Lit::Bool {
             value: true,
