@@ -107,10 +107,13 @@ fn test_tuple_comma() {
     snapshot!(expr.to_token_stream() as Pat, @"Pat::Tuple");
 
     expr.elems.push_value(parse_quote!(_));
-    // FIXME: must parse to Pat::Tuple, not Pat::Paren
+    // Must not parse to Pat::Paren
     snapshot!(expr.to_token_stream() as Pat, @r###"
-    Pat::Paren {
-        pat: Pat::Wild,
+    Pat::Tuple {
+        elems: [
+            Pat::Wild,
+            Token![,],
+        ],
     }
     "###);
 
