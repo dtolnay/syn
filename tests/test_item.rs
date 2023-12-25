@@ -230,6 +230,7 @@ fn test_supertraits() {
                     ],
                 },
             }),
+            Token![+],
         ],
     }
     "###);
@@ -318,6 +319,7 @@ fn test_impl_trait_trailing_plus() {
                                 ],
                             },
                         }),
+                        Token![+],
                     ],
                 },
             ),

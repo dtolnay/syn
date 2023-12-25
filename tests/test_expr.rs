@@ -390,6 +390,7 @@ fn test_extended_interpolated_path() {
                         PathSegment {
                             ident: "a",
                         },
+                        Token![::],
                         PathSegment {
                             ident: "b",
                         },
@@ -411,6 +412,7 @@ fn test_extended_interpolated_path() {
                 PathSegment {
                     ident: "a",
                 },
+                Token![::],
                 PathSegment {
                     ident: "b",
                 },
@@ -427,9 +429,11 @@ fn test_extended_interpolated_path() {
                 PathSegment {
                     ident: "a",
                 },
+                Token![::],
                 PathSegment {
                     ident: "b",
                 },
+                Token![::],
                 PathSegment {
                     ident: "c",
                 },
@@ -451,6 +455,7 @@ fn test_extended_interpolated_path() {
                                 PathSegment {
                                     ident: "a",
                                 },
+                                Token![::],
                                 PathSegment {
                                     ident: "b",
                                 },

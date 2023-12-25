@@ -65,6 +65,7 @@ fn test_field() {
                     PathSegment {
                         ident: "primitive",
                     },
+                    Token![::],
                     PathSegment {
                         ident: "bool",
                     },
@@ -97,6 +98,7 @@ fn test_pat() {
                     }),
                 ],
             },
+            Token![|],
             Pat::Ident {
                 ident: "None",
             },
