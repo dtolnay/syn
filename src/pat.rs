@@ -856,6 +856,15 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.paren_token.surround(tokens, |tokens| {
                 self.elems.to_tokens(tokens);
+                // If there is only one element, a trailing comma is needed to
+                // distinguish PatTuple from PatParen, unless this is `(..)`
+                // which is a tuple pattern even without comma.
+                if self.elems.len() == 1
+                    && !self.elems.trailing_punct()
+                    && !matches!(self.elems[0], Pat::Rest { .. })
+                {
+                    <Token![,]>::default().to_tokens(tokens);
+                }
             });
         }
     }
