@@ -116,7 +116,7 @@ fn test_punctuated() {
         Lit::Bool {
             value: true,
         },
-        Or,
+        Token![|],
         Lit::Bool {
             value: true,
         },
@@ -129,11 +129,11 @@ fn test_punctuated() {
         Lit::Bool {
             value: true,
         },
-        Or,
+        Token![|],
         Lit::Bool {
             value: true,
         },
-        Or,
+        Token![|],
     ]
     "###);
 }
