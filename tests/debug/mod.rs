@@ -127,14 +127,14 @@ where
 impl<'a, T, P> Debug for Lite<punctuated::Pairs<'a, T, P>>
 where
     Lite<T>: Debug,
-    P: Debug,
+    Lite<P>: Debug,
 {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut list = formatter.debug_list();
         for pair in self.value.clone() {
             let (node, punct) = pair.into_tuple();
             list.entry(Lite(node));
-            list.entries(punct);
+            list.entries(punct.map(Lite));
         }
         list.finish()
     }
