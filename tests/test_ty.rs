@@ -4,8 +4,9 @@
 mod macros;
 
 use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
-use quote::quote;
-use syn::Type;
+use quote::{quote, ToTokens as _};
+use syn::punctuated::Punctuated;
+use syn::{parse_quote, token, Token, Type, TypeTuple};
 
 #[test]
 fn test_mut_self() {
@@ -337,6 +338,59 @@ fn test_trailing_plus() {
                 },
             }),
             Token![+],
+        ],
+    }
+    "###);
+}
+
+#[test]
+fn test_tuple_comma() {
+    let mut expr = TypeTuple {
+        paren_token: token::Paren::default(),
+        elems: Punctuated::new(),
+    };
+    snapshot!(expr.to_token_stream() as Type, @"Type::Tuple");
+
+    expr.elems.push_value(parse_quote!(_));
+    // Must not parse to Type::Paren
+    snapshot!(expr.to_token_stream() as Type, @r###"
+    Type::Tuple {
+        elems: [
+            Type::Infer,
+            Token![,],
+        ],
+    }
+    "###);
+
+    expr.elems.push_punct(<Token![,]>::default());
+    snapshot!(expr.to_token_stream() as Type, @r###"
+    Type::Tuple {
+        elems: [
+            Type::Infer,
+            Token![,],
+        ],
+    }
+    "###);
+
+    expr.elems.push_value(parse_quote!(_));
+    snapshot!(expr.to_token_stream() as Type, @r###"
+    Type::Tuple {
+        elems: [
+            Type::Infer,
+            Token![,],
+            Type::Infer,
+        ],
+    }
+    "###);
+
+    expr.elems.push_punct(<Token![,]>::default());
+    snapshot!(expr.to_token_stream() as Type, @r###"
+    Type::Tuple {
+        elems: [
+            Type::Infer,
+            Token![,],
+            Type::Infer,
+            Token![,],
         ],
     }
     "###);

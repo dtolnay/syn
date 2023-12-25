@@ -4,8 +4,9 @@
 mod macros;
 
 use proc_macro2::{Delimiter, Group};
-use quote::quote;
-use syn::{Expr, ExprRange, Stmt};
+use quote::{quote, ToTokens as _};
+use syn::punctuated::Punctuated;
+use syn::{parse_quote, token, Expr, ExprRange, ExprTuple, Stmt, Token};
 
 #[test]
 fn test_expr_parse() {
@@ -480,6 +481,60 @@ fn test_extended_interpolated_path() {
         then_branch: Block {
             stmts: [],
         },
+    }
+    "###);
+}
+
+#[test]
+fn test_tuple_comma() {
+    let mut expr = ExprTuple {
+        attrs: Vec::new(),
+        paren_token: token::Paren::default(),
+        elems: Punctuated::new(),
+    };
+    snapshot!(expr.to_token_stream() as Expr, @"Expr::Tuple");
+
+    expr.elems.push_value(parse_quote!(continue));
+    // Must not parse to Expr::Paren
+    snapshot!(expr.to_token_stream() as Expr, @r###"
+    Expr::Tuple {
+        elems: [
+            Expr::Continue,
+            Token![,],
+        ],
+    }
+    "###);
+
+    expr.elems.push_punct(<Token![,]>::default());
+    snapshot!(expr.to_token_stream() as Expr, @r###"
+    Expr::Tuple {
+        elems: [
+            Expr::Continue,
+            Token![,],
+        ],
+    }
+    "###);
+
+    expr.elems.push_value(parse_quote!(continue));
+    snapshot!(expr.to_token_stream() as Expr, @r###"
+    Expr::Tuple {
+        elems: [
+            Expr::Continue,
+            Token![,],
+            Expr::Continue,
+        ],
+    }
+    "###);
+
+    expr.elems.push_punct(<Token![,]>::default());
+    snapshot!(expr.to_token_stream() as Expr, @r###"
+    Expr::Tuple {
+        elems: [
+            Expr::Continue,
+            Token![,],
+            Expr::Continue,
+            Token![,],
+        ],
     }
     "###);
 }
