@@ -532,7 +532,7 @@ spanless_eq_enum!(AttrTokenTree; Token(0 1) Delimited(0 1 2 3) Attributes(0));
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
 spanless_eq_enum!(BlockCheckMode; Default Unsafe(0));
 spanless_eq_enum!(BorrowKind; Ref Raw);
-spanless_eq_enum!(BoundConstness; Never Maybe(0));
+spanless_eq_enum!(BoundConstness; Never Always(0) Maybe(0));
 spanless_eq_enum!(BoundPolarity; Positive Negative(0) Maybe(0));
 spanless_eq_enum!(ByRef; Yes No);
 spanless_eq_enum!(CaptureBy; Value(move_kw) Ref);
