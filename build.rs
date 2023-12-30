@@ -1,5 +1,6 @@
 use std::env;
-use std::process::{Command, Stdio};
+use std::ffi::OsString;
+use std::process::{self, Command, Stdio};
 
 // The rustc-cfg strings below are *not* public API. Please let us know by
 // opening a GitHub issue if your build environment requires some way to enable
@@ -16,7 +17,7 @@ fn main() {
 }
 
 fn unstable() -> bool {
-    let rustc = env::var_os("RUSTC").unwrap();
+    let rustc = cargo_env_var("RUSTC");
 
     // Pick up Cargo rustc configuration.
     let mut cmd = if let Some(wrapper) = env::var_os("RUSTC_WRAPPER") {
@@ -67,4 +68,14 @@ fn unstable() -> bool {
         Ok(status) => status.success(),
         Err(_) => false,
     }
+}
+
+fn cargo_env_var(key: &str) -> OsString {
+    env::var_os(key).unwrap_or_else(|| {
+        eprintln!(
+            "Environment variable ${} is not set during execution of build script",
+            key,
+        );
+        process::exit(1);
+    })
 }
