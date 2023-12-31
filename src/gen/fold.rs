@@ -220,7 +220,7 @@ pub trait Fold {
     fn fold_expr_range(&mut self, i: ExprRange) -> ExprRange {
         fold_expr_range(self, i)
     }
-    #[cfg(feature = "full")]
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_expr_reference(&mut self, i: ExprReference) -> ExprReference {
         fold_expr_reference(self, i)
     }
@@ -1046,9 +1046,7 @@ where
         Expr::Paren(_binding_0) => Expr::Paren(f.fold_expr_paren(_binding_0)),
         Expr::Path(_binding_0) => Expr::Path(f.fold_expr_path(_binding_0)),
         Expr::Range(_binding_0) => Expr::Range(full!(f.fold_expr_range(_binding_0))),
-        Expr::Reference(_binding_0) => {
-            Expr::Reference(full!(f.fold_expr_reference(_binding_0)))
-        }
+        Expr::Reference(_binding_0) => Expr::Reference(f.fold_expr_reference(_binding_0)),
         Expr::Repeat(_binding_0) => Expr::Repeat(full!(f.fold_expr_repeat(_binding_0))),
         Expr::Return(_binding_0) => Expr::Return(full!(f.fold_expr_return(_binding_0))),
         Expr::Struct(_binding_0) => Expr::Struct(full!(f.fold_expr_struct(_binding_0))),
@@ -1393,7 +1391,7 @@ where
         end: (node.end).map(|it| Box::new(f.fold_expr(*it))),
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_expr_reference<F>(f: &mut F, node: ExprReference) -> ExprReference
 where
     F: Fold + ?Sized,

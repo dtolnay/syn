@@ -437,7 +437,6 @@ impl Debug for Expr {
             Expr::Path(v0) => v0.debug(formatter, "Path"),
             #[cfg(feature = "full")]
             Expr::Range(v0) => v0.debug(formatter, "Range"),
-            #[cfg(feature = "full")]
             Expr::Reference(v0) => v0.debug(formatter, "Reference"),
             #[cfg(feature = "full")]
             Expr::Repeat(v0) => v0.debug(formatter, "Repeat"),
@@ -930,7 +929,7 @@ impl Debug for ExprRange {
         self.debug(formatter, "ExprRange")
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ExprReference {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

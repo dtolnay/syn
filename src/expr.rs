@@ -551,8 +551,8 @@ ast_struct! {
 
 ast_struct! {
     /// A referencing operation: `&a` or `&mut a`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct ExprReference #full {
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    pub struct ExprReference {
         pub attrs: Vec<Attribute>,
         pub and_token: Token![&],
         pub mutability: Option<Token![mut]>,
@@ -1405,7 +1405,14 @@ pub(crate) mod parsing {
 
     #[cfg(not(feature = "full"))]
     fn unary_expr(input: ParseStream) -> Result<Expr> {
-        if input.peek(Token![*]) || input.peek(Token![!]) || input.peek(Token![-]) {
+        if input.peek(Token![&]) {
+            Ok(Expr::Reference(ExprReference {
+                attrs: Vec::new(),
+                and_token: input.parse()?,
+                mutability: input.parse()?,
+                expr: Box::new(unary_expr(input)?),
+            }))
+        } else if input.peek(Token![*]) || input.peek(Token![!]) || input.peek(Token![-]) {
             Ok(Expr::Unary(ExprUnary {
                 attrs: Vec::new(),
                 op: input.parse()?,
@@ -3290,7 +3297,6 @@ pub(crate) mod printing {
         }
     }
 
-    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprReference {
         fn to_tokens(&self, tokens: &mut TokenStream) {
