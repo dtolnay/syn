@@ -290,7 +290,6 @@ impl PartialEq for Expr {
             (Expr::Path(self0), Expr::Path(other0)) => self0 == other0,
             #[cfg(feature = "full")]
             (Expr::Range(self0), Expr::Range(other0)) => self0 == other0,
-            #[cfg(feature = "full")]
             (Expr::Reference(self0), Expr::Reference(other0)) => self0 == other0,
             #[cfg(feature = "full")]
             (Expr::Repeat(self0), Expr::Repeat(other0)) => self0 == other0,
@@ -602,10 +601,10 @@ impl PartialEq for ExprRange {
             && self.limits == other.limits && self.end == other.end
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprReference {}
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprReference {
     fn eq(&self, other: &Self) -> bool {

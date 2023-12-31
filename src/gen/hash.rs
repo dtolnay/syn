@@ -457,7 +457,6 @@ impl Hash for Expr {
                 state.write_u8(26u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
             Expr::Reference(v0) => {
                 state.write_u8(27u8);
                 v0.hash(state);
@@ -847,7 +846,7 @@ impl Hash for ExprRange {
         self.end.hash(state);
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for ExprReference {
     fn hash<H>(&self, state: &mut H)

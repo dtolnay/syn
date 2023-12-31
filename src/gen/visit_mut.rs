@@ -220,7 +220,7 @@ pub trait VisitMut {
     fn visit_expr_range_mut(&mut self, i: &mut ExprRange) {
         visit_expr_range_mut(self, i);
     }
-    #[cfg(feature = "full")]
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_expr_reference_mut(&mut self, i: &mut ExprReference) {
         visit_expr_reference_mut(self, i);
     }
@@ -1165,7 +1165,7 @@ where
             full!(v.visit_expr_range_mut(_binding_0));
         }
         Expr::Reference(_binding_0) => {
-            full!(v.visit_expr_reference_mut(_binding_0));
+            v.visit_expr_reference_mut(_binding_0);
         }
         Expr::Repeat(_binding_0) => {
             full!(v.visit_expr_repeat_mut(_binding_0));
@@ -1568,7 +1568,7 @@ where
         v.visit_expr_mut(&mut **it);
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr_reference_mut<V>(v: &mut V, node: &mut ExprReference)
 where
     V: VisitMut + ?Sized,

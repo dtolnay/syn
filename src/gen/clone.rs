@@ -271,7 +271,6 @@ impl Clone for Expr {
             Expr::Path(v0) => Expr::Path(v0.clone()),
             #[cfg(feature = "full")]
             Expr::Range(v0) => Expr::Range(v0.clone()),
-            #[cfg(feature = "full")]
             Expr::Reference(v0) => Expr::Reference(v0.clone()),
             #[cfg(feature = "full")]
             Expr::Repeat(v0) => Expr::Repeat(v0.clone()),
@@ -625,7 +624,7 @@ impl Clone for ExprRange {
         }
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for ExprReference {
     fn clone(&self) -> Self {
