@@ -396,10 +396,10 @@ mod lifetime;
 pub use crate::lifetime::Lifetime;
 
 mod lit;
+#[doc(hidden)] // https://github.com/dtolnay/syn/issues/1566
+pub use crate::lit::StrStyle;
 #[doc(inline)]
-pub use crate::lit::{
-    Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr, StrStyle,
-};
+pub use crate::lit::{Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr};
 
 #[cfg(feature = "parsing")]
 mod lookahead;

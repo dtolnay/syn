@@ -786,8 +786,7 @@ pub_if_not_doc! {
 
 /// The style of a string literal, either plain quoted or a raw string like
 /// `r##"data"##`.
-//
-// Vestigial. https://github.com/dtolnay/syn/issues/1566
+#[doc(hidden)] // https://github.com/dtolnay/syn/issues/1566
 pub enum StrStyle {
     /// An ordinary string like `"data"`.
     Cooked,
