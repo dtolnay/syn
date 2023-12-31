@@ -37,6 +37,7 @@ macro_rules! ast_struct {
     };
 }
 
+#[cfg(any(feature = "full", features = "derive"))]
 macro_rules! ast_enum {
     (
         $(#[$enum_attr:meta])*
