@@ -327,33 +327,18 @@ mod parsing {
         Ok(res)
     }
 
-    fn no_visit(input: ParseStream) -> bool {
-        if peek_tag(input, "no_visit") {
-            input.parse::<Token![#]>().unwrap();
-            input.parse::<Ident>().unwrap();
-            true
-        } else {
-            false
-        }
-    }
-
-    pub fn ast_enum(input: ParseStream) -> Result<Option<AstItem>> {
+    pub fn ast_enum(input: ParseStream) -> Result<AstItem> {
         let attrs = input.call(Attribute::parse_outer)?;
         input.parse::<Token![pub]>()?;
         input.parse::<Token![enum]>()?;
         let ident: Ident = input.parse()?;
-        let no_visit = no_visit(input);
         let rest: TokenStream = input.parse()?;
-        Ok(if no_visit {
-            None
-        } else {
-            Some(AstItem {
-                ast: syn::parse2(quote! {
-                    #(#attrs)*
-                    pub enum #ident #rest
-                })?,
-                features: vec![],
-            })
+        Ok(AstItem {
+            ast: syn::parse2(quote! {
+                #(#attrs)*
+                pub enum #ident #rest
+            })?,
+            features: vec![],
         })
     }
 
@@ -597,21 +582,19 @@ fn do_load_file(
 
                 // Try to parse the AstItem declaration out of the item.
                 let tts = item.mac.tokens.clone();
-                let found = if item.mac.path.is_ident("ast_struct") {
-                    Some(parsing::ast_struct.parse2(tts)?)
+                let mut found = if item.mac.path.is_ident("ast_struct") {
+                    parsing::ast_struct.parse2(tts)
                 } else if item.mac.path.is_ident("ast_enum") {
-                    parsing::ast_enum.parse2(tts)?
+                    parsing::ast_enum.parse2(tts)
                 } else if item.mac.path.is_ident("ast_enum_of_structs") {
-                    Some(parsing::ast_enum_of_structs.parse2(tts)?)
+                    parsing::ast_enum_of_structs.parse2(tts)
                 } else {
                     continue;
-                };
+                }?;
 
                 // Record our features on the parsed AstItems.
-                if let Some(mut item) = found {
-                    item.features.extend(clone_features(&features));
-                    lookup.items.insert(item.ast.ident.clone(), item);
-                }
+                found.features.extend(clone_features(&features));
+                lookup.items.insert(found.ast.ident.clone(), found);
             }
             Item::Struct(item) => {
                 let ident = item.ident;
