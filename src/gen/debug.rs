@@ -432,7 +432,6 @@ impl Debug for Expr {
             Expr::Macro(v0) => v0.debug(formatter, "Macro"),
             #[cfg(feature = "full")]
             Expr::Match(v0) => v0.debug(formatter, "Match"),
-            #[cfg(feature = "full")]
             Expr::MethodCall(v0) => v0.debug(formatter, "MethodCall"),
             Expr::Paren(v0) => v0.debug(formatter, "Paren"),
             Expr::Path(v0) => v0.debug(formatter, "Path"),
@@ -862,7 +861,7 @@ impl Debug for ExprMatch {
         self.debug(formatter, "ExprMatch")
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ExprMethodCall {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

@@ -503,8 +503,8 @@ ast_struct! {
 
 ast_struct! {
     /// A method call expression: `x.foo::<T>(a, b)`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct ExprMethodCall #full {
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    pub struct ExprMethodCall {
         pub attrs: Vec<Attribute>,
         pub receiver: Box<Expr>,
         pub dot_token: Token![.],
@@ -1549,17 +1549,45 @@ pub(crate) mod parsing {
                 && !input.peek2(Token![await])
             {
                 let mut dot_token: Token![.] = input.parse()?;
+
                 let float_token: Option<LitFloat> = input.parse()?;
                 if let Some(float_token) = float_token {
                     if multi_index(&mut e, &mut dot_token, float_token)? {
                         continue;
                     }
                 }
+
+                let member: Member = input.parse()?;
+                let turbofish = if member.is_named() && input.peek(Token![::]) {
+                    let colon2_token: Token![::] = input.parse()?;
+                    let turbofish =
+                        AngleBracketedGenericArguments::do_parse(Some(colon2_token), input)?;
+                    Some(turbofish)
+                } else {
+                    None
+                };
+
+                if turbofish.is_some() || input.peek(token::Paren) {
+                    if let Member::Named(method) = member {
+                        let content;
+                        e = Expr::MethodCall(ExprMethodCall {
+                            attrs: Vec::new(),
+                            receiver: Box::new(e),
+                            dot_token,
+                            method,
+                            turbofish,
+                            paren_token: parenthesized!(content in input),
+                            args: content.parse_terminated(Expr::parse, Token![,])?,
+                        });
+                        continue;
+                    }
+                }
+
                 e = Expr::Field(ExprField {
                     attrs: Vec::new(),
                     base: Box::new(e),
                     dot_token,
-                    member: input.parse()?,
+                    member,
                 });
             } else if input.peek(token::Bracket) {
                 let content;
@@ -2872,7 +2900,6 @@ pub(crate) mod parsing {
         Ok(!trailing_dot)
     }
 
-    #[cfg(feature = "full")]
     impl Member {
         fn is_named(&self) -> bool {
             match self {
@@ -3220,7 +3247,6 @@ pub(crate) mod printing {
         }
     }
 
-    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprMethodCall {
         fn to_tokens(&self, tokens: &mut TokenStream) {

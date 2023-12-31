@@ -1500,6 +1500,7 @@
       "ident": "ExprMethodCall",
       "features": {
         "any": [
+          "derive",
           "full"
         ]
       },
