@@ -36,14 +36,6 @@ macro_rules! ast_struct {
 }
 
 macro_rules! ast_enum {
-    // Drop the `#no_visit` attribute, if present.
-    (
-        [$($attrs_pub:tt)*]
-        enum $name:ident #no_visit $($rest:tt)*
-    ) => (
-        ast_enum!([$($attrs_pub)*] enum $name $($rest)*);
-    );
-
     (
         [$($attrs_pub:tt)*]
         enum $name:ident $($rest:tt)*
