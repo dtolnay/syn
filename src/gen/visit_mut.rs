@@ -204,7 +204,7 @@ pub trait VisitMut {
     fn visit_expr_match_mut(&mut self, i: &mut ExprMatch) {
         visit_expr_match_mut(self, i);
     }
-    #[cfg(feature = "full")]
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn visit_expr_method_call_mut(&mut self, i: &mut ExprMethodCall) {
         visit_expr_method_call_mut(self, i);
     }
@@ -1153,7 +1153,7 @@ where
             full!(v.visit_expr_match_mut(_binding_0));
         }
         Expr::MethodCall(_binding_0) => {
-            full!(v.visit_expr_method_call_mut(_binding_0));
+            v.visit_expr_method_call_mut(_binding_0);
         }
         Expr::Paren(_binding_0) => {
             v.visit_expr_paren_mut(_binding_0);
@@ -1508,7 +1508,7 @@ where
         v.visit_arm_mut(it);
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn visit_expr_method_call_mut<V>(v: &mut V, node: &mut ExprMethodCall)
 where
     V: VisitMut + ?Sized,

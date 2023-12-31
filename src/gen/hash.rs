@@ -440,7 +440,6 @@ impl Hash for Expr {
                 state.write_u8(22u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
             Expr::MethodCall(v0) => {
                 state.write_u8(23u8);
                 v0.hash(state);
@@ -798,7 +797,7 @@ impl Hash for ExprMatch {
         self.arms.hash(state);
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Hash for ExprMethodCall {
     fn hash<H>(&self, state: &mut H)

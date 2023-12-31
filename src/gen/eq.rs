@@ -285,7 +285,6 @@ impl PartialEq for Expr {
             (Expr::Macro(self0), Expr::Macro(other0)) => self0 == other0,
             #[cfg(feature = "full")]
             (Expr::Match(self0), Expr::Match(other0)) => self0 == other0,
-            #[cfg(feature = "full")]
             (Expr::MethodCall(self0), Expr::MethodCall(other0)) => self0 == other0,
             (Expr::Paren(self0), Expr::Paren(other0)) => self0 == other0,
             (Expr::Path(self0), Expr::Path(other0)) => self0 == other0,
@@ -560,10 +559,10 @@ impl PartialEq for ExprMatch {
         self.attrs == other.attrs && self.expr == other.expr && self.arms == other.arms
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for ExprMethodCall {}
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for ExprMethodCall {
     fn eq(&self, other: &Self) -> bool {

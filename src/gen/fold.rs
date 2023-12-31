@@ -204,7 +204,7 @@ pub trait Fold {
     fn fold_expr_match(&mut self, i: ExprMatch) -> ExprMatch {
         fold_expr_match(self, i)
     }
-    #[cfg(feature = "full")]
+    #[cfg(any(feature = "derive", feature = "full"))]
     fn fold_expr_method_call(&mut self, i: ExprMethodCall) -> ExprMethodCall {
         fold_expr_method_call(self, i)
     }
@@ -1041,7 +1041,7 @@ where
         Expr::Macro(_binding_0) => Expr::Macro(f.fold_expr_macro(_binding_0)),
         Expr::Match(_binding_0) => Expr::Match(full!(f.fold_expr_match(_binding_0))),
         Expr::MethodCall(_binding_0) => {
-            Expr::MethodCall(full!(f.fold_expr_method_call(_binding_0)))
+            Expr::MethodCall(f.fold_expr_method_call(_binding_0))
         }
         Expr::Paren(_binding_0) => Expr::Paren(f.fold_expr_paren(_binding_0)),
         Expr::Path(_binding_0) => Expr::Path(f.fold_expr_path(_binding_0)),
@@ -1343,7 +1343,7 @@ where
         arms: FoldHelper::lift(node.arms, |it| f.fold_arm(it)),
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 pub fn fold_expr_method_call<F>(f: &mut F, node: ExprMethodCall) -> ExprMethodCall
 where
     F: Fold + ?Sized,

@@ -424,7 +424,10 @@ pub(crate) mod parsing {
             Self::do_parse(Some(colon2_token), input)
         }
 
-        fn do_parse(colon2_token: Option<Token![::]>, input: ParseStream) -> Result<Self> {
+        pub(crate) fn do_parse(
+            colon2_token: Option<Token![::]>,
+            input: ParseStream,
+        ) -> Result<Self> {
             Ok(AngleBracketedGenericArguments {
                 colon2_token,
                 lt_token: input.parse()?,
