@@ -5,15 +5,16 @@
 macro_rules! ast_struct {
     (
         $(#[$attr:meta])*
-        $pub:ident struct $name:ident #full $($rest:tt)*
+        $pub:ident $struct:ident $name:ident #full $($rest:tt)*
     ) => {
         check_keyword_matches!(pub $pub);
+        check_keyword_matches!(struct $struct);
 
         #[cfg(feature = "full")]
-        $(#[$attr])* $pub struct $name $($rest)*
+        $(#[$attr])* $pub $struct $name $($rest)*
 
         #[cfg(not(feature = "full"))]
-        $(#[$attr])* $pub struct $name {
+        $(#[$attr])* $pub $struct $name {
             _noconstruct: ::std::marker::PhantomData<::proc_macro2::Span>,
         }
 
@@ -27,11 +28,12 @@ macro_rules! ast_struct {
 
     (
         $(#[$attr:meta])*
-        $pub:ident struct $name:ident $($rest:tt)*
+        $pub:ident $struct:ident $name:ident $($rest:tt)*
     ) => {
         check_keyword_matches!(pub $pub);
+        check_keyword_matches!(struct $struct);
 
-        $(#[$attr])* $pub struct $name $($rest)*
+        $(#[$attr])* $pub $struct $name $($rest)*
     };
 }
 
@@ -148,6 +150,7 @@ macro_rules! generate_to_tokens {
 macro_rules! check_keyword_matches {
     (enum enum) => {};
     (pub pub) => {};
+    (struct struct) => {};
 }
 
 // Rustdoc bug: does not respect the doc(hidden) on some items.
