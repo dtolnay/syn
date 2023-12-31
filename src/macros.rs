@@ -4,14 +4,16 @@
 )]
 macro_rules! ast_struct {
     (
-        [$($attrs_pub:tt)*]
-        struct $name:ident #full $($rest:tt)*
+        $(#[$attr:meta])*
+        $pub:ident struct $name:ident #full $($rest:tt)*
     ) => {
+        check_keyword_matches!(pub $pub);
+
         #[cfg(feature = "full")]
-        $($attrs_pub)* struct $name $($rest)*
+        $(#[$attr])* $pub struct $name $($rest)*
 
         #[cfg(not(feature = "full"))]
-        $($attrs_pub)* struct $name {
+        $(#[$attr])* $pub struct $name {
             _noconstruct: ::std::marker::PhantomData<::proc_macro2::Span>,
         }
 
@@ -24,19 +26,12 @@ macro_rules! ast_struct {
     };
 
     (
-        [$($attrs_pub:tt)*]
-        struct $name:ident $($rest:tt)*
-    ) => {
-        $($attrs_pub)* struct $name $($rest)*
-    };
-
-    (
         $(#[$attr:meta])*
-        $pub:ident $($t:tt)*
+        $pub:ident struct $name:ident $($rest:tt)*
     ) => {
         check_keyword_matches!(pub $pub);
 
-        ast_struct!([$(#[$attr])* $pub] $($t)*);
+        $(#[$attr])* $pub struct $name $($rest)*
     };
 }
 
