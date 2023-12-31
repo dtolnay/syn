@@ -5,13 +5,13 @@
 macro_rules! ast_struct {
     (
         $(#[$attr:meta])*
-        $pub:ident $struct:ident $name:ident #full $($rest:tt)*
+        $pub:ident $struct:ident $name:ident #full $body:tt
     ) => {
         check_keyword_matches!(pub $pub);
         check_keyword_matches!(struct $struct);
 
         #[cfg(feature = "full")]
-        $(#[$attr])* $pub $struct $name $($rest)*
+        $(#[$attr])* $pub $struct $name $body
 
         #[cfg(not(feature = "full"))]
         $(#[$attr])* $pub $struct $name {
@@ -28,12 +28,12 @@ macro_rules! ast_struct {
 
     (
         $(#[$attr:meta])*
-        $pub:ident $struct:ident $name:ident $($rest:tt)*
+        $pub:ident $struct:ident $name:ident $body:tt
     ) => {
         check_keyword_matches!(pub $pub);
         check_keyword_matches!(struct $struct);
 
-        $(#[$attr])* $pub $struct $name $($rest)*
+        $(#[$attr])* $pub $struct $name $body
     };
 }
 
