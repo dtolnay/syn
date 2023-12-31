@@ -57,13 +57,13 @@ macro_rules! ast_enum_of_structs {
 
         $(#[$enum_attr])* $pub $enum $name $body
 
-        ast_enum_of_structs_impl!($pub $enum $name $body);
+        ast_enum_of_structs_impl!($name $body);
     };
 }
 
 macro_rules! ast_enum_of_structs_impl {
     (
-        $pub:ident $enum:ident $name:ident {
+        $name:ident {
             $(
                 $(#[cfg $cfg_attr:tt])*
                 $(#[doc $($doc_attr:tt)*])*
@@ -71,9 +71,6 @@ macro_rules! ast_enum_of_structs_impl {
             )*
         }
     ) => {
-        check_keyword_matches!(pub $pub);
-        check_keyword_matches!(enum $enum);
-
         $($(
             ast_enum_from_struct!($name::$variant, $($member)::+);
         )*)*
