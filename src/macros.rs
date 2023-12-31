@@ -52,10 +52,9 @@ macro_rules! ast_enum_of_structs {
     (
         $(#[$enum_attr:meta])*
         $pub:ident $enum:ident $name:ident $body:tt
-        $($remaining:tt)*
     ) => {
         ast_enum!($(#[$enum_attr])* $pub $enum $name $body);
-        ast_enum_of_structs_impl!($pub $enum $name $body $($remaining)*);
+        ast_enum_of_structs_impl!($pub $enum $name $body);
     };
 }
 
