@@ -30,8 +30,13 @@ macro_rules! ast_struct {
         $($attrs_pub)* struct $name $($rest)*
     };
 
-    ($($t:tt)*) => {
-        strip_attrs_pub!(ast_struct!($($t)*));
+    (
+        $(#[$attr:meta])*
+        $pub:ident $($t:tt)*
+    ) => {
+        check_keyword_matches!(pub $pub);
+
+        ast_struct!([$(#[$attr])* $pub] $($t)*);
     };
 }
 
@@ -142,14 +147,6 @@ macro_rules! generate_to_tokens {
                 }
             }
         }
-    };
-}
-
-macro_rules! strip_attrs_pub {
-    ($mac:ident!($(#[$m:meta])* $pub:ident $($t:tt)*)) => {
-        check_keyword_matches!(pub $pub);
-
-        $mac!([$(#[$m])* $pub] $($t)*);
     };
 }
 
