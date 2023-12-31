@@ -37,14 +37,13 @@ macro_rules! ast_struct {
 
 macro_rules! ast_enum {
     (
-        [$($attrs_pub:tt)*]
-        enum $name:ident $($rest:tt)*
+        $(#[$enum_attr:meta])*
+        $pub:ident $enum:ident $name:ident $body:tt
     ) => {
-        $($attrs_pub)* enum $name $($rest)*
-    };
+        check_keyword_matches!(pub $pub);
+        check_keyword_matches!(enum $enum);
 
-    ($($t:tt)*) => {
-        strip_attrs_pub!(ast_enum!($($t)*));
+        $(#[$enum_attr])* $pub $enum $name $body
     };
 }
 
