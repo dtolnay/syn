@@ -39,9 +39,9 @@ macro_rules! ast_enum {
     (
         [$($attrs_pub:tt)*]
         enum $name:ident $($rest:tt)*
-    ) => (
+    ) => {
         $($attrs_pub)* enum $name $($rest)*
-    );
+    };
 
     ($($t:tt)*) => {
         strip_attrs_pub!(ast_enum!($($t)*));
