@@ -228,7 +228,7 @@ ast_struct! {
 pub(crate) mod parsing {
     use super::*;
     use crate::ext::IdentExt as _;
-    use crate::parse::{ParseBuffer, ParseStream, Result};
+    use crate::parse::{Parse, ParseBuffer, ParseStream, Result};
     use crate::path;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -352,6 +352,18 @@ pub(crate) mod parsing {
         pub fn parse_multi_with_leading_vert(input: ParseStream) -> Result<Self> {
             let leading_vert: Option<Token![|]> = input.parse()?;
             multi_pat_impl(input, leading_vert)
+        }
+    }
+
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    impl Parse for PatType {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(PatType {
+                attrs: Vec::new(),
+                pat: Box::new(Pat::parse_single(input)?),
+                colon_token: input.parse()?,
+                ty: input.parse()?,
+            })
         }
     }
 
