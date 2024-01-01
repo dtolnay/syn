@@ -357,6 +357,7 @@ ast_struct! {
 
 ast_struct! {
     /// A const block: `const { ... }`.
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprConst #full {
         pub attrs: Vec<Attribute>,
         pub const_token: Token![const],
@@ -443,6 +444,7 @@ ast_struct! {
 
 ast_struct! {
     /// The inferred value of a const generic argument, denoted `_`.
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct ExprInfer #full {
         pub attrs: Vec<Attribute>,
         pub underscore_token: Token![_],
@@ -483,6 +485,7 @@ ast_struct! {
 
 ast_struct! {
     /// A macro invocation expression: `format!("{}", q)`.
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct ExprMacro {
         pub attrs: Vec<Attribute>,
         pub mac: Macro,

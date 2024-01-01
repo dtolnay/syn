@@ -117,6 +117,7 @@ ast_struct! {
 
 ast_struct! {
     /// A parenthesized pattern: `(A | B)`.
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
     pub struct PatParen {
         pub attrs: Vec<Attribute>,
         pub paren_token: token::Paren,
