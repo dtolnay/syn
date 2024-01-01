@@ -123,7 +123,7 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     }
 
     let ident = Ident::new(&node.ident, Span::call_site());
-    let cfg_features = cfg::features(&node.features);
+    let cfg_features = cfg::features(&node.features, "extra-traits");
 
     let body = expand_impl_body(defs, node);
 
@@ -135,7 +135,6 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
 
     quote! {
         #cfg_features
-        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl Hash for #ident {
             fn hash<H>(&self, #hasher: &mut H)
             where

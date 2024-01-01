@@ -27,7 +27,7 @@ pub fn traverse(
     let mut traits = TokenStream::new();
     let mut impls = TokenStream::new();
     for s in types {
-        let features = cfg::features(&s.features);
+        let features = cfg::features(&s.features, None);
         traits.extend(features.clone());
         impls.extend(features);
         node(&mut traits, &mut impls, &s, defs);

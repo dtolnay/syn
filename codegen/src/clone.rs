@@ -76,7 +76,7 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     }
 
     let ident = Ident::new(&node.ident, Span::call_site());
-    let cfg_features = cfg::features(&node.features);
+    let cfg_features = cfg::features(&node.features, "clone-impls");
 
     let copy = node.ident == "AttrStyle"
         || node.ident == "BinOp"
@@ -86,10 +86,8 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     if copy {
         return quote! {
             #cfg_features
-            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Copy for #ident {}
             #cfg_features
-            #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
             impl Clone for #ident {
                 fn clone(&self) -> Self {
                     *self
@@ -102,7 +100,6 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
 
     quote! {
         #cfg_features
-        #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
         impl Clone for #ident {
             fn clone(&self) -> Self {
                 #body

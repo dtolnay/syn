@@ -114,11 +114,10 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     }
 
     let ident = Ident::new(&node.ident, Span::call_site());
-    let cfg_features = cfg::features(&node.features);
+    let cfg_features = cfg::features(&node.features, "extra-traits");
 
     let eq = quote! {
         #cfg_features
-        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl Eq for #ident {}
     };
 
@@ -138,7 +137,6 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
         #eq
 
         #cfg_features
-        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl PartialEq for #ident {
             fn eq(&self, #other: &Self) -> bool {
                 #body
