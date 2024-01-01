@@ -1708,6 +1708,7 @@
       "ident": "ExprStruct",
       "features": {
         "any": [
+          "derive",
           "full"
         ]
       },
@@ -2001,6 +2002,7 @@
       "ident": "FieldValue",
       "features": {
         "any": [
+          "derive",
           "full"
         ]
       },

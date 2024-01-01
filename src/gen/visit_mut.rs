@@ -282,8 +282,8 @@ pub trait VisitMut {
     fn visit_expr_return_mut(&mut self, i: &mut ExprReturn) {
         visit_expr_return_mut(self, i);
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_expr_struct_mut(&mut self, i: &mut ExprStruct) {
         visit_expr_struct_mut(self, i);
     }
@@ -337,8 +337,8 @@ pub trait VisitMut {
     fn visit_field_pat_mut(&mut self, i: &mut FieldPat) {
         visit_field_pat_mut(self, i);
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_field_value_mut(&mut self, i: &mut FieldValue) {
         visit_field_value_mut(self, i);
     }
@@ -1365,7 +1365,7 @@ where
             full!(v.visit_expr_return_mut(_binding_0));
         }
         Expr::Struct(_binding_0) => {
-            full!(v.visit_expr_struct_mut(_binding_0));
+            v.visit_expr_struct_mut(_binding_0);
         }
         Expr::Try(_binding_0) => {
             full!(v.visit_expr_try_mut(_binding_0));
@@ -1827,8 +1827,8 @@ where
         v.visit_expr_mut(&mut **it);
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_expr_struct_mut<V>(v: &mut V, node: &mut ExprStruct)
 where
     V: VisitMut + ?Sized,
@@ -1983,8 +1983,8 @@ where
     skip!(node.colon_token);
     v.visit_pat_mut(&mut *node.pat);
 }
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_field_value_mut<V>(v: &mut V, node: &mut FieldValue)
 where
     V: VisitMut + ?Sized,

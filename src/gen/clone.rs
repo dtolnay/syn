@@ -276,7 +276,6 @@ impl Clone for Expr {
             Expr::Repeat(v0) => Expr::Repeat(v0.clone()),
             #[cfg(feature = "full")]
             Expr::Return(v0) => Expr::Return(v0.clone()),
-            #[cfg(feature = "full")]
             Expr::Struct(v0) => Expr::Struct(v0.clone()),
             #[cfg(feature = "full")]
             Expr::Try(v0) => Expr::Try(v0.clone()),
@@ -660,7 +659,7 @@ impl Clone for ExprReturn {
         }
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for ExprStruct {
     fn clone(&self) -> Self {
@@ -789,7 +788,7 @@ impl Clone for FieldPat {
         }
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
 impl Clone for FieldValue {
     fn clone(&self) -> Self {

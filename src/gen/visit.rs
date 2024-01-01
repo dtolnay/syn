@@ -281,8 +281,8 @@ pub trait Visit<'ast> {
     fn visit_expr_return(&mut self, i: &'ast ExprReturn) {
         visit_expr_return(self, i);
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_expr_struct(&mut self, i: &'ast ExprStruct) {
         visit_expr_struct(self, i);
     }
@@ -336,8 +336,8 @@ pub trait Visit<'ast> {
     fn visit_field_pat(&mut self, i: &'ast FieldPat) {
         visit_field_pat(self, i);
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_field_value(&mut self, i: &'ast FieldValue) {
         visit_field_value(self, i);
     }
@@ -1364,7 +1364,7 @@ where
             full!(v.visit_expr_return(_binding_0));
         }
         Expr::Struct(_binding_0) => {
-            full!(v.visit_expr_struct(_binding_0));
+            v.visit_expr_struct(_binding_0);
         }
         Expr::Try(_binding_0) => {
             full!(v.visit_expr_try(_binding_0));
@@ -1826,8 +1826,8 @@ where
         v.visit_expr(&**it);
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_expr_struct<'ast, V>(v: &mut V, node: &'ast ExprStruct)
 where
     V: Visit<'ast> + ?Sized,
@@ -1982,8 +1982,8 @@ where
     skip!(node.colon_token);
     v.visit_pat(&*node.pat);
 }
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_field_value<'ast, V>(v: &mut V, node: &'ast FieldValue)
 where
     V: Visit<'ast> + ?Sized,

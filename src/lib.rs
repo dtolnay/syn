@@ -349,20 +349,20 @@ pub use crate::error::{Error, Result};
 mod expr;
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-pub use crate::expr::{Arm, FieldValue, Label, RangeLimits};
+pub use crate::expr::{Arm, Label, RangeLimits};
 #[cfg(any(feature = "full", feature = "derive"))]
 #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::expr::{
     Expr, ExprBinary, ExprCall, ExprCast, ExprField, ExprIndex, ExprLit, ExprMacro, ExprMethodCall,
-    ExprParen, ExprPath, ExprReference, ExprUnary, Index, Member,
+    ExprParen, ExprPath, ExprReference, ExprStruct, ExprUnary, FieldValue, Index, Member,
 };
 #[cfg(any(feature = "full", feature = "derive"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
 pub use crate::expr::{
     ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak, ExprClosure, ExprConst,
     ExprContinue, ExprForLoop, ExprGroup, ExprIf, ExprInfer, ExprLet, ExprLoop, ExprMatch,
-    ExprRange, ExprRepeat, ExprReturn, ExprStruct, ExprTry, ExprTryBlock, ExprTuple, ExprUnsafe,
-    ExprWhile, ExprYield,
+    ExprRange, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprTuple, ExprUnsafe, ExprWhile,
+    ExprYield,
 };
 
 #[cfg(feature = "parsing")]
