@@ -442,7 +442,6 @@ impl Debug for Expr {
             Expr::Repeat(v0) => v0.debug(formatter, "Repeat"),
             #[cfg(feature = "full")]
             Expr::Return(v0) => v0.debug(formatter, "Return"),
-            #[cfg(feature = "full")]
             Expr::Struct(v0) => v0.debug(formatter, "Struct"),
             #[cfg(feature = "full")]
             Expr::Try(v0) => v0.debug(formatter, "Try"),
@@ -980,7 +979,7 @@ impl Debug for ExprReturn {
         self.debug(formatter, "ExprReturn")
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for ExprStruct {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -1150,7 +1149,7 @@ impl Debug for FieldPat {
         formatter.finish()
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for FieldValue {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

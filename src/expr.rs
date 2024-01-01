@@ -590,8 +590,8 @@ ast_struct! {
     ///
     /// The `rest` provides the value of the remaining fields as in `S { a:
     /// 1, b: 1, ..rest }`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
-    pub struct ExprStruct #full {
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    pub struct ExprStruct {
         pub attrs: Vec<Attribute>,
         pub qself: Option<QSelf>,
         pub path: Path,
@@ -843,10 +843,9 @@ impl IdentFragment for Index {
     }
 }
 
-#[cfg(feature = "full")]
 ast_struct! {
     /// A field-value pair in a struct literal.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct FieldValue {
         pub attrs: Vec<Attribute>,
         pub member: Member,
@@ -1803,7 +1802,8 @@ pub(crate) mod parsing {
             }));
         }
 
-        #[cfg(feature = "full")]
+        #[cfg(not(feature = "full"))]
+        let allow_struct = (true,);
         if allow_struct.0 && input.peek(token::Brace) {
             return expr_struct_helper(input, qself, path).map(Expr::Struct);
         }
@@ -2612,7 +2612,6 @@ pub(crate) mod parsing {
         })
     }
 
-    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for FieldValue {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -2642,7 +2641,6 @@ pub(crate) mod parsing {
         }
     }
 
-    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprStruct {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -2651,7 +2649,6 @@ pub(crate) mod parsing {
         }
     }
 
-    #[cfg(feature = "full")]
     fn expr_struct_helper(
         input: ParseStream,
         qself: Option<QSelf>,
@@ -3333,7 +3330,6 @@ pub(crate) mod printing {
         }
     }
 
-    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprStruct {
         fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -3450,7 +3446,6 @@ pub(crate) mod printing {
         }
     }
 
-    #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for FieldValue {
         fn to_tokens(&self, tokens: &mut TokenStream) {

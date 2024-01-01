@@ -282,8 +282,8 @@ pub trait Fold {
     fn fold_expr_return(&mut self, i: ExprReturn) -> ExprReturn {
         fold_expr_return(self, i)
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_expr_struct(&mut self, i: ExprStruct) -> ExprStruct {
         fold_expr_struct(self, i)
     }
@@ -337,8 +337,8 @@ pub trait Fold {
     fn fold_field_pat(&mut self, i: FieldPat) -> FieldPat {
         fold_field_pat(self, i)
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_field_value(&mut self, i: FieldValue) -> FieldValue {
         fold_field_value(self, i)
     }
@@ -1240,7 +1240,7 @@ where
         Expr::Reference(_binding_0) => Expr::Reference(f.fold_expr_reference(_binding_0)),
         Expr::Repeat(_binding_0) => Expr::Repeat(full!(f.fold_expr_repeat(_binding_0))),
         Expr::Return(_binding_0) => Expr::Return(full!(f.fold_expr_return(_binding_0))),
-        Expr::Struct(_binding_0) => Expr::Struct(full!(f.fold_expr_struct(_binding_0))),
+        Expr::Struct(_binding_0) => Expr::Struct(f.fold_expr_struct(_binding_0)),
         Expr::Try(_binding_0) => Expr::Try(full!(f.fold_expr_try(_binding_0))),
         Expr::TryBlock(_binding_0) => {
             Expr::TryBlock(full!(f.fold_expr_try_block(_binding_0)))
@@ -1648,8 +1648,8 @@ where
         expr: (node.expr).map(|it| Box::new(f.fold_expr(*it))),
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_expr_struct<F>(f: &mut F, node: ExprStruct) -> ExprStruct
 where
     F: Fold + ?Sized,
@@ -1788,8 +1788,8 @@ where
         pat: Box::new(f.fold_pat(*node.pat)),
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(doc_cfg, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_field_value<F>(f: &mut F, node: FieldValue) -> FieldValue
 where
     F: Fold + ?Sized,
