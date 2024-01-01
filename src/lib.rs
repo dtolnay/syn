@@ -353,11 +353,16 @@ pub use crate::expr::{Arm, FieldValue, Label, RangeLimits};
 #[cfg(any(feature = "full", feature = "derive"))]
 #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::expr::{
-    Expr, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBinary, ExprBlock, ExprBreak, ExprCall,
-    ExprCast, ExprClosure, ExprConst, ExprContinue, ExprField, ExprForLoop, ExprGroup, ExprIf,
-    ExprIndex, ExprInfer, ExprLet, ExprLit, ExprLoop, ExprMacro, ExprMatch, ExprMethodCall,
-    ExprParen, ExprPath, ExprRange, ExprReference, ExprRepeat, ExprReturn, ExprStruct, ExprTry,
-    ExprTryBlock, ExprTuple, ExprUnary, ExprUnsafe, ExprWhile, ExprYield, Index, Member,
+    Expr, ExprBinary, ExprCall, ExprCast, ExprField, ExprIndex, ExprLit, ExprMacro, ExprMethodCall,
+    ExprParen, ExprPath, ExprReference, ExprUnary, Index, Member,
+};
+#[cfg(any(feature = "full", feature = "derive"))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+pub use crate::expr::{
+    ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak, ExprClosure, ExprConst,
+    ExprContinue, ExprForLoop, ExprGroup, ExprIf, ExprInfer, ExprLet, ExprLoop, ExprMatch,
+    ExprRange, ExprRepeat, ExprReturn, ExprStruct, ExprTry, ExprTryBlock, ExprTuple, ExprUnsafe,
+    ExprWhile, ExprYield,
 };
 
 #[cfg(feature = "parsing")]
