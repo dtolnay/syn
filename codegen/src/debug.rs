@@ -147,7 +147,7 @@ fn expand_impl(defs: &Definitions, node: &Node, syntax_tree_variants: &Set<&str>
     }
 
     let ident = Ident::new(&node.ident, Span::call_site());
-    let cfg_features = cfg::features(&node.features);
+    let cfg_features = cfg::features(&node.features, "extra-traits");
     let body = expand_impl_body(defs, node, syntax_tree_variants);
     let formatter = match &node.data {
         Data::Enum(variants) if variants.is_empty() => quote!(_formatter),
@@ -156,7 +156,6 @@ fn expand_impl(defs: &Definitions, node: &Node, syntax_tree_variants: &Set<&str>
 
     quote! {
         #cfg_features
-        #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
         impl Debug for #ident {
             fn fmt(&self, #formatter: &mut fmt::Formatter) -> fmt::Result {
                 #body
