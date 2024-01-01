@@ -507,15 +507,6 @@ pub(crate) mod parsing {
         })
     }
 
-    impl Member {
-        fn is_unnamed(&self) -> bool {
-            match self {
-                Member::Named(_) => false,
-                Member::Unnamed(_) => true,
-            }
-        }
-    }
-
     fn field_pat(input: ParseStream) -> Result<FieldPat> {
         let begin = input.fork();
         let boxed: Option<Token![box]> = input.parse()?;
@@ -529,7 +520,7 @@ pub(crate) mod parsing {
         }?;
 
         if boxed.is_none() && by_ref.is_none() && mutability.is_none() && input.peek(Token![:])
-            || member.is_unnamed()
+            || !member.is_named()
         {
             return Ok(FieldPat {
                 attrs: Vec::new(),
