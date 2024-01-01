@@ -75,7 +75,7 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use super::*;
-    use crate::parse::discouraged::Speculative;
+    use crate::parse::discouraged::Speculative as _;
     use crate::parse::{Parse, ParseStream, Result};
     use proc_macro2::TokenStream;
 

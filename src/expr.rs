@@ -960,8 +960,8 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
 pub(crate) mod parsing {
     use super::*;
     #[cfg(feature = "full")]
-    use crate::ext::IdentExt;
-    use crate::parse::discouraged::Speculative;
+    use crate::ext::IdentExt as _;
+    use crate::parse::discouraged::Speculative as _;
     #[cfg(feature = "full")]
     use crate::parse::ParseBuffer;
     use crate::parse::{Parse, ParseStream, Result};

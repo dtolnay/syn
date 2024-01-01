@@ -227,7 +227,7 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use super::*;
-    use crate::ext::IdentExt;
+    use crate::ext::IdentExt as _;
     use crate::parse::{ParseBuffer, ParseStream, Result};
     use crate::path;
 
