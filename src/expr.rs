@@ -957,31 +957,10 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
 }
 
 #[cfg(feature = "parsing")]
-pub(crate) mod parsing {
-    use super::*;
-    #[cfg(feature = "full")]
-    use crate::ext::IdentExt as _;
-    use crate::parse::discouraged::Speculative as _;
-    #[cfg(feature = "full")]
-    use crate::parse::ParseBuffer;
-    use crate::parse::{Parse, ParseStream, Result};
-    use crate::path;
-    use std::cmp::Ordering;
+mod precedence {
+    use super::BinOp;
 
-    mod kw {
-        crate::custom_keyword!(builtin);
-        crate::custom_keyword!(raw);
-    }
-
-    // When we're parsing expressions which occur before blocks, like in an if
-    // statement's condition, we cannot parse a struct literal.
-    //
-    // Struct literals are ambiguous in certain positions
-    // https://github.com/rust-lang/rfcs/pull/92
-    #[cfg(feature = "full")]
-    pub(crate) struct AllowStruct(bool);
-
-    enum Precedence {
+    pub(crate) enum Precedence {
         Any,
         Assign,
         Range,
@@ -998,7 +977,7 @@ pub(crate) mod parsing {
     }
 
     impl Precedence {
-        fn of(op: &BinOp) -> Self {
+        pub(crate) fn of(op: &BinOp) -> Self {
             match op {
                 BinOp::Add(_) | BinOp::Sub(_) => Precedence::Arithmetic,
                 BinOp::Mul(_) | BinOp::Div(_) | BinOp::Rem(_) => Precedence::Term,
@@ -1027,6 +1006,33 @@ pub(crate) mod parsing {
             }
         }
     }
+}
+
+#[cfg(feature = "parsing")]
+pub(crate) mod parsing {
+    use super::precedence::Precedence;
+    use super::*;
+    #[cfg(feature = "full")]
+    use crate::ext::IdentExt as _;
+    use crate::parse::discouraged::Speculative as _;
+    #[cfg(feature = "full")]
+    use crate::parse::ParseBuffer;
+    use crate::parse::{Parse, ParseStream, Result};
+    use crate::path;
+    use std::cmp::Ordering;
+
+    mod kw {
+        crate::custom_keyword!(builtin);
+        crate::custom_keyword!(raw);
+    }
+
+    // When we're parsing expressions which occur before blocks, like in an if
+    // statement's condition, we cannot parse a struct literal.
+    //
+    // Struct literals are ambiguous in certain positions
+    // https://github.com/rust-lang/rfcs/pull/92
+    #[cfg(feature = "full")]
+    pub(crate) struct AllowStruct(bool);
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Expr {
