@@ -404,7 +404,7 @@ impl std::error::Error for Error {}
 
 impl From<LexError> for Error {
     fn from(err: LexError) -> Self {
-        Error::new(err.span(), "lex error")
+        Error::new(err.span(), err)
     }
 }
 
