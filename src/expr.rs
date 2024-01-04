@@ -2142,9 +2142,9 @@ pub(crate) mod parsing {
         let else_token: Token![else] = input.parse()?;
 
         let lookahead = input.lookahead1();
-        let else_branch = if input.peek(Token![if]) {
+        let else_branch = if lookahead.peek(Token![if]) {
             input.parse().map(Expr::If)?
-        } else if input.peek(token::Brace) {
+        } else if lookahead.peek(token::Brace) {
             Expr::Block(ExprBlock {
                 attrs: Vec::new(),
                 label: None,
