@@ -106,7 +106,7 @@ fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
             };
             let after = match librustc_parse(back, &sess) {
                 Ok(after) => after,
-                Err(mut diagnostic) => {
+                Err(diagnostic) => {
                     errorf!("=== {}: librustc failed to parse", path.display());
                     diagnostic.emit();
                     return Err(false);

@@ -25,7 +25,7 @@ pub fn librustc_expr(input: &str) -> Option<P<ast::Expr>> {
         .parse_expr();
         match e {
             Ok(expr) => Some(expr),
-            Err(mut diagnostic) => {
+            Err(diagnostic) => {
                 diagnostic.emit();
                 None
             }
