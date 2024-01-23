@@ -158,6 +158,7 @@ use rustc_ast::tokenstream::{
     AttrTokenStream, AttrTokenTree, AttributesData, DelimSpacing, DelimSpan, LazyAttrTokenStream,
     Spacing, TokenStream, TokenTree,
 };
+use rustc_data_structures::packed::Pu128;
 use rustc_data_structures::sync::Lrc;
 use rustc_span::source_map::Spanned;
 use rustc_span::symbol::{sym, Ident};
@@ -296,6 +297,7 @@ spanless_eq_partial_eq!(u128);
 spanless_eq_partial_eq!(usize);
 spanless_eq_partial_eq!(char);
 spanless_eq_partial_eq!(String);
+spanless_eq_partial_eq!(Pu128);
 spanless_eq_partial_eq!(Symbol);
 spanless_eq_partial_eq!(CommentKind);
 spanless_eq_partial_eq!(Delimiter);
