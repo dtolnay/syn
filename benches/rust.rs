@@ -63,7 +63,7 @@ mod librustc_parse {
         struct SilentEmitter;
 
         impl Emitter for SilentEmitter {
-            fn emit_diagnostic(&mut self, _diag: &Diagnostic) {}
+            fn emit_diagnostic(&mut self, _diag: Diagnostic) {}
             fn source_map(&self) -> Option<&Lrc<SourceMap>> {
                 None
             }
