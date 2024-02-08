@@ -1,6 +1,8 @@
 use super::*;
 use proc_macro2::TokenStream;
+#[cfg(feature = "printing")]
 use std::iter;
+#[cfg(feature = "printing")]
 use std::slice;
 
 #[cfg(feature = "parsing")]
@@ -582,13 +584,16 @@ impl MetaList {
     }
 }
 
+#[cfg(feature = "printing")]
 pub(crate) trait FilterAttrs<'a> {
     type Ret: Iterator<Item = &'a Attribute>;
 
     fn outer(self) -> Self::Ret;
+    #[cfg(feature = "full")]
     fn inner(self) -> Self::Ret;
 }
 
+#[cfg(feature = "printing")]
 impl<'a> FilterAttrs<'a> for &'a [Attribute] {
     type Ret = iter::Filter<slice::Iter<'a, Attribute>, fn(&&Attribute) -> bool>;
 
@@ -602,6 +607,7 @@ impl<'a> FilterAttrs<'a> for &'a [Attribute] {
         self.iter().filter(is_outer)
     }
 
+    #[cfg(feature = "full")]
     fn inner(self) -> Self::Ret {
         fn is_inner(attr: &&Attribute) -> bool {
             match attr.style {
