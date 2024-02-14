@@ -201,7 +201,7 @@ use std::rc::Rc;
 use std::str::FromStr;
 
 pub use crate::error::{Error, Result};
-pub use crate::lookahead::{Lookahead1, Peek};
+pub use crate::lookahead::{Lookahead1, Peek, TokenMarker};
 
 /// Parsing interface implemented by all types that can be parsed in a default
 /// way from a token stream.
