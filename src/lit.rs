@@ -225,10 +225,11 @@ impl LitStr {
 
         // Parse string literal into a token stream with every span equal to the
         // original literal's span.
+        let span = self.span();
         let mut tokens = TokenStream::from_str(&self.value())?;
-        tokens = respan_token_stream(tokens, self.span());
+        tokens = respan_token_stream(tokens, span);
 
-        let result = parser.parse2(tokens)?;
+        let result = crate::parse::parse_scoped(parser, span, tokens)?;
 
         let suffix = self.suffix();
         if !suffix.is_empty() {
