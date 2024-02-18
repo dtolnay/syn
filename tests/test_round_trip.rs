@@ -169,7 +169,7 @@ fn translate_message(diagnostic: &Diagnostic) -> Cow<'static, str> {
     let args = translation::to_fluent_args(diagnostic.args());
 
     let (identifier, attr) = match message {
-        DiagnosticMessage::Str(msg) | DiagnosticMessage::Eager(msg) => return msg.clone(),
+        DiagnosticMessage::Str(msg) | DiagnosticMessage::Translated(msg) => return msg.clone(),
         DiagnosticMessage::FluentIdentifier(identifier, attr) => (identifier, attr),
     };
 
