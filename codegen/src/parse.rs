@@ -619,7 +619,7 @@ fn do_load_file(
                 }
             }
             Item::Use(item)
-                if relative_to_workspace_root == Path::new(SYN_CRATE_ROOT)
+                if relative_to_workspace_root == Path::new("src/pat.rs")
                     && matches!(item.vis, Visibility::Public(_)) =>
             {
                 load_aliases(item.tree, lookup);
