@@ -25,7 +25,7 @@ ast_enum! {
     ///
     /// This type is a [syntax tree enum].
     ///
-    /// [syntax tree enum]: Expr#syntax-tree-enums
+    /// [syntax tree enum]: crate::expr::Expr#syntax-tree-enums
     #[cfg_attr(doc_cfg, doc(cfg(feature = "derive")))]
     pub enum Data {
         Struct(DataStruct),

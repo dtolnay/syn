@@ -85,9 +85,9 @@ ast_struct! {
     /// [`Attribute::parse_outer`] or [`Attribute::parse_inner`] depending on
     /// which you intend to parse.
     ///
-    /// [`Parse`]: parse::Parse
-    /// [`ParseStream::parse`]: parse::ParseBuffer::parse
-    /// [`ParseStream::call`]: parse::ParseBuffer::call
+    /// [`Parse`]: crate::parse::Parse
+    /// [`ParseStream::parse`]: crate::parse::ParseBuffer::parse
+    /// [`ParseStream::call`]: crate::parse::ParseBuffer::call
     ///
     /// ```
     /// use syn::{Attribute, Ident, Result, Token};
@@ -468,7 +468,7 @@ ast_enum_of_structs! {
     ///
     /// This type is a [syntax tree enum].
     ///
-    /// [syntax tree enum]: Expr#syntax-tree-enums
+    /// [syntax tree enum]: crate::expr::Expr#syntax-tree-enums
     #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum Meta {
         Path(Path),

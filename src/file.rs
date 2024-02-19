@@ -6,6 +6,8 @@ ast_struct! {
     ///
     /// Typically `File` objects are created with [`parse_file`].
     ///
+    /// [`parse_file`]: crate::parse_file
+    ///
     /// # Example
     ///
     /// Parse a Rust source file into a `syn::File` and print out a debug
