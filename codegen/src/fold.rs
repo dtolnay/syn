@@ -80,7 +80,12 @@ fn visit(
 
 fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Definitions) {
     let under_name = gen::under_name(&s.ident);
-    let ty = Ident::new(&s.ident, Span::call_site());
+    let ident = Ident::new(&s.ident, Span::call_site());
+    let ty = if let "Ident" | "Span" = s.ident.as_str() {
+        quote!(proc_macro2::#ident)
+    } else {
+        quote!(crate::#ident)
+    };
     let fold_fn = format_ident!("fold_{}", under_name);
 
     let mut fold_impl = TokenStream::new();
@@ -149,7 +154,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
             }
 
             if fields.is_empty() {
-                if ty == "Ident" {
+                if s.ident == "Ident" {
                     fold_impl.extend(quote! {
                         let mut node = node;
                         let span = f.fold_span(node.span());
@@ -168,7 +173,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
             }
         }
         Data::Private => {
-            if ty == "Ident" {
+            if s.ident == "Ident" {
                 fold_impl.extend(quote! {
                     let mut node = node;
                     let span = f.fold_span(node.span());
@@ -223,9 +228,7 @@ pub fn generate(defs: &Definitions) -> Result<()> {
             )]
 
             #[cfg(any(feature = "full", feature = "derive"))]
-            use crate::gen::helper::fold::*;
-            use crate::*;
-            use proc_macro2::Span;
+            use crate::gen::helper::fold::FoldHelper;
 
             #full_macro
 

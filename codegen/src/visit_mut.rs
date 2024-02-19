@@ -96,7 +96,12 @@ fn visit(
 
 fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Definitions) {
     let under_name = gen::under_name(&s.ident);
-    let ty = Ident::new(&s.ident, Span::call_site());
+    let ident = Ident::new(&s.ident, Span::call_site());
+    let ty = if let "Ident" | "Span" = s.ident.as_str() {
+        quote!(proc_macro2::#ident)
+    } else {
+        quote!(crate::#ident)
+    };
     let visit_mut_fn = format_ident!("visit_{}_mut", under_name);
 
     let mut visit_mut_impl = TokenStream::new();
@@ -164,7 +169,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
             }
         }
         Data::Private => {
-            if ty == "Ident" {
+            if s.ident == "Ident" {
                 visit_mut_impl.extend(quote! {
                     let mut span = node.span();
                     v.visit_span_mut(&mut span);
@@ -201,8 +206,6 @@ pub fn generate(defs: &Definitions) -> Result<()> {
 
             #[cfg(any(feature = "full", feature = "derive"))]
             use crate::punctuated::Punctuated;
-            use crate::*;
-            use proc_macro2::Span;
 
             #full_macro
 

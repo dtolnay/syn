@@ -31,7 +31,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                     let variant = Ident::new(variant_name, Span::call_site());
                     if fields.is_empty() {
                         quote! {
-                            #ident::#variant => {
+                            crate::#ident::#variant => {
                                 state.write_u8(#i);
                             }
                         }
@@ -69,7 +69,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                         }
                         quote! {
                             #cfg
-                            #ident::#variant(#(#pats),*) => {
+                            crate::#ident::#variant(#(#pats),*) => {
                                 state.write_u8(#i);
                                 #(#hashes)*
                             }
@@ -135,7 +135,7 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
 
     quote! {
         #cfg_features
-        impl Hash for #ident {
+        impl Hash for crate::#ident {
             fn hash<H>(&self, #hasher: &mut H)
             where
                 H: Hasher,
@@ -157,7 +157,6 @@ pub fn generate(defs: &Definitions) -> Result<()> {
         quote! {
             #[cfg(any(feature = "derive", feature = "full"))]
             use crate::tt::TokenStreamHelper;
-            use crate::*;
             use std::hash::{Hash, Hasher};
 
             #impls

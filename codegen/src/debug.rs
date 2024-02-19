@@ -57,7 +57,7 @@ fn expand_impl_body(
                 let variant = Ident::new(variant_name, Span::call_site());
                 if fields.is_empty() {
                     quote! {
-                        #ident::#variant => formatter.write_str(#variant_name),
+                        crate::#ident::#variant => formatter.write_str(#variant_name),
                     }
                 } else {
                     let mut cfg = None;
@@ -71,7 +71,7 @@ fn expand_impl_body(
                     if syntax_tree_enum(type_name, variant_name, fields).is_some() {
                         quote! {
                             #cfg
-                            #ident::#variant(v0) => v0.debug(formatter, #variant_name),
+                            crate::#ident::#variant(v0) => v0.debug(formatter, #variant_name),
                         }
                     } else {
                         let pats = (0..fields.len())
@@ -79,7 +79,7 @@ fn expand_impl_body(
                             .collect::<Vec<_>>();
                         quote! {
                             #cfg
-                            #ident::#variant(#(#pats),*) => {
+                            crate::#ident::#variant(#(#pats),*) => {
                                 let mut formatter = formatter.debug_tuple(#variant_name);
                                 #(formatter.field(#pats);)*
                                 formatter.finish()
@@ -128,7 +128,7 @@ fn expand_impl_body(
 
     if is_syntax_tree_variant {
         quote! {
-            impl #ident {
+            impl crate::#ident {
                 fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
                     #body
                 }
@@ -156,7 +156,7 @@ fn expand_impl(defs: &Definitions, node: &Node, syntax_tree_variants: &Set<&str>
 
     quote! {
         #cfg_features
-        impl Debug for #ident {
+        impl Debug for crate::#ident {
             fn fmt(&self, #formatter: &mut fmt::Formatter) -> fmt::Result {
                 #body
             }
@@ -185,7 +185,6 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     file::write(
         DEBUG_SRC,
         quote! {
-            use crate::*;
             use std::fmt::{self, Debug};
 
             #impls

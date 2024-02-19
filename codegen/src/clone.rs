@@ -17,7 +17,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                 let variant = Ident::new(variant_name, Span::call_site());
                 if fields.is_empty() {
                     quote! {
-                        #ident::#variant => #ident::#variant,
+                        crate::#ident::#variant => crate::#ident::#variant,
                     }
                 } else {
                     let mut pats = Vec::new();
@@ -37,7 +37,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                     }
                     quote! {
                         #cfg
-                        #ident::#variant(#(#pats),*) => #ident::#variant(#(#clones),*),
+                        crate::#ident::#variant(#(#pats),*) => crate::#ident::#variant(#(#clones),*),
                     }
                 }
             });
@@ -63,7 +63,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                     #ident: self.#ident.clone(),
                 }
             });
-            quote!(#ident { #(#fields)* })
+            quote!(crate::#ident { #(#fields)* })
         }
         Data::Private => unreachable!(),
     }
@@ -86,9 +86,9 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
     if copy {
         return quote! {
             #cfg_features
-            impl Copy for #ident {}
+            impl Copy for crate::#ident {}
             #cfg_features
-            impl Clone for #ident {
+            impl Clone for crate::#ident {
                 fn clone(&self) -> Self {
                     *self
                 }
@@ -100,7 +100,7 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
 
     quote! {
         #cfg_features
-        impl Clone for #ident {
+        impl Clone for crate::#ident {
             fn clone(&self) -> Self {
                 #body
             }
@@ -118,8 +118,6 @@ pub fn generate(defs: &Definitions) -> Result<()> {
         CLONE_SRC,
         quote! {
             #![allow(clippy::clone_on_copy, clippy::expl_impl_clone_on_copy)]
-
-            use crate::*;
 
             #impls
         },

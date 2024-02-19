@@ -27,7 +27,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                 let variant = Ident::new(variant_name, Span::call_site());
                 if fields.is_empty() {
                     quote! {
-                        (#ident::#variant, #ident::#variant) => true,
+                        (crate::#ident::#variant, crate::#ident::#variant) => true,
                     }
                 } else {
                     let mut this_pats = Vec::new();
@@ -66,7 +66,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                     }
                     quote! {
                         #cfg
-                        (#ident::#variant(#(#this_pats),*), #ident::#variant(#(#other_pats),*)) => {
+                        (crate::#ident::#variant(#(#this_pats),*), crate::#ident::#variant(#(#other_pats),*)) => {
                             #(#comparisons)&&*
                         }
                     }
@@ -118,7 +118,7 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
 
     let eq = quote! {
         #cfg_features
-        impl Eq for #ident {}
+        impl Eq for crate::#ident {}
     };
 
     let manual_partial_eq = node.data == Data::Private;
@@ -137,7 +137,7 @@ fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
         #eq
 
         #cfg_features
-        impl PartialEq for #ident {
+        impl PartialEq for crate::#ident {
             fn eq(&self, #other: &Self) -> bool {
                 #body
             }
@@ -156,7 +156,6 @@ pub fn generate(defs: &Definitions) -> Result<()> {
         quote! {
             #[cfg(any(feature = "derive", feature = "full"))]
             use crate::tt::TokenStreamHelper;
-            use crate::*;
 
             #impls
         },
