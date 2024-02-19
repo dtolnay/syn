@@ -39,12 +39,10 @@ enum Error {
 
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use self::Error::*;
-
         match self {
-            IncorrectUsage => write!(f, "Usage: dump-syntax path/to/filename.rs"),
-            ReadFile(error) => write!(f, "Unable to read file: {}", error),
-            ParseFile {
+            Error::IncorrectUsage => write!(f, "Usage: dump-syntax path/to/filename.rs"),
+            Error::ReadFile(error) => write!(f, "Unable to read file: {}", error),
+            Error::ParseFile {
                 error,
                 filepath,
                 source_code,
