@@ -1,8 +1,19 @@
-use super::*;
+use crate::attr::Attribute;
+use crate::data::{Fields, FieldsNamed, Variant};
 use crate::derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
+use crate::expr::Expr;
+use crate::generics::{Generics, TypeParamBound};
+use crate::ident::Ident;
+use crate::lifetime::Lifetime;
+use crate::mac::Macro;
+use crate::pat::{Pat, PatType};
+use crate::path::Path;
 use crate::punctuated::Punctuated;
+use crate::restriction::Visibility;
+use crate::stmt::Block;
+use crate::token;
+use crate::ty::{Abi, ReturnType, Type};
 use proc_macro2::TokenStream;
-
 #[cfg(feature = "parsing")]
 use std::mem;
 
@@ -893,10 +904,35 @@ ast_enum! {
 
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
-    use super::*;
+    use crate::attr::{self, Attribute};
+    use crate::derive;
+    use crate::error::{Error, Result};
+    use crate::expr::Expr;
     use crate::ext::IdentExt as _;
+    use crate::generics::{Generics, TypeParamBound};
+    use crate::ident::Ident;
+    use crate::item::{
+        FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
+        ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType, Item, ItemConst,
+        ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod,
+        ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
+        Signature, StaticMutability, TraitItem, TraitItemConst, TraitItemFn, TraitItemMacro,
+        TraitItemType, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
+    };
+    use crate::lifetime::Lifetime;
+    use crate::lit::LitStr;
+    use crate::mac::{self, Macro, MacroDelimiter};
     use crate::parse::discouraged::Speculative as _;
-    use crate::parse::{Parse, ParseBuffer, ParseStream, Result};
+    use crate::parse::{Parse, ParseBuffer, ParseStream};
+    use crate::pat::{Pat, PatType, PatWild};
+    use crate::path::Path;
+    use crate::punctuated::Punctuated;
+    use crate::restriction::Visibility;
+    use crate::stmt::Block;
+    use crate::token;
+    use crate::ty::{Abi, ReturnType, Type, TypePath, TypeReference};
+    use crate::verbatim;
+    use proc_macro2::TokenStream;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Item {
@@ -2856,9 +2892,19 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use super::*;
     use crate::attr::FilterAttrs;
+    use crate::data::Fields;
+    use crate::item::{
+        ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType, ImplItemConst,
+        ImplItemFn, ImplItemMacro, ImplItemType, ItemConst, ItemEnum, ItemExternCrate, ItemFn,
+        ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait,
+        ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Signature, StaticMutability,
+        TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob, UseGroup, UseName,
+        UsePath, UseRename, Variadic,
+    };
+    use crate::mac::MacroDelimiter;
     use crate::print::TokensOrDefault;
+    use crate::ty::Type;
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 

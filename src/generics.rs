@@ -1,5 +1,11 @@
-use super::*;
+use crate::attr::Attribute;
+use crate::expr::Expr;
+use crate::ident::Ident;
+use crate::lifetime::Lifetime;
+use crate::path::Path;
 use crate::punctuated::{Iter, IterMut, Punctuated};
+use crate::token;
+use crate::ty::Type;
 use proc_macro2::TokenStream;
 #[cfg(all(feature = "printing", feature = "extra-traits"))]
 use std::fmt::{self, Debug};
@@ -531,9 +537,22 @@ ast_struct! {
 
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
-    use super::*;
+    use crate::attr::Attribute;
+    use crate::error::Result;
     use crate::ext::IdentExt as _;
-    use crate::parse::{Parse, ParseStream, Result};
+    use crate::generics::{
+        BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeParam, PredicateLifetime,
+        PredicateType, TraitBound, TraitBoundModifier, TypeParam, TypeParamBound, WhereClause,
+        WherePredicate,
+    };
+    use crate::ident::Ident;
+    use crate::lifetime::Lifetime;
+    use crate::parse::{Parse, ParseStream};
+    use crate::path::{self, ParenthesizedGenericArguments, Path, PathArguments};
+    use crate::punctuated::Punctuated;
+    use crate::token;
+    use crate::ty::Type;
+    use crate::verbatim;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Generics {
@@ -971,8 +990,12 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use super::*;
     use crate::attr::FilterAttrs;
+    use crate::generics::{
+        BoundLifetimes, ConstParam, GenericParam, Generics, ImplGenerics, LifetimeParam,
+        PredicateLifetime, PredicateType, TraitBound, TraitBoundModifier, Turbofish, TypeGenerics,
+        TypeParam, WhereClause,
+    };
     use crate::print::TokensOrDefault;
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};

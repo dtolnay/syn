@@ -1,5 +1,13 @@
-use super::*;
+use crate::attr::Attribute;
+use crate::expr::Expr;
+use crate::generics::{BoundLifetimes, TypeParamBound};
+use crate::ident::Ident;
+use crate::lifetime::Lifetime;
+use crate::lit::LitStr;
+use crate::mac::Macro;
+use crate::path::{Path, QSelf};
 use crate::punctuated::Punctuated;
+use crate::token;
 use proc_macro2::TokenStream;
 
 ast_enum_of_structs! {
@@ -264,10 +272,24 @@ ast_enum! {
 
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
-    use super::*;
+    use crate::attr::Attribute;
+    use crate::error::{self, Result};
     use crate::ext::IdentExt as _;
-    use crate::parse::{Parse, ParseStream, Result};
+    use crate::generics::{BoundLifetimes, TraitBound, TraitBoundModifier, TypeParamBound};
+    use crate::ident::Ident;
+    use crate::lifetime::Lifetime;
+    use crate::mac::{self, Macro};
+    use crate::parse::{Parse, ParseStream};
     use crate::path;
+    use crate::path::{Path, PathArguments, QSelf};
+    use crate::punctuated::Punctuated;
+    use crate::token;
+    use crate::ty::{
+        Abi, BareFnArg, BareVariadic, ReturnType, Type, TypeArray, TypeBareFn, TypeGroup,
+        TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
+        TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
+    };
+    use crate::verbatim;
     use proc_macro2::Span;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
@@ -994,9 +1016,14 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use super::*;
     use crate::attr::FilterAttrs;
+    use crate::path;
     use crate::print::TokensOrDefault;
+    use crate::ty::{
+        Abi, BareFnArg, BareVariadic, ReturnType, TypeArray, TypeBareFn, TypeGroup, TypeImplTrait,
+        TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice,
+        TypeTraitObject, TypeTuple,
+    };
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 

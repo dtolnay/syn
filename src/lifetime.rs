@@ -1,10 +1,9 @@
+#[cfg(feature = "parsing")]
+use crate::lookahead;
 use proc_macro2::{Ident, Span};
 use std::cmp::Ordering;
 use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
-
-#[cfg(feature = "parsing")]
-use crate::lookahead;
 
 /// A Rust lifetime: `'a`.
 ///
@@ -123,8 +122,9 @@ pub_if_not_doc! {
 
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
-    use super::*;
-    use crate::parse::{Parse, ParseStream, Result};
+    use crate::error::Result;
+    use crate::lifetime::Lifetime;
+    use crate::parse::{Parse, ParseStream};
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Lifetime {
@@ -140,7 +140,7 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use super::*;
+    use crate::lifetime::Lifetime;
     use proc_macro2::{Punct, Spacing, TokenStream};
     use quote::{ToTokens, TokenStreamExt};
 

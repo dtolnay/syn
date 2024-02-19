@@ -1,12 +1,29 @@
-use super::*;
+use crate::attr::Attribute;
+#[cfg(feature = "full")]
+use crate::generics::BoundLifetimes;
+use crate::ident::Ident;
+#[cfg(feature = "full")]
+use crate::lifetime::Lifetime;
+use crate::lit::Lit;
+use crate::mac::Macro;
+use crate::op::{BinOp, UnOp};
+#[cfg(feature = "full")]
+use crate::pat::Pat;
+use crate::path::{AngleBracketedGenericArguments, Path, QSelf};
 use crate::punctuated::Punctuated;
+#[cfg(feature = "full")]
+use crate::stmt::Block;
+use crate::token;
+#[cfg(feature = "full")]
+use crate::ty::ReturnType;
+use crate::ty::Type;
 use proc_macro2::{Span, TokenStream};
 #[cfg(feature = "printing")]
 use quote::IdentFragment;
 #[cfg(feature = "printing")]
 use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
-#[cfg(feature = "parsing")]
+#[cfg(all(feature = "parsing", feature = "full"))]
 use std::mem;
 
 ast_enum_of_structs! {
@@ -1011,16 +1028,52 @@ mod precedence {
 
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
-    use super::precedence::Precedence;
-    use super::*;
+    #[cfg(feature = "full")]
+    use crate::attr;
+    use crate::attr::Attribute;
+    use crate::error::{Error, Result};
+    use crate::expr::precedence::Precedence;
+    #[cfg(feature = "full")]
+    use crate::expr::{
+        requires_terminator, Arm, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock,
+        ExprBreak, ExprClosure, ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet,
+        ExprLoop, ExprMatch, ExprRange, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprTuple,
+        ExprUnsafe, ExprWhile, ExprYield, Label, RangeLimits,
+    };
+    use crate::expr::{
+        Expr, ExprBinary, ExprCall, ExprCast, ExprField, ExprGroup, ExprIndex, ExprLit, ExprMacro,
+        ExprMethodCall, ExprParen, ExprPath, ExprReference, ExprStruct, ExprUnary, FieldValue,
+        Index, Member,
+    };
     #[cfg(feature = "full")]
     use crate::ext::IdentExt as _;
+    #[cfg(feature = "full")]
+    use crate::generics::BoundLifetimes;
+    use crate::ident::Ident;
+    #[cfg(feature = "full")]
+    use crate::lifetime::Lifetime;
+    use crate::lit::{Lit, LitFloat, LitInt};
+    use crate::mac::{self, Macro};
+    use crate::op::BinOp;
     use crate::parse::discouraged::Speculative as _;
     #[cfg(feature = "full")]
     use crate::parse::ParseBuffer;
-    use crate::parse::{Parse, ParseStream, Result};
-    use crate::path;
+    use crate::parse::{Parse, ParseStream};
+    #[cfg(feature = "full")]
+    use crate::pat::{Pat, PatType};
+    use crate::path::{self, AngleBracketedGenericArguments, Path, QSelf};
+    use crate::punctuated::Punctuated;
+    #[cfg(feature = "full")]
+    use crate::stmt::Block;
+    use crate::token;
+    use crate::ty;
+    #[cfg(feature = "full")]
+    use crate::ty::{ReturnType, Type};
+    use crate::verbatim;
+    #[cfg(feature = "full")]
+    use proc_macro2::TokenStream;
     use std::cmp::Ordering;
+    use std::mem;
 
     mod kw {
         crate::custom_keyword!(builtin);
@@ -2948,10 +3001,25 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 pub(crate) mod printing {
-    use super::*;
+    use crate::attr::Attribute;
     #[cfg(feature = "full")]
     use crate::attr::FilterAttrs;
-    use proc_macro2::{Literal, TokenStream};
+    #[cfg(feature = "full")]
+    use crate::expr::{
+        requires_terminator, Arm, Expr, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock,
+        ExprBreak, ExprClosure, ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet,
+        ExprLoop, ExprMatch, ExprRange, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprTuple,
+        ExprUnsafe, ExprWhile, ExprYield, Label, RangeLimits,
+    };
+    use crate::expr::{
+        ExprBinary, ExprCall, ExprCast, ExprField, ExprGroup, ExprIndex, ExprLit, ExprMacro,
+        ExprMethodCall, ExprParen, ExprPath, ExprReference, ExprStruct, ExprUnary, FieldValue,
+        Index, Member,
+    };
+    use crate::path;
+    #[cfg(feature = "full")]
+    use crate::token;
+    use proc_macro2::{Literal, Span, TokenStream};
     use quote::{ToTokens, TokenStreamExt};
 
     // If the given expression is a bare `ExprStruct`, wraps it in parenthesis

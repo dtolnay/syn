@@ -1,14 +1,15 @@
-use super::*;
+#[cfg(feature = "parsing")]
+use crate::error::Result;
+#[cfg(feature = "parsing")]
+use crate::parse::{Parse, ParseStream, Parser};
+use crate::path::Path;
 use crate::token::{Brace, Bracket, Paren};
 use proc_macro2::extra::DelimSpan;
-#[cfg(any(feature = "parsing", feature = "printing"))]
+#[cfg(feature = "parsing")]
 use proc_macro2::Delimiter;
 use proc_macro2::TokenStream;
 #[cfg(feature = "parsing")]
 use proc_macro2::TokenTree;
-
-#[cfg(feature = "parsing")]
-use crate::parse::{Parse, ParseStream, Parser, Result};
 
 ast_struct! {
     /// A macro invocation: `println!("{}", mac)`.
@@ -162,8 +163,10 @@ pub(crate) fn parse_delimiter(input: ParseStream) -> Result<(MacroDelimiter, Tok
 
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
-    use super::*;
-    use crate::parse::{Parse, ParseStream, Result};
+    use crate::error::Result;
+    use crate::mac::{parse_delimiter, Macro};
+    use crate::parse::{Parse, ParseStream};
+    use crate::path::Path;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Macro {
@@ -185,8 +188,9 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use super::*;
-    use proc_macro2::TokenStream;
+    use crate::mac::{Macro, MacroDelimiter};
+    use crate::token;
+    use proc_macro2::{Delimiter, TokenStream};
     use quote::ToTokens;
 
     impl MacroDelimiter {

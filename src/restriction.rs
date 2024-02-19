@@ -1,4 +1,5 @@
-use super::*;
+use crate::path::Path;
+use crate::token;
 
 ast_enum! {
     /// The visibility level of an item: inherited or `pub` or
@@ -57,10 +58,14 @@ ast_enum! {
 
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
-    use super::*;
+    use crate::error::Result;
     use crate::ext::IdentExt as _;
+    use crate::ident::Ident;
     use crate::parse::discouraged::Speculative as _;
-    use crate::parse::{Parse, ParseStream, Result};
+    use crate::parse::{Parse, ParseStream};
+    use crate::path::Path;
+    use crate::restriction::{VisRestricted, Visibility};
+    use crate::token;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Visibility {
@@ -141,7 +146,7 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use super::*;
+    use crate::restriction::{VisRestricted, Visibility};
     use proc_macro2::TokenStream;
     use quote::ToTokens;
 

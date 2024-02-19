@@ -555,7 +555,7 @@ impl LitBool {
 
 #[cfg(feature = "extra-traits")]
 mod debug_impls {
-    use super::*;
+    use crate::lit::{LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr};
     use std::fmt::{self, Debug};
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
@@ -808,10 +808,14 @@ pub_if_not_doc! {
 
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
-    use super::*;
     use crate::buffer::Cursor;
-    use crate::parse::{Parse, ParseStream, Result};
-    use proc_macro2::Punct;
+    use crate::error::Result;
+    use crate::lit::{
+        value, Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitFloatRepr, LitInt,
+        LitIntRepr, LitStr,
+    };
+    use crate::parse::{Parse, ParseStream};
+    use proc_macro2::{Literal, Punct};
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Lit {
@@ -964,7 +968,7 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use super::*;
+    use crate::lit::{LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr};
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 
@@ -1019,8 +1023,12 @@ mod printing {
 }
 
 mod value {
-    use super::*;
     use crate::bigint::BigInt;
+    use crate::lit::{
+        Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitFloatRepr, LitInt, LitIntRepr,
+        LitRepr, LitStr,
+    };
+    use proc_macro2::{Literal, Span};
     use std::char;
     use std::ops::{Index, RangeFrom};
 

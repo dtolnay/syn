@@ -1,4 +1,9 @@
-use super::*;
+use crate::attr::Attribute;
+use crate::expr::Expr;
+use crate::item::Item;
+use crate::mac::Macro;
+use crate::pat::Pat;
+use crate::token;
 
 ast_struct! {
     /// A braced block containing Rust statements.
@@ -74,9 +79,19 @@ ast_struct! {
 
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
-    use super::*;
+    use crate::attr::Attribute;
+    use crate::error::Result;
+    use crate::expr::{self, Expr, ExprBlock, ExprMacro};
+    use crate::ident::Ident;
+    use crate::item;
+    use crate::mac::{self, Macro};
     use crate::parse::discouraged::Speculative as _;
-    use crate::parse::{Parse, ParseStream, Result};
+    use crate::parse::{Parse, ParseStream};
+    use crate::pat::{Pat, PatType};
+    use crate::path::Path;
+    use crate::stmt::{Block, Local, LocalInit, Stmt, StmtMacro};
+    use crate::token;
+    use crate::ty::Type;
     use proc_macro2::TokenStream;
 
     struct AllowNoSemi(bool);
@@ -395,7 +410,8 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use super::*;
+    use crate::expr;
+    use crate::stmt::{Block, Local, Stmt, StmtMacro};
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 

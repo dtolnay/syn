@@ -1,6 +1,16 @@
-use super::*;
+use crate::attr::Attribute;
+use crate::expr::Member;
+use crate::ident::Ident;
+use crate::path::{Path, QSelf};
 use crate::punctuated::Punctuated;
+use crate::token;
+use crate::ty::Type;
 use proc_macro2::TokenStream;
+
+pub use crate::expr::{
+    ExprConst as PatConst, ExprLit as PatLit, ExprMacro as PatMacro, ExprPath as PatPath,
+    ExprRange as PatRange,
+};
 
 ast_enum_of_structs! {
     /// A pattern in a local binding, function signature, match expression, or
@@ -227,10 +237,26 @@ ast_struct! {
 
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
-    use super::*;
+    use crate::attr::Attribute;
+    use crate::error::{self, Result};
+    use crate::expr::{
+        Expr, ExprConst, ExprLit, ExprMacro, ExprPath, ExprRange, Member, RangeLimits,
+    };
     use crate::ext::IdentExt as _;
-    use crate::parse::{Parse, ParseBuffer, ParseStream, Result};
-    use crate::path;
+    use crate::ident::Ident;
+    use crate::lit::Lit;
+    use crate::mac::{self, Macro};
+    use crate::parse::{Parse, ParseBuffer, ParseStream};
+    use crate::pat::{
+        FieldPat, Pat, PatIdent, PatOr, PatParen, PatReference, PatRest, PatSlice, PatStruct,
+        PatTuple, PatTupleStruct, PatType, PatWild,
+    };
+    use crate::path::{self, Path, QSelf};
+    use crate::punctuated::Punctuated;
+    use crate::stmt::Block;
+    use crate::token;
+    use crate::verbatim;
+    use proc_macro2::TokenStream;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Pat {
@@ -773,8 +799,12 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use super::*;
     use crate::attr::FilterAttrs;
+    use crate::pat::{
+        FieldPat, Pat, PatIdent, PatOr, PatParen, PatReference, PatRest, PatSlice, PatStruct,
+        PatTuple, PatTupleStruct, PatType, PatWild,
+    };
+    use crate::path;
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 

@@ -1,5 +1,10 @@
-use super::*;
-use crate::punctuated::Punctuated;
+use crate::attr::Attribute;
+use crate::expr::Expr;
+use crate::ident::Ident;
+use crate::punctuated::{self, Punctuated};
+use crate::restriction::{FieldMutability, Visibility};
+use crate::token;
+use crate::ty::Type;
 
 ast_struct! {
     /// An enum variant.
@@ -155,11 +160,19 @@ ast_struct! {
 
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
-    use super::*;
+    use crate::attr::Attribute;
+    use crate::data::{Field, Fields, FieldsNamed, FieldsUnnamed, Variant};
+    use crate::error::Result;
+    use crate::expr::Expr;
     use crate::ext::IdentExt as _;
+    use crate::ident::Ident;
     #[cfg(not(feature = "full"))]
     use crate::parse::discouraged::Speculative as _;
-    use crate::parse::{Parse, ParseStream, Result};
+    use crate::parse::{Parse, ParseStream};
+    use crate::restriction::{FieldMutability, Visibility};
+    use crate::token;
+    use crate::ty::Type;
+    use crate::verbatim;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Variant {
@@ -205,6 +218,12 @@ pub(crate) mod parsing {
 
     #[cfg(not(feature = "full"))]
     pub(crate) fn scan_lenient_discriminant(input: ParseStream) -> Result<()> {
+        use crate::expr::Member;
+        use crate::lifetime::Lifetime;
+        use crate::lit::Lit;
+        use crate::lit::LitFloat;
+        use crate::op::{BinOp, UnOp};
+        use crate::path::{self, AngleBracketedGenericArguments};
         use proc_macro2::Delimiter::{self, Brace, Bracket, Parenthesis};
 
         let consume = |delimiter: Delimiter| {
@@ -353,7 +372,7 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use super::*;
+    use crate::data::{Field, FieldsNamed, FieldsUnnamed, Variant};
     use crate::print::TokensOrDefault;
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};

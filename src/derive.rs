@@ -1,5 +1,10 @@
-use super::*;
+use crate::attr::Attribute;
+use crate::data::{Fields, FieldsNamed, Variant};
+use crate::generics::Generics;
+use crate::ident::Ident;
 use crate::punctuated::Punctuated;
+use crate::restriction::Visibility;
+use crate::token;
 
 ast_struct! {
     /// Data structure sent to a `proc_macro_derive` macro.
@@ -60,8 +65,16 @@ ast_struct! {
 
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
-    use super::*;
-    use crate::parse::{Parse, ParseStream, Result};
+    use crate::attr::Attribute;
+    use crate::data::{Fields, FieldsNamed, Variant};
+    use crate::derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
+    use crate::error::Result;
+    use crate::generics::{Generics, WhereClause};
+    use crate::ident::Ident;
+    use crate::parse::{Parse, ParseStream};
+    use crate::punctuated::Punctuated;
+    use crate::restriction::Visibility;
+    use crate::token;
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for DeriveInput {
@@ -193,8 +206,9 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use super::*;
     use crate::attr::FilterAttrs;
+    use crate::data::Fields;
+    use crate::derive::{Data, DeriveInput};
     use crate::print::TokensOrDefault;
     use proc_macro2::TokenStream;
     use quote::ToTokens;

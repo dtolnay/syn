@@ -1,14 +1,20 @@
-use super::*;
+#[cfg(feature = "parsing")]
+use crate::error::Error;
+#[cfg(feature = "parsing")]
+use crate::error::Result;
+use crate::expr::Expr;
+use crate::mac::MacroDelimiter;
+#[cfg(feature = "parsing")]
+use crate::meta::{self, ParseNestedMeta};
+#[cfg(feature = "parsing")]
+use crate::parse::{Parse, ParseStream, Parser};
+use crate::path::Path;
+use crate::token;
 use proc_macro2::TokenStream;
 #[cfg(feature = "printing")]
 use std::iter;
 #[cfg(feature = "printing")]
 use std::slice;
-
-#[cfg(feature = "parsing")]
-use crate::meta::{self, ParseNestedMeta};
-#[cfg(feature = "parsing")]
-use crate::parse::{Parse, ParseStream, Parser, Result};
 
 ast_struct! {
     /// An attribute, like `#[repr(transparent)]`.
@@ -621,14 +627,19 @@ impl<'a> FilterAttrs<'a> for &'a [Attribute] {
 
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
-    use super::*;
+    use crate::attr::{AttrStyle, Attribute, Meta, MetaList, MetaNameValue};
+    use crate::error::Result;
+    use crate::expr::{Expr, ExprLit};
+    use crate::lit::Lit;
     use crate::parse::discouraged::Speculative as _;
-    use crate::parse::{Parse, ParseStream, Result};
+    use crate::parse::{Parse, ParseStream};
+    use crate::path::Path;
+    use crate::{mac, token};
     use std::fmt::{self, Display};
 
     pub(crate) fn parse_inner(input: ParseStream, attrs: &mut Vec<Attribute>) -> Result<()> {
         while input.peek(Token![#]) && input.peek2(Token![!]) {
-            attrs.push(input.call(parsing::single_parse_inner)?);
+            attrs.push(input.call(single_parse_inner)?);
         }
         Ok(())
     }
@@ -746,7 +757,7 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use super::*;
+    use crate::attr::{AttrStyle, Attribute, MetaList, MetaNameValue};
     use proc_macro2::TokenStream;
     use quote::ToTokens;
 
