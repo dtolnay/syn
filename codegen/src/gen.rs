@@ -1,4 +1,4 @@
-use crate::cfg;
+use crate::cfg::{self, DocCfg};
 use inflections::Inflect;
 use proc_macro2::{Ident, Span, TokenStream};
 use syn_codegen::{Data, Definitions, Features, Node};
@@ -27,7 +27,7 @@ pub fn traverse(
     let mut traits = TokenStream::new();
     let mut impls = TokenStream::new();
     for s in types {
-        let features = cfg::features(&s.features, None);
+        let features = cfg::features(&s.features, DocCfg::Ordinary);
         traits.extend(features.clone());
         impls.extend(features);
         node(&mut traits, &mut impls, &s, defs);

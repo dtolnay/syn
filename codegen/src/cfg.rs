@@ -2,28 +2,40 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn_codegen::Features;
 
-pub fn features<'a>(
-    features: &Features,
-    overriding_cfg: impl Into<Option<&'a str>>,
-) -> TokenStream {
+pub enum DocCfg {
+    Ordinary,
+    Override(&'static str),
+    None,
+}
+
+impl From<&'static str> for DocCfg {
+    fn from(overriding_cfg: &'static str) -> Self {
+        DocCfg::Override(overriding_cfg)
+    }
+}
+
+pub fn features(features: &Features, doc_cfg: impl Into<DocCfg>) -> TokenStream {
     let features = &features.any;
     let cfg = match features.len() {
         0 => None,
         1 => Some(quote! { cfg(feature = #(#features)*) }),
         _ => Some(quote! { cfg(any(#(feature = #features),*)) }),
     };
-    match (cfg, overriding_cfg.into()) {
-        (Some(cfg), Some(overriding_cfg)) => quote! {
-            #[#cfg]
-            #[cfg_attr(doc_cfg, doc(cfg(feature = #overriding_cfg)))]
-        },
-        (Some(cfg), None) => quote! {
+    match (cfg, doc_cfg.into()) {
+        (Some(cfg), DocCfg::Ordinary) => quote! {
             #[#cfg]
             #[cfg_attr(doc_cfg, doc(#cfg))]
         },
-        (None, Some(overriding_cfg)) => quote! {
+        (Some(cfg), DocCfg::Override(overriding_cfg)) => quote! {
+            #[#cfg]
             #[cfg_attr(doc_cfg, doc(cfg(feature = #overriding_cfg)))]
         },
-        (None, None) => TokenStream::new(),
+        (Some(cfg), DocCfg::None) => quote! {
+            #[#cfg]
+        },
+        (None, DocCfg::Override(overriding_cfg)) => quote! {
+            #[cfg_attr(doc_cfg, doc(cfg(feature = #overriding_cfg)))]
+        },
+        (None, DocCfg::Ordinary | DocCfg::None) => TokenStream::new(),
     }
 }

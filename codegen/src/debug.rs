@@ -1,4 +1,5 @@
-use crate::{cfg, file, lookup};
+use crate::cfg::{self, DocCfg};
+use crate::{file, lookup};
 use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
@@ -49,7 +50,7 @@ fn expand_impl_body(
     let ident = Ident::new(type_name, Span::call_site());
     let is_syntax_tree_variant = syntax_tree_variants.contains(type_name.as_str());
 
-    let body = match &node.data {
+    match &node.data {
         Data::Enum(variants) if variants.is_empty() => quote!(match *self {}),
         Data::Enum(variants) => {
             assert!(!is_syntax_tree_variant);
@@ -124,19 +125,6 @@ fn expand_impl_body(
             }
         }
         Data::Private => unreachable!(),
-    };
-
-    if is_syntax_tree_variant {
-        quote! {
-            impl crate::#ident {
-                fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
-                    #body
-                }
-            }
-            self.debug(formatter, #type_name)
-        }
-    } else {
-        body
     }
 }
 
@@ -146,7 +134,10 @@ fn expand_impl(defs: &Definitions, node: &Node, syntax_tree_variants: &Set<&str>
         return TokenStream::new();
     }
 
-    let ident = Ident::new(&node.ident, Span::call_site());
+    let type_name = &node.ident;
+    let ident = Ident::new(type_name, Span::call_site());
+    let is_syntax_tree_variant = syntax_tree_variants.contains(type_name.as_str());
+
     let cfg_features = cfg::features(&node.features, "extra-traits");
     let body = expand_impl_body(defs, node, syntax_tree_variants);
     let formatter = match &node.data {
@@ -154,11 +145,29 @@ fn expand_impl(defs: &Definitions, node: &Node, syntax_tree_variants: &Set<&str>
         _ => quote!(formatter),
     };
 
-    quote! {
-        #cfg_features
-        impl Debug for crate::#ident {
-            fn fmt(&self, #formatter: &mut fmt::Formatter) -> fmt::Result {
-                #body
+    if is_syntax_tree_variant {
+        let inherent_cfg_features = cfg::features(&node.features, DocCfg::None);
+        quote! {
+            #cfg_features
+            impl Debug for crate::#ident {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    self.debug(formatter, #type_name)
+                }
+            }
+            #inherent_cfg_features
+            impl crate::#ident {
+                fn debug(&self, #formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
+                    #body
+                }
+            }
+        }
+    } else {
+        quote! {
+            #cfg_features
+            impl Debug for crate::#ident {
+                fn fmt(&self, #formatter: &mut fmt::Formatter) -> fmt::Result {
+                    #body
+                }
             }
         }
     }
@@ -185,6 +194,8 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     file::write(
         DEBUG_SRC,
         quote! {
+            #![allow(unknown_lints, non_local_definitions)]
+
             use std::fmt::{self, Debug};
 
             #impls
