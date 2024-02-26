@@ -154,7 +154,9 @@ use rustc_ast::ast::WhereEqPredicate;
 use rustc_ast::ast::WherePredicate;
 use rustc_ast::ast::WhereRegionPredicate;
 use rustc_ast::ptr::P;
-use rustc_ast::token::{self, CommentKind, Delimiter, Lit, Nonterminal, Token, TokenKind};
+use rustc_ast::token::{
+    self, CommentKind, Delimiter, IdentIsRaw, Lit, Nonterminal, Token, TokenKind,
+};
 use rustc_ast::tokenstream::{
     AttrTokenStream, AttrTokenTree, AttributesData, DelimSpacing, DelimSpan, LazyAttrTokenStream,
     Spacing, TokenStream, TokenTree,
@@ -752,7 +754,7 @@ fn doc_comment<'a>(
     match trees.next() {
         Some(TokenTree::Token(
             Token {
-                kind: TokenKind::Ident(symbol, false),
+                kind: TokenKind::Ident(symbol, IdentIsRaw::No),
                 span: _,
             },
             _spacing,
