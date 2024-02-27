@@ -4,34 +4,33 @@ use crate::token;
 use proc_macro2::extra::DelimSpan;
 use proc_macro2::Delimiter;
 
-// Not public API.
-#[doc(hidden)]
+/// The rust code enclosed in parentheses
 pub struct Parens<'a> {
-    #[doc(hidden)]
+    /// Paren token '(' and ')'
     pub token: token::Paren,
-    #[doc(hidden)]
+
+    /// Inner content
     pub content: ParseBuffer<'a>,
 }
 
-// Not public API.
-#[doc(hidden)]
+/// The rust code enclosed in braces
 pub struct Braces<'a> {
-    #[doc(hidden)]
+    /// Brace token '{' and '}'
     pub token: token::Brace,
-    #[doc(hidden)]
+
+    /// Inner content
     pub content: ParseBuffer<'a>,
 }
 
-// Not public API.
-#[doc(hidden)]
+/// The rust code enclosed in brackets
 pub struct Brackets<'a> {
-    #[doc(hidden)]
+    /// Bracket token ']' and '['
     pub token: token::Bracket,
-    #[doc(hidden)]
+
+    /// Inner content
     pub content: ParseBuffer<'a>,
 }
 
-// Not public API.
 #[cfg(any(feature = "full", feature = "derive"))]
 #[doc(hidden)]
 pub struct Group<'a> {
@@ -41,8 +40,8 @@ pub struct Group<'a> {
     pub content: ParseBuffer<'a>,
 }
 
-// Not public API.
-#[doc(hidden)]
+/// Parse a set of parentheses and expose their content to subsequent parsers.
+/// Use it instead of parenthesized! macro when you want to handle Err yourself
 pub fn parse_parens<'a>(input: &ParseBuffer<'a>) -> Result<Parens<'a>> {
     parse_delimited(input, Delimiter::Parenthesis).map(|(span, content)| Parens {
         token: token::Paren(span),
@@ -50,8 +49,8 @@ pub fn parse_parens<'a>(input: &ParseBuffer<'a>) -> Result<Parens<'a>> {
     })
 }
 
-// Not public API.
-#[doc(hidden)]
+/// Parse a set of curly braces and expose their content to subsequent parsers.
+/// Use it instead of braced! macro when you want to handle Err yourself
 pub fn parse_braces<'a>(input: &ParseBuffer<'a>) -> Result<Braces<'a>> {
     parse_delimited(input, Delimiter::Brace).map(|(span, content)| Braces {
         token: token::Brace(span),
@@ -59,8 +58,9 @@ pub fn parse_braces<'a>(input: &ParseBuffer<'a>) -> Result<Braces<'a>> {
     })
 }
 
-// Not public API.
-#[doc(hidden)]
+/// Parse a set of square brackets and expose their content to subsequent
+/// parsers.
+/// Use it instead of bracketed! macro when you want to handle Err yourself
 pub fn parse_brackets<'a>(input: &ParseBuffer<'a>) -> Result<Brackets<'a>> {
     parse_delimited(input, Delimiter::Bracket).map(|(span, content)| Brackets {
         token: token::Bracket(span),
