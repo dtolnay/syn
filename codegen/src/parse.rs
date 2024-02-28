@@ -169,7 +169,7 @@ fn introspect_type(item: &syn::Type, lookup: &Lookup) -> types::Type {
                     while let Some(alias) = lookup.aliases.get(resolved) {
                         resolved = alias;
                     }
-                    if lookup.items.get(resolved).is_some() {
+                    if lookup.items.contains_key(resolved) {
                         types::Type::Syn(resolved.to_string())
                     } else {
                         unimplemented!("{}", resolved);
