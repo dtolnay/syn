@@ -54,7 +54,7 @@ mod librustc_parse {
 
     use rustc_data_structures::sync::Lrc;
     use rustc_error_messages::FluentBundle;
-    use rustc_errors::{emitter::Emitter, translation::Translate, DiagCtxt, Diagnostic};
+    use rustc_errors::{emitter::Emitter, translation::Translate, DiagCtxt, DiagInner};
     use rustc_session::parse::ParseSess;
     use rustc_span::source_map::{FilePathMapping, SourceMap};
     use rustc_span::{edition::Edition, FileName};
@@ -63,7 +63,7 @@ mod librustc_parse {
         struct SilentEmitter;
 
         impl Emitter for SilentEmitter {
-            fn emit_diagnostic(&mut self, _diag: Diagnostic) {}
+            fn emit_diagnostic(&mut self, _diag: DiagInner) {}
             fn source_map(&self) -> Option<&Lrc<SourceMap>> {
                 None
             }
