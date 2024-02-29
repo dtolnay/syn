@@ -30,7 +30,7 @@ use rustc_ast::ast::{
 use rustc_ast::mut_visit::{self, MutVisitor};
 use rustc_ast_pretty::pprust;
 use rustc_error_messages::{DiagnosticMessage, LazyFallbackBundle};
-use rustc_errors::{translation, Diagnostic, PResult};
+use rustc_errors::{translation, Diag, PResult};
 use rustc_session::parse::ParseSess;
 use rustc_span::source_map::FilePathMapping;
 use rustc_span::FileName;
@@ -156,7 +156,7 @@ fn librustc_parse(content: String, sess: &ParseSess) -> PResult<Crate> {
     parse::parse_crate_from_source_str(name, content, sess)
 }
 
-fn translate_message(diagnostic: &Diagnostic) -> Cow<'static, str> {
+fn translate_message(diagnostic: &Diag) -> Cow<'static, str> {
     thread_local! {
         static FLUENT_BUNDLE: LazyFallbackBundle = {
             let locale_resources = rustc_driver::DEFAULT_LOCALE_RESOURCES.to_vec();
