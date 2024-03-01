@@ -81,7 +81,7 @@ mod librustc_parse {
         rustc_span::create_session_if_not_set_then(Edition::Edition2018, |_| {
             let source_map = Lrc::new(SourceMap::new(FilePathMapping::empty()));
             let emitter = Box::new(SilentEmitter);
-            let handler = DiagCtxt::with_emitter(emitter);
+            let handler = DiagCtxt::new(emitter);
             let sess = ParseSess::with_dcx(handler, source_map);
             if let Err(diagnostic) = rustc_parse::parse_crate_from_source_str(
                 FileName::Custom("bench".to_owned()),
