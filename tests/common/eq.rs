@@ -496,7 +496,7 @@ spanless_eq_struct!(Item<K>; attrs id span vis ident kind !tokens);
 spanless_eq_struct!(Label; ident);
 spanless_eq_struct!(Lifetime; id ident);
 spanless_eq_struct!(Lit; kind symbol suffix);
-spanless_eq_struct!(Local; pat ty kind id span attrs !tokens);
+spanless_eq_struct!(Local; id pat ty kind span colon_sp attrs !tokens);
 spanless_eq_struct!(MacCall; path args);
 spanless_eq_struct!(MacCallStmt; mac style attrs tokens);
 spanless_eq_struct!(MacroDef; body macro_rules);
