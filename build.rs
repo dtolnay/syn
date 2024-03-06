@@ -11,7 +11,9 @@ fn main() {
     // Note: add "/build.rs" to package.include in Cargo.toml if adding any
     // conditional compilation within the library.
 
-    if !unstable() {
+    if !unstable() || {
+        true // FIXME: waiting on https://github.com/rust-lang/rust/pull/121967
+    } {
         println!("cargo:rustc-cfg=syn_disable_nightly_tests");
     }
 }
