@@ -1354,6 +1354,18 @@ impl Parse for Nothing {
     }
 }
 
+#[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Clone for Nothing {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+#[cfg(feature = "clone-impls")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+impl Copy for Nothing {}
+
 #[cfg(feature = "extra-traits")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Debug for Nothing {
