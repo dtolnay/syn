@@ -188,6 +188,8 @@ use crate::lookahead;
 use crate::punctuated::Punctuated;
 use crate::token::Token;
 use proc_macro2::{Delimiter, Group, Literal, Punct, Span, TokenStream, TokenTree};
+#[cfg(feature = "printing")]
+use quote::ToTokens;
 use std::cell::Cell;
 use std::fmt::{self, Debug, Display};
 #[cfg(feature = "extra-traits")]
@@ -1351,6 +1353,14 @@ pub struct Nothing;
 impl Parse for Nothing {
     fn parse(_input: ParseStream) -> Result<Self> {
         Ok(Nothing)
+    }
+}
+
+#[cfg(feature = "printing")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+impl ToTokens for Nothing {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let _ = tokens;
     }
 }
 
