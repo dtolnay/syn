@@ -1,0 +1,26 @@
+[workspace]
+[package]
+name = "syn-test-suite"
+version = "0.0.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+edition = "2021"
+publish = false
+
+[lib]
+path = "test.rs"
+
+[dependencies]
+syn = { path = "../..", default-features = false }
+
+[features]
+default = ["derive", "parsing", "printing", "clone-impls", "proc-macro"]
+derive = ["syn/derive"]
+full = ["syn/full"]
+parsing = ["syn/parsing"]
+printing = ["syn/printing"]
+visit = ["syn/visit"]
+visit-mut = ["syn/visit-mut"]
+fold = ["syn/fold"]
+clone-impls = ["syn/clone-impls"]
+extra-traits = ["syn/extra-traits"]
+proc-macro = ["syn/proc-macro"]
