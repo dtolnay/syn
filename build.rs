@@ -2,6 +2,7 @@
 
 use std::env;
 use std::ffi::OsString;
+use std::iter;
 use std::process::{self, Command, Stdio};
 
 // The rustc-cfg strings below are *not* public API. Please let us know by
@@ -20,16 +21,15 @@ fn main() {
 
 fn unstable() -> bool {
     let rustc = cargo_env_var("RUSTC");
-
-    // Pick up Cargo rustc configuration.
-    let mut cmd = if let Some(wrapper) = env::var_os("RUSTC_WRAPPER") {
-        let mut cmd = Command::new(wrapper);
-        // The wrapper's first argument is supposed to be the path to rustc.
-        cmd.arg(rustc);
-        cmd
-    } else {
-        Command::new(rustc)
-    };
+    let rustc_wrapper = env::var_os("RUSTC_WRAPPER").filter(|wrapper| !wrapper.is_empty());
+    let rustc_workspace_wrapper =
+        env::var_os("RUSTC_WORKSPACE_WRAPPER").filter(|wrapper| !wrapper.is_empty());
+    let mut rustc = rustc_wrapper
+        .into_iter()
+        .chain(rustc_workspace_wrapper)
+        .chain(iter::once(rustc));
+    let mut cmd = Command::new(rustc.next().unwrap());
+    cmd.args(rustc);
 
     cmd.stdin(Stdio::null());
     cmd.stdout(Stdio::null());
