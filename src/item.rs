@@ -795,6 +795,7 @@ ast_struct! {
         pub constness: Option<Token![const]>,
         pub asyncness: Option<Token![async]>,
         pub unsafety: Option<Token![unsafe]>,
+        pub generator: Option<Token![gen]>,
         pub abi: Option<Abi>,
         pub fn_token: Token![fn],
         pub ident: Ident,
@@ -1180,7 +1181,6 @@ pub(crate) mod parsing {
             }
 
             let semi_token: Token![;] = input.parse()?;
-
             Ok(FlexibleItemType {
                 vis,
                 defaultness,
@@ -1488,6 +1488,7 @@ pub(crate) mod parsing {
         fork.parse::<Option<Token![const]>>().is_ok()
             && fork.parse::<Option<Token![async]>>().is_ok()
             && fork.parse::<Option<Token![unsafe]>>().is_ok()
+            && fork.parse::<Option<Token![gen]>>().is_ok()
             && fork.parse::<Option<Abi>>().is_ok()
             && fork.peek(Token![fn])
     }
@@ -1497,6 +1498,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let constness: Option<Token![const]> = input.parse()?;
             let asyncness: Option<Token![async]> = input.parse()?;
+            let generator: Option<Token![gen]> = input.parse()?;
             let unsafety: Option<Token![unsafe]> = input.parse()?;
             let abi: Option<Abi> = input.parse()?;
             let fn_token: Token![fn] = input.parse()?;
@@ -1511,6 +1513,7 @@ pub(crate) mod parsing {
             generics.where_clause = input.parse()?;
 
             Ok(Signature {
+                generator,
                 constness,
                 asyncness,
                 unsafety,
@@ -2654,6 +2657,7 @@ pub(crate) mod parsing {
                 };
                 generics.where_clause = input.parse()?;
                 let semi_token: Token![;] = input.parse()?;
+
                 return match value {
                     Some((eq_token, expr))
                         if generics.lt_token.is_none() && generics.where_clause.is_none() =>
@@ -2985,6 +2989,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
+            self.unsafety.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
             self.mod_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
@@ -3373,6 +3378,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.constness.to_tokens(tokens);
             self.asyncness.to_tokens(tokens);
+            self.generator.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
             self.abi.to_tokens(tokens);
             self.fn_token.to_tokens(tokens);

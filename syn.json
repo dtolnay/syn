@@ -4337,6 +4337,11 @@
             "token": "Unsafe"
           }
         },
+        "generator": {
+          "option": {
+            "token": "Gen"
+          }
+        },
         "abi": {
           "option": {
             "syn": "Abi"
@@ -5500,6 +5505,7 @@
     "Fn": "fn",
     "For": "for",
     "Ge": ">=",
+    "Gen": "gen",
     "Gt": ">",
     "If": "if",
     "Impl": "impl",

@@ -3231,6 +3231,7 @@ where
     skip!(node.constness);
     skip!(node.asyncness);
     skip!(node.unsafety);
+    skip!(node.generator);
     if let Some(it) = &mut node.abi {
         v.visit_abi_mut(it);
     }

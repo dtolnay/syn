@@ -770,6 +770,7 @@ define_keywords! {
     "ref"         pub struct Ref
     "return"      pub struct Return
     "Self"        pub struct SelfType
+    "gen"         pub struct Gen
     "self"        pub struct SelfValue
     "static"      pub struct Static
     "struct"      pub struct Struct
@@ -960,6 +961,7 @@ macro_rules! Token {
     [unsafe]      => { $crate::token::Unsafe };
     [unsized]     => { $crate::token::Unsized };
     [use]         => { $crate::token::Use };
+    [gen]         => { $crate::token::Gen };
     [virtual]     => { $crate::token::Virtual };
     [where]       => { $crate::token::Where };
     [while]       => { $crate::token::While };

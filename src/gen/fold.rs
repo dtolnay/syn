@@ -3146,6 +3146,7 @@ where
         constness: node.constness,
         asyncness: node.asyncness,
         unsafety: node.unsafety,
+        generator: node.generator,
         abi: (node.abi).map(|it| f.fold_abi(it)),
         fn_token: node.fn_token,
         ident: f.fold_ident(node.ident),

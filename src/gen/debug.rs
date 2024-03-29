@@ -2478,6 +2478,7 @@ impl Debug for crate::Signature {
         formatter.field("constness", &self.constness);
         formatter.field("asyncness", &self.asyncness);
         formatter.field("unsafety", &self.unsafety);
+        formatter.field("generator", &self.generator);
         formatter.field("abi", &self.abi);
         formatter.field("fn_token", &self.fn_token);
         formatter.field("ident", &self.ident);

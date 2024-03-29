@@ -3663,6 +3663,9 @@ impl Debug for Lite<syn::Signature> {
         if self.value.unsafety.is_some() {
             formatter.field("unsafety", &Present);
         }
+        if self.value.generator.is_some() {
+            formatter.field("generator", &Present);
+        }
         if let Some(val) = &self.value.abi {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -4843,6 +4846,11 @@ impl Debug for Lite<syn::token::For> {
 impl Debug for Lite<syn::token::Ge> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("Token![>=]")
+    }
+}
+impl Debug for Lite<syn::token::Gen> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Token![gen]")
     }
 }
 impl Debug for Lite<syn::token::Gt> {

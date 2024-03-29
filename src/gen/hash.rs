@@ -2177,6 +2177,7 @@ impl Hash for crate::Signature {
         self.constness.hash(state);
         self.asyncness.hash(state);
         self.unsafety.hash(state);
+        self.generator.hash(state);
         self.abi.hash(state);
         self.ident.hash(state);
         self.generics.hash(state);

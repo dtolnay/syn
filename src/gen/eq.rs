@@ -1702,10 +1702,10 @@ impl Eq for crate::Signature {}
 impl PartialEq for crate::Signature {
     fn eq(&self, other: &Self) -> bool {
         self.constness == other.constness && self.asyncness == other.asyncness
-            && self.unsafety == other.unsafety && self.abi == other.abi
-            && self.ident == other.ident && self.generics == other.generics
-            && self.inputs == other.inputs && self.variadic == other.variadic
-            && self.output == other.output
+            && self.unsafety == other.unsafety && self.generator == other.generator
+            && self.abi == other.abi && self.ident == other.ident
+            && self.generics == other.generics && self.inputs == other.inputs
+            && self.variadic == other.variadic && self.output == other.output
     }
 }
 #[cfg(feature = "full")]
