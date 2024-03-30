@@ -37,6 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # TODO: Remove 1.56 CI
         rust: [stable, beta, 1.60.0, 1.56.0]
         include:
           - rust: nightly
