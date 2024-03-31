@@ -545,7 +545,7 @@ spanless_eq_enum!(BorrowKind; Ref Raw);
 spanless_eq_enum!(BoundAsyncness; Normal Async(0));
 spanless_eq_enum!(BoundConstness; Never Always(0) Maybe(0));
 spanless_eq_enum!(BoundPolarity; Positive Negative(0) Maybe(0));
-spanless_eq_enum!(ByRef; Yes No);
+spanless_eq_enum!(ByRef; Yes(0) No);
 spanless_eq_enum!(CaptureBy; Value(move_kw) Ref);
 spanless_eq_enum!(ClosureBinder; NotPresent For(span generic_params));
 spanless_eq_enum!(Const; Yes(0) No);
