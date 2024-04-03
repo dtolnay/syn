@@ -245,6 +245,7 @@ macro_rules! custom_punctuation_len {
     ($mode:ident, ^=)    => { 2 };
     ($mode:ident, :)     => { 1 };
     ($mode:ident, ,)     => { 1 };
+    ($mode:ident, $)     => { 1 };
     ($mode:ident, .)     => { 1 };
     ($mode:ident, ..)    => { 2 };
     ($mode:ident, ...)   => { 3 };
