@@ -1300,6 +1300,7 @@ impl PartialEq for crate::Lit {
         match (self, other) {
             (crate::Lit::Str(self0), crate::Lit::Str(other0)) => self0 == other0,
             (crate::Lit::ByteStr(self0), crate::Lit::ByteStr(other0)) => self0 == other0,
+            (crate::Lit::CStr(self0), crate::Lit::CStr(other0)) => self0 == other0,
             (crate::Lit::Byte(self0), crate::Lit::Byte(other0)) => self0 == other0,
             (crate::Lit::Char(self0), crate::Lit::Char(other0)) => self0 == other0,
             (crate::Lit::Int(self0), crate::Lit::Int(other0)) => self0 == other0,
@@ -1324,6 +1325,8 @@ impl PartialEq for crate::LitBool {
 impl Eq for crate::LitByte {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::LitByteStr {}
+#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::LitCStr {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::LitChar {}
 #[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]

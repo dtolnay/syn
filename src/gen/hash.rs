@@ -1682,28 +1682,32 @@ impl Hash for crate::Lit {
                 state.write_u8(1u8);
                 v0.hash(state);
             }
-            crate::Lit::Byte(v0) => {
+            crate::Lit::CStr(v0) => {
                 state.write_u8(2u8);
                 v0.hash(state);
             }
-            crate::Lit::Char(v0) => {
+            crate::Lit::Byte(v0) => {
                 state.write_u8(3u8);
                 v0.hash(state);
             }
-            crate::Lit::Int(v0) => {
+            crate::Lit::Char(v0) => {
                 state.write_u8(4u8);
                 v0.hash(state);
             }
-            crate::Lit::Float(v0) => {
+            crate::Lit::Int(v0) => {
                 state.write_u8(5u8);
                 v0.hash(state);
             }
-            crate::Lit::Bool(v0) => {
+            crate::Lit::Float(v0) => {
                 state.write_u8(6u8);
                 v0.hash(state);
             }
-            crate::Lit::Verbatim(v0) => {
+            crate::Lit::Bool(v0) => {
                 state.write_u8(7u8);
+                v0.hash(state);
+            }
+            crate::Lit::Verbatim(v0) => {
+                state.write_u8(8u8);
                 v0.to_string().hash(state);
             }
         }
