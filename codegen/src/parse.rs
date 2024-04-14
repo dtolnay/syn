@@ -3,6 +3,7 @@ use anyhow::{bail, Result};
 use indexmap::IndexMap;
 use quote::quote;
 use std::collections::BTreeMap;
+use std::fmt::{self, Display};
 use std::fs;
 use std::path::{Path, PathBuf};
 use syn::parse::{Error, Parser};
@@ -11,7 +12,6 @@ use syn::{
     Ident, Item, PathArguments, TypeMacro, TypePath, TypeTuple, UseTree, Visibility,
 };
 use syn_codegen as types;
-use thiserror::Error;
 
 const SYN_CRATE_ROOT: &str = "src/lib.rs";
 const TOKEN_SRC: &str = "src/token.rs";
@@ -495,13 +495,27 @@ fn get_features(attrs: &[Attribute], base: &[Attribute]) -> Vec<Attribute> {
     ret
 }
 
-#[derive(Error, Debug)]
-#[error("{path}:{line}:{column}: {error}")]
+#[derive(Debug)]
 struct LoadFileError {
     path: PathBuf,
     line: usize,
     column: usize,
     error: Error,
+}
+
+impl std::error::Error for LoadFileError {}
+
+impl Display for LoadFileError {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            formatter,
+            "{path}:{line}:{column}: {error}",
+            path = self.path.display(),
+            line = self.line,
+            column = self.column,
+            error = self.error,
+        )
+    }
 }
 
 fn load_file(
