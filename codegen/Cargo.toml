@@ -8,7 +8,7 @@ publish = false # this is an internal crate which should never be published
 
 [dependencies]
 anyhow = "1"
-color-backtrace = "0.4"
+color-backtrace = "0.6"
 indexmap = { version = "2", features = ["serde"] }
 inflections = "1.1"
 prettyplease = "0.2.3"
