@@ -1008,6 +1008,7 @@ mod value {
         LitRepr, LitStr,
     };
     use proc_macro2::{Literal, Span};
+    use std::ascii;
     use std::char;
     use std::ops::{Index, RangeFrom};
 
@@ -1192,7 +1193,10 @@ mod value {
                                 _ => continue 'outer,
                             }
                         },
-                        b => panic!("unexpected byte {:?} after \\ character in byte literal", b),
+                        b => panic!(
+                            "unexpected byte '{}' after \\ character in string literal",
+                            ascii::escape_default(b),
+                        ),
                     }
                 }
                 b'\r' => {
@@ -1283,7 +1287,10 @@ mod value {
                                 continue 'outer;
                             }
                         },
-                        b => panic!("unexpected byte {:?} after \\ character in byte literal", b),
+                        b => panic!(
+                            "unexpected byte '{}' after \\ character in byte-string literal",
+                            ascii::escape_default(b),
+                        ),
                     }
                 }
                 b'\r' => {
@@ -1335,7 +1342,10 @@ mod value {
                     b'0' => b'\0',
                     b'\'' => b'\'',
                     b'"' => b'"',
-                    b => panic!("unexpected byte {:?} after \\ character in byte literal", b),
+                    b => panic!(
+                        "unexpected byte '{}' after \\ character in byte literal",
+                        ascii::escape_default(b),
+                    ),
                 }
             }
             b => {
@@ -1377,7 +1387,10 @@ mod value {
                     b'0' => '\0',
                     b'\'' => '\'',
                     b'"' => '"',
-                    b => panic!("unexpected byte {:?} after \\ character in byte literal", b),
+                    b => panic!(
+                        "unexpected byte '{}' after \\ character in character literal",
+                        ascii::escape_default(b),
+                    ),
                 }
             }
             _ => {
