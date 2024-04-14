@@ -156,7 +156,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@miri
       - run: cargo miri setup
-      - run: cargo miri test --all-features
+      - run: cargo miri test --all-features ${{github.event_name == 'pull_request' && '--tests' || ''}}
         env:
           MIRIFLAGS: -Zmiri-strict-provenance
 
