@@ -1175,9 +1175,9 @@ mod value {
                             char::from_u32(u32::from(byte)).unwrap()
                         }
                         b'u' => {
-                            let (chr, rest) = backslash_u(s);
+                            let (ch, rest) = backslash_u(s);
                             s = rest;
-                            chr
+                            ch
                         }
                         b'n' => '\n',
                         b'r' => '\r',
@@ -1376,9 +1376,9 @@ mod value {
                         char::from_u32(u32::from(byte)).unwrap()
                     }
                     b'u' => {
-                        let (chr, rest) = backslash_u(s);
+                        let (ch, rest) = backslash_u(s);
                         s = rest;
-                        chr
+                        ch
                     }
                     b'n' => '\n',
                     b'r' => '\r',
