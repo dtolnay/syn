@@ -28,6 +28,7 @@ mod fold;
 mod full;
 mod gen;
 mod hash;
+#[cfg(feature = "json")]
 mod json;
 mod lookup;
 mod operand;
@@ -45,6 +46,7 @@ fn main() -> anyhow::Result<()> {
     debug::generate(&defs)?;
     eq::generate(&defs)?;
     hash::generate(&defs)?;
+    #[cfg(feature = "json")]
     json::generate(&defs)?;
     fold::generate(&defs)?;
     visit::generate(&defs)?;

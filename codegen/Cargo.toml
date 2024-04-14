@@ -6,6 +6,10 @@ edition = "2021"
 
 publish = false # this is an internal crate which should never be published
 
+[features]
+default = ["json"]
+json = ["syn-codegen/serde"]
+
 [dependencies]
 anyhow = "1"
 color-backtrace = "0.6"
@@ -18,7 +22,7 @@ semver = { version = "1", features = ["serde"] }
 serde = "1.0.88"
 serde_json = "1.0.38"
 syn = { version = "2", features = ["derive", "full", "parsing", "printing"], default-features = false }
-syn-codegen = { path = "../json" }
+syn-codegen = { path = "../json", default-features = false }
 toml = "0.8"
 
 [workspace]
