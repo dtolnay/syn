@@ -88,7 +88,7 @@ fn introspect_item(item: &AstItem, lookup: &Lookup) -> types::Node {
             },
             exhaustive: true,
         },
-        Data::Union(..) => panic!("Union not supported"),
+        Data::Union(..) => panic!("union not supported"),
     }
 }
 
@@ -106,7 +106,7 @@ fn introspect_enum(item: &DataEnum, lookup: &Lookup) -> types::Variants {
                     .map(|field| introspect_type(&field.ty, lookup))
                     .collect(),
                 Fields::Unit => vec![],
-                Fields::Named(_) => panic!("Enum representation not supported"),
+                Fields::Named(_) => panic!("enum representation not supported"),
             };
             Some((variant.ident.to_string(), fields))
         })
@@ -126,7 +126,7 @@ fn introspect_struct(item: &DataStruct, lookup: &Lookup) -> types::Fields {
             })
             .collect(),
         Fields::Unit => IndexMap::new(),
-        Fields::Unnamed(_) => panic!("Struct representation not supported"),
+        Fields::Unnamed(_) => panic!("struct representation not supported"),
     }
 }
 
@@ -244,32 +244,32 @@ fn is_doc_hidden(attrs: &[Attribute]) -> bool {
 fn first_arg(params: &PathArguments) -> &syn::Type {
     let data = match params {
         PathArguments::AngleBracketed(data) => data,
-        _ => panic!("Expected at least 1 type argument here"),
+        _ => panic!("expected at least 1 type argument here"),
     };
 
     match data
         .args
         .first()
-        .expect("Expected at least 1 type argument here")
+        .expect("expected at least 1 type argument here")
     {
         GenericArgument::Type(ty) => ty,
-        _ => panic!("Expected at least 1 type argument here"),
+        _ => panic!("expected at least 1 type argument here"),
     }
 }
 
 fn last_arg(params: &PathArguments) -> &syn::Type {
     let data = match params {
         PathArguments::AngleBracketed(data) => data,
-        _ => panic!("Expected at least 1 type argument here"),
+        _ => panic!("expected at least 1 type argument here"),
     };
 
     match data
         .args
         .last()
-        .expect("Expected at least 1 type argument here")
+        .expect("expected at least 1 type argument here")
     {
         GenericArgument::Type(ty) => ty,
-        _ => panic!("Expected at least 1 type argument here"),
+        _ => panic!("expected at least 1 type argument here"),
     }
 }
 

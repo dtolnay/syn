@@ -34,7 +34,7 @@ macro_rules! assert_vis_parse {
 
         match parse.vis {
             $p => {}
-            _ => panic!("Expected {}, got {:?}", stringify!($p), parse.vis),
+            _ => panic!("expected {}, got {:?}", stringify!($p), parse.vis),
         }
 
         // NOTE: Round-trips through `to_string` to avoid potential whitespace

@@ -6,7 +6,7 @@ use syn::parse::{Parse, ParseStream, Parser, Result};
 use syn::{parenthesized, Token};
 
 #[test]
-#[should_panic(expected = "Fork was not derived from the advancing parse stream")]
+#[should_panic(expected = "fork was not derived from the advancing parse stream")]
 fn smuggled_speculative_cursor_between_sources() {
     struct BreakRules;
     impl Parse for BreakRules {
@@ -23,7 +23,7 @@ fn smuggled_speculative_cursor_between_sources() {
 }
 
 #[test]
-#[should_panic(expected = "Fork was not derived from the advancing parse stream")]
+#[should_panic(expected = "fork was not derived from the advancing parse stream")]
 fn smuggled_speculative_cursor_between_brackets() {
     struct BreakRules;
     impl Parse for BreakRules {
@@ -41,7 +41,7 @@ fn smuggled_speculative_cursor_between_brackets() {
 }
 
 #[test]
-#[should_panic(expected = "Fork was not derived from the advancing parse stream")]
+#[should_panic(expected = "fork was not derived from the advancing parse stream")]
 fn smuggled_speculative_cursor_into_brackets() {
     struct BreakRules;
     impl Parse for BreakRules {

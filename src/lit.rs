@@ -368,7 +368,7 @@ impl LitInt {
     pub fn new(repr: &str, span: Span) -> Self {
         let (digits, suffix) = match value::parse_lit_int(repr) {
             Some(parse) => parse,
-            None => panic!("Not an integer literal: `{}`", repr),
+            None => panic!("not an integer literal: `{}`", repr),
         };
 
         let mut token: Literal = repr.parse().unwrap();
@@ -447,7 +447,7 @@ impl From<Literal> for LitInt {
                 }),
             }
         } else {
-            panic!("Not an integer literal: `{}`", repr);
+            panic!("not an integer literal: `{}`", repr);
         }
     }
 }
@@ -462,7 +462,7 @@ impl LitFloat {
     pub fn new(repr: &str, span: Span) -> Self {
         let (digits, suffix) = match value::parse_lit_float(repr) {
             Some(parse) => parse,
-            None => panic!("Not a float literal: `{}`", repr),
+            None => panic!("not a float literal: `{}`", repr),
         };
 
         let mut token: Literal = repr.parse().unwrap();
@@ -519,7 +519,7 @@ impl From<Literal> for LitFloat {
                 }),
             }
         } else {
-            panic!("Not a float literal: `{}`", repr);
+            panic!("not a float literal: `{}`", repr);
         }
     }
 }
@@ -1087,7 +1087,7 @@ mod value {
                 _ => {}
             }
 
-            panic!("Unrecognized literal: `{}`", repr);
+            panic!("unrecognized literal: `{}`", repr);
         }
 
         pub fn suffix(&self) -> &str {
@@ -1171,7 +1171,7 @@ mod value {
                         b'x' => {
                             let (byte, rest) = backslash_x(s);
                             s = rest;
-                            assert!(byte <= 0x7F, "Invalid \\x byte in string literal");
+                            assert!(byte <= 0x7F, "invalid \\x byte in string literal");
                             char::from_u32(u32::from(byte)).unwrap()
                         }
                         b'u' => {
@@ -1200,7 +1200,7 @@ mod value {
                     }
                 }
                 b'\r' => {
-                    assert_eq!(byte(s, 1), b'\n', "Bare CR not allowed in string");
+                    assert_eq!(byte(s, 1), b'\n', "bare CR not allowed in string");
                     s = &s[2..];
                     '\n'
                 }
@@ -1294,7 +1294,7 @@ mod value {
                     }
                 }
                 b'\r' => {
-                    assert_eq!(byte(v, 1), b'\n', "Bare CR not allowed in string");
+                    assert_eq!(byte(v, 1), b'\n', "bare CR not allowed in string");
                     v = &v[2..];
                     b'\n'
                 }
@@ -1372,7 +1372,7 @@ mod value {
                     b'x' => {
                         let (byte, rest) = backslash_x(s);
                         s = rest;
-                        assert!(byte <= 0x7F, "Invalid \\x byte in character literal");
+                        assert!(byte <= 0x7F, "invalid \\x byte in character literal");
                         char::from_u32(u32::from(byte)).unwrap()
                     }
                     b'u' => {

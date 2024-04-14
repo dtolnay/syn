@@ -478,7 +478,7 @@ where
     let mut nomore = false;
     for pair in i {
         if nomore {
-            panic!("Punctuated extended with items after a Pair::End");
+            panic!("punctuated extended with items after a Pair::End");
         }
         match pair {
             Pair::Punctuated(a, b) => punctuated.inner.push((a, b)),

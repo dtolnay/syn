@@ -34,12 +34,12 @@ ast_struct! {
     ///         }
     ///     };
     ///
-    ///     let mut file = File::open(&filename).expect("Unable to open file");
+    ///     let mut file = File::open(&filename).expect("unable to open file");
     ///
     ///     let mut src = String::new();
-    ///     file.read_to_string(&mut src).expect("Unable to read file");
+    ///     file.read_to_string(&mut src).expect("unable to read file");
     ///
-    ///     let syntax = syn::parse_file(&src).expect("Unable to parse file");
+    ///     let syntax = syn::parse_file(&src).expect("unable to parse file");
     ///
     ///     // Debug impl is available if Syn is built with "extra-traits" feature.
     ///     println!("{:#?}", syntax);

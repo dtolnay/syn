@@ -63,7 +63,7 @@ fn test_rustc_precedence() {
     repo::clone_rust();
     let abort_after = common::abort_after();
     if abort_after == 0 {
-        panic!("Skipping all precedence tests");
+        panic!("skipping all precedence tests");
     }
 
     let passed = AtomicUsize::new(0);
