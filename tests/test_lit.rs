@@ -252,9 +252,10 @@ fn suffix() {
 
     assert_eq!(get_suffix("\"\"s"), "s");
     assert_eq!(get_suffix("r\"\"r"), "r");
+    assert_eq!(get_suffix("r#\"\"#r"), "r");
     assert_eq!(get_suffix("b\"\"b"), "b");
     assert_eq!(get_suffix("br\"\"br"), "br");
-    assert_eq!(get_suffix("r#\"\"#r"), "r");
+    assert_eq!(get_suffix("br#\"\"#br"), "br");
     assert_eq!(get_suffix("'c'c"), "c");
     assert_eq!(get_suffix("b'b'b"), "b");
     assert_eq!(get_suffix("1i32"), "i32");
