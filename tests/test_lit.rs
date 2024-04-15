@@ -13,6 +13,7 @@ use quote::ToTokens;
 use std::str::FromStr;
 use syn::{Lit, LitFloat, LitInt, LitStr};
 
+#[track_caller]
 fn lit(s: &str) -> Lit {
     let mut tokens = TokenStream::from_str(s).unwrap().into_iter();
     match tokens.next().unwrap() {
@@ -26,6 +27,7 @@ fn lit(s: &str) -> Lit {
 
 #[test]
 fn strings() {
+    #[track_caller]
     fn test_string(s: &str, value: &str) {
         match lit(s) {
             Lit::Str(lit) => {
@@ -65,6 +67,7 @@ fn strings() {
 
 #[test]
 fn byte_strings() {
+    #[track_caller]
     fn test_byte_string(s: &str, value: &[u8]) {
         match lit(s) {
             Lit::ByteStr(lit) => {
@@ -97,6 +100,7 @@ fn byte_strings() {
 
 #[test]
 fn bytes() {
+    #[track_caller]
     fn test_byte(s: &str, value: u8) {
         match lit(s) {
             Lit::Byte(lit) => {
@@ -119,6 +123,7 @@ fn bytes() {
 
 #[test]
 fn chars() {
+    #[track_caller]
     fn test_char(s: &str, value: char) {
         match lit(s) {
             Lit::Char(lit) => {
@@ -145,6 +150,7 @@ fn chars() {
 
 #[test]
 fn ints() {
+    #[track_caller]
     fn test_int(s: &str, value: u64, suffix: &str) {
         match lit(s) {
             Lit::Int(lit) => {
@@ -185,6 +191,7 @@ fn ints() {
 
 #[test]
 fn floats() {
+    #[track_caller]
     fn test_float(s: &str, value: f64, suffix: &str) {
         match lit(s) {
             Lit::Float(lit) => {
@@ -224,6 +231,7 @@ fn negative() {
 
 #[test]
 fn suffix() {
+    #[track_caller]
     fn get_suffix(token: &str) -> String {
         let lit = syn::parse_str::<Lit>(token).unwrap();
         match lit {
