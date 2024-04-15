@@ -294,7 +294,7 @@ pub fn edition(path: &Path) -> &'static str {
     if path.ends_with("dyn-2015-no-warnings-without-lints.rs") {
         "2015"
     } else {
-        "2018"
+        "2021"
     }
 }
 
