@@ -1,5 +1,6 @@
 #![allow(
     clippy::float_cmp,
+    clippy::needless_raw_string_hashes,
     clippy::non_ascii_literal,
     clippy::single_match_else,
     clippy::uninlined_format_args
@@ -29,6 +30,7 @@ fn lit(s: &str) -> Lit {
 fn strings() {
     #[track_caller]
     fn test_string(s: &str, value: &str) {
+        let s = s.trim();
         match lit(s) {
             Lit::Str(lit) => {
                 assert_eq!(lit.value(), value);
@@ -41,16 +43,16 @@ fn strings() {
         }
     }
 
-    test_string("\"a\"", "a");
-    test_string("\"\\n\"", "\n");
-    test_string("\"\\r\"", "\r");
-    test_string("\"\\t\"", "\t");
-    test_string("\"🐕\"", "🐕"); // NOTE: This is an emoji
-    test_string("\"\\\"\"", "\"");
-    test_string("\"'\"", "'");
-    test_string("\"\"", "");
-    test_string("\"\\u{1F415}\"", "\u{1F415}");
-    test_string("\"\\u{1_2__3_}\"", "\u{123}");
+    test_string(r#"  ""  "#, "");
+    test_string(r#"  "a"  "#, "a");
+    test_string(r#"  "\n"  "#, "\n");
+    test_string(r#"  "\r"  "#, "\r");
+    test_string(r#"  "\t"  "#, "\t");
+    test_string(r#"  "🐕"  "#, "🐕"); // NOTE: This is an emoji
+    test_string(r#"  "\""  "#, "\"");
+    test_string(r#"  "'"  "#, "'");
+    test_string(r#"  "\u{1F415}"  "#, "\u{1F415}");
+    test_string(r#"  "\u{1_2__3_}"  "#, "\u{123}");
     test_string(
         "\"contains\nnewlines\\\nescaped newlines\"",
         "contains\nnewlinesescaped newlines",
@@ -69,6 +71,7 @@ fn strings() {
 fn byte_strings() {
     #[track_caller]
     fn test_byte_string(s: &str, value: &[u8]) {
+        let s = s.trim();
         match lit(s) {
             Lit::ByteStr(lit) => {
                 assert_eq!(lit.value(), value);
@@ -81,13 +84,13 @@ fn byte_strings() {
         }
     }
 
-    test_byte_string("b\"a\"", b"a");
-    test_byte_string("b\"\\n\"", b"\n");
-    test_byte_string("b\"\\r\"", b"\r");
-    test_byte_string("b\"\\t\"", b"\t");
-    test_byte_string("b\"\\\"\"", b"\"");
-    test_byte_string("b\"'\"", b"'");
-    test_byte_string("b\"\"", b"");
+    test_byte_string(r#"  b""  "#, b"");
+    test_byte_string(r#"  b"a"  "#, b"a");
+    test_byte_string(r#"  b"\n"  "#, b"\n");
+    test_byte_string(r#"  b"\r"  "#, b"\r");
+    test_byte_string(r#"  b"\t"  "#, b"\t");
+    test_byte_string(r#"  b"\""  "#, b"\"");
+    test_byte_string(r#"  b"'"  "#, b"'");
     test_byte_string(
         "b\"contains\nnewlines\\\nescaped newlines\"",
         b"contains\nnewlinesescaped newlines",
@@ -102,6 +105,7 @@ fn byte_strings() {
 fn bytes() {
     #[track_caller]
     fn test_byte(s: &str, value: u8) {
+        let s = s.trim();
         match lit(s) {
             Lit::Byte(lit) => {
                 assert_eq!(lit.value(), value);
@@ -112,19 +116,20 @@ fn bytes() {
         }
     }
 
-    test_byte("b'a'", b'a');
-    test_byte("b'\\n'", b'\n');
-    test_byte("b'\\r'", b'\r');
-    test_byte("b'\\t'", b'\t');
-    test_byte("b'\\''", b'\'');
-    test_byte("b'\"'", b'"');
-    test_byte("b'a'q", b'a');
+    test_byte(r#"  b'a'  "#, b'a');
+    test_byte(r#"  b'\n'  "#, b'\n');
+    test_byte(r#"  b'\r'  "#, b'\r');
+    test_byte(r#"  b'\t'  "#, b'\t');
+    test_byte(r#"  b'\''  "#, b'\'');
+    test_byte(r#"  b'"'  "#, b'"');
+    test_byte(r#"  b'a'q  "#, b'a');
 }
 
 #[test]
 fn chars() {
     #[track_caller]
     fn test_char(s: &str, value: char) {
+        let s = s.trim();
         match lit(s) {
             Lit::Char(lit) => {
                 assert_eq!(lit.value(), value);
@@ -137,15 +142,15 @@ fn chars() {
         }
     }
 
-    test_char("'a'", 'a');
-    test_char("'\\n'", '\n');
-    test_char("'\\r'", '\r');
-    test_char("'\\t'", '\t');
-    test_char("'🐕'", '🐕'); // NOTE: This is an emoji
-    test_char("'\\''", '\'');
-    test_char("'\"'", '"');
-    test_char("'\\u{1F415}'", '\u{1F415}');
-    test_char("'a'q", 'a');
+    test_char(r#"  'a'  "#, 'a');
+    test_char(r#"  '\n'  "#, '\n');
+    test_char(r#"  '\r'  "#, '\r');
+    test_char(r#"  '\t'  "#, '\t');
+    test_char(r#"  '🐕'  "#, '🐕'); // NOTE: This is an emoji
+    test_char(r#"  '\''  "#, '\'');
+    test_char(r#"  '"'  "#, '"');
+    test_char(r#"  '\u{1F415}'  "#, '\u{1F415}');
+    test_char(r#"  'a'q  "#, 'a');
 }
 
 #[test]
