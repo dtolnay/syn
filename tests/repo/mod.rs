@@ -17,12 +17,6 @@ const REVISION: &str = "b10cfcd65fd7f7b1ab9beb34798b2108de003452";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: CStr literals: c"…", cr"…"
-    // https://github.com/dtolnay/syn/issues/1502
-    "src/tools/clippy/tests/ui/needless_raw_string.rs",
-    "src/tools/clippy/tests/ui/needless_raw_string_hashes.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0085_expr_literals.rs",
-
     // TODO: explicit tail calls: `become _g()`
     // https://github.com/dtolnay/syn/issues/1501
     "tests/ui/explicit-tail-calls/return-lifetime-sub.rs",
