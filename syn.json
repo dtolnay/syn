@@ -3366,6 +3366,11 @@
             "syn": "LitByteStr"
           }
         ],
+        "CStr": [
+          {
+            "syn": "LitCStr"
+          }
+        ],
         "Byte": [
           {
             "syn": "LitByte"
@@ -3421,6 +3426,12 @@
     },
     {
       "ident": "LitByteStr",
+      "features": {
+        "any": []
+      }
+    },
+    {
+      "ident": "LitCStr",
       "features": {
         "any": []
       }

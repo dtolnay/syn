@@ -581,6 +581,9 @@ pub trait Fold {
     fn fold_lit_byte_str(&mut self, i: crate::LitByteStr) -> crate::LitByteStr {
         fold_lit_byte_str(self, i)
     }
+    fn fold_lit_cstr(&mut self, i: crate::LitCStr) -> crate::LitCStr {
+        fold_lit_cstr(self, i)
+    }
     fn fold_lit_char(&mut self, i: crate::LitChar) -> crate::LitChar {
         fold_lit_char(self, i)
     }
@@ -2628,6 +2631,7 @@ where
         crate::Lit::ByteStr(_binding_0) => {
             crate::Lit::ByteStr(f.fold_lit_byte_str(_binding_0))
         }
+        crate::Lit::CStr(_binding_0) => crate::Lit::CStr(f.fold_lit_cstr(_binding_0)),
         crate::Lit::Byte(_binding_0) => crate::Lit::Byte(f.fold_lit_byte(_binding_0)),
         crate::Lit::Char(_binding_0) => crate::Lit::Char(f.fold_lit_char(_binding_0)),
         crate::Lit::Int(_binding_0) => crate::Lit::Int(f.fold_lit_int(_binding_0)),
@@ -2655,6 +2659,15 @@ where
     node
 }
 pub fn fold_lit_byte_str<F>(f: &mut F, node: crate::LitByteStr) -> crate::LitByteStr
+where
+    F: Fold + ?Sized,
+{
+    let span = f.fold_span(node.span());
+    let mut node = node;
+    node.set_span(span);
+    node
+}
+pub fn fold_lit_cstr<F>(f: &mut F, node: crate::LitCStr) -> crate::LitCStr
 where
     F: Fold + ?Sized,
 {

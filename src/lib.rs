@@ -418,7 +418,9 @@ mod lit;
 #[doc(hidden)] // https://github.com/dtolnay/syn/issues/1566
 pub use crate::lit::StrStyle;
 #[doc(inline)]
-pub use crate::lit::{Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr};
+pub use crate::lit::{
+    Lit, LitBool, LitByte, LitByteStr, LitCStr, LitChar, LitFloat, LitInt, LitStr,
+};
 
 #[cfg(feature = "parsing")]
 mod lookahead;

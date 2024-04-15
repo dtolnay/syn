@@ -1338,6 +1338,7 @@ impl Clone for crate::Lit {
         match self {
             crate::Lit::Str(v0) => crate::Lit::Str(v0.clone()),
             crate::Lit::ByteStr(v0) => crate::Lit::ByteStr(v0.clone()),
+            crate::Lit::CStr(v0) => crate::Lit::CStr(v0.clone()),
             crate::Lit::Byte(v0) => crate::Lit::Byte(v0.clone()),
             crate::Lit::Char(v0) => crate::Lit::Char(v0.clone()),
             crate::Lit::Int(v0) => crate::Lit::Int(v0.clone()),

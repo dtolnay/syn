@@ -548,6 +548,9 @@ pub trait VisitMut {
     fn visit_lit_byte_str_mut(&mut self, i: &mut crate::LitByteStr) {
         visit_lit_byte_str_mut(self, i);
     }
+    fn visit_lit_cstr_mut(&mut self, i: &mut crate::LitCStr) {
+        visit_lit_cstr_mut(self, i);
+    }
     fn visit_lit_char_mut(&mut self, i: &mut crate::LitChar) {
         visit_lit_char_mut(self, i);
     }
@@ -2694,6 +2697,9 @@ where
         crate::Lit::ByteStr(_binding_0) => {
             v.visit_lit_byte_str_mut(_binding_0);
         }
+        crate::Lit::CStr(_binding_0) => {
+            v.visit_lit_cstr_mut(_binding_0);
+        }
         crate::Lit::Byte(_binding_0) => {
             v.visit_lit_byte_mut(_binding_0);
         }
@@ -2726,6 +2732,10 @@ where
     V: VisitMut + ?Sized,
 {}
 pub fn visit_lit_byte_str_mut<V>(v: &mut V, node: &mut crate::LitByteStr)
+where
+    V: VisitMut + ?Sized,
+{}
+pub fn visit_lit_cstr_mut<V>(v: &mut V, node: &mut crate::LitCStr)
 where
     V: VisitMut + ?Sized,
 {}

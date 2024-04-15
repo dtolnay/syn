@@ -11,6 +11,7 @@ mod macros;
 
 use proc_macro2::{Delimiter, Group, Literal, Span, TokenStream, TokenTree};
 use quote::ToTokens;
+use std::ffi::CStr;
 use std::str::FromStr;
 use syn::{Lit, LitFloat, LitInt, LitStr};
 
@@ -99,6 +100,45 @@ fn byte_strings() {
     test_byte_string("b\"...\"q", b"...");
     test_byte_string("br\"...\"q", b"...");
     test_byte_string("br##\"...\"##q", b"...");
+}
+
+#[test]
+fn c_strings() {
+    #[track_caller]
+    fn test_c_string(s: &str, value: &CStr) {
+        let s = s.trim();
+        match lit(s) {
+            Lit::CStr(lit) => {
+                assert_eq!(*lit.value(), *value);
+                let again = lit.into_token_stream().to_string();
+                if again != s {
+                    test_c_string(&again, value);
+                }
+            }
+            wrong => panic!("{:?}", wrong),
+        }
+    }
+
+    test_c_string(r#"  c""  "#, c"");
+    test_c_string(r#"  c"a"  "#, c"a");
+    test_c_string(r#"  c"\n"  "#, c"\n");
+    test_c_string(r#"  c"\r"  "#, c"\r");
+    test_c_string(r#"  c"\t"  "#, c"\t");
+    test_c_string(r#"  c"\\"  "#, c"\\");
+    test_c_string(r#"  c"\'"  "#, c"'");
+    test_c_string(r#"  c"\""  "#, c"\"");
+    test_c_string(
+        "c\"contains\nnewlines\\\nescaped newlines\"",
+        c"contains\nnewlinesescaped newlines",
+    );
+    test_c_string("cr\"raw\nstring\\\nhere\"", c"raw\nstring\\\nhere");
+    test_c_string("c\"...\"q", c"...");
+    test_c_string("cr\"...\"", c"...");
+    test_c_string("cr##\"...\"##", c"...");
+    test_c_string(
+        r#"  c"hello\x80我叫\u{1F980}"  "#, // from the RFC
+        c"hello\x80我叫\u{1F980}",
+    );
 }
 
 #[test]
@@ -242,6 +282,7 @@ fn suffix() {
         match lit {
             Lit::Str(lit) => lit.suffix().to_owned(),
             Lit::ByteStr(lit) => lit.suffix().to_owned(),
+            Lit::CStr(lit) => lit.suffix().to_owned(),
             Lit::Byte(lit) => lit.suffix().to_owned(),
             Lit::Char(lit) => lit.suffix().to_owned(),
             Lit::Int(lit) => lit.suffix().to_owned(),
@@ -256,6 +297,9 @@ fn suffix() {
     assert_eq!(get_suffix("b\"\"b"), "b");
     assert_eq!(get_suffix("br\"\"br"), "br");
     assert_eq!(get_suffix("br#\"\"#br"), "br");
+    assert_eq!(get_suffix("c\"\"c"), "c");
+    assert_eq!(get_suffix("cr\"\"cr"), "cr");
+    assert_eq!(get_suffix("cr#\"\"#cr"), "cr");
     assert_eq!(get_suffix("'c'c"), "c");
     assert_eq!(get_suffix("b'b'b"), "b");
     assert_eq!(get_suffix("1i32"), "i32");

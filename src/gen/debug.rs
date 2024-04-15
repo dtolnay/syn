@@ -1958,6 +1958,7 @@ impl Debug for crate::Lit {
         match self {
             crate::Lit::Str(v0) => v0.debug(formatter, "Str"),
             crate::Lit::ByteStr(v0) => v0.debug(formatter, "ByteStr"),
+            crate::Lit::CStr(v0) => v0.debug(formatter, "CStr"),
             crate::Lit::Byte(v0) => v0.debug(formatter, "Byte"),
             crate::Lit::Char(v0) => v0.debug(formatter, "Char"),
             crate::Lit::Int(v0) => v0.debug(formatter, "Int"),
