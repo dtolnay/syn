@@ -136,8 +136,8 @@ fn test_peek_groups() {
         assert!(!input.peek2(Token![::]));
         assert!(input.peek2(Token![!]));
         assert!(input.peek2(token::Group));
-        assert!(!input.peek3(Token![=])); // FIXME
-        assert!(input.peek3(Token![static])); // FIXME
+        assert!(input.peek3(Token![=]));
+        assert!(!input.peek3(Token![static]));
 
         let content;
         parenthesized!(content in input);
@@ -155,8 +155,8 @@ fn test_peek_groups() {
         assert!(input.peek(token::Group));
         assert!(input.peek(Token![!]));
         assert!(input.peek2(Token![=]));
-        assert!(!input.peek3(Token![static])); // FIXME
-        assert!(input.peek2(Token![static])); // FIXME
+        assert!(input.peek3(Token![static]));
+        assert!(!input.peek2(Token![static]));
 
         let _: Token![!] = input.parse()?;
 
