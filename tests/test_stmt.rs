@@ -57,7 +57,7 @@ fn test_raw_invalid() {
 
 #[test]
 fn test_none_group() {
-    // <Ø async fn f() {} Ø>
+    // <∅ async fn f() {} ∅>
     let tokens = TokenStream::from_iter([TokenTree::Group(Group::new(
         Delimiter::None,
         TokenStream::from_iter([

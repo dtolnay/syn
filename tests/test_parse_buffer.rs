@@ -68,7 +68,7 @@ fn trailing_empty_none_group() {
         Ok(())
     }
 
-    // `+ ( + <Ø Ø> ) <Ø <Ø Ø> Ø>`
+    // `+ ( + <∅ ∅> ) <∅ <∅ ∅> ∅>`
     let tokens = TokenStream::from_iter([
         TokenTree::Punct(Punct::new('+', Spacing::Alone)),
         TokenTree::Group(Group::new(
