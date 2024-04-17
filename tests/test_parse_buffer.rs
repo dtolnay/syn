@@ -69,11 +69,11 @@ fn trailing_empty_none_group() {
     }
 
     // `+ ( + <Ø Ø> ) <Ø <Ø Ø> Ø>`
-    let tokens = TokenStream::from_iter(vec![
+    let tokens = TokenStream::from_iter([
         TokenTree::Punct(Punct::new('+', Spacing::Alone)),
         TokenTree::Group(Group::new(
             Delimiter::Parenthesis,
-            TokenStream::from_iter(vec![
+            TokenStream::from_iter([
                 TokenTree::Punct(Punct::new('+', Spacing::Alone)),
                 TokenTree::Group(Group::new(Delimiter::None, TokenStream::new())),
             ]),
@@ -81,7 +81,7 @@ fn trailing_empty_none_group() {
         TokenTree::Group(Group::new(Delimiter::None, TokenStream::new())),
         TokenTree::Group(Group::new(
             Delimiter::None,
-            TokenStream::from_iter(vec![TokenTree::Group(Group::new(
+            TokenStream::from_iter([TokenTree::Group(Group::new(
                 Delimiter::None,
                 TokenStream::new(),
             ))]),
