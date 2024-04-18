@@ -33,24 +33,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/target/mut_ref.rs",
     "src/tools/rustfmt/tests/target/postfix-match/pf-match.rs",
     "tests/codegen/async-closure-debug.rs",
-    "tests/crashes/108814.rs",
-    "tests/crashes/110627.rs",
-    "tests/crashes/111742.rs",
-    "tests/crashes/116519.rs",
-    "tests/crashes/116554.rs",
-    "tests/crashes/118038.rs",
-    "tests/crashes/119701.rs",
-    "tests/crashes/119716-2.rs",
-    "tests/crashes/119716.rs",
-    "tests/crashes/119786.rs",
-    "tests/crashes/119830.rs",
-    "tests/crashes/120503.rs",
-    "tests/crashes/121422.rs",
-    "tests/crashes/121429.rs",
-    "tests/crashes/121585-2.rs",
-    "tests/crashes/122989.rs",
-    "tests/crashes/123077-2.rs",
-    "tests/crashes/23707.rs",
     "tests/pretty/delegation.rs",
     "tests/pretty/postfix-match.rs",
     "tests/ui/associated-type-bounds/return-type-notation/unpretty-parenthesized.rs",
@@ -305,6 +287,9 @@ static EXCLUDE_DIRS: &[&str] = &[
     // Inputs that used to crash rust-analyzer, but aren't necessarily supposed to parse
     "src/tools/rust-analyzer/crates/syntax/test_data/parser/fuzz-failures",
     "src/tools/rust-analyzer/crates/syntax/test_data/reparse/fuzz-failures",
+
+    // Inputs that crash rustc, making no claim about whether they are valid Rust
+    "tests/crashes",
 ];
 
 // Directories in which a .stderr implies the corresponding .rs is not expected
