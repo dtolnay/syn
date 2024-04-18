@@ -63,9 +63,11 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/parser/struct-literal-in-match-guard.rs",
 
     // TODO: `!` as a pattern
+    // https://github.com/dtolnay/syn/issues/1546
     "tests/ui/rfcs/rfc-0000-never_patterns/diverges.rs",
 
     // TODO: async trait bounds: `impl async Fn()`
+    // https://github.com/dtolnay/syn/issues/1628
     "src/tools/miri/tests/pass/async-closure-captures.rs",
     "src/tools/miri/tests/pass/async-closure-drop.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0211_async_trait_bound.rs",
@@ -95,11 +97,13 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/async-await/async-fn/sugar.rs",
 
     // TODO: mutable by-reference bindings (mut ref)
+    // https://github.com/dtolnay/syn/issues/1629
     "src/tools/rustfmt/tests/source/mut_ref.rs",
     "src/tools/rustfmt/tests/target/mut_ref.rs",
     "tests/ui/mut/mut-ref.rs",
 
     // TODO: postfix match
+    // https://github.com/dtolnay/syn/issues/1630
     "src/tools/rustfmt/tests/source/postfix-match/pf-match.rs",
     "src/tools/rustfmt/tests/target/postfix-match/pf-match.rs",
     "tests/pretty/postfix-match.rs",
@@ -108,6 +112,7 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/match/postfix-match/postfix-match.rs",
 
     // TODO: delegation
+    // https://github.com/dtolnay/syn/issues/1580
     "tests/pretty/delegation.rs",
     "tests/ui/delegation/explicit-paths-in-traits-pass.rs",
     "tests/ui/delegation/explicit-paths-pass.rs",
@@ -115,11 +120,13 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/delegation/parse.rs",
 
     // TODO: for await
+    // https://github.com/dtolnay/syn/issues/1631
     "tests/ui/async-await/for-await-2015.rs",
     "tests/ui/async-await/for-await-passthrough.rs",
     "tests/ui/async-await/for-await.rs",
 
     // TODO: const trait bound: `T: const Trait`
+    // https://github.com/dtolnay/syn/issues/1632
     "tests/ui/generic-const-items/const-trait-impl.rs",
     "tests/ui/rfcs/rfc-2632-const-trait-impl/const-fns-are-early-bound.rs",
     "tests/ui/rfcs/rfc-2632-const-trait-impl/const-trait-bounds.rs",
