@@ -17,25 +17,61 @@ const REVISION: &str = "becebb3158149a115cad8a402612e25436a7e37b";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO
-    "compiler/rustc_expand/src/module.rs",
-    "compiler/rustc_infer/src/infer/error_reporting/need_type_info.rs",
+    // TODO: explicit tail calls: `become _g()`
+    // https://github.com/dtolnay/syn/issues/1501
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0209_become_expr.rs",
+    "tests/ui/explicit-tail-calls/return-lifetime-sub.rs",
+
+    // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
+    // https://github.com/dtolnay/syn/issues/1435
+    "src/tools/rustfmt/tests/source/issue_5721.rs",
+    "src/tools/rustfmt/tests/source/non-lifetime-binders.rs",
+    "src/tools/rustfmt/tests/target/issue_5721.rs",
+    "src/tools/rustfmt/tests/target/non-lifetime-binders.rs",
+    "tests/rustdoc-json/non_lifetime_binders.rs",
+    "tests/rustdoc/inline_cross/auxiliary/non_lifetime_binders.rs",
+    "tests/rustdoc/non_lifetime_binders.rs",
+
+    // TODO: return type notation: `where T: Trait<method(): Send>`
+    // https://github.com/dtolnay/syn/issues/1434
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0208_associated_return_type_bounds.rs",
+    "tests/ui/associated-type-bounds/return-type-notation/basic.rs",
+    "tests/ui/associated-type-bounds/return-type-notation/unpretty-parenthesized.rs",
+    "tests/ui/feature-gates/feature-gate-return_type_notation.rs",
+
+    // TODO: lazy type alias syntax with where-clause in trailing position
+    // https://github.com/dtolnay/syn/issues/1525
+    "tests/rustdoc/typedef-inner-variants-lazy_type_alias.rs",
+
+    // TODO: gen blocks and functions
+    // https://github.com/dtolnay/syn/issues/1526
+    "compiler/rustc_codegen_cranelift/example/gen_block_iterate.rs",
+    "tests/ui/coroutine/async-gen-deduce-yield.rs",
+    "tests/ui/coroutine/async-gen-yield-ty-is-unit.rs",
+    "tests/ui/coroutine/async_gen_fn_iter.rs",
+    "tests/ui/coroutine/gen_block_is_fused_iter.rs",
+    "tests/ui/coroutine/gen_block_is_iter.rs",
+    "tests/ui/coroutine/gen_block_iterate.rs",
+    "tests/ui/coroutine/gen_fn_iter.rs",
+    "tests/ui/coroutine/gen_fn_lifetime_capture.rs",
+    "tests/ui/coroutine/return-types-diverge.rs",
+    "tests/ui/higher-ranked/builtin-closure-like-bounds.rs",
+    "tests/ui/sanitizer/cfi-coroutine.rs",
+
+    // TODO: struct literal in match guard
+    // https://github.com/dtolnay/syn/issues/1527
+    "tests/ui/parser/struct-literal-in-match-guard.rs",
+
+    // TODO: `!` as a pattern
+    "tests/ui/rfcs/rfc-0000-never_patterns/diverges.rs",
+
+    // TODO: async trait bounds: `impl async Fn()`
     "src/tools/miri/tests/pass/async-closure-captures.rs",
     "src/tools/miri/tests/pass/async-closure-drop.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0209_become_expr.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0211_async_trait_bound.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0212_const_trait_bound.rs",
-    "src/tools/rustfmt/tests/parser/stashed-diag.rs",
-    "src/tools/rustfmt/tests/parser/stashed-diag2.rs",
-    "src/tools/rustfmt/tests/source/mut_ref.rs",
-    "src/tools/rustfmt/tests/source/postfix-match/pf-match.rs",
     "src/tools/rustfmt/tests/target/asyncness.rs",
-    "src/tools/rustfmt/tests/target/mut_ref.rs",
-    "src/tools/rustfmt/tests/target/postfix-match/pf-match.rs",
     "tests/codegen/async-closure-debug.rs",
-    "tests/pretty/delegation.rs",
-    "tests/pretty/postfix-match.rs",
-    "tests/ui/associated-type-bounds/return-type-notation/unpretty-parenthesized.rs",
     "tests/ui/async-await/async-closures/async-fn-mut-for-async-fn.rs",
     "tests/ui/async-await/async-closures/async-fn-once-for-async-fn.rs",
     "tests/ui/async-await/async-closures/auxiliary/foreign.rs",
@@ -57,67 +93,37 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/async-await/async-fn/impl-trait.rs",
     "tests/ui/async-await/async-fn/project.rs",
     "tests/ui/async-await/async-fn/sugar.rs",
-    "tests/ui/async-await/for-await-2015.rs",
-    "tests/ui/async-await/for-await-passthrough.rs",
-    "tests/ui/async-await/for-await.rs",
-    "tests/ui/coroutine/async-gen-deduce-yield.rs",
-    "tests/ui/coroutine/async-gen-yield-ty-is-unit.rs",
-    "tests/ui/coroutine/async_gen_fn_iter.rs",
-    "tests/ui/coroutine/gen_block_is_fused_iter.rs",
-    "tests/ui/coroutine/gen_fn_iter.rs",
-    "tests/ui/coroutine/gen_fn_lifetime_capture.rs",
-    "tests/ui/coroutine/return-types-diverge.rs",
+
+    // TODO: mutable by-reference bindings (mut ref)
+    "src/tools/rustfmt/tests/source/mut_ref.rs",
+    "src/tools/rustfmt/tests/target/mut_ref.rs",
+    "tests/ui/mut/mut-ref.rs",
+
+    // TODO: postfix match
+    "src/tools/rustfmt/tests/source/postfix-match/pf-match.rs",
+    "src/tools/rustfmt/tests/target/postfix-match/pf-match.rs",
+    "tests/pretty/postfix-match.rs",
+    "tests/ui/match/postfix-match/no-unused-parens.rs",
+    "tests/ui/match/postfix-match/pf-match-chain.rs",
+    "tests/ui/match/postfix-match/postfix-match.rs",
+
+    // TODO: delegation
+    "tests/pretty/delegation.rs",
     "tests/ui/delegation/explicit-paths-in-traits-pass.rs",
     "tests/ui/delegation/explicit-paths-pass.rs",
     "tests/ui/delegation/explicit-paths-signature-pass.rs",
     "tests/ui/delegation/parse.rs",
+
+    // TODO: for await
+    "tests/ui/async-await/for-await-2015.rs",
+    "tests/ui/async-await/for-await-passthrough.rs",
+    "tests/ui/async-await/for-await.rs",
+
+    // TODO: const trait bound: `T: const Trait`
     "tests/ui/generic-const-items/const-trait-impl.rs",
-    "tests/ui/higher-ranked/builtin-closure-like-bounds.rs",
-    "tests/ui/match/postfix-match/no-unused-parens.rs",
-    "tests/ui/match/postfix-match/pf-match-chain.rs",
-    "tests/ui/match/postfix-match/postfix-match.rs",
-    "tests/ui/mut/mut-ref.rs",
-    "tests/ui/parser/constraints-before-generic-args-syntactic-pass.rs",
-    "tests/ui/rfcs/rfc-0000-never_patterns/diverges.rs",
     "tests/ui/rfcs/rfc-2632-const-trait-impl/const-fns-are-early-bound.rs",
     "tests/ui/rfcs/rfc-2632-const-trait-impl/const-trait-bounds.rs",
     "tests/ui/rfcs/rfc-2632-const-trait-impl/effects/minicore.rs",
-    "tests/ui/sanitizer/cfi-coroutine.rs",
-    "tests/ui/traits/negative-bounds/supertrait.rs",
-
-    // TODO: explicit tail calls: `become _g()`
-    // https://github.com/dtolnay/syn/issues/1501
-    "tests/ui/explicit-tail-calls/return-lifetime-sub.rs",
-
-    // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
-    // https://github.com/dtolnay/syn/issues/1435
-    "src/tools/rustfmt/tests/source/issue_5721.rs",
-    "src/tools/rustfmt/tests/source/non-lifetime-binders.rs",
-    "src/tools/rustfmt/tests/target/issue_5721.rs",
-    "src/tools/rustfmt/tests/target/non-lifetime-binders.rs",
-    "tests/rustdoc-json/non_lifetime_binders.rs",
-    "tests/rustdoc/inline_cross/auxiliary/non_lifetime_binders.rs",
-    "tests/rustdoc/non_lifetime_binders.rs",
-
-    // TODO: return type notation: `where T: Trait<method(): Send>`
-    // https://github.com/dtolnay/syn/issues/1434
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0208_associated_return_type_bounds.rs",
-    "tests/ui/associated-type-bounds/return-type-notation/basic.rs",
-    "tests/ui/feature-gates/feature-gate-return_type_notation.rs",
-
-    // TODO: lazy type alias syntax with where-clause in trailing position
-    // https://github.com/dtolnay/syn/issues/1525
-    "tests/rustdoc/typedef-inner-variants-lazy_type_alias.rs",
-
-    // TODO: gen blocks and functions
-    // https://github.com/dtolnay/syn/issues/1526
-    "compiler/rustc_codegen_cranelift/example/gen_block_iterate.rs",
-    "tests/ui/coroutine/gen_block_is_iter.rs",
-    "tests/ui/coroutine/gen_block_iterate.rs",
-
-    // TODO: struct literal in match guard
-    // https://github.com/dtolnay/syn/issues/1527
-    "tests/ui/parser/struct-literal-in-match-guard.rs",
 
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "tests/ui/const-generics/early/closing-args-token.rs",
@@ -131,12 +137,16 @@ static EXCLUDE_FILES: &[&str] = &[
 
     // Negative polarity trait bound: `where T: !Copy`
     "src/tools/rustfmt/tests/target/negative-bounds.rs",
+    "tests/ui/traits/negative-bounds/supertrait.rs",
 
     // Lifetime bound inside for<>: `T: ~const ?for<'a: 'b> Trait<'a>`
     "tests/ui/rfcs/rfc-2632-const-trait-impl/tilde-const-syntax.rs",
 
     // Const impl that is not a trait impl: `impl ~const T {}`
     "tests/ui/rfcs/rfc-2632-const-trait-impl/syntax.rs",
+
+    // Lifetimes and types out of order in angle bracketed path arguments
+    "tests/ui/parser/constraints-before-generic-args-syntactic-pass.rs",
 
     // Deprecated anonymous parameter syntax in traits
     "src/tools/rustfmt/tests/source/trait.rs",
@@ -214,6 +224,8 @@ static EXCLUDE_FILES: &[&str] = &[
 
     // Placeholder syntax for "throw expressions"
     "compiler/rustc_errors/src/translation.rs",
+    "compiler/rustc_expand/src/module.rs",
+    "compiler/rustc_infer/src/infer/error_reporting/need_type_info.rs",
     "src/tools/clippy/tests/ui/needless_return.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0204_yeet_expr.rs",
     "tests/pretty/yeet-expr.rs",
@@ -249,6 +261,8 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/coverage/target/comments.rs",
     "src/tools/rustfmt/tests/parser/issue-4126/invalid.rs",
     "src/tools/rustfmt/tests/parser/issue_4418.rs",
+    "src/tools/rustfmt/tests/parser/stashed-diag.rs",
+    "src/tools/rustfmt/tests/parser/stashed-diag2.rs",
     "src/tools/rustfmt/tests/parser/unclosed-delims/issue_4466.rs",
     "src/tools/rustfmt/tests/source/configs/disable_all_formatting/true.rs",
     "src/tools/rustfmt/tests/source/configs/spaces_around_ranges/false.rs",
