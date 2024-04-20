@@ -52,9 +52,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 #[macro_use]
 mod macros;
 
-#[allow(dead_code)]
 mod common;
-
 mod repo;
 
 #[test]
