@@ -189,10 +189,7 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
         ExprField, ExprKind, GenericArg, GenericBound, ItemKind, Local, LocalKind, Pat, Stmt,
         StmtKind, StructExpr, StructRest, TraitBoundModifiers, Ty,
     };
-    use rustc_ast::mut_visit::{
-        noop_flat_map_assoc_item, noop_visit_generic_arg, noop_visit_item_kind, noop_visit_local,
-        noop_visit_param_bound, MutVisitor,
-    };
+    use rustc_ast::mut_visit::{noop_flat_map_assoc_item, noop_visit_item_kind, MutVisitor};
     use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
     use rustc_span::DUMMY_SP;
     use smallvec::SmallVec;
@@ -240,7 +237,6 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
     }
 
     fn noop_visit_expr<T: MutVisitor>(e: &mut Expr, vis: &mut T) {
-        use rustc_ast::mut_visit::{noop_visit_expr, visit_attrs};
         match &mut e.kind {
             ExprKind::AddrOf(BorrowKind::Raw, ..) => {}
             ExprKind::Struct(expr) => {
@@ -256,11 +252,8 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
                 if let StructRest::Base(rest) = rest {
                     vis.visit_expr(rest);
                 }
-                vis.visit_id(&mut e.id);
-                vis.visit_span(&mut e.span);
-                visit_attrs(&mut e.attrs, vis);
             }
-            _ => noop_visit_expr(e, vis),
+            _ => rustc_ast::mut_visit::noop_visit_expr(e, vis),
         }
     }
 
@@ -288,13 +281,14 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
 
         fn visit_generic_arg(&mut self, arg: &mut GenericArg) {
             match arg {
+                GenericArg::Lifetime(_lifetime) => {}
+                GenericArg::Type(arg) => self.visit_ty(arg),
                 // Don't wrap unbraced const generic arg as that's invalid syntax.
                 GenericArg::Const(anon_const) => {
                     if let ExprKind::Block(..) = &mut anon_const.value.kind {
                         noop_visit_expr(&mut anon_const.value, self);
                     }
                 }
-                _ => noop_visit_generic_arg(arg, self),
             }
         }
 
@@ -307,7 +301,8 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
                         ..
                     },
                 ) => {}
-                _ => noop_visit_param_bound(bound, self),
+                GenericBound::Trait(ty, _modifier) => self.visit_poly_trait_ref(ty),
+                GenericBound::Outlives(_lifetime) => {}
             }
         }
 
@@ -320,9 +315,15 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
         }
 
         fn visit_local(&mut self, local: &mut P<Local>) {
-            match local.kind {
-                LocalKind::InitElse(..) => {}
-                _ => noop_visit_local(local, self),
+            match &mut local.kind {
+                LocalKind::Decl => {}
+                LocalKind::Init(init) => {
+                    self.visit_expr(init);
+                }
+                LocalKind::InitElse(init, els) => {
+                    self.visit_expr(init);
+                    self.visit_block(els);
+                }
             }
         }
 
