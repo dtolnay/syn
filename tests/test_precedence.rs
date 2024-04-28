@@ -186,10 +186,10 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
     use rustc_ast::ast::{
         AssocItem, AssocItemKind, Attribute, BinOpKind, Block, BorrowKind, BoundConstness, Expr,
-        ExprField, ExprKind, GenericArg, GenericBound, ItemKind, Local, LocalKind, Pat, Stmt,
-        StmtKind, StructExpr, StructRest, TraitBoundModifiers, Ty,
+        ExprField, ExprKind, GenericArg, GenericBound, Local, LocalKind, Pat, Stmt, StmtKind,
+        StructExpr, StructRest, TraitBoundModifiers, Ty,
     };
-    use rustc_ast::mut_visit::{noop_flat_map_assoc_item, noop_visit_item_kind, MutVisitor};
+    use rustc_ast::mut_visit::{noop_flat_map_item, MutVisitor};
     use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
     use rustc_span::DUMMY_SP;
     use smallvec::SmallVec;
@@ -327,15 +327,6 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
             }
         }
 
-        fn visit_item_kind(&mut self, item: &mut ItemKind) {
-            match item {
-                ItemKind::Const(const_item)
-                    if !const_item.generics.params.is_empty()
-                        || !const_item.generics.where_clause.predicates.is_empty() => {}
-                _ => noop_visit_item_kind(item, self),
-            }
-        }
-
         fn flat_map_trait_item(&mut self, item: P<AssocItem>) -> SmallVec<[P<AssocItem>; 1]> {
             match &item.kind {
                 AssocItemKind::Const(const_item)
@@ -344,7 +335,7 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
                 {
                     SmallVec::from([item])
                 }
-                _ => noop_flat_map_assoc_item(item, self),
+                _ => noop_flat_map_item(item, self),
             }
         }
 
@@ -356,7 +347,7 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
                 {
                     SmallVec::from([item])
                 }
-                _ => noop_flat_map_assoc_item(item, self),
+                _ => noop_flat_map_item(item, self),
             }
         }
 
