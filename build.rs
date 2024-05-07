@@ -14,6 +14,12 @@ fn main() {
     // Note: add "/build.rs" to package.include in Cargo.toml if adding any
     // conditional compilation within the library.
 
+    println!("cargo:rustc-cfg=check_cfg");
+    println!("cargo:rustc-check-cfg=cfg(check_cfg)");
+    println!("cargo:rustc-check-cfg=cfg(doc_cfg)");
+    println!("cargo:rustc-check-cfg=cfg(syn_disable_nightly_tests)");
+    println!("cargo:rustc-check-cfg=cfg(syn_only)");
+
     if !unstable() {
         println!("cargo:rustc-cfg=syn_disable_nightly_tests");
     }
