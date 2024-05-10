@@ -576,3 +576,34 @@ fn test_tuple_comma() {
     }
     "###);
 }
+
+#[test]
+fn test_assign_range_precedence() {
+    // Range has higher precedence as the right-hand of an assignment, but
+    // ambiguous precedence as the left-hand of an assignment.
+    snapshot!("() = () .. ()" as Expr, @r###"
+    Expr::Assign {
+        left: Expr::Tuple,
+        right: Expr::Range {
+            start: Some(Expr::Tuple),
+            limits: RangeLimits::HalfOpen,
+            end: Some(Expr::Tuple),
+        },
+    }
+    "###);
+
+    snapshot!("() += () .. ()" as Expr, @r###"
+    Expr::Binary {
+        left: Expr::Tuple,
+        op: BinOp::AddAssign,
+        right: Expr::Range {
+            start: Some(Expr::Tuple),
+            limits: RangeLimits::HalfOpen,
+            end: Some(Expr::Tuple),
+        },
+    }
+    "###);
+
+    syn::parse_str::<Expr>("() .. () = ()").unwrap_err();
+    syn::parse_str::<Expr>("() .. () += ()").unwrap_err();
+}
