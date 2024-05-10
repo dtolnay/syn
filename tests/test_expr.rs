@@ -5,7 +5,9 @@ mod macros;
 
 use proc_macro2::{Delimiter, Group};
 use quote::{quote, ToTokens as _};
+use std::mem;
 use syn::punctuated::Punctuated;
+use syn::visit_mut::{self, VisitMut};
 use syn::{parse_quote, token, Expr, ExprRange, ExprTuple, Stmt, Token};
 
 #[test]
@@ -638,4 +640,32 @@ fn test_assign_range_precedence() {
 
     syn::parse_str::<Expr>("() .. () = ()").unwrap_err();
     syn::parse_str::<Expr>("() .. () += ()").unwrap_err();
+}
+
+#[test]
+fn test_fixup() {
+    struct FlattenParens;
+
+    impl VisitMut for FlattenParens {
+        fn visit_expr_mut(&mut self, e: &mut Expr) {
+            while let Expr::Paren(paren) = e {
+                *e = mem::replace(&mut *paren.expr, Expr::PLACEHOLDER);
+            }
+            visit_mut::visit_expr_mut(self, e);
+        }
+    }
+
+    let tokens = quote!(2 * (1 + 1));
+    let original: Expr = syn::parse2(tokens).unwrap();
+
+    let mut flat = original.clone();
+    FlattenParens.visit_expr_mut(&mut flat);
+    let reconstructed: Expr = syn::parse2(flat.to_token_stream()).unwrap();
+
+    assert!(
+        original == reconstructed,
+        "original: {}\nreconstructed: {}",
+        original.to_token_stream(),
+        reconstructed.to_token_stream(),
+    );
 }
