@@ -1150,7 +1150,7 @@ mod precedence {
     use super::BinOp;
     use std::cmp::Ordering;
 
-    pub(crate) enum Precedence {
+    pub(super) enum Precedence {
         Any,
         Assign,
         Range,
@@ -1167,7 +1167,7 @@ mod precedence {
     }
 
     impl Precedence {
-        pub(crate) fn of(op: &BinOp) -> Self {
+        pub(super) fn of(op: &BinOp) -> Self {
             match op {
                 BinOp::Add(_) | BinOp::Sub(_) => Precedence::Arithmetic,
                 BinOp::Mul(_) | BinOp::Div(_) | BinOp::Rem(_) => Precedence::Term,
