@@ -1,4 +1,6 @@
 use crate::attr::Attribute;
+#[cfg(all(feature = "parsing", feature = "full"))]
+use crate::error::Result;
 #[cfg(feature = "full")]
 use crate::generics::BoundLifetimes;
 use crate::ident::Ident;
@@ -7,6 +9,8 @@ use crate::lifetime::Lifetime;
 use crate::lit::Lit;
 use crate::mac::Macro;
 use crate::op::{BinOp, UnOp};
+#[cfg(all(feature = "parsing", feature = "full"))]
+use crate::parse::ParseStream;
 #[cfg(feature = "full")]
 use crate::pat::Pat;
 use crate::path::{AngleBracketedGenericArguments, Path, QSelf};
@@ -703,6 +707,155 @@ impl Expr {
         },
     });
 
+    /// An alternative to the primary `Expr::parse` parser (from the [`Parse`]
+    /// trait) for ambiguous syntactic positions in which a trailing brace
+    /// should not be taken as part of the expression.
+    ///
+    /// [`Parse`]: crate::parse::Parse
+    ///
+    /// Rust grammar has an ambiguity where braces sometimes turn a path
+    /// expression into a struct initialization and sometimes do not. In the
+    /// following code, the expression `S {}` is one expression. Presumably
+    /// there is an empty struct `struct S {}` defined somewhere which it is
+    /// instantiating.
+    ///
+    /// ```
+    /// # struct S;
+    /// # impl std::ops::Deref for S {
+    /// #     type Target = bool;
+    /// #     fn deref(&self) -> &Self::Target {
+    /// #         &true
+    /// #     }
+    /// # }
+    /// let _ = *S {};
+    ///
+    /// // parsed by rustc as: `*(S {})`
+    /// ```
+    ///
+    /// We would want to parse the above using `Expr::parse` after the `=`
+    /// token.
+    ///
+    /// But in the following, `S {}` is *not* a struct init expression.
+    ///
+    /// ```
+    /// # const S: &bool = &true;
+    /// if *S {} {}
+    ///
+    /// // parsed by rustc as:
+    /// //
+    /// //    if (*S) {
+    /// //        /* empty block */
+    /// //    }
+    /// //    {
+    /// //        /* another empty block */
+    /// //    }
+    /// ```
+    ///
+    /// For that reason we would want to parse if-conditions using
+    /// `Expr::parse_without_eager_brace` after the `if` token. Same for similar
+    /// syntactic positions such as the condition expr after a `while` token or
+    /// the expr at the top of a `match`.
+    ///
+    /// The Rust grammar's choices around which way this ambiguity is resolved
+    /// at various syntactic positions is fairly arbitrary. Really either parse
+    /// behavior could work in most positions, and language designers just
+    /// decide each case based on which is more likely to be what the programmer
+    /// had in mind most of the time.
+    ///
+    /// ```
+    /// # struct S;
+    /// # fn doc() -> S {
+    /// if return S {} {}
+    /// # unreachable!()
+    /// # }
+    ///
+    /// // parsed by rustc as:
+    /// //
+    /// //    if (return (S {})) {
+    /// //    }
+    /// //
+    /// // but could equally well have been this other arbitrary choice:
+    /// //
+    /// //    if (return S) {
+    /// //    }
+    /// //    {}
+    /// ```
+    ///
+    /// Note the grammar ambiguity on trailing braces is distinct from
+    /// precedence and is not captured by assigning a precedence level to the
+    /// braced struct init expr in relation to other operators. This can be
+    /// illustrated by `return 0..S {}` vs `match 0..S {}`. The former parses as
+    /// `return (0..(S {}))` implying tighter precedence for struct init than
+    /// `..`, while the latter parses as `match (0..S) {}` implying tighter
+    /// precedence for `..` than struct init, a contradiction.
+    #[cfg(all(feature = "full", feature = "parsing"))]
+    #[cfg_attr(doc_cfg, doc(cfg(all(feature = "full", feature = "parsing"))))]
+    pub fn parse_without_eager_brace(input: ParseStream) -> Result<Expr> {
+        parsing::ambiguous_expr(input, parsing::AllowStruct(false))
+    }
+
+    /// An alternative to the primary `Expr::parse` parser (from the [`Parse`]
+    /// trait) for syntactic positions in which expression boundaries are placed
+    /// more eagerly than done by the typical expression grammar. This includes
+    /// expressions at the head of a statement or in the right-hand side of a
+    /// `match` arm.
+    ///
+    /// [`Parse`]: crate::parse::Parse
+    ///
+    /// Compare the following cases:
+    ///
+    /// 1.
+    ///   ```
+    ///   # let result = ();
+    ///   # let guard = false;
+    ///   # let cond = true;
+    ///   # let f = true;
+    ///   # let g = f;
+    ///   #
+    ///   let _ = match result {
+    ///       () if guard => if cond { f } else { g }
+    ///       () => false,
+    ///   };
+    ///   ```
+    ///
+    /// 2.
+    ///   ```
+    ///   # let cond = true;
+    ///   # let f = ();
+    ///   # let g = f;
+    ///   #
+    ///   let _ = || {
+    ///       if cond { f } else { g }
+    ///       ()
+    ///   };
+    ///   ```
+    ///
+    /// 3.
+    ///   ```
+    ///   # let cond = true;
+    ///   # let f = || ();
+    ///   # let g = f;
+    ///   #
+    ///   let _ = [if cond { f } else { g } ()];
+    ///   ```
+    ///
+    /// The same sequence of tokens `if cond { f } else { g } ()` appears in
+    /// expression position 3 times. The first two syntactic positions use eager
+    /// placement of expression boundaries, and parse as `Expr::If`, with the
+    /// adjacent `()` becoming `Pat::Tuple` or `Expr::Tuple`. In contrast, the
+    /// third case uses standard expression boundaries and parses as
+    /// `Expr::Call`.
+    ///
+    /// As with [`parse_without_eager_brace`], this ambiguity in the Rust
+    /// grammar is independent of precedence.
+    ///
+    /// [`parse_without_eager_brace`]: Self::parse_without_eager_brace
+    #[cfg(all(feature = "full", feature = "parsing"))]
+    #[cfg_attr(doc_cfg, doc(cfg(all(feature = "full", feature = "parsing"))))]
+    pub fn parse_with_earlier_boundary_rule(input: ParseStream) -> Result<Expr> {
+        parsing::parse_with_earlier_boundary_rule(input)
+    }
+
     #[cfg(all(feature = "parsing", feature = "full"))]
     pub(crate) fn replace_attrs(&mut self, new: Vec<Attribute>) -> Vec<Attribute> {
         match self {
@@ -1086,7 +1239,7 @@ pub(crate) mod parsing {
     // Struct literals are ambiguous in certain positions
     // https://github.com/rust-lang/rfcs/pull/92
     #[cfg(feature = "full")]
-    pub(crate) struct AllowStruct(bool);
+    pub(super) struct AllowStruct(pub bool);
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for Expr {
@@ -1099,208 +1252,65 @@ pub(crate) mod parsing {
         }
     }
 
-    impl Expr {
-        /// An alternative to the primary `Expr::parse` parser (from the
-        /// [`Parse`] trait) for ambiguous syntactic positions in which a
-        /// trailing brace should not be taken as part of the expression.
-        ///
-        /// Rust grammar has an ambiguity where braces sometimes turn a path
-        /// expression into a struct initialization and sometimes do not. In the
-        /// following code, the expression `S {}` is one expression. Presumably
-        /// there is an empty struct `struct S {}` defined somewhere which it is
-        /// instantiating.
-        ///
-        /// ```
-        /// # struct S;
-        /// # impl std::ops::Deref for S {
-        /// #     type Target = bool;
-        /// #     fn deref(&self) -> &Self::Target {
-        /// #         &true
-        /// #     }
-        /// # }
-        /// let _ = *S {};
-        ///
-        /// // parsed by rustc as: `*(S {})`
-        /// ```
-        ///
-        /// We would want to parse the above using `Expr::parse` after the `=`
-        /// token.
-        ///
-        /// But in the following, `S {}` is *not* a struct init expression.
-        ///
-        /// ```
-        /// # const S: &bool = &true;
-        /// if *S {} {}
-        ///
-        /// // parsed by rustc as:
-        /// //
-        /// //    if (*S) {
-        /// //        /* empty block */
-        /// //    }
-        /// //    {
-        /// //        /* another empty block */
-        /// //    }
-        /// ```
-        ///
-        /// For that reason we would want to parse if-conditions using
-        /// `Expr::parse_without_eager_brace` after the `if` token. Same for
-        /// similar syntactic positions such as the condition expr after a
-        /// `while` token or the expr at the top of a `match`.
-        ///
-        /// The Rust grammar's choices around which way this ambiguity is
-        /// resolved at various syntactic positions is fairly arbitrary. Really
-        /// either parse behavior could work in most positions, and language
-        /// designers just decide each case based on which is more likely to be
-        /// what the programmer had in mind most of the time.
-        ///
-        /// ```
-        /// # struct S;
-        /// # fn doc() -> S {
-        /// if return S {} {}
-        /// # unreachable!()
-        /// # }
-        ///
-        /// // parsed by rustc as:
-        /// //
-        /// //    if (return (S {})) {
-        /// //    }
-        /// //
-        /// // but could equally well have been this other arbitrary choice:
-        /// //
-        /// //    if (return S) {
-        /// //    }
-        /// //    {}
-        /// ```
-        ///
-        /// Note the grammar ambiguity on trailing braces is distinct from
-        /// precedence and is not captured by assigning a precedence level to
-        /// the braced struct init expr in relation to other operators. This can
-        /// be illustrated by `return 0..S {}` vs `match 0..S {}`. The former
-        /// parses as `return (0..(S {}))` implying tighter precedence for
-        /// struct init than `..`, while the latter parses as `match (0..S) {}`
-        /// implying tighter precedence for `..` than struct init, a
-        /// contradiction.
-        #[cfg(feature = "full")]
-        #[cfg_attr(doc_cfg, doc(cfg(all(feature = "full", feature = "parsing"))))]
-        pub fn parse_without_eager_brace(input: ParseStream) -> Result<Expr> {
-            ambiguous_expr(input, AllowStruct(false))
+    #[cfg(feature = "full")]
+    pub(super) fn parse_with_earlier_boundary_rule(input: ParseStream) -> Result<Expr> {
+        let mut attrs = input.call(expr_attrs)?;
+        let mut expr = if input.peek(token::Group) {
+            let allow_struct = AllowStruct(true);
+            let atom = expr_group(input, allow_struct)?;
+            if continue_parsing_early(&atom) {
+                trailer_helper(input, atom)?
+            } else {
+                atom
+            }
+        } else if input.peek(Token![if]) {
+            Expr::If(input.parse()?)
+        } else if input.peek(Token![while]) {
+            Expr::While(input.parse()?)
+        } else if input.peek(Token![for])
+            && !(input.peek2(Token![<]) && (input.peek3(Lifetime) || input.peek3(Token![>])))
+        {
+            Expr::ForLoop(input.parse()?)
+        } else if input.peek(Token![loop]) {
+            Expr::Loop(input.parse()?)
+        } else if input.peek(Token![match]) {
+            Expr::Match(input.parse()?)
+        } else if input.peek(Token![try]) && input.peek2(token::Brace) {
+            Expr::TryBlock(input.parse()?)
+        } else if input.peek(Token![unsafe]) {
+            Expr::Unsafe(input.parse()?)
+        } else if input.peek(Token![const]) && input.peek2(token::Brace) {
+            Expr::Const(input.parse()?)
+        } else if input.peek(token::Brace) {
+            Expr::Block(input.parse()?)
+        } else if input.peek(Lifetime) {
+            atom_labeled(input)?
+        } else {
+            let allow_struct = AllowStruct(true);
+            unary_expr(input, allow_struct)?
+        };
+
+        if continue_parsing_early(&expr) {
+            attrs.extend(expr.replace_attrs(Vec::new()));
+            expr.replace_attrs(attrs);
+
+            let allow_struct = AllowStruct(true);
+            return parse_expr(input, expr, allow_struct, Precedence::Any);
         }
 
-        /// An alternative to the primary `Expr::parse` parser (from the
-        /// [`Parse`] trait) for syntactic positions in which expression
-        /// boundaries are placed more eagerly than done by the typical
-        /// expression grammar. This includes expressions at the head of a
-        /// statement or in the right-hand side of a `match` arm.
-        ///
-        /// Compare the following cases:
-        ///
-        /// 1.
-        ///   ```
-        ///   # let result = ();
-        ///   # let guard = false;
-        ///   # let cond = true;
-        ///   # let f = true;
-        ///   # let g = f;
-        ///   #
-        ///   let _ = match result {
-        ///       () if guard => if cond { f } else { g }
-        ///       () => false,
-        ///   };
-        ///   ```
-        ///
-        /// 2.
-        ///   ```
-        ///   # let cond = true;
-        ///   # let f = ();
-        ///   # let g = f;
-        ///   #
-        ///   let _ = || {
-        ///       if cond { f } else { g }
-        ///       ()
-        ///   };
-        ///   ```
-        ///
-        /// 3.
-        ///   ```
-        ///   # let cond = true;
-        ///   # let f = || ();
-        ///   # let g = f;
-        ///   #
-        ///   let _ = [if cond { f } else { g } ()];
-        ///   ```
-        ///
-        /// The same sequence of tokens `if cond { f } else { g } ()` appears in
-        /// expression position 3 times. The first two syntactic positions use
-        /// eager placement of expression boundaries, and parse as `Expr::If`,
-        /// with the adjacent `()` becoming `Pat::Tuple` or `Expr::Tuple`. In
-        /// contrast, the third case uses standard expression boundaries and
-        /// parses as `Expr::Call`.
-        ///
-        /// As with [`parse_without_eager_brace`], this ambiguity in the Rust
-        /// grammar is independent of precedence.
-        ///
-        /// [`parse_without_eager_brace`]: Self::parse_without_eager_brace
-        #[cfg(feature = "full")]
-        #[cfg_attr(doc_cfg, doc(cfg(all(feature = "full", feature = "parsing"))))]
-        pub fn parse_with_earlier_boundary_rule(input: ParseStream) -> Result<Expr> {
-            let mut attrs = input.call(expr_attrs)?;
-            let mut expr = if input.peek(token::Group) {
-                let allow_struct = AllowStruct(true);
-                let atom = expr_group(input, allow_struct)?;
-                if continue_parsing_early(&atom) {
-                    trailer_helper(input, atom)?
-                } else {
-                    atom
-                }
-            } else if input.peek(Token![if]) {
-                Expr::If(input.parse()?)
-            } else if input.peek(Token![while]) {
-                Expr::While(input.parse()?)
-            } else if input.peek(Token![for])
-                && !(input.peek2(Token![<]) && (input.peek3(Lifetime) || input.peek3(Token![>])))
-            {
-                Expr::ForLoop(input.parse()?)
-            } else if input.peek(Token![loop]) {
-                Expr::Loop(input.parse()?)
-            } else if input.peek(Token![match]) {
-                Expr::Match(input.parse()?)
-            } else if input.peek(Token![try]) && input.peek2(token::Brace) {
-                Expr::TryBlock(input.parse()?)
-            } else if input.peek(Token![unsafe]) {
-                Expr::Unsafe(input.parse()?)
-            } else if input.peek(Token![const]) && input.peek2(token::Brace) {
-                Expr::Const(input.parse()?)
-            } else if input.peek(token::Brace) {
-                Expr::Block(input.parse()?)
-            } else if input.peek(Lifetime) {
-                atom_labeled(input)?
-            } else {
-                let allow_struct = AllowStruct(true);
-                unary_expr(input, allow_struct)?
-            };
-
-            if continue_parsing_early(&expr) {
-                attrs.extend(expr.replace_attrs(Vec::new()));
-                expr.replace_attrs(attrs);
-
-                let allow_struct = AllowStruct(true);
-                return parse_expr(input, expr, allow_struct, Precedence::Any);
-            }
-
-            if input.peek(Token![.]) && !input.peek(Token![..]) || input.peek(Token![?]) {
-                expr = trailer_helper(input, expr)?;
-
-                attrs.extend(expr.replace_attrs(Vec::new()));
-                expr.replace_attrs(attrs);
-
-                let allow_struct = AllowStruct(true);
-                return parse_expr(input, expr, allow_struct, Precedence::Any);
-            }
+        if input.peek(Token![.]) && !input.peek(Token![..]) || input.peek(Token![?]) {
+            expr = trailer_helper(input, expr)?;
 
             attrs.extend(expr.replace_attrs(Vec::new()));
             expr.replace_attrs(attrs);
-            Ok(expr)
+
+            let allow_struct = AllowStruct(true);
+            return parse_expr(input, expr, allow_struct, Precedence::Any);
         }
+
+        attrs.extend(expr.replace_attrs(Vec::new()));
+        expr.replace_attrs(attrs);
+        Ok(expr)
     }
 
     #[cfg(feature = "full")]
@@ -1511,7 +1521,7 @@ pub(crate) mod parsing {
     }
 
     // Parse an arbitrary expression.
-    fn ambiguous_expr(
+    pub(super) fn ambiguous_expr(
         input: ParseStream,
         #[cfg(feature = "full")] allow_struct: AllowStruct,
     ) -> Result<Expr> {
