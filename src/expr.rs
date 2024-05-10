@@ -1148,6 +1148,7 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
 #[cfg(feature = "parsing")]
 mod precedence {
     use super::BinOp;
+    use std::cmp::Ordering;
 
     pub(crate) enum Precedence {
         Any,
@@ -1193,6 +1194,28 @@ mod precedence {
                 | BinOp::ShlAssign(_)
                 | BinOp::ShrAssign(_) => Precedence::Assign,
             }
+        }
+    }
+
+    impl Copy for Precedence {}
+
+    impl Clone for Precedence {
+        fn clone(&self) -> Self {
+            *self
+        }
+    }
+
+    impl PartialEq for Precedence {
+        fn eq(&self, other: &Self) -> bool {
+            *self as u8 == *other as u8
+        }
+    }
+
+    impl PartialOrd for Precedence {
+        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+            let this = *self as u8;
+            let other = *other as u8;
+            Some(this.cmp(&other))
         }
     }
 }
@@ -1243,7 +1266,6 @@ pub(crate) mod parsing {
     use crate::verbatim;
     #[cfg(feature = "full")]
     use proc_macro2::TokenStream;
-    use std::cmp::Ordering;
     use std::mem;
 
     mod kw {
@@ -1338,28 +1360,6 @@ pub(crate) mod parsing {
     impl Clone for AllowStruct {
         fn clone(&self) -> Self {
             *self
-        }
-    }
-
-    impl Copy for Precedence {}
-
-    impl Clone for Precedence {
-        fn clone(&self) -> Self {
-            *self
-        }
-    }
-
-    impl PartialEq for Precedence {
-        fn eq(&self, other: &Self) -> bool {
-            *self as u8 == *other as u8
-        }
-    }
-
-    impl PartialOrd for Precedence {
-        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-            let this = *self as u8;
-            let other = *other as u8;
-            Some(this.cmp(&other))
         }
     }
 
