@@ -697,8 +697,26 @@ ast_struct! {
 }
 
 impl Expr {
-    #[cfg(feature = "parsing")]
-    const DUMMY: Self = Expr::Path(ExprPath {
+    /// An unspecified invalid expression.
+    ///
+    /// ```
+    /// use quote::ToTokens;
+    /// use std::mem;
+    /// use syn::{parse_quote, Expr};
+    ///
+    /// fn unparenthesize(e: &mut Expr) {
+    ///     while let Expr::Paren(paren) = e {
+    ///         *e = mem::replace(&mut *paren.expr, Expr::PLACEHOLDER);
+    ///     }
+    /// }
+    ///
+    /// fn main() {
+    ///     let mut e: Expr = parse_quote! { ((1 + 1)) };
+    ///     unparenthesize(&mut e);
+    ///     assert_eq!("1 + 1", e.to_token_stream().to_string());
+    /// }
+    /// ```
+    pub const PLACEHOLDER: Self = Expr::Path(ExprPath {
         attrs: Vec::new(),
         qself: None,
         path: Path {
@@ -3014,7 +3032,7 @@ pub(crate) mod parsing {
             let part_end = offset + part.len();
             index.span = float_token.subspan(offset..part_end).unwrap_or(float_span);
 
-            let base = mem::replace(e, Expr::DUMMY);
+            let base = mem::replace(e, Expr::PLACEHOLDER);
             *e = Expr::Field(ExprField {
                 attrs: Vec::new(),
                 base: Box::new(base),
