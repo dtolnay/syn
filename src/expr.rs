@@ -1397,31 +1397,31 @@ pub(crate) mod parsing {
                     break;
                 }
                 input.advance_to(&ahead);
-                let rhs = parse_binop_rhs(input, allow_struct, precedence)?;
+                let right = parse_binop_rhs(input, allow_struct, precedence)?;
                 lhs = Expr::Binary(ExprBinary {
                     attrs: Vec::new(),
                     left: Box::new(lhs),
                     op,
-                    right: Box::new(rhs),
+                    right,
                 });
             } else if Precedence::Assign >= base && input.peek(Token![=]) && !input.peek(Token![=>])
             {
                 let eq_token: Token![=] = input.parse()?;
-                let rhs = parse_binop_rhs(input, allow_struct, Precedence::Assign)?;
+                let right = parse_binop_rhs(input, allow_struct, Precedence::Assign)?;
                 lhs = Expr::Assign(ExprAssign {
                     attrs: Vec::new(),
                     left: Box::new(lhs),
                     eq_token,
-                    right: Box::new(rhs),
+                    right,
                 });
             } else if Precedence::Range >= base && input.peek(Token![..]) {
                 let limits: RangeLimits = input.parse()?;
-                let rhs = parse_range_end(input, &limits, allow_struct)?;
+                let end = parse_range_end(input, &limits, allow_struct)?;
                 lhs = Expr::Range(ExprRange {
                     attrs: Vec::new(),
                     start: Some(Box::new(lhs)),
                     limits,
-                    end: rhs.map(Box::new),
+                    end,
                 });
             } else if Precedence::Cast >= base && input.peek(Token![as]) {
                 let as_token: Token![as] = input.parse()?;
@@ -1452,12 +1452,12 @@ pub(crate) mod parsing {
                     break;
                 }
                 input.advance_to(&ahead);
-                let rhs = parse_binop_rhs(input, precedence)?;
+                let right = parse_binop_rhs(input, precedence)?;
                 lhs = Expr::Binary(ExprBinary {
                     attrs: Vec::new(),
                     left: Box::new(lhs),
                     op,
-                    right: Box::new(rhs),
+                    right,
                 });
             } else if Precedence::Cast >= base && input.peek(Token![as]) {
                 let as_token: Token![as] = input.parse()?;
@@ -1482,7 +1482,7 @@ pub(crate) mod parsing {
         input: ParseStream,
         #[cfg(feature = "full")] allow_struct: AllowStruct,
         precedence: Precedence,
-    ) -> Result<Expr> {
+    ) -> Result<Box<Expr>> {
         let mut rhs = unary_expr(
             input,
             #[cfg(feature = "full")]
@@ -1499,7 +1499,7 @@ pub(crate) mod parsing {
                     next,
                 )?;
             } else {
-                return Ok(rhs);
+                return Ok(Box::new(rhs));
             }
         }
     }
@@ -2859,12 +2859,12 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     fn expr_range(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprRange> {
         let limits: RangeLimits = input.parse()?;
-        let rhs = parse_range_end(input, &limits, allow_struct)?;
+        let end = parse_range_end(input, &limits, allow_struct)?;
         Ok(ExprRange {
             attrs: Vec::new(),
             start: None,
             limits,
-            end: rhs.map(Box::new),
+            end,
         })
     }
 
@@ -2873,7 +2873,7 @@ pub(crate) mod parsing {
         input: ParseStream,
         limits: &RangeLimits,
         allow_struct: AllowStruct,
-    ) -> Result<Option<Expr>> {
+    ) -> Result<Option<Box<Expr>>> {
         if matches!(limits, RangeLimits::HalfOpen(_))
             && (input.is_empty()
                 || input.peek(Token![,])
