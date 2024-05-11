@@ -197,6 +197,7 @@ use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
 use std::mem;
 use std::ops::Deref;
+use std::panic::{RefUnwindSafe, UnwindSafe};
 use std::rc::Rc;
 use std::str::FromStr;
 
@@ -282,6 +283,9 @@ impl<'a> Debug for ParseBuffer<'a> {
         Debug::fmt(&self.cursor().token_stream(), f)
     }
 }
+
+impl<'a> UnwindSafe for ParseBuffer<'a> {}
+impl<'a> RefUnwindSafe for ParseBuffer<'a> {}
 
 /// Cursor state associated with speculative parsing.
 ///
