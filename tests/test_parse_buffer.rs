@@ -1,6 +1,7 @@
 #![allow(clippy::non_ascii_literal)]
 
-use proc_macro2::{Delimiter, Group, Punct, Spacing, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, TokenStream, TokenTree};
+use std::panic;
 use syn::parse::discouraged::Speculative as _;
 use syn::parse::{Parse, ParseStream, Parser, Result};
 use syn::{parenthesized, Token};
@@ -89,4 +90,14 @@ fn trailing_empty_none_group() {
     ]);
 
     parse.parse2(tokens).unwrap();
+}
+
+#[test]
+fn test_unwind_safe() {
+    fn parse(input: ParseStream) -> Result<Ident> {
+        let thread_result = panic::catch_unwind(|| input.parse());
+        thread_result.unwrap()
+    }
+
+    parse.parse_str("throw").unwrap();
 }
