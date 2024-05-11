@@ -1416,18 +1416,7 @@ pub(crate) mod parsing {
                 });
             } else if Precedence::Range >= base && input.peek(Token![..]) {
                 let limits: RangeLimits = input.parse()?;
-                let rhs = if matches!(limits, RangeLimits::HalfOpen(_))
-                    && (input.is_empty()
-                        || input.peek(Token![,])
-                        || input.peek(Token![;])
-                        || input.peek(Token![.]) && !input.peek(Token![..])
-                        || !allow_struct.0 && input.peek(token::Brace))
-                {
-                    None
-                } else {
-                    let rhs = parse_binop_rhs(input, allow_struct, Precedence::Range)?;
-                    Some(rhs)
-                };
+                let rhs = parse_range_end(input, &limits, allow_struct)?;
                 lhs = Expr::Range(ExprRange {
                     attrs: Vec::new(),
                     start: Some(Box::new(lhs)),
@@ -2870,24 +2859,33 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     fn expr_range(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprRange> {
         let limits: RangeLimits = input.parse()?;
-        let end = if matches!(limits, RangeLimits::HalfOpen(_))
+        let rhs = parse_range_end(input, &limits, allow_struct)?;
+        Ok(ExprRange {
+            attrs: Vec::new(),
+            start: None,
+            limits,
+            end: rhs.map(Box::new),
+        })
+    }
+
+    #[cfg(feature = "full")]
+    fn parse_range_end(
+        input: ParseStream,
+        limits: &RangeLimits,
+        allow_struct: AllowStruct,
+    ) -> Result<Option<Expr>> {
+        if matches!(limits, RangeLimits::HalfOpen(_))
             && (input.is_empty()
                 || input.peek(Token![,])
                 || input.peek(Token![;])
                 || input.peek(Token![.]) && !input.peek(Token![..])
                 || !allow_struct.0 && input.peek(token::Brace))
         {
-            None
+            Ok(None)
         } else {
-            let to = ambiguous_expr(input, allow_struct)?;
-            Some(Box::new(to))
-        };
-        Ok(ExprRange {
-            attrs: Vec::new(),
-            start: None,
-            limits,
-            end,
-        })
+            let end = parse_binop_rhs(input, allow_struct, Precedence::Range)?;
+            Ok(Some(end))
+        }
     }
 
     #[cfg(feature = "full")]
