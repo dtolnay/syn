@@ -331,7 +331,7 @@ fn test_postfix_operator_after_cast() {
 }
 
 #[test]
-fn test_ranges() {
+fn test_range_kinds() {
     syn::parse_str::<Expr>("..").unwrap();
     syn::parse_str::<Expr>("..hi").unwrap();
     syn::parse_str::<Expr>("lo..").unwrap();
@@ -346,6 +346,44 @@ fn test_ranges() {
     syn::parse_str::<Expr>("...hi").unwrap_err();
     syn::parse_str::<Expr>("lo...").unwrap_err();
     syn::parse_str::<Expr>("lo...hi").unwrap_err();
+}
+
+#[test]
+fn test_range_precedence() {
+    snapshot!(".. .." as Expr, @r###"
+    Expr::Range {
+        limits: RangeLimits::HalfOpen,
+        end: Some(Expr::Range {
+            limits: RangeLimits::HalfOpen,
+        }),
+    }
+    "###);
+
+    snapshot!(".. .. ()" as Expr, @r###"
+    Expr::Range {
+        limits: RangeLimits::HalfOpen,
+        end: Some(Expr::Range {
+            limits: RangeLimits::HalfOpen,
+            end: Some(Expr::Tuple),
+        }),
+    }
+    "###);
+
+    snapshot!("() .. .." as Expr, @r###"
+    Expr::Range {
+        start: Some(Expr::Tuple),
+        limits: RangeLimits::HalfOpen,
+        end: Some(Expr::Range {
+            limits: RangeLimits::HalfOpen,
+        }),
+    }
+    "###);
+
+    // A range with a lower bound cannot be the upper bound of another range,
+    // and a range with an upper bound cannot be the lower bound of another
+    // range.
+    syn::parse_str::<Expr>(".. x ..").unwrap_err();
+    syn::parse_str::<Expr>("x .. x ..").unwrap_err();
 }
 
 #[test]
