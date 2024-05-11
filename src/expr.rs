@@ -1099,52 +1099,6 @@ ast_enum! {
     }
 }
 
-#[cfg(any(feature = "parsing", feature = "printing"))]
-#[cfg(feature = "full")]
-pub(crate) fn requires_terminator(expr: &Expr) -> bool {
-    // see https://github.com/rust-lang/rust/blob/9a19e7604/compiler/rustc_ast/src/util/classify.rs#L7-L26
-    match expr {
-        Expr::If(_)
-        | Expr::Match(_)
-        | Expr::Block(_) | Expr::Unsafe(_) // both under ExprKind::Block in rustc
-        | Expr::While(_)
-        | Expr::Loop(_)
-        | Expr::ForLoop(_)
-        | Expr::TryBlock(_)
-        | Expr::Const(_) => false,
-        Expr::Array(_)
-        | Expr::Assign(_)
-        | Expr::Async(_)
-        | Expr::Await(_)
-        | Expr::Binary(_)
-        | Expr::Break(_)
-        | Expr::Call(_)
-        | Expr::Cast(_)
-        | Expr::Closure(_)
-        | Expr::Continue(_)
-        | Expr::Field(_)
-        | Expr::Group(_)
-        | Expr::Index(_)
-        | Expr::Infer(_)
-        | Expr::Let(_)
-        | Expr::Lit(_)
-        | Expr::Macro(_)
-        | Expr::MethodCall(_)
-        | Expr::Paren(_)
-        | Expr::Path(_)
-        | Expr::Range(_)
-        | Expr::Reference(_)
-        | Expr::Repeat(_)
-        | Expr::Return(_)
-        | Expr::Struct(_)
-        | Expr::Try(_)
-        | Expr::Tuple(_)
-        | Expr::Unary(_)
-        | Expr::Yield(_)
-        | Expr::Verbatim(_) => true
-    }
-}
-
 #[cfg(feature = "parsing")]
 mod precedence {
     use super::BinOp;
@@ -1225,14 +1179,16 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     use crate::attr;
     use crate::attr::Attribute;
+    #[cfg(feature = "full")]
+    use crate::classify;
     use crate::error::{Error, Result};
     use crate::expr::precedence::Precedence;
     #[cfg(feature = "full")]
     use crate::expr::{
-        requires_terminator, Arm, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock,
-        ExprBreak, ExprClosure, ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet,
-        ExprLoop, ExprMatch, ExprRange, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprTuple,
-        ExprUnsafe, ExprWhile, ExprYield, Label, RangeLimits,
+        Arm, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak, ExprClosure,
+        ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet, ExprLoop, ExprMatch,
+        ExprRange, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprTuple, ExprUnsafe, ExprWhile,
+        ExprYield, Label, RangeLimits,
     };
     use crate::expr::{
         Expr, ExprBinary, ExprCall, ExprCast, ExprField, ExprGroup, ExprIndex, ExprLit, ExprMacro,
@@ -3005,7 +2961,7 @@ pub(crate) mod parsing {
                 fat_arrow_token: input.parse()?,
                 body: {
                     let body = Expr::parse_with_earlier_boundary_rule(input)?;
-                    requires_comma = requires_terminator(&body);
+                    requires_comma = classify::requires_terminator(&body);
                     Box::new(body)
                 },
                 comma: {
@@ -3109,11 +3065,13 @@ pub(crate) mod printing {
     #[cfg(feature = "full")]
     use crate::attr::FilterAttrs;
     #[cfg(feature = "full")]
+    use crate::classify;
+    #[cfg(feature = "full")]
     use crate::expr::{
-        requires_terminator, Arm, Expr, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock,
-        ExprBreak, ExprClosure, ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet,
-        ExprLoop, ExprMatch, ExprRange, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprTuple,
-        ExprUnsafe, ExprWhile, ExprYield, Label, RangeLimits,
+        Arm, Expr, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak, ExprClosure,
+        ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet, ExprLoop, ExprMatch,
+        ExprRange, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprTuple, ExprUnsafe, ExprWhile,
+        ExprYield, Label, RangeLimits,
     };
     use crate::expr::{
         ExprBinary, ExprCall, ExprCast, ExprField, ExprGroup, ExprIndex, ExprLit, ExprMacro,
@@ -3442,7 +3400,7 @@ pub(crate) mod printing {
                     // Ensure that we have a comma after a non-block arm, except
                     // for the last one.
                     let is_last = i == self.arms.len() - 1;
-                    if !is_last && requires_terminator(&arm.body) && arm.comma.is_none() {
+                    if !is_last && classify::requires_terminator(&arm.body) && arm.comma.is_none() {
                         <Token![,]>::default().to_tokens(tokens);
                     }
                 }
