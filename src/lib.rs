@@ -327,6 +327,10 @@ mod bigint;
 #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 pub mod buffer;
 
+#[cfg(any(feature = "parsing", feature = "printing"))]
+#[cfg(feature = "full")]
+mod classify;
+
 mod custom_keyword;
 
 mod custom_punctuation;
