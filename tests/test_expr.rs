@@ -379,30 +379,11 @@ fn test_range_precedence() {
     }
     "###);
 
-    // FIXME: should fail to parse. A range with a lower bound cannot be the
-    // upper bound of another range.
-    snapshot!(".. () .." as Expr, @r###"
-    Expr::Range {
-        limits: RangeLimits::HalfOpen,
-        end: Some(Expr::Range {
-            start: Some(Expr::Tuple),
-            limits: RangeLimits::HalfOpen,
-        }),
-    }
-    "###);
-
-    // FIXME: should fail to parse. A range with an upper bound cannot be the
-    // lower bound of another range.
-    snapshot!("() .. () .." as Expr, @r###"
-    Expr::Range {
-        start: Some(Expr::Range {
-            start: Some(Expr::Tuple),
-            limits: RangeLimits::HalfOpen,
-            end: Some(Expr::Tuple),
-        }),
-        limits: RangeLimits::HalfOpen,
-    }
-    "###);
+    // A range with a lower bound cannot be the upper bound of another range,
+    // and a range with an upper bound cannot be the lower bound of another
+    // range.
+    syn::parse_str::<Expr>(".. x ..").unwrap_err();
+    syn::parse_str::<Expr>("x .. x ..").unwrap_err();
 }
 
 #[test]
