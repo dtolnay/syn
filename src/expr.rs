@@ -1400,6 +1400,13 @@ pub(crate) mod parsing {
                 if precedence < base {
                     break;
                 }
+                if precedence == Precedence::Compare {
+                    if let Expr::Binary(lhs) = &lhs {
+                        if Precedence::of(&lhs.op) == Precedence::Compare {
+                            break;
+                        }
+                    }
+                }
                 input.advance_to(&ahead);
                 let right = parse_binop_rhs(input, allow_struct, precedence)?;
                 lhs = Expr::Binary(ExprBinary {
@@ -1454,6 +1461,13 @@ pub(crate) mod parsing {
                 let precedence = Precedence::of(&op);
                 if precedence < base {
                     break;
+                }
+                if precedence == Precedence::Compare {
+                    if let Expr::Binary(lhs) = &lhs {
+                        if Precedence::of(&lhs.op) == Precedence::Compare {
+                            break;
+                        }
+                    }
                 }
                 input.advance_to(&ahead);
                 let right = parse_binop_rhs(input, precedence)?;

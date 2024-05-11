@@ -578,6 +578,38 @@ fn test_tuple_comma() {
 }
 
 #[test]
+fn test_binop_associativity() {
+    // Left to right.
+    snapshot!("() + () + ()" as Expr, @r###"
+    Expr::Binary {
+        left: Expr::Binary {
+            left: Expr::Tuple,
+            op: BinOp::Add,
+            right: Expr::Tuple,
+        },
+        op: BinOp::Add,
+        right: Expr::Tuple,
+    }
+    "###);
+
+    // Right to left.
+    snapshot!("() += () += ()" as Expr, @r###"
+    Expr::Binary {
+        left: Expr::Tuple,
+        op: BinOp::AddAssign,
+        right: Expr::Binary {
+            left: Expr::Tuple,
+            op: BinOp::AddAssign,
+            right: Expr::Tuple,
+        },
+    }
+    "###);
+
+    // Parenthesization is required.
+    syn::parse_str::<Expr>("() == () == ()").unwrap_err();
+}
+
+#[test]
 fn test_assign_range_precedence() {
     // Range has higher precedence as the right-hand of an assignment, but
     // ambiguous precedence as the left-hand of an assignment.
