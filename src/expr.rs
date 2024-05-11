@@ -2255,40 +2255,54 @@ pub(crate) mod parsing {
     impl Parse for ExprIf {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
-            Ok(ExprIf {
-                attrs,
-                if_token: input.parse()?,
-                cond: Box::new(input.call(Expr::parse_without_eager_brace)?),
-                then_branch: input.parse()?,
-                else_branch: {
-                    if input.peek(Token![else]) {
-                        Some(input.call(else_block)?)
-                    } else {
-                        None
-                    }
-                },
-            })
+
+            let mut clauses = Vec::new();
+            let mut expr;
+            loop {
+                let if_token: Token![if] = input.parse()?;
+                let cond = input.call(Expr::parse_without_eager_brace)?;
+                let then_branch: Block = input.parse()?;
+
+                expr = ExprIf {
+                    attrs: Vec::new(),
+                    if_token,
+                    cond: Box::new(cond),
+                    then_branch,
+                    else_branch: None,
+                };
+
+                if !input.peek(Token![else]) {
+                    break;
+                }
+
+                let else_token: Token![else] = input.parse()?;
+                let lookahead = input.lookahead1();
+                if lookahead.peek(Token![if]) {
+                    expr.else_branch = Some((else_token, Box::new(Expr::PLACEHOLDER)));
+                    clauses.push(expr);
+                    continue;
+                } else if lookahead.peek(token::Brace) {
+                    expr.else_branch = Some((
+                        else_token,
+                        Box::new(Expr::Block(ExprBlock {
+                            attrs: Vec::new(),
+                            label: None,
+                            block: input.parse()?,
+                        })),
+                    ));
+                    break;
+                } else {
+                    return Err(lookahead.error());
+                }
+            }
+
+            while let Some(mut prev) = clauses.pop() {
+                *prev.else_branch.as_mut().unwrap().1 = Expr::If(expr);
+                expr = prev;
+            }
+            expr.attrs = attrs;
+            Ok(expr)
         }
-    }
-
-    #[cfg(feature = "full")]
-    fn else_block(input: ParseStream) -> Result<(Token![else], Box<Expr>)> {
-        let else_token: Token![else] = input.parse()?;
-
-        let lookahead = input.lookahead1();
-        let else_branch = if lookahead.peek(Token![if]) {
-            input.parse().map(Expr::If)?
-        } else if lookahead.peek(token::Brace) {
-            Expr::Block(ExprBlock {
-                attrs: Vec::new(),
-                label: None,
-                block: input.parse()?,
-            })
-        } else {
-            return Err(lookahead.error());
-        };
-
-        Ok((else_token, Box::new(else_branch)))
     }
 
     #[cfg(feature = "full")]
