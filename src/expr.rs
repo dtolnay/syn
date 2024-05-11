@@ -3334,16 +3334,33 @@ pub(crate) mod printing {
     impl ToTokens for ExprIf {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            self.if_token.to_tokens(tokens);
-            wrap_bare_struct(tokens, &self.cond);
-            self.then_branch.to_tokens(tokens);
-            if let Some((else_token, else_)) = &self.else_branch {
+
+            let mut expr = self;
+            loop {
+                expr.if_token.to_tokens(tokens);
+                wrap_bare_struct(tokens, &expr.cond);
+                expr.then_branch.to_tokens(tokens);
+
+                let (else_token, else_) = match &expr.else_branch {
+                    Some(else_branch) => else_branch,
+                    None => break,
+                };
+
                 else_token.to_tokens(tokens);
-                // If we are not one of the valid expressions to exist in an else
-                // clause, wrap ourselves in a block.
-                match **else_ {
-                    Expr::If(_) | Expr::Block(_) => else_.to_tokens(tokens),
-                    _ => token::Brace::default().surround(tokens, |tokens| else_.to_tokens(tokens)),
+                match &**else_ {
+                    Expr::If(next) => {
+                        expr = next;
+                    }
+                    Expr::Block(last) => {
+                        last.to_tokens(tokens);
+                        break;
+                    }
+                    // If this is not one of the valid expressions to exist in
+                    // an else clause, wrap it in a block.
+                    other => {
+                        token::Brace::default().surround(tokens, |tokens| other.to_tokens(tokens));
+                        break;
+                    }
                 }
             }
         }
