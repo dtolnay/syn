@@ -1391,12 +1391,12 @@ pub(crate) mod parsing {
     ) -> Result<Expr> {
         loop {
             let ahead = input.fork();
-            if let Some(op) = match ahead.parse::<BinOp>() {
-                Ok(op) if Precedence::of(&op) >= base => Some(op),
-                _ => None,
-            } {
-                input.advance_to(&ahead);
+            if let Ok(op) = ahead.parse::<BinOp>() {
                 let precedence = Precedence::of(&op);
+                if precedence < base {
+                    break;
+                }
+                input.advance_to(&ahead);
                 let mut rhs = unary_expr(input, allow_struct)?;
                 loop {
                     let next = peek_precedence(input);
@@ -1412,10 +1412,7 @@ pub(crate) mod parsing {
                     op,
                     right: Box::new(rhs),
                 });
-            } else if Precedence::Assign >= base
-                && input.peek(Token![=])
-                && !input.peek(Token![==])
-                && !input.peek(Token![=>])
+            } else if Precedence::Assign >= base && input.peek(Token![=]) && !input.peek(Token![=>])
             {
                 let eq_token: Token![=] = input.parse()?;
                 let mut rhs = unary_expr(input, allow_struct)?;
@@ -1484,12 +1481,12 @@ pub(crate) mod parsing {
     fn parse_expr(input: ParseStream, mut lhs: Expr, base: Precedence) -> Result<Expr> {
         loop {
             let ahead = input.fork();
-            if let Some(op) = match ahead.parse::<BinOp>() {
-                Ok(op) if Precedence::of(&op) >= base => Some(op),
-                _ => None,
-            } {
-                input.advance_to(&ahead);
+            if let Ok(op) = ahead.parse::<BinOp>() {
                 let precedence = Precedence::of(&op);
+                if precedence < base {
+                    break;
+                }
+                input.advance_to(&ahead);
                 let mut rhs = unary_expr(input)?;
                 loop {
                     let next = peek_precedence(input);
