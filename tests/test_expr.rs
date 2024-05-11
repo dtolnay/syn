@@ -605,18 +605,8 @@ fn test_binop_associativity() {
     }
     "###);
 
-    // FIXME: this should fail to parse. Parenthesization is required.
-    snapshot!("() == () == ()" as Expr, @r###"
-    Expr::Binary {
-        left: Expr::Binary {
-            left: Expr::Tuple,
-            op: BinOp::Eq,
-            right: Expr::Tuple,
-        },
-        op: BinOp::Eq,
-        right: Expr::Tuple,
-    }
-    "###);
+    // Parenthesization is required.
+    syn::parse_str::<Expr>("() == () == ()").unwrap_err();
 }
 
 #[test]
