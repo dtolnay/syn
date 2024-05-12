@@ -298,8 +298,8 @@ pub(crate) mod parsing {
             let eq_token: Token![=] = eq_token;
             let expr: Expr = input.parse()?;
 
-            let diverge = if let Some(else_token) = input.parse()? {
-                let else_token: Token![else] = else_token;
+            let diverge = if !classify::expr_trailing_brace(&expr) && input.peek(Token![else]) {
+                let else_token: Token![else] = input.parse()?;
                 let diverge = ExprBlock {
                     attrs: Vec::new(),
                     label: None,

@@ -921,7 +921,7 @@ pub(crate) mod parsing {
     };
     use crate::lifetime::Lifetime;
     use crate::lit::LitStr;
-    use crate::mac::{self, Macro, MacroDelimiter};
+    use crate::mac::{self, Macro};
     use crate::parse::discouraged::Speculative as _;
     use crate::parse::{Parse, ParseBuffer, ParseStream};
     use crate::pat::{Pat, PatType, PatWild};
@@ -2868,15 +2868,6 @@ pub(crate) mod parsing {
             match self {
                 Visibility::Inherited => true,
                 _ => false,
-            }
-        }
-    }
-
-    impl MacroDelimiter {
-        pub(crate) fn is_brace(&self) -> bool {
-            match self {
-                MacroDelimiter::Brace(_) => true,
-                MacroDelimiter::Paren(_) | MacroDelimiter::Bracket(_) => false,
             }
         }
     }
