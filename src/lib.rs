@@ -477,6 +477,9 @@ pub use crate::path::{
     ParenthesizedGenericArguments, Path, PathArguments, PathSegment, QSelf,
 };
 
+#[cfg(all(any(feature = "full", feature = "derive"), feature = "parsing"))]
+mod precedence;
+
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 mod print;
 
