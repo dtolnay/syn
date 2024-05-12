@@ -1,15 +1,9 @@
 use crate::expr::Expr;
-#[cfg(feature = "parsing")]
 use crate::generics::TypeParamBound;
-#[cfg(feature = "parsing")]
 use crate::path::{Path, PathArguments};
-#[cfg(feature = "parsing")]
 use crate::punctuated::Punctuated;
-#[cfg(feature = "parsing")]
 use crate::ty::{ReturnType, Type};
-#[cfg(feature = "parsing")]
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
-#[cfg(feature = "parsing")]
 use std::ops::ControlFlow;
 
 pub(crate) fn requires_terminator(expr: &Expr) -> bool {
@@ -57,7 +51,6 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
 }
 
 /// Whether the expression's last token is `}`.
-#[cfg(feature = "parsing")]
 pub(crate) fn expr_trailing_brace(mut expr: &Expr) -> bool {
     loop {
         match expr {
@@ -116,7 +109,6 @@ pub(crate) fn expr_trailing_brace(mut expr: &Expr) -> bool {
     }
 }
 
-#[cfg(feature = "parsing")]
 fn type_trailing_brace(mut ty: &Type) -> bool {
     fn last_type_in_path(path: &Path) -> Option<&Type> {
         match &path.segments.last().unwrap().arguments {
@@ -174,7 +166,6 @@ fn type_trailing_brace(mut ty: &Type) -> bool {
     }
 }
 
-#[cfg(feature = "parsing")]
 fn tokens_trailing_brace(tokens: &TokenStream) -> bool {
     if let Some(TokenTree::Group(last)) = tokens.clone().into_iter().last() {
         last.delimiter() == Delimiter::Brace
