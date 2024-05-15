@@ -70,12 +70,12 @@ macro_rules! ast_enum_of_structs_impl {
             $(
                 $(#[cfg $cfg_attr:tt])*
                 $(#[doc $($doc_attr:tt)*])*
-                $variant:ident $( ($($member:ident)::+) )*,
+                $variant:ident $( ($member:ident) )*,
             )*
         }
     ) => {
         $($(
-            ast_enum_from_struct!($name::$variant, $($member)::+);
+            ast_enum_from_struct!($name::$variant, $member);
         )*)*
 
         #[cfg(feature = "printing")]
@@ -86,7 +86,7 @@ macro_rules! ast_enum_of_structs_impl {
                 $(
                     $(#[cfg $cfg_attr])*
                     $(#[doc $($doc_attr)*])*
-                    $variant $($($member)::+)*,
+                    $variant $($member)*,
                 )*
             }
         }
