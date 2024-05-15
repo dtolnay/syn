@@ -1740,7 +1740,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![continue]) {
             input.parse().map(Expr::Continue)
         } else if input.peek(Token![return]) {
-            expr_return(input, allow_struct).map(Expr::Return)
+            input.parse().map(Expr::Return)
         } else if input.peek(token::Bracket) {
             array_or_repeat(input)
         } else if input.peek(Token![let]) {
@@ -2374,8 +2374,17 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprReturn {
         fn parse(input: ParseStream) -> Result<Self> {
-            let allow_struct = AllowStruct(true);
-            expr_return(input, allow_struct)
+            Ok(ExprReturn {
+                attrs: Vec::new(),
+                return_token: input.parse()?,
+                expr: {
+                    if can_begin_expr(input) {
+                        Some(input.parse()?)
+                    } else {
+                        None
+                    }
+                },
+            })
         }
     }
 
@@ -2601,7 +2610,7 @@ pub(crate) mod parsing {
         if label.is_some() && ahead.peek(Token![:]) {
             // Not allowed: `break 'label: loop {...}`
             // Parentheses are required. `break ('label: loop {...})`
-            let _ = ambiguous_expr(input, allow_struct)?;
+            let _: Expr = input.parse()?;
             let start_span = label.unwrap().apostrophe;
             let end_span = input.cursor().prev_span();
             return Err(crate::error::new2(
@@ -2613,8 +2622,7 @@ pub(crate) mod parsing {
 
         input.advance_to(&ahead);
         let expr = if can_begin_expr(input) && (allow_struct.0 || !input.peek(token::Brace)) {
-            let expr = ambiguous_expr(input, allow_struct)?;
-            Some(Box::new(expr))
+            Some(input.parse()?)
         } else {
             None
         };
@@ -2624,27 +2632,6 @@ pub(crate) mod parsing {
             break_token,
             label,
             expr,
-        })
-    }
-
-    #[cfg(feature = "full")]
-    fn expr_return(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprReturn> {
-        Ok(ExprReturn {
-            attrs: Vec::new(),
-            return_token: input.parse()?,
-            expr: {
-                if can_begin_expr(input) {
-                    // NOTE: return is greedy and eats blocks after it even when in a
-                    // position where structs are not allowed, such as in if statement
-                    // conditions. For example:
-                    //
-                    // if return { println!("A") } {} // Prints "A"
-                    let expr = ambiguous_expr(input, allow_struct)?;
-                    Some(Box::new(expr))
-                } else {
-                    None
-                }
-            },
         })
     }
 
