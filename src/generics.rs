@@ -1216,7 +1216,7 @@ pub(crate) mod printing {
             self.ty.to_tokens(tokens);
             if let Some(default) = &self.default {
                 TokensOrDefault(&self.eq_token).to_tokens(tokens);
-                default.to_tokens(tokens);
+                print_const_argument(default, tokens);
             }
         }
     }
