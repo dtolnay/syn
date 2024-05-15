@@ -86,7 +86,7 @@ macro_rules! ast_enum_of_structs_impl {
                 $(
                     $(#[cfg $cfg_attr])*
                     $(#[doc $($doc_attr)*])*
-                    $variant $($member)*,
+                    $variant $( ($member) )*,
                 )*
             }
         }
@@ -126,7 +126,7 @@ macro_rules! generate_to_tokens {
         ($($arms:tt)*) $tokens:ident $name:ident {
             $(#[cfg $cfg_attr:tt])*
             $(#[doc $($doc_attr:tt)*])*
-            $variant:ident $member:ident,
+            $variant:ident($member:ident),
             $($next:tt)*
         }
     ) => {
