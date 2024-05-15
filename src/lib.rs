@@ -952,8 +952,6 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
     parse::Parser::parse_str(T::parse, s)
 }
 
-// FIXME the name parse_file makes it sound like you might pass in a path to a
-// file, rather than the content.
 /// Parse the content of a file of Rust code.
 ///
 /// This is different from `syn::parse_str::<File>(content)` in two ways:
