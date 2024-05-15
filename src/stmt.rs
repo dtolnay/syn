@@ -412,7 +412,7 @@ pub(crate) mod parsing {
 #[cfg(feature = "printing")]
 mod printing {
     use crate::classify;
-    use crate::expr;
+    use crate::expr::{self, Expr};
     use crate::stmt::{Block, Local, Stmt, StmtMacro};
     use crate::token;
     use proc_macro2::TokenStream;
@@ -457,7 +457,11 @@ mod printing {
                 }
                 if let Some((else_token, diverge)) = &init.diverge {
                     else_token.to_tokens(tokens);
-                    diverge.to_tokens(tokens);
+                    match &**diverge {
+                        Expr::Block(diverge) => diverge.to_tokens(tokens),
+                        _ => token::Brace::default()
+                            .surround(tokens, |tokens| diverge.to_tokens(tokens)),
+                    }
                 }
             }
             self.semi_token.to_tokens(tokens);
