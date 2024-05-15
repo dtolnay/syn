@@ -60,39 +60,8 @@ macro_rules! ast_enum_of_structs {
 
         $(#[$enum_attr])* $pub $enum $name $body
 
-        ast_enum_of_structs_impl!($name $body);
-
         #[cfg(feature = "printing")]
         generate_to_tokens!(() tokens $name $body);
-    };
-}
-
-macro_rules! ast_enum_of_structs_impl {
-    (
-        $name:ident {
-            $(
-                $(#[cfg $cfg_attr:tt])*
-                $(#[doc $($doc_attr:tt)*])*
-                $variant:ident $( ($member:ident) )*,
-            )*
-        }
-    ) => {
-        $($(
-            ast_enum_from_struct!($name::$variant, $member);
-        )*)*
-    };
-}
-
-macro_rules! ast_enum_from_struct {
-    // No From<TokenStream> for verbatim variants.
-    ($name:ident::Verbatim, $member:ident) => {};
-
-    ($name:ident::$variant:ident, $member:ident) => {
-        impl From<$member> for $name {
-            fn from(e: $member) -> $name {
-                $name::$variant(e)
-            }
-        }
     };
 }
 
