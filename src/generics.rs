@@ -989,14 +989,16 @@ pub(crate) mod parsing {
 }
 
 #[cfg(feature = "printing")]
-mod printing {
+pub(crate) mod printing {
     use crate::attr::FilterAttrs;
+    use crate::expr::Expr;
     use crate::generics::{
         BoundLifetimes, ConstParam, GenericParam, Generics, ImplGenerics, LifetimeParam,
         PredicateLifetime, PredicateType, TraitBound, TraitBoundModifier, Turbofish, TypeGenerics,
         TypeParam, WhereClause,
     };
     use crate::print::TokensOrDefault;
+    use crate::token;
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 
@@ -1214,7 +1216,7 @@ mod printing {
             self.ty.to_tokens(tokens);
             if let Some(default) = &self.default {
                 TokensOrDefault(&self.eq_token).to_tokens(tokens);
-                default.to_tokens(tokens);
+                print_const_argument(default, tokens);
             }
         }
     }
@@ -1245,6 +1247,32 @@ mod printing {
             self.bounded_ty.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.bounds.to_tokens(tokens);
+        }
+    }
+
+    pub(crate) fn print_const_argument(expr: &Expr, tokens: &mut TokenStream) {
+        match expr {
+            Expr::Lit(expr) => expr.to_tokens(tokens),
+
+            Expr::Path(expr)
+                if expr.attrs.is_empty()
+                    && expr.qself.is_none()
+                    && expr.path.get_ident().is_some() =>
+            {
+                expr.to_tokens(tokens);
+            }
+
+            #[cfg(feature = "full")]
+            Expr::Block(expr) => expr.to_tokens(tokens),
+
+            #[cfg(not(feature = "full"))]
+            Expr::Verbatim(expr) => expr.to_tokens(tokens),
+
+            // ERROR CORRECTION: Add braces to make sure that the
+            // generated code is valid.
+            _ => token::Brace::default().surround(tokens, |tokens| {
+                expr.to_tokens(tokens);
+            }),
         }
     }
 }
