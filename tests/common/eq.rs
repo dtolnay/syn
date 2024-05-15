@@ -684,15 +684,14 @@ impl SpanlessEq for TokenKind {
                 _ => false,
             },
             (TokenKind::Interpolated(this), TokenKind::Interpolated(other)) => {
-                let (this, this_span) = this.as_ref();
-                let (other, other_span) = other.as_ref();
-                SpanlessEq::eq(this_span, other_span)
-                    && match (this, other) {
-                        (Nonterminal::NtExpr(this), Nonterminal::NtExpr(other)) => {
-                            SpanlessEq::eq(this, other)
-                        }
-                        _ => this == other,
+                let this = this.as_ref();
+                let other = other.as_ref();
+                match (this, other) {
+                    (Nonterminal::NtExpr(this), Nonterminal::NtExpr(other)) => {
+                        SpanlessEq::eq(this, other)
                     }
+                    _ => this == other,
+                }
             }
             _ => self == other,
         }
@@ -801,7 +800,7 @@ fn is_escaped_literal_token(token: &Token, unescaped: Symbol) -> bool {
         Token {
             kind: TokenKind::Interpolated(nonterminal),
             span: _,
-        } => match &nonterminal.0 {
+        } => match nonterminal.as_ref() {
             Nonterminal::NtExpr(expr) => match &expr.kind {
                 ExprKind::Lit(lit) => is_escaped_lit(lit, unescaped),
                 _ => false,
