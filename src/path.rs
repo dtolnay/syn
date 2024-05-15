@@ -741,33 +741,37 @@ pub(crate) mod printing {
             match self {
                 GenericArgument::Lifetime(lt) => lt.to_tokens(tokens),
                 GenericArgument::Type(ty) => ty.to_tokens(tokens),
-                GenericArgument::Const(expr) => match expr {
-                    Expr::Lit(expr) => expr.to_tokens(tokens),
-
-                    Expr::Path(expr)
-                        if expr.attrs.is_empty()
-                            && expr.qself.is_none()
-                            && expr.path.get_ident().is_some() =>
-                    {
-                        expr.to_tokens(tokens);
-                    }
-
-                    #[cfg(feature = "full")]
-                    Expr::Block(expr) => expr.to_tokens(tokens),
-
-                    #[cfg(not(feature = "full"))]
-                    Expr::Verbatim(expr) => expr.to_tokens(tokens),
-
-                    // ERROR CORRECTION: Add braces to make sure that the
-                    // generated code is valid.
-                    _ => token::Brace::default().surround(tokens, |tokens| {
-                        expr.to_tokens(tokens);
-                    }),
-                },
+                GenericArgument::Const(expr) => print_const_argument(expr, tokens),
                 GenericArgument::AssocType(assoc) => assoc.to_tokens(tokens),
                 GenericArgument::AssocConst(assoc) => assoc.to_tokens(tokens),
                 GenericArgument::Constraint(constraint) => constraint.to_tokens(tokens),
             }
+        }
+    }
+
+    fn print_const_argument(expr: &Expr, tokens: &mut TokenStream) {
+        match expr {
+            Expr::Lit(expr) => expr.to_tokens(tokens),
+
+            Expr::Path(expr)
+                if expr.attrs.is_empty()
+                    && expr.qself.is_none()
+                    && expr.path.get_ident().is_some() =>
+            {
+                expr.to_tokens(tokens);
+            }
+
+            #[cfg(feature = "full")]
+            Expr::Block(expr) => expr.to_tokens(tokens),
+
+            #[cfg(not(feature = "full"))]
+            Expr::Verbatim(expr) => expr.to_tokens(tokens),
+
+            // ERROR CORRECTION: Add braces to make sure that the
+            // generated code is valid.
+            _ => token::Brace::default().surround(tokens, |tokens| {
+                expr.to_tokens(tokens);
+            }),
         }
     }
 
