@@ -61,6 +61,9 @@ macro_rules! ast_enum_of_structs {
         $(#[$enum_attr])* $pub $enum $name $body
 
         ast_enum_of_structs_impl!($name $body);
+
+        #[cfg(feature = "printing")]
+        generate_to_tokens!(() tokens $name $body);
     };
 }
 
@@ -77,19 +80,6 @@ macro_rules! ast_enum_of_structs_impl {
         $($(
             ast_enum_from_struct!($name::$variant, $member);
         )*)*
-
-        #[cfg(feature = "printing")]
-        generate_to_tokens! {
-            ()
-            tokens
-            $name {
-                $(
-                    $(#[cfg $cfg_attr])*
-                    $(#[doc $($doc_attr)*])*
-                    $variant $( ($member) )*,
-                )*
-            }
-        }
     };
 }
 
