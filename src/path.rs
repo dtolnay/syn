@@ -834,7 +834,7 @@ pub(crate) mod printing {
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);
             self.eq_token.to_tokens(tokens);
-            self.value.to_tokens(tokens);
+            print_const_argument(&self.value, tokens);
         }
     }
 
