@@ -110,9 +110,42 @@ pub(crate) fn expr_trailing_brace(mut expr: &Expr) -> bool {
             | Expr::Tuple(_) => return false,
         }
     }
-}
 
-fn type_trailing_brace(mut ty: &Type) -> bool {
+    fn type_trailing_brace(mut ty: &Type) -> bool {
+        loop {
+            match ty {
+                Type::BareFn(t) => match &t.output {
+                    ReturnType::Default => return false,
+                    ReturnType::Type(_, ret) => ty = ret,
+                },
+                Type::ImplTrait(t) => match last_type_in_bounds(&t.bounds) {
+                    ControlFlow::Break(trailing_brace) => return trailing_brace,
+                    ControlFlow::Continue(t) => ty = t,
+                },
+                Type::Macro(t) => return t.mac.delimiter.is_brace(),
+                Type::Path(t) => match last_type_in_path(&t.path) {
+                    Some(t) => ty = t,
+                    None => return false,
+                },
+                Type::Ptr(t) => ty = &t.elem,
+                Type::Reference(t) => ty = &t.elem,
+                Type::TraitObject(t) => match last_type_in_bounds(&t.bounds) {
+                    ControlFlow::Break(trailing_brace) => return trailing_brace,
+                    ControlFlow::Continue(t) => ty = t,
+                },
+                Type::Verbatim(t) => return tokens_trailing_brace(t),
+
+                Type::Array(_)
+                | Type::Group(_)
+                | Type::Infer(_)
+                | Type::Never(_)
+                | Type::Paren(_)
+                | Type::Slice(_)
+                | Type::Tuple(_) => return false,
+            }
+        }
+    }
+
     fn last_type_in_path(path: &Path) -> Option<&Type> {
         match &path.segments.last().unwrap().arguments {
             PathArguments::None | PathArguments::AngleBracketed(_) => None,
@@ -136,44 +169,11 @@ fn type_trailing_brace(mut ty: &Type) -> bool {
         }
     }
 
-    loop {
-        match ty {
-            Type::BareFn(t) => match &t.output {
-                ReturnType::Default => return false,
-                ReturnType::Type(_, ret) => ty = ret,
-            },
-            Type::ImplTrait(t) => match last_type_in_bounds(&t.bounds) {
-                ControlFlow::Break(trailing_brace) => return trailing_brace,
-                ControlFlow::Continue(t) => ty = t,
-            },
-            Type::Macro(t) => return t.mac.delimiter.is_brace(),
-            Type::Path(t) => match last_type_in_path(&t.path) {
-                Some(t) => ty = t,
-                None => return false,
-            },
-            Type::Ptr(t) => ty = &t.elem,
-            Type::Reference(t) => ty = &t.elem,
-            Type::TraitObject(t) => match last_type_in_bounds(&t.bounds) {
-                ControlFlow::Break(trailing_brace) => return trailing_brace,
-                ControlFlow::Continue(t) => ty = t,
-            },
-            Type::Verbatim(t) => return tokens_trailing_brace(t),
-
-            Type::Array(_)
-            | Type::Group(_)
-            | Type::Infer(_)
-            | Type::Never(_)
-            | Type::Paren(_)
-            | Type::Slice(_)
-            | Type::Tuple(_) => return false,
+    fn tokens_trailing_brace(tokens: &TokenStream) -> bool {
+        if let Some(TokenTree::Group(last)) = tokens.clone().into_iter().last() {
+            last.delimiter() == Delimiter::Brace
+        } else {
+            false
         }
-    }
-}
-
-fn tokens_trailing_brace(tokens: &TokenStream) -> bool {
-    if let Some(TokenTree::Group(last)) = tokens.clone().into_iter().last() {
-        last.delimiter() == Delimiter::Brace
-    } else {
-        false
     }
 }
