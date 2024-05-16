@@ -68,6 +68,13 @@ fn test_round_trip() {
 }
 
 fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
+    let failed = || {
+        let prev_failed = failed.fetch_add(1, Ordering::Relaxed);
+        if prev_failed + 1 >= abort_after {
+            process::exit(1);
+        }
+    };
+
     let content = fs::read_to_string(path).unwrap();
 
     let start = Instant::now();
@@ -75,10 +82,7 @@ fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
         Ok(krate) => (krate, start.elapsed()),
         Err(msg) => {
             errorf!("=== {}: syn failed to parse\n{:?}\n", path.display(), msg);
-            let prev_failed = failed.fetch_add(1, Ordering::Relaxed);
-            if prev_failed + 1 >= abort_after {
-                process::exit(1);
-            }
+            failed();
             return;
         }
     };
@@ -138,10 +142,7 @@ fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
             }
         };
         if !equal {
-            let prev_failed = failed.fetch_add(1, Ordering::Relaxed);
-            if prev_failed + 1 >= abort_after {
-                process::exit(1);
-            }
+            failed();
         }
     });
 }
