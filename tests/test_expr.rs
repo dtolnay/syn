@@ -655,17 +655,38 @@ fn test_fixup() {
         }
     }
 
-    let tokens = quote!(2 * (1 + 1));
-    let original: Expr = syn::parse2(tokens).unwrap();
+    for tokens in [
+        quote! { 2 * (1 + 1) },
+        quote! { 0 + (0 + 0) },
+        quote! { (a = b) = c },
+        quote! { (x as i32) < 0 },
+        quote! { (1 + x as i32) < 0 },
+        quote! { (1 + 1).abs() },
+        quote! { (lo..hi)[..] },
+        quote! { (a..b)..(c..d) },
+        quote! { (&mut fut).await },
+        quote! { &mut (x as i32) },
+        quote! { -(x as i32) },
+        quote! { if (S {} == 1) {} },
+        quote! { { (m! {}) - 1 } },
+        quote! { match m { _ => ({}) - 1 } },
+        quote! { if let _ = (a && b) && c {} },
+        quote! { if let _ = (S {}) {} },
+    ] {
+        let original: Expr = syn::parse2(tokens).unwrap();
 
-    let mut flat = original.clone();
-    FlattenParens.visit_expr_mut(&mut flat);
-    let reconstructed: Expr = syn::parse2(flat.to_token_stream()).unwrap();
+        let mut flat = original.clone();
+        FlattenParens.visit_expr_mut(&mut flat);
+        let reconstructed: Expr = match syn::parse2(flat.to_token_stream()) {
+            Ok(reconstructed) => reconstructed,
+            Err(err) => panic!("failed to parse `{}`: {}", flat.to_token_stream(), err),
+        };
 
-    assert!(
-        original == reconstructed,
-        "original: {}\nreconstructed: {}",
-        original.to_token_stream(),
-        reconstructed.to_token_stream(),
-    );
+        assert!(
+            original == reconstructed,
+            "original: {}\nreconstructed: {}",
+            original.to_token_stream(),
+            reconstructed.to_token_stream(),
+        );
+    }
 }
