@@ -290,6 +290,7 @@
     clippy::return_self_not_must_use,
     clippy::similar_names,
     clippy::single_match_else,
+    clippy::struct_excessive_bools,
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::trivially_copy_pass_by_ref,
