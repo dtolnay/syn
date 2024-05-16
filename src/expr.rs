@@ -2993,6 +2993,8 @@ pub(crate) mod printing {
     use crate::path;
     #[cfg(feature = "full")]
     use crate::token;
+    #[cfg(feature = "full")]
+    use crate::ty::ReturnType;
     use proc_macro2::{Literal, Span, TokenStream};
     use quote::{ToTokens, TokenStreamExt};
 
@@ -3135,7 +3137,13 @@ pub(crate) mod printing {
             self.inputs.to_tokens(tokens);
             self.or2_token.to_tokens(tokens);
             self.output.to_tokens(tokens);
-            self.body.to_tokens(tokens);
+            if matches!(self.output, ReturnType::Default) || matches!(*self.body, Expr::Block(_)) {
+                self.body.to_tokens(tokens);
+            } else {
+                token::Brace::default().surround(tokens, |tokens| {
+                    self.body.to_tokens(tokens);
+                });
+            }
         }
     }
 
