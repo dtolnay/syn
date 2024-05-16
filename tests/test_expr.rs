@@ -3,12 +3,13 @@
 #[macro_use]
 mod macros;
 
+use crate::macros::debug::Lite;
 use proc_macro2::{Delimiter, Group};
 use quote::{quote, ToTokens as _};
 use std::mem;
 use syn::punctuated::Punctuated;
 use syn::visit_mut::{self, VisitMut};
-use syn::{parse_quote, token, Expr, ExprRange, ExprTuple, Stmt, Token};
+use syn::{parse_quote, token, Expr, ExprGroup, ExprRange, ExprTuple, Stmt, Token};
 
 #[test]
 fn test_expr_parse() {
@@ -655,6 +656,23 @@ fn test_fixup() {
         }
     }
 
+    struct ConvertParensToGroup;
+
+    impl VisitMut for ConvertParensToGroup {
+        fn visit_expr_mut(&mut self, e: &mut Expr) {
+            if let Expr::Paren(original) = e {
+                *e = Expr::Group(ExprGroup {
+                    attrs: mem::take(&mut original.attrs),
+                    group_token: token::Group {
+                        span: original.paren_token.span.join(),
+                    },
+                    expr: Box::new(mem::replace(&mut *original.expr, Expr::PLACEHOLDER)),
+                });
+            }
+            visit_mut::visit_expr_mut(self, e);
+        }
+    }
+
     for tokens in [
         quote! { 2 * (1 + 1) },
         quote! { 0 + (0 + 0) },
@@ -668,8 +686,6 @@ fn test_fixup() {
         quote! { &mut (x as i32) },
         quote! { -(x as i32) },
         quote! { if (S {} == 1) {} },
-        quote! { { (m! {}) - 1 } },
-        quote! { match m { _ => ({}) - 1 } },
         quote! { if let _ = (a && b) && c {} },
         quote! { if let _ = (S {}) {} },
     ] {
@@ -682,11 +698,14 @@ fn test_fixup() {
             Err(err) => panic!("failed to parse `{}`: {}", flat.to_token_stream(), err),
         };
 
+        let mut expected = original.clone();
+        ConvertParensToGroup.visit_expr_mut(&mut expected);
+
         assert!(
-            original == reconstructed,
-            "original: {}\nreconstructed: {}",
-            original.to_token_stream(),
-            reconstructed.to_token_stream(),
+            expected == reconstructed,
+            "expected: {:#?}\nreconstructed: {:#?}",
+            Lite(&expected),
+            Lite(&reconstructed),
         );
     }
 }

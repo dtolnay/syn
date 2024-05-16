@@ -3052,7 +3052,7 @@ pub(crate) mod printing {
         };
 
         if needs_group {
-            token::Paren::default().surround(tokens, do_print_expr);
+            token::Group::default().surround(tokens, do_print_expr);
         } else {
             do_print_expr(tokens);
         }
@@ -3108,7 +3108,7 @@ pub(crate) mod printing {
         };
 
         if needs_group {
-            token::Paren::default().surround(tokens, do_print_expr);
+            token::Group::default().surround(tokens, do_print_expr);
         } else {
             do_print_expr(tokens);
         }
