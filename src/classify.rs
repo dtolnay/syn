@@ -6,8 +6,15 @@ use crate::ty::{ReturnType, Type};
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
 use std::ops::ControlFlow;
 
-pub(crate) fn requires_terminator(expr: &Expr) -> bool {
-    // see https://github.com/rust-lang/rust/blob/9a19e7604/compiler/rustc_ast/src/util/classify.rs#L7-L26
+#[cfg(feature = "parsing")]
+pub(crate) fn requires_semi_to_be_stmt(expr: &Expr) -> bool {
+    match expr {
+        Expr::Macro(expr) => !expr.mac.delimiter.is_brace(),
+        _ => requires_comma_to_be_match_arm(expr),
+    }
+}
+
+pub(crate) fn requires_comma_to_be_match_arm(expr: &Expr) -> bool {
     match expr {
         Expr::If(_)
         | Expr::Match(_)

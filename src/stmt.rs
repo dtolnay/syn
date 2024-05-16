@@ -159,7 +159,7 @@ pub(crate) mod parsing {
                 }
                 let stmt = parse_stmt(input, AllowNoSemi(true))?;
                 let requires_semicolon = match &stmt {
-                    Stmt::Expr(stmt, None) => classify::requires_terminator(stmt),
+                    Stmt::Expr(stmt, None) => classify::requires_semi_to_be_stmt(stmt),
                     Stmt::Macro(stmt) => {
                         stmt.semi_token.is_none() && !stmt.mac.delimiter.is_brace()
                     }
@@ -401,7 +401,7 @@ pub(crate) mod parsing {
 
         if semi_token.is_some() {
             Ok(Stmt::Expr(e, semi_token))
-        } else if allow_nosemi.0 || !classify::requires_terminator(&e) {
+        } else if allow_nosemi.0 || !classify::requires_semi_to_be_stmt(&e) {
             Ok(Stmt::Expr(e, None))
         } else {
             Err(input.error("expected semicolon"))

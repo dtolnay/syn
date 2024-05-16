@@ -2873,7 +2873,7 @@ pub(crate) mod parsing {
                 fat_arrow_token: input.parse()?,
                 body: {
                     let body = Expr::parse_with_earlier_boundary_rule(input)?;
-                    requires_comma = classify::requires_terminator(&body);
+                    requires_comma = classify::requires_comma_to_be_match_arm(&body);
                     Box::new(body)
                 },
                 comma: {
@@ -3312,7 +3312,10 @@ pub(crate) mod printing {
                     // Ensure that we have a comma after a non-block arm, except
                     // for the last one.
                     let is_last = i == self.arms.len() - 1;
-                    if !is_last && classify::requires_terminator(&arm.body) && arm.comma.is_none() {
+                    if !is_last
+                        && classify::requires_comma_to_be_match_arm(&arm.body)
+                        && arm.comma.is_none()
+                    {
                         <Token![,]>::default().to_tokens(tokens);
                     }
                 }
