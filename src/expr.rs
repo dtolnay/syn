@@ -1744,7 +1744,7 @@ pub(crate) mod parsing {
         } else if input.peek(token::Bracket) {
             array_or_repeat(input)
         } else if input.peek(Token![let]) {
-            input.parse().map(Expr::Let)
+            expr_let(input, allow_struct).map(Expr::Let)
         } else if input.peek(Token![if]) {
             input.parse().map(Expr::If)
         } else if input.peek(Token![while]) {
@@ -2117,18 +2117,23 @@ pub(crate) mod parsing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
     impl Parse for ExprLet {
         fn parse(input: ParseStream) -> Result<Self> {
-            Ok(ExprLet {
-                attrs: Vec::new(),
-                let_token: input.parse()?,
-                pat: Box::new(Pat::parse_multi_with_leading_vert(input)?),
-                eq_token: input.parse()?,
-                expr: Box::new({
-                    let allow_struct = AllowStruct(false);
-                    let lhs = unary_expr(input, allow_struct)?;
-                    parse_expr(input, lhs, allow_struct, Precedence::Compare)?
-                }),
-            })
+            let allow_struct = AllowStruct(false);
+            expr_let(input, allow_struct)
         }
+    }
+
+    #[cfg(feature = "full")]
+    fn expr_let(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprLet> {
+        Ok(ExprLet {
+            attrs: Vec::new(),
+            let_token: input.parse()?,
+            pat: Box::new(Pat::parse_multi_with_leading_vert(input)?),
+            eq_token: input.parse()?,
+            expr: Box::new({
+                let lhs = unary_expr(input, allow_struct)?;
+                parse_expr(input, lhs, allow_struct, Precedence::Compare)?
+            }),
+        })
     }
 
     #[cfg(feature = "full")]

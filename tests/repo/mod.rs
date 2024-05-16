@@ -58,10 +58,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/higher-ranked/builtin-closure-like-bounds.rs",
     "tests/ui/sanitizer/cfi-coroutine.rs",
 
-    // TODO: struct literal in match guard
-    // https://github.com/dtolnay/syn/issues/1527
-    "tests/ui/parser/struct-literal-in-match-guard.rs",
-
     // TODO: `!` as a pattern
     // https://github.com/dtolnay/syn/issues/1546
     "tests/ui/rfcs/rfc-0000-never_patterns/diverges.rs",
