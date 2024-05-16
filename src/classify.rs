@@ -17,6 +17,7 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
         | Expr::ForLoop(_)
         | Expr::TryBlock(_)
         | Expr::Const(_) => false,
+
         Expr::Array(_)
         | Expr::Assign(_)
         | Expr::Async(_)
@@ -54,57 +55,59 @@ pub(crate) fn requires_terminator(expr: &Expr) -> bool {
 pub(crate) fn expr_trailing_brace(mut expr: &Expr) -> bool {
     loop {
         match expr {
-            Expr::Array(_) => return false,
+            Expr::Async(_)
+            | Expr::Block(_)
+            | Expr::Const(_)
+            | Expr::ForLoop(_)
+            | Expr::If(_)
+            | Expr::Loop(_)
+            | Expr::Match(_)
+            | Expr::Struct(_)
+            | Expr::TryBlock(_)
+            | Expr::Unsafe(_)
+            | Expr::While(_) => return true,
+
             Expr::Assign(e) => expr = &e.right,
-            Expr::Async(_) => return true,
-            Expr::Await(_) => return false,
             Expr::Binary(e) => expr = &e.right,
-            Expr::Block(_) => return true,
             Expr::Break(e) => match &e.expr {
                 Some(e) => expr = e,
                 None => return false,
             },
-            Expr::Call(_) => return false,
             Expr::Cast(e) => return type_trailing_brace(&e.ty),
             Expr::Closure(e) => expr = &e.body,
-            Expr::Const(_) => return true,
-            Expr::Continue(_) => return false,
-            Expr::Field(_) => return false,
-            Expr::ForLoop(_) => return true,
-            Expr::Group(_) => return false,
-            Expr::If(_) => return true,
-            Expr::Index(_) => return false,
-            Expr::Infer(_) => return false,
             Expr::Let(e) => expr = &e.expr,
-            Expr::Lit(_) => return false,
-            Expr::Loop(_) => return true,
             Expr::Macro(e) => return e.mac.delimiter.is_brace(),
-            Expr::Match(_) => return true,
-            Expr::MethodCall(_) => return false,
-            Expr::Paren(_) => return false,
-            Expr::Path(_) => return false,
             Expr::Range(e) => match &e.end {
                 Some(end) => expr = end,
                 None => return false,
             },
             Expr::Reference(e) => expr = &e.expr,
-            Expr::Repeat(_) => return false,
             Expr::Return(e) => match &e.expr {
                 Some(e) => expr = e,
                 None => return false,
             },
-            Expr::Struct(_) => return true,
-            Expr::Try(_) => return false,
-            Expr::TryBlock(_) => return true,
-            Expr::Tuple(_) => return false,
             Expr::Unary(e) => expr = &e.expr,
-            Expr::Unsafe(_) => return true,
             Expr::Verbatim(e) => return tokens_trailing_brace(e),
-            Expr::While(_) => return true,
             Expr::Yield(e) => match &e.expr {
                 Some(e) => expr = e,
                 None => return false,
             },
+
+            Expr::Array(_)
+            | Expr::Await(_)
+            | Expr::Call(_)
+            | Expr::Continue(_)
+            | Expr::Field(_)
+            | Expr::Group(_)
+            | Expr::Index(_)
+            | Expr::Infer(_)
+            | Expr::Lit(_)
+            | Expr::MethodCall(_)
+            | Expr::Paren(_)
+            | Expr::Path(_)
+            | Expr::Repeat(_)
+            | Expr::Try(_)
+            | Expr::Tuple(_) => return false,
         }
     }
 }
@@ -135,33 +138,34 @@ fn type_trailing_brace(mut ty: &Type) -> bool {
 
     loop {
         match ty {
-            Type::Array(_) => return false,
             Type::BareFn(t) => match &t.output {
                 ReturnType::Default => return false,
                 ReturnType::Type(_, ret) => ty = ret,
             },
-            Type::Group(_) => return false,
             Type::ImplTrait(t) => match last_type_in_bounds(&t.bounds) {
                 ControlFlow::Break(trailing_brace) => return trailing_brace,
                 ControlFlow::Continue(t) => ty = t,
             },
-            Type::Infer(_) => return false,
             Type::Macro(t) => return t.mac.delimiter.is_brace(),
-            Type::Never(_) => return false,
-            Type::Paren(_) => return false,
             Type::Path(t) => match last_type_in_path(&t.path) {
                 Some(t) => ty = t,
                 None => return false,
             },
             Type::Ptr(t) => ty = &t.elem,
             Type::Reference(t) => ty = &t.elem,
-            Type::Slice(_) => return false,
             Type::TraitObject(t) => match last_type_in_bounds(&t.bounds) {
                 ControlFlow::Break(trailing_brace) => return trailing_brace,
                 ControlFlow::Continue(t) => ty = t,
             },
-            Type::Tuple(_) => return false,
             Type::Verbatim(t) => return tokens_trailing_brace(t),
+
+            Type::Array(_)
+            | Type::Group(_)
+            | Type::Infer(_)
+            | Type::Never(_)
+            | Type::Paren(_)
+            | Type::Slice(_)
+            | Type::Tuple(_) => return false,
         }
     }
 }
