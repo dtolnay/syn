@@ -1,19 +1,33 @@
 use crate::op::BinOp;
 use std::cmp::Ordering;
 
+// Reference: https://doc.rust-lang.org/reference/expressions.html#expression-precedence
 pub(crate) enum Precedence {
+    // return, break, closures
     Any,
+    // = += -= *= /= %= &= |= ^= <<= >>=
     Assign,
+    // .. ..=
     Range,
+    // ||
     Or,
+    // &&
     And,
+    // == != < > <= >=
     Compare,
+    // |
     BitOr,
+    // ^
     BitXor,
+    // &
     BitAnd,
+    // << >>
     Shift,
+    // + -
     Arithmetic,
+    // * / %
     Term,
+    // as
     Cast,
 }
 
