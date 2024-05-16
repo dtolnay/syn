@@ -39,6 +39,7 @@ use rustc_ast::ast::CoroutineKind;
 use rustc_ast::ast::Crate;
 use rustc_ast::ast::Defaultness;
 use rustc_ast::ast::Delegation;
+use rustc_ast::ast::DelegationMac;
 use rustc_ast::ast::DelimArgs;
 use rustc_ast::ast::EnumDef;
 use rustc_ast::ast::Expr;
@@ -474,7 +475,8 @@ spanless_eq_struct!(Block; stmts id rules span tokens could_be_bare_literal);
 spanless_eq_struct!(Closure; binder capture_clause constness coroutine_kind movability fn_decl body !fn_decl_span !fn_arg_span);
 spanless_eq_struct!(ConstItem; defaultness generics ty expr);
 spanless_eq_struct!(Crate; attrs items spans id is_placeholder);
-spanless_eq_struct!(Delegation; id qself rename path body);
+spanless_eq_struct!(Delegation; id qself path rename body);
+spanless_eq_struct!(DelegationMac; qself prefix suffixes body);
 spanless_eq_struct!(DelimArgs; dspan delim tokens);
 spanless_eq_struct!(DelimSpacing; open close);
 spanless_eq_struct!(EnumDef; variants);
@@ -538,7 +540,7 @@ spanless_eq_struct!(WhereEqPredicate; span lhs_ty rhs_ty);
 spanless_eq_struct!(WhereRegionPredicate; span lifetime bounds);
 spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
 spanless_eq_enum!(AssocConstraintKind; Equality(term) Bound(bounds));
-spanless_eq_enum!(AssocItemKind; Const(0) Fn(0) Type(0) MacCall(0) Delegation(0));
+spanless_eq_enum!(AssocItemKind; Const(0) Fn(0) Type(0) MacCall(0) Delegation(0) DelegationMac(0));
 spanless_eq_enum!(AttrArgs; Empty Delimited(0) Eq(0 1));
 spanless_eq_enum!(AttrArgsEq; Ast(0) Hir(0));
 spanless_eq_enum!(AttrStyle; Outer Inner);
@@ -622,7 +624,7 @@ spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
 spanless_eq_enum!(ItemKind; ExternCrate(0) Use(0) Static(0) Const(0) Fn(0)
     Mod(0 1) ForeignMod(0) GlobalAsm(0) TyAlias(0) Enum(0 1) Struct(0 1)
     Union(0 1) Trait(0) TraitAlias(0 1) Impl(0) MacCall(0) MacroDef(0)
-    Delegation(0));
+    Delegation(0) DelegationMac(0));
 spanless_eq_enum!(LitKind; Str(0 1) ByteStr(0 1) CStr(0 1) Byte(0) Char(0)
     Int(0 1) Float(0 1) Bool(0) Err(0));
 spanless_eq_enum!(PatKind; Wild Ident(0 1 2) Struct(0 1 2 3) TupleStruct(0 1 2)
