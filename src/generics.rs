@@ -991,7 +991,11 @@ pub(crate) mod parsing {
 #[cfg(feature = "printing")]
 pub(crate) mod printing {
     use crate::attr::FilterAttrs;
+    #[cfg(feature = "full")]
+    use crate::expr;
     use crate::expr::Expr;
+    #[cfg(feature = "full")]
+    use crate::fixup::FixupContext;
     use crate::generics::{
         BoundLifetimes, ConstParam, GenericParam, Generics, ImplGenerics, LifetimeParam,
         PredicateLifetime, PredicateType, TraitBound, TraitBoundModifier, Turbofish, TypeGenerics,
@@ -1271,6 +1275,10 @@ pub(crate) mod printing {
             // ERROR CORRECTION: Add braces to make sure that the
             // generated code is valid.
             _ => token::Brace::default().surround(tokens, |tokens| {
+                #[cfg(feature = "full")]
+                expr::printing::print_expr(expr, tokens, FixupContext::new_stmt());
+
+                #[cfg(not(feature = "full"))]
                 expr.to_tokens(tokens);
             }),
         }

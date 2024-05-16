@@ -1,4 +1,8 @@
+#[cfg(feature = "printing")]
+use crate::expr::Expr;
 use crate::op::BinOp;
+#[cfg(all(feature = "printing", feature = "full"))]
+use crate::ty::ReturnType;
 use std::cmp::Ordering;
 
 // Reference: https://doc.rust-lang.org/reference/expressions.html#expression-precedence
@@ -29,6 +33,15 @@ pub(crate) enum Precedence {
     Term,
     // as
     Cast,
+    // unary - * ! & &mut
+    #[cfg(feature = "printing")]
+    Prefix,
+    // function calls, array indexing, field expressions, method calls, ?
+    #[cfg(feature = "printing")]
+    Postfix,
+    // paths, loops
+    #[cfg(feature = "printing")]
+    Unambiguous,
 }
 
 impl Precedence {
@@ -42,12 +55,14 @@ impl Precedence {
             BinOp::BitAnd(_) => Precedence::BitAnd,
             BinOp::BitOr(_) => Precedence::BitOr,
             BinOp::Shl(_) | BinOp::Shr(_) => Precedence::Shift,
+
             BinOp::Eq(_)
             | BinOp::Lt(_)
             | BinOp::Le(_)
             | BinOp::Ne(_)
             | BinOp::Ge(_)
             | BinOp::Gt(_) => Precedence::Compare,
+
             BinOp::AddAssign(_)
             | BinOp::SubAssign(_)
             | BinOp::MulAssign(_)
@@ -58,6 +73,69 @@ impl Precedence {
             | BinOp::BitOrAssign(_)
             | BinOp::ShlAssign(_)
             | BinOp::ShrAssign(_) => Precedence::Assign,
+        }
+    }
+
+    #[cfg(feature = "printing")]
+    pub(crate) fn of(e: &Expr) -> Self {
+        match e {
+            #[cfg(feature = "full")]
+            Expr::Closure(e) => match e.output {
+                ReturnType::Default => Precedence::Any,
+                ReturnType::Type(..) => Precedence::Unambiguous,
+            },
+
+            Expr::Break(_) | Expr::Return(_) | Expr::Yield(_) => Precedence::Any,
+            Expr::Assign(_) => Precedence::Assign,
+            Expr::Range(_) => Precedence::Range,
+            Expr::Binary(e) => Precedence::of_binop(&e.op),
+            Expr::Cast(_) => Precedence::Cast,
+            Expr::Let(_) | Expr::Reference(_) | Expr::Unary(_) => Precedence::Prefix,
+
+            Expr::Await(_)
+            | Expr::Call(_)
+            | Expr::MethodCall(_)
+            | Expr::Field(_)
+            | Expr::Index(_)
+            | Expr::Try(_) => Precedence::Postfix,
+
+            Expr::Array(_)
+            | Expr::Async(_)
+            | Expr::Block(_)
+            | Expr::Const(_)
+            | Expr::Continue(_)
+            | Expr::ForLoop(_)
+            | Expr::Group(_)
+            | Expr::If(_)
+            | Expr::Infer(_)
+            | Expr::Lit(_)
+            | Expr::Loop(_)
+            | Expr::Macro(_)
+            | Expr::Match(_)
+            | Expr::Paren(_)
+            | Expr::Path(_)
+            | Expr::Repeat(_)
+            | Expr::Struct(_)
+            | Expr::TryBlock(_)
+            | Expr::Tuple(_)
+            | Expr::Unsafe(_)
+            | Expr::Verbatim(_)
+            | Expr::While(_) => Precedence::Unambiguous,
+
+            #[cfg(not(feature = "full"))]
+            Expr::Closure(_) => unreachable!(),
+        }
+    }
+
+    #[cfg(feature = "printing")]
+    pub(crate) fn of_rhs(e: &Expr) -> Self {
+        match e {
+            Expr::Break(_) | Expr::Closure(_) | Expr::Return(_) | Expr::Yield(_) => {
+                Precedence::Prefix
+            }
+            #[cfg(feature = "full")]
+            Expr::Range(e) if e.start.is_none() => Precedence::Prefix,
+            _ => Precedence::of(e),
         }
     }
 }

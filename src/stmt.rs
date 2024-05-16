@@ -410,9 +410,10 @@ pub(crate) mod parsing {
 }
 
 #[cfg(feature = "printing")]
-mod printing {
+pub(crate) mod printing {
     use crate::classify;
     use crate::expr::{self, Expr};
+    use crate::fixup::FixupContext;
     use crate::stmt::{Block, Local, Stmt, StmtMacro};
     use crate::token;
     use proc_macro2::TokenStream;
@@ -434,7 +435,7 @@ mod printing {
                 Stmt::Local(local) => local.to_tokens(tokens),
                 Stmt::Item(item) => item.to_tokens(tokens),
                 Stmt::Expr(expr, semi) => {
-                    expr.to_tokens(tokens);
+                    expr::printing::print_expr(expr, tokens, FixupContext::new_stmt());
                     semi.to_tokens(tokens);
                 }
                 Stmt::Macro(mac) => mac.to_tokens(tokens),
@@ -459,8 +460,9 @@ mod printing {
                     else_token.to_tokens(tokens);
                     match &**diverge {
                         Expr::Block(diverge) => diverge.to_tokens(tokens),
-                        _ => token::Brace::default()
-                            .surround(tokens, |tokens| diverge.to_tokens(tokens)),
+                        _ => token::Brace::default().surround(tokens, |tokens| {
+                            expr::printing::print_expr(diverge, tokens, FixupContext::new_stmt());
+                        }),
                     }
                 }
             }
