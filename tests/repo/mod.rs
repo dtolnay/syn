@@ -132,6 +132,10 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/rfcs/rfc-2632-const-trait-impl/const-trait-bounds.rs",
     "tests/ui/rfcs/rfc-2632-const-trait-impl/effects/minicore.rs",
 
+    // TODO: `|| .. .method()`
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0208_closure_range_method_call.rs",
+    "src/tools/rustfmt/tests/source/issue-4808.rs",
+
     // Compile-fail expr parameter in const generic position: f::<1 + 2>()
     "tests/ui/const-generics/early/closing-args-token.rs",
     "tests/ui/const-generics/early/const-expression-parameter.rs",
