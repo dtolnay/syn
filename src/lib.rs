@@ -328,8 +328,10 @@ mod bigint;
 #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
 pub mod buffer;
 
-#[cfg(any(feature = "parsing", feature = "printing"))]
-#[cfg(feature = "full")]
+#[cfg(any(
+    all(feature = "parsing", feature = "full"),
+    all(feature = "printing", any(feature = "full", feature = "derive")),
+))]
 mod classify;
 
 mod custom_keyword;
@@ -382,6 +384,9 @@ mod file;
 #[cfg(feature = "full")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
 pub use crate::file::File;
+
+#[cfg(all(feature = "full", feature = "printing"))]
+mod fixup;
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod generics;
@@ -478,7 +483,10 @@ pub use crate::path::{
     ParenthesizedGenericArguments, Path, PathArguments, PathSegment, QSelf,
 };
 
-#[cfg(all(any(feature = "full", feature = "derive"), feature = "parsing"))]
+#[cfg(all(
+    any(feature = "full", feature = "derive"),
+    any(feature = "parsing", feature = "printing")
+))]
 mod precedence;
 
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]

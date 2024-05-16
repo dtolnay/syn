@@ -2976,40 +2976,29 @@ pub(crate) mod printing {
     use crate::attr::Attribute;
     #[cfg(feature = "full")]
     use crate::attr::FilterAttrs;
-    #[cfg(feature = "full")]
     use crate::classify;
     #[cfg(feature = "full")]
     use crate::expr::{
-        Arm, Expr, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak, ExprClosure,
+        Arm, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak, ExprClosure,
         ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet, ExprLoop, ExprMatch,
         ExprRange, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprTuple, ExprUnsafe, ExprWhile,
         ExprYield, Label, RangeLimits,
     };
     use crate::expr::{
-        ExprBinary, ExprCall, ExprCast, ExprField, ExprGroup, ExprIndex, ExprLit, ExprMacro,
+        Expr, ExprBinary, ExprCall, ExprCast, ExprField, ExprGroup, ExprIndex, ExprLit, ExprMacro,
         ExprMethodCall, ExprParen, ExprPath, ExprReference, ExprStruct, ExprUnary, FieldValue,
         Index, Member,
     };
-    use crate::path;
     #[cfg(feature = "full")]
+    use crate::fixup::FixupContext;
+    use crate::op::BinOp;
+    use crate::path;
+    use crate::precedence::Precedence;
     use crate::token;
     #[cfg(feature = "full")]
     use crate::ty::ReturnType;
     use proc_macro2::{Literal, Span, TokenStream};
     use quote::{ToTokens, TokenStreamExt};
-
-    // If the given expression is a bare `ExprStruct`, wraps it in parenthesis
-    // before appending it to `TokenStream`.
-    #[cfg(feature = "full")]
-    fn wrap_bare_struct(tokens: &mut TokenStream, e: &Expr) {
-        if let Expr::Struct(_) = *e {
-            token::Paren::default().surround(tokens, |tokens| {
-                e.to_tokens(tokens);
-            });
-        } else {
-            e.to_tokens(tokens);
-        }
-    }
 
     #[cfg(feature = "full")]
     pub(crate) fn outer_attrs_to_tokens(attrs: &[Attribute], tokens: &mut TokenStream) {
@@ -3023,6 +3012,107 @@ pub(crate) mod printing {
 
     #[cfg(not(feature = "full"))]
     pub(crate) fn outer_attrs_to_tokens(_attrs: &[Attribute], _tokens: &mut TokenStream) {}
+
+    #[cfg(feature = "full")]
+    fn print_condition(expr: &Expr, tokens: &mut TokenStream) {
+        print_subexpression(
+            expr,
+            classify::confusable_with_adjacent_block(expr),
+            tokens,
+            FixupContext::new_condition(),
+        );
+    }
+
+    fn print_subexpression(
+        expr: &Expr,
+        needs_group: bool,
+        tokens: &mut TokenStream,
+        #[cfg(feature = "full")] mut fixup: FixupContext,
+    ) {
+        #[cfg(not(feature = "full"))]
+        let do_print_expr = |tokens: &mut TokenStream| expr.to_tokens(tokens);
+
+        #[cfg(feature = "full")]
+        let do_print_expr = {
+            // If we are surrounding the whole cond in parentheses, such as:
+            //
+            //     if (return Struct {}) {}
+            //
+            // then there is no need for parenthesizing the individual struct
+            // expressions within. On the other hand if the whole cond is not
+            // parenthesized, then print_expr must parenthesize exterior struct
+            // literals.
+            //
+            //     if x == (Struct {}) {}
+            //
+            if needs_group {
+                fixup = FixupContext::default();
+            }
+            |tokens: &mut TokenStream| print_expr(expr, tokens, fixup)
+        };
+
+        if needs_group {
+            token::Paren::default().surround(tokens, do_print_expr);
+        } else {
+            do_print_expr(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    pub(crate) fn print_expr(expr: &Expr, tokens: &mut TokenStream, mut fixup: FixupContext) {
+        let needs_group = fixup.would_cause_statement_boundary(expr);
+        if needs_group {
+            fixup = FixupContext::default();
+        }
+
+        let do_print_expr = |tokens: &mut TokenStream| match expr {
+            Expr::Array(e) => e.to_tokens(tokens),
+            Expr::Assign(e) => print_expr_assign(e, tokens, fixup),
+            Expr::Async(e) => e.to_tokens(tokens),
+            Expr::Await(e) => print_expr_await(e, tokens, fixup),
+            Expr::Binary(e) => print_expr_binary(e, tokens, fixup),
+            Expr::Block(e) => e.to_tokens(tokens),
+            Expr::Break(e) => print_expr_break(e, tokens, fixup),
+            Expr::Call(e) => print_expr_call(e, tokens, fixup),
+            Expr::Cast(e) => print_expr_cast(e, tokens, fixup),
+            Expr::Closure(e) => e.to_tokens(tokens),
+            Expr::Const(e) => e.to_tokens(tokens),
+            Expr::Continue(e) => e.to_tokens(tokens),
+            Expr::Field(e) => print_expr_field(e, tokens, fixup),
+            Expr::ForLoop(e) => e.to_tokens(tokens),
+            Expr::Group(e) => e.to_tokens(tokens),
+            Expr::If(e) => e.to_tokens(tokens),
+            Expr::Index(e) => print_expr_index(e, tokens, fixup),
+            Expr::Infer(e) => e.to_tokens(tokens),
+            Expr::Let(e) => print_expr_let(e, tokens, fixup),
+            Expr::Lit(e) => e.to_tokens(tokens),
+            Expr::Loop(e) => e.to_tokens(tokens),
+            Expr::Macro(e) => e.to_tokens(tokens),
+            Expr::Match(e) => e.to_tokens(tokens),
+            Expr::MethodCall(e) => print_expr_method_call(e, tokens, fixup),
+            Expr::Paren(e) => e.to_tokens(tokens),
+            Expr::Path(e) => e.to_tokens(tokens),
+            Expr::Range(e) => print_expr_range(e, tokens, fixup),
+            Expr::Reference(e) => print_expr_reference(e, tokens, fixup),
+            Expr::Repeat(e) => e.to_tokens(tokens),
+            Expr::Return(e) => print_expr_return(e, tokens, fixup),
+            Expr::Struct(e) => e.to_tokens(tokens),
+            Expr::Try(e) => print_expr_try(e, tokens, fixup),
+            Expr::TryBlock(e) => e.to_tokens(tokens),
+            Expr::Tuple(e) => e.to_tokens(tokens),
+            Expr::Unary(e) => print_expr_unary(e, tokens, fixup),
+            Expr::Unsafe(e) => e.to_tokens(tokens),
+            Expr::Verbatim(e) => e.to_tokens(tokens),
+            Expr::While(e) => e.to_tokens(tokens),
+            Expr::Yield(e) => print_expr_yield(e, tokens, fixup),
+        };
+
+        if needs_group {
+            token::Paren::default().surround(tokens, do_print_expr);
+        } else {
+            do_print_expr(tokens);
+        }
+    }
 
     #[cfg(feature = "full")]
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
@@ -3039,11 +3129,27 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprAssign {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.left.to_tokens(tokens);
-            self.eq_token.to_tokens(tokens);
-            self.right.to_tokens(tokens);
+            let fixup = FixupContext::default();
+            print_expr_assign(self, tokens, fixup);
         }
+    }
+
+    #[cfg(feature = "full")]
+    fn print_expr_assign(e: &ExprAssign, tokens: &mut TokenStream, fixup: FixupContext) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        print_subexpression(
+            &e.left,
+            Precedence::of(&e.left) <= Precedence::Assign,
+            tokens,
+            fixup.leftmost_subexpression(),
+        );
+        e.eq_token.to_tokens(tokens);
+        print_subexpression(
+            &e.right,
+            Precedence::of_rhs(&e.right) < Precedence::Assign,
+            tokens,
+            fixup.subsequent_subexpression(),
+        );
     }
 
     #[cfg(feature = "full")]
@@ -3061,21 +3167,94 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprAwait {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.base.to_tokens(tokens);
-            self.dot_token.to_tokens(tokens);
-            self.await_token.to_tokens(tokens);
+            let fixup = FixupContext::default();
+            print_expr_await(self, tokens, fixup);
         }
+    }
+
+    #[cfg(feature = "full")]
+    fn print_expr_await(e: &ExprAwait, tokens: &mut TokenStream, fixup: FixupContext) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        print_subexpression(
+            &e.base,
+            Precedence::of(&e.base) < Precedence::Postfix,
+            tokens,
+            fixup.leftmost_subexpression_with_dot(),
+        );
+        e.dot_token.to_tokens(tokens);
+        e.await_token.to_tokens(tokens);
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprBinary {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.left.to_tokens(tokens);
-            self.op.to_tokens(tokens);
-            self.right.to_tokens(tokens);
+            print_expr_binary(
+                self,
+                tokens,
+                #[cfg(feature = "full")]
+                FixupContext::default(),
+            );
         }
+    }
+
+    fn print_expr_binary(
+        e: &ExprBinary,
+        tokens: &mut TokenStream,
+        #[cfg(feature = "full")] fixup: FixupContext,
+    ) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+
+        let binop_prec = Precedence::of_binop(&e.op);
+        let left_prec = Precedence::of(&e.left);
+        let right_prec = Precedence::of_rhs(&e.right);
+        let (mut left_needs_group, right_needs_group) = if let Precedence::Assign = binop_prec {
+            (left_prec <= binop_prec, right_prec < binop_prec)
+        } else {
+            (left_prec < binop_prec, right_prec <= binop_prec)
+        };
+
+        // These cases require parenthesization independently of precedence.
+        match (&*e.left, &e.op) {
+            // `x as i32 < y` has the parser thinking that `i32 < y` is the
+            // beginning of a path type. It starts trying to parse `x as (i32 <
+            // y ...` instead of `(x as i32) < ...`. We need to convince it
+            // _not_ to do that.
+            (_, BinOp::Lt(_) | BinOp::Shl(_)) if classify::confusable_with_adjacent_lt(&e.left) => {
+                left_needs_group = true;
+            }
+
+            // We are given `(let _ = a) OP b`.
+            //
+            // - When `OP <= LAnd` we should print `let _ = a OP b` to avoid
+            //   redundant parens as the parser will interpret this as `(let _ =
+            //   a) OP b`.
+            //
+            // - Otherwise, e.g. when we have `(let a = b) < c` in AST, parens
+            //   are required since the parser would interpret `let a = b < c`
+            //   as `let a = (b < c)`. To achieve this, we force parens.
+            #[cfg(feature = "full")]
+            (Expr::Let(_), _) if binop_prec > Precedence::And => {
+                left_needs_group = true;
+            }
+
+            _ => {}
+        }
+
+        print_subexpression(
+            &e.left,
+            left_needs_group,
+            tokens,
+            #[cfg(feature = "full")]
+            fixup.leftmost_subexpression(),
+        );
+        e.op.to_tokens(tokens);
+        print_subexpression(
+            &e.right,
+            right_needs_group,
+            tokens,
+            #[cfg(feature = "full")]
+            fixup.subsequent_subexpression(),
+        );
     }
 
     #[cfg(feature = "full")]
@@ -3095,32 +3274,85 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprBreak {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.break_token.to_tokens(tokens);
-            self.label.to_tokens(tokens);
-            self.expr.to_tokens(tokens);
+            let fixup = FixupContext::default();
+            print_expr_break(self, tokens, fixup);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    fn print_expr_break(e: &ExprBreak, tokens: &mut TokenStream, fixup: FixupContext) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        e.break_token.to_tokens(tokens);
+        e.label.to_tokens(tokens);
+        if let Some(expr) = &e.expr {
+            print_expr(expr, tokens, fixup.subsequent_subexpression());
         }
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprCall {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.func.to_tokens(tokens);
-            self.paren_token.surround(tokens, |tokens| {
-                self.args.to_tokens(tokens);
-            });
+            print_expr_call(
+                self,
+                tokens,
+                #[cfg(feature = "full")]
+                FixupContext::default(),
+            );
         }
+    }
+
+    fn print_expr_call(
+        e: &ExprCall,
+        tokens: &mut TokenStream,
+        #[cfg(feature = "full")] fixup: FixupContext,
+    ) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+
+        let precedence = if let Expr::Field(_) = &*e.func {
+            Precedence::Any
+        } else {
+            Precedence::Postfix
+        };
+        print_subexpression(
+            &e.func,
+            Precedence::of(&e.func) < precedence,
+            tokens,
+            #[cfg(feature = "full")]
+            fixup.leftmost_subexpression(),
+        );
+
+        e.paren_token.surround(tokens, |tokens| {
+            e.args.to_tokens(tokens);
+        });
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprCast {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.expr.to_tokens(tokens);
-            self.as_token.to_tokens(tokens);
-            self.ty.to_tokens(tokens);
+            print_expr_cast(
+                self,
+                tokens,
+                #[cfg(feature = "full")]
+                FixupContext::default(),
+            );
         }
+    }
+
+    fn print_expr_cast(
+        e: &ExprCast,
+        tokens: &mut TokenStream,
+        #[cfg(feature = "full")] fixup: FixupContext,
+    ) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        print_subexpression(
+            &e.expr,
+            Precedence::of(&e.expr) < Precedence::Cast,
+            tokens,
+            #[cfg(feature = "full")]
+            fixup.leftmost_subexpression(),
+        );
+        e.as_token.to_tokens(tokens);
+        e.ty.to_tokens(tokens);
     }
 
     #[cfg(feature = "full")]
@@ -3141,7 +3373,7 @@ pub(crate) mod printing {
                 self.body.to_tokens(tokens);
             } else {
                 token::Brace::default().surround(tokens, |tokens| {
-                    self.body.to_tokens(tokens);
+                    print_expr(&self.body, tokens, FixupContext::new_stmt());
                 });
             }
         }
@@ -3173,11 +3405,30 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprField {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.base.to_tokens(tokens);
-            self.dot_token.to_tokens(tokens);
-            self.member.to_tokens(tokens);
+            print_expr_field(
+                self,
+                tokens,
+                #[cfg(feature = "full")]
+                FixupContext::default(),
+            );
         }
+    }
+
+    fn print_expr_field(
+        e: &ExprField,
+        tokens: &mut TokenStream,
+        #[cfg(feature = "full")] fixup: FixupContext,
+    ) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        print_subexpression(
+            &e.base,
+            Precedence::of(&e.base) < Precedence::Postfix,
+            tokens,
+            #[cfg(feature = "full")]
+            fixup.leftmost_subexpression_with_dot(),
+        );
+        e.dot_token.to_tokens(tokens);
+        e.member.to_tokens(tokens);
     }
 
     #[cfg(feature = "full")]
@@ -3189,7 +3440,7 @@ pub(crate) mod printing {
             self.for_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
             self.in_token.to_tokens(tokens);
-            wrap_bare_struct(tokens, &self.expr);
+            print_condition(&self.expr, tokens);
             self.body.brace_token.surround(tokens, |tokens| {
                 inner_attrs_to_tokens(&self.attrs, tokens);
                 tokens.append_all(&self.body.stmts);
@@ -3216,7 +3467,7 @@ pub(crate) mod printing {
             let mut expr = self;
             loop {
                 expr.if_token.to_tokens(tokens);
-                wrap_bare_struct(tokens, &expr.cond);
+                print_condition(&expr.cond, tokens);
                 expr.then_branch.to_tokens(tokens);
 
                 let (else_token, else_) = match &expr.else_branch {
@@ -3236,7 +3487,9 @@ pub(crate) mod printing {
                     // If this is not one of the valid expressions to exist in
                     // an else clause, wrap it in a block.
                     other => {
-                        token::Brace::default().surround(tokens, |tokens| other.to_tokens(tokens));
+                        token::Brace::default().surround(tokens, |tokens| {
+                            print_expr(other, tokens, FixupContext::new_stmt());
+                        });
                         break;
                     }
                 }
@@ -3247,12 +3500,31 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprIndex {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.expr.to_tokens(tokens);
-            self.bracket_token.surround(tokens, |tokens| {
-                self.index.to_tokens(tokens);
-            });
+            print_expr_index(
+                self,
+                tokens,
+                #[cfg(feature = "full")]
+                FixupContext::default(),
+            );
         }
+    }
+
+    fn print_expr_index(
+        e: &ExprIndex,
+        tokens: &mut TokenStream,
+        #[cfg(feature = "full")] fixup: FixupContext,
+    ) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        print_subexpression(
+            &e.expr,
+            Precedence::of(&e.expr) < Precedence::Postfix,
+            tokens,
+            #[cfg(feature = "full")]
+            fixup.leftmost_subexpression(),
+        );
+        e.bracket_token.surround(tokens, |tokens| {
+            e.index.to_tokens(tokens);
+        });
     }
 
     #[cfg(feature = "full")]
@@ -3268,12 +3540,23 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprLet {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.let_token.to_tokens(tokens);
-            self.pat.to_tokens(tokens);
-            self.eq_token.to_tokens(tokens);
-            wrap_bare_struct(tokens, &self.expr);
+            let fixup = FixupContext::default();
+            print_expr_let(self, tokens, fixup);
         }
+    }
+
+    #[cfg(feature = "full")]
+    fn print_expr_let(e: &ExprLet, tokens: &mut TokenStream, fixup: FixupContext) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        e.let_token.to_tokens(tokens);
+        e.pat.to_tokens(tokens);
+        e.eq_token.to_tokens(tokens);
+        print_subexpression(
+            &e.expr,
+            fixup.needs_group_as_let_scrutinee(&e.expr),
+            tokens,
+            FixupContext::default(),
+        );
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
@@ -3312,7 +3595,7 @@ pub(crate) mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.match_token.to_tokens(tokens);
-            wrap_bare_struct(tokens, &self.expr);
+            print_condition(&self.expr, tokens);
             self.brace_token.surround(tokens, |tokens| {
                 inner_attrs_to_tokens(&self.attrs, tokens);
                 for (i, arm) in self.arms.iter().enumerate() {
@@ -3334,15 +3617,34 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprMethodCall {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.receiver.to_tokens(tokens);
-            self.dot_token.to_tokens(tokens);
-            self.method.to_tokens(tokens);
-            self.turbofish.to_tokens(tokens);
-            self.paren_token.surround(tokens, |tokens| {
-                self.args.to_tokens(tokens);
-            });
+            print_expr_method_call(
+                self,
+                tokens,
+                #[cfg(feature = "full")]
+                FixupContext::default(),
+            );
         }
+    }
+
+    fn print_expr_method_call(
+        e: &ExprMethodCall,
+        tokens: &mut TokenStream,
+        #[cfg(feature = "full")] fixup: FixupContext,
+    ) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        print_subexpression(
+            &e.receiver,
+            Precedence::of(&e.receiver) < Precedence::Postfix,
+            tokens,
+            #[cfg(feature = "full")]
+            fixup.leftmost_subexpression_with_dot(),
+        );
+        e.dot_token.to_tokens(tokens);
+        e.method.to_tokens(tokens);
+        e.turbofish.to_tokens(tokens);
+        e.paren_token.surround(tokens, |tokens| {
+            e.args.to_tokens(tokens);
+        });
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
@@ -3367,21 +3669,60 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprRange {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.start.to_tokens(tokens);
-            self.limits.to_tokens(tokens);
-            self.end.to_tokens(tokens);
+            let fixup = FixupContext::default();
+            print_expr_range(self, tokens, fixup);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    fn print_expr_range(e: &ExprRange, tokens: &mut TokenStream, fixup: FixupContext) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        if let Some(start) = &e.start {
+            print_subexpression(
+                start,
+                Precedence::of(start) <= Precedence::Range,
+                tokens,
+                fixup.leftmost_subexpression(),
+            );
+        }
+        e.limits.to_tokens(tokens);
+        if let Some(end) = &e.end {
+            print_subexpression(
+                end,
+                Precedence::of_rhs(end) <= Precedence::Range,
+                tokens,
+                fixup.subsequent_subexpression(),
+            );
         }
     }
 
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprReference {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.and_token.to_tokens(tokens);
-            self.mutability.to_tokens(tokens);
-            self.expr.to_tokens(tokens);
+            print_expr_reference(
+                self,
+                tokens,
+                #[cfg(feature = "full")]
+                FixupContext::default(),
+            );
         }
+    }
+
+    fn print_expr_reference(
+        e: &ExprReference,
+        tokens: &mut TokenStream,
+        #[cfg(feature = "full")] fixup: FixupContext,
+    ) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        e.and_token.to_tokens(tokens);
+        e.mutability.to_tokens(tokens);
+        print_subexpression(
+            &e.expr,
+            Precedence::of_rhs(&e.expr) < Precedence::Prefix,
+            tokens,
+            #[cfg(feature = "full")]
+            fixup.subsequent_subexpression(),
+        );
     }
 
     #[cfg(feature = "full")]
@@ -3401,9 +3742,17 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprReturn {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.return_token.to_tokens(tokens);
-            self.expr.to_tokens(tokens);
+            let fixup = FixupContext::default();
+            print_expr_return(self, tokens, fixup);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    fn print_expr_return(e: &ExprReturn, tokens: &mut TokenStream, fixup: FixupContext) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        e.return_token.to_tokens(tokens);
+        if let Some(expr) = &e.expr {
+            print_expr(expr, tokens, fixup.subsequent_subexpression());
         }
     }
 
@@ -3428,10 +3777,21 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprTry {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.expr.to_tokens(tokens);
-            self.question_token.to_tokens(tokens);
+            let fixup = FixupContext::default();
+            print_expr_try(self, tokens, fixup);
         }
+    }
+
+    #[cfg(feature = "full")]
+    fn print_expr_try(e: &ExprTry, tokens: &mut TokenStream, fixup: FixupContext) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        print_subexpression(
+            &e.expr,
+            Precedence::of(&e.expr) < Precedence::Postfix,
+            tokens,
+            fixup.leftmost_subexpression_with_dot(),
+        );
+        e.question_token.to_tokens(tokens);
     }
 
     #[cfg(feature = "full")]
@@ -3463,10 +3823,29 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprUnary {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.op.to_tokens(tokens);
-            self.expr.to_tokens(tokens);
+            print_expr_unary(
+                self,
+                tokens,
+                #[cfg(feature = "full")]
+                FixupContext::default(),
+            );
         }
+    }
+
+    fn print_expr_unary(
+        e: &ExprUnary,
+        tokens: &mut TokenStream,
+        #[cfg(feature = "full")] fixup: FixupContext,
+    ) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        e.op.to_tokens(tokens);
+        print_subexpression(
+            &e.expr,
+            Precedence::of_rhs(&e.expr) < Precedence::Prefix,
+            tokens,
+            #[cfg(feature = "full")]
+            fixup.subsequent_subexpression(),
+        );
     }
 
     #[cfg(feature = "full")]
@@ -3489,7 +3868,7 @@ pub(crate) mod printing {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.label.to_tokens(tokens);
             self.while_token.to_tokens(tokens);
-            wrap_bare_struct(tokens, &self.cond);
+            print_condition(&self.cond, tokens);
             self.body.brace_token.surround(tokens, |tokens| {
                 inner_attrs_to_tokens(&self.attrs, tokens);
                 tokens.append_all(&self.body.stmts);
@@ -3501,9 +3880,17 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprYield {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.yield_token.to_tokens(tokens);
-            self.expr.to_tokens(tokens);
+            let fixup = FixupContext::default();
+            print_expr_yield(self, tokens, fixup);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    fn print_expr_yield(e: &ExprYield, tokens: &mut TokenStream, fixup: FixupContext) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        e.yield_token.to_tokens(tokens);
+        if let Some(expr) = &e.expr {
+            print_expr(expr, tokens, fixup.subsequent_subexpression());
         }
     }
 
@@ -3518,7 +3905,7 @@ pub(crate) mod printing {
                 guard.to_tokens(tokens);
             }
             self.fat_arrow_token.to_tokens(tokens);
-            self.body.to_tokens(tokens);
+            print_expr(&self.body, tokens, FixupContext::new_match_arm());
             self.comma.to_tokens(tokens);
         }
     }

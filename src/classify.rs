@@ -3,10 +3,11 @@ use crate::generics::TypeParamBound;
 use crate::path::{Path, PathArguments};
 use crate::punctuated::Punctuated;
 use crate::ty::{ReturnType, Type};
+#[cfg(feature = "full")]
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
 use std::ops::ControlFlow;
 
-#[cfg(feature = "parsing")]
+#[cfg(feature = "full")]
 pub(crate) fn requires_semi_to_be_stmt(expr: &Expr) -> bool {
     match expr {
         Expr::Macro(expr) => !expr.mac.delimiter.is_brace(),
@@ -14,6 +15,7 @@ pub(crate) fn requires_semi_to_be_stmt(expr: &Expr) -> bool {
     }
 }
 
+#[cfg(feature = "full")]
 pub(crate) fn requires_comma_to_be_match_arm(expr: &Expr) -> bool {
     match expr {
         Expr::If(_)
@@ -58,7 +60,196 @@ pub(crate) fn requires_comma_to_be_match_arm(expr: &Expr) -> bool {
     }
 }
 
+#[cfg(all(feature = "printing", feature = "full"))]
+pub(crate) fn confusable_with_adjacent_block(mut expr: &Expr) -> bool {
+    let mut stack = Vec::new();
+
+    while let Some(next) = match expr {
+        Expr::Assign(e) => {
+            stack.push(&e.right);
+            Some(&e.left)
+        }
+        Expr::Await(e) => Some(&e.base),
+        Expr::Binary(e) => {
+            stack.push(&e.right);
+            Some(&e.left)
+        }
+        Expr::Break(e) => {
+            if let Some(Expr::Block(_)) = e.expr.as_deref() {
+                return true;
+            }
+            stack.pop()
+        }
+        Expr::Call(e) => Some(&e.func),
+        Expr::Cast(e) => Some(&e.expr),
+        Expr::Closure(e) => Some(&e.body),
+        Expr::Field(e) => Some(&e.base),
+        Expr::Index(e) => Some(&e.expr),
+        Expr::MethodCall(e) => Some(&e.receiver),
+        Expr::Range(e) => {
+            if let Some(Expr::Block(_)) = e.end.as_deref() {
+                return true;
+            }
+            match (&e.start, &e.end) {
+                (Some(start), end) => {
+                    stack.extend(end);
+                    Some(start)
+                }
+                (None, Some(end)) => Some(end),
+                (None, None) => stack.pop(),
+            }
+        }
+        Expr::Reference(e) => Some(&e.expr),
+        Expr::Return(e) => {
+            if e.expr.is_none() && stack.is_empty() {
+                return true;
+            }
+            stack.pop()
+        }
+        Expr::Struct(_) => return true,
+        Expr::Try(e) => Some(&e.expr),
+        Expr::Unary(e) => Some(&e.expr),
+        Expr::Yield(e) => {
+            if e.expr.is_none() && stack.is_empty() {
+                return true;
+            }
+            stack.pop()
+        }
+
+        Expr::Array(_)
+        | Expr::Async(_)
+        | Expr::Block(_)
+        | Expr::Const(_)
+        | Expr::Continue(_)
+        | Expr::ForLoop(_)
+        | Expr::Group(_)
+        | Expr::If(_)
+        | Expr::Infer(_)
+        | Expr::Let(_)
+        | Expr::Lit(_)
+        | Expr::Loop(_)
+        | Expr::Macro(_)
+        | Expr::Match(_)
+        | Expr::Paren(_)
+        | Expr::Path(_)
+        | Expr::Repeat(_)
+        | Expr::TryBlock(_)
+        | Expr::Tuple(_)
+        | Expr::Unsafe(_)
+        | Expr::Verbatim(_)
+        | Expr::While(_) => stack.pop(),
+    } {
+        expr = next;
+    }
+
+    false
+}
+
+#[cfg(feature = "printing")]
+pub(crate) fn confusable_with_adjacent_lt(mut expr: &Expr) -> bool {
+    loop {
+        match expr {
+            Expr::Binary(e) => expr = &e.right,
+            Expr::Cast(e) => return trailing_unparameterized_path(&e.ty),
+            Expr::Reference(e) => expr = &e.expr,
+            Expr::Unary(e) => expr = &e.expr,
+
+            Expr::Array(_)
+            | Expr::Assign(_)
+            | Expr::Async(_)
+            | Expr::Await(_)
+            | Expr::Block(_)
+            | Expr::Break(_)
+            | Expr::Call(_)
+            | Expr::Closure(_)
+            | Expr::Const(_)
+            | Expr::Continue(_)
+            | Expr::Field(_)
+            | Expr::ForLoop(_)
+            | Expr::Group(_)
+            | Expr::If(_)
+            | Expr::Index(_)
+            | Expr::Infer(_)
+            | Expr::Let(_)
+            | Expr::Lit(_)
+            | Expr::Loop(_)
+            | Expr::Macro(_)
+            | Expr::Match(_)
+            | Expr::MethodCall(_)
+            | Expr::Paren(_)
+            | Expr::Path(_)
+            | Expr::Range(_)
+            | Expr::Repeat(_)
+            | Expr::Return(_)
+            | Expr::Struct(_)
+            | Expr::Try(_)
+            | Expr::TryBlock(_)
+            | Expr::Tuple(_)
+            | Expr::Unsafe(_)
+            | Expr::Verbatim(_)
+            | Expr::While(_)
+            | Expr::Yield(_) => return false,
+        }
+    }
+
+    fn trailing_unparameterized_path(mut ty: &Type) -> bool {
+        loop {
+            match ty {
+                Type::BareFn(t) => match &t.output {
+                    ReturnType::Default => return false,
+                    ReturnType::Type(_, ret) => ty = ret,
+                },
+                Type::ImplTrait(t) => match last_type_in_bounds(&t.bounds) {
+                    ControlFlow::Break(trailing_path) => return trailing_path,
+                    ControlFlow::Continue(t) => ty = t,
+                },
+                Type::Path(t) => match last_type_in_path(&t.path) {
+                    ControlFlow::Break(trailing_path) => return trailing_path,
+                    ControlFlow::Continue(t) => ty = t,
+                },
+                Type::Ptr(t) => ty = &t.elem,
+                Type::Reference(t) => ty = &t.elem,
+                Type::TraitObject(t) => match last_type_in_bounds(&t.bounds) {
+                    ControlFlow::Break(trailing_path) => return trailing_path,
+                    ControlFlow::Continue(t) => ty = t,
+                },
+
+                Type::Array(_)
+                | Type::Group(_)
+                | Type::Infer(_)
+                | Type::Macro(_)
+                | Type::Never(_)
+                | Type::Paren(_)
+                | Type::Slice(_)
+                | Type::Tuple(_)
+                | Type::Verbatim(_) => return false,
+            }
+        }
+    }
+
+    fn last_type_in_path(path: &Path) -> ControlFlow<bool, &Type> {
+        match &path.segments.last().unwrap().arguments {
+            PathArguments::None => ControlFlow::Break(true),
+            PathArguments::AngleBracketed(_) => ControlFlow::Break(false),
+            PathArguments::Parenthesized(arg) => match &arg.output {
+                ReturnType::Default => ControlFlow::Break(false),
+                ReturnType::Type(_, ret) => ControlFlow::Continue(ret),
+            },
+        }
+    }
+
+    fn last_type_in_bounds(
+        bounds: &Punctuated<TypeParamBound, Token![+]>,
+    ) -> ControlFlow<bool, &Type> {
+        match bounds.last().unwrap() {
+            TypeParamBound::Trait(t) => last_type_in_path(&t.path),
+            TypeParamBound::Lifetime(_) | TypeParamBound::Verbatim(_) => ControlFlow::Break(false),
+        }
+    }
+}
+
 /// Whether the expression's last token is `}`.
+#[cfg(feature = "full")]
 pub(crate) fn expr_trailing_brace(mut expr: &Expr) -> bool {
     loop {
         match expr {
