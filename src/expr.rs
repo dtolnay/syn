@@ -1277,13 +1277,13 @@ pub(crate) mod parsing {
                 // another binary operator.
                 break;
             } else if let Ok(op) = ahead.parse::<BinOp>() {
-                let precedence = Precedence::of(&op);
+                let precedence = Precedence::of_binop(&op);
                 if precedence < base {
                     break;
                 }
                 if precedence == Precedence::Compare {
                     if let Expr::Binary(lhs) = &lhs {
-                        if Precedence::of(&lhs.op) == Precedence::Compare {
+                        if Precedence::of_binop(&lhs.op) == Precedence::Compare {
                             break;
                         }
                     }
@@ -1339,13 +1339,13 @@ pub(crate) mod parsing {
         loop {
             let ahead = input.fork();
             if let Ok(op) = ahead.parse::<BinOp>() {
-                let precedence = Precedence::of(&op);
+                let precedence = Precedence::of_binop(&op);
                 if precedence < base {
                     break;
                 }
                 if precedence == Precedence::Compare {
                     if let Expr::Binary(lhs) = &lhs {
-                        if Precedence::of(&lhs.op) == Precedence::Compare {
+                        if Precedence::of_binop(&lhs.op) == Precedence::Compare {
                             break;
                         }
                     }
@@ -1405,7 +1405,7 @@ pub(crate) mod parsing {
 
     fn peek_precedence(input: ParseStream) -> Precedence {
         if let Ok(op) = input.fork().parse() {
-            Precedence::of(&op)
+            Precedence::of_binop(&op)
         } else if input.peek(Token![=]) && !input.peek(Token![=>]) {
             Precedence::Assign
         } else if input.peek(Token![..]) {

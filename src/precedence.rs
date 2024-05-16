@@ -18,7 +18,7 @@ pub(crate) enum Precedence {
 }
 
 impl Precedence {
-    pub(crate) fn of(op: &BinOp) -> Self {
+    pub(crate) fn of_binop(op: &BinOp) -> Self {
         match op {
             BinOp::Add(_) | BinOp::Sub(_) => Precedence::Arithmetic,
             BinOp::Mul(_) | BinOp::Div(_) | BinOp::Rem(_) => Precedence::Term,
