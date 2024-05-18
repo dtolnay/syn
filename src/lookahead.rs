@@ -110,7 +110,7 @@ impl<'a> Lookahead1<'a> {
     /// The error message will identify all of the expected token types that
     /// have been peeked against this lookahead instance.
     pub fn error(self) -> Error {
-        let comparisons = self.comparisons.borrow();
+        let comparisons = self.comparisons.into_inner();
         match comparisons.len() {
             0 => {
                 if self.cursor.eof() {
