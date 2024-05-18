@@ -3051,7 +3051,7 @@ pub(crate) mod printing {
             //     if x == (Struct {}) {}
             //
             if needs_group {
-                fixup = FixupContext::default();
+                fixup = FixupContext::NONE;
             }
             |tokens: &mut TokenStream| print_expr(expr, tokens, fixup)
         };
@@ -3067,7 +3067,7 @@ pub(crate) mod printing {
     pub(crate) fn print_expr(expr: &Expr, tokens: &mut TokenStream, mut fixup: FixupContext) {
         let needs_group = fixup.would_cause_statement_boundary(expr);
         if needs_group {
-            fixup = FixupContext::default();
+            fixup = FixupContext::NONE;
         }
 
         let do_print_expr = |tokens: &mut TokenStream| match expr {
@@ -3134,8 +3134,7 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprAssign {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            let fixup = FixupContext::default();
-            print_expr_assign(self, tokens, fixup);
+            print_expr_assign(self, tokens, FixupContext::NONE);
         }
     }
 
@@ -3172,8 +3171,7 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprAwait {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            let fixup = FixupContext::default();
-            print_expr_await(self, tokens, fixup);
+            print_expr_await(self, tokens, FixupContext::NONE);
         }
     }
 
@@ -3197,7 +3195,7 @@ pub(crate) mod printing {
                 self,
                 tokens,
                 #[cfg(feature = "full")]
-                FixupContext::default(),
+                FixupContext::NONE,
             );
         }
     }
@@ -3279,8 +3277,7 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprBreak {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            let fixup = FixupContext::default();
-            print_expr_break(self, tokens, fixup);
+            print_expr_break(self, tokens, FixupContext::NONE);
         }
     }
 
@@ -3301,7 +3298,7 @@ pub(crate) mod printing {
                 self,
                 tokens,
                 #[cfg(feature = "full")]
-                FixupContext::default(),
+                FixupContext::NONE,
             );
         }
     }
@@ -3338,7 +3335,7 @@ pub(crate) mod printing {
                 self,
                 tokens,
                 #[cfg(feature = "full")]
-                FixupContext::default(),
+                FixupContext::NONE,
             );
         }
     }
@@ -3414,7 +3411,7 @@ pub(crate) mod printing {
                 self,
                 tokens,
                 #[cfg(feature = "full")]
-                FixupContext::default(),
+                FixupContext::NONE,
             );
         }
     }
@@ -3509,7 +3506,7 @@ pub(crate) mod printing {
                 self,
                 tokens,
                 #[cfg(feature = "full")]
-                FixupContext::default(),
+                FixupContext::NONE,
             );
         }
     }
@@ -3545,8 +3542,7 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprLet {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            let fixup = FixupContext::default();
-            print_expr_let(self, tokens, fixup);
+            print_expr_let(self, tokens, FixupContext::NONE);
         }
     }
 
@@ -3560,7 +3556,7 @@ pub(crate) mod printing {
             &e.expr,
             fixup.needs_group_as_let_scrutinee(&e.expr),
             tokens,
-            FixupContext::default(),
+            FixupContext::NONE,
         );
     }
 
@@ -3626,7 +3622,7 @@ pub(crate) mod printing {
                 self,
                 tokens,
                 #[cfg(feature = "full")]
-                FixupContext::default(),
+                FixupContext::NONE,
             );
         }
     }
@@ -3674,8 +3670,7 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprRange {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            let fixup = FixupContext::default();
-            print_expr_range(self, tokens, fixup);
+            print_expr_range(self, tokens, FixupContext::NONE);
         }
     }
 
@@ -3708,7 +3703,7 @@ pub(crate) mod printing {
                 self,
                 tokens,
                 #[cfg(feature = "full")]
-                FixupContext::default(),
+                FixupContext::NONE,
             );
         }
     }
@@ -3747,8 +3742,7 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprReturn {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            let fixup = FixupContext::default();
-            print_expr_return(self, tokens, fixup);
+            print_expr_return(self, tokens, FixupContext::NONE);
         }
     }
 
@@ -3782,8 +3776,7 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprTry {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            let fixup = FixupContext::default();
-            print_expr_try(self, tokens, fixup);
+            print_expr_try(self, tokens, FixupContext::NONE);
         }
     }
 
@@ -3832,7 +3825,7 @@ pub(crate) mod printing {
                 self,
                 tokens,
                 #[cfg(feature = "full")]
-                FixupContext::default(),
+                FixupContext::NONE,
             );
         }
     }
@@ -3885,8 +3878,7 @@ pub(crate) mod printing {
     #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprYield {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            let fixup = FixupContext::default();
-            print_expr_yield(self, tokens, fixup);
+            print_expr_yield(self, tokens, FixupContext::NONE);
         }
     }
 
