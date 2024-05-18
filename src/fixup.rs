@@ -2,7 +2,6 @@ use crate::classify;
 use crate::expr::Expr;
 use crate::precedence::Precedence;
 
-#[derive(Copy, Clone)]
 pub(crate) struct FixupContext {
     // Print expression such that it can be parsed back as a statement
     // consisting of the original expression.
@@ -211,5 +210,13 @@ impl FixupContext {
     pub fn needs_group_as_let_scrutinee(self, expr: &Expr) -> bool {
         self.parenthesize_exterior_struct_lit && classify::confusable_with_adjacent_block(expr)
             || Precedence::of_rhs(expr) <= Precedence::And
+    }
+}
+
+impl Copy for FixupContext {}
+
+impl Clone for FixupContext {
+    fn clone(&self) -> Self {
+        *self
     }
 }
