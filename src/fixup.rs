@@ -2,7 +2,7 @@ use crate::classify;
 use crate::expr::Expr;
 use crate::precedence::Precedence;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 pub(crate) struct FixupContext {
     // Print expression such that it can be parsed back as a statement
     // consisting of the original expression.
