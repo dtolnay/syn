@@ -87,27 +87,23 @@ pub(crate) struct FixupContext {
     parenthesize_exterior_struct_lit: bool,
 }
 
-/// The default amount of fixing is minimal fixing. Fixups should be turned on
-/// in a targeted fashion where needed.
-impl Default for FixupContext {
-    fn default() -> Self {
-        FixupContext {
-            stmt: false,
-            leftmost_subexpression_in_stmt: false,
-            match_arm: false,
-            leftmost_subexpression_in_match_arm: false,
-            parenthesize_exterior_struct_lit: false,
-        }
-    }
-}
-
 impl FixupContext {
+    /// The default amount of fixing is minimal fixing. Fixups should be turned
+    /// on in a targeted fashion where needed.
+    pub const NONE: Self = FixupContext {
+        stmt: false,
+        leftmost_subexpression_in_stmt: false,
+        match_arm: false,
+        leftmost_subexpression_in_match_arm: false,
+        parenthesize_exterior_struct_lit: false,
+    };
+
     /// Create the initial fixup for printing an expression in statement
     /// position.
     pub fn new_stmt() -> Self {
         FixupContext {
             stmt: true,
-            ..FixupContext::default()
+            ..FixupContext::NONE
         }
     }
 
@@ -116,7 +112,7 @@ impl FixupContext {
     pub fn new_match_arm() -> Self {
         FixupContext {
             match_arm: true,
-            ..FixupContext::default()
+            ..FixupContext::NONE
         }
     }
 
@@ -127,7 +123,7 @@ impl FixupContext {
     pub fn new_condition() -> Self {
         FixupContext {
             parenthesize_exterior_struct_lit: true,
-            ..FixupContext::default()
+            ..FixupContext::NONE
         }
     }
 
