@@ -1020,7 +1020,7 @@ where
     F: Fold + ?Sized,
 {
     crate::Arm {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         pat: f.fold_pat(node.pat),
         guard: (node.guard).map(|it| ((it).0, Box::new(f.fold_expr(*(it).1)))),
         fat_arrow_token: node.fat_arrow_token,
@@ -1085,7 +1085,7 @@ where
     F: Fold + ?Sized,
 {
     crate::BareFnArg {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         name: (node.name).map(|it| (f.fold_ident((it).0), (it).1)),
         ty: f.fold_type(node.ty),
     }
@@ -1097,7 +1097,7 @@ where
     F: Fold + ?Sized,
 {
     crate::BareVariadic {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         name: (node.name).map(|it| (f.fold_ident((it).0), (it).1)),
         dots: node.dots,
         comma: node.comma,
@@ -1148,7 +1148,7 @@ where
 {
     crate::Block {
         brace_token: node.brace_token,
-        stmts: crate::gen::helper::fold::vec(node.stmts, f, F::fold_stmt),
+        stmts: fold_vec(node.stmts, f, F::fold_stmt),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1174,7 +1174,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ConstParam {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         const_token: node.const_token,
         ident: f.fold_ident(node.ident),
         colon_token: node.colon_token,
@@ -1254,7 +1254,7 @@ where
     F: Fold + ?Sized,
 {
     crate::DeriveInput {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
@@ -1382,7 +1382,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprArray {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         bracket_token: node.bracket_token,
         elems: crate::punctuated::fold(node.elems, f, F::fold_expr),
     }
@@ -1394,7 +1394,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprAssign {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         left: Box::new(f.fold_expr(*node.left)),
         eq_token: node.eq_token,
         right: Box::new(f.fold_expr(*node.right)),
@@ -1407,7 +1407,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprAsync {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         async_token: node.async_token,
         capture: node.capture,
         block: f.fold_block(node.block),
@@ -1420,7 +1420,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprAwait {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         base: Box::new(f.fold_expr(*node.base)),
         dot_token: node.dot_token,
         await_token: node.await_token,
@@ -1433,7 +1433,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprBinary {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         left: Box::new(f.fold_expr(*node.left)),
         op: f.fold_bin_op(node.op),
         right: Box::new(f.fold_expr(*node.right)),
@@ -1446,7 +1446,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprBlock {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         label: (node.label).map(|it| f.fold_label(it)),
         block: f.fold_block(node.block),
     }
@@ -1458,7 +1458,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprBreak {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         break_token: node.break_token,
         label: (node.label).map(|it| f.fold_lifetime(it)),
         expr: (node.expr).map(|it| Box::new(f.fold_expr(*it))),
@@ -1471,7 +1471,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprCall {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         func: Box::new(f.fold_expr(*node.func)),
         paren_token: node.paren_token,
         args: crate::punctuated::fold(node.args, f, F::fold_expr),
@@ -1484,7 +1484,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprCast {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         expr: Box::new(f.fold_expr(*node.expr)),
         as_token: node.as_token,
         ty: Box::new(f.fold_type(*node.ty)),
@@ -1497,7 +1497,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprClosure {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         lifetimes: (node.lifetimes).map(|it| f.fold_bound_lifetimes(it)),
         constness: node.constness,
         movability: node.movability,
@@ -1517,7 +1517,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprConst {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         const_token: node.const_token,
         block: f.fold_block(node.block),
     }
@@ -1529,7 +1529,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprContinue {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         continue_token: node.continue_token,
         label: (node.label).map(|it| f.fold_lifetime(it)),
     }
@@ -1541,7 +1541,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprField {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         base: Box::new(f.fold_expr(*node.base)),
         dot_token: node.dot_token,
         member: f.fold_member(node.member),
@@ -1554,7 +1554,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprForLoop {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         label: (node.label).map(|it| f.fold_label(it)),
         for_token: node.for_token,
         pat: Box::new(f.fold_pat(*node.pat)),
@@ -1570,7 +1570,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprGroup {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         group_token: node.group_token,
         expr: Box::new(f.fold_expr(*node.expr)),
     }
@@ -1582,7 +1582,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprIf {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         if_token: node.if_token,
         cond: Box::new(f.fold_expr(*node.cond)),
         then_branch: f.fold_block(node.then_branch),
@@ -1597,7 +1597,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprIndex {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         expr: Box::new(f.fold_expr(*node.expr)),
         bracket_token: node.bracket_token,
         index: Box::new(f.fold_expr(*node.index)),
@@ -1610,7 +1610,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprInfer {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         underscore_token: node.underscore_token,
     }
 }
@@ -1621,7 +1621,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprLet {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         let_token: node.let_token,
         pat: Box::new(f.fold_pat(*node.pat)),
         eq_token: node.eq_token,
@@ -1635,7 +1635,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprLit {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         lit: f.fold_lit(node.lit),
     }
 }
@@ -1646,7 +1646,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprLoop {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         label: (node.label).map(|it| f.fold_label(it)),
         loop_token: node.loop_token,
         body: f.fold_block(node.body),
@@ -1659,7 +1659,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprMacro {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         mac: f.fold_macro(node.mac),
     }
 }
@@ -1670,11 +1670,11 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprMatch {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         match_token: node.match_token,
         expr: Box::new(f.fold_expr(*node.expr)),
         brace_token: node.brace_token,
-        arms: crate::gen::helper::fold::vec(node.arms, f, F::fold_arm),
+        arms: fold_vec(node.arms, f, F::fold_arm),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1687,7 +1687,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprMethodCall {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         receiver: Box::new(f.fold_expr(*node.receiver)),
         dot_token: node.dot_token,
         method: f.fold_ident(node.method),
@@ -1704,7 +1704,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprParen {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         paren_token: node.paren_token,
         expr: Box::new(f.fold_expr(*node.expr)),
     }
@@ -1716,7 +1716,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprPath {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         qself: (node.qself).map(|it| f.fold_qself(it)),
         path: f.fold_path(node.path),
     }
@@ -1728,7 +1728,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprRange {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         start: (node.start).map(|it| Box::new(f.fold_expr(*it))),
         limits: f.fold_range_limits(node.limits),
         end: (node.end).map(|it| Box::new(f.fold_expr(*it))),
@@ -1744,7 +1744,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprReference {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         and_token: node.and_token,
         mutability: node.mutability,
         expr: Box::new(f.fold_expr(*node.expr)),
@@ -1757,7 +1757,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprRepeat {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         bracket_token: node.bracket_token,
         expr: Box::new(f.fold_expr(*node.expr)),
         semi_token: node.semi_token,
@@ -1771,7 +1771,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprReturn {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         return_token: node.return_token,
         expr: (node.expr).map(|it| Box::new(f.fold_expr(*it))),
     }
@@ -1783,7 +1783,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprStruct {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         qself: (node.qself).map(|it| f.fold_qself(it)),
         path: f.fold_path(node.path),
         brace_token: node.brace_token,
@@ -1799,7 +1799,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprTry {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         expr: Box::new(f.fold_expr(*node.expr)),
         question_token: node.question_token,
     }
@@ -1814,7 +1814,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprTryBlock {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         try_token: node.try_token,
         block: f.fold_block(node.block),
     }
@@ -1826,7 +1826,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprTuple {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         paren_token: node.paren_token,
         elems: crate::punctuated::fold(node.elems, f, F::fold_expr),
     }
@@ -1838,7 +1838,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprUnary {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         op: f.fold_un_op(node.op),
         expr: Box::new(f.fold_expr(*node.expr)),
     }
@@ -1850,7 +1850,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprUnsafe {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         unsafe_token: node.unsafe_token,
         block: f.fold_block(node.block),
     }
@@ -1862,7 +1862,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprWhile {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         label: (node.label).map(|it| f.fold_label(it)),
         while_token: node.while_token,
         cond: Box::new(f.fold_expr(*node.cond)),
@@ -1876,7 +1876,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ExprYield {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         yield_token: node.yield_token,
         expr: (node.expr).map(|it| Box::new(f.fold_expr(*it))),
     }
@@ -1888,7 +1888,7 @@ where
     F: Fold + ?Sized,
 {
     crate::Field {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         mutability: f.fold_field_mutability(node.mutability),
         ident: (node.ident).map(|it| f.fold_ident(it)),
@@ -1916,7 +1916,7 @@ where
     F: Fold + ?Sized,
 {
     crate::FieldPat {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         member: f.fold_member(node.member),
         colon_token: node.colon_token,
         pat: Box::new(f.fold_pat(*node.pat)),
@@ -1929,7 +1929,7 @@ where
     F: Fold + ?Sized,
 {
     crate::FieldValue {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         member: f.fold_member(node.member),
         colon_token: node.colon_token,
         expr: f.fold_expr(node.expr),
@@ -1984,8 +1984,8 @@ where
 {
     crate::File {
         shebang: node.shebang,
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
-        items: crate::gen::helper::fold::vec(node.items, f, F::fold_item),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
+        items: fold_vec(node.items, f, F::fold_item),
     }
 }
 #[cfg(feature = "full")]
@@ -2037,7 +2037,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ForeignItemFn {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         sig: f.fold_signature(node.sig),
         semi_token: node.semi_token,
@@ -2053,7 +2053,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ForeignItemMacro {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         mac: f.fold_macro(node.mac),
         semi_token: node.semi_token,
     }
@@ -2068,7 +2068,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ForeignItemStatic {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         static_token: node.static_token,
         mutability: f.fold_static_mutability(node.mutability),
@@ -2088,7 +2088,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ForeignItemType {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         type_token: node.type_token,
         ident: f.fold_ident(node.ident),
@@ -2198,7 +2198,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ImplItemConst {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         defaultness: node.defaultness,
         const_token: node.const_token,
@@ -2218,7 +2218,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ImplItemFn {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         defaultness: node.defaultness,
         sig: f.fold_signature(node.sig),
@@ -2235,7 +2235,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ImplItemMacro {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         mac: f.fold_macro(node.mac),
         semi_token: node.semi_token,
     }
@@ -2250,7 +2250,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ImplItemType {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         defaultness: node.defaultness,
         type_token: node.type_token,
@@ -2333,7 +2333,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemConst {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         const_token: node.const_token,
         ident: f.fold_ident(node.ident),
@@ -2352,7 +2352,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemEnum {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         enum_token: node.enum_token,
         ident: f.fold_ident(node.ident),
@@ -2371,7 +2371,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemExternCrate {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         extern_token: node.extern_token,
         crate_token: node.crate_token,
@@ -2387,7 +2387,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemFn {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         sig: f.fold_signature(node.sig),
         block: Box::new(f.fold_block(*node.block)),
@@ -2403,11 +2403,11 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemForeignMod {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         unsafety: node.unsafety,
         abi: f.fold_abi(node.abi),
         brace_token: node.brace_token,
-        items: crate::gen::helper::fold::vec(node.items, f, F::fold_foreign_item),
+        items: fold_vec(node.items, f, F::fold_foreign_item),
     }
 }
 #[cfg(feature = "full")]
@@ -2417,7 +2417,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemImpl {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         defaultness: node.defaultness,
         unsafety: node.unsafety,
         impl_token: node.impl_token,
@@ -2425,7 +2425,7 @@ where
         trait_: (node.trait_).map(|it| ((it).0, f.fold_path((it).1), (it).2)),
         self_ty: Box::new(f.fold_type(*node.self_ty)),
         brace_token: node.brace_token,
-        items: crate::gen::helper::fold::vec(node.items, f, F::fold_impl_item),
+        items: fold_vec(node.items, f, F::fold_impl_item),
     }
 }
 #[cfg(feature = "full")]
@@ -2435,7 +2435,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemMacro {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         ident: (node.ident).map(|it| f.fold_ident(it)),
         mac: f.fold_macro(node.mac),
         semi_token: node.semi_token,
@@ -2448,13 +2448,12 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemMod {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         unsafety: node.unsafety,
         mod_token: node.mod_token,
         ident: f.fold_ident(node.ident),
-        content: (node.content)
-            .map(|it| ((it).0, crate::gen::helper::fold::vec((it).1, f, F::fold_item))),
+        content: (node.content).map(|it| ((it).0, fold_vec((it).1, f, F::fold_item))),
         semi: node.semi,
     }
 }
@@ -2465,7 +2464,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemStatic {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         static_token: node.static_token,
         mutability: f.fold_static_mutability(node.mutability),
@@ -2484,7 +2483,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemStruct {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         struct_token: node.struct_token,
         ident: f.fold_ident(node.ident),
@@ -2500,7 +2499,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemTrait {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         unsafety: node.unsafety,
         auto_token: node.auto_token,
@@ -2515,7 +2514,7 @@ where
             F::fold_type_param_bound,
         ),
         brace_token: node.brace_token,
-        items: crate::gen::helper::fold::vec(node.items, f, F::fold_trait_item),
+        items: fold_vec(node.items, f, F::fold_trait_item),
     }
 }
 #[cfg(feature = "full")]
@@ -2528,7 +2527,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemTraitAlias {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         trait_token: node.trait_token,
         ident: f.fold_ident(node.ident),
@@ -2545,7 +2544,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemType {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         type_token: node.type_token,
         ident: f.fold_ident(node.ident),
@@ -2562,7 +2561,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemUnion {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         union_token: node.union_token,
         ident: f.fold_ident(node.ident),
@@ -2577,7 +2576,7 @@ where
     F: Fold + ?Sized,
 {
     crate::ItemUse {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         vis: f.fold_visibility(node.vis),
         use_token: node.use_token,
         leading_colon: node.leading_colon,
@@ -2615,7 +2614,7 @@ where
     F: Fold + ?Sized,
 {
     crate::LifetimeParam {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         lifetime: f.fold_lifetime(node.lifetime),
         colon_token: node.colon_token,
         bounds: crate::punctuated::fold(node.bounds, f, F::fold_lifetime),
@@ -2718,7 +2717,7 @@ where
     F: Fold + ?Sized,
 {
     crate::Local {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         let_token: node.let_token,
         pat: f.fold_pat(node.pat),
         init: (node.init).map(|it| f.fold_local_init(it)),
@@ -2881,7 +2880,7 @@ where
     F: Fold + ?Sized,
 {
     crate::PatIdent {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         by_ref: node.by_ref,
         mutability: node.mutability,
         ident: f.fold_ident(node.ident),
@@ -2895,7 +2894,7 @@ where
     F: Fold + ?Sized,
 {
     crate::PatOr {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         leading_vert: node.leading_vert,
         cases: crate::punctuated::fold(node.cases, f, F::fold_pat),
     }
@@ -2907,7 +2906,7 @@ where
     F: Fold + ?Sized,
 {
     crate::PatParen {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         paren_token: node.paren_token,
         pat: Box::new(f.fold_pat(*node.pat)),
     }
@@ -2919,7 +2918,7 @@ where
     F: Fold + ?Sized,
 {
     crate::PatReference {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         and_token: node.and_token,
         mutability: node.mutability,
         pat: Box::new(f.fold_pat(*node.pat)),
@@ -2932,7 +2931,7 @@ where
     F: Fold + ?Sized,
 {
     crate::PatRest {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         dot2_token: node.dot2_token,
     }
 }
@@ -2943,7 +2942,7 @@ where
     F: Fold + ?Sized,
 {
     crate::PatSlice {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         bracket_token: node.bracket_token,
         elems: crate::punctuated::fold(node.elems, f, F::fold_pat),
     }
@@ -2955,7 +2954,7 @@ where
     F: Fold + ?Sized,
 {
     crate::PatStruct {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         qself: (node.qself).map(|it| f.fold_qself(it)),
         path: f.fold_path(node.path),
         brace_token: node.brace_token,
@@ -2970,7 +2969,7 @@ where
     F: Fold + ?Sized,
 {
     crate::PatTuple {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         paren_token: node.paren_token,
         elems: crate::punctuated::fold(node.elems, f, F::fold_pat),
     }
@@ -2985,7 +2984,7 @@ where
     F: Fold + ?Sized,
 {
     crate::PatTupleStruct {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         qself: (node.qself).map(|it| f.fold_qself(it)),
         path: f.fold_path(node.path),
         paren_token: node.paren_token,
@@ -2999,7 +2998,7 @@ where
     F: Fold + ?Sized,
 {
     crate::PatType {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         pat: Box::new(f.fold_pat(*node.pat)),
         colon_token: node.colon_token,
         ty: Box::new(f.fold_type(*node.ty)),
@@ -3012,7 +3011,7 @@ where
     F: Fold + ?Sized,
 {
     crate::PatWild {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         underscore_token: node.underscore_token,
     }
 }
@@ -3126,7 +3125,7 @@ where
     F: Fold + ?Sized,
 {
     crate::Receiver {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         reference: (node.reference)
             .map(|it| ((it).0, ((it).1).map(|it| f.fold_lifetime(it)))),
         mutability: node.mutability,
@@ -3214,7 +3213,7 @@ where
     F: Fold + ?Sized,
 {
     crate::StmtMacro {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         mac: f.fold_macro(node.mac),
         semi_token: node.semi_token,
     }
@@ -3280,7 +3279,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TraitItemConst {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         const_token: node.const_token,
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
@@ -3297,7 +3296,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TraitItemFn {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         sig: f.fold_signature(node.sig),
         default: (node.default).map(|it| f.fold_block(it)),
         semi_token: node.semi_token,
@@ -3313,7 +3312,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TraitItemMacro {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         mac: f.fold_macro(node.mac),
         semi_token: node.semi_token,
     }
@@ -3328,7 +3327,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TraitItemType {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         type_token: node.type_token,
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
@@ -3478,7 +3477,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypeParam {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         ident: f.fold_ident(node.ident),
         colon_token: node.colon_token,
         bounds: crate::punctuated::fold(node.bounds, f, F::fold_type_param_bound),
@@ -3692,7 +3691,7 @@ where
     F: Fold + ?Sized,
 {
     crate::Variadic {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         pat: (node.pat).map(|it| (Box::new(f.fold_pat(*(it).0)), (it).1)),
         dots: node.dots,
         comma: node.comma,
@@ -3705,7 +3704,7 @@ where
     F: Fold + ?Sized,
 {
     crate::Variant {
-        attrs: crate::gen::helper::fold::vec(node.attrs, f, F::fold_attribute),
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
         ident: f.fold_ident(node.ident),
         fields: f.fold_fields(node.fields),
         discriminant: (node.discriminant).map(|it| ((it).0, f.fold_expr((it).1))),
@@ -3769,4 +3768,12 @@ where
             crate::WherePredicate::Type(f.fold_predicate_type(_binding_0))
         }
     }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+fn fold_vec<T, V, F>(vec: Vec<T>, fold: &mut V, mut f: F) -> Vec<T>
+where
+    V: ?Sized,
+    F: FnMut(&mut V, T) -> T,
+{
+    vec.into_iter().map(|it| f(fold, it)).collect()
 }

@@ -850,10 +850,6 @@ mod gen {
     #[cfg(feature = "extra-traits")]
     #[rustfmt::skip]
     mod hash;
-
-    #[cfg(any(feature = "full", feature = "derive"))]
-    #[path = "../gen_helper.rs"]
-    mod helper;
 }
 
 #[cfg(feature = "fold")]
