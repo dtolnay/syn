@@ -34,7 +34,7 @@ fn visit(
             let Type::Syn(t) = &**t else { unimplemented!() };
             let method = method_name(t);
             Some(quote! {
-                FoldHelper::lift(#name, f, F::#method)
+                fold_vec(#name, f, F::#method)
             })
         }
         Type::Punctuated(p) => {
@@ -230,9 +230,6 @@ pub fn generate(defs: &Definitions) -> Result<()> {
                 clippy::needless_pass_by_ref_mut,
             )]
 
-            #[cfg(any(feature = "full", feature = "derive"))]
-            use crate::gen::helper::fold::FoldHelper;
-
             #full_macro
 
             /// Syntax tree traversal to transform the nodes of an owned syntax tree.
@@ -245,6 +242,15 @@ pub fn generate(defs: &Definitions) -> Result<()> {
             }
 
             #impls
+
+            #[cfg(any(feature = "derive", feature = "full"))]
+            fn fold_vec<T, V, F>(vec: Vec<T>, fold: &mut V, mut f: F) -> Vec<T>
+            where
+                V: ?Sized,
+                F: FnMut(&mut V, T) -> T,
+            {
+                vec.into_iter().map(|it| f(fold, it)).collect()
+            }
         },
     )?;
     Ok(())
