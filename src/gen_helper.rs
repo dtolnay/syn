@@ -19,7 +19,7 @@ pub(crate) mod fold {
         }
     }
 
-    impl<T, U> FoldHelper for Punctuated<T, U> {
+    impl<T, P> FoldHelper for Punctuated<T, P> {
         type Item = T;
         fn lift<F>(self, mut f: F) -> Self
         where
@@ -27,7 +27,7 @@ pub(crate) mod fold {
         {
             self.into_pairs()
                 .map(Pair::into_tuple)
-                .map(|(t, u)| Pair::new(f(t), u))
+                .map(|(t, p)| Pair::new(f(t), p))
                 .collect()
         }
     }
