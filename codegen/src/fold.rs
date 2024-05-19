@@ -42,7 +42,7 @@ fn visit(
             let Type::Syn(t) = t else { unimplemented!() };
             let method = method_name(t);
             Some(quote! {
-                FoldHelper::lift(#name, f, F::#method)
+                crate::punctuated::fold(#name, f, F::#method)
             })
         }
         Type::Option(t) => {
