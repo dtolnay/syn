@@ -34,7 +34,7 @@ fn visit(
             let Type::Syn(t) = &**t else { unimplemented!() };
             let method = method_name(t);
             Some(quote! {
-                FoldHelper::lift(#name, f, F::#method)
+                crate::gen::helper::fold::vec(#name, f, F::#method)
             })
         }
         Type::Punctuated(p) => {
@@ -229,9 +229,6 @@ pub fn generate(defs: &Definitions) -> Result<()> {
                 clippy::needless_match,
                 clippy::needless_pass_by_ref_mut,
             )]
-
-            #[cfg(any(feature = "full", feature = "derive"))]
-            use crate::gen::helper::fold::FoldHelper;
 
             #full_macro
 
