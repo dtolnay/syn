@@ -1083,13 +1083,17 @@ where
     V: ?Sized,
     F: FnMut(&mut V, T) -> T,
 {
-    punctuated
-        .into_pairs()
-        .map(|pair| match pair {
-            Pair::Punctuated(t, p) => Pair::Punctuated(f(fold, t), p),
-            Pair::End(t) => Pair::End(f(fold, t)),
-        })
-        .collect()
+    Punctuated {
+        inner: punctuated
+            .inner
+            .into_iter()
+            .map(|(t, p)| (f(fold, t), p))
+            .collect(),
+        last: match punctuated.last {
+            Some(t) => Some(Box::new(f(fold, *t))),
+            None => None,
+        },
+    }
 }
 
 #[cfg(feature = "printing")]
