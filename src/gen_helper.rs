@@ -26,8 +26,10 @@ pub(crate) mod fold {
             F: FnMut(Self::Item) -> Self::Item,
         {
             self.into_pairs()
-                .map(Pair::into_tuple)
-                .map(|(t, p)| Pair::new(f(t), p))
+                .map(|pair| match pair {
+                    Pair::Punctuated(t, p) => Pair::Punctuated(f(t), p),
+                    Pair::End(t) => Pair::End(f(t)),
+                })
                 .collect()
         }
     }
