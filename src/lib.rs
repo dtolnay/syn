@@ -250,7 +250,7 @@
 
 // Syn types in rustdoc of other crates get linked to here.
 #![doc(html_root_url = "https://docs.rs/syn/2.0.64")]
-#![cfg_attr(doc_cfg, feature(doc_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![deny(unsafe_op_in_unsafe_fn)]
 #![allow(non_camel_case_types)]
 #![cfg_attr(not(check_cfg), allow(unexpected_cfgs))]
@@ -319,13 +319,13 @@ pub mod token;
 #[cfg(any(feature = "full", feature = "derive"))]
 mod attr;
 #[cfg(any(feature = "full", feature = "derive"))]
-#[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::attr::{AttrStyle, Attribute, Meta, MetaList, MetaNameValue};
 
 mod bigint;
 
 #[cfg(feature = "parsing")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 pub mod buffer;
 
 #[cfg(any(
@@ -341,13 +341,13 @@ mod custom_punctuation;
 #[cfg(any(feature = "full", feature = "derive"))]
 mod data;
 #[cfg(any(feature = "full", feature = "derive"))]
-#[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::data::{Field, Fields, FieldsNamed, FieldsUnnamed, Variant};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod derive;
 #[cfg(feature = "derive")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "derive")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
 pub use crate::derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
 
 mod drops;
@@ -358,16 +358,16 @@ pub use crate::error::{Error, Result};
 #[cfg(any(feature = "full", feature = "derive"))]
 mod expr;
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub use crate::expr::{Arm, Label, RangeLimits};
 #[cfg(any(feature = "full", feature = "derive"))]
-#[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::expr::{
     Expr, ExprBinary, ExprCall, ExprCast, ExprField, ExprIndex, ExprLit, ExprMacro, ExprMethodCall,
     ExprParen, ExprPath, ExprReference, ExprStruct, ExprUnary, FieldValue, Index, Member,
 };
 #[cfg(any(feature = "full", feature = "derive"))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub use crate::expr::{
     ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak, ExprClosure, ExprConst,
     ExprContinue, ExprForLoop, ExprGroup, ExprIf, ExprInfer, ExprLet, ExprLoop, ExprMatch,
@@ -376,13 +376,13 @@ pub use crate::expr::{
 };
 
 #[cfg(feature = "parsing")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 pub mod ext;
 
 #[cfg(feature = "full")]
 mod file;
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub use crate::file::File;
 
 #[cfg(all(feature = "full", feature = "printing"))]
@@ -391,7 +391,7 @@ mod fixup;
 #[cfg(any(feature = "full", feature = "derive"))]
 mod generics;
 #[cfg(any(feature = "full", feature = "derive"))]
-#[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::generics::{
     BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeParam, PredicateLifetime,
     PredicateType, TraitBound, TraitBoundModifier, TypeParam, TypeParamBound, WhereClause,
@@ -399,7 +399,7 @@ pub use crate::generics::{
 };
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 #[cfg_attr(
-    doc_cfg,
+    docsrs,
     doc(cfg(all(any(feature = "full", feature = "derive"), feature = "printing")))
 )]
 pub use crate::generics::{ImplGenerics, Turbofish, TypeGenerics};
@@ -411,7 +411,7 @@ pub use crate::ident::Ident;
 #[cfg(feature = "full")]
 mod item;
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub use crate::item::{
     FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
     ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType, ImplRestriction, Item,
@@ -439,12 +439,12 @@ mod lookahead;
 #[cfg(any(feature = "full", feature = "derive"))]
 mod mac;
 #[cfg(any(feature = "full", feature = "derive"))]
-#[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::mac::{Macro, MacroDelimiter};
 
 #[cfg(all(feature = "parsing", any(feature = "full", feature = "derive")))]
 #[cfg_attr(
-    doc_cfg,
+    docsrs,
     doc(cfg(all(feature = "parsing", any(feature = "full", feature = "derive"))))
 )]
 pub mod meta;
@@ -452,11 +452,11 @@ pub mod meta;
 #[cfg(any(feature = "full", feature = "derive"))]
 mod op;
 #[cfg(any(feature = "full", feature = "derive"))]
-#[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::op::{BinOp, UnOp};
 
 #[cfg(feature = "parsing")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 pub mod parse;
 
 #[cfg(all(feature = "parsing", feature = "proc-macro"))]
@@ -468,7 +468,7 @@ mod parse_quote;
 #[cfg(feature = "full")]
 mod pat;
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub use crate::pat::{
     FieldPat, Pat, PatConst, PatIdent, PatLit, PatMacro, PatOr, PatParen, PatPath, PatRange,
     PatReference, PatRest, PatSlice, PatStruct, PatTuple, PatTupleStruct, PatType, PatWild,
@@ -477,7 +477,7 @@ pub use crate::pat::{
 #[cfg(any(feature = "full", feature = "derive"))]
 mod path;
 #[cfg(any(feature = "full", feature = "derive"))]
-#[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::path::{
     AngleBracketedGenericArguments, AssocConst, AssocType, Constraint, GenericArgument,
     ParenthesizedGenericArguments, Path, PathArguments, PathSegment, QSelf,
@@ -497,7 +497,7 @@ pub mod punctuated;
 #[cfg(any(feature = "full", feature = "derive"))]
 mod restriction;
 #[cfg(any(feature = "full", feature = "derive"))]
-#[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::restriction::{FieldMutability, VisRestricted, Visibility};
 
 mod sealed;
@@ -505,13 +505,13 @@ mod sealed;
 mod span;
 
 #[cfg(all(feature = "parsing", feature = "printing"))]
-#[cfg_attr(doc_cfg, doc(cfg(all(feature = "parsing", feature = "printing"))))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "printing"))))]
 pub mod spanned;
 
 #[cfg(feature = "full")]
 mod stmt;
 #[cfg(feature = "full")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub use crate::stmt::{Block, Local, LocalInit, Stmt, StmtMacro};
 
 mod thread;
@@ -522,7 +522,7 @@ mod tt;
 #[cfg(any(feature = "full", feature = "derive"))]
 mod ty;
 #[cfg(any(feature = "full", feature = "derive"))]
-#[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::ty::{
     Abi, BareFnArg, BareVariadic, ReturnType, Type, TypeArray, TypeBareFn, TypeGroup,
     TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference,
@@ -617,7 +617,7 @@ mod gen {
     /// }
     /// ```
     #[cfg(feature = "fold")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "fold")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "fold")))]
     #[rustfmt::skip]
     pub mod fold;
 
@@ -736,7 +736,7 @@ mod gen {
     /// }
     /// ```
     #[cfg(feature = "visit")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "visit")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "visit")))]
     #[rustfmt::skip]
     pub mod visit;
 
@@ -830,7 +830,7 @@ mod gen {
     /// }
     /// ```
     #[cfg(feature = "visit-mut")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "visit-mut")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "visit-mut")))]
     #[rustfmt::skip]
     pub mod visit_mut;
 
@@ -856,15 +856,15 @@ mod gen {
 }
 
 #[cfg(feature = "fold")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "fold")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "fold")))]
 pub use crate::gen::fold;
 
 #[cfg(feature = "visit")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "visit")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "visit")))]
 pub use crate::gen::visit;
 
 #[cfg(feature = "visit-mut")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "visit-mut")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "visit-mut")))]
 pub use crate::gen::visit_mut;
 
 // Not public API.
@@ -911,7 +911,7 @@ pub mod __private;
 /// }
 /// ```
 #[cfg(all(feature = "parsing", feature = "proc-macro"))]
-#[cfg_attr(doc_cfg, doc(cfg(all(feature = "parsing", feature = "proc-macro"))))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "proc-macro"))))]
 pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
     parse::Parser::parse(T::parse, tokens)
 }
@@ -929,7 +929,7 @@ pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
 ///
 /// [`syn::parse`]: parse()
 #[cfg(feature = "parsing")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
     parse::Parser::parse2(T::parse, tokens)
 }
@@ -956,7 +956,7 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 /// # run().unwrap();
 /// ```
 #[cfg(feature = "parsing")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
     parse::Parser::parse_str(T::parse, s)
 }
@@ -994,7 +994,7 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 /// # run().unwrap();
 /// ```
 #[cfg(all(feature = "parsing", feature = "full"))]
-#[cfg_attr(doc_cfg, doc(cfg(all(feature = "parsing", feature = "full"))))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "full"))))]
 pub fn parse_file(mut content: &str) -> Result<File> {
     // Strip the BOM if it is present
     const BOM: &str = "\u{feff}";

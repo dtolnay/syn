@@ -10,7 +10,7 @@ ast_enum! {
     /// This type is a [syntax tree enum].
     ///
     /// [syntax tree enum]: crate::expr::Expr#syntax-tree-enums
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum Visibility {
         /// A public visibility level: `pub`.
         Public(Token![pub]),
@@ -27,7 +27,7 @@ ast_enum! {
 ast_struct! {
     /// A visibility level restricted to some path: `pub(self)` or
     /// `pub(super)` or `pub(crate)` or `pub(in some::module)`.
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct VisRestricted {
         pub pub_token: Token![pub],
         pub paren_token: token::Paren,
@@ -38,7 +38,7 @@ ast_struct! {
 
 ast_enum! {
     /// Unused, but reserved for RFC 3323 restrictions.
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     #[non_exhaustive]
     pub enum FieldMutability {
         None,
@@ -67,7 +67,7 @@ pub(crate) mod parsing {
     use crate::restriction::{VisRestricted, Visibility};
     use crate::token;
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for Visibility {
         fn parse(input: ParseStream) -> Result<Self> {
             // Recognize an empty None-delimited group, as produced by a $:vis
@@ -150,7 +150,7 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::ToTokens;
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for Visibility {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             match self {
@@ -161,7 +161,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for VisRestricted {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.pub_token.to_tokens(tokens);

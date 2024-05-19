@@ -21,7 +21,7 @@ ast_enum_of_structs! {
     /// This type is a [syntax tree enum].
     ///
     /// [syntax tree enum]: crate::expr::Expr#syntax-tree-enums
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     #[non_exhaustive]
     pub enum Pat {
         /// A const block: `const { ... }`.
@@ -106,7 +106,7 @@ ast_struct! {
     ///
     /// It may also be a unit struct or struct variant (e.g. `None`), or a
     /// constant; these cannot be distinguished syntactically.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct PatIdent {
         pub attrs: Vec<Attribute>,
         pub by_ref: Option<Token![ref]>,
@@ -118,7 +118,7 @@ ast_struct! {
 
 ast_struct! {
     /// A pattern that matches any one of a set of cases.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct PatOr {
         pub attrs: Vec<Attribute>,
         pub leading_vert: Option<Token![|]>,
@@ -128,7 +128,7 @@ ast_struct! {
 
 ast_struct! {
     /// A parenthesized pattern: `(A | B)`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct PatParen {
         pub attrs: Vec<Attribute>,
         pub paren_token: token::Paren,
@@ -138,7 +138,7 @@ ast_struct! {
 
 ast_struct! {
     /// A reference pattern: `&mut var`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct PatReference {
         pub attrs: Vec<Attribute>,
         pub and_token: Token![&],
@@ -149,7 +149,7 @@ ast_struct! {
 
 ast_struct! {
     /// The dots in a tuple or slice pattern: `[0, 1, ..]`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct PatRest {
         pub attrs: Vec<Attribute>,
         pub dot2_token: Token![..],
@@ -158,7 +158,7 @@ ast_struct! {
 
 ast_struct! {
     /// A dynamically sized slice pattern: `[a, b, ref i @ .., y, z]`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct PatSlice {
         pub attrs: Vec<Attribute>,
         pub bracket_token: token::Bracket,
@@ -168,7 +168,7 @@ ast_struct! {
 
 ast_struct! {
     /// A struct or struct variant pattern: `Variant { x, y, .. }`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct PatStruct {
         pub attrs: Vec<Attribute>,
         pub qself: Option<QSelf>,
@@ -181,7 +181,7 @@ ast_struct! {
 
 ast_struct! {
     /// A tuple pattern: `(a, b)`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct PatTuple {
         pub attrs: Vec<Attribute>,
         pub paren_token: token::Paren,
@@ -191,7 +191,7 @@ ast_struct! {
 
 ast_struct! {
     /// A tuple struct or tuple variant pattern: `Variant(x, y, .., z)`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct PatTupleStruct {
         pub attrs: Vec<Attribute>,
         pub qself: Option<QSelf>,
@@ -203,7 +203,7 @@ ast_struct! {
 
 ast_struct! {
     /// A type ascription pattern: `foo: f64`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct PatType {
         pub attrs: Vec<Attribute>,
         pub pat: Box<Pat>,
@@ -214,7 +214,7 @@ ast_struct! {
 
 ast_struct! {
     /// A pattern that matches any value: `_`.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct PatWild {
         pub attrs: Vec<Attribute>,
         pub underscore_token: Token![_],
@@ -226,7 +226,7 @@ ast_struct! {
     ///
     /// Patterns like the fields of Foo `{ x, ref y, ref mut z }` are treated
     /// the same as `x: x, y: ref y, z: ref mut z` but there is no colon token.
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct FieldPat {
         pub attrs: Vec<Attribute>,
         pub member: Member,
@@ -258,7 +258,7 @@ pub(crate) mod parsing {
     use crate::verbatim;
     use proc_macro2::TokenStream;
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Pat {
         /// Parse a pattern that does _not_ involve `|` at the top level.
         ///
@@ -382,7 +382,7 @@ pub(crate) mod parsing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for PatType {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(PatType {
@@ -814,7 +814,7 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PatIdent {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -828,7 +828,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PatOr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -837,7 +837,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PatParen {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -847,7 +847,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PatReference {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -857,7 +857,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PatRest {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -865,7 +865,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PatSlice {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -875,7 +875,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PatStruct {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -891,7 +891,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PatTuple {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -910,7 +910,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PatTupleStruct {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -921,7 +921,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PatType {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -931,7 +931,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PatWild {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -939,7 +939,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for FieldPat {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());

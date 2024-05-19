@@ -1154,14 +1154,14 @@ impl<'a> ParseBuffer<'a> {
     }
 }
 
-#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 impl<T: Parse> Parse for Box<T> {
     fn parse(input: ParseStream) -> Result<Self> {
         input.parse().map(Box::new)
     }
 }
 
-#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 impl<T: Parse + Token> Parse for Option<T> {
     fn parse(input: ParseStream) -> Result<Self> {
         if T::peek(input.cursor()) {
@@ -1172,14 +1172,14 @@ impl<T: Parse + Token> Parse for Option<T> {
     }
 }
 
-#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 impl Parse for TokenStream {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| Ok((cursor.token_stream(), Cursor::empty())))
     }
 }
 
-#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 impl Parse for TokenTree {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| match cursor.token_tree() {
@@ -1189,7 +1189,7 @@ impl Parse for TokenTree {
     }
 }
 
-#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 impl Parse for Group {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| {
@@ -1203,7 +1203,7 @@ impl Parse for Group {
     }
 }
 
-#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 impl Parse for Punct {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| match cursor.punct() {
@@ -1213,7 +1213,7 @@ impl Parse for Punct {
     }
 }
 
-#[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 impl Parse for Literal {
     fn parse(input: ParseStream) -> Result<Self> {
         input.step(|cursor| match cursor.literal() {
@@ -1242,7 +1242,7 @@ pub trait Parser: Sized {
     /// This function will check that the input is fully parsed. If there are
     /// any unparsed tokens at the end of the stream, an error is returned.
     #[cfg(feature = "proc-macro")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "proc-macro")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "proc-macro")))]
     fn parse(self, tokens: proc_macro::TokenStream) -> Result<Self::Output> {
         self.parse2(proc_macro2::TokenStream::from(tokens))
     }
@@ -1351,7 +1351,7 @@ impl Parse for Nothing {
 }
 
 #[cfg(feature = "printing")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
 impl ToTokens for Nothing {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let _ = tokens;
@@ -1359,7 +1359,7 @@ impl ToTokens for Nothing {
 }
 
 #[cfg(feature = "clone-impls")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for Nothing {
     fn clone(&self) -> Self {
         *self
@@ -1367,11 +1367,11 @@ impl Clone for Nothing {
 }
 
 #[cfg(feature = "clone-impls")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Copy for Nothing {}
 
 #[cfg(feature = "extra-traits")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for Nothing {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str("Nothing")
@@ -1379,11 +1379,11 @@ impl Debug for Nothing {
 }
 
 #[cfg(feature = "extra-traits")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Eq for Nothing {}
 
 #[cfg(feature = "extra-traits")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for Nothing {
     fn eq(&self, _other: &Self) -> bool {
         true
@@ -1391,7 +1391,7 @@ impl PartialEq for Nothing {
 }
 
 #[cfg(feature = "extra-traits")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for Nothing {
     fn hash<H: Hasher>(&self, _state: &mut H) {}
 }

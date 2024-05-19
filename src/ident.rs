@@ -72,7 +72,7 @@ mod parsing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for Ident {
         fn parse(input: ParseStream) -> Result<Self> {
             input.step(|cursor| {
