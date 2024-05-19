@@ -274,6 +274,7 @@
     clippy::let_underscore_untyped, // https://github.com/rust-lang/rust-clippy/issues/10410
     clippy::manual_assert,
     clippy::manual_let_else,
+    clippy::manual_map,
     clippy::match_like_matches_macro,
     clippy::match_on_vec_items,
     clippy::match_same_arms,
