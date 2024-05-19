@@ -127,7 +127,7 @@ macro_rules! generate_to_tokens {
     };
 
     (($($arms:tt)*) $tokens:ident $name:ident {}) => {
-        #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+        #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
         impl ::quote::ToTokens for $name {
             fn to_tokens(&self, $tokens: &mut ::proc_macro2::TokenStream) {
                 match self {

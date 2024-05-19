@@ -263,7 +263,7 @@ impl<T, P> Punctuated<T, P> {
     /// Parsing continues until the end of this parse stream. The entire content
     /// of this parse stream must consist of `T` and `P`.
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_terminated(input: ParseStream) -> Result<Self>
     where
         T: Parse,
@@ -281,7 +281,7 @@ impl<T, P> Punctuated<T, P> {
     ///
     /// [`parse_terminated`]: Punctuated::parse_terminated
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_terminated_with(
         input: ParseStream,
         parser: fn(ParseStream) -> Result<T>,
@@ -315,7 +315,7 @@ impl<T, P> Punctuated<T, P> {
     /// is not followed by a `P`, even if there are remaining tokens in the
     /// stream.
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_separated_nonempty(input: ParseStream) -> Result<Self>
     where
         T: Parse,
@@ -333,7 +333,7 @@ impl<T, P> Punctuated<T, P> {
     ///
     /// [`parse_separated_nonempty`]: Punctuated::parse_separated_nonempty
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_separated_nonempty_with(
         input: ParseStream,
         parser: fn(ParseStream) -> Result<T>,
@@ -358,7 +358,7 @@ impl<T, P> Punctuated<T, P> {
 }
 
 #[cfg(feature = "clone-impls")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl<T, P> Clone for Punctuated<T, P>
 where
     T: Clone,
@@ -378,7 +378,7 @@ where
 }
 
 #[cfg(feature = "extra-traits")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl<T, P> Eq for Punctuated<T, P>
 where
     T: Eq,
@@ -387,7 +387,7 @@ where
 }
 
 #[cfg(feature = "extra-traits")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl<T, P> PartialEq for Punctuated<T, P>
 where
     T: PartialEq,
@@ -400,7 +400,7 @@ where
 }
 
 #[cfg(feature = "extra-traits")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl<T, P> Hash for Punctuated<T, P>
 where
     T: Hash,
@@ -414,7 +414,7 @@ where
 }
 
 #[cfg(feature = "extra-traits")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "extra-traits")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl<T: Debug, P: Debug> Debug for Punctuated<T, P> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut list = f.debug_list();
@@ -1007,7 +1007,7 @@ impl<T, P> Pair<T, P> {
 }
 
 #[cfg(feature = "clone-impls")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl<T, P> Pair<&T, &P> {
     pub fn cloned(self) -> Pair<T, P>
     where
@@ -1022,7 +1022,7 @@ impl<T, P> Pair<&T, &P> {
 }
 
 #[cfg(feature = "clone-impls")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl<T, P> Clone for Pair<T, P>
 where
     T: Clone,
@@ -1037,7 +1037,7 @@ where
 }
 
 #[cfg(feature = "clone-impls")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "clone-impls")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl<T, P> Copy for Pair<T, P>
 where
     T: Copy,
@@ -1079,7 +1079,7 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt};
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl<T, P> ToTokens for Punctuated<T, P>
     where
         T: ToTokens,
@@ -1090,7 +1090,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl<T, P> ToTokens for Pair<T, P>
     where
         T: ToTokens,

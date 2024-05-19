@@ -13,7 +13,7 @@ use proc_macro2::TokenTree;
 
 ast_struct! {
     /// A macro invocation: `println!("{}", mac)`.
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Macro {
         pub path: Path,
         pub bang_token: Token![!],
@@ -24,7 +24,7 @@ ast_struct! {
 
 ast_enum! {
     /// A grouping token that surrounds a macro body: `m!(...)` or `m!{...}` or `m![...]`.
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum MacroDelimiter {
         Paren(Paren),
         Brace(Brace),
@@ -134,7 +134,7 @@ impl Macro {
     /// }
     /// ```
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_body<T: Parse>(&self) -> Result<T> {
         self.parse_body_with(T::parse)
     }
@@ -142,7 +142,7 @@ impl Macro {
     /// Parse the tokens within the macro invocation's delimiters using the
     /// given parser.
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_body_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
         let scope = self.delimiter.span().close();
         crate::parse::parse_scoped(parser, scope, self.tokens.clone())
@@ -176,7 +176,7 @@ pub(crate) mod parsing {
     use crate::parse::{Parse, ParseStream};
     use crate::path::Path;
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for Macro {
         fn parse(input: ParseStream) -> Result<Self> {
             let tokens;
@@ -212,7 +212,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for Macro {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.path.to_tokens(tokens);

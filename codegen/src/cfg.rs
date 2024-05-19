@@ -24,17 +24,17 @@ pub fn features(features: &Features, doc_cfg: impl Into<DocCfg>) -> TokenStream 
     match (cfg, doc_cfg.into()) {
         (Some(cfg), DocCfg::Ordinary) => quote! {
             #[#cfg]
-            #[cfg_attr(doc_cfg, doc(#cfg))]
+            #[cfg_attr(docsrs, doc(#cfg))]
         },
         (Some(cfg), DocCfg::Override(overriding_cfg)) => quote! {
             #[#cfg]
-            #[cfg_attr(doc_cfg, doc(cfg(feature = #overriding_cfg)))]
+            #[cfg_attr(docsrs, doc(cfg(feature = #overriding_cfg)))]
         },
         (Some(cfg), DocCfg::None) => quote! {
             #[#cfg]
         },
         (None, DocCfg::Override(overriding_cfg)) => quote! {
-            #[cfg_attr(doc_cfg, doc(cfg(feature = #overriding_cfg)))]
+            #[cfg_attr(docsrs, doc(cfg(feature = #overriding_cfg)))]
         },
         (None, DocCfg::Ordinary | DocCfg::None) => TokenStream::new(),
     }

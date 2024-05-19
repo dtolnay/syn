@@ -169,7 +169,7 @@ ast_struct! {
     /// };
     /// assert_eq!(doc, attr);
     /// ```
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Attribute {
         pub pound_token: Token![#],
         pub style: AttrStyle,
@@ -218,7 +218,7 @@ impl Attribute {
     /// # anyhow::Ok(())
     /// ```
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_args<T: Parse>(&self) -> Result<T> {
         self.parse_args_with(T::parse)
     }
@@ -241,7 +241,7 @@ impl Attribute {
     /// # anyhow::Ok(())
     /// ```
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_args_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
         match &self.meta {
             Meta::Path(path) => Err(crate::error::new2(
@@ -387,7 +387,7 @@ impl Attribute {
     /// # Ok(())
     /// ```
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_nested_meta(
         &self,
         logic: impl FnMut(ParseNestedMeta) -> Result<()>,
@@ -402,7 +402,7 @@ impl Attribute {
     /// See
     /// [*Parsing from tokens to Attribute*](#parsing-from-tokens-to-attribute).
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
         let mut attrs = Vec::new();
         while input.peek(Token![#]) {
@@ -418,7 +418,7 @@ impl Attribute {
     /// See
     /// [*Parsing from tokens to Attribute*](#parsing-from-tokens-to-attribute).
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_inner(input: ParseStream) -> Result<Vec<Self>> {
         let mut attrs = Vec::new();
         parsing::parse_inner(input, &mut attrs)?;
@@ -441,7 +441,7 @@ ast_enum! {
     /// - `#![feature(proc_macro)]`
     /// - `//! # Example`
     /// - `/*! Please file an issue */`
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum AttrStyle {
         Outer,
         Inner(Token![!]),
@@ -469,7 +469,7 @@ ast_enum_of_structs! {
     /// This type is a [syntax tree enum].
     ///
     /// [syntax tree enum]: crate::expr::Expr#syntax-tree-enums
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum Meta {
         Path(Path),
 
@@ -483,7 +483,7 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// A structured list within an attribute, like `derive(Copy, Clone)`.
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct MetaList {
         pub path: Path,
         pub delimiter: MacroDelimiter,
@@ -493,7 +493,7 @@ ast_struct! {
 
 ast_struct! {
     /// A name-value pair within an attribute, like `feature = "nightly"`.
-    #[cfg_attr(doc_cfg, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct MetaNameValue {
         pub path: Path,
         pub eq_token: Token![=],
@@ -516,7 +516,7 @@ impl Meta {
 
     /// Error if this is a `Meta::List` or `Meta::NameValue`.
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn require_path_only(&self) -> Result<&Path> {
         let error_span = match self {
             Meta::Path(path) => return Ok(path),
@@ -528,7 +528,7 @@ impl Meta {
 
     /// Error if this is a `Meta::Path` or `Meta::NameValue`.
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn require_list(&self) -> Result<&MetaList> {
         match self {
             Meta::List(meta) => Ok(meta),
@@ -546,7 +546,7 @@ impl Meta {
 
     /// Error if this is a `Meta::Path` or `Meta::List`.
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn require_name_value(&self) -> Result<&MetaNameValue> {
         match self {
             Meta::NameValue(meta) => Ok(meta),
@@ -566,14 +566,14 @@ impl Meta {
 impl MetaList {
     /// See [`Attribute::parse_args`].
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_args<T: Parse>(&self) -> Result<T> {
         self.parse_args_with(T::parse)
     }
 
     /// See [`Attribute::parse_args_with`].
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_args_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
         let scope = self.delimiter.span().close();
         crate::parse::parse_scoped(parser, scope, self.tokens.clone())
@@ -581,7 +581,7 @@ impl MetaList {
 
     /// See [`Attribute::parse_nested_meta`].
     #[cfg(feature = "parsing")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_nested_meta(
         &self,
         logic: impl FnMut(ParseNestedMeta) -> Result<()>,
@@ -664,7 +664,7 @@ pub(crate) mod parsing {
         })
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for Meta {
         fn parse(input: ParseStream) -> Result<Self> {
             let path = input.call(Path::parse_mod_style)?;
@@ -672,7 +672,7 @@ pub(crate) mod parsing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for MetaList {
         fn parse(input: ParseStream) -> Result<Self> {
             let path = input.call(Path::parse_mod_style)?;
@@ -680,7 +680,7 @@ pub(crate) mod parsing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "parsing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for MetaNameValue {
         fn parse(input: ParseStream) -> Result<Self> {
             let path = input.call(Path::parse_mod_style)?;
@@ -761,7 +761,7 @@ mod printing {
     use proc_macro2::TokenStream;
     use quote::ToTokens;
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for Attribute {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.pound_token.to_tokens(tokens);
@@ -774,7 +774,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for MetaList {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.path.to_tokens(tokens);
@@ -782,7 +782,7 @@ mod printing {
         }
     }
 
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "printing")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for MetaNameValue {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.path.to_tokens(tokens);
