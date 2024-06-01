@@ -536,6 +536,7 @@ mod verbatim;
 #[cfg(all(feature = "parsing", feature = "full"))]
 mod whitespace;
 
+#[rustfmt::skip] // https://github.com/rust-lang/rustfmt/issues/6176
 mod gen {
     /// Syntax tree traversal to transform the nodes of an owned syntax tree.
     ///
