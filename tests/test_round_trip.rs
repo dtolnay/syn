@@ -220,7 +220,9 @@ fn normalize(krate: &mut Crate) {
             for arg in &mut e.args {
                 match arg {
                     AngleBracketedArg::Arg(arg) => self.visit_generic_arg(arg),
-                    AngleBracketedArg::Constraint(constraint) => self.visit_constraint(constraint),
+                    AngleBracketedArg::Constraint(constraint) => {
+                        self.visit_assoc_item_constraint(constraint);
+                    }
                 }
             }
         }
