@@ -83,11 +83,10 @@ mod librustc_parse {
             let emitter = Box::new(SilentEmitter);
             let handler = DiagCtxt::new(emitter);
             let sess = ParseSess::with_dcx(handler, source_map);
-            if let Err(diagnostic) = rustc_parse::parse_crate_from_source_str(
-                FileName::Custom("bench".to_owned()),
-                content.to_owned(),
-                &sess,
-            ) {
+            let name = FileName::Custom("bench".to_owned());
+            let mut parser =
+                rustc_parse::new_parser_from_source_str(&sess, name, content.to_owned()).unwrap();
+            if let Err(diagnostic) = parser.parse_crate_mod() {
                 diagnostic.cancel();
                 return Err(());
             };
