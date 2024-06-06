@@ -160,7 +160,8 @@ fn librustc_parse(content: String, sess: &ParseSess) -> PResult<Crate> {
     static COUNTER: AtomicUsize = AtomicUsize::new(0);
     let counter = COUNTER.fetch_add(1, Ordering::Relaxed);
     let name = FileName::Custom(format!("test_round_trip{}", counter));
-    parse::parse_crate_from_source_str(name, content, sess)
+    let mut parser = parse::new_parser_from_source_str(sess, name, content).unwrap();
+    parser.parse_crate_mod()
 }
 
 fn translate_message(diagnostic: &Diag) -> Cow<'static, str> {
