@@ -42,6 +42,7 @@ unicode-ident = "1"
 [dev-dependencies]
 anyhow = "1"
 automod = "1"
+clap = { version = "4", features = ["deprecated", "derive"] }
 insta = "1"
 ref-cast = "1"
 rustversion = "1"

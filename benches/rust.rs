@@ -23,6 +23,7 @@ mod macros;
 #[path = "../tests/repo/mod.rs"]
 mod repo;
 
+use clap::Parser;
 use std::fs;
 use std::path::Path;
 use std::time::{Duration, Instant};
@@ -143,7 +144,15 @@ fn exec(mut codepath: impl FnMut(&Path, &str) -> Result<(), ()>) -> Duration {
     begin.elapsed()
 }
 
+#[derive(Parser, Debug)]
+struct Args {
+    #[arg(long)]
+    bench: bool,
+}
+
 fn main() {
+    _ = Args::parse();
+
     repo::clone_rust();
 
     macro_rules! testcases {
