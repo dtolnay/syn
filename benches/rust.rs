@@ -1,9 +1,9 @@
 // $ cargo bench --features full,test --bench rust
 //
 // Syn only, useful for profiling:
-// $ RUSTFLAGS='--cfg syn_only' cargo build --release --features full,test --bench rust
+// $ cargo bench --features full,test --bench rust -- --syn-only
 
-#![cfg_attr(not(syn_only), feature(rustc_private))]
+#![feature(rustc_private)]
 #![recursion_limit = "1024"]
 #![allow(
     clippy::arc_with_non_send_sync,
@@ -28,7 +28,6 @@ use std::fs;
 use std::path::Path;
 use std::time::{Duration, Instant};
 
-#[cfg(not(syn_only))]
 mod tokenstream_parse {
     use proc_macro2::TokenStream;
     use std::path::Path;
@@ -47,7 +46,6 @@ mod syn_parse {
     }
 }
 
-#[cfg(not(syn_only))]
 mod librustc_parse {
     extern crate rustc_data_structures;
     extern crate rustc_driver;
@@ -103,7 +101,6 @@ mod librustc_parse {
     }
 }
 
-#[cfg(not(syn_only))]
 mod read_from_disk {
     use std::path::Path;
 
@@ -148,26 +145,26 @@ fn exec(mut codepath: impl FnMut(&Path, &str) -> Result<(), ()>) -> Duration {
 struct Args {
     #[arg(long)]
     bench: bool,
+    #[arg(long)]
+    syn_only: bool,
 }
 
 fn main() {
-    _ = Args::parse();
+    let args = Args::parse();
 
     repo::clone_rust();
 
     macro_rules! testcases {
-        ($($(#[$cfg:meta])* $name:ident,)*) => {
+        ($($name:ident),*) => {
             [
                 $(
-                    $(#[$cfg])*
                     (stringify!($name), $name::bench as fn(&Path, &str) -> Result<(), ()>),
                 )*
             ]
         };
     }
 
-    #[cfg(not(syn_only))]
-    {
+    if !args.syn_only {
         let mut lines = 0;
         let mut files = 0;
         exec(|_path, content| {
@@ -178,15 +175,13 @@ fn main() {
         eprintln!("\n{} lines in {} files", lines, files);
     }
 
-    for (name, f) in testcases!(
-        #[cfg(not(syn_only))]
-        read_from_disk,
-        #[cfg(not(syn_only))]
-        tokenstream_parse,
-        syn_parse,
-        #[cfg(not(syn_only))]
-        librustc_parse,
-    ) {
+    let testcases: &[_] = if args.syn_only {
+        &testcases!(syn_parse)
+    } else {
+        &testcases!(read_from_disk, tokenstream_parse, syn_parse, librustc_parse)
+    };
+
+    for (name, f) in testcases {
         eprint!("{:20}", format!("{}:", name));
         let elapsed = exec(f);
         eprintln!(
