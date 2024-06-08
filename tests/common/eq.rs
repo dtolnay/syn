@@ -465,7 +465,7 @@ spanless_eq_struct!(AngleBracketedArgs; span args);
 spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arm; attrs pat guard body span id is_placeholder);
 spanless_eq_struct!(AssocItemConstraint; id ident gen_args kind span);
-spanless_eq_struct!(AttrItem; path args tokens);
+spanless_eq_struct!(AttrItem; unsafety path args tokens);
 spanless_eq_struct!(AttrTokenStream; 0);
 spanless_eq_struct!(Attribute; kind id style span);
 spanless_eq_struct!(AttributesData; attrs tokens);
