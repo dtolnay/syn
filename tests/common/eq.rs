@@ -576,7 +576,7 @@ spanless_eq_enum!(FormatTrait; Display Debug LowerExp UpperExp Octal Pointer Bin
 spanless_eq_enum!(GenBlockKind; Async Gen AsyncGen);
 spanless_eq_enum!(GenericArg; Lifetime(0) Type(0) Const(0));
 spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0));
-spanless_eq_enum!(GenericBound; Trait(0 1) Outlives(0));
+spanless_eq_enum!(GenericBound; Trait(0 1) Outlives(0) Use(0 1));
 spanless_eq_enum!(GenericParamKind; Lifetime Type(default) Const(ty kw_span default));
 spanless_eq_enum!(ImplPolarity; Positive Negative(0));
 spanless_eq_enum!(Inline; Yes No);
@@ -638,7 +638,7 @@ spanless_eq_enum!(PatKind; Wild Ident(0 1 2) Struct(0 1 2 3) TupleStruct(0 1 2)
     Slice(0) Rest Never Paren(0) MacCall(0) Err(0));
 spanless_eq_enum!(TyKind; Slice(0) Array(0 1) Ptr(0) Ref(0 1) BareFn(0) Never
     Tup(0) AnonStruct(0 1) AnonUnion(0 1) Path(0 1) TraitObject(0 1)
-    ImplTrait(0 1 2) Paren(0) Typeof(0) Infer ImplicitSelf MacCall(0) CVarArgs
+    ImplTrait(0 1) Paren(0) Typeof(0) Infer ImplicitSelf MacCall(0) CVarArgs
     Pat(0 1) Dummy Err(0));
 
 impl SpanlessEq for Ident {

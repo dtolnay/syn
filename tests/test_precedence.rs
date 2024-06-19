@@ -303,6 +303,7 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
                 ) => {}
                 GenericBound::Trait(ty, _modifier) => self.visit_poly_trait_ref(ty),
                 GenericBound::Outlives(_lifetime) => {}
+                GenericBound::Use(..) => {}
             }
         }
 
