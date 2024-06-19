@@ -425,10 +425,3 @@ pub(crate) fn open_span_of_group(cursor: Cursor) -> Span {
         _ => cursor.span(),
     }
 }
-
-pub(crate) fn close_span_of_group(cursor: Cursor) -> Span {
-    match cursor.entry() {
-        Entry::Group(group, _) => group.span_close(),
-        _ => cursor.span(),
-    }
-}
