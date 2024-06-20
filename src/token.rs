@@ -264,6 +264,11 @@ macro_rules! define_keywords {
                 }
             }
 
+            #[cfg(all(feature = "parsing", docsrs))]
+            impl crate::lookahead::Peek for $name {
+                type Token = Self;
+            }
+
             impl std::default::Default for $name {
                 fn default() -> Self {
                     $name {
@@ -391,6 +396,11 @@ macro_rules! define_punctuation_structs {
                 }
             }
 
+            #[cfg(all(feature = "parsing", docsrs))]
+            impl crate::lookahead::Peek for $name {
+                type Token = Self;
+            }
+
             impl std::default::Default for $name {
                 fn default() -> Self {
                     $name {
@@ -498,6 +508,11 @@ macro_rules! define_delimiters {
                 $name {
                     span: span.into_spans(),
                 }
+            }
+
+            #[cfg(all(feature = "parsing", docsrs))]
+            impl crate::lookahead::Peek for $name {
+                type Token = Self;
             }
 
             impl std::default::Default for $name {

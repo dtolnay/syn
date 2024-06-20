@@ -807,6 +807,11 @@ macro_rules! lit_extra_traits {
                 match marker {}
             }
         }
+
+        #[cfg(all(feature = "parsing", docsrs))]
+        impl lookahead::Peek for $ty {
+            type Token = Self;
+        }
     };
 }
 
@@ -825,6 +830,11 @@ pub_if_not_doc! {
     pub fn LitBool(marker: lookahead::TokenMarker) -> LitBool {
         match marker {}
     }
+}
+
+#[cfg(all(feature = "parsing", docsrs))]
+impl lookahead::Peek for LitBool {
+    type Token = Self;
 }
 
 /// The style of a string literal, either plain quoted or a raw string like
@@ -846,6 +856,11 @@ pub_if_not_doc! {
     pub fn Lit(marker: lookahead::TokenMarker) -> Lit {
         match marker {}
     }
+}
+
+#[cfg(all(feature = "parsing", docsrs))]
+impl lookahead::Peek for Lit {
+    type Token = Self;
 }
 
 #[cfg(feature = "parsing")]
