@@ -309,13 +309,31 @@ impl<'a> Cursor<'a> {
 
     /// Returns the `Span` of the current token, or `Span::call_site()` if this
     /// cursor points to eof.
-    pub fn span(self) -> Span {
+    pub fn span(mut self) -> Span {
         match self.entry() {
             Entry::Group(group, _) => group.span(),
             Entry::Literal(literal) => literal.span(),
             Entry::Ident(ident) => ident.span(),
             Entry::Punct(punct) => punct.span(),
-            Entry::End(_) => Span::call_site(),
+            Entry::End(offset) => {
+                let start_of_buffer = unsafe { self.ptr.offset(*offset) };
+                // Locate the matching Group begin token.
+                let mut depth = 1;
+                while start_of_buffer < self.ptr {
+                    self.ptr = unsafe { self.ptr.offset(-1) };
+                    match self.entry() {
+                        Entry::Group(group, _) => {
+                            depth -= 1;
+                            if depth == 0 {
+                                return group.span_close();
+                            }
+                        }
+                        Entry::End(_) => depth += 1,
+                        Entry::Literal(_) | Entry::Ident(_) | Entry::Punct(_) => {}
+                    }
+                }
+                Span::call_site()
+            }
         }
     }
 
