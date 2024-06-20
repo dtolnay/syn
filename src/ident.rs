@@ -1,5 +1,7 @@
 #[cfg(feature = "parsing")]
 use crate::lookahead;
+#[cfg(all(feature = "parsing", docsrs))]
+use crate::lookahead::Peek;
 
 pub use proc_macro2::Ident;
 
@@ -10,6 +12,11 @@ pub_if_not_doc! {
     pub fn Ident(marker: lookahead::TokenMarker) -> Ident {
         match marker {}
     }
+}
+
+#[cfg(all(feature = "parsing", docsrs))]
+impl Peek for Ident {
+    type Token = Self;
 }
 
 macro_rules! ident_from_token {
