@@ -100,8 +100,6 @@ use crate::lifetime::Lifetime;
 #[cfg(feature = "parsing")]
 use crate::lit::{Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr};
 #[cfg(feature = "parsing")]
-use crate::lookahead;
-#[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream};
 use crate::span::IntoSpans;
 use proc_macro2::extra::DelimSpan;
@@ -692,7 +690,7 @@ impl private::Sealed for Group {}
 #[cfg(feature = "parsing")]
 impl Token for Paren {
     fn peek(cursor: Cursor) -> bool {
-        lookahead::is_delimiter(cursor, Delimiter::Parenthesis)
+        cursor.group(Delimiter::Parenthesis).is_some()
     }
 
     fn display() -> &'static str {
@@ -703,7 +701,7 @@ impl Token for Paren {
 #[cfg(feature = "parsing")]
 impl Token for Brace {
     fn peek(cursor: Cursor) -> bool {
-        lookahead::is_delimiter(cursor, Delimiter::Brace)
+        cursor.group(Delimiter::Brace).is_some()
     }
 
     fn display() -> &'static str {
@@ -714,7 +712,7 @@ impl Token for Brace {
 #[cfg(feature = "parsing")]
 impl Token for Bracket {
     fn peek(cursor: Cursor) -> bool {
-        lookahead::is_delimiter(cursor, Delimiter::Bracket)
+        cursor.group(Delimiter::Bracket).is_some()
     }
 
     fn display() -> &'static str {
@@ -725,7 +723,7 @@ impl Token for Bracket {
 #[cfg(feature = "parsing")]
 impl Token for Group {
     fn peek(cursor: Cursor) -> bool {
-        lookahead::is_delimiter(cursor, Delimiter::None)
+        cursor.group(Delimiter::None).is_some()
     }
 
     fn display() -> &'static str {
