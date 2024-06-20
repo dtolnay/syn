@@ -98,7 +98,7 @@ use crate::error::Result;
 #[cfg(feature = "parsing")]
 use crate::lifetime::Lifetime;
 #[cfg(feature = "parsing")]
-use crate::lit::{Lit, LitBool, LitByte, LitByteStr, LitChar, LitFloat, LitInt, LitStr};
+use crate::lit::{Lit, LitBool, LitByte, LitByteStr, LitCStr, LitChar, LitFloat, LitInt, LitStr};
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream};
 use crate::span::IntoSpans;
@@ -199,6 +199,7 @@ impl_token!("lifetime" Lifetime);
 impl_token!("literal" Lit);
 impl_token!("string literal" LitStr);
 impl_token!("byte string literal" LitByteStr);
+impl_token!("C-string literal" LitCStr);
 impl_token!("byte literal" LitByte);
 impl_token!("character literal" LitChar);
 impl_token!("integer literal" LitInt);
