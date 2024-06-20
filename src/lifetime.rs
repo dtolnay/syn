@@ -120,11 +120,6 @@ pub_if_not_doc! {
     }
 }
 
-#[cfg(all(feature = "parsing", docsrs))]
-impl lookahead::Peek for Lifetime {
-    type Token = Self;
-}
-
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::error::Result;

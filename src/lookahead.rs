@@ -162,5 +162,4 @@ impl<S> IntoSpans<S> for TokenMarker {
     }
 }
 
-#[cfg(not(docsrs))]
 impl<F: Copy + FnOnce(TokenMarker) -> T, T: Token> Sealed for F {}

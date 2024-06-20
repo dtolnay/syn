@@ -4,6 +4,7 @@ use crate::buffer::Cursor;
 use crate::error::Result;
 use crate::parse::ParseStream;
 use crate::parse::Peek;
+use crate::sealed::lookahead;
 use crate::token::CustomToken;
 use proc_macro2::Ident;
 
@@ -114,8 +115,7 @@ impl CustomToken for private::IdentAny {
     }
 }
 
-#[cfg(not(docsrs))]
-impl crate::sealed::lookahead::Sealed for private::PeekFn {}
+impl lookahead::Sealed for private::PeekFn {}
 
 mod private {
     use proc_macro2::Ident;
