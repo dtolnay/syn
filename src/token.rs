@@ -98,8 +98,6 @@ use crate::error::Result;
 #[cfg(feature = "parsing")]
 use crate::lifetime::Lifetime;
 #[cfg(feature = "parsing")]
-use crate::lit::{Lit, LitBool, LitByte, LitByteStr, LitCStr, LitChar, LitFloat, LitInt, LitStr};
-#[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream};
 use crate::span::IntoSpans;
 use proc_macro2::extra::DelimSpan;
@@ -161,49 +159,6 @@ pub(crate) mod private {
 
 #[cfg(feature = "parsing")]
 impl private::Sealed for Ident {}
-
-#[cfg(feature = "parsing")]
-fn peek_impl(cursor: Cursor, peek: fn(ParseStream) -> bool) -> bool {
-    use crate::parse::Unexpected;
-    use std::cell::Cell;
-    use std::rc::Rc;
-
-    let scope = Span::call_site();
-    let unexpected = Rc::new(Cell::new(Unexpected::None));
-    let buffer = crate::parse::new_parse_buffer(scope, cursor, unexpected);
-    peek(&buffer)
-}
-
-macro_rules! impl_token {
-    ($display:literal $name:ty) => {
-        #[cfg(feature = "parsing")]
-        impl Token for $name {
-            fn peek(cursor: Cursor) -> bool {
-                fn peek(input: ParseStream) -> bool {
-                    <$name as Parse>::parse(input).is_ok()
-                }
-                peek_impl(cursor, peek)
-            }
-
-            fn display() -> &'static str {
-                $display
-            }
-        }
-
-        #[cfg(feature = "parsing")]
-        impl private::Sealed for $name {}
-    };
-}
-
-impl_token!("literal" Lit);
-impl_token!("string literal" LitStr);
-impl_token!("byte string literal" LitByteStr);
-impl_token!("C-string literal" LitCStr);
-impl_token!("byte literal" LitByte);
-impl_token!("character literal" LitChar);
-impl_token!("integer literal" LitInt);
-impl_token!("floating point literal" LitFloat);
-impl_token!("boolean literal" LitBool);
 
 macro_rules! impl_low_level_token {
     ($display:literal $($path:ident)::+ $get:ident) => {
