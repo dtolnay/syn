@@ -18,7 +18,7 @@ include = [
 keywords = ["macros", "syn"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/dtolnay/syn"
-rust-version = "1.60"
+rust-version = "1.61"
 
 [features]
 default = ["derive", "parsing", "printing", "clone-impls", "proc-macro"]
