@@ -195,7 +195,6 @@ macro_rules! impl_token {
     };
 }
 
-impl_token!("lifetime" Lifetime);
 impl_token!("literal" Lit);
 impl_token!("string literal" LitStr);
 impl_token!("byte string literal" LitByteStr);
@@ -205,12 +204,11 @@ impl_token!("character literal" LitChar);
 impl_token!("integer literal" LitInt);
 impl_token!("floating point literal" LitFloat);
 impl_token!("boolean literal" LitBool);
-impl_token!("group token" proc_macro2::Group);
 
 macro_rules! impl_low_level_token {
-    ($display:literal $ty:ident $get:ident) => {
+    ($display:literal $($path:ident)::+ $get:ident) => {
         #[cfg(feature = "parsing")]
-        impl Token for $ty {
+        impl Token for $($path)::+ {
             fn peek(cursor: Cursor) -> bool {
                 cursor.$get().is_some()
             }
@@ -221,13 +219,15 @@ macro_rules! impl_low_level_token {
         }
 
         #[cfg(feature = "parsing")]
-        impl private::Sealed for $ty {}
+        impl private::Sealed for $($path)::+ {}
     };
 }
 
 impl_low_level_token!("punctuation token" Punct punct);
 impl_low_level_token!("literal" Literal literal);
 impl_low_level_token!("token" TokenTree token_tree);
+impl_low_level_token!("group token" proc_macro2::Group any_group);
+impl_low_level_token!("lifetime" Lifetime lifetime);
 
 #[cfg(feature = "parsing")]
 impl<T: CustomToken> private::Sealed for T {}
