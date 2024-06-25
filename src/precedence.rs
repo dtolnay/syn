@@ -36,10 +36,7 @@ pub(crate) enum Precedence {
     // unary - * ! & &mut
     #[cfg(feature = "printing")]
     Prefix,
-    // function calls, array indexing, field expressions, method calls, ?
-    #[cfg(feature = "printing")]
-    Postfix,
-    // paths, loops
+    // paths, loops, function calls, array indexing, field expressions, method calls
     #[cfg(feature = "printing")]
     Unambiguous,
 }
@@ -92,30 +89,29 @@ impl Precedence {
             Expr::Cast(_) => Precedence::Cast,
             Expr::Let(_) | Expr::Reference(_) | Expr::Unary(_) => Precedence::Prefix,
 
-            Expr::Await(_)
-            | Expr::Call(_)
-            | Expr::MethodCall(_)
-            | Expr::Field(_)
-            | Expr::Index(_)
-            | Expr::Try(_) => Precedence::Postfix,
-
             Expr::Array(_)
             | Expr::Async(_)
+            | Expr::Await(_)
             | Expr::Block(_)
+            | Expr::Call(_)
             | Expr::Const(_)
             | Expr::Continue(_)
+            | Expr::Field(_)
             | Expr::ForLoop(_)
             | Expr::Group(_)
             | Expr::If(_)
+            | Expr::Index(_)
             | Expr::Infer(_)
             | Expr::Lit(_)
             | Expr::Loop(_)
             | Expr::Macro(_)
             | Expr::Match(_)
+            | Expr::MethodCall(_)
             | Expr::Paren(_)
             | Expr::Path(_)
             | Expr::Repeat(_)
             | Expr::Struct(_)
+            | Expr::Try(_)
             | Expr::TryBlock(_)
             | Expr::Tuple(_)
             | Expr::Unsafe(_)

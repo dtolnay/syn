@@ -3180,7 +3180,7 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
         print_subexpression(
             &e.base,
-            Precedence::of(&e.base) < Precedence::Postfix,
+            Precedence::of(&e.base) < Precedence::Unambiguous,
             tokens,
             fixup.leftmost_subexpression_with_dot(),
         );
@@ -3313,7 +3313,7 @@ pub(crate) mod printing {
         let precedence = if let Expr::Field(_) = &*e.func {
             Precedence::Any
         } else {
-            Precedence::Postfix
+            Precedence::Unambiguous
         };
         print_subexpression(
             &e.func,
@@ -3424,7 +3424,7 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
         print_subexpression(
             &e.base,
-            Precedence::of(&e.base) < Precedence::Postfix,
+            Precedence::of(&e.base) < Precedence::Unambiguous,
             tokens,
             #[cfg(feature = "full")]
             fixup.leftmost_subexpression_with_dot(),
@@ -3519,7 +3519,7 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
         print_subexpression(
             &e.expr,
-            Precedence::of(&e.expr) < Precedence::Postfix,
+            Precedence::of(&e.expr) < Precedence::Unambiguous,
             tokens,
             #[cfg(feature = "full")]
             fixup.leftmost_subexpression(),
@@ -3635,7 +3635,7 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
         print_subexpression(
             &e.receiver,
-            Precedence::of(&e.receiver) < Precedence::Postfix,
+            Precedence::of(&e.receiver) < Precedence::Unambiguous,
             tokens,
             #[cfg(feature = "full")]
             fixup.leftmost_subexpression_with_dot(),
@@ -3785,7 +3785,7 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
         print_subexpression(
             &e.expr,
-            Precedence::of(&e.expr) < Precedence::Postfix,
+            Precedence::of(&e.expr) < Precedence::Unambiguous,
             tokens,
             fixup.leftmost_subexpression_with_dot(),
         );
