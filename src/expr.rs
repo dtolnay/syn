@@ -3286,8 +3286,15 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
         e.break_token.to_tokens(tokens);
         e.label.to_tokens(tokens);
-        if let Some(expr) = &e.expr {
-            print_expr(expr, tokens, fixup.subsequent_subexpression());
+        if let Some(value) = &e.expr {
+            print_subexpression(
+                value,
+                // Parenthesize `break 'inner: loop { break 'inner 1 } + 1`
+                //                     ^---------------------------------^
+                e.label.is_none() && classify::expr_leading_label(value),
+                tokens,
+                fixup.subsequent_subexpression(),
+            );
         }
     }
 
