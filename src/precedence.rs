@@ -28,9 +28,9 @@ pub(crate) enum Precedence {
     // << >>
     Shift,
     // + -
-    Arithmetic,
+    Sum,
     // * / %
-    Term,
+    Product,
     // as
     Cast,
     // unary - * ! & &mut
@@ -44,8 +44,8 @@ pub(crate) enum Precedence {
 impl Precedence {
     pub(crate) fn of_binop(op: &BinOp) -> Self {
         match op {
-            BinOp::Add(_) | BinOp::Sub(_) => Precedence::Arithmetic,
-            BinOp::Mul(_) | BinOp::Div(_) | BinOp::Rem(_) => Precedence::Term,
+            BinOp::Add(_) | BinOp::Sub(_) => Precedence::Sum,
+            BinOp::Mul(_) | BinOp::Div(_) | BinOp::Rem(_) => Precedence::Product,
             BinOp::And(_) => Precedence::And,
             BinOp::Or(_) => Precedence::Or,
             BinOp::BitXor(_) => Precedence::BitXor,
