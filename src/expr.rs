@@ -3119,6 +3119,13 @@ pub(crate) mod printing {
         }
     }
 
+    fn precedence_of_rhs(e: &Expr, #[cfg(feature = "full")] fixup: FixupContext) -> Precedence {
+        #[cfg(feature = "full")]
+        return fixup.precedence_of_rhs(e);
+        #[cfg(not(feature = "full"))]
+        return Precedence::of(e);
+    }
+
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprArray {
@@ -3150,7 +3157,7 @@ pub(crate) mod printing {
         e.eq_token.to_tokens(tokens);
         print_subexpression(
             &e.right,
-            Precedence::of_rhs(&e.right) < Precedence::Assign,
+            precedence_of_rhs(&e.right, fixup) < Precedence::Assign,
             tokens,
             fixup.subsequent_subexpression(),
         );
@@ -3209,7 +3216,11 @@ pub(crate) mod printing {
 
         let binop_prec = Precedence::of_binop(&e.op);
         let left_prec = Precedence::of(&e.left);
-        let right_prec = Precedence::of_rhs(&e.right);
+        let right_prec = precedence_of_rhs(
+            &e.right,
+            #[cfg(feature = "full")]
+            fixup,
+        );
         let (mut left_needs_group, right_needs_group) = if let Precedence::Assign = binop_prec {
             (left_prec <= binop_prec, right_prec < binop_prec)
         } else {
@@ -3696,7 +3707,7 @@ pub(crate) mod printing {
         if let Some(end) = &e.end {
             print_subexpression(
                 end,
-                Precedence::of_rhs(end) <= Precedence::Range,
+                precedence_of_rhs(end, fixup) <= Precedence::Range,
                 tokens,
                 fixup.subsequent_subexpression(),
             );
@@ -3723,9 +3734,14 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
         e.and_token.to_tokens(tokens);
         e.mutability.to_tokens(tokens);
+        let prec = precedence_of_rhs(
+            &e.expr,
+            #[cfg(feature = "full")]
+            fixup,
+        );
         print_subexpression(
             &e.expr,
-            Precedence::of_rhs(&e.expr) < Precedence::Prefix,
+            prec < Precedence::Prefix,
             tokens,
             #[cfg(feature = "full")]
             fixup.subsequent_subexpression(),
@@ -3844,9 +3860,14 @@ pub(crate) mod printing {
     ) {
         outer_attrs_to_tokens(&e.attrs, tokens);
         e.op.to_tokens(tokens);
+        let prec = precedence_of_rhs(
+            &e.expr,
+            #[cfg(feature = "full")]
+            fixup,
+        );
         print_subexpression(
             &e.expr,
-            Precedence::of_rhs(&e.expr) < Precedence::Prefix,
+            prec < Precedence::Prefix,
             tokens,
             #[cfg(feature = "full")]
             fixup.subsequent_subexpression(),
