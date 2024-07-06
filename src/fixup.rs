@@ -85,6 +85,14 @@ pub(crate) struct FixupContext {
     //     }
     //
     parenthesize_exterior_struct_lit: bool,
+
+    // This is the difference between:
+    //
+    //     let _ = 1 + return 1;  // no parens if rightmost subexpression
+    //
+    //     let _ = 1 + (return 1) + 1;  // needs parens
+    //
+    parenthesize_exterior_jump: bool,
 }
 
 impl FixupContext {
@@ -96,6 +104,7 @@ impl FixupContext {
         match_arm: false,
         leftmost_subexpression_in_match_arm: false,
         parenthesize_exterior_struct_lit: false,
+        parenthesize_exterior_jump: false,
     };
 
     /// Create the initial fixup for printing an expression in statement
@@ -145,6 +154,7 @@ impl FixupContext {
             match_arm: false,
             leftmost_subexpression_in_match_arm: self.match_arm
                 || self.leftmost_subexpression_in_match_arm,
+            parenthesize_exterior_jump: true,
             ..self
         }
     }
@@ -159,6 +169,7 @@ impl FixupContext {
             leftmost_subexpression_in_stmt: false,
             match_arm: self.match_arm || self.leftmost_subexpression_in_match_arm,
             leftmost_subexpression_in_match_arm: false,
+            parenthesize_exterior_jump: true,
             ..self
         }
     }
@@ -205,7 +216,23 @@ impl FixupContext {
     ///     "let chain".
     pub fn needs_group_as_let_scrutinee(self, expr: &Expr) -> bool {
         self.parenthesize_exterior_struct_lit && classify::confusable_with_adjacent_block(expr)
-            || Precedence::of_rhs(expr) <= Precedence::And
+            || self.precedence_of_rhs(expr) <= Precedence::And
+    }
+
+    /// Determines the effective precedence of a subexpression. Some expressions
+    /// have higher precedence on the right side of a binary operator than on
+    /// the left.
+    pub fn precedence_of_rhs(self, expr: &Expr) -> Precedence {
+        if !self.parenthesize_exterior_jump {
+            match expr {
+                Expr::Break(_) | Expr::Closure(_) | Expr::Return(_) | Expr::Yield(_) => {
+                    return Precedence::Prefix;
+                }
+                Expr::Range(e) if e.start.is_none() => return Precedence::Prefix,
+                _ => {}
+            }
+        }
+        Precedence::of(expr)
     }
 }
 

@@ -122,18 +122,6 @@ impl Precedence {
             Expr::Closure(_) => unreachable!(),
         }
     }
-
-    #[cfg(feature = "printing")]
-    pub(crate) fn of_rhs(e: &Expr) -> Self {
-        match e {
-            Expr::Break(_) | Expr::Closure(_) | Expr::Return(_) | Expr::Yield(_) => {
-                Precedence::Prefix
-            }
-            #[cfg(feature = "full")]
-            Expr::Range(e) if e.start.is_none() => Precedence::Prefix,
-            _ => Precedence::of(e),
-        }
-    }
 }
 
 impl Copy for Precedence {}
