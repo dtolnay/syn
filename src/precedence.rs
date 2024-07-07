@@ -19,6 +19,9 @@ pub(crate) enum Precedence {
     Or,
     // &&
     And,
+    // let
+    #[cfg(feature = "printing")]
+    Let,
     // == != < > <= >=
     Compare,
     // |
@@ -97,8 +100,9 @@ impl Precedence {
             Expr::Assign(_) => Precedence::Assign,
             Expr::Range(_) => Precedence::Range,
             Expr::Binary(e) => Precedence::of_binop(&e.op),
+            Expr::Let(_) => Precedence::Let,
             Expr::Cast(_) => Precedence::Cast,
-            Expr::Let(_) | Expr::Reference(_) | Expr::Unary(_) => Precedence::Prefix,
+            Expr::Reference(_) | Expr::Unary(_) => Precedence::Prefix,
 
             Expr::Array(_)
             | Expr::Async(_)
