@@ -257,48 +257,48 @@ impl FixupContext {
     /// Determines the effective precedence of a left subexpression. Some
     /// expressions have lower precedence when adjacent to particular operators.
     pub fn leading_precedence(self, expr: &Expr) -> Precedence {
-        match expr {
+        if self.next_operator_can_begin_expr {
             // Decrease precedence of value-less jumps when followed by an
             // operator that would otherwise get interpreted as beginning a
             // value for the jump.
-            Expr::Break(_) | Expr::Return(_) | Expr::Yield(_)
-                if self.next_operator_can_begin_expr =>
-            {
-                Precedence::Jump
+            if let Expr::Break(_) | Expr::Return(_) | Expr::Yield(_) = expr {
+                return Precedence::Jump;
             }
-            Expr::Cast(cast)
-                if self.next_operator_can_begin_generics
-                    && classify::trailing_unparameterized_path(&cast.ty) =>
-            {
-                Precedence::MIN
-            }
-            _ => Precedence::of(expr),
         }
+        self.precedence(expr)
     }
 
     /// Determines the effective precedence of a right subexpression. Some
     /// expressions have higher precedence on the right side of a binary
     /// operator than on the left.
     pub fn trailing_precedence(self, expr: &Expr) -> Precedence {
-        match expr {
-            // Increase precedence of expressions that extend to the end of
-            // current statement or group.
-            Expr::Break(_) | Expr::Closure(_) | Expr::Let(_) | Expr::Return(_) | Expr::Yield(_)
-                if !self.parenthesize_exterior_jump =>
-            {
-                Precedence::Prefix
+        if !self.parenthesize_exterior_jump {
+            match expr {
+                // Increase precedence of expressions that extend to the end of
+                // current statement or group.
+                Expr::Break(_)
+                | Expr::Closure(_)
+                | Expr::Let(_)
+                | Expr::Return(_)
+                | Expr::Yield(_) => {
+                    return Precedence::Prefix;
+                }
+                Expr::Range(e) if e.start.is_none() => return Precedence::Prefix,
+                _ => {}
             }
-            Expr::Range(e) if e.start.is_none() && !self.parenthesize_exterior_jump => {
-                Precedence::Prefix
-            }
-            Expr::Cast(cast)
-                if self.next_operator_can_begin_generics
-                    && classify::trailing_unparameterized_path(&cast.ty) =>
-            {
-                Precedence::MIN
-            }
-            _ => Precedence::of(expr),
         }
+        self.precedence(expr)
+    }
+
+    fn precedence(self, expr: &Expr) -> Precedence {
+        if self.next_operator_can_begin_generics {
+            if let Expr::Cast(cast) = expr {
+                if classify::trailing_unparameterized_path(&cast.ty) {
+                    return Precedence::MIN;
+                }
+            }
+        }
+        Precedence::of(expr)
     }
 }
 
