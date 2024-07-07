@@ -3157,7 +3157,7 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
         print_subexpression(
             &e.left,
-            Precedence::of(&e.left) <= Precedence::Assign,
+            Precedence::of(&e.left) <= Precedence::Range,
             tokens,
             fixup.leftmost_subexpression(),
         );
@@ -3247,7 +3247,7 @@ pub(crate) mod printing {
 
         let binop_prec = Precedence::of_binop(&e.op);
         let (mut left_needs_group, right_needs_group) = if let Precedence::Assign = binop_prec {
-            (left_prec <= binop_prec, right_prec < binop_prec)
+            (left_prec <= Precedence::Range, right_prec < binop_prec)
         } else {
             (left_prec < binop_prec, right_prec <= binop_prec)
         };

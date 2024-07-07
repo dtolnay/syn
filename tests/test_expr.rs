@@ -677,6 +677,8 @@ fn test_fixup() {
         quote! { if let _ = ((break) - 1 || true) {} },
         quote! { if let _ = (break + 1 || true) {} },
         quote! { (break)() },
+        quote! { (..) = () },
+        quote! { (..) += () },
     ] {
         let original: Expr = syn::parse2(tokens).unwrap();
 
