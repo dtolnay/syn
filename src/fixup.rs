@@ -249,7 +249,7 @@ impl FixupContext {
                 // Decrease precedence of value-less jumps when followed by an
                 // operator that would otherwise get interpreted as beginning a
                 // value for the jump.
-                Expr::Break(_) | Expr::Return(_) | Expr::Yield(_) => return Precedence::Any,
+                Expr::Break(_) | Expr::Return(_) | Expr::Yield(_) => return Precedence::Jump,
                 _ => {}
             }
         }
