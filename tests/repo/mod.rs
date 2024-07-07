@@ -386,6 +386,7 @@ pub fn edition(path: &Path) -> &'static str {
     }
 }
 
+#[allow(dead_code)]
 pub fn abort_after() -> usize {
     match env::var("ABORT_AFTER_FAILURE") {
         Ok(s) => s.parse().expect("failed to parse ABORT_AFTER_FAILURE"),
