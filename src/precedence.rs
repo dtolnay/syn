@@ -44,6 +44,8 @@ pub(crate) enum Precedence {
 }
 
 impl Precedence {
+    pub(crate) const MIN: Self = Precedence::Any;
+
     pub(crate) fn of_binop(op: &BinOp) -> Self {
         match op {
             BinOp::Add(_) | BinOp::Sub(_) => Precedence::Sum,
