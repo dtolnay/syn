@@ -3253,30 +3253,12 @@ pub(crate) mod printing {
         };
 
         // These cases require parenthesization independently of precedence.
-        match (&*e.left, &e.op) {
+        if let BinOp::Lt(_) | BinOp::Shl(_) = &e.op {
             // `x as i32 < y` has the parser thinking that `i32 < y` is the
             // beginning of a path type. It starts trying to parse `x as (i32 <
             // y ...` instead of `(x as i32) < ...`. We need to convince it
             // _not_ to do that.
-            (_, BinOp::Lt(_) | BinOp::Shl(_)) if classify::confusable_with_adjacent_lt(&e.left) => {
-                left_needs_group = true;
-            }
-
-            // We are given `(let _ = a) OP b`.
-            //
-            // - When `OP <= LAnd` we should print `let _ = a OP b` to avoid
-            //   redundant parens as the parser will interpret this as `(let _ =
-            //   a) OP b`.
-            //
-            // - Otherwise, e.g. when we have `(let a = b) < c` in AST, parens
-            //   are required since the parser would interpret `let a = b < c`
-            //   as `let a = (b < c)`. To achieve this, we force parens.
-            #[cfg(feature = "full")]
-            (Expr::Let(_), _) if binop_prec > Precedence::And => {
-                left_needs_group = true;
-            }
-
-            _ => {}
+            left_needs_group |= classify::confusable_with_adjacent_lt(&e.left);
         }
 
         print_subexpression(

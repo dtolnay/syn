@@ -239,7 +239,7 @@ impl FixupContext {
     ///     "let chain".
     pub fn needs_group_as_let_scrutinee(self, expr: &Expr) -> bool {
         self.parenthesize_exterior_struct_lit && classify::confusable_with_adjacent_block(expr)
-            || self.trailing_precedence(expr) <= Precedence::And
+            || self.trailing_precedence(expr) < Precedence::Let
     }
 
     /// Determines the effective precedence of a left subexpression. Some
@@ -265,7 +265,11 @@ impl FixupContext {
             match expr {
                 // Increase precedence of expressions that extend to the end of
                 // current statement or group.
-                Expr::Break(_) | Expr::Closure(_) | Expr::Return(_) | Expr::Yield(_) => {
+                Expr::Break(_)
+                | Expr::Closure(_)
+                | Expr::Let(_)
+                | Expr::Return(_)
+                | Expr::Yield(_) => {
                     return Precedence::Prefix;
                 }
                 Expr::Range(e) if e.start.is_none() => return Precedence::Prefix,
