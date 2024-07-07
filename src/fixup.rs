@@ -101,6 +101,15 @@ pub(crate) struct FixupContext {
     //     let _ = return + 1;  // no paren because '+' cannot begin expr
     //
     next_operator_can_begin_expr: bool,
+
+    // This is the difference between:
+    //
+    //     let _ = x as u8 + T;
+    //
+    //     let _ = (x as u8) < T;
+    //
+    // Without parens, the latter would want to parse `u8<T...` as a type.
+    next_operator_can_begin_generics: bool,
 }
 
 impl FixupContext {
@@ -114,6 +123,7 @@ impl FixupContext {
         parenthesize_exterior_struct_lit: false,
         parenthesize_exterior_jump: false,
         next_operator_can_begin_expr: false,
+        next_operator_can_begin_generics: false,
     };
 
     /// Create the initial fixup for printing an expression in statement
@@ -189,9 +199,11 @@ impl FixupContext {
     pub fn leftmost_subexpression_with_begin_operator(
         self,
         next_operator_can_begin_expr: bool,
+        next_operator_can_begin_generics: bool,
     ) -> Self {
         FixupContext {
             next_operator_can_begin_expr,
+            next_operator_can_begin_generics,
             ..self.leftmost_subexpression()
         }
     }
@@ -245,38 +257,48 @@ impl FixupContext {
     /// Determines the effective precedence of a left subexpression. Some
     /// expressions have lower precedence when adjacent to particular operators.
     pub fn leading_precedence(self, expr: &Expr) -> Precedence {
-        if self.next_operator_can_begin_expr {
-            match expr {
-                // Decrease precedence of value-less jumps when followed by an
-                // operator that would otherwise get interpreted as beginning a
-                // value for the jump.
-                Expr::Break(_) | Expr::Return(_) | Expr::Yield(_) => return Precedence::Jump,
-                _ => {}
+        match expr {
+            // Decrease precedence of value-less jumps when followed by an
+            // operator that would otherwise get interpreted as beginning a
+            // value for the jump.
+            Expr::Break(_) | Expr::Return(_) | Expr::Yield(_)
+                if self.next_operator_can_begin_expr =>
+            {
+                Precedence::Jump
             }
+            Expr::Cast(cast)
+                if self.next_operator_can_begin_generics
+                    && classify::trailing_unparameterized_path(&cast.ty) =>
+            {
+                Precedence::MIN
+            }
+            _ => Precedence::of(expr),
         }
-        Precedence::of(expr)
     }
 
     /// Determines the effective precedence of a right subexpression. Some
     /// expressions have higher precedence on the right side of a binary
     /// operator than on the left.
     pub fn trailing_precedence(self, expr: &Expr) -> Precedence {
-        if !self.parenthesize_exterior_jump {
-            match expr {
-                // Increase precedence of expressions that extend to the end of
-                // current statement or group.
-                Expr::Break(_)
-                | Expr::Closure(_)
-                | Expr::Let(_)
-                | Expr::Return(_)
-                | Expr::Yield(_) => {
-                    return Precedence::Prefix;
-                }
-                Expr::Range(e) if e.start.is_none() => return Precedence::Prefix,
-                _ => {}
+        match expr {
+            // Increase precedence of expressions that extend to the end of
+            // current statement or group.
+            Expr::Break(_) | Expr::Closure(_) | Expr::Let(_) | Expr::Return(_) | Expr::Yield(_)
+                if !self.parenthesize_exterior_jump =>
+            {
+                Precedence::Prefix
             }
+            Expr::Range(e) if e.start.is_none() && !self.parenthesize_exterior_jump => {
+                Precedence::Prefix
+            }
+            Expr::Cast(cast)
+                if self.next_operator_can_begin_generics
+                    && classify::trailing_unparameterized_path(&cast.ty) =>
+            {
+                Precedence::MIN
+            }
+            _ => Precedence::of(expr),
         }
-        Precedence::of(expr)
     }
 }
 

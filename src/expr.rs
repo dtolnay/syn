@@ -2981,6 +2981,7 @@ pub(crate) mod printing {
     use crate::attr::Attribute;
     #[cfg(feature = "full")]
     use crate::attr::FilterAttrs;
+    #[cfg(feature = "full")]
     use crate::classify;
     #[cfg(feature = "full")]
     use crate::expr::{
@@ -2996,6 +2997,7 @@ pub(crate) mod printing {
     };
     #[cfg(feature = "full")]
     use crate::fixup::FixupContext;
+    #[cfg(feature = "full")]
     use crate::op::BinOp;
     use crate::path;
     use crate::precedence::Precedence;
@@ -3222,17 +3224,23 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
 
         #[cfg(feature = "full")]
-        let left_fixup = fixup.leftmost_subexpression_with_begin_operator(match &e.op {
-            BinOp::Sub(_)
-            | BinOp::Mul(_)
-            | BinOp::And(_)
-            | BinOp::Or(_)
-            | BinOp::BitAnd(_)
-            | BinOp::BitOr(_)
-            | BinOp::Shl(_)
-            | BinOp::Lt(_) => true,
-            _ => false,
-        });
+        let left_fixup = fixup.leftmost_subexpression_with_begin_operator(
+            match &e.op {
+                BinOp::Sub(_)
+                | BinOp::Mul(_)
+                | BinOp::And(_)
+                | BinOp::Or(_)
+                | BinOp::BitAnd(_)
+                | BinOp::BitOr(_)
+                | BinOp::Shl(_)
+                | BinOp::Lt(_) => true,
+                _ => false,
+            },
+            match &e.op {
+                BinOp::Shl(_) | BinOp::Lt(_) => true,
+                _ => false,
+            },
+        );
         let left_prec = leading_precedence(
             &e.left,
             #[cfg(feature = "full")]
@@ -3246,20 +3254,11 @@ pub(crate) mod printing {
         );
 
         let binop_prec = Precedence::of_binop(&e.op);
-        let (mut left_needs_group, right_needs_group) = match binop_prec {
+        let (left_needs_group, right_needs_group) = match binop_prec {
             Precedence::Assign => (left_prec <= Precedence::Range, right_prec < binop_prec),
             Precedence::Compare => (left_prec <= binop_prec, right_prec <= binop_prec),
             _ => (left_prec < binop_prec, right_prec <= binop_prec),
         };
-
-        // These cases require parenthesization independently of precedence.
-        if let BinOp::Lt(_) | BinOp::Shl(_) = &e.op {
-            // `x as i32 < y` has the parser thinking that `i32 < y` is the
-            // beginning of a path type. It starts trying to parse `x as (i32 <
-            // y ...` instead of `(x as i32) < ...`. We need to convince it
-            // _not_ to do that.
-            left_needs_group |= classify::confusable_with_adjacent_lt(&e.left);
-        }
 
         print_subexpression(
             &e.left,
@@ -3341,7 +3340,7 @@ pub(crate) mod printing {
             Precedence::Unambiguous
         };
         #[cfg(feature = "full")]
-        let func_fixup = fixup.leftmost_subexpression_with_begin_operator(true);
+        let func_fixup = fixup.leftmost_subexpression_with_begin_operator(true, false);
         let func_precedence = leading_precedence(
             &e.func,
             #[cfg(feature = "full")]
@@ -3550,7 +3549,7 @@ pub(crate) mod printing {
     ) {
         outer_attrs_to_tokens(&e.attrs, tokens);
         #[cfg(feature = "full")]
-        let obj_fixup = fixup.leftmost_subexpression_with_begin_operator(true);
+        let obj_fixup = fixup.leftmost_subexpression_with_begin_operator(true, false);
         let obj_precedence = leading_precedence(
             &e.expr,
             #[cfg(feature = "full")]

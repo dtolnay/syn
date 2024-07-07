@@ -660,7 +660,7 @@ fn test_fixup() {
         quote! { 0 + (0 + 0) },
         quote! { (a = b) = c },
         quote! { (x as i32) < 0 },
-        quote! { (1 + x as i32) < 0 },
+        quote! { 1 + (x as i32) < 0 },
         quote! { (1 + 1).abs() },
         quote! { (lo..hi)[..] },
         quote! { (a..b)..(c..d) },
