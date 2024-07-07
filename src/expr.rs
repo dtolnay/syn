@@ -3246,10 +3246,10 @@ pub(crate) mod printing {
         );
 
         let binop_prec = Precedence::of_binop(&e.op);
-        let (mut left_needs_group, right_needs_group) = if let Precedence::Assign = binop_prec {
-            (left_prec <= Precedence::Range, right_prec < binop_prec)
-        } else {
-            (left_prec < binop_prec, right_prec <= binop_prec)
+        let (mut left_needs_group, right_needs_group) = match binop_prec {
+            Precedence::Assign => (left_prec <= Precedence::Range, right_prec < binop_prec),
+            Precedence::Compare => (left_prec <= binop_prec, right_prec <= binop_prec),
+            _ => (left_prec < binop_prec, right_prec <= binop_prec),
         };
 
         // These cases require parenthesization independently of precedence.
