@@ -97,8 +97,8 @@ fn test_rustc_precedence() {
         }
     });
 
-    let passed = passed.load(Ordering::Relaxed);
-    let failed = failed.load(Ordering::Relaxed);
+    let passed = passed.into_inner();
+    let failed = failed.into_inner();
 
     errorf!("\n===== Precedence Test Results =====\n");
     errorf!("{} passed | {} failed\n", passed, failed);

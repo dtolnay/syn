@@ -61,7 +61,7 @@ fn test_round_trip() {
 
     repo::for_each_rust_file(|path| test(path, &failed, abort_after));
 
-    let failed = failed.load(Ordering::Relaxed);
+    let failed = failed.into_inner();
     if failed > 0 {
         panic!("{} failures", failed);
     }
