@@ -1216,7 +1216,7 @@ pub(crate) mod parsing {
             expr.replace_attrs(attrs);
 
             let allow_struct = AllowStruct(true);
-            return parse_expr(input, expr, allow_struct, Precedence::Any);
+            return parse_expr(input, expr, allow_struct, Precedence::MIN);
         }
 
         if input.peek(Token![.]) && !input.peek(Token![..]) || input.peek(Token![?]) {
@@ -1226,7 +1226,7 @@ pub(crate) mod parsing {
             expr.replace_attrs(attrs);
 
             let allow_struct = AllowStruct(true);
-            return parse_expr(input, expr, allow_struct, Precedence::Any);
+            return parse_expr(input, expr, allow_struct, Precedence::MIN);
         }
 
         attrs.extend(expr.replace_attrs(Vec::new()));
@@ -1413,7 +1413,7 @@ pub(crate) mod parsing {
         } else if input.peek(Token![as]) {
             Precedence::Cast
         } else {
-            Precedence::Any
+            Precedence::MIN
         }
     }
 
@@ -1432,7 +1432,7 @@ pub(crate) mod parsing {
             lhs,
             #[cfg(feature = "full")]
             allow_struct,
-            Precedence::Any,
+            Precedence::MIN,
         )
     }
 
@@ -3354,7 +3354,7 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
 
         let call_precedence = if let Expr::Field(_) = &*e.func {
-            Precedence::Any
+            Precedence::MIN
         } else {
             Precedence::Unambiguous
         };
