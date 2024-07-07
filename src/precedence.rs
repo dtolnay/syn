@@ -10,7 +10,7 @@ use std::cmp::Ordering;
 // Reference: https://doc.rust-lang.org/reference/expressions.html#expression-precedence
 pub(crate) enum Precedence {
     // return, break, closures
-    Any,
+    Jump,
     // = += -= *= /= %= &= |= ^= <<= >>=
     Assign,
     // .. ..=
@@ -44,7 +44,7 @@ pub(crate) enum Precedence {
 }
 
 impl Precedence {
-    pub(crate) const MIN: Self = Precedence::Any;
+    pub(crate) const MIN: Self = Precedence::Jump;
 
     pub(crate) fn of_binop(op: &BinOp) -> Self {
         match op {
@@ -82,7 +82,7 @@ impl Precedence {
         match e {
             #[cfg(feature = "full")]
             Expr::Closure(e) => match e.output {
-                ReturnType::Default => Precedence::Any,
+                ReturnType::Default => Precedence::Jump,
                 ReturnType::Type(..) => Precedence::Unambiguous,
             },
 
@@ -90,7 +90,7 @@ impl Precedence {
             Expr::Break(ExprBreak { expr, .. })
             | Expr::Return(ExprReturn { expr, .. })
             | Expr::Yield(ExprYield { expr, .. }) => match expr {
-                Some(_) => Precedence::Any,
+                Some(_) => Precedence::Jump,
                 None => Precedence::Unambiguous,
             },
 
