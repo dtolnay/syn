@@ -93,6 +93,14 @@ pub(crate) struct FixupContext {
     //     let _ = 1 + (return 1) + 1;  // needs parens
     //
     parenthesize_exterior_jump: bool,
+
+    // This is the difference between:
+    //
+    //     let _ = (return) - 1;  // without paren, this would return -1
+    //
+    //     let _ = return + 1;  // no paren because '+' cannot begin expr
+    //
+    next_operator_can_begin_expr: bool,
 }
 
 impl FixupContext {
@@ -105,6 +113,7 @@ impl FixupContext {
         leftmost_subexpression_in_match_arm: false,
         parenthesize_exterior_struct_lit: false,
         parenthesize_exterior_jump: false,
+        next_operator_can_begin_expr: false,
     };
 
     /// Create the initial fixup for printing an expression in statement
@@ -174,6 +183,19 @@ impl FixupContext {
         }
     }
 
+    /// Transform this fixup into the one that should apply when printing a
+    /// leftmost subexpression followed by punctuation that is legal as the
+    /// first token of an expression.
+    pub fn leftmost_subexpression_with_begin_operator(
+        self,
+        next_operator_can_begin_expr: bool,
+    ) -> Self {
+        FixupContext {
+            next_operator_can_begin_expr,
+            ..self.leftmost_subexpression()
+        }
+    }
+
     /// Transform this fixup into the one that should apply when printing any
     /// subexpression that is neither a leftmost subexpression nor surrounded in
     /// delimiters.
@@ -216,15 +238,32 @@ impl FixupContext {
     ///     "let chain".
     pub fn needs_group_as_let_scrutinee(self, expr: &Expr) -> bool {
         self.parenthesize_exterior_struct_lit && classify::confusable_with_adjacent_block(expr)
-            || self.precedence_of_rhs(expr) <= Precedence::And
+            || self.trailing_precedence(expr) <= Precedence::And
     }
 
-    /// Determines the effective precedence of a subexpression. Some expressions
-    /// have higher precedence on the right side of a binary operator than on
-    /// the left.
-    pub fn precedence_of_rhs(self, expr: &Expr) -> Precedence {
+    /// Determines the effective precedence of a left subexpression. Some
+    /// expressions have lower precedence when adjacent to particular operators.
+    pub fn leading_precedence(self, expr: &Expr) -> Precedence {
+        if self.next_operator_can_begin_expr {
+            match expr {
+                // Decrease precedence of value-less jumps when followed by an
+                // operator that would otherwise get interpreted as beginning a
+                // value for the jump.
+                Expr::Break(_) | Expr::Return(_) | Expr::Yield(_) => return Precedence::Any,
+                _ => {}
+            }
+        }
+        Precedence::of(expr)
+    }
+
+    /// Determines the effective precedence of a right subexpression. Some
+    /// expressions have higher precedence on the right side of a binary
+    /// operator than on the left.
+    pub fn trailing_precedence(self, expr: &Expr) -> Precedence {
         if !self.parenthesize_exterior_jump {
             match expr {
+                // Increase precedence of expressions that extend to the end of
+                // current statement or group.
                 Expr::Break(_) | Expr::Closure(_) | Expr::Return(_) | Expr::Yield(_) => {
                     return Precedence::Prefix;
                 }

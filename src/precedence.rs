@@ -1,5 +1,7 @@
 #[cfg(feature = "printing")]
 use crate::expr::Expr;
+#[cfg(all(feature = "printing", feature = "full"))]
+use crate::expr::{ExprBreak, ExprReturn, ExprYield};
 use crate::op::BinOp;
 #[cfg(all(feature = "printing", feature = "full"))]
 use crate::ty::ReturnType;
@@ -82,7 +84,14 @@ impl Precedence {
                 ReturnType::Type(..) => Precedence::Unambiguous,
             },
 
-            Expr::Break(_) | Expr::Return(_) | Expr::Yield(_) => Precedence::Any,
+            #[cfg(feature = "full")]
+            Expr::Break(ExprBreak { expr, .. })
+            | Expr::Return(ExprReturn { expr, .. })
+            | Expr::Yield(ExprYield { expr, .. }) => match expr {
+                Some(_) => Precedence::Any,
+                None => Precedence::Unambiguous,
+            },
+
             Expr::Assign(_) => Precedence::Assign,
             Expr::Range(_) => Precedence::Range,
             Expr::Binary(e) => Precedence::of_binop(&e.op),
@@ -119,7 +128,7 @@ impl Precedence {
             | Expr::While(_) => Precedence::Unambiguous,
 
             #[cfg(not(feature = "full"))]
-            Expr::Closure(_) => unreachable!(),
+            Expr::Break(_) | Expr::Closure(_) | Expr::Return(_) | Expr::Yield(_) => unreachable!(),
         }
     }
 }
