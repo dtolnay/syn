@@ -675,7 +675,8 @@ fn test_fixup() {
         quote! { break ('a: loop { break 'a 1 } + 1) },
         quote! { a + (|| b) + c },
         quote! { if let _ = ((break) - 1 || true) {} },
-        quote! { if let _ = ((break) + 1 || true) {} },
+        quote! { if let _ = (break + 1 || true) {} },
+        quote! { (break)() },
     ] {
         let original: Expr = syn::parse2(tokens).unwrap();
 

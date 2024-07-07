@@ -3119,9 +3119,16 @@ pub(crate) mod printing {
         }
     }
 
-    fn precedence_of_rhs(e: &Expr, #[cfg(feature = "full")] fixup: FixupContext) -> Precedence {
+    fn leading_precedence(e: &Expr, #[cfg(feature = "full")] fixup: FixupContext) -> Precedence {
         #[cfg(feature = "full")]
-        return fixup.precedence_of_rhs(e);
+        return fixup.leading_precedence(e);
+        #[cfg(not(feature = "full"))]
+        return Precedence::of(e);
+    }
+
+    fn trailing_precedence(e: &Expr, #[cfg(feature = "full")] fixup: FixupContext) -> Precedence {
+        #[cfg(feature = "full")]
+        return fixup.trailing_precedence(e);
         #[cfg(not(feature = "full"))]
         return Precedence::of(e);
     }
@@ -3157,7 +3164,7 @@ pub(crate) mod printing {
         e.eq_token.to_tokens(tokens);
         print_subexpression(
             &e.right,
-            precedence_of_rhs(&e.right, fixup) < Precedence::Assign,
+            trailing_precedence(&e.right, fixup) < Precedence::Assign,
             tokens,
             fixup.subsequent_subexpression(),
         );
@@ -3214,13 +3221,31 @@ pub(crate) mod printing {
     ) {
         outer_attrs_to_tokens(&e.attrs, tokens);
 
-        let binop_prec = Precedence::of_binop(&e.op);
-        let left_prec = Precedence::of(&e.left);
-        let right_prec = precedence_of_rhs(
+        #[cfg(feature = "full")]
+        let left_fixup = fixup.leftmost_subexpression_with_begin_operator(match &e.op {
+            BinOp::Sub(_)
+            | BinOp::Mul(_)
+            | BinOp::And(_)
+            | BinOp::Or(_)
+            | BinOp::BitAnd(_)
+            | BinOp::BitOr(_)
+            | BinOp::Shl(_)
+            | BinOp::Lt(_) => true,
+            _ => false,
+        });
+        let left_prec = leading_precedence(
+            &e.left,
+            #[cfg(feature = "full")]
+            left_fixup,
+        );
+
+        let right_prec = trailing_precedence(
             &e.right,
             #[cfg(feature = "full")]
             fixup,
         );
+
+        let binop_prec = Precedence::of_binop(&e.op);
         let (mut left_needs_group, right_needs_group) = if let Precedence::Assign = binop_prec {
             (left_prec <= binop_prec, right_prec < binop_prec)
         } else {
@@ -3259,7 +3284,7 @@ pub(crate) mod printing {
             left_needs_group,
             tokens,
             #[cfg(feature = "full")]
-            fixup.leftmost_subexpression(),
+            left_fixup,
         );
         e.op.to_tokens(tokens);
         print_subexpression(
@@ -3328,17 +3353,24 @@ pub(crate) mod printing {
     ) {
         outer_attrs_to_tokens(&e.attrs, tokens);
 
-        let precedence = if let Expr::Field(_) = &*e.func {
+        let call_precedence = if let Expr::Field(_) = &*e.func {
             Precedence::Any
         } else {
             Precedence::Unambiguous
         };
+        #[cfg(feature = "full")]
+        let func_fixup = fixup.leftmost_subexpression_with_begin_operator(true);
+        let func_precedence = leading_precedence(
+            &e.func,
+            #[cfg(feature = "full")]
+            func_fixup,
+        );
         print_subexpression(
             &e.func,
-            Precedence::of(&e.func) < precedence,
+            func_precedence < call_precedence,
             tokens,
             #[cfg(feature = "full")]
-            fixup.leftmost_subexpression(),
+            func_fixup,
         );
 
         e.paren_token.surround(tokens, |tokens| {
@@ -3535,12 +3567,19 @@ pub(crate) mod printing {
         #[cfg(feature = "full")] fixup: FixupContext,
     ) {
         outer_attrs_to_tokens(&e.attrs, tokens);
+        #[cfg(feature = "full")]
+        let obj_fixup = fixup.leftmost_subexpression_with_begin_operator(true);
+        let obj_precedence = leading_precedence(
+            &e.expr,
+            #[cfg(feature = "full")]
+            obj_fixup,
+        );
         print_subexpression(
             &e.expr,
-            Precedence::of(&e.expr) < Precedence::Unambiguous,
+            obj_precedence < Precedence::Unambiguous,
             tokens,
             #[cfg(feature = "full")]
-            fixup.leftmost_subexpression(),
+            obj_fixup,
         );
         e.bracket_token.surround(tokens, |tokens| {
             e.index.to_tokens(tokens);
@@ -3707,7 +3746,7 @@ pub(crate) mod printing {
         if let Some(end) = &e.end {
             print_subexpression(
                 end,
-                precedence_of_rhs(end, fixup) <= Precedence::Range,
+                trailing_precedence(end, fixup) <= Precedence::Range,
                 tokens,
                 fixup.subsequent_subexpression(),
             );
@@ -3734,7 +3773,7 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
         e.and_token.to_tokens(tokens);
         e.mutability.to_tokens(tokens);
-        let prec = precedence_of_rhs(
+        let prec = trailing_precedence(
             &e.expr,
             #[cfg(feature = "full")]
             fixup,
@@ -3860,7 +3899,7 @@ pub(crate) mod printing {
     ) {
         outer_attrs_to_tokens(&e.attrs, tokens);
         e.op.to_tokens(tokens);
-        let prec = precedence_of_rhs(
+        let prec = trailing_precedence(
             &e.expr,
             #[cfg(feature = "full")]
             fixup,
