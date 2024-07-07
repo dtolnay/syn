@@ -221,6 +221,7 @@ impl FixupContext {
     /// examples.
     pub fn would_cause_statement_boundary(self, expr: &Expr) -> bool {
         (self.leftmost_subexpression_in_stmt && !classify::requires_semi_to_be_stmt(expr))
+            || ((self.stmt || self.leftmost_subexpression_in_stmt) && matches!(expr, Expr::Let(_)))
             || (self.leftmost_subexpression_in_match_arm
                 && !classify::requires_comma_to_be_match_arm(expr))
     }

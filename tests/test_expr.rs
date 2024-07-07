@@ -680,6 +680,7 @@ fn test_fixup() {
         quote! { (..) = () },
         quote! { (..) += () },
         quote! { (1 < 2) == (3 < 4) },
+        quote! { { (let _ = ()) } },
     ] {
         let original: Expr = syn::parse2(tokens).unwrap();
 
