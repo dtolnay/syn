@@ -101,6 +101,15 @@ pub(crate) struct FixupContext {
     //     let _ = return + 1;  // no paren because '+' cannot begin expr
     //
     next_operator_can_begin_expr: bool,
+
+    // This is the difference between:
+    //
+    //     let _ = x as u8 + T;
+    //
+    //     let _ = (x as u8) < T;
+    //
+    // Without parens, the latter would want to parse `u8<T...` as a type.
+    next_operator_can_begin_generics: bool,
 }
 
 impl FixupContext {
@@ -114,6 +123,7 @@ impl FixupContext {
         parenthesize_exterior_struct_lit: false,
         parenthesize_exterior_jump: false,
         next_operator_can_begin_expr: false,
+        next_operator_can_begin_generics: false,
     };
 
     /// Create the initial fixup for printing an expression in statement
@@ -189,9 +199,11 @@ impl FixupContext {
     pub fn leftmost_subexpression_with_begin_operator(
         self,
         next_operator_can_begin_expr: bool,
+        next_operator_can_begin_generics: bool,
     ) -> Self {
         FixupContext {
             next_operator_can_begin_expr,
+            next_operator_can_begin_generics,
             ..self.leftmost_subexpression()
         }
     }
@@ -246,15 +258,14 @@ impl FixupContext {
     /// expressions have lower precedence when adjacent to particular operators.
     pub fn leading_precedence(self, expr: &Expr) -> Precedence {
         if self.next_operator_can_begin_expr {
-            match expr {
-                // Decrease precedence of value-less jumps when followed by an
-                // operator that would otherwise get interpreted as beginning a
-                // value for the jump.
-                Expr::Break(_) | Expr::Return(_) | Expr::Yield(_) => return Precedence::Jump,
-                _ => {}
+            // Decrease precedence of value-less jumps when followed by an
+            // operator that would otherwise get interpreted as beginning a
+            // value for the jump.
+            if let Expr::Break(_) | Expr::Return(_) | Expr::Yield(_) = expr {
+                return Precedence::Jump;
             }
         }
-        Precedence::of(expr)
+        self.precedence(expr)
     }
 
     /// Determines the effective precedence of a right subexpression. Some
@@ -274,6 +285,17 @@ impl FixupContext {
                 }
                 Expr::Range(e) if e.start.is_none() => return Precedence::Prefix,
                 _ => {}
+            }
+        }
+        self.precedence(expr)
+    }
+
+    fn precedence(self, expr: &Expr) -> Precedence {
+        if self.next_operator_can_begin_generics {
+            if let Expr::Cast(cast) = expr {
+                if classify::trailing_unparameterized_path(&cast.ty) {
+                    return Precedence::MIN;
+                }
             }
         }
         Precedence::of(expr)

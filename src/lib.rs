@@ -329,10 +329,7 @@ mod bigint;
 #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 pub mod buffer;
 
-#[cfg(any(
-    all(feature = "parsing", feature = "full"),
-    all(feature = "printing", any(feature = "full", feature = "derive")),
-))]
+#[cfg(all(any(feature = "parsing", feature = "printing"), feature = "full"))]
 mod classify;
 
 mod custom_keyword;
