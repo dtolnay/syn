@@ -57,9 +57,9 @@ mod repo;
 
 #[test]
 fn test_rustc_precedence() {
-    common::rayon_init();
+    repo::rayon_init();
     repo::clone_rust();
-    let abort_after = common::abort_after();
+    let abort_after = repo::abort_after();
     if abort_after == 0 {
         panic!("skipping all precedence tests");
     }
