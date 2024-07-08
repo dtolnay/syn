@@ -1,11 +1,19 @@
+#[cfg(feature = "full")]
 use crate::expr::Expr;
+#[cfg(any(feature = "printing", feature = "full"))]
 use crate::generics::TypeParamBound;
+#[cfg(any(feature = "printing", feature = "full"))]
 use crate::path::{Path, PathArguments};
+#[cfg(any(feature = "printing", feature = "full"))]
 use crate::punctuated::Punctuated;
+#[cfg(any(feature = "printing", feature = "full"))]
 use crate::ty::{ReturnType, Type};
+#[cfg(feature = "full")]
 use proc_macro2::{Delimiter, TokenStream, TokenTree};
+#[cfg(any(feature = "printing", feature = "full"))]
 use std::ops::ControlFlow;
 
+#[cfg(feature = "full")]
 pub(crate) fn requires_semi_to_be_stmt(expr: &Expr) -> bool {
     match expr {
         Expr::Macro(expr) => !expr.mac.delimiter.is_brace(),
@@ -13,6 +21,7 @@ pub(crate) fn requires_semi_to_be_stmt(expr: &Expr) -> bool {
     }
 }
 
+#[cfg(feature = "full")]
 pub(crate) fn requires_comma_to_be_match_arm(expr: &Expr) -> bool {
     match expr {
         Expr::If(_)
@@ -57,7 +66,7 @@ pub(crate) fn requires_comma_to_be_match_arm(expr: &Expr) -> bool {
     }
 }
 
-#[cfg(feature = "printing")]
+#[cfg(all(feature = "printing", feature = "full"))]
 pub(crate) fn confusable_with_adjacent_block(mut expr: &Expr) -> bool {
     let mut stack = Vec::new();
 
@@ -199,7 +208,7 @@ pub(crate) fn trailing_unparameterized_path(mut ty: &Type) -> bool {
 }
 
 /// Whether the expression's first token is the label of a loop/block.
-#[cfg(feature = "printing")]
+#[cfg(all(feature = "printing", feature = "full"))]
 pub(crate) fn expr_leading_label(mut expr: &Expr) -> bool {
     loop {
         match expr {
@@ -252,6 +261,7 @@ pub(crate) fn expr_leading_label(mut expr: &Expr) -> bool {
 }
 
 /// Whether the expression's last token is `}`.
+#[cfg(feature = "full")]
 pub(crate) fn expr_trailing_brace(mut expr: &Expr) -> bool {
     loop {
         match expr {
