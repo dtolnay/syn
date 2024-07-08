@@ -330,7 +330,10 @@ mod bigint;
 #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 pub mod buffer;
 
-#[cfg(all(any(feature = "parsing", feature = "printing"), feature = "full"))]
+#[cfg(any(
+    all(feature = "parsing", feature = "full"),
+    all(feature = "printing", any(feature = "full", feature = "derive")),
+))]
 mod classify;
 
 mod custom_keyword;
@@ -384,7 +387,7 @@ mod file;
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub use crate::file::File;
 
-#[cfg(all(feature = "full", feature = "printing"))]
+#[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 mod fixup;
 
 #[cfg(any(feature = "full", feature = "derive"))]
