@@ -19,9 +19,6 @@ const REVISION: &str = "5069856495870486134dd2ca0b0e2516308c5c2a";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: parenthesization of `{ (match () {})() }`
-    "compiler/rustc_lint/src/context/diagnostics.rs",
-
     // TODO: `unsafe static`, `safe fn`
     // https://github.com/dtolnay/syn/issues/1675
     "src/tools/rustfmt/tests/target/unsafe_extern_blocks.rs",

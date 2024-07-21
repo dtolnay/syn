@@ -478,7 +478,8 @@ fn make_parens_invisible(expr: syn::Expr) -> syn::Expr {
         }
 
         fn fold_stmt(&mut self, stmt: Stmt) -> Stmt {
-            if let Stmt::Expr(expr @ (Expr::Binary(_) | Expr::Cast(_)), None) = stmt {
+            if let Stmt::Expr(expr @ (Expr::Binary(_) | Expr::Call(_) | Expr::Cast(_)), None) = stmt
+            {
                 Stmt::Expr(
                     Expr::Paren(ExprParen {
                         attrs: Vec::new(),
