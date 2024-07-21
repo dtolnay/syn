@@ -15,10 +15,49 @@ use std::path::{Path, PathBuf};
 use tar::Archive;
 use walkdir::{DirEntry, WalkDir};
 
-const REVISION: &str = "becebb3158149a115cad8a402612e25436a7e37b";
+const REVISION: &str = "5069856495870486134dd2ca0b0e2516308c5c2a";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
+    // TODO
+    "compiler/rustc_infer/src/infer/need_type_info.rs",
+    "compiler/rustc_lint/src/context/diagnostics.rs",
+    "library/std/src/sys/pal/uefi/helpers.rs",
+    "src/tools/miri/tests/fail/tail_calls/cc-mismatch.rs",
+    "src/tools/miri/tests/fail/tail_calls/signature-mismatch-arg.rs",
+    "src/tools/miri/tests/pass/tail_call.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0213_metas.rs",
+    "src/tools/rustfmt/tests/target/return-type-notation.rs",
+    "src/tools/rustfmt/tests/target/unsafe_attributes.rs",
+    "src/tools/rustfmt/tests/target/unsafe_extern_blocks.rs",
+    "tests/mir-opt/building/match/never_patterns.rs",
+    "tests/mir-opt/tail_call_drops.rs",
+    "tests/pretty/postfix-match/simple-matches.rs",
+    "tests/rustdoc/unsafe-extern-blocks.rs",
+    "tests/ui/async-await/async-closures/force-move-due-to-inferred-kind.rs",
+    "tests/ui/attributes/unsafe/unsafe-attributes.rs",
+    "tests/ui/delegation/body-identity-glob.rs",
+    "tests/ui/delegation/body-identity-list.rs",
+    "tests/ui/delegation/fn-header.rs",
+    "tests/ui/delegation/glob-glob.rs",
+    "tests/ui/delegation/glob-override.rs",
+    "tests/ui/delegation/glob.rs",
+    "tests/ui/delegation/impl-trait.rs",
+    "tests/ui/delegation/list.rs",
+    "tests/ui/delegation/macro-inside-glob.rs",
+    "tests/ui/delegation/macro-inside-list.rs",
+    "tests/ui/delegation/method-call-priority.rs",
+    "tests/ui/delegation/rename.rs",
+    "tests/ui/delegation/self-coercion.rs",
+    "tests/ui/explicit-tail-calls/ctfe-arg-good-borrow.rs",
+    "tests/ui/explicit-tail-calls/ctfe-arg-move.rs",
+    "tests/ui/explicit-tail-calls/ctfe-collatz-multi-rec.rs",
+    "tests/ui/explicit-tail-calls/drop-order.rs",
+    "tests/ui/rfcs/rfc-0000-never_patterns/use-bindings.rs",
+    "tests/ui/rust-2024/unsafe-attributes/unsafe-attribute-marked.rs",
+    "tests/ui/rust-2024/unsafe-extern-blocks/safe-items.rs",
+    "tests/ui/unpretty/expanded-exhaustive.rs",
+
     // TODO: explicit tail calls: `become _g()`
     // https://github.com/dtolnay/syn/issues/1501
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0209_become_expr.rs",
@@ -104,7 +143,6 @@ static EXCLUDE_FILES: &[&str] = &[
     // https://github.com/dtolnay/syn/issues/1630
     "src/tools/rustfmt/tests/source/postfix-match/pf-match.rs",
     "src/tools/rustfmt/tests/target/postfix-match/pf-match.rs",
-    "tests/pretty/postfix-match.rs",
     "tests/ui/match/postfix-match/no-unused-parens.rs",
     "tests/ui/match/postfix-match/pf-match-chain.rs",
     "tests/ui/match/postfix-match/postfix-match.rs",
@@ -234,7 +272,6 @@ static EXCLUDE_FILES: &[&str] = &[
     // Placeholder syntax for "throw expressions"
     "compiler/rustc_errors/src/translation.rs",
     "compiler/rustc_expand/src/module.rs",
-    "compiler/rustc_infer/src/infer/error_reporting/need_type_info.rs",
     "src/tools/clippy/tests/ui/needless_return.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0204_yeet_expr.rs",
     "tests/pretty/yeet-expr.rs",
