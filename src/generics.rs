@@ -775,18 +775,24 @@ pub(crate) mod parsing {
             if cfg!(feature = "full") && input.peek(Token![use]) {
                 input.parse::<Token![use]>()?;
                 input.parse::<Token![<]>()?;
-                while !input.peek(Token![>]) {
-                    if input.peek(Lifetime) {
+                loop {
+                    let lookahead = input.lookahead1();
+                    if lookahead.peek(Lifetime) {
                         input.parse::<Lifetime>()?;
-                    } else if input.peek(Ident) {
+                    } else if lookahead.peek(Ident) {
                         input.parse::<Ident>()?;
-                    } else {
+                    } else if lookahead.peek(Token![>]) {
                         break;
+                    } else {
+                        return Err(lookahead.error());
                     }
-                    if input.peek(Token![,]) {
+                    let lookahead = input.lookahead1();
+                    if lookahead.peek(Token![,]) {
                         input.parse::<Token![,]>()?;
-                    } else {
+                    } else if lookahead.peek(Token![>]) {
                         break;
+                    } else {
+                        return Err(lookahead.error());
                     }
                 }
                 input.parse::<Token![>]>()?;
