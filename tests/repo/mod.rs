@@ -23,17 +23,20 @@ static EXCLUDE_FILES: &[&str] = &[
     "compiler/rustc_lint/src/context/diagnostics.rs",
 
     // TODO: `unsafe static`, `safe fn`
+    // https://github.com/dtolnay/syn/issues/1675
     "src/tools/rustfmt/tests/target/unsafe_extern_blocks.rs",
     "tests/rustdoc/unsafe-extern-blocks.rs",
     "tests/ui/rust-2024/unsafe-extern-blocks/safe-items.rs",
 
     // TODO: unsafe attributes: `#[unsafe(path::to)]`
+    // https://github.com/dtolnay/syn/issues/1710
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0213_metas.rs",
     "src/tools/rustfmt/tests/target/unsafe_attributes.rs",
     "tests/ui/attributes/unsafe/unsafe-attributes.rs",
     "tests/ui/rust-2024/unsafe-attributes/unsafe-attribute-marked.rs",
 
     // TODO: vararg in function pointer type: `extern fn(_: *mut _, _: ...)`
+    // https://github.com/dtolnay/syn/issues/1711
     "library/std/src/sys/pal/uefi/helpers.rs",
 
     // TODO: explicit tail calls: `become _g()`
