@@ -772,6 +772,27 @@ pub(crate) mod parsing {
 
             let begin = input.fork();
 
+            if cfg!(feature = "full") && input.peek(Token![use]) {
+                input.parse::<Token![use]>()?;
+                input.parse::<Token![<]>()?;
+                while !input.peek(Token![>]) {
+                    if input.peek(Lifetime) {
+                        input.parse::<Lifetime>()?;
+                    } else if input.peek(Ident) {
+                        input.parse::<Ident>()?;
+                    } else {
+                        break;
+                    }
+                    if input.peek(Token![,]) {
+                        input.parse::<Token![,]>()?;
+                    } else {
+                        break;
+                    }
+                }
+                input.parse::<Token![>]>()?;
+                return Ok(TypeParamBound::Verbatim(verbatim::between(&begin, input)));
+            }
+
             let content;
             let (paren_token, content) = if input.peek(token::Paren) {
                 (Some(parenthesized!(content in input)), &content)
