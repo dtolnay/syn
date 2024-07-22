@@ -238,7 +238,7 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
 
     fn noop_visit_expr<T: MutVisitor>(e: &mut Expr, vis: &mut T) {
         match &mut e.kind {
-            ExprKind::AddrOf(BorrowKind::Raw, ..) => {}
+            ExprKind::AddrOf(BorrowKind::Raw, ..) | ExprKind::Become(..) => {}
             ExprKind::Struct(expr) => {
                 let StructExpr {
                     qself,

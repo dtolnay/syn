@@ -32,19 +32,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/attributes/unsafe/unsafe-attributes.rs",
     "tests/ui/rust-2024/unsafe-attributes/unsafe-attribute-marked.rs",
 
-    // TODO: explicit tail calls: `become _g()`
-    // https://github.com/dtolnay/syn/issues/1501
-    "src/tools/miri/tests/fail/tail_calls/cc-mismatch.rs",
-    "src/tools/miri/tests/fail/tail_calls/signature-mismatch-arg.rs",
-    "src/tools/miri/tests/pass/tail_call.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0209_become_expr.rs",
-    "tests/mir-opt/tail_call_drops.rs",
-    "tests/ui/explicit-tail-calls/ctfe-arg-good-borrow.rs",
-    "tests/ui/explicit-tail-calls/ctfe-arg-move.rs",
-    "tests/ui/explicit-tail-calls/ctfe-collatz-multi-rec.rs",
-    "tests/ui/explicit-tail-calls/drop-order.rs",
-    "tests/ui/explicit-tail-calls/return-lifetime-sub.rs",
-
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
     // https://github.com/dtolnay/syn/issues/1435
     "src/tools/rustfmt/tests/source/issue_5721.rs",
