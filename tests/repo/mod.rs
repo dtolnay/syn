@@ -32,10 +32,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/attributes/unsafe/unsafe-attributes.rs",
     "tests/ui/rust-2024/unsafe-attributes/unsafe-attribute-marked.rs",
 
-    // TODO: vararg in function pointer type: `extern fn(_: *mut _, _: ...)`
-    // https://github.com/dtolnay/syn/issues/1711
-    "library/std/src/sys/pal/uefi/helpers.rs",
-
     // TODO: explicit tail calls: `become _g()`
     // https://github.com/dtolnay/syn/issues/1501
     "src/tools/miri/tests/fail/tail_calls/cc-mismatch.rs",
