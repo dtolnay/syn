@@ -2,8 +2,8 @@ use crate::buffer::Cursor;
 use crate::error::{self, Error};
 use crate::sealed::lookahead::Sealed;
 use crate::span::IntoSpans;
-use crate::token::Token;
-use proc_macro2::Span;
+use crate::token::{CustomToken, Token};
+use proc_macro2::{Delimiter, Span};
 use std::cell::RefCell;
 
 /// Support for checking the next token in a stream to decide how to parse.
@@ -110,7 +110,18 @@ impl<'a> Lookahead1<'a> {
     /// The error message will identify all of the expected token types that
     /// have been peeked against this lookahead instance.
     pub fn error(self) -> Error {
-        let comparisons = self.comparisons.into_inner();
+        let mut comparisons = self.comparisons.into_inner();
+        comparisons.retain_mut(|display| {
+            if *display == "`)`" {
+                *display = match self.cursor.scope_delimiter() {
+                    Delimiter::Parenthesis => "`)`",
+                    Delimiter::Brace => "`}`",
+                    Delimiter::Bracket => "`]`",
+                    Delimiter::None => return false,
+                }
+            }
+            true
+        });
         match comparisons.len() {
             0 => {
                 if self.cursor.eof() {
@@ -150,6 +161,31 @@ pub trait Peek: Sealed {
     type Token: Token;
 }
 
+/// Pseudo-token used for peeking the end of parse stream.
+pub struct End;
+
+impl Copy for End {}
+
+impl Clone for End {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl Peek for End {
+    type Token = Self;
+}
+
+impl CustomToken for End {
+    fn peek(cursor: Cursor) -> bool {
+        cursor.eof()
+    }
+
+    fn display() -> &'static str {
+        "`)`" // Lookahead1 error message will fill in the expected close delimiter
+    }
+}
+
 impl<F: Copy + FnOnce(TokenMarker) -> T, T: Token> Peek for F {
     type Token = T;
 }
@@ -163,3 +199,5 @@ impl<S> IntoSpans<S> for TokenMarker {
 }
 
 impl<F: Copy + FnOnce(TokenMarker) -> T, T: Token> Sealed for F {}
+
+impl Sealed for End {}
