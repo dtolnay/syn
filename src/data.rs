@@ -3,6 +3,7 @@ use crate::expr::Expr;
 use crate::ident::Ident;
 use crate::punctuated::{self, Punctuated};
 use crate::restriction::{FieldMutability, Visibility};
+use crate::spanned::Spanned;
 use crate::token;
 use crate::ty::Type;
 
@@ -102,6 +103,54 @@ impl Fields {
             Fields::Unit => true,
             Fields::Named(f) => f.named.is_empty(),
             Fields::Unnamed(f) => f.unnamed.is_empty(),
+        }
+    }
+}
+
+#[cfg(any(feature = "full", feature = "derive"))]
+mod iter_member {
+    use super::*;
+    use crate::Member;
+
+    impl Fields {
+        /// Get an iterator over the fields of a struct or variant as [`Member`]s.
+        /// This iterator can be used to iterate over a named or unnamed struct or
+        /// variant's fields uniformly.
+        ///
+        /// The return type can considered as impl [`Iterator<Item = Member>`].
+        #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
+        pub fn iter_member(&self) -> IterMember {
+            IterMember {
+                iter: self.iter(),
+                unnamed_counter: 0,
+            }
+        }
+    }
+
+    /// An iterator over the fields of a struct or variant as [`Member`]s.
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[derive(Clone)]
+    pub struct IterMember<'a> {
+        iter: punctuated::Iter<'a, Field>,
+        unnamed_counter: u32,
+    }
+
+    impl<'a> Iterator for IterMember<'a> {
+        type Item = Member;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            let field = self.iter.next()?;
+            match &field.ident {
+                Some(ident) => Some(Member::Named(ident.clone())),
+                None => {
+                    let m = Member::Unnamed(crate::Index {
+                        index: self.unnamed_counter,
+                        span: field.ty.span(),
+                    });
+                    self.unnamed_counter += 1;
+                    Some(m)
+                }
+            }
         }
     }
 }
