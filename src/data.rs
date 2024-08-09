@@ -3,7 +3,6 @@ use crate::expr::Expr;
 use crate::ident::Ident;
 use crate::punctuated::{self, Punctuated};
 use crate::restriction::{FieldMutability, Visibility};
-use crate::spanned::Spanned;
 use crate::token;
 use crate::ty::Type;
 
@@ -145,7 +144,13 @@ mod iter_member {
                 None => {
                     let m = Member::Unnamed(crate::Index {
                         index: self.unnamed_counter,
-                        span: field.ty.span(),
+                        span: {
+                            #[cfg(all(feature = "parsing", feature = "printing"))]
+                            let span = crate::spanned::Spanned::span(&field.ty);
+                            #[cfg(not(all(feature = "parsing", feature = "printing")))]
+                            let span = proc_macro2::Span::call_site();
+                            span
+                        },
                     });
                     self.unnamed_counter += 1;
                     Some(m)
