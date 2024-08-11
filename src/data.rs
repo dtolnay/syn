@@ -117,42 +117,40 @@ mod iter_member {
         /// variant's fields uniformly.
         #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
         pub fn members(&self) -> impl Iterator<Item = Member> + '_ {
+            #[derive(Clone)]
+            struct IterMember<'a> {
+                iter: punctuated::Iter<'a, Field>,
+                unnamed_counter: u32,
+            }
+
+            impl<'a> Iterator for IterMember<'a> {
+                type Item = Member;
+
+                fn next(&mut self) -> Option<Self::Item> {
+                    let field = self.iter.next()?;
+                    match &field.ident {
+                        Some(ident) => Some(Member::Named(ident.clone())),
+                        None => {
+                            let m = Member::Unnamed(crate::Index {
+                                index: self.unnamed_counter,
+                                span: {
+                                    #[cfg(all(feature = "parsing", feature = "printing"))]
+                                    let span = crate::spanned::Spanned::span(&field.ty);
+                                    #[cfg(not(all(feature = "parsing", feature = "printing")))]
+                                    let span = proc_macro2::Span::call_site();
+                                    span
+                                },
+                            });
+                            self.unnamed_counter += 1;
+                            Some(m)
+                        }
+                    }
+                }
+            }
+
             IterMember {
                 iter: self.iter(),
                 unnamed_counter: 0,
-            }
-        }
-    }
-
-    /// An iterator over the fields of a struct or variant as [`Member`]s.
-    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
-    #[derive(Clone)]
-    pub struct IterMember<'a> {
-        iter: punctuated::Iter<'a, Field>,
-        unnamed_counter: u32,
-    }
-
-    impl<'a> Iterator for IterMember<'a> {
-        type Item = Member;
-
-        fn next(&mut self) -> Option<Self::Item> {
-            let field = self.iter.next()?;
-            match &field.ident {
-                Some(ident) => Some(Member::Named(ident.clone())),
-                None => {
-                    let m = Member::Unnamed(crate::Index {
-                        index: self.unnamed_counter,
-                        span: {
-                            #[cfg(all(feature = "parsing", feature = "printing"))]
-                            let span = crate::spanned::Spanned::span(&field.ty);
-                            #[cfg(not(all(feature = "parsing", feature = "printing")))]
-                            let span = proc_macro2::Span::call_site();
-                            span
-                        },
-                    });
-                    self.unnamed_counter += 1;
-                    Some(m)
-                }
             }
         }
     }
