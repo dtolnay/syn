@@ -115,10 +115,8 @@ mod iter_member {
         /// Get an iterator over the fields of a struct or variant as [`Member`]s.
         /// This iterator can be used to iterate over a named or unnamed struct or
         /// variant's fields uniformly.
-        ///
-        /// The return type can considered as impl [`Iterator<Item = Member>`].
         #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
-        pub fn members(&self) -> IterMember {
+        pub fn members(&self) -> impl Iterator<Item = Member> + '_ {
             IterMember {
                 iter: self.iter(),
                 unnamed_counter: 0,
