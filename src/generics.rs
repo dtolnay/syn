@@ -110,7 +110,7 @@ impl Generics {
     ///   style="padding-left:0;padding-right:0;">LifetimeParam</code></a><code
     ///   style="padding-left:0;">&gt;</code>
     /// over the lifetime parameters in `self.params`.
-    pub fn lifetimes(&self) -> Lifetimes {
+    pub fn lifetimes(&self) -> impl Iterator<Item = &LifetimeParam> {
         Lifetimes(self.params.iter())
     }
 
@@ -121,7 +121,7 @@ impl Generics {
     ///   style="padding-left:0;padding-right:0;">LifetimeParam</code></a><code
     ///   style="padding-left:0;">&gt;</code>
     /// over the lifetime parameters in `self.params`.
-    pub fn lifetimes_mut(&mut self) -> LifetimesMut {
+    pub fn lifetimes_mut(&mut self) -> impl Iterator<Item = &mut LifetimeParam> {
         LifetimesMut(self.params.iter_mut())
     }
 
@@ -132,7 +132,7 @@ impl Generics {
     ///   style="padding-left:0;padding-right:0;">TypeParam</code></a><code
     ///   style="padding-left:0;">&gt;</code>
     /// over the type parameters in `self.params`.
-    pub fn type_params(&self) -> TypeParams {
+    pub fn type_params(&self) -> impl Iterator<Item = &TypeParam> {
         TypeParams(self.params.iter())
     }
 
@@ -143,7 +143,7 @@ impl Generics {
     ///   style="padding-left:0;padding-right:0;">TypeParam</code></a><code
     ///   style="padding-left:0;">&gt;</code>
     /// over the type parameters in `self.params`.
-    pub fn type_params_mut(&mut self) -> TypeParamsMut {
+    pub fn type_params_mut(&mut self) -> impl Iterator<Item = &mut TypeParam> {
         TypeParamsMut(self.params.iter_mut())
     }
 
@@ -154,7 +154,7 @@ impl Generics {
     ///   style="padding-left:0;padding-right:0;">ConstParam</code></a><code
     ///   style="padding-left:0;">&gt;</code>
     /// over the constant parameters in `self.params`.
-    pub fn const_params(&self) -> ConstParams {
+    pub fn const_params(&self) -> impl Iterator<Item = &ConstParam> {
         ConstParams(self.params.iter())
     }
 
@@ -165,7 +165,7 @@ impl Generics {
     ///   style="padding-left:0;padding-right:0;">ConstParam</code></a><code
     ///   style="padding-left:0;">&gt;</code>
     /// over the constant parameters in `self.params`.
-    pub fn const_params_mut(&mut self) -> ConstParamsMut {
+    pub fn const_params_mut(&mut self) -> impl Iterator<Item = &mut ConstParam> {
         ConstParamsMut(self.params.iter_mut())
     }
 
