@@ -1,5 +1,5 @@
 use crate::attr::Attribute;
-use crate::expr::{Expr, Member};
+use crate::expr::{Expr, Index, Member};
 use crate::ident::Ident;
 use crate::punctuated::{self, Punctuated};
 use crate::restriction::{FieldMutability, Visibility};
@@ -110,7 +110,7 @@ impl Fields {
     /// variant's fields uniformly.
     pub fn members(&self) -> impl Iterator<Item = Member> + Clone + '_ {
         struct Members<'a> {
-            iter: punctuated::Iter<'a, Field>,
+            fields: punctuated::Iter<'a, Field>,
             index: u32,
         }
 
@@ -118,19 +118,19 @@ impl Fields {
             type Item = Member;
 
             fn next(&mut self) -> Option<Self::Item> {
-                let field = self.iter.next()?;
+                let field = self.fields.next()?;
                 let member = match &field.ident {
                     Some(ident) => Member::Named(ident.clone()),
-                    None => Member::Unnamed(crate::Index {
-                        index: self.index,
-                        span: {
-                            #[cfg(all(feature = "parsing", feature = "printing"))]
-                            let span = crate::spanned::Spanned::span(&field.ty);
-                            #[cfg(not(all(feature = "parsing", feature = "printing")))]
-                            let span = proc_macro2::Span::call_site();
-                            span
-                        },
-                    }),
+                    None => {
+                        #[cfg(all(feature = "parsing", feature = "printing"))]
+                        let span = crate::spanned::Spanned::span(&field.ty);
+                        #[cfg(not(all(feature = "parsing", feature = "printing")))]
+                        let span = proc_macro2::Span::call_site();
+                        Member::Unnamed(Index {
+                            index: self.index,
+                            span,
+                        })
+                    }
                 };
                 self.index += 1;
                 Some(member)
@@ -140,14 +140,14 @@ impl Fields {
         impl<'a> Clone for Members<'a> {
             fn clone(&self) -> Self {
                 Members {
-                    iter: self.iter.clone(),
+                    fields: self.fields.clone(),
                     index: self.index,
                 }
             }
         }
 
         Members {
-            iter: self.iter(),
+            fields: self.iter(),
             index: 0,
         }
     }
