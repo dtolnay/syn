@@ -1,5 +1,5 @@
 use crate::attr::Attribute;
-use crate::expr::Expr;
+use crate::expr::{Expr, Member};
 use crate::ident::Ident;
 use crate::punctuated::{self, Punctuated};
 use crate::restriction::{FieldMutability, Visibility};
@@ -104,52 +104,45 @@ impl Fields {
             Fields::Unnamed(f) => f.unnamed.is_empty(),
         }
     }
-}
 
-mod iter_member {
-    use super::*;
-    use crate::Member;
+    /// Get an iterator over the fields of a struct or variant as [`Member`]s.
+    /// This iterator can be used to iterate over a named or unnamed struct or
+    /// variant's fields uniformly.
+    pub fn members(&self) -> impl Iterator<Item = Member> + '_ {
+        #[derive(Clone)]
+        struct IterMember<'a> {
+            iter: punctuated::Iter<'a, Field>,
+            unnamed_counter: u32,
+        }
 
-    impl Fields {
-        /// Get an iterator over the fields of a struct or variant as [`Member`]s.
-        /// This iterator can be used to iterate over a named or unnamed struct or
-        /// variant's fields uniformly.
-        pub fn members(&self) -> impl Iterator<Item = Member> + '_ {
-            #[derive(Clone)]
-            struct IterMember<'a> {
-                iter: punctuated::Iter<'a, Field>,
-                unnamed_counter: u32,
-            }
+        impl<'a> Iterator for IterMember<'a> {
+            type Item = Member;
 
-            impl<'a> Iterator for IterMember<'a> {
-                type Item = Member;
-
-                fn next(&mut self) -> Option<Self::Item> {
-                    let field = self.iter.next()?;
-                    match &field.ident {
-                        Some(ident) => Some(Member::Named(ident.clone())),
-                        None => {
-                            let m = Member::Unnamed(crate::Index {
-                                index: self.unnamed_counter,
-                                span: {
-                                    #[cfg(all(feature = "parsing", feature = "printing"))]
-                                    let span = crate::spanned::Spanned::span(&field.ty);
-                                    #[cfg(not(all(feature = "parsing", feature = "printing")))]
-                                    let span = proc_macro2::Span::call_site();
-                                    span
-                                },
-                            });
-                            self.unnamed_counter += 1;
-                            Some(m)
-                        }
+            fn next(&mut self) -> Option<Self::Item> {
+                let field = self.iter.next()?;
+                match &field.ident {
+                    Some(ident) => Some(Member::Named(ident.clone())),
+                    None => {
+                        let m = Member::Unnamed(crate::Index {
+                            index: self.unnamed_counter,
+                            span: {
+                                #[cfg(all(feature = "parsing", feature = "printing"))]
+                                let span = crate::spanned::Spanned::span(&field.ty);
+                                #[cfg(not(all(feature = "parsing", feature = "printing")))]
+                                let span = proc_macro2::Span::call_site();
+                                span
+                            },
+                        });
+                        self.unnamed_counter += 1;
+                        Some(m)
                     }
                 }
             }
+        }
 
-            IterMember {
-                iter: self.iter(),
-                unnamed_counter: 0,
-            }
+        IterMember {
+            iter: self.iter(),
+            unnamed_counter: 0,
         }
     }
 }
