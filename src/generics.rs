@@ -103,68 +103,32 @@ impl Default for Generics {
 }
 
 impl Generics {
-    /// Returns an
-    /// <code
-    ///   style="padding-right:0;">Iterator&lt;Item = &amp;</code><a
-    ///   href="struct.LifetimeParam.html"><code
-    ///   style="padding-left:0;padding-right:0;">LifetimeParam</code></a><code
-    ///   style="padding-left:0;">&gt;</code>
-    /// over the lifetime parameters in `self.params`.
+    /// Iterator over the lifetime parameters in `self.params`.
     pub fn lifetimes(&self) -> impl Iterator<Item = &LifetimeParam> {
         Lifetimes(self.params.iter())
     }
 
-    /// Returns an
-    /// <code
-    ///   style="padding-right:0;">Iterator&lt;Item = &amp;mut </code><a
-    ///   href="struct.LifetimeParam.html"><code
-    ///   style="padding-left:0;padding-right:0;">LifetimeParam</code></a><code
-    ///   style="padding-left:0;">&gt;</code>
-    /// over the lifetime parameters in `self.params`.
+    /// Iterator over the lifetime parameters in `self.params`.
     pub fn lifetimes_mut(&mut self) -> impl Iterator<Item = &mut LifetimeParam> {
         LifetimesMut(self.params.iter_mut())
     }
 
-    /// Returns an
-    /// <code
-    ///   style="padding-right:0;">Iterator&lt;Item = &amp;</code><a
-    ///   href="struct.TypeParam.html"><code
-    ///   style="padding-left:0;padding-right:0;">TypeParam</code></a><code
-    ///   style="padding-left:0;">&gt;</code>
-    /// over the type parameters in `self.params`.
+    /// Iterator over the type parameters in `self.params`.
     pub fn type_params(&self) -> impl Iterator<Item = &TypeParam> {
         TypeParams(self.params.iter())
     }
 
-    /// Returns an
-    /// <code
-    ///   style="padding-right:0;">Iterator&lt;Item = &amp;mut </code><a
-    ///   href="struct.TypeParam.html"><code
-    ///   style="padding-left:0;padding-right:0;">TypeParam</code></a><code
-    ///   style="padding-left:0;">&gt;</code>
-    /// over the type parameters in `self.params`.
+    /// Iterator over the type parameters in `self.params`.
     pub fn type_params_mut(&mut self) -> impl Iterator<Item = &mut TypeParam> {
         TypeParamsMut(self.params.iter_mut())
     }
 
-    /// Returns an
-    /// <code
-    ///   style="padding-right:0;">Iterator&lt;Item = &amp;</code><a
-    ///   href="struct.ConstParam.html"><code
-    ///   style="padding-left:0;padding-right:0;">ConstParam</code></a><code
-    ///   style="padding-left:0;">&gt;</code>
-    /// over the constant parameters in `self.params`.
+    /// Iterator over the constant parameters in `self.params`.
     pub fn const_params(&self) -> impl Iterator<Item = &ConstParam> {
         ConstParams(self.params.iter())
     }
 
-    /// Returns an
-    /// <code
-    ///   style="padding-right:0;">Iterator&lt;Item = &amp;mut </code><a
-    ///   href="struct.ConstParam.html"><code
-    ///   style="padding-left:0;padding-right:0;">ConstParam</code></a><code
-    ///   style="padding-left:0;">&gt;</code>
-    /// over the constant parameters in `self.params`.
+    /// Iterator over the constant parameters in `self.params`.
     pub fn const_params_mut(&mut self) -> impl Iterator<Item = &mut ConstParam> {
         ConstParamsMut(self.params.iter_mut())
     }
