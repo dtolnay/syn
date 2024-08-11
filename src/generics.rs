@@ -105,31 +105,139 @@ impl Default for Generics {
 impl Generics {
     /// Iterator over the lifetime parameters in `self.params`.
     pub fn lifetimes(&self) -> impl Iterator<Item = &LifetimeParam> {
+        struct Lifetimes<'a>(Iter<'a, GenericParam>);
+
+        impl<'a> Iterator for Lifetimes<'a> {
+            type Item = &'a LifetimeParam;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                let next = match self.0.next() {
+                    Some(item) => item,
+                    None => return None,
+                };
+                if let GenericParam::Lifetime(lifetime) = next {
+                    Some(lifetime)
+                } else {
+                    self.next()
+                }
+            }
+        }
+
         Lifetimes(self.params.iter())
     }
 
     /// Iterator over the lifetime parameters in `self.params`.
     pub fn lifetimes_mut(&mut self) -> impl Iterator<Item = &mut LifetimeParam> {
+        struct LifetimesMut<'a>(IterMut<'a, GenericParam>);
+
+        impl<'a> Iterator for LifetimesMut<'a> {
+            type Item = &'a mut LifetimeParam;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                let next = match self.0.next() {
+                    Some(item) => item,
+                    None => return None,
+                };
+                if let GenericParam::Lifetime(lifetime) = next {
+                    Some(lifetime)
+                } else {
+                    self.next()
+                }
+            }
+        }
+
         LifetimesMut(self.params.iter_mut())
     }
 
     /// Iterator over the type parameters in `self.params`.
     pub fn type_params(&self) -> impl Iterator<Item = &TypeParam> {
+        struct TypeParams<'a>(Iter<'a, GenericParam>);
+
+        impl<'a> Iterator for TypeParams<'a> {
+            type Item = &'a TypeParam;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                let next = match self.0.next() {
+                    Some(item) => item,
+                    None => return None,
+                };
+                if let GenericParam::Type(type_param) = next {
+                    Some(type_param)
+                } else {
+                    self.next()
+                }
+            }
+        }
+
         TypeParams(self.params.iter())
     }
 
     /// Iterator over the type parameters in `self.params`.
     pub fn type_params_mut(&mut self) -> impl Iterator<Item = &mut TypeParam> {
+        struct TypeParamsMut<'a>(IterMut<'a, GenericParam>);
+
+        impl<'a> Iterator for TypeParamsMut<'a> {
+            type Item = &'a mut TypeParam;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                let next = match self.0.next() {
+                    Some(item) => item,
+                    None => return None,
+                };
+                if let GenericParam::Type(type_param) = next {
+                    Some(type_param)
+                } else {
+                    self.next()
+                }
+            }
+        }
+
         TypeParamsMut(self.params.iter_mut())
     }
 
     /// Iterator over the constant parameters in `self.params`.
     pub fn const_params(&self) -> impl Iterator<Item = &ConstParam> {
+        struct ConstParams<'a>(Iter<'a, GenericParam>);
+
+        impl<'a> Iterator for ConstParams<'a> {
+            type Item = &'a ConstParam;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                let next = match self.0.next() {
+                    Some(item) => item,
+                    None => return None,
+                };
+                if let GenericParam::Const(const_param) = next {
+                    Some(const_param)
+                } else {
+                    self.next()
+                }
+            }
+        }
+
         ConstParams(self.params.iter())
     }
 
     /// Iterator over the constant parameters in `self.params`.
     pub fn const_params_mut(&mut self) -> impl Iterator<Item = &mut ConstParam> {
+        struct ConstParamsMut<'a>(IterMut<'a, GenericParam>);
+
+        impl<'a> Iterator for ConstParamsMut<'a> {
+            type Item = &'a mut ConstParam;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                let next = match self.0.next() {
+                    Some(item) => item,
+                    None => return None,
+                };
+                if let GenericParam::Const(const_param) = next {
+                    Some(const_param)
+                } else {
+                    self.next()
+                }
+            }
+        }
+
         ConstParamsMut(self.params.iter_mut())
     }
 
@@ -139,114 +247,6 @@ impl Generics {
             where_token: <Token![where]>::default(),
             predicates: Punctuated::new(),
         })
-    }
-}
-
-pub struct Lifetimes<'a>(Iter<'a, GenericParam>);
-
-impl<'a> Iterator for Lifetimes<'a> {
-    type Item = &'a LifetimeParam;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let next = match self.0.next() {
-            Some(item) => item,
-            None => return None,
-        };
-        if let GenericParam::Lifetime(lifetime) = next {
-            Some(lifetime)
-        } else {
-            self.next()
-        }
-    }
-}
-
-pub struct LifetimesMut<'a>(IterMut<'a, GenericParam>);
-
-impl<'a> Iterator for LifetimesMut<'a> {
-    type Item = &'a mut LifetimeParam;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let next = match self.0.next() {
-            Some(item) => item,
-            None => return None,
-        };
-        if let GenericParam::Lifetime(lifetime) = next {
-            Some(lifetime)
-        } else {
-            self.next()
-        }
-    }
-}
-
-pub struct TypeParams<'a>(Iter<'a, GenericParam>);
-
-impl<'a> Iterator for TypeParams<'a> {
-    type Item = &'a TypeParam;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let next = match self.0.next() {
-            Some(item) => item,
-            None => return None,
-        };
-        if let GenericParam::Type(type_param) = next {
-            Some(type_param)
-        } else {
-            self.next()
-        }
-    }
-}
-
-pub struct TypeParamsMut<'a>(IterMut<'a, GenericParam>);
-
-impl<'a> Iterator for TypeParamsMut<'a> {
-    type Item = &'a mut TypeParam;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let next = match self.0.next() {
-            Some(item) => item,
-            None => return None,
-        };
-        if let GenericParam::Type(type_param) = next {
-            Some(type_param)
-        } else {
-            self.next()
-        }
-    }
-}
-
-pub struct ConstParams<'a>(Iter<'a, GenericParam>);
-
-impl<'a> Iterator for ConstParams<'a> {
-    type Item = &'a ConstParam;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let next = match self.0.next() {
-            Some(item) => item,
-            None => return None,
-        };
-        if let GenericParam::Const(const_param) = next {
-            Some(const_param)
-        } else {
-            self.next()
-        }
-    }
-}
-
-pub struct ConstParamsMut<'a>(IterMut<'a, GenericParam>);
-
-impl<'a> Iterator for ConstParamsMut<'a> {
-    type Item = &'a mut ConstParam;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let next = match self.0.next() {
-            Some(item) => item,
-            None => return None,
-        };
-        if let GenericParam::Const(const_param) = next {
-            Some(const_param)
-        } else {
-            self.next()
-        }
     }
 }
 
