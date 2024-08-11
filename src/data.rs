@@ -118,7 +118,7 @@ mod iter_member {
         ///
         /// The return type can considered as impl [`Iterator<Item = Member>`].
         #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
-        pub fn iter_member(&self) -> IterMember {
+        pub fn members(&self) -> IterMember {
             IterMember {
                 iter: self.iter(),
                 unnamed_counter: 0,
