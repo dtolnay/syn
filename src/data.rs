@@ -138,43 +138,6 @@ impl Fields {
     /// self.a.clone() }`. For structs with unnamed fields, `Self { 0:
     /// self.0.clone() }`. And for unit structs, `Self {}`.
     pub fn members(&self) -> impl Iterator<Item = Member> + Clone + '_ {
-        struct Members<'a> {
-            fields: punctuated::Iter<'a, Field>,
-            index: u32,
-        }
-
-        impl<'a> Iterator for Members<'a> {
-            type Item = Member;
-
-            fn next(&mut self) -> Option<Self::Item> {
-                let field = self.fields.next()?;
-                let member = match &field.ident {
-                    Some(ident) => Member::Named(ident.clone()),
-                    None => {
-                        #[cfg(all(feature = "parsing", feature = "printing"))]
-                        let span = crate::spanned::Spanned::span(&field.ty);
-                        #[cfg(not(all(feature = "parsing", feature = "printing")))]
-                        let span = proc_macro2::Span::call_site();
-                        Member::Unnamed(Index {
-                            index: self.index,
-                            span,
-                        })
-                    }
-                };
-                self.index += 1;
-                Some(member)
-            }
-        }
-
-        impl<'a> Clone for Members<'a> {
-            fn clone(&self) -> Self {
-                Members {
-                    fields: self.fields.clone(),
-                    index: self.index,
-                }
-            }
-        }
-
         Members {
             fields: self.iter(),
             index: 0,
@@ -231,6 +194,43 @@ ast_struct! {
         pub colon_token: Option<Token![:]>,
 
         pub ty: Type,
+    }
+}
+
+pub struct Members<'a> {
+    fields: punctuated::Iter<'a, Field>,
+    index: u32,
+}
+
+impl<'a> Iterator for Members<'a> {
+    type Item = Member;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let field = self.fields.next()?;
+        let member = match &field.ident {
+            Some(ident) => Member::Named(ident.clone()),
+            None => {
+                #[cfg(all(feature = "parsing", feature = "printing"))]
+                let span = crate::spanned::Spanned::span(&field.ty);
+                #[cfg(not(all(feature = "parsing", feature = "printing")))]
+                let span = proc_macro2::Span::call_site();
+                Member::Unnamed(Index {
+                    index: self.index,
+                    span,
+                })
+            }
+        };
+        self.index += 1;
+        Some(member)
+    }
+}
+
+impl<'a> Clone for Members<'a> {
+    fn clone(&self) -> Self {
+        Members {
+            fields: self.fields.clone(),
+            index: self.index,
+        }
     }
 }
 
