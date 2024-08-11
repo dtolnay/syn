@@ -268,10 +268,7 @@ impl Generics {
     /// # ;
     /// ```
     #[cfg(feature = "printing")]
-    #[cfg_attr(
-        docsrs,
-        doc(cfg(all(any(feature = "full", feature = "derive"), feature = "printing")))
-    )]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
         (
             ImplGenerics(self),
