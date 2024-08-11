@@ -248,6 +248,37 @@ impl Generics {
             predicates: Punctuated::new(),
         })
     }
+
+    /// Split a type's generics into the pieces required for impl'ing a trait
+    /// for that type.
+    ///
+    /// ```
+    /// # use proc_macro2::{Span, Ident};
+    /// # use quote::quote;
+    /// #
+    /// # let generics: syn::Generics = Default::default();
+    /// # let name = Ident::new("MyType", Span::call_site());
+    /// #
+    /// let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    /// quote! {
+    ///     impl #impl_generics MyTrait for #name #ty_generics #where_clause {
+    ///         // ...
+    ///     }
+    /// }
+    /// # ;
+    /// ```
+    #[cfg(feature = "printing")]
+    #[cfg_attr(
+        docsrs,
+        doc(cfg(all(any(feature = "full", feature = "derive"), feature = "printing")))
+    )]
+    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
+        (
+            ImplGenerics(self),
+            TypeGenerics(self),
+            self.where_clause.as_ref(),
+        )
+    }
 }
 
 /// Returned by `Generics::split_for_impl`.
@@ -273,39 +304,6 @@ pub struct TypeGenerics<'a>(&'a Generics);
     doc(cfg(all(any(feature = "full", feature = "derive"), feature = "printing")))
 )]
 pub struct Turbofish<'a>(&'a Generics);
-
-#[cfg(feature = "printing")]
-impl Generics {
-    /// Split a type's generics into the pieces required for impl'ing a trait
-    /// for that type.
-    ///
-    /// ```
-    /// # use proc_macro2::{Span, Ident};
-    /// # use quote::quote;
-    /// #
-    /// # let generics: syn::Generics = Default::default();
-    /// # let name = Ident::new("MyType", Span::call_site());
-    /// #
-    /// let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-    /// quote! {
-    ///     impl #impl_generics MyTrait for #name #ty_generics #where_clause {
-    ///         // ...
-    ///     }
-    /// }
-    /// # ;
-    /// ```
-    #[cfg_attr(
-        docsrs,
-        doc(cfg(all(any(feature = "full", feature = "derive"), feature = "printing")))
-    )]
-    pub fn split_for_impl(&self) -> (ImplGenerics, TypeGenerics, Option<&WhereClause>) {
-        (
-            ImplGenerics(self),
-            TypeGenerics(self),
-            self.where_clause.as_ref(),
-        )
-    }
-}
 
 #[cfg(feature = "printing")]
 macro_rules! generics_wrapper_impls {
