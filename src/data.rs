@@ -106,7 +106,6 @@ impl Fields {
     }
 }
 
-#[cfg(any(feature = "full", feature = "derive"))]
 mod iter_member {
     use super::*;
     use crate::Member;
@@ -115,7 +114,6 @@ mod iter_member {
         /// Get an iterator over the fields of a struct or variant as [`Member`]s.
         /// This iterator can be used to iterate over a named or unnamed struct or
         /// variant's fields uniformly.
-        #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
         pub fn members(&self) -> impl Iterator<Item = Member> + '_ {
             #[derive(Clone)]
             struct IterMember<'a> {
