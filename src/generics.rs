@@ -103,34 +103,46 @@ impl Default for Generics {
 }
 
 impl Generics {
-    /// Iterator over the lifetime parameters in `self.params`.
-    pub fn lifetimes(&self) -> impl Iterator<Item = &LifetimeParam> {
-        Lifetimes(self.params.iter())
+    return_impl_trait! {
+        /// Iterator over the lifetime parameters in `self.params`.
+        pub fn lifetimes(&self) -> impl Iterator<Item = &LifetimeParam> [Lifetimes] {
+            Lifetimes(self.params.iter())
+        }
     }
 
-    /// Iterator over the lifetime parameters in `self.params`.
-    pub fn lifetimes_mut(&mut self) -> impl Iterator<Item = &mut LifetimeParam> {
-        LifetimesMut(self.params.iter_mut())
+    return_impl_trait! {
+        /// Iterator over the lifetime parameters in `self.params`.
+        pub fn lifetimes_mut(&mut self) -> impl Iterator<Item = &mut LifetimeParam> [LifetimesMut] {
+            LifetimesMut(self.params.iter_mut())
+        }
     }
 
-    /// Iterator over the type parameters in `self.params`.
-    pub fn type_params(&self) -> impl Iterator<Item = &TypeParam> {
-        TypeParams(self.params.iter())
+    return_impl_trait! {
+        /// Iterator over the type parameters in `self.params`.
+        pub fn type_params(&self) -> impl Iterator<Item = &TypeParam> [TypeParams] {
+            TypeParams(self.params.iter())
+        }
     }
 
-    /// Iterator over the type parameters in `self.params`.
-    pub fn type_params_mut(&mut self) -> impl Iterator<Item = &mut TypeParam> {
-        TypeParamsMut(self.params.iter_mut())
+    return_impl_trait! {
+        /// Iterator over the type parameters in `self.params`.
+        pub fn type_params_mut(&mut self) -> impl Iterator<Item = &mut TypeParam> [TypeParamsMut] {
+            TypeParamsMut(self.params.iter_mut())
+        }
     }
 
-    /// Iterator over the constant parameters in `self.params`.
-    pub fn const_params(&self) -> impl Iterator<Item = &ConstParam> {
-        ConstParams(self.params.iter())
+    return_impl_trait! {
+        /// Iterator over the constant parameters in `self.params`.
+        pub fn const_params(&self) -> impl Iterator<Item = &ConstParam> [ConstParams] {
+            ConstParams(self.params.iter())
+        }
     }
 
-    /// Iterator over the constant parameters in `self.params`.
-    pub fn const_params_mut(&mut self) -> impl Iterator<Item = &mut ConstParam> {
-        ConstParamsMut(self.params.iter_mut())
+    return_impl_trait! {
+        /// Iterator over the constant parameters in `self.params`.
+        pub fn const_params_mut(&mut self) -> impl Iterator<Item = &mut ConstParam> [ConstParamsMut] {
+            ConstParamsMut(self.params.iter_mut())
+        }
     }
 
     /// Initializes an empty `where`-clause if there is not one present already.

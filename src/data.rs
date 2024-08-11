@@ -105,42 +105,44 @@ impl Fields {
         }
     }
 
-    /// Get an iterator over the fields of a struct or variant as [`Member`]s.
-    /// This iterator can be used to iterate over a named or unnamed struct or
-    /// variant's fields uniformly.
-    ///
-    /// # Example
-    ///
-    /// The following is a simplistic [`Clone`] derive for structs. (A more
-    /// complete implementation would additionally want to infer trait bounds on
-    /// the generic type parameters.)
-    ///
-    /// ```
-    /// # use quote::quote;
-    /// #
-    /// fn derive_clone(input: &syn::ItemStruct) -> proc_macro2::TokenStream {
-    ///     let ident = &input.ident;
-    ///     let members = input.fields.members();
-    ///     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
-    ///     quote! {
-    ///         impl #impl_generics Clone for #ident #ty_generics #where_clause {
-    ///             fn clone(&self) -> Self {
-    ///                 Self {
-    ///                     #(#members: self.#members.clone()),*
-    ///                 }
-    ///             }
-    ///         }
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// For structs with named fields, it produces an expression like `Self { a:
-    /// self.a.clone() }`. For structs with unnamed fields, `Self { 0:
-    /// self.0.clone() }`. And for unit structs, `Self {}`.
-    pub fn members(&self) -> impl Iterator<Item = Member> + Clone + '_ {
-        Members {
-            fields: self.iter(),
-            index: 0,
+    return_impl_trait! {
+        /// Get an iterator over the fields of a struct or variant as [`Member`]s.
+        /// This iterator can be used to iterate over a named or unnamed struct or
+        /// variant's fields uniformly.
+        ///
+        /// # Example
+        ///
+        /// The following is a simplistic [`Clone`] derive for structs. (A more
+        /// complete implementation would additionally want to infer trait bounds on
+        /// the generic type parameters.)
+        ///
+        /// ```
+        /// # use quote::quote;
+        /// #
+        /// fn derive_clone(input: &syn::ItemStruct) -> proc_macro2::TokenStream {
+        ///     let ident = &input.ident;
+        ///     let members = input.fields.members();
+        ///     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+        ///     quote! {
+        ///         impl #impl_generics Clone for #ident #ty_generics #where_clause {
+        ///             fn clone(&self) -> Self {
+        ///                 Self {
+        ///                     #(#members: self.#members.clone()),*
+        ///                 }
+        ///             }
+        ///         }
+        ///     }
+        /// }
+        /// ```
+        ///
+        /// For structs with named fields, it produces an expression like `Self { a:
+        /// self.a.clone() }`. For structs with unnamed fields, `Self { 0:
+        /// self.0.clone() }`. And for unit structs, `Self {}`.
+        pub fn members(&self) -> impl Iterator<Item = Member> + Clone + '_ [Members] {
+            Members {
+                fields: self.iter(),
+                index: 0,
+            }
         }
     }
 }
