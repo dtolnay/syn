@@ -110,12 +110,12 @@ impl Fields {
     /// variant's fields uniformly.
     pub fn members(&self) -> impl Iterator<Item = Member> + '_ {
         #[derive(Clone)]
-        struct IterMember<'a> {
+        struct Members<'a> {
             iter: punctuated::Iter<'a, Field>,
             unnamed_counter: u32,
         }
 
-        impl<'a> Iterator for IterMember<'a> {
+        impl<'a> Iterator for Members<'a> {
             type Item = Member;
 
             fn next(&mut self) -> Option<Self::Item> {
@@ -140,7 +140,7 @@ impl Fields {
             }
         }
 
-        IterMember {
+        Members {
             iter: self.iter(),
             unnamed_counter: 0,
         }
