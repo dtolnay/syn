@@ -108,8 +108,7 @@ impl Fields {
     /// Get an iterator over the fields of a struct or variant as [`Member`]s.
     /// This iterator can be used to iterate over a named or unnamed struct or
     /// variant's fields uniformly.
-    pub fn members(&self) -> impl Iterator<Item = Member> + '_ {
-        #[derive(Clone)]
+    pub fn members(&self) -> impl Iterator<Item = Member> + Clone + '_ {
         struct Members<'a> {
             iter: punctuated::Iter<'a, Field>,
             unnamed_counter: u32,
@@ -136,6 +135,15 @@ impl Fields {
                         self.unnamed_counter += 1;
                         Some(m)
                     }
+                }
+            }
+        }
+
+        impl<'a> Clone for Members<'a> {
+            fn clone(&self) -> Self {
+                Members {
+                    iter: self.iter.clone(),
+                    unnamed_counter: self.unnamed_counter,
                 }
             }
         }
