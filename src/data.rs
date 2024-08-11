@@ -111,7 +111,7 @@ impl Fields {
     pub fn members(&self) -> impl Iterator<Item = Member> + Clone + '_ {
         struct Members<'a> {
             iter: punctuated::Iter<'a, Field>,
-            unnamed_counter: u32,
+            index: u32,
         }
 
         impl<'a> Iterator for Members<'a> {
@@ -119,23 +119,21 @@ impl Fields {
 
             fn next(&mut self) -> Option<Self::Item> {
                 let field = self.iter.next()?;
-                match &field.ident {
-                    Some(ident) => Some(Member::Named(ident.clone())),
-                    None => {
-                        let m = Member::Unnamed(crate::Index {
-                            index: self.unnamed_counter,
-                            span: {
-                                #[cfg(all(feature = "parsing", feature = "printing"))]
-                                let span = crate::spanned::Spanned::span(&field.ty);
-                                #[cfg(not(all(feature = "parsing", feature = "printing")))]
-                                let span = proc_macro2::Span::call_site();
-                                span
-                            },
-                        });
-                        self.unnamed_counter += 1;
-                        Some(m)
-                    }
-                }
+                let member = match &field.ident {
+                    Some(ident) => Member::Named(ident.clone()),
+                    None => Member::Unnamed(crate::Index {
+                        index: self.index,
+                        span: {
+                            #[cfg(all(feature = "parsing", feature = "printing"))]
+                            let span = crate::spanned::Spanned::span(&field.ty);
+                            #[cfg(not(all(feature = "parsing", feature = "printing")))]
+                            let span = proc_macro2::Span::call_site();
+                            span
+                        },
+                    }),
+                };
+                self.index += 1;
+                Some(member)
             }
         }
 
@@ -143,14 +141,14 @@ impl Fields {
             fn clone(&self) -> Self {
                 Members {
                     iter: self.iter.clone(),
-                    unnamed_counter: self.unnamed_counter,
+                    index: self.index,
                 }
             }
         }
 
         Members {
             iter: self.iter(),
-            unnamed_counter: 0,
+            index: 0,
         }
     }
 }
