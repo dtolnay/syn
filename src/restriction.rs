@@ -146,6 +146,7 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
+    use crate::path;
     use crate::restriction::{VisRestricted, Visibility};
     use proc_macro2::TokenStream;
     use quote::ToTokens;
@@ -169,7 +170,7 @@ mod printing {
                 // TODO: If we have a path which is not "self" or "super" or
                 // "crate", automatically add the "in" token.
                 self.in_token.to_tokens(tokens);
-                self.path.to_tokens(tokens);
+                path::printing::print_mod_style(tokens, &self.path);
             });
         }
     }

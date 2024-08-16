@@ -867,6 +867,14 @@ pub(crate) mod printing {
         }
     }
 
+    pub(crate) fn print_mod_style(tokens: &mut TokenStream, path: &Path) {
+        path.leading_colon.to_tokens(tokens);
+        for segment in path.segments.pairs() {
+            segment.value().ident.to_tokens(tokens);
+            segment.punct().to_tokens(tokens);
+        }
+    }
+
     #[cfg(feature = "parsing")]
     #[cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "printing"))))]
     impl Spanned for QSelf {
