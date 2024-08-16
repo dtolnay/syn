@@ -3013,6 +3013,7 @@ pub(crate) mod printing {
     use crate::fixup::FixupContext;
     use crate::op::BinOp;
     use crate::path;
+    use crate::path::printing::PathStyle;
     use crate::precedence::Precedence;
     use crate::token;
     #[cfg(feature = "full")]
@@ -3626,7 +3627,13 @@ pub(crate) mod printing {
         );
         e.dot_token.to_tokens(tokens);
         e.method.to_tokens(tokens);
-        e.turbofish.to_tokens(tokens);
+        if let Some(turbofish) = &e.turbofish {
+            path::printing::print_angle_bracketed_generic_arguments(
+                tokens,
+                turbofish,
+                PathStyle::Expr,
+            );
+        }
         e.paren_token.surround(tokens, |tokens| {
             e.args.to_tokens(tokens);
         });
@@ -3646,7 +3653,7 @@ pub(crate) mod printing {
     impl ToTokens for ExprPath {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            path::printing::print_path(tokens, &self.qself, &self.path);
+            path::printing::print_qpath(tokens, &self.qself, &self.path, PathStyle::Expr);
         }
     }
 
@@ -3733,7 +3740,7 @@ pub(crate) mod printing {
     impl ToTokens for ExprStruct {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
-            path::printing::print_path(tokens, &self.qself, &self.path);
+            path::printing::print_qpath(tokens, &self.qself, &self.path, PathStyle::Expr);
             self.brace_token.surround(tokens, |tokens| {
                 self.fields.to_tokens(tokens);
                 if let Some(dot2_token) = &self.dot2_token {

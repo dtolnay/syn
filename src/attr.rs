@@ -777,6 +777,7 @@ pub(crate) mod parsing {
 mod printing {
     use crate::attr::{AttrStyle, Attribute, Meta, MetaList, MetaNameValue};
     use crate::path;
+    use crate::path::printing::PathStyle;
     use proc_macro2::TokenStream;
     use quote::ToTokens;
 
@@ -797,7 +798,7 @@ mod printing {
     impl ToTokens for Meta {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             match self {
-                Meta::Path(path) => path::printing::print_mod_style(tokens, path),
+                Meta::Path(path) => path::printing::print_path(tokens, path, PathStyle::Mod),
                 Meta::List(meta_list) => meta_list.to_tokens(tokens),
                 Meta::NameValue(meta_name_value) => meta_name_value.to_tokens(tokens),
             }
@@ -807,7 +808,7 @@ mod printing {
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for MetaList {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            path::printing::print_mod_style(tokens, &self.path);
+            path::printing::print_path(tokens, &self.path, PathStyle::Mod);
             self.delimiter.surround(tokens, self.tokens.clone());
         }
     }
@@ -815,7 +816,7 @@ mod printing {
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for MetaNameValue {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            path::printing::print_mod_style(tokens, &self.path);
+            path::printing::print_path(tokens, &self.path, PathStyle::Mod);
             self.eq_token.to_tokens(tokens);
             self.value.to_tokens(tokens);
         }
