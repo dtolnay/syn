@@ -448,7 +448,7 @@ ast_enum! {
     }
 }
 
-ast_enum_of_structs! {
+ast_enum! {
     /// Content of a compile-time structured attribute.
     ///
     /// ## Path
@@ -625,6 +625,24 @@ impl<'a> FilterAttrs<'a> for &'a [Attribute] {
     }
 }
 
+impl From<Path> for Meta {
+    fn from(meta: Path) -> Meta {
+        Meta::Path(meta)
+    }
+}
+
+impl From<MetaList> for Meta {
+    fn from(meta: MetaList) -> Meta {
+        Meta::List(meta)
+    }
+}
+
+impl From<MetaNameValue> for Meta {
+    fn from(meta: MetaNameValue) -> Meta {
+        Meta::NameValue(meta)
+    }
+}
+
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::attr::{AttrStyle, Attribute, Meta, MetaList, MetaNameValue};
@@ -757,7 +775,7 @@ pub(crate) mod parsing {
 
 #[cfg(feature = "printing")]
 mod printing {
-    use crate::attr::{AttrStyle, Attribute, MetaList, MetaNameValue};
+    use crate::attr::{AttrStyle, Attribute, Meta, MetaList, MetaNameValue};
     use proc_macro2::TokenStream;
     use quote::ToTokens;
 
@@ -771,6 +789,17 @@ mod printing {
             self.bracket_token.surround(tokens, |tokens| {
                 self.meta.to_tokens(tokens);
             });
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for Meta {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                Meta::Path(meta) => meta.to_tokens(tokens),
+                Meta::List(meta) => meta.to_tokens(tokens),
+                Meta::NameValue(meta) => meta.to_tokens(tokens),
+            }
         }
     }
 
