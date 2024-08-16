@@ -417,7 +417,8 @@ pub(crate) mod parsing {
     }
 
     fn pat_path_or_macro_or_struct_or_range(input: ParseStream) -> Result<Pat> {
-        let (qself, path) = path::parsing::qpath(input, true)?;
+        let expr_style = true;
+        let (qself, path) = path::parsing::qpath(input, expr_style)?;
 
         if qself.is_none()
             && input.peek(Token![!])

@@ -1853,7 +1853,8 @@ pub(crate) mod parsing {
         input: ParseStream,
         #[cfg(feature = "full")] allow_struct: AllowStruct,
     ) -> Result<Expr> {
-        let (qself, path) = path::parsing::qpath(input, true)?;
+        let expr_style = true;
+        let (qself, path) = path::parsing::qpath(input, expr_style)?;
         rest_of_path_or_macro_or_struct(
             qself,
             path,
@@ -2684,7 +2685,8 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for ExprStruct {
         fn parse(input: ParseStream) -> Result<Self> {
-            let (qself, path) = path::parsing::qpath(input, true)?;
+            let expr_style = true;
+            let (qself, path) = path::parsing::qpath(input, expr_style)?;
             expr_struct_helper(input, qself, path)
         }
     }
@@ -2851,7 +2853,8 @@ pub(crate) mod parsing {
             #[cfg(feature = "full")]
             let attrs = input.call(Attribute::parse_outer)?;
 
-            let (qself, path) = path::parsing::qpath(input, true)?;
+            let expr_style = true;
+            let (qself, path) = path::parsing::qpath(input, expr_style)?;
 
             Ok(ExprPath { attrs, qself, path })
         }
