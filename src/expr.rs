@@ -2400,9 +2400,7 @@ pub(crate) mod parsing {
     fn expr_become(input: ParseStream) -> Result<Expr> {
         let begin = input.fork();
         input.parse::<Token![become]>()?;
-        if can_begin_expr(input) {
-            input.parse::<Expr>()?;
-        }
+        input.parse::<Expr>()?;
         Ok(Expr::Verbatim(verbatim::between(&begin, input)))
     }
 
