@@ -29,6 +29,7 @@ jobs:
           components: llvm-tools, rustc-dev
       - run: cargo test --all-features --release --tests
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: Cargo.lock
           path: Cargo.lock
