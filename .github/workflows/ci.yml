@@ -28,6 +28,10 @@ jobs:
         with:
           components: llvm-tools, rustc-dev
       - run: cargo test --all-features --release --tests
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Cargo.lock
+          path: Cargo.lock
 
   build:
     name: ${{matrix.name || format('Rust {0}', matrix.rust)}}
