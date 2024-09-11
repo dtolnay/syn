@@ -138,27 +138,6 @@ macro_rules! generate_to_tokens {
     };
 }
 
-// Rustdoc bug: does not respect the doc(hidden) on some items.
-#[cfg(all(doc, feature = "parsing"))]
-macro_rules! pub_if_not_doc {
-    ($(#[$m:meta])* $pub:ident $($item:tt)*) => {
-        check_keyword_matches!(pub $pub);
-
-        $(#[$m])*
-        $pub(crate) $($item)*
-    };
-}
-
-#[cfg(all(not(doc), feature = "parsing"))]
-macro_rules! pub_if_not_doc {
-    ($(#[$m:meta])* $pub:ident $($item:tt)*) => {
-        check_keyword_matches!(pub $pub);
-
-        $(#[$m])*
-        $pub $($item)*
-    };
-}
-
 macro_rules! check_keyword_matches {
     (enum enum) => {};
     (pub pub) => {};

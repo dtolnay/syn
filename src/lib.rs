@@ -408,7 +408,7 @@ pub use crate::generics::{ImplGenerics, Turbofish, TypeGenerics};
 
 mod ident;
 #[doc(inline)]
-pub use crate::ident::Ident;
+pub use crate::ident::syntax_tree::Ident;
 
 #[cfg(feature = "full")]
 mod item;
@@ -425,15 +425,15 @@ pub use crate::item::{
 
 mod lifetime;
 #[doc(inline)]
-pub use crate::lifetime::Lifetime;
+pub use crate::lifetime::syntax_tree::Lifetime;
 
 mod lit;
-#[doc(hidden)] // https://github.com/dtolnay/syn/issues/1566
-pub use crate::lit::StrStyle;
 #[doc(inline)]
-pub use crate::lit::{
+pub use crate::lit::syntax_tree::{
     Lit, LitBool, LitByte, LitByteStr, LitCStr, LitChar, LitFloat, LitInt, LitStr,
 };
+#[doc(hidden)] // https://github.com/dtolnay/syn/issues/1566
+pub use crate::lit::StrStyle;
 
 #[cfg(feature = "parsing")]
 mod lookahead;
@@ -530,6 +530,15 @@ pub use crate::ty::{
     TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference,
     TypeSlice, TypeTraitObject, TypeTuple,
 };
+
+// These signatures need to be included in the crate root, rather than exported
+// via `pub use` from a submodule, due to a rustdoc bug in which rustdoc does
+// not respect doc(hidden) on items that are re-exported.
+#[cfg(feature = "parsing")]
+include!("typed_lookahead.rs");
+// Make module get visited by cargo-fmt.
+#[cfg(any())]
+mod typed_lookahead;
 
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "parsing"))]
 mod verbatim;

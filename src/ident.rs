@@ -1,15 +1,11 @@
-#[cfg(feature = "parsing")]
-use crate::lookahead;
-
 pub use proc_macro2::Ident;
 
-#[cfg(feature = "parsing")]
-pub_if_not_doc! {
-    #[doc(hidden)]
-    #[allow(non_snake_case)]
-    pub fn Ident(marker: lookahead::TokenMarker) -> Ident {
-        match marker {}
-    }
+#[cfg(all(feature = "parsing", any(feature = "derive", feature = "full")))]
+pub(crate) use crate::typed_lookahead::Ident;
+
+pub(crate) mod syntax_tree {
+    // Type namespace only.
+    pub use proc_macro2::Ident;
 }
 
 macro_rules! ident_from_token {

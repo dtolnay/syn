@@ -1,6 +1,4 @@
 #[cfg(feature = "parsing")]
-use crate::lookahead;
-#[cfg(feature = "parsing")]
 use crate::parse::{Parse, Parser};
 use crate::{Error, Result};
 use proc_macro2::{Ident, Literal, Span};
@@ -11,6 +9,23 @@ use std::fmt::{self, Display};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
 use std::str::{self, FromStr};
+
+#[cfg(feature = "parsing")]
+pub(crate) use crate::typed_lookahead::{
+    Lit, LitBool, LitByte, LitByteStr, LitCStr, LitChar, LitFloat, LitInt, LitStr,
+};
+
+pub(crate) mod syntax_tree {
+    // Type namespace.
+    pub use crate::lit::*;
+
+    // Shadow the value namespace.
+    #[cfg(feature = "parsing")]
+    #[allow(unused_imports)]
+    use crate::typed_lookahead::{
+        Lit, LitBool, LitByte, LitByteStr, LitCStr, LitChar, LitFloat, LitInt, LitStr,
+    };
+}
 
 ast_enum_of_structs! {
     /// A Rust literal such as a string or integer or boolean.
@@ -798,15 +813,6 @@ macro_rules! lit_extra_traits {
                 self.repr.token.to_string().hash(state);
             }
         }
-
-        #[cfg(feature = "parsing")]
-        pub_if_not_doc! {
-            #[doc(hidden)]
-            #[allow(non_snake_case)]
-            pub fn $ty(marker: lookahead::TokenMarker) -> $ty {
-                match marker {}
-            }
-        }
     };
 }
 
@@ -818,15 +824,6 @@ lit_extra_traits!(LitChar);
 lit_extra_traits!(LitInt);
 lit_extra_traits!(LitFloat);
 
-#[cfg(feature = "parsing")]
-pub_if_not_doc! {
-    #[doc(hidden)]
-    #[allow(non_snake_case)]
-    pub fn LitBool(marker: lookahead::TokenMarker) -> LitBool {
-        match marker {}
-    }
-}
-
 /// The style of a string literal, either plain quoted or a raw string like
 /// `r##"data"##`.
 #[doc(hidden)] // https://github.com/dtolnay/syn/issues/1566
@@ -837,15 +834,6 @@ pub enum StrStyle {
     ///
     /// The unsigned integer is the number of `#` symbols used.
     Raw(usize),
-}
-
-#[cfg(feature = "parsing")]
-pub_if_not_doc! {
-    #[doc(hidden)]
-    #[allow(non_snake_case)]
-    pub fn Lit(marker: lookahead::TokenMarker) -> Lit {
-        match marker {}
-    }
 }
 
 #[cfg(feature = "parsing")]

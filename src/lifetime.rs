@@ -1,9 +1,20 @@
-#[cfg(feature = "parsing")]
-use crate::lookahead;
 use proc_macro2::{Ident, Span};
 use std::cmp::Ordering;
 use std::fmt::{self, Display};
 use std::hash::{Hash, Hasher};
+
+#[cfg(feature = "parsing")]
+pub(crate) use crate::typed_lookahead::Lifetime;
+
+pub(crate) mod syntax_tree {
+    // Type namespace.
+    pub use crate::lifetime::*;
+
+    // Shadow the value namespace.
+    #[cfg(feature = "parsing")]
+    #[allow(unused_imports)]
+    use crate::typed_lookahead::Lifetime;
+}
 
 /// A Rust lifetime: `'a`.
 ///
@@ -108,15 +119,6 @@ impl Ord for Lifetime {
 impl Hash for Lifetime {
     fn hash<H: Hasher>(&self, h: &mut H) {
         self.ident.hash(h);
-    }
-}
-
-#[cfg(feature = "parsing")]
-pub_if_not_doc! {
-    #[doc(hidden)]
-    #[allow(non_snake_case)]
-    pub fn Lifetime(marker: lookahead::TokenMarker) -> Lifetime {
-        match marker {}
     }
 }
 
