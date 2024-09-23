@@ -973,14 +973,11 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 ///
 /// ```no_run
 /// use std::error::Error;
-/// use std::fs::File;
+/// use std::fs::read_to_string;
 /// use std::io::Read;
 ///
 /// fn run() -> Result<(), Box<dyn Error>> {
-///     let mut file = File::open("path/to/code.rs")?;
-///     let mut content = String::new();
-///     file.read_to_string(&mut content)?;
-///
+///     let content = read_to_string("path/to/code.rs")?;
 ///     let ast = syn::parse_file(&content)?;
 ///     if let Some(shebang) = ast.shebang {
 ///         println!("{}", shebang);
