@@ -15,7 +15,7 @@ ast_struct! {
     ///
     /// ```
     /// use std::env;
-    /// use std::fs::read_to_string;
+    /// use std::fs;
     /// use std::process;
     ///
     /// fn main() {
@@ -33,7 +33,7 @@ ast_struct! {
     ///         }
     ///     };
     ///
-    ///     let src = read_to_string(&filename).expect("unable to read file");
+    ///     let src = fs::read_to_string(&filename).expect("unable to read file");
     ///     let syntax = syn::parse_file(&src).expect("unable to parse file");
     ///
     ///     // Debug impl is available if Syn is built with "extra-traits" feature.
