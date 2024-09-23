@@ -956,8 +956,8 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 /// ```
 #[cfg(feature = "parsing")]
 #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
-pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
-    parse::Parser::parse_str(T::parse, s)
+pub fn parse_str<T: parse::Parse, S: AsRef<str> + ?Sized>(s: &S) -> Result<T> {
+    parse::Parser::parse_str(T::parse, s.as_ref())
 }
 
 /// Parse the content of a file of Rust code.
@@ -994,7 +994,9 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 /// ```
 #[cfg(all(feature = "parsing", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "full"))))]
-pub fn parse_file(mut content: &str) -> Result<File> {
+pub fn parse_file<S: AsRef<str> + ?Sized>(s: &S) -> Result<File> {
+    let mut content: &str = s.as_ref();
+
     // Strip the BOM if it is present
     const BOM: &str = "\u{feff}";
     if content.starts_with(BOM) {
