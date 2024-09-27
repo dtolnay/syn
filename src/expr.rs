@@ -1284,7 +1284,7 @@ pub(crate) mod parsing {
                 if precedence == Precedence::Compare {
                     if let Expr::Binary(lhs) = &lhs {
                         if Precedence::of_binop(&lhs.op) == Precedence::Compare {
-                            break;
+                            return Err(input.error("comparison operators cannot be chained"));
                         }
                     }
                 }
@@ -1346,7 +1346,7 @@ pub(crate) mod parsing {
                 if precedence == Precedence::Compare {
                     if let Expr::Binary(lhs) = &lhs {
                         if Precedence::of_binop(&lhs.op) == Precedence::Compare {
-                            break;
+                            return Err(input.error("comparison operators cannot be chained"));
                         }
                     }
                 }

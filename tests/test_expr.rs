@@ -646,6 +646,9 @@ fn test_assign_range_precedence() {
 fn test_chained_comparison() {
     // https://github.com/dtolnay/syn/issues/1738
     let _ = syn::parse_str::<Expr>("a = a < a <");
+
+    let err = syn::parse_str::<Expr>("a < a < a").unwrap_err();
+    assert_eq!("comparison operators cannot be chained", err.to_string());
 }
 
 #[test]
