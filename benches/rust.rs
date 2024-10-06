@@ -11,6 +11,7 @@
     clippy::let_underscore_untyped,
     clippy::manual_let_else,
     clippy::match_like_matches_macro,
+    clippy::needless_lifetimes,
     clippy::uninlined_format_args,
     clippy::unnecessary_wraps
 )]

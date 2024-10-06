@@ -284,6 +284,7 @@
     clippy::module_name_repetitions,
     clippy::must_use_candidate,
     clippy::needless_doctest_main,
+    clippy::needless_lifetimes,
     clippy::needless_pass_by_value,
     clippy::needless_update,
     clippy::never_loop,

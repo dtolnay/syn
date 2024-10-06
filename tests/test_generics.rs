@@ -1,5 +1,6 @@
 #![allow(
     clippy::manual_let_else,
+    clippy::needless_lifetimes,
     clippy::too_many_lines,
     clippy::uninlined_format_args
 )]

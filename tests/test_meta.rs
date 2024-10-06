@@ -1,4 +1,5 @@
 #![allow(
+    clippy::needless_lifetimes,
     clippy::shadow_unrelated,
     clippy::too_many_lines,
     clippy::uninlined_format_args

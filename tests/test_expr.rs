@@ -1,4 +1,8 @@
-#![allow(clippy::single_element_loop, clippy::uninlined_format_args)]
+#![allow(
+    clippy::needless_lifetimes,
+    clippy::single_element_loop,
+    clippy::uninlined_format_args
+)]
 
 #[macro_use]
 mod macros;

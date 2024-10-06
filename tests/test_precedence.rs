@@ -25,6 +25,7 @@
     clippy::manual_let_else,
     clippy::match_like_matches_macro,
     clippy::match_wildcard_for_single_variants,
+    clippy::needless_lifetimes,
     clippy::too_many_lines,
     clippy::uninlined_format_args
 )]

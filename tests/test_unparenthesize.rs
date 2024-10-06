@@ -1,5 +1,9 @@
 #![cfg(not(miri))]
-#![allow(clippy::manual_assert, clippy::uninlined_format_args)]
+#![allow(
+    clippy::manual_assert,
+    clippy::needless_lifetimes,
+    clippy::uninlined_format_args
+)]
 
 use quote::ToTokens as _;
 use std::fs;

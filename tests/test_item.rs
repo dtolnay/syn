@@ -1,4 +1,4 @@
-#![allow(clippy::uninlined_format_args)]
+#![allow(clippy::needless_lifetimes, clippy::uninlined_format_args)]
 
 #[macro_use]
 mod macros;

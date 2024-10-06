@@ -1,4 +1,8 @@
-#![allow(clippy::map_unwrap_or, clippy::uninlined_format_args)]
+#![allow(
+    clippy::map_unwrap_or,
+    clippy::needless_lifetimes,
+    clippy::uninlined_format_args
+)]
 
 use syn::punctuated::{Pair, Punctuated};
 use syn::{parse_quote, GenericParam, Generics, Lifetime, LifetimeParam, Token};

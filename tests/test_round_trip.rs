@@ -7,6 +7,7 @@
     clippy::manual_assert,
     clippy::manual_let_else,
     clippy::match_like_matches_macro,
+    clippy::needless_lifetimes,
     clippy::uninlined_format_args
 )]
 
