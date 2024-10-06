@@ -290,6 +290,7 @@
     clippy::never_loop,
     clippy::range_plus_one,
     clippy::redundant_else,
+    clippy::ref_option,
     clippy::return_self_not_must_use,
     clippy::similar_names,
     clippy::single_match_else,
