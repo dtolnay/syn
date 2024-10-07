@@ -18,7 +18,7 @@ fn test_unit() {
         struct Unit;
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         vis: Visibility::Inherited,
         ident: "Unit",
@@ -28,7 +28,7 @@ fn test_unit() {
             semi_token: Some,
         },
     }
-    "###);
+    "#);
 }
 
 #[test]
@@ -41,7 +41,7 @@ fn test_struct() {
         }
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         attrs: [
             Attribute {
@@ -111,9 +111,9 @@ fn test_struct() {
             },
         },
     }
-    "###);
+    "#);
 
-    snapshot!(&input.attrs[0].meta, @r###"
+    snapshot!(&input.attrs[0].meta, @r#"
     Meta::List {
         path: Path {
             segments: [
@@ -125,7 +125,7 @@ fn test_struct() {
         delimiter: MacroDelimiter::Paren,
         tokens: TokenStream(`Debug , Clone`),
     }
-    "###);
+    "#);
 }
 
 #[test]
@@ -137,7 +137,7 @@ fn test_union() {
         }
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         vis: Visibility::Inherited,
         ident: "MaybeUninit",
@@ -178,7 +178,7 @@ fn test_union() {
             },
         },
     }
-    "###);
+    "#);
 }
 
 #[test]
@@ -198,7 +198,7 @@ fn test_enum() {
         }
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         attrs: [
             Attribute {
@@ -315,11 +315,11 @@ fn test_enum() {
             ],
         },
     }
-    "###);
+    "#);
 
     let meta_items: Vec<_> = input.attrs.into_iter().map(|attr| attr.meta).collect();
 
-    snapshot!(meta_items, @r###"
+    snapshot!(meta_items, @r#"
     [
         Meta::NameValue {
             path: Path {
@@ -341,7 +341,7 @@ fn test_enum() {
             ],
         },
     ]
-    "###);
+    "#);
 }
 
 #[test]
@@ -361,7 +361,7 @@ fn test_attr_with_mod_style_path_with_self() {
         struct S;
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         attrs: [
             Attribute {
@@ -387,9 +387,9 @@ fn test_attr_with_mod_style_path_with_self() {
             semi_token: Some,
         },
     }
-    "###);
+    "#);
 
-    snapshot!(&input.attrs[0].meta, @r###"
+    snapshot!(&input.attrs[0].meta, @r#"
     Meta::Path {
         segments: [
             PathSegment {
@@ -401,7 +401,7 @@ fn test_attr_with_mod_style_path_with_self() {
             },
         ],
     }
-    "###);
+    "#);
 }
 
 #[test]
@@ -411,7 +411,7 @@ fn test_pub_restricted() {
         pub(in m) struct Z(pub(in m::n) u8);
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         vis: Visibility::Restricted {
             in_token: Some,
@@ -458,7 +458,7 @@ fn test_pub_restricted() {
             semi_token: Some,
         },
     }
-    "###);
+    "#);
 }
 
 #[test]
@@ -467,7 +467,7 @@ fn test_pub_restricted_crate() {
         pub(crate) struct S;
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         vis: Visibility::Restricted {
             path: Path {
@@ -485,7 +485,7 @@ fn test_pub_restricted_crate() {
             semi_token: Some,
         },
     }
-    "###);
+    "#);
 }
 
 #[test]
@@ -494,7 +494,7 @@ fn test_pub_restricted_super() {
         pub(super) struct S;
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         vis: Visibility::Restricted {
             path: Path {
@@ -512,7 +512,7 @@ fn test_pub_restricted_super() {
             semi_token: Some,
         },
     }
-    "###);
+    "#);
 }
 
 #[test]
@@ -521,7 +521,7 @@ fn test_pub_restricted_in_super() {
         pub(in super) struct S;
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         vis: Visibility::Restricted {
             in_token: Some,
@@ -540,7 +540,7 @@ fn test_pub_restricted_in_super() {
             semi_token: Some,
         },
     }
-    "###);
+    "#);
 }
 
 #[test]
@@ -549,7 +549,7 @@ fn test_fields_on_unit_struct() {
         struct S;
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         vis: Visibility::Inherited,
         ident: "S",
@@ -559,7 +559,7 @@ fn test_fields_on_unit_struct() {
             semi_token: Some,
         },
     }
-    "###);
+    "#);
 
     let data = match input.data {
         Data::Struct(data) => data,
@@ -578,7 +578,7 @@ fn test_fields_on_named_struct() {
         }
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         vis: Visibility::Inherited,
         ident: "S",
@@ -620,14 +620,14 @@ fn test_fields_on_named_struct() {
             },
         },
     }
-    "###);
+    "#);
 
     let data = match input.data {
         Data::Struct(data) => data,
         _ => panic!("expected a struct"),
     };
 
-    snapshot!(data.fields.into_iter().collect::<Vec<_>>(), @r###"
+    snapshot!(data.fields.into_iter().collect::<Vec<_>>(), @r#"
     [
         Field {
             vis: Visibility::Inherited,
@@ -658,7 +658,7 @@ fn test_fields_on_named_struct() {
             },
         },
     ]
-    "###);
+    "#);
 }
 
 #[test]
@@ -667,7 +667,7 @@ fn test_fields_on_tuple_struct() {
         struct S(i32, pub String);
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         vis: Visibility::Inherited,
         ident: "S",
@@ -705,14 +705,14 @@ fn test_fields_on_tuple_struct() {
             semi_token: Some,
         },
     }
-    "###);
+    "#);
 
     let data = match input.data {
         Data::Struct(data) => data,
         _ => panic!("expected a struct"),
     };
 
-    snapshot!(data.fields.iter().collect::<Vec<_>>(), @r###"
+    snapshot!(data.fields.iter().collect::<Vec<_>>(), @r#"
     [
         Field {
             vis: Visibility::Inherited,
@@ -739,7 +739,7 @@ fn test_fields_on_tuple_struct() {
             },
         },
     ]
-    "###);
+    "#);
 }
 
 #[test]
@@ -749,7 +749,7 @@ fn test_ambiguous_crate() {
         struct S(crate::X);
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         vis: Visibility::Inherited,
         ident: "S",
@@ -778,5 +778,5 @@ fn test_ambiguous_crate() {
             semi_token: Some,
         },
     }
-    "###);
+    "#);
 }

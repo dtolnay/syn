@@ -17,7 +17,7 @@ fn test_split_for_impl() {
         struct S<'a, 'b: 'a, #[may_dangle] T: 'a = ()> where T: Debug;
     };
 
-    snapshot!(input as DeriveInput, @r###"
+    snapshot!(input as DeriveInput, @r#"
     DeriveInput {
         vis: Visibility::Inherited,
         ident: "S",
@@ -99,7 +99,7 @@ fn test_split_for_impl() {
             semi_token: Some,
         },
     }
-    "###);
+    "#);
 
     let generics = input.generics;
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
@@ -129,21 +129,21 @@ fn test_split_for_impl() {
 #[test]
 fn test_ty_param_bound() {
     let tokens = quote!('a);
-    snapshot!(tokens as TypeParamBound, @r###"
+    snapshot!(tokens as TypeParamBound, @r#"
     TypeParamBound::Lifetime {
         ident: "a",
     }
-    "###);
+    "#);
 
     let tokens = quote!('_);
-    snapshot!(tokens as TypeParamBound, @r###"
+    snapshot!(tokens as TypeParamBound, @r#"
     TypeParamBound::Lifetime {
         ident: "_",
     }
-    "###);
+    "#);
 
     let tokens = quote!(Debug);
-    snapshot!(tokens as TypeParamBound, @r###"
+    snapshot!(tokens as TypeParamBound, @r#"
     TypeParamBound::Trait(TraitBound {
         path: Path {
             segments: [
@@ -153,10 +153,10 @@ fn test_ty_param_bound() {
             ],
         },
     })
-    "###);
+    "#);
 
     let tokens = quote!(?Sized);
-    snapshot!(tokens as TypeParamBound, @r###"
+    snapshot!(tokens as TypeParamBound, @r#"
     TypeParamBound::Trait(TraitBound {
         modifier: TraitBoundModifier::Maybe,
         path: Path {
@@ -167,7 +167,7 @@ fn test_ty_param_bound() {
             ],
         },
     })
-    "###);
+    "#);
 }
 
 #[test]
@@ -182,7 +182,7 @@ fn test_fn_precedence_in_where_clause() {
         }
     };
 
-    snapshot!(input as ItemFn, @r###"
+    snapshot!(input as ItemFn, @r#"
     ItemFn {
         vis: Visibility::Inherited,
         sig: Signature {
@@ -252,7 +252,7 @@ fn test_fn_precedence_in_where_clause() {
             stmts: [],
         },
     }
-    "###);
+    "#);
 
     let where_clause = input.sig.generics.where_clause.as_ref().unwrap();
     assert_eq!(where_clause.predicates.len(), 1);
