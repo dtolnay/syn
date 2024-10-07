@@ -2385,6 +2385,25 @@ impl Debug for crate::PathSegment {
         formatter.finish()
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::PointerMutability {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("PointerMutability::")?;
+        match self {
+            crate::PointerMutability::Const(v0) => {
+                let mut formatter = formatter.debug_tuple("Const");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::PointerMutability::Mut(v0) => {
+                let mut formatter = formatter.debug_tuple("Mut");
+                formatter.field(v0);
+                formatter.finish()
+            }
+        }
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::PredicateLifetime {

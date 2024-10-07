@@ -723,6 +723,14 @@ pub trait Fold {
     fn fold_path_segment(&mut self, i: crate::PathSegment) -> crate::PathSegment {
         fold_path_segment(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_pointer_mutability(
+        &mut self,
+        i: crate::PointerMutability,
+    ) -> crate::PointerMutability {
+        fold_pointer_mutability(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_predicate_lifetime(
@@ -3058,6 +3066,24 @@ where
     crate::PathSegment {
         ident: f.fold_ident(node.ident),
         arguments: f.fold_path_arguments(node.arguments),
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_pointer_mutability<F>(
+    f: &mut F,
+    node: crate::PointerMutability,
+) -> crate::PointerMutability
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        crate::PointerMutability::Const(_binding_0) => {
+            crate::PointerMutability::Const(_binding_0)
+        }
+        crate::PointerMutability::Mut(_binding_0) => {
+            crate::PointerMutability::Mut(_binding_0)
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

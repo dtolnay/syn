@@ -2086,6 +2086,23 @@ impl Hash for crate::PathSegment {
         self.arguments.hash(state);
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::PointerMutability {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            crate::PointerMutability::Const(_) => {
+                state.write_u8(0u8);
+            }
+            crate::PointerMutability::Mut(_) => {
+                state.write_u8(1u8);
+            }
+        }
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::PredicateLifetime {

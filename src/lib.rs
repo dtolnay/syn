@@ -363,7 +363,7 @@ pub use crate::error::{Error, Result};
 mod expr;
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub use crate::expr::{Arm, Label, RangeLimits};
+pub use crate::expr::{Arm, Label, PointerMutability, RangeLimits};
 #[cfg(any(feature = "full", feature = "derive"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::expr::{

@@ -685,6 +685,11 @@ pub trait Visit<'ast> {
     fn visit_path_segment(&mut self, i: &'ast crate::PathSegment) {
         visit_path_segment(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_pointer_mutability(&mut self, i: &'ast crate::PointerMutability) {
+        visit_pointer_mutability(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_predicate_lifetime(&mut self, i: &'ast crate::PredicateLifetime) {
@@ -3141,6 +3146,21 @@ where
 {
     v.visit_ident(&node.ident);
     v.visit_path_arguments(&node.arguments);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_pointer_mutability<'ast, V>(v: &mut V, node: &'ast crate::PointerMutability)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    match node {
+        crate::PointerMutability::Const(_binding_0) => {
+            skip!(_binding_0);
+        }
+        crate::PointerMutability::Mut(_binding_0) => {
+            skip!(_binding_0);
+        }
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]

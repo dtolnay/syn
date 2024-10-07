@@ -3532,6 +3532,20 @@ impl Debug for Lite<syn::PathSegment> {
         formatter.finish()
     }
 }
+impl Debug for Lite<syn::PointerMutability> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match &self.value {
+            syn::PointerMutability::Const(_val) => {
+                formatter.write_str("PointerMutability::Const")?;
+                Ok(())
+            }
+            syn::PointerMutability::Mut(_val) => {
+                formatter.write_str("PointerMutability::Mut")?;
+                Ok(())
+            }
+        }
+    }
+}
 impl Debug for Lite<syn::PredicateLifetime> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PredicateLifetime");
