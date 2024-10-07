@@ -102,7 +102,7 @@ impl Precedence {
             Expr::Binary(e) => Precedence::of_binop(&e.op),
             Expr::Let(_) => Precedence::Let,
             Expr::Cast(_) => Precedence::Cast,
-            Expr::Reference(_) | Expr::Unary(_) => Precedence::Prefix,
+            Expr::RawAddr(_) | Expr::Reference(_) | Expr::Unary(_) => Precedence::Prefix,
 
             Expr::Array(_)
             | Expr::Async(_)

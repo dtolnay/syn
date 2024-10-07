@@ -186,9 +186,9 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 
 fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
     use rustc_ast::ast::{
-        AssocItem, AssocItemKind, Attribute, BinOpKind, Block, BorrowKind, BoundConstness, Expr,
-        ExprField, ExprKind, GenericArg, GenericBound, Local, LocalKind, Pat, PolyTraitRef, Stmt,
-        StmtKind, StructExpr, StructRest, TraitBoundModifiers, Ty,
+        AssocItem, AssocItemKind, Attribute, BinOpKind, Block, BoundConstness, Expr, ExprField,
+        ExprKind, GenericArg, GenericBound, Local, LocalKind, Pat, PolyTraitRef, Stmt, StmtKind,
+        StructExpr, StructRest, TraitBoundModifiers, Ty,
     };
     use rustc_ast::mut_visit::{walk_flat_map_item, MutVisitor};
     use rustc_ast::visit::{AssocCtxt, BoundKind};
@@ -240,7 +240,7 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
 
     fn noop_visit_expr<T: MutVisitor>(e: &mut Expr, vis: &mut T) {
         match &mut e.kind {
-            ExprKind::AddrOf(BorrowKind::Raw, ..) | ExprKind::Become(..) => {}
+            ExprKind::Become(..) => {}
             ExprKind::Struct(expr) => {
                 let StructExpr {
                     qself,
