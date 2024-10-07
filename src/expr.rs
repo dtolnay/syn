@@ -1151,7 +1151,6 @@ pub(crate) mod parsing {
 
     mod kw {
         crate::custom_keyword!(builtin);
-        crate::custom_keyword!(raw);
     }
 
     // When we're parsing expressions which occur before blocks, like in an if
@@ -1468,7 +1467,7 @@ pub(crate) mod parsing {
 
         if input.peek(Token![&]) {
             let and_token: Token![&] = input.parse()?;
-            let raw: Option<kw::raw> = if input.peek(kw::raw)
+            let raw: Option<Token![raw]> = if input.peek(Token![raw])
                 && (input.peek2(Token![mut]) || input.peek2(Token![const]))
             {
                 Some(input.parse()?)

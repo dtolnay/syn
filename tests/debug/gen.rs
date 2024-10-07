@@ -5011,6 +5011,11 @@ impl Debug for Lite<syn::token::RArrow> {
         formatter.write_str("Token![->]")
     }
 }
+impl Debug for Lite<syn::token::Raw> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Token![raw]")
+    }
+}
 impl Debug for Lite<syn::token::Ref> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("Token![ref]")
