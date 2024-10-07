@@ -264,6 +264,11 @@ pub trait Visit<'ast> {
     fn visit_expr_range(&mut self, i: &'ast crate::ExprRange) {
         visit_expr_range(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_expr_raw_addr(&mut self, i: &'ast crate::ExprRawAddr) {
+        visit_expr_raw_addr(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_expr_reference(&mut self, i: &'ast crate::ExprReference) {
@@ -1360,6 +1365,9 @@ where
         crate::Expr::Range(_binding_0) => {
             full!(v.visit_expr_range(_binding_0));
         }
+        crate::Expr::RawAddr(_binding_0) => {
+            full!(v.visit_expr_raw_addr(_binding_0));
+        }
         crate::Expr::Reference(_binding_0) => {
             v.visit_expr_reference(_binding_0);
         }
@@ -1790,6 +1798,20 @@ where
     if let Some(it) = &node.end {
         v.visit_expr(&**it);
     }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_expr_raw_addr<'ast, V>(v: &mut V, node: &'ast crate::ExprRawAddr)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    skip!(node.and_token);
+    skip!(node.raw);
+    v.visit_pointer_mutability(&node.mutability);
+    v.visit_expr(&*node.expr);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]

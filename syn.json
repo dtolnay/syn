@@ -775,6 +775,11 @@
             "syn": "ExprRange"
           }
         ],
+        "RawAddr": [
+          {
+            "syn": "ExprRawAddr"
+          }
+        ],
         "Reference": [
           {
             "syn": "ExprReference"
@@ -1615,6 +1620,35 @@
             "box": {
               "syn": "Expr"
             }
+          }
+        }
+      }
+    },
+    {
+      "ident": "ExprRawAddr",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "and_token": {
+          "token": "And"
+        },
+        "raw": {
+          "token": "Raw"
+        },
+        "mutability": {
+          "syn": "PointerMutability"
+        },
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         }
       }

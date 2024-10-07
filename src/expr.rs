@@ -202,6 +202,9 @@ ast_enum_of_structs! {
         /// A range expression: `1..2`, `1..`, `..2`, `1..=2`, `..=2`.
         Range(ExprRange),
 
+        /// Address-of operation: `&raw const place` or `&raw mut place`.
+        RawAddr(ExprRawAddr),
+
         /// A referencing operation: `&a` or `&mut a`.
         Reference(ExprReference),
 
@@ -575,6 +578,18 @@ ast_struct! {
 }
 
 ast_struct! {
+    /// Address-of operation: `&raw const place` or `&raw mut place`.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    pub struct ExprRawAddr #full {
+        pub attrs: Vec<Attribute>,
+        pub and_token: Token![&],
+        pub raw: Token![raw],
+        pub mutability: PointerMutability,
+        pub expr: Box<Expr>,
+    }
+}
+
+ast_struct! {
     /// A referencing operation: `&a` or `&mut a`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct ExprReference {
@@ -904,6 +919,7 @@ impl Expr {
             | Expr::Paren(ExprParen { attrs, .. })
             | Expr::Path(ExprPath { attrs, .. })
             | Expr::Range(ExprRange { attrs, .. })
+            | Expr::RawAddr(ExprRawAddr { attrs, .. })
             | Expr::Reference(ExprReference { attrs, .. })
             | Expr::Repeat(ExprRepeat { attrs, .. })
             | Expr::Return(ExprReturn { attrs, .. })
@@ -1122,8 +1138,8 @@ pub(crate) mod parsing {
     use crate::expr::{
         Arm, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak, ExprClosure,
         ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet, ExprLoop, ExprMatch,
-        ExprRange, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprUnsafe, ExprWhile, ExprYield,
-        Label, PointerMutability, RangeLimits,
+        ExprRange, ExprRawAddr, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprUnsafe,
+        ExprWhile, ExprYield, Label, PointerMutability, RangeLimits,
     };
     use crate::expr::{
         Expr, ExprBinary, ExprCall, ExprCast, ExprField, ExprGroup, ExprIndex, ExprLit, ExprMacro,
@@ -1486,12 +1502,23 @@ pub(crate) mod parsing {
                 None
             };
             let mutability: Option<Token![mut]> = input.parse()?;
-            if raw.is_some() && mutability.is_none() {
-                input.parse::<Token![const]>()?;
-            }
+            let const_token: Option<Token![const]> = if raw.is_some() && mutability.is_none() {
+                Some(input.parse()?)
+            } else {
+                None
+            };
             let expr = Box::new(unary_expr(input, allow_struct)?);
-            if raw.is_some() {
-                Ok(Expr::Verbatim(verbatim::between(&begin, input)))
+            if let Some(raw) = raw {
+                Ok(Expr::RawAddr(ExprRawAddr {
+                    attrs,
+                    and_token,
+                    raw,
+                    mutability: match mutability {
+                        Some(mut_token) => PointerMutability::Mut(mut_token),
+                        None => PointerMutability::Const(const_token.unwrap()),
+                    },
+                    expr,
+                }))
             } else {
                 Ok(Expr::Reference(ExprReference {
                     attrs,
@@ -2371,6 +2398,21 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Parse for ExprRawAddr {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let allow_struct = AllowStruct(true);
+            Ok(ExprRawAddr {
+                attrs: Vec::new(),
+                and_token: input.parse()?,
+                raw: input.parse()?,
+                mutability: input.parse()?,
+                expr: Box::new(unary_expr(input, allow_struct)?),
+            })
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for ExprReference {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_struct = AllowStruct(true);
@@ -3029,8 +3071,8 @@ pub(crate) mod printing {
     use crate::expr::{
         Arm, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak, ExprClosure,
         ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet, ExprLoop, ExprMatch,
-        ExprRange, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprUnsafe, ExprWhile, ExprYield,
-        Label, PointerMutability, RangeLimits,
+        ExprRange, ExprRawAddr, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprUnsafe,
+        ExprWhile, ExprYield, Label, PointerMutability, RangeLimits,
     };
     use crate::expr::{
         Expr, ExprBinary, ExprCall, ExprCast, ExprField, ExprGroup, ExprIndex, ExprLit, ExprMacro,
@@ -3156,6 +3198,8 @@ pub(crate) mod printing {
             Expr::Path(e) => e.to_tokens(tokens),
             #[cfg(feature = "full")]
             Expr::Range(e) => print_expr_range(e, tokens, fixup),
+            #[cfg(feature = "full")]
+            Expr::RawAddr(e) => print_expr_raw_addr(e, tokens, fixup),
             Expr::Reference(e) => print_expr_reference(e, tokens, fixup),
             #[cfg(feature = "full")]
             Expr::Repeat(e) => e.to_tokens(tokens),
@@ -3712,6 +3756,28 @@ pub(crate) mod printing {
                 fixup.subsequent_subexpression(),
             );
         }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for ExprRawAddr {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            print_expr_raw_addr(self, tokens, FixupContext::NONE);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    fn print_expr_raw_addr(e: &ExprRawAddr, tokens: &mut TokenStream, fixup: FixupContext) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        e.and_token.to_tokens(tokens);
+        e.raw.to_tokens(tokens);
+        e.mutability.to_tokens(tokens);
+        print_subexpression(
+            &e.expr,
+            fixup.trailing_precedence(&e.expr) < Precedence::Prefix,
+            tokens,
+            fixup.subsequent_subexpression(),
+        );
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
