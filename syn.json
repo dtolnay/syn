@@ -4153,6 +4153,26 @@
       }
     },
     {
+      "ident": "PointerMutability",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "variants": {
+        "Const": [
+          {
+            "token": "Const"
+          }
+        ],
+        "Mut": [
+          {
+            "token": "Mut"
+          }
+        ]
+      }
+    },
+    {
       "ident": "PredicateLifetime",
       "features": {
         "any": [
