@@ -5544,6 +5544,7 @@
     "Pub": "pub",
     "Question": "?",
     "RArrow": "->",
+    "Raw": "raw",
     "Ref": "ref",
     "Return": "return",
     "SelfType": "Self",
