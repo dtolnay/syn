@@ -71,13 +71,13 @@ mod librustc_parse {
 
         impl Emitter for SilentEmitter {
             fn emit_diagnostic(&mut self, _diag: DiagInner) {}
-            fn source_map(&self) -> Option<&Lrc<SourceMap>> {
+            fn source_map(&self) -> Option<&SourceMap> {
                 None
             }
         }
 
         impl Translate for SilentEmitter {
-            fn fluent_bundle(&self) -> Option<&Lrc<FluentBundle>> {
+            fn fluent_bundle(&self) -> Option<&FluentBundle> {
                 None
             }
             fn fallback_fluent_bundle(&self) -> &FluentBundle {
