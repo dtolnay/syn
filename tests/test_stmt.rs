@@ -21,7 +21,18 @@ fn test_raw_operator() {
     Stmt::Local {
         pat: Pat::Wild,
         init: Some(LocalInit {
-            expr: Expr::Verbatim(`& raw const x`),
+            expr: Expr::RawAddr {
+                mutability: PointerMutability::Const,
+                expr: Expr::Path {
+                    path: Path {
+                        segments: [
+                            PathSegment {
+                                ident: "x",
+                            },
+                        ],
+                    },
+                },
+            },
         }),
     }
     "#);

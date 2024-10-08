@@ -441,6 +441,8 @@ impl Debug for crate::Expr {
             crate::Expr::Path(v0) => v0.debug(formatter, "Path"),
             #[cfg(feature = "full")]
             crate::Expr::Range(v0) => v0.debug(formatter, "Range"),
+            #[cfg(feature = "full")]
+            crate::Expr::RawAddr(v0) => v0.debug(formatter, "RawAddr"),
             crate::Expr::Reference(v0) => v0.debug(formatter, "Reference"),
             #[cfg(feature = "full")]
             crate::Expr::Repeat(v0) => v0.debug(formatter, "Repeat"),
@@ -955,6 +957,25 @@ impl crate::ExprRange {
         formatter.field("start", &self.start);
         formatter.field("limits", &self.limits);
         formatter.field("end", &self.end);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::ExprRawAddr {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        self.debug(formatter, "ExprRawAddr")
+    }
+}
+#[cfg(feature = "full")]
+impl crate::ExprRawAddr {
+    fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
+        let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
+        formatter.field("and_token", &self.and_token);
+        formatter.field("raw", &self.raw);
+        formatter.field("mutability", &self.mutability);
+        formatter.field("expr", &self.expr);
         formatter.finish()
     }
 }
@@ -2383,6 +2404,25 @@ impl Debug for crate::PathSegment {
         formatter.field("ident", &self.ident);
         formatter.field("arguments", &self.arguments);
         formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::PointerMutability {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("PointerMutability::")?;
+        match self {
+            crate::PointerMutability::Const(v0) => {
+                let mut formatter = formatter.debug_tuple("Const");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::PointerMutability::Mut(v0) => {
+                let mut formatter = formatter.debug_tuple("Mut");
+                formatter.field(v0);
+                formatter.finish()
+            }
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

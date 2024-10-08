@@ -856,6 +856,15 @@ impl Debug for Lite<syn::Expr> {
                 }
                 formatter.finish()
             }
+            syn::Expr::RawAddr(_val) => {
+                let mut formatter = formatter.debug_struct("Expr::RawAddr");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                formatter.field("mutability", Lite(&_val.mutability));
+                formatter.field("expr", Lite(&_val.expr));
+                formatter.finish()
+            }
             syn::Expr::Reference(_val) => {
                 let mut formatter = formatter.debug_struct("Expr::Reference");
                 if !_val.attrs.is_empty() {
@@ -1510,6 +1519,17 @@ impl Debug for Lite<syn::ExprRange> {
             }
             formatter.field("end", Print::ref_cast(val));
         }
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::ExprRawAddr> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ExprRawAddr");
+        if !self.value.attrs.is_empty() {
+            formatter.field("attrs", Lite(&self.value.attrs));
+        }
+        formatter.field("mutability", Lite(&self.value.mutability));
+        formatter.field("expr", Lite(&self.value.expr));
         formatter.finish()
     }
 }
@@ -3532,6 +3552,20 @@ impl Debug for Lite<syn::PathSegment> {
         formatter.finish()
     }
 }
+impl Debug for Lite<syn::PointerMutability> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match &self.value {
+            syn::PointerMutability::Const(_val) => {
+                formatter.write_str("PointerMutability::Const")?;
+                Ok(())
+            }
+            syn::PointerMutability::Mut(_val) => {
+                formatter.write_str("PointerMutability::Mut")?;
+                Ok(())
+            }
+        }
+    }
+}
 impl Debug for Lite<syn::PredicateLifetime> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PredicateLifetime");
@@ -5009,6 +5043,11 @@ impl Debug for Lite<syn::token::Question> {
 impl Debug for Lite<syn::token::RArrow> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("Token![->]")
+    }
+}
+impl Debug for Lite<syn::token::Raw> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Token![raw]")
     }
 }
 impl Debug for Lite<syn::token::Ref> {

@@ -269,6 +269,11 @@ pub trait Fold {
     fn fold_expr_range(&mut self, i: crate::ExprRange) -> crate::ExprRange {
         fold_expr_range(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_expr_raw_addr(&mut self, i: crate::ExprRawAddr) -> crate::ExprRawAddr {
+        fold_expr_raw_addr(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_expr_reference(&mut self, i: crate::ExprReference) -> crate::ExprReference {
@@ -722,6 +727,14 @@ pub trait Fold {
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_path_segment(&mut self, i: crate::PathSegment) -> crate::PathSegment {
         fold_path_segment(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_pointer_mutability(
+        &mut self,
+        i: crate::PointerMutability,
+    ) -> crate::PointerMutability {
+        fold_pointer_mutability(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -1339,6 +1352,9 @@ where
         crate::Expr::Range(_binding_0) => {
             crate::Expr::Range(full!(f.fold_expr_range(_binding_0)))
         }
+        crate::Expr::RawAddr(_binding_0) => {
+            crate::Expr::RawAddr(full!(f.fold_expr_raw_addr(_binding_0)))
+        }
         crate::Expr::Reference(_binding_0) => {
             crate::Expr::Reference(f.fold_expr_reference(_binding_0))
         }
@@ -1732,6 +1748,20 @@ where
         start: (node.start).map(|it| Box::new(f.fold_expr(*it))),
         limits: f.fold_range_limits(node.limits),
         end: (node.end).map(|it| Box::new(f.fold_expr(*it))),
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_expr_raw_addr<F>(f: &mut F, node: crate::ExprRawAddr) -> crate::ExprRawAddr
+where
+    F: Fold + ?Sized,
+{
+    crate::ExprRawAddr {
+        attrs: fold_vec(node.attrs, f, F::fold_attribute),
+        and_token: node.and_token,
+        raw: node.raw,
+        mutability: f.fold_pointer_mutability(node.mutability),
+        expr: Box::new(f.fold_expr(*node.expr)),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3058,6 +3088,24 @@ where
     crate::PathSegment {
         ident: f.fold_ident(node.ident),
         arguments: f.fold_path_arguments(node.arguments),
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_pointer_mutability<F>(
+    f: &mut F,
+    node: crate::PointerMutability,
+) -> crate::PointerMutability
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        crate::PointerMutability::Const(_binding_0) => {
+            crate::PointerMutability::Const(_binding_0)
+        }
+        crate::PointerMutability::Mut(_binding_0) => {
+            crate::PointerMutability::Mut(_binding_0)
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

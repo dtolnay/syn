@@ -456,59 +456,64 @@ impl Hash for crate::Expr {
                 state.write_u8(26u8);
                 v0.hash(state);
             }
-            crate::Expr::Reference(v0) => {
+            #[cfg(feature = "full")]
+            crate::Expr::RawAddr(v0) => {
                 state.write_u8(27u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
-            crate::Expr::Repeat(v0) => {
+            crate::Expr::Reference(v0) => {
                 state.write_u8(28u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            crate::Expr::Return(v0) => {
+            crate::Expr::Repeat(v0) => {
                 state.write_u8(29u8);
                 v0.hash(state);
             }
-            crate::Expr::Struct(v0) => {
+            #[cfg(feature = "full")]
+            crate::Expr::Return(v0) => {
                 state.write_u8(30u8);
                 v0.hash(state);
             }
-            #[cfg(feature = "full")]
-            crate::Expr::Try(v0) => {
+            crate::Expr::Struct(v0) => {
                 state.write_u8(31u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
-            crate::Expr::TryBlock(v0) => {
+            crate::Expr::Try(v0) => {
                 state.write_u8(32u8);
                 v0.hash(state);
             }
-            crate::Expr::Tuple(v0) => {
+            #[cfg(feature = "full")]
+            crate::Expr::TryBlock(v0) => {
                 state.write_u8(33u8);
                 v0.hash(state);
             }
-            crate::Expr::Unary(v0) => {
+            crate::Expr::Tuple(v0) => {
                 state.write_u8(34u8);
+                v0.hash(state);
+            }
+            crate::Expr::Unary(v0) => {
+                state.write_u8(35u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             crate::Expr::Unsafe(v0) => {
-                state.write_u8(35u8);
+                state.write_u8(36u8);
                 v0.hash(state);
             }
             crate::Expr::Verbatim(v0) => {
-                state.write_u8(36u8);
+                state.write_u8(37u8);
                 TokenStreamHelper(v0).hash(state);
             }
             #[cfg(feature = "full")]
             crate::Expr::While(v0) => {
-                state.write_u8(37u8);
+                state.write_u8(38u8);
                 v0.hash(state);
             }
             #[cfg(feature = "full")]
             crate::Expr::Yield(v0) => {
-                state.write_u8(38u8);
+                state.write_u8(39u8);
                 v0.hash(state);
             }
             #[cfg(not(feature = "full"))]
@@ -841,6 +846,18 @@ impl Hash for crate::ExprRange {
         self.start.hash(state);
         self.limits.hash(state);
         self.end.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::ExprRawAddr {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.attrs.hash(state);
+        self.mutability.hash(state);
+        self.expr.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2084,6 +2101,23 @@ impl Hash for crate::PathSegment {
     {
         self.ident.hash(state);
         self.arguments.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::PointerMutability {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            crate::PointerMutability::Const(_) => {
+                state.write_u8(0u8);
+            }
+            crate::PointerMutability::Mut(_) => {
+                state.write_u8(1u8);
+            }
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
