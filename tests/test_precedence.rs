@@ -187,8 +187,8 @@ fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
 fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
     use rustc_ast::ast::{
         AssocItem, AssocItemKind, Attribute, BinOpKind, Block, BorrowKind, BoundConstness, Expr,
-        ExprField, ExprKind, GenericArg, GenericBound, Local, LocalKind, Pat, Stmt, StmtKind,
-        StructExpr, StructRest, TraitBoundModifiers, Ty,
+        ExprField, ExprKind, GenericArg, GenericBound, Local, LocalKind, Pat, PolyTraitRef, Stmt,
+        StmtKind, StructExpr, StructRest, TraitBoundModifiers, Ty,
     };
     use rustc_ast::mut_visit::{walk_flat_map_item, MutVisitor};
     use rustc_ast::visit::{AssocCtxt, BoundKind};
@@ -296,16 +296,17 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
 
         fn visit_param_bound(&mut self, bound: &mut GenericBound, _ctxt: BoundKind) {
             match bound {
-                GenericBound::Trait(
-                    _,
-                    TraitBoundModifiers {
-                        constness: BoundConstness::Maybe(_),
-                        ..
-                    },
-                )
+                GenericBound::Trait(PolyTraitRef {
+                    modifiers:
+                        TraitBoundModifiers {
+                            constness: BoundConstness::Maybe(_),
+                            ..
+                        },
+                    ..
+                })
                 | GenericBound::Outlives(..)
                 | GenericBound::Use(..) => {}
-                GenericBound::Trait(ty, _modifier) => self.visit_poly_trait_ref(ty),
+                GenericBound::Trait(ty) => self.visit_poly_trait_ref(ty),
             }
         }
 
