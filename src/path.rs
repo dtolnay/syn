@@ -377,8 +377,15 @@ pub(crate) mod parsing {
                                     if input.peek(Token![,]) || input.peek(Token![>]) {
                                         break;
                                     }
-                                    let value: TypeParamBound = input.parse()?;
-                                    bounds.push_value(value);
+                                    bounds.push_value({
+                                        let allow_precise_capture = false;
+                                        let allow_tilde_const = true;
+                                        TypeParamBound::parse_single(
+                                            input,
+                                            allow_precise_capture,
+                                            allow_tilde_const,
+                                        )?
+                                    });
                                     if !input.peek(Token![+]) {
                                         break;
                                     }
