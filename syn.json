@@ -775,6 +775,11 @@
             "syn": "ExprRange"
           }
         ],
+        "RawAddr": [
+          {
+            "syn": "ExprRawAddr"
+          }
+        ],
         "Reference": [
           {
             "syn": "ExprReference"
@@ -1615,6 +1620,35 @@
             "box": {
               "syn": "Expr"
             }
+          }
+        }
+      }
+    },
+    {
+      "ident": "ExprRawAddr",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "and_token": {
+          "token": "And"
+        },
+        "raw": {
+          "token": "Raw"
+        },
+        "mutability": {
+          "syn": "PointerMutability"
+        },
+        "expr": {
+          "box": {
+            "syn": "Expr"
           }
         }
       }
@@ -4153,6 +4187,26 @@
       }
     },
     {
+      "ident": "PointerMutability",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "variants": {
+        "Const": [
+          {
+            "token": "Const"
+          }
+        ],
+        "Mut": [
+          {
+            "token": "Mut"
+          }
+        ]
+      }
+    },
+    {
       "ident": "PredicateLifetime",
       "features": {
         "any": [
@@ -5544,6 +5598,7 @@
     "Pub": "pub",
     "Question": "?",
     "RArrow": "->",
+    "Raw": "raw",
     "Ref": "ref",
     "Return": "return",
     "SelfType": "Self",

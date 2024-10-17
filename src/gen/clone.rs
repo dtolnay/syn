@@ -270,6 +270,8 @@ impl Clone for crate::Expr {
             crate::Expr::Path(v0) => crate::Expr::Path(v0.clone()),
             #[cfg(feature = "full")]
             crate::Expr::Range(v0) => crate::Expr::Range(v0.clone()),
+            #[cfg(feature = "full")]
+            crate::Expr::RawAddr(v0) => crate::Expr::RawAddr(v0.clone()),
             crate::Expr::Reference(v0) => crate::Expr::Reference(v0.clone()),
             #[cfg(feature = "full")]
             crate::Expr::Repeat(v0) => crate::Expr::Repeat(v0.clone()),
@@ -618,6 +620,19 @@ impl Clone for crate::ExprRange {
             start: self.start.clone(),
             limits: self.limits.clone(),
             end: self.end.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::ExprRawAddr {
+    fn clone(&self) -> Self {
+        crate::ExprRawAddr {
+            attrs: self.attrs.clone(),
+            and_token: self.and_token.clone(),
+            raw: self.raw.clone(),
+            mutability: self.mutability.clone(),
+            expr: self.expr.clone(),
         }
     }
 }
@@ -1644,6 +1659,20 @@ impl Clone for crate::PathSegment {
         crate::PathSegment {
             ident: self.ident.clone(),
             arguments: self.arguments.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::PointerMutability {
+    fn clone(&self) -> Self {
+        match self {
+            crate::PointerMutability::Const(v0) => {
+                crate::PointerMutability::Const(v0.clone())
+            }
+            crate::PointerMutability::Mut(v0) => {
+                crate::PointerMutability::Mut(v0.clone())
+            }
         }
     }
 }

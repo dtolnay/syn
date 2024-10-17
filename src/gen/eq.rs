@@ -297,6 +297,10 @@ impl PartialEq for crate::Expr {
             (crate::Expr::Path(self0), crate::Expr::Path(other0)) => self0 == other0,
             #[cfg(feature = "full")]
             (crate::Expr::Range(self0), crate::Expr::Range(other0)) => self0 == other0,
+            #[cfg(feature = "full")]
+            (crate::Expr::RawAddr(self0), crate::Expr::RawAddr(other0)) => {
+                self0 == other0
+            }
             (crate::Expr::Reference(self0), crate::Expr::Reference(other0)) => {
                 self0 == other0
             }
@@ -608,6 +612,17 @@ impl PartialEq for crate::ExprRange {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.start == other.start
             && self.limits == other.limits && self.end == other.end
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::ExprRawAddr {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::ExprRawAddr {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs && self.mutability == other.mutability
+            && self.expr == other.expr
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1620,6 +1635,22 @@ impl Eq for crate::PathSegment {}
 impl PartialEq for crate::PathSegment {
     fn eq(&self, other: &Self) -> bool {
         self.ident == other.ident && self.arguments == other.arguments
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::PointerMutability {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::PointerMutability {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (crate::PointerMutability::Const(_), crate::PointerMutability::Const(_)) => {
+                true
+            }
+            (crate::PointerMutability::Mut(_), crate::PointerMutability::Mut(_)) => true,
+            _ => false,
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
