@@ -509,7 +509,7 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::attr::Attribute;
-    use crate::error::Result;
+    use crate::error::{self, Result};
     use crate::ext::IdentExt as _;
     use crate::generics::{
         BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeParam, PredicateLifetime,
@@ -706,8 +706,15 @@ pub(crate) mod parsing {
                     if input.peek(Token![,]) || input.peek(Token![>]) || input.peek(Token![=]) {
                         break;
                     }
-                    let value: TypeParamBound = input.parse()?;
-                    bounds.push_value(value);
+                    bounds.push_value({
+                        let allow_precise_capture = false;
+                        let allow_tilde_const = true;
+                        TypeParamBound::parse_single(
+                            input,
+                            allow_precise_capture,
+                            allow_tilde_const,
+                        )?
+                    });
                     if !input.peek(Token![+]) {
                         break;
                     }
@@ -737,6 +744,18 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for TypeParamBound {
         fn parse(input: ParseStream) -> Result<Self> {
+            let allow_precise_capture = true;
+            let allow_tilde_const = true;
+            Self::parse_single(input, allow_precise_capture, allow_tilde_const)
+        }
+    }
+
+    impl TypeParamBound {
+        pub(crate) fn parse_single(
+            input: ParseStream,
+            allow_precise_capture: bool,
+            allow_tilde_const: bool,
+        ) -> Result<Self> {
             if input.peek(Lifetime) {
                 return input.parse().map(TypeParamBound::Lifetime);
             }
@@ -744,7 +763,7 @@ pub(crate) mod parsing {
             let begin = input.fork();
 
             if cfg!(feature = "full") && input.peek(Token![use]) {
-                input.parse::<Token![use]>()?;
+                let use_token: Token![use] = input.parse()?;
                 input.parse::<Token![<]>()?;
                 loop {
                     let lookahead = input.lookahead1();
@@ -766,8 +785,13 @@ pub(crate) mod parsing {
                         return Err(lookahead.error());
                     }
                 }
-                input.parse::<Token![>]>()?;
-                return Ok(TypeParamBound::Verbatim(verbatim::between(&begin, input)));
+                let gt_token: Token![>] = input.parse()?;
+                return if allow_precise_capture {
+                    Ok(TypeParamBound::Verbatim(verbatim::between(&begin, input)))
+                } else {
+                    let msg = "`use<...>` precise capturing syntax is not allowed here";
+                    Err(error::new2(use_token.span, gt_token.span, msg))
+                };
             }
 
             let content;
@@ -780,8 +804,12 @@ pub(crate) mod parsing {
             let is_tilde_const =
                 cfg!(feature = "full") && content.peek(Token![~]) && content.peek2(Token![const]);
             if is_tilde_const {
-                content.parse::<Token![~]>()?;
-                content.parse::<Token![const]>()?;
+                let tilde_token: Token![~] = content.parse()?;
+                let const_token: Token![const] = content.parse()?;
+                if !allow_tilde_const {
+                    let msg = "`~const` is not allowed here";
+                    return Err(error::new2(tilde_token.span, const_token.span, msg));
+                }
             }
 
             let mut bound: TraitBound = content.parse()?;
@@ -793,16 +821,17 @@ pub(crate) mod parsing {
                 Ok(TypeParamBound::Trait(bound))
             }
         }
-    }
 
-    impl TypeParamBound {
         pub(crate) fn parse_multiple(
             input: ParseStream,
             allow_plus: bool,
+            allow_precise_capture: bool,
+            allow_tilde_const: bool,
         ) -> Result<Punctuated<Self, Token![+]>> {
             let mut bounds = Punctuated::new();
             loop {
-                bounds.push_value(input.parse()?);
+                let bound = Self::parse_single(input, allow_precise_capture, allow_tilde_const)?;
+                bounds.push_value(bound);
                 if !(allow_plus && input.peek(Token![+])) {
                     break;
                 }
@@ -970,8 +999,15 @@ pub(crate) mod parsing {
                             {
                                 break;
                             }
-                            let value = input.parse()?;
-                            bounds.push_value(value);
+                            bounds.push_value({
+                                let allow_precise_capture = false;
+                                let allow_tilde_const = true;
+                                TypeParamBound::parse_single(
+                                    input,
+                                    allow_precise_capture,
+                                    allow_tilde_const,
+                                )?
+                            });
                             if !input.peek(Token![+]) {
                                 break;
                             }

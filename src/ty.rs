@@ -402,7 +402,15 @@ pub(crate) mod parsing {
                         }));
                         while let Some(plus) = input.parse()? {
                             bounds.push_punct(plus);
-                            bounds.push_value(input.parse()?);
+                            bounds.push_value({
+                                let allow_precise_capture = false;
+                                let allow_tilde_const = false;
+                                TypeParamBound::parse_single(
+                                    input,
+                                    allow_precise_capture,
+                                    allow_tilde_const,
+                                )?
+                            });
                         }
                         bounds
                     },
@@ -469,7 +477,15 @@ pub(crate) mod parsing {
                             bounds.push_value(first);
                             while let Some(plus) = input.parse()? {
                                 bounds.push_punct(plus);
-                                bounds.push_value(input.parse()?);
+                                bounds.push_value({
+                                    let allow_precise_capture = false;
+                                    let allow_tilde_const = false;
+                                    TypeParamBound::parse_single(
+                                        input,
+                                        allow_precise_capture,
+                                        allow_tilde_const,
+                                    )?
+                                });
                             }
                             bounds
                         },
@@ -532,7 +548,15 @@ pub(crate) mod parsing {
                         {
                             break;
                         }
-                        bounds.push_value(input.parse()?);
+                        bounds.push_value({
+                            let allow_precise_capture = false;
+                            let allow_tilde_const = false;
+                            TypeParamBound::parse_single(
+                                input,
+                                allow_precise_capture,
+                                allow_tilde_const,
+                            )?
+                        });
                     }
                 }
                 return Ok(Type::TraitObject(TypeTraitObject {
@@ -823,7 +847,14 @@ pub(crate) mod parsing {
             input: ParseStream,
             allow_plus: bool,
         ) -> Result<Punctuated<TypeParamBound, Token![+]>> {
-            let bounds = TypeParamBound::parse_multiple(input, allow_plus)?;
+            let allow_precise_capture = false;
+            let allow_tilde_const = false;
+            let bounds = TypeParamBound::parse_multiple(
+                input,
+                allow_plus,
+                allow_precise_capture,
+                allow_tilde_const,
+            )?;
             let mut last_lifetime_span = None;
             let mut at_least_one_trait = false;
             for bound in &bounds {
@@ -863,7 +894,14 @@ pub(crate) mod parsing {
 
         pub(crate) fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
             let impl_token: Token![impl] = input.parse()?;
-            let bounds = TypeParamBound::parse_multiple(input, allow_plus)?;
+            let allow_precise_capture = true;
+            let allow_tilde_const = false;
+            let bounds = TypeParamBound::parse_multiple(
+                input,
+                allow_plus,
+                allow_precise_capture,
+                allow_tilde_const,
+            )?;
             let mut last_lifetime_span = None;
             let mut at_least_one_trait = false;
             for bound in &bounds {
