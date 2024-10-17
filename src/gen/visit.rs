@@ -89,6 +89,11 @@ pub trait Visit<'ast> {
     fn visit_bound_lifetimes(&mut self, i: &'ast crate::BoundLifetimes) {
         visit_bound_lifetimes(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_captured_param(&mut self, i: &'ast crate::CapturedParam) {
+        visit_captured_param(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_const_param(&mut self, i: &'ast crate::ConstParam) {
@@ -695,6 +700,11 @@ pub trait Visit<'ast> {
     fn visit_pointer_mutability(&mut self, i: &'ast crate::PointerMutability) {
         visit_pointer_mutability(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_precise_capture(&mut self, i: &'ast crate::PreciseCapture) {
+        visit_precise_capture(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_predicate_lifetime(&mut self, i: &'ast crate::PredicateLifetime) {
@@ -1178,6 +1188,21 @@ where
         v.visit_generic_param(it);
     }
     skip!(node.gt_token);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_captured_param<'ast, V>(v: &mut V, node: &'ast crate::CapturedParam)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    match node {
+        crate::CapturedParam::Lifetime(_binding_0) => {
+            v.visit_lifetime(_binding_0);
+        }
+        crate::CapturedParam::Ident(_binding_0) => {
+            v.visit_ident(_binding_0);
+        }
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -3184,6 +3209,20 @@ where
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_precise_capture<'ast, V>(v: &mut V, node: &'ast crate::PreciseCapture)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    skip!(node.use_token);
+    skip!(node.lt_token);
+    for el in Punctuated::pairs(&node.params) {
+        let it = el.value();
+        v.visit_captured_param(it);
+    }
+    skip!(node.gt_token);
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_predicate_lifetime<'ast, V>(v: &mut V, node: &'ast crate::PredicateLifetime)
@@ -3639,6 +3678,9 @@ where
         }
         crate::TypeParamBound::Lifetime(_binding_0) => {
             v.visit_lifetime(_binding_0);
+        }
+        crate::TypeParamBound::PreciseCapture(_binding_0) => {
+            full!(v.visit_precise_capture(_binding_0));
         }
         crate::TypeParamBound::Verbatim(_binding_0) => {
             skip!(_binding_0);

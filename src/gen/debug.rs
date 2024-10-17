@@ -290,6 +290,25 @@ impl Debug for crate::BoundLifetimes {
         formatter.finish()
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::CapturedParam {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("CapturedParam::")?;
+        match self {
+            crate::CapturedParam::Lifetime(v0) => {
+                let mut formatter = formatter.debug_tuple("Lifetime");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::CapturedParam::Ident(v0) => {
+                let mut formatter = formatter.debug_tuple("Ident");
+                formatter.field(v0);
+                formatter.finish()
+            }
+        }
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::ConstParam {
@@ -2425,6 +2444,18 @@ impl Debug for crate::PointerMutability {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::PreciseCapture {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("PreciseCapture");
+        formatter.field("use_token", &self.use_token);
+        formatter.field("lt_token", &self.lt_token);
+        formatter.field("params", &self.params);
+        formatter.field("gt_token", &self.gt_token);
+        formatter.finish()
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::PredicateLifetime {
@@ -2878,11 +2909,19 @@ impl Debug for crate::TypeParamBound {
                 formatter.finish()
             }
             crate::TypeParamBound::Lifetime(v0) => v0.debug(formatter, "Lifetime"),
+            #[cfg(feature = "full")]
+            crate::TypeParamBound::PreciseCapture(v0) => {
+                let mut formatter = formatter.debug_tuple("PreciseCapture");
+                formatter.field(v0);
+                formatter.finish()
+            }
             crate::TypeParamBound::Verbatim(v0) => {
                 let mut formatter = formatter.debug_tuple("Verbatim");
                 formatter.field(v0);
                 formatter.finish()
             }
+            #[cfg(not(feature = "full"))]
+            _ => unreachable!(),
         }
     }
 }

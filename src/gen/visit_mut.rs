@@ -90,6 +90,11 @@ pub trait VisitMut {
     fn visit_bound_lifetimes_mut(&mut self, i: &mut crate::BoundLifetimes) {
         visit_bound_lifetimes_mut(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_captured_param_mut(&mut self, i: &mut crate::CapturedParam) {
+        visit_captured_param_mut(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_const_param_mut(&mut self, i: &mut crate::ConstParam) {
@@ -696,6 +701,11 @@ pub trait VisitMut {
     fn visit_pointer_mutability_mut(&mut self, i: &mut crate::PointerMutability) {
         visit_pointer_mutability_mut(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_precise_capture_mut(&mut self, i: &mut crate::PreciseCapture) {
+        visit_precise_capture_mut(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_predicate_lifetime_mut(&mut self, i: &mut crate::PredicateLifetime) {
@@ -1179,6 +1189,21 @@ where
         v.visit_generic_param_mut(it);
     }
     skip!(node.gt_token);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_captured_param_mut<V>(v: &mut V, node: &mut crate::CapturedParam)
+where
+    V: VisitMut + ?Sized,
+{
+    match node {
+        crate::CapturedParam::Lifetime(_binding_0) => {
+            v.visit_lifetime_mut(_binding_0);
+        }
+        crate::CapturedParam::Ident(_binding_0) => {
+            v.visit_ident_mut(_binding_0);
+        }
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -3184,6 +3209,20 @@ where
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_precise_capture_mut<V>(v: &mut V, node: &mut crate::PreciseCapture)
+where
+    V: VisitMut + ?Sized,
+{
+    skip!(node.use_token);
+    skip!(node.lt_token);
+    for mut el in Punctuated::pairs_mut(&mut node.params) {
+        let it = el.value_mut();
+        v.visit_captured_param_mut(it);
+    }
+    skip!(node.gt_token);
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_predicate_lifetime_mut<V>(v: &mut V, node: &mut crate::PredicateLifetime)
@@ -3636,6 +3675,9 @@ where
         }
         crate::TypeParamBound::Lifetime(_binding_0) => {
             v.visit_lifetime_mut(_binding_0);
+        }
+        crate::TypeParamBound::PreciseCapture(_binding_0) => {
+            full!(v.visit_precise_capture_mut(_binding_0));
         }
         crate::TypeParamBound::Verbatim(_binding_0) => {
             skip!(_binding_0);

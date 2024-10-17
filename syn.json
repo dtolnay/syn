@@ -451,6 +451,27 @@
       }
     },
     {
+      "ident": "CapturedParam",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "variants": {
+        "Lifetime": [
+          {
+            "syn": "Lifetime"
+          }
+        ],
+        "Ident": [
+          {
+            "proc_macro2": "Ident"
+          }
+        ]
+      },
+      "exhaustive": false
+    },
+    {
       "ident": "ConstParam",
       "features": {
         "any": [
@@ -4207,6 +4228,33 @@
       }
     },
     {
+      "ident": "PreciseCapture",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "use_token": {
+          "token": "Use"
+        },
+        "lt_token": {
+          "token": "Lt"
+        },
+        "params": {
+          "punctuated": {
+            "element": {
+              "syn": "CapturedParam"
+            },
+            "punct": "Comma"
+          }
+        },
+        "gt_token": {
+          "token": "Gt"
+        }
+      }
+    },
+    {
       "ident": "PredicateLifetime",
       "features": {
         "any": [
@@ -5043,6 +5091,11 @@
         "Lifetime": [
           {
             "syn": "Lifetime"
+          }
+        ],
+        "PreciseCapture": [
+          {
+            "syn": "PreciseCapture"
           }
         ],
         "Verbatim": [

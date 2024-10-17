@@ -204,7 +204,9 @@ pub(crate) fn trailing_unparameterized_path(mut ty: &Type) -> bool {
     ) -> ControlFlow<bool, &Type> {
         match bounds.last().unwrap() {
             TypeParamBound::Trait(t) => last_type_in_path(&t.path),
-            TypeParamBound::Lifetime(_) | TypeParamBound::Verbatim(_) => ControlFlow::Break(false),
+            TypeParamBound::Lifetime(_)
+            | TypeParamBound::PreciseCapture(_)
+            | TypeParamBound::Verbatim(_) => ControlFlow::Break(false),
         }
     }
 }
@@ -378,7 +380,9 @@ pub(crate) fn expr_trailing_brace(mut expr: &Expr) -> bool {
                 Some(t) => ControlFlow::Continue(t),
                 None => ControlFlow::Break(false),
             },
-            TypeParamBound::Lifetime(_) => ControlFlow::Break(false),
+            TypeParamBound::Lifetime(_) | TypeParamBound::PreciseCapture(_) => {
+                ControlFlow::Break(false)
+            }
             TypeParamBound::Verbatim(t) => ControlFlow::Break(tokens_trailing_brace(t)),
         }
     }

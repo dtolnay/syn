@@ -415,7 +415,21 @@ fn test_impl_trait_use() {
                 },
             }),
             Token![+],
-            TypeParamBound::Verbatim(`use < '_ , 'a , A , Test >`),
+            TypeParamBound::PreciseCapture(PreciseCapture {
+                params: [
+                    CapturedParam::Lifetime(Lifetime {
+                        ident: "_",
+                    }),
+                    Token![,],
+                    CapturedParam::Lifetime(Lifetime {
+                        ident: "a",
+                    }),
+                    Token![,],
+                    CapturedParam::Ident("A"),
+                    Token![,],
+                    CapturedParam::Ident("Test"),
+                ],
+            }),
         ],
     }
     "#);
@@ -437,7 +451,14 @@ fn test_impl_trait_use() {
                 },
             }),
             Token![+],
-            TypeParamBound::Verbatim(`use < '_ , >`),
+            TypeParamBound::PreciseCapture(PreciseCapture {
+                params: [
+                    CapturedParam::Lifetime(Lifetime {
+                        ident: "_",
+                    }),
+                    Token![,],
+                ],
+            }),
         ],
     }
     "#);

@@ -401,6 +401,9 @@ pub use crate::generics::{
     PredicateType, TraitBound, TraitBoundModifier, TypeParam, TypeParamBound, WhereClause,
     WherePredicate,
 };
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub use crate::generics::{CapturedParam, PreciseCapture};
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 #[cfg_attr(
     docsrs,

@@ -314,6 +314,27 @@ impl Debug for Lite<syn::BoundLifetimes> {
         formatter.finish()
     }
 }
+impl Debug for Lite<syn::CapturedParam> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match &self.value {
+            syn::CapturedParam::Lifetime(_val) => {
+                formatter.write_str("CapturedParam::Lifetime")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
+            }
+            syn::CapturedParam::Ident(_val) => {
+                formatter.write_str("CapturedParam::Ident")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
+            }
+            _ => unreachable!(),
+        }
+    }
+}
 impl Debug for Lite<syn::ConstParam> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ConstParam");
@@ -3566,6 +3587,15 @@ impl Debug for Lite<syn::PointerMutability> {
         }
     }
 }
+impl Debug for Lite<syn::PreciseCapture> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("PreciseCapture");
+        if !self.value.params.is_empty() {
+            formatter.field("params", Lite(&self.value.params));
+        }
+        formatter.finish()
+    }
+}
 impl Debug for Lite<syn::PredicateLifetime> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PredicateLifetime");
@@ -4387,6 +4417,13 @@ impl Debug for Lite<syn::TypeParamBound> {
                 let mut formatter = formatter.debug_struct("TypeParamBound::Lifetime");
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.finish()
+            }
+            syn::TypeParamBound::PreciseCapture(_val) => {
+                formatter.write_str("TypeParamBound::PreciseCapture")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
             }
             syn::TypeParamBound::Verbatim(_val) => {
                 formatter.write_str("TypeParamBound::Verbatim")?;
