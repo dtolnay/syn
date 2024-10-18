@@ -290,7 +290,7 @@ pub(crate) mod parsing {
         TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
     use crate::verbatim;
-    use proc_macro2::Span;
+    use proc_macro2::{Span, TokenTree};
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for Type {
@@ -859,13 +859,14 @@ pub(crate) mod parsing {
             let mut at_least_one_trait = false;
             for bound in &bounds {
                 match bound {
-                    TypeParamBound::Trait(_) | TypeParamBound::Verbatim(_) => {
+                    TypeParamBound::Trait(_) => {
                         at_least_one_trait = true;
                         break;
                     }
                     TypeParamBound::Lifetime(lifetime) => {
                         last_lifetime_span = Some(lifetime.ident.span());
                     }
+                    TypeParamBound::Verbatim(_) => unreachable!(),
                 }
             }
             // Just lifetimes like `'a + 'b` is not a TraitObject.
@@ -902,16 +903,29 @@ pub(crate) mod parsing {
                 allow_precise_capture,
                 allow_tilde_const,
             )?;
-            let mut last_lifetime_span = None;
+            let mut last_nontrait_span = None;
             let mut at_least_one_trait = false;
             for bound in &bounds {
                 match bound {
-                    TypeParamBound::Trait(_) | TypeParamBound::Verbatim(_) => {
+                    TypeParamBound::Trait(_) => {
                         at_least_one_trait = true;
                         break;
                     }
                     TypeParamBound::Lifetime(lifetime) => {
-                        last_lifetime_span = Some(lifetime.ident.span());
+                        last_nontrait_span = Some(lifetime.ident.span());
+                    }
+                    TypeParamBound::Verbatim(verbatim) => {
+                        let mut tokens = verbatim.clone().into_iter();
+                        match tokens.next().unwrap() {
+                            TokenTree::Ident(ident) if ident == "use" => {
+                                last_nontrait_span = Some(tokens.last().unwrap().span());
+                            }
+                            _ => {
+                                // ~const Trait
+                                at_least_one_trait = true;
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -919,7 +933,7 @@ pub(crate) mod parsing {
                 let msg = "at least one trait must be specified";
                 return Err(error::new2(
                     impl_token.span,
-                    last_lifetime_span.unwrap(),
+                    last_nontrait_span.unwrap(),
                     msg,
                 ));
             }
