@@ -8,6 +8,7 @@ documentation = "https://docs.rs/syn"
 edition = "2021"
 include = [
     "/benches/**",
+    "/build.rs",
     "/Cargo.toml",
     "/LICENSE-APACHE",
     "/LICENSE-MIT",
@@ -17,6 +18,7 @@ include = [
 ]
 keywords = ["macros", "syn"]
 license = "MIT OR Apache-2.0"
+links = "syn2"
 repository = "https://github.com/dtolnay/syn"
 rust-version = "1.61"
 
@@ -78,6 +80,9 @@ features = ["full", "visit", "visit-mut", "fold", "extra-traits"]
 [workspace]
 members = [
     "dev",
+    "codegen/crates/fold",
+    "codegen/crates/visit",
+    "codegen/crates/visit-mut",
     "examples/dump-syntax",
     "examples/heapsize/example",
     "examples/heapsize/heapsize",

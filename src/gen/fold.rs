@@ -1151,6 +1151,8 @@ where
         crate::BinOp::BitOrAssign(_binding_0) => crate::BinOp::BitOrAssign(_binding_0),
         crate::BinOp::ShlAssign(_binding_0) => crate::BinOp::ShlAssign(_binding_0),
         crate::BinOp::ShrAssign(_binding_0) => crate::BinOp::ShrAssign(_binding_0),
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -1389,6 +1391,8 @@ where
         crate::Expr::Yield(_binding_0) => {
             crate::Expr::Yield(full!(f.fold_expr_yield(_binding_0)))
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -1937,6 +1941,8 @@ where
 {
     match node {
         crate::FieldMutability::None => crate::FieldMutability::None,
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2055,6 +2061,8 @@ where
         crate::ForeignItem::Verbatim(_binding_0) => {
             crate::ForeignItem::Verbatim(_binding_0)
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2154,6 +2162,8 @@ where
         crate::GenericArgument::Constraint(_binding_0) => {
             crate::GenericArgument::Constraint(f.fold_constraint(_binding_0))
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2216,6 +2226,8 @@ where
             crate::ImplItem::Macro(f.fold_impl_item_macro(_binding_0))
         }
         crate::ImplItem::Verbatim(_binding_0) => crate::ImplItem::Verbatim(_binding_0),
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2300,7 +2312,10 @@ pub fn fold_impl_restriction<F>(
 where
     F: Fold + ?Sized,
 {
-    match node {}
+    match node {
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -2354,6 +2369,8 @@ where
         }
         crate::Item::Use(_binding_0) => crate::Item::Use(f.fold_item_use(_binding_0)),
         crate::Item::Verbatim(_binding_0) => crate::Item::Verbatim(_binding_0),
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2666,6 +2683,8 @@ where
         crate::Lit::Float(_binding_0) => crate::Lit::Float(f.fold_lit_float(_binding_0)),
         crate::Lit::Bool(_binding_0) => crate::Lit::Bool(f.fold_lit_bool(_binding_0)),
         crate::Lit::Verbatim(_binding_0) => crate::Lit::Verbatim(_binding_0),
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 pub fn fold_lit_bool<F>(f: &mut F, node: crate::LitBool) -> crate::LitBool
@@ -2901,6 +2920,8 @@ where
         crate::Pat::Type(_binding_0) => crate::Pat::Type(f.fold_pat_type(_binding_0)),
         crate::Pat::Verbatim(_binding_0) => crate::Pat::Verbatim(_binding_0),
         crate::Pat::Wild(_binding_0) => crate::Pat::Wild(f.fold_pat_wild(_binding_0)),
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -3235,6 +3256,8 @@ where
             crate::StaticMutability::Mut(_binding_0)
         }
         crate::StaticMutability::None => crate::StaticMutability::None,
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -3315,6 +3338,8 @@ where
             crate::TraitItem::Macro(f.fold_trait_item_macro(_binding_0))
         }
         crate::TraitItem::Verbatim(_binding_0) => crate::TraitItem::Verbatim(_binding_0),
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -3431,6 +3456,8 @@ where
             crate::Type::Tuple(f.fold_type_tuple(_binding_0))
         }
         crate::Type::Verbatim(_binding_0) => crate::Type::Verbatim(_binding_0),
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3552,6 +3579,8 @@ where
         crate::TypeParamBound::Verbatim(_binding_0) => {
             crate::TypeParamBound::Verbatim(_binding_0)
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3651,6 +3680,8 @@ where
         crate::UnOp::Deref(_binding_0) => crate::UnOp::Deref(_binding_0),
         crate::UnOp::Not(_binding_0) => crate::UnOp::Not(_binding_0),
         crate::UnOp::Neg(_binding_0) => crate::UnOp::Neg(_binding_0),
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -3815,6 +3846,8 @@ where
         crate::WherePredicate::Type(_binding_0) => {
             crate::WherePredicate::Type(f.fold_predicate_type(_binding_0))
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

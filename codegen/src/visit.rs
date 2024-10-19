@@ -109,7 +109,10 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
     match &s.data {
         Data::Enum(variants) if variants.is_empty() => {
             visit_impl.extend(quote! {
-                match *node {}
+                match *node {
+                    #[cfg(syn_non_exhaustive)]
+                    _ => unreachable!(),
+                }
             });
         }
         Data::Enum(variants) => {
@@ -149,6 +152,13 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                         }
                     });
                 }
+            }
+
+            if !s.exhaustive {
+                visit_variants.extend(quote! {
+                    #[cfg(syn_non_exhaustive)]
+                    _ => unreachable!(),
+                });
             }
 
             visit_impl.extend(quote! {

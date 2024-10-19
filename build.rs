@@ -8,12 +8,19 @@ use std::process::{self, Command, Stdio};
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
 
-    // Note: add "/build.rs" to package.include in Cargo.toml if adding any
-    // conditional compilation within the library.
+    let mut features = Vec::new();
+    if env::var_os("CARGO_FEATURE_DERIVE").is_some() {
+        features.push("derive");
+    }
+    if env::var_os("CARGO_FEATURE_FULL").is_some() {
+        features.push("full");
+    }
+    println!("cargo:FEATURES={}", features.join(","));
 
     println!("cargo:rustc-cfg=check_cfg");
     println!("cargo:rustc-check-cfg=cfg(check_cfg)");
     println!("cargo:rustc-check-cfg=cfg(syn_disable_nightly_tests)");
+    println!("cargo:rustc-check-cfg=cfg(syn_non_exhaustive)");
     println!("cargo:rustc-check-cfg=cfg(syn_only)");
 
     if !unstable() {

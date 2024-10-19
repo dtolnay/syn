@@ -1152,6 +1152,8 @@ where
         crate::BinOp::ShrAssign(_binding_0) => {
             skip!(_binding_0);
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -1404,6 +1406,8 @@ where
         crate::Expr::Yield(_binding_0) => {
             full!(v.visit_expr_yield(_binding_0));
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -1995,6 +1999,8 @@ where
 {
     match node {
         crate::FieldMutability::None => {}
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2114,6 +2120,8 @@ where
         crate::ForeignItem::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2201,6 +2209,8 @@ where
         crate::GenericArgument::Constraint(_binding_0) => {
             v.visit_constraint(_binding_0);
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2265,6 +2275,8 @@ where
         crate::ImplItem::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2337,7 +2349,10 @@ pub fn visit_impl_restriction<'ast, V>(v: &mut V, node: &'ast crate::ImplRestric
 where
     V: Visit<'ast> + ?Sized,
 {
-    match *node {}
+    match *node {
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -2403,6 +2418,8 @@ where
         crate::Item::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -2745,6 +2762,8 @@ where
         crate::Lit::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 pub fn visit_lit_bool<'ast, V>(v: &mut V, node: &'ast crate::LitBool)
@@ -2967,6 +2986,8 @@ where
         crate::Pat::Wild(_binding_0) => {
             v.visit_pat_wild(_binding_0);
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -3314,6 +3335,8 @@ where
             skip!(_binding_0);
         }
         crate::StaticMutability::None => {}
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -3401,6 +3424,8 @@ where
         crate::TraitItem::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -3525,6 +3550,8 @@ where
         crate::Type::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3643,6 +3670,8 @@ where
         crate::TypeParamBound::Verbatim(_binding_0) => {
             skip!(_binding_0);
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3738,6 +3767,8 @@ where
         crate::UnOp::Neg(_binding_0) => {
             skip!(_binding_0);
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }
 #[cfg(feature = "full")]
@@ -3896,5 +3927,7 @@ where
         crate::WherePredicate::Type(_binding_0) => {
             v.visit_predicate_type(_binding_0);
         }
+        #[cfg(syn_non_exhaustive)]
+        _ => unreachable!(),
     }
 }

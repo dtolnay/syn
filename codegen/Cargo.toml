@@ -26,5 +26,11 @@ syn-codegen = { path = "../json", default-features = false }
 toml = "0.8"
 
 [workspace]
+exclude = [
+    "crates/fold",
+    "crates/visit",
+    "crates/visit-mut",
+]
+
 [patch.crates-io]
 syn = { path = ".." }

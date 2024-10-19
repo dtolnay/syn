@@ -136,6 +136,13 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                 }
             }
 
+            if !s.exhaustive {
+                fold_variants.extend(quote! {
+                    #[cfg(syn_non_exhaustive)]
+                    _ => unreachable!(),
+                });
+            }
+
             fold_impl.extend(quote! {
                 match node {
                     #fold_variants

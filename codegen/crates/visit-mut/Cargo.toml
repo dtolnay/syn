@@ -1,0 +1,20 @@
+[package]
+name = "syn-visit-mut"
+version = "0.0.1"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+categories = ["development-tools::procedural-macro-helpers"]
+description = "Trait to visit a syn syntax tree by mutable reference."
+documentation = "https://docs.rs/syn-visit-mut"
+edition = "2021"
+keywords = ["syn"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/dtolnay/syn"
+
+[dependencies]
+syn = { version = "2", path = "../../..", default-features = false }
+proc-macro2 = { version = "1", default-features = false }
+
+[package.metadata.docs.rs]
+features = ["syn/derive", "syn/full"]
+targets = ["x86_64-unknown-linux-gnu"]
+rustdoc-args = ["--generate-link-to-definition"]
