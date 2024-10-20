@@ -1236,14 +1236,14 @@ pub trait Parser: Sized {
 
     /// Parse a proc-macro2 token stream into the chosen syntax tree node.
     ///
-    /// This function will check that the input is fully parsed. If there are
-    /// any unparsed tokens at the end of the stream, an error is returned.
+    /// This function enforces that the input is fully parsed. If there are any
+    /// unparsed tokens at the end of the stream, an error is returned.
     fn parse2(self, tokens: TokenStream) -> Result<Self::Output>;
 
     /// Parse tokens of source code into the chosen syntax tree node.
     ///
-    /// This function will check that the input is fully parsed. If there are
-    /// any unparsed tokens at the end of the stream, an error is returned.
+    /// This function enforces that the input is fully parsed. If there are any
+    /// unparsed tokens at the end of the stream, an error is returned.
     #[cfg(feature = "proc-macro")]
     #[cfg_attr(docsrs, doc(cfg(feature = "proc-macro")))]
     fn parse(self, tokens: proc_macro::TokenStream) -> Result<Self::Output> {
@@ -1252,8 +1252,8 @@ pub trait Parser: Sized {
 
     /// Parse a string of Rust code into the chosen syntax tree node.
     ///
-    /// This function will check that the input is fully parsed. If there are
-    /// any unparsed tokens at the end of the string, an error is returned.
+    /// This function enforces that the input is fully parsed. If there are any
+    /// unparsed tokens at the end of the string, an error is returned.
     ///
     /// # Hygiene
     ///
