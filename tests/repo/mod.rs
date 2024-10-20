@@ -25,13 +25,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/rustdoc/unsafe-extern-blocks.rs",
     "tests/ui/rust-2024/unsafe-extern-blocks/safe-items.rs",
 
-    // TODO: unsafe attributes: `#[unsafe(path::to)]`
-    // https://github.com/dtolnay/syn/issues/1710
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0213_metas.rs",
-    "src/tools/rustfmt/tests/target/unsafe_attributes.rs",
-    "tests/ui/attributes/unsafe/unsafe-attributes.rs",
-    "tests/ui/rust-2024/unsafe-attributes/unsafe-attribute-marked.rs",
-
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
     // https://github.com/dtolnay/syn/issues/1435
     "src/tools/rustfmt/tests/source/issue_5721.rs",

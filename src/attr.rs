@@ -653,6 +653,7 @@ pub(crate) mod parsing {
     use crate::parse::{Parse, ParseStream};
     use crate::path::Path;
     use crate::{mac, token};
+    use proc_macro2::Ident;
     use std::fmt::{self, Display};
 
     pub(crate) fn parse_inner(input: ParseStream, attrs: &mut Vec<Attribute>) -> Result<()> {
@@ -685,7 +686,7 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for Meta {
         fn parse(input: ParseStream) -> Result<Self> {
-            let path = input.call(Path::parse_mod_style)?;
+            let path = parse_outermost_meta_path(input)?;
             parse_meta_after_path(path, input)
         }
     }
@@ -693,7 +694,7 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for MetaList {
         fn parse(input: ParseStream) -> Result<Self> {
-            let path = input.call(Path::parse_mod_style)?;
+            let path = parse_outermost_meta_path(input)?;
             parse_meta_list_after_path(path, input)
         }
     }
@@ -701,8 +702,19 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for MetaNameValue {
         fn parse(input: ParseStream) -> Result<Self> {
-            let path = input.call(Path::parse_mod_style)?;
+            let path = parse_outermost_meta_path(input)?;
             parse_meta_name_value_after_path(path, input)
+        }
+    }
+
+    // Unlike meta::parse_meta_path which accepts arbitrary keywords in the path,
+    // only the `unsafe` keyword is accepted as an attribute's outermost path.
+    fn parse_outermost_meta_path(input: ParseStream) -> Result<Path> {
+        if input.peek(Token![unsafe]) {
+            let unsafe_token: Token![unsafe] = input.parse()?;
+            Ok(Path::from(Ident::new("unsafe", unsafe_token.span)))
+        } else {
+            Path::parse_mod_style(input)
         }
     }
 
