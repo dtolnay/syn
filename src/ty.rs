@@ -290,7 +290,7 @@ pub(crate) mod parsing {
         TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
     use crate::verbatim;
-    use proc_macro2::{Span, TokenTree};
+    use proc_macro2::Span;
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for Type {
@@ -465,6 +465,7 @@ pub(crate) mod parsing {
                                     })
                                 }
                                 other @ (TypeParamBound::Lifetime(_)
+                                | TypeParamBound::PreciseCapture(_)
                                 | TypeParamBound::Verbatim(_)) => other,
                             }
                         }
@@ -866,7 +867,9 @@ pub(crate) mod parsing {
                     TypeParamBound::Lifetime(lifetime) => {
                         last_lifetime_span = Some(lifetime.ident.span());
                     }
-                    TypeParamBound::Verbatim(_) => unreachable!(),
+                    TypeParamBound::PreciseCapture(_) | TypeParamBound::Verbatim(_) => {
+                        unreachable!()
+                    }
                 }
             }
             // Just lifetimes like `'a + 'b` is not a TraitObject.
@@ -914,18 +917,21 @@ pub(crate) mod parsing {
                     TypeParamBound::Lifetime(lifetime) => {
                         last_nontrait_span = Some(lifetime.ident.span());
                     }
-                    TypeParamBound::Verbatim(verbatim) => {
-                        let mut tokens = verbatim.clone().into_iter();
-                        match tokens.next().unwrap() {
-                            TokenTree::Ident(ident) if ident == "use" => {
-                                last_nontrait_span = Some(tokens.last().unwrap().span());
-                            }
-                            _ => {
-                                // ~const Trait
-                                at_least_one_trait = true;
-                                break;
-                            }
+                    TypeParamBound::PreciseCapture(precise_capture) => {
+                        #[cfg(feature = "full")]
+                        {
+                            last_nontrait_span = Some(precise_capture.gt_token.span);
                         }
+                        #[cfg(not(feature = "full"))]
+                        {
+                            _ = precise_capture;
+                            unreachable!();
+                        }
+                    }
+                    TypeParamBound::Verbatim(_) => {
+                        // ~const Trait
+                        at_least_one_trait = true;
+                        break;
                     }
                 }
             }

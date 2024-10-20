@@ -230,6 +230,25 @@ impl Hash for crate::BoundLifetimes {
         self.lifetimes.hash(state);
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::CapturedParam {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            crate::CapturedParam::Lifetime(v0) => {
+                state.write_u8(0u8);
+                v0.hash(state);
+            }
+            crate::CapturedParam::Ident(v0) => {
+                state.write_u8(1u8);
+                v0.hash(state);
+            }
+        }
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::ConstParam {
@@ -2120,6 +2139,16 @@ impl Hash for crate::PointerMutability {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::PreciseCapture {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.params.hash(state);
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::PredicateLifetime {
@@ -2568,10 +2597,17 @@ impl Hash for crate::TypeParamBound {
                 state.write_u8(1u8);
                 v0.hash(state);
             }
-            crate::TypeParamBound::Verbatim(v0) => {
+            #[cfg(feature = "full")]
+            crate::TypeParamBound::PreciseCapture(v0) => {
                 state.write_u8(2u8);
+                v0.hash(state);
+            }
+            crate::TypeParamBound::Verbatim(v0) => {
+                state.write_u8(3u8);
                 TokenStreamHelper(v0).hash(state);
             }
+            #[cfg(not(feature = "full"))]
+            _ => unreachable!(),
         }
     }
 }

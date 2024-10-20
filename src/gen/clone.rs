@@ -139,6 +139,18 @@ impl Clone for crate::BoundLifetimes {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::CapturedParam {
+    fn clone(&self) -> Self {
+        match self {
+            crate::CapturedParam::Lifetime(v0) => {
+                crate::CapturedParam::Lifetime(v0.clone())
+            }
+            crate::CapturedParam::Ident(v0) => crate::CapturedParam::Ident(v0.clone()),
+        }
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::ConstParam {
@@ -1676,6 +1688,18 @@ impl Clone for crate::PointerMutability {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::PreciseCapture {
+    fn clone(&self) -> Self {
+        crate::PreciseCapture {
+            use_token: self.use_token.clone(),
+            lt_token: self.lt_token.clone(),
+            params: self.params.clone(),
+            gt_token: self.gt_token.clone(),
+        }
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::PredicateLifetime {
@@ -2011,9 +2035,15 @@ impl Clone for crate::TypeParamBound {
             crate::TypeParamBound::Lifetime(v0) => {
                 crate::TypeParamBound::Lifetime(v0.clone())
             }
+            #[cfg(feature = "full")]
+            crate::TypeParamBound::PreciseCapture(v0) => {
+                crate::TypeParamBound::PreciseCapture(v0.clone())
+            }
             crate::TypeParamBound::Verbatim(v0) => {
                 crate::TypeParamBound::Verbatim(v0.clone())
             }
+            #[cfg(not(feature = "full"))]
+            _ => unreachable!(),
         }
     }
 }

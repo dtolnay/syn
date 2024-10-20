@@ -426,6 +426,7 @@ ast_enum_of_structs! {
     pub enum TypeParamBound {
         Trait(TraitBound),
         Lifetime(Lifetime),
+        PreciseCapture(PreciseCapture),
         Verbatim(TokenStream),
     }
 }
@@ -450,6 +451,34 @@ ast_enum! {
     pub enum TraitBoundModifier {
         None,
         Maybe(Token![?]),
+    }
+}
+
+ast_struct! {
+    /// Precise capturing bound: the 'use&lt;&hellip;&gt;' in `impl Trait +
+    /// use<'a, T>`.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    pub struct PreciseCapture #full {
+        pub use_token: Token![use],
+        pub lt_token: Token![<],
+        pub params: Punctuated<CapturedParam, Token![,]>,
+        pub gt_token: Token![>],
+    }
+}
+
+#[cfg(feature = "full")]
+ast_enum! {
+    /// Single parameter in a precise capturing bound.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    #[non_exhaustive]
+    pub enum CapturedParam {
+        /// A lifetime parameter in precise capturing bound: `fn f<'a>() -> impl
+        /// Trait + use<'a>`.
+        Lifetime(Lifetime),
+        /// A type parameter or const generic parameter in precise capturing
+        /// bound: `fn f<T>() -> impl Trait + use<T>` or `fn f<const K: T>() ->
+        /// impl Trait + use<K>`.
+        Ident(Ident),
     }
 }
 
@@ -516,6 +545,8 @@ pub(crate) mod parsing {
         PredicateType, TraitBound, TraitBoundModifier, TypeParam, TypeParamBound, WhereClause,
         WherePredicate,
     };
+    #[cfg(feature = "full")]
+    use crate::generics::{CapturedParam, PreciseCapture};
     use crate::ident::Ident;
     use crate::lifetime::Lifetime;
     use crate::parse::{Parse, ParseStream};
@@ -753,7 +784,7 @@ pub(crate) mod parsing {
     impl TypeParamBound {
         pub(crate) fn parse_single(
             input: ParseStream,
-            allow_precise_capture: bool,
+            #[cfg_attr(not(feature = "full"), allow(unused_variables))] allow_precise_capture: bool,
             allow_tilde_const: bool,
         ) -> Result<Self> {
             if input.peek(Lifetime) {
@@ -762,36 +793,47 @@ pub(crate) mod parsing {
 
             let begin = input.fork();
 
-            if cfg!(feature = "full") && input.peek(Token![use]) {
-                let use_token: Token![use] = input.parse()?;
-                input.parse::<Token![<]>()?;
-                loop {
-                    let lookahead = input.lookahead1();
-                    if lookahead.peek(Lifetime) {
-                        input.parse::<Lifetime>()?;
-                    } else if lookahead.peek(Ident) {
-                        input.parse::<Ident>()?;
-                    } else if lookahead.peek(Token![>]) {
-                        break;
-                    } else {
-                        return Err(lookahead.error());
+            #[cfg(feature = "full")]
+            {
+                if input.peek(Token![use]) {
+                    let use_token: Token![use] = input.parse()?;
+                    let lt_token: Token![<] = input.parse()?;
+                    let mut params = Punctuated::new();
+                    loop {
+                        let lookahead = input.lookahead1();
+                        let capture = if lookahead.peek(Lifetime) {
+                            input.parse().map(CapturedParam::Lifetime)
+                        } else if lookahead.peek(Ident) {
+                            input.parse().map(CapturedParam::Ident)
+                        } else if lookahead.peek(Token![>]) {
+                            break;
+                        } else {
+                            return Err(lookahead.error());
+                        }?;
+                        params.push_value(capture);
+                        let lookahead = input.lookahead1();
+                        let comma = if lookahead.peek(Token![,]) {
+                            input.parse::<Token![,]>()
+                        } else if lookahead.peek(Token![>]) {
+                            break;
+                        } else {
+                            return Err(lookahead.error());
+                        }?;
+                        params.push_punct(comma);
                     }
-                    let lookahead = input.lookahead1();
-                    if lookahead.peek(Token![,]) {
-                        input.parse::<Token![,]>()?;
-                    } else if lookahead.peek(Token![>]) {
-                        break;
+                    let gt_token: Token![>] = input.parse()?;
+                    return if allow_precise_capture {
+                        Ok(TypeParamBound::PreciseCapture(PreciseCapture {
+                            use_token,
+                            lt_token,
+                            params,
+                            gt_token,
+                        }))
                     } else {
-                        return Err(lookahead.error());
-                    }
+                        let msg = "`use<...>` precise capturing syntax is not allowed here";
+                        Err(error::new2(use_token.span, gt_token.span, msg))
+                    };
                 }
-                let gt_token: Token![>] = input.parse()?;
-                return if allow_precise_capture {
-                    Ok(TypeParamBound::Verbatim(verbatim::between(&begin, input)))
-                } else {
-                    let msg = "`use<...>` precise capturing syntax is not allowed here";
-                    Err(error::new2(use_token.span, gt_token.span, msg))
-                };
             }
 
             let content;
@@ -1035,6 +1077,8 @@ pub(crate) mod printing {
         PredicateLifetime, PredicateType, TraitBound, TraitBoundModifier, Turbofish, TypeGenerics,
         TypeParam, WhereClause,
     };
+    #[cfg(feature = "full")]
+    use crate::generics::{CapturedParam, PreciseCapture};
     use crate::print::TokensOrDefault;
     use crate::token;
     use proc_macro2::TokenStream;
@@ -1285,6 +1329,28 @@ pub(crate) mod printing {
             self.bounded_ty.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.bounds.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for PreciseCapture {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            self.use_token.to_tokens(tokens);
+            self.lt_token.to_tokens(tokens);
+            self.params.to_tokens(tokens);
+            self.gt_token.to_tokens(tokens);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for CapturedParam {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                CapturedParam::Lifetime(lifetime) => lifetime.to_tokens(tokens),
+                CapturedParam::Ident(ident) => ident.to_tokens(tokens),
+            }
         }
     }
 

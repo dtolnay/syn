@@ -91,6 +91,11 @@ pub trait Fold {
     ) -> crate::BoundLifetimes {
         fold_bound_lifetimes(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_captured_param(&mut self, i: crate::CapturedParam) -> crate::CapturedParam {
+        fold_captured_param(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_const_param(&mut self, i: crate::ConstParam) -> crate::ConstParam {
@@ -736,6 +741,14 @@ pub trait Fold {
     ) -> crate::PointerMutability {
         fold_pointer_mutability(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_precise_capture(
+        &mut self,
+        i: crate::PreciseCapture,
+    ) -> crate::PreciseCapture {
+        fold_precise_capture(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_predicate_lifetime(
@@ -1178,6 +1191,24 @@ where
         lt_token: node.lt_token,
         lifetimes: crate::punctuated::fold(node.lifetimes, f, F::fold_generic_param),
         gt_token: node.gt_token,
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_captured_param<F>(
+    f: &mut F,
+    node: crate::CapturedParam,
+) -> crate::CapturedParam
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        crate::CapturedParam::Lifetime(_binding_0) => {
+            crate::CapturedParam::Lifetime(f.fold_lifetime(_binding_0))
+        }
+        crate::CapturedParam::Ident(_binding_0) => {
+            crate::CapturedParam::Ident(f.fold_ident(_binding_0))
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3108,6 +3139,22 @@ where
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_precise_capture<F>(
+    f: &mut F,
+    node: crate::PreciseCapture,
+) -> crate::PreciseCapture
+where
+    F: Fold + ?Sized,
+{
+    crate::PreciseCapture {
+        use_token: node.use_token,
+        lt_token: node.lt_token,
+        params: crate::punctuated::fold(node.params, f, F::fold_captured_param),
+        gt_token: node.gt_token,
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_predicate_lifetime<F>(
@@ -3548,6 +3595,11 @@ where
         }
         crate::TypeParamBound::Lifetime(_binding_0) => {
             crate::TypeParamBound::Lifetime(f.fold_lifetime(_binding_0))
+        }
+        crate::TypeParamBound::PreciseCapture(_binding_0) => {
+            crate::TypeParamBound::PreciseCapture(
+                full!(f.fold_precise_capture(_binding_0)),
+            )
         }
         crate::TypeParamBound::Verbatim(_binding_0) => {
             crate::TypeParamBound::Verbatim(_binding_0)
