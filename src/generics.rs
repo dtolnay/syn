@@ -1046,10 +1046,8 @@ pub(crate) mod parsing {
             let mut params = Punctuated::new();
             loop {
                 let lookahead = input.lookahead1();
-                params.push_value(if lookahead.peek(Lifetime) {
-                    input.parse().map(CapturedParam::Lifetime)?
-                } else if lookahead.peek(Ident) {
-                    input.parse().map(CapturedParam::Ident)?
+                params.push_value(if lookahead.peek(Lifetime) || lookahead.peek(Ident) {
+                    input.parse::<CapturedParam>()?
                 } else if lookahead.peek(Token![>]) {
                     break;
                 } else {
@@ -1071,6 +1069,21 @@ pub(crate) mod parsing {
                 params,
                 gt_token,
             })
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Parse for CapturedParam {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let lookahead = input.lookahead1();
+            if lookahead.peek(Lifetime) {
+                input.parse().map(CapturedParam::Lifetime)
+            } else if lookahead.peek(Ident) {
+                input.parse().map(CapturedParam::Ident)
+            } else {
+                Err(lookahead.error())
+            }
         }
     }
 }
