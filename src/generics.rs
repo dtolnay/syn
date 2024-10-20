@@ -801,25 +801,23 @@ pub(crate) mod parsing {
                     let mut params = Punctuated::new();
                     loop {
                         let lookahead = input.lookahead1();
-                        let capture = if lookahead.peek(Lifetime) {
-                            input.parse().map(CapturedParam::Lifetime)
+                        params.push_value(if lookahead.peek(Lifetime) {
+                            input.parse().map(CapturedParam::Lifetime)?
                         } else if lookahead.peek(Ident) {
-                            input.parse().map(CapturedParam::Ident)
+                            input.parse().map(CapturedParam::Ident)?
                         } else if lookahead.peek(Token![>]) {
                             break;
                         } else {
                             return Err(lookahead.error());
-                        }?;
-                        params.push_value(capture);
+                        });
                         let lookahead = input.lookahead1();
-                        let comma = if lookahead.peek(Token![,]) {
-                            input.parse::<Token![,]>()
+                        params.push_punct(if lookahead.peek(Token![,]) {
+                            input.parse::<Token![,]>()?
                         } else if lookahead.peek(Token![>]) {
                             break;
                         } else {
                             return Err(lookahead.error());
-                        }?;
-                        params.push_punct(comma);
+                        });
                     }
                     let gt_token: Token![>] = input.parse()?;
                     return if allow_precise_capture {
