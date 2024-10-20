@@ -1,4 +1,4 @@
-use crate::{cfg, file, lookup};
+use crate::{cfg, file, full, lookup};
 use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
@@ -13,6 +13,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
     match &node.data {
         Data::Enum(variants) if variants.is_empty() => quote!(match *self {}),
         Data::Enum(variants) => {
+            let mixed_derive_full = full::is_mixed_derive_full_enum(defs, node);
             let arms = variants.iter().map(|(variant_name, fields)| {
                 let variant = Ident::new(variant_name, Span::call_site());
                 if fields.is_empty() {
@@ -28,9 +29,10 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                         pats.push(pat);
                     }
                     let mut cfg = None;
-                    if node.ident == "Expr" {
+                    if mixed_derive_full {
                         if let Type::Syn(ty) = &fields[0] {
-                            if !lookup::node(defs, ty).features.any.contains("derive") {
+                            let features = &lookup::node(defs, ty).features;
+                            if features.any.contains("full") && !features.any.contains("derive") {
                                 cfg = Some(quote!(#[cfg(feature = "full")]));
                             }
                         }
@@ -41,7 +43,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                     }
                 }
             });
-            let nonexhaustive = if node.ident == "Expr" {
+            let nonexhaustive = if mixed_derive_full {
                 Some(quote! {
                     #[cfg(not(feature = "full"))]
                     _ => unreachable!(),
