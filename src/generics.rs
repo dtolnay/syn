@@ -796,40 +796,16 @@ pub(crate) mod parsing {
             #[cfg(feature = "full")]
             {
                 if input.peek(Token![use]) {
-                    let use_token: Token![use] = input.parse()?;
-                    let lt_token: Token![<] = input.parse()?;
-                    let mut params = Punctuated::new();
-                    loop {
-                        let lookahead = input.lookahead1();
-                        params.push_value(if lookahead.peek(Lifetime) {
-                            input.parse().map(CapturedParam::Lifetime)?
-                        } else if lookahead.peek(Ident) {
-                            input.parse().map(CapturedParam::Ident)?
-                        } else if lookahead.peek(Token![>]) {
-                            break;
-                        } else {
-                            return Err(lookahead.error());
-                        });
-                        let lookahead = input.lookahead1();
-                        params.push_punct(if lookahead.peek(Token![,]) {
-                            input.parse::<Token![,]>()?
-                        } else if lookahead.peek(Token![>]) {
-                            break;
-                        } else {
-                            return Err(lookahead.error());
-                        });
-                    }
-                    let gt_token: Token![>] = input.parse()?;
+                    let precise_capture: PreciseCapture = input.parse()?;
                     return if allow_precise_capture {
-                        Ok(TypeParamBound::PreciseCapture(PreciseCapture {
-                            use_token,
-                            lt_token,
-                            params,
-                            gt_token,
-                        }))
+                        Ok(TypeParamBound::PreciseCapture(precise_capture))
                     } else {
                         let msg = "`use<...>` precise capturing syntax is not allowed here";
-                        Err(error::new2(use_token.span, gt_token.span, msg))
+                        Err(error::new2(
+                            precise_capture.use_token.span,
+                            precise_capture.gt_token.span,
+                            msg,
+                        ))
                     };
                 }
             }
@@ -1058,6 +1034,43 @@ pub(crate) mod parsing {
                     },
                 }))
             }
+        }
+    }
+
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Parse for PreciseCapture {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let use_token: Token![use] = input.parse()?;
+            let lt_token: Token![<] = input.parse()?;
+            let mut params = Punctuated::new();
+            loop {
+                let lookahead = input.lookahead1();
+                params.push_value(if lookahead.peek(Lifetime) {
+                    input.parse().map(CapturedParam::Lifetime)?
+                } else if lookahead.peek(Ident) {
+                    input.parse().map(CapturedParam::Ident)?
+                } else if lookahead.peek(Token![>]) {
+                    break;
+                } else {
+                    return Err(lookahead.error());
+                });
+                let lookahead = input.lookahead1();
+                params.push_punct(if lookahead.peek(Token![,]) {
+                    input.parse::<Token![,]>()?
+                } else if lookahead.peek(Token![>]) {
+                    break;
+                } else {
+                    return Err(lookahead.error());
+                });
+            }
+            let gt_token: Token![>] = input.parse()?;
+            Ok(PreciseCapture {
+                use_token,
+                lt_token,
+                params,
+                gt_token,
+            })
         }
     }
 }
