@@ -1,3 +1,4 @@
+use crate::cfg::{self, DocCfg};
 use crate::{file, full, gen};
 use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
@@ -32,10 +33,16 @@ fn visit(
         }
         Type::Vec(t) => {
             let Type::Syn(t) = &**t else { unimplemented!() };
-            let method = method_name(t);
-            Some(quote! {
-                fold_vec(#name, f, F::#method)
-            })
+            if t == "Attribute" {
+                Some(quote! {
+                    f.fold_attributes(#name)
+                })
+            } else {
+                let method = method_name(t);
+                Some(quote! {
+                    fold_vec(#name, f, F::#method)
+                })
+            }
         }
         Type::Punctuated(p) => {
             let t = &*p.element;
@@ -214,6 +221,16 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
             #fold_impl
         }
     });
+
+    if s.ident == "Attribute" {
+        let features = cfg::features(&s.features, DocCfg::Ordinary);
+        traits.extend(quote! {
+            #features
+            fn fold_attributes(&mut self, i: Vec<crate::Attribute>) -> Vec<crate::Attribute> {
+                fold_vec(i, self, Self::fold_attribute)
+            }
+        });
+    }
 }
 
 pub fn generate(defs: &Definitions) -> Result<()> {
