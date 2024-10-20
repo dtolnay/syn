@@ -1,3 +1,4 @@
+use crate::cfg::{self, DocCfg};
 use crate::operand::{Borrowed, Operand, Owned};
 use crate::{file, full, gen};
 use anyhow::Result;
@@ -36,14 +37,20 @@ fn visit(
             visit(t, features, defs, &Owned(quote!(*#name)))
         }
         Type::Vec(t) => {
-            let operand = Borrowed(quote!(it));
-            let val = visit(t, features, defs, &operand)?;
             let name = name.ref_mut_tokens();
-            Some(quote! {
-                for it in #name {
-                    #val;
-                }
-            })
+            if matches!(&**t, Type::Syn(t) if t == "Attribute") {
+                Some(quote! {
+                    v.visit_attributes_mut(#name);
+                })
+            } else {
+                let operand = Borrowed(quote!(it));
+                let val = visit(t, features, defs, &operand)?;
+                Some(quote! {
+                    for it in #name {
+                        #val;
+                    }
+                })
+            }
         }
         Type::Punctuated(p) => {
             let operand = Borrowed(quote!(it));
@@ -193,6 +200,18 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
             #visit_mut_impl
         }
     });
+
+    if s.ident == "Attribute" {
+        let features = cfg::features(&s.features, DocCfg::Ordinary);
+        traits.extend(quote! {
+            #features
+            fn visit_attributes_mut(&mut self, i: &mut Vec<crate::Attribute>) {
+                for attr in i {
+                    self.visit_attribute_mut(attr);
+                }
+            }
+        });
+    }
 }
 
 pub fn generate(defs: &Definitions) -> Result<()> {
