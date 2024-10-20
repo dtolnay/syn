@@ -1338,7 +1338,26 @@ pub(crate) mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.use_token.to_tokens(tokens);
             self.lt_token.to_tokens(tokens);
-            self.params.to_tokens(tokens);
+
+            // Print lifetimes before types and consts, regardless of their
+            // order in self.params.
+            let mut trailing_or_empty = true;
+            for param in self.params.pairs() {
+                if let CapturedParam::Lifetime(_) = **param.value() {
+                    param.to_tokens(tokens);
+                    trailing_or_empty = param.punct().is_some();
+                }
+            }
+            for param in self.params.pairs() {
+                if let CapturedParam::Ident(_) = **param.value() {
+                    if !trailing_or_empty {
+                        <Token![,]>::default().to_tokens(tokens);
+                        trailing_or_empty = true;
+                    }
+                    param.to_tokens(tokens);
+                }
+            }
+
             self.gt_token.to_tokens(tokens);
         }
     }
