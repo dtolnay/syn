@@ -888,6 +888,9 @@ pub mod __private;
 /// `proc_macro2::TokenStream`, use [`syn::parse2`] instead.
 ///
 /// [`syn::parse2`]: parse2
+///
+/// This function enforces that the input is fully parsed. If there are any
+/// unparsed tokens at the end of the stream, an error is returned.
 #[cfg(all(feature = "parsing", feature = "proc-macro"))]
 #[cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "proc-macro"))))]
 pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
@@ -896,9 +899,6 @@ pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
 
 /// Parse a proc-macro2 token stream into the chosen syntax tree node.
 ///
-/// This function enforces that the input is fully parsed. If there are any
-/// unparsed tokens at the end of the stream, an error is returned.
-///
 /// This function parses a `proc_macro2::TokenStream` which is commonly useful
 /// when the input comes from a node of the Syn syntax tree, for example the
 /// body tokens of a [`Macro`] node. When in a procedural macro parsing the
@@ -906,6 +906,9 @@ pub fn parse<T: parse::Parse>(tokens: proc_macro::TokenStream) -> Result<T> {
 /// instead.
 ///
 /// [`syn::parse`]: parse()
+///
+/// This function enforces that the input is fully parsed. If there are any
+/// unparsed tokens at the end of the stream, an error is returned.
 #[cfg(feature = "parsing")]
 #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
@@ -913,6 +916,9 @@ pub fn parse2<T: parse::Parse>(tokens: proc_macro2::TokenStream) -> Result<T> {
 }
 
 /// Parse a string of Rust code into the chosen syntax tree node.
+///
+/// This function enforces that the input is fully parsed. If there are any
+/// unparsed tokens at the end of the stream, an error is returned.
 ///
 /// # Hygiene
 ///
