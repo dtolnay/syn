@@ -1176,10 +1176,6 @@ pub(crate) mod parsing {
     use proc_macro2::TokenStream;
     use std::mem;
 
-    mod kw {
-        crate::custom_keyword!(builtin);
-    }
-
     // When we're parsing expressions which occur before blocks, like in an if
     // statement's condition, we cannot parse a struct literal.
     //
@@ -1767,7 +1763,8 @@ pub(crate) mod parsing {
             || input.peek(Token![async]) && (input.peek2(Token![|]) || input.peek2(Token![move]))
         {
             expr_closure(input, allow_struct).map(Expr::Closure)
-        } else if input.peek(kw::builtin) && input.peek2(Token![#]) {
+        } else if token::parsing::peek_keyword(input.cursor(), "builtin") && input.peek2(Token![#])
+        {
             expr_builtin(input)
         } else if input.peek(Ident)
             || input.peek(Token![::])
@@ -1884,7 +1881,7 @@ pub(crate) mod parsing {
     fn expr_builtin(input: ParseStream) -> Result<Expr> {
         let begin = input.fork();
 
-        input.parse::<kw::builtin>()?;
+        token::parsing::keyword(input, "builtin")?;
         input.parse::<Token![#]>()?;
         input.parse::<Ident>()?;
 
