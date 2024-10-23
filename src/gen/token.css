@@ -936,12 +936,13 @@ a.struct[title="struct syn::token::Typeof"]::after {
 	content: "........";
 }
 
-a.struct[title="struct syn::token::Underscore"]::before {
-	content: "Token![_]";
+a.struct[title="struct syn::token::Underscore"] {
+	font-size: calc(100% * 9 / 10);
 }
 
-a.struct[title="struct syn::token::Underscore"]::after {
-	content: "";
+a.struct[title="struct syn::token::Underscore"]::before {
+	content: "Token![_]";
+	font-size: calc(100% * 10 / 9);
 }
 
 a.struct[title="struct syn::token::Union"]::before {

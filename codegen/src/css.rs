@@ -1,6 +1,7 @@
 use crate::workspace_path;
 use anyhow::Result;
 use indoc::{formatdoc, indoc};
+use std::cmp::Ordering;
 use std::fs;
 use syn_codegen::Definitions;
 
@@ -30,17 +31,36 @@ pub fn generate(defs: &Definitions) -> Result<()> {
         }
     "};
     for (ty, repr) in &defs.tokens {
-        let padding = ".".repeat((repr.len() + 8).saturating_sub(ty.len()));
-        styles += &formatdoc! {"
+        let macro_len = "Token![]".len() + repr.len();
+        let ty_len = ty.len();
+        styles.push('\n');
+        styles += &match Ord::cmp(&macro_len, &ty_len) {
+            Ordering::Less => {
+                formatdoc! {"
+                    a.struct[title=\"struct syn::token::{ty}\"] {{
+                    \tfont-size: calc(100% * {macro_len} / {ty_len});
+                    }}
 
-            a.struct[title=\"struct syn::token::{ty}\"]::before {{
-            \tcontent: \"Token![{repr}]\";
-            }}
+                    a.struct[title=\"struct syn::token::{ty}\"]::before {{
+                    \tcontent: \"Token![{repr}]\";
+                    \tfont-size: calc(100% * {ty_len} / {macro_len});
+                    }}
+                "}
+            }
+            Ordering::Equal => unreachable!(),
+            Ordering::Greater => {
+                let padding = ".".repeat(macro_len.saturating_sub(ty.len()));
+                formatdoc! {"
+                    a.struct[title=\"struct syn::token::{ty}\"]::before {{
+                    \tcontent: \"Token![{repr}]\";
+                    }}
 
-            a.struct[title=\"struct syn::token::{ty}\"]::after {{
-            \tcontent: \"{padding}\";
-            }}
-        "};
+                    a.struct[title=\"struct syn::token::{ty}\"]::after {{
+                    \tcontent: \"{padding}\";
+                    }}
+                "}
+            }
+        };
     }
 
     let css_path = workspace_path::get("src/gen/token.css");
