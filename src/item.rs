@@ -1896,7 +1896,7 @@ pub(crate) mod parsing {
                     input.parse::<Expr>()?;
                 }
                 let semi_token: Token![;] = input.parse()?;
-                if safe || has_value {
+                if unsafety.is_some() || safe || has_value {
                     Ok(ForeignItem::Verbatim(verbatim::between(&begin, input)))
                 } else {
                     Ok(ForeignItem::Static(ForeignItemStatic {
