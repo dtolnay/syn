@@ -19,12 +19,6 @@ const REVISION: &str = "5069856495870486134dd2ca0b0e2516308c5c2a";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: `unsafe static`, `safe fn`
-    // https://github.com/dtolnay/syn/issues/1675
-    "src/tools/rustfmt/tests/target/unsafe_extern_blocks.rs",
-    "tests/rustdoc/unsafe-extern-blocks.rs",
-    "tests/ui/rust-2024/unsafe-extern-blocks/safe-items.rs",
-
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
     // https://github.com/dtolnay/syn/issues/1435
     "src/tools/rustfmt/tests/source/issue_5721.rs",
@@ -301,6 +295,7 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/false.rs",
     "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/true.rs",
     "src/tools/rustfmt/tests/target/type.rs",
+    "src/tools/rustfmt/tests/target/unsafe_extern_blocks.rs",
     "tests/run-make/translation/test.rs",
     "tests/ui/generics/issue-94432-garbage-ice.rs",
 
