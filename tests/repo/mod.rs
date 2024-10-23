@@ -19,9 +19,6 @@ const REVISION: &str = "86d69c705a552236a622eee3fdea94bf13c5f102";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: self capture: `impl Sized + use<Self>`
-    "tests/ui/impl-trait/precise-capturing/self-capture.rs",
-
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
     // https://github.com/dtolnay/syn/issues/1435
     "src/tools/rustfmt/tests/source/issue_5721.rs",
