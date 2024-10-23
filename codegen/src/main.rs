@@ -21,6 +21,7 @@
 
 mod cfg;
 mod clone;
+mod css;
 mod debug;
 mod eq;
 mod file;
@@ -52,5 +53,6 @@ fn main() -> anyhow::Result<()> {
     visit::generate(&defs)?;
     visit_mut::generate(&defs)?;
     snapshot::generate(&defs)?;
+    css::generate(&defs)?;
     Ok(())
 }
