@@ -1046,13 +1046,16 @@ pub(crate) mod parsing {
             let mut params = Punctuated::new();
             loop {
                 let lookahead = input.lookahead1();
-                params.push_value(if lookahead.peek(Lifetime) || lookahead.peek(Ident) {
-                    input.parse::<CapturedParam>()?
-                } else if lookahead.peek(Token![>]) {
-                    break;
-                } else {
-                    return Err(lookahead.error());
-                });
+                params.push_value(
+                    if lookahead.peek(Lifetime) || lookahead.peek(Ident) || input.peek(Token![Self])
+                    {
+                        input.parse::<CapturedParam>()?
+                    } else if lookahead.peek(Token![>]) {
+                        break;
+                    } else {
+                        return Err(lookahead.error());
+                    },
+                );
                 let lookahead = input.lookahead1();
                 params.push_punct(if lookahead.peek(Token![,]) {
                     input.parse::<Token![,]>()?
@@ -1079,8 +1082,8 @@ pub(crate) mod parsing {
             let lookahead = input.lookahead1();
             if lookahead.peek(Lifetime) {
                 input.parse().map(CapturedParam::Lifetime)
-            } else if lookahead.peek(Ident) {
-                input.parse().map(CapturedParam::Ident)
+            } else if lookahead.peek(Ident) || input.peek(Token![Self]) {
+                input.call(Ident::parse_any).map(CapturedParam::Ident)
             } else {
                 Err(lookahead.error())
             }
