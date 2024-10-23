@@ -15,10 +15,67 @@ use std::path::{Path, PathBuf};
 use tar::Archive;
 use walkdir::{DirEntry, WalkDir};
 
-const REVISION: &str = "5069856495870486134dd2ca0b0e2516308c5c2a";
+const REVISION: &str = "86d69c705a552236a622eee3fdea94bf13c5f102";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
+    // TODO
+    "compiler/rustc_trait_selection/src/error_reporting/infer/need_type_info.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/async_trait_bound.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/bare_dyn_types_with_paren_as_generic_args.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/closure_range_method_call.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/const_param_default_path.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/const_trait_bound.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/dyn_trait_type_weak.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/fn_def_param.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/gen_blocks.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/param_list_vararg.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/path_fn_trait_args.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/range_pat.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/return_type_syntax_assoc_type_bound.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/return_type_syntax_in_path.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/type_item_where_clause.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/typepathfn_with_coloncolon.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/use_tree_abs_star.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/value_parameters_no_patterns.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/yeet_expr.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0073_safe_declarations_in_extern_blocks.rs",
+    "src/tools/rustfmt/tests/source/pin_sugar.rs",
+    "src/tools/rustfmt/tests/source/type-alias-where-clauses-with-comments.rs",
+    "src/tools/rustfmt/tests/source/type-alias-where-clauses.rs",
+    "src/tools/rustfmt/tests/target/pin_sugar.rs",
+    "src/tools/rustfmt/tests/target/type-alias-where-clauses-with-comments.rs",
+    "src/tools/rustfmt/tests/target/type-alias-where-clauses.rs",
+    "tests/coverage/async_closure.rs",
+    "tests/ui/associated-type-bounds/return-type-notation/higher-ranked-bound-works.rs",
+    "tests/ui/associated-type-bounds/return-type-notation/namespace-conflict.rs",
+    "tests/ui/associated-type-bounds/return-type-notation/path-constrained-in-method.rs",
+    "tests/ui/associated-type-bounds/return-type-notation/path-self-qself.rs",
+    "tests/ui/associated-type-bounds/return-type-notation/path-works.rs",
+    "tests/ui/async-await/async-closures/body-check-on-non-fnmut.rs",
+    "tests/ui/async-await/async-closures/box-deref-in-debuginfo.rs",
+    "tests/ui/async-await/async-closures/clone-closure.rs",
+    "tests/ui/async-await/async-closures/debuginfo-by-move-body.rs",
+    "tests/ui/async-await/async-closures/foreign.rs",
+    "tests/ui/async-await/async-closures/inline-body.rs",
+    "tests/ui/async-await/async-closures/non-copy-arg-does-not-force-inner-move.rs",
+    "tests/ui/async-await/pin-sugar.rs",
+    "tests/ui/async-await/return-type-notation/normalizing-self-auto-trait-issue-109924.rs",
+    "tests/ui/async-await/return-type-notation/rtn-implied-in-supertrait.rs",
+    "tests/ui/async-await/return-type-notation/supertrait-bound.rs",
+    "tests/ui/borrowck/alias-liveness/rtn-static.rs",
+    "tests/ui/coroutine/other-attribute-on-gen.rs",
+    "tests/ui/delegation/generics/free-fn-to-free-fn-pass.rs",
+    "tests/ui/delegation/generics/free-fn-to-trait-method-pass.rs",
+    "tests/ui/delegation/generics/impl-to-free-fn-pass.rs",
+    "tests/ui/delegation/generics/impl-trait-to-trait-method-pass.rs",
+    "tests/ui/delegation/generics/inherent-impl-to-trait-method-pass.rs",
+    "tests/ui/delegation/generics/trait-method-to-other-pass.rs",
+    "tests/ui/impl-trait/precise-capturing/self-capture.rs",
+    "tests/ui/sanitizer/cfi/coroutine.rs",
+    "tests/ui/traits/const-traits/syntax.rs",
+    "tests/ui/traits/const-traits/tilde-const-syntax.rs",
+
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
     // https://github.com/dtolnay/syn/issues/1435
     "src/tools/rustfmt/tests/source/issue_5721.rs",
@@ -31,7 +88,6 @@ static EXCLUDE_FILES: &[&str] = &[
 
     // TODO: return type notation: `where T: Trait<method(): Send>`
     // https://github.com/dtolnay/syn/issues/1434
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0208_associated_return_type_bounds.rs",
     "src/tools/rustfmt/tests/target/return-type-notation.rs",
     "tests/ui/associated-type-bounds/return-type-notation/basic.rs",
     "tests/ui/associated-type-bounds/return-type-notation/unpretty-parenthesized.rs",
@@ -54,7 +110,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/coroutine/gen_fn_lifetime_capture.rs",
     "tests/ui/coroutine/return-types-diverge.rs",
     "tests/ui/higher-ranked/builtin-closure-like-bounds.rs",
-    "tests/ui/sanitizer/cfi-coroutine.rs",
 
     // TODO: `!` as a pattern
     // https://github.com/dtolnay/syn/issues/1546
@@ -66,8 +121,6 @@ static EXCLUDE_FILES: &[&str] = &[
     // https://github.com/dtolnay/syn/issues/1628
     "src/tools/miri/tests/pass/async-closure-captures.rs",
     "src/tools/miri/tests/pass/async-closure-drop.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0211_async_trait_bound.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0212_const_trait_bound.rs",
     "src/tools/rustfmt/tests/target/asyncness.rs",
     "tests/codegen/async-closure-debug.rs",
     "tests/ui/async-await/async-closures/async-fn-mut-for-async-fn.rs",
@@ -138,12 +191,8 @@ static EXCLUDE_FILES: &[&str] = &[
     // TODO: const trait bound: `T: const Trait`
     // https://github.com/dtolnay/syn/issues/1632
     "tests/ui/generic-const-items/const-trait-impl.rs",
-    "tests/ui/rfcs/rfc-2632-const-trait-impl/const-fns-are-early-bound.rs",
-    "tests/ui/rfcs/rfc-2632-const-trait-impl/const-trait-bounds.rs",
-    "tests/ui/rfcs/rfc-2632-const-trait-impl/effects/minicore.rs",
 
     // TODO: `|| .. .method()`
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0208_closure_range_method_call.rs",
     "src/tools/rustfmt/tests/source/issue-4808.rs",
 
     // Several of the above
@@ -162,12 +211,6 @@ static EXCLUDE_FILES: &[&str] = &[
     // Negative polarity trait bound: `where T: !Copy`
     "src/tools/rustfmt/tests/target/negative-bounds.rs",
     "tests/ui/traits/negative-bounds/supertrait.rs",
-
-    // Lifetime bound inside for<>: `T: ~const ?for<'a: 'b> Trait<'a>`
-    "tests/ui/rfcs/rfc-2632-const-trait-impl/tilde-const-syntax.rs",
-
-    // Const impl that is not a trait impl: `impl ~const T {}`
-    "tests/ui/rfcs/rfc-2632-const-trait-impl/syntax.rs",
 
     // Lifetimes and types out of order in angle bracketed path arguments
     "tests/ui/parser/constraints-before-generic-args-syntactic-pass.rs",
@@ -189,10 +232,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/rustdoc/generic-associated-types/gats.rs",
 
     // Deprecated trait object syntax with parenthesized generic arguments and no dyn keyword
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0004_value_parameters_no_patterns.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0104_path_fn_trait_args.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0202_typepathfn_with_coloncolon.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0209_bare_dyn_types_with_paren_as_generic_args.rs",
     "src/tools/rustfmt/tests/source/attrib.rs",
     "src/tools/rustfmt/tests/source/closure.rs",
     "src/tools/rustfmt/tests/source/existential_type.rs",
@@ -229,13 +268,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/consts/miri_unleashed/const_refers_to_static_cross_crate.rs",
 
     // Various extensions to Rust syntax made up by rust-analyzer
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0012_type_item_where_clause.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0058_range_pat.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0123_param_list_vararg.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0131_existential_type.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0156_fn_def_param.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0179_use_tree_abs_star.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0188_const_param_default_path.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0015_use_tree.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0029_range_forms.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0051_parameter_attrs.rs",
@@ -249,17 +281,13 @@ static EXCLUDE_FILES: &[&str] = &[
     // Placeholder syntax for "throw expressions"
     "compiler/rustc_errors/src/translation.rs",
     "compiler/rustc_expand/src/module.rs",
-    "compiler/rustc_infer/src/infer/need_type_info.rs",
     "src/tools/clippy/tests/ui/needless_return.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0204_yeet_expr.rs",
     "tests/pretty/yeet-expr.rs",
     "tests/ui/try-trait/yeet-for-option.rs",
     "tests/ui/try-trait/yeet-for-result.rs",
 
     // Edition 2015 code using identifiers that are now keywords
     // TODO: some of these we should probably parse
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0159_try_macro_fallback.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/0160_try_macro_rules.rs",
     "src/tools/rustfmt/tests/source/configs/indent_style/block_call.rs",
     "src/tools/rustfmt/tests/source/configs/use_try_shorthand/false.rs",
     "src/tools/rustfmt/tests/source/configs/use_try_shorthand/true.rs",
@@ -301,9 +329,6 @@ static EXCLUDE_FILES: &[&str] = &[
 
     // Generated file containing a top-level expression, used with `include!`
     "compiler/rustc_codegen_gcc/src/intrinsic/archs.rs",
-
-    // Clippy lint lists represented as expressions
-    "src/tools/clippy/clippy_lints/src/lib.deprecated.rs",
 
     // Not actually test cases
     "tests/ui/lint/expansion-time-include.rs",
