@@ -56,6 +56,10 @@ mod macros;
 mod common;
 mod repo;
 
+#[path = "../src/scan_expr.rs"]
+#[allow(dead_code)]
+mod scan_expr;
+
 #[test]
 fn test_rustc_precedence() {
     repo::rayon_init();

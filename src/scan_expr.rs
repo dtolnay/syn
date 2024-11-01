@@ -1,13 +1,9 @@
-use crate::expr::Member;
-use crate::lifetime::Lifetime;
-use crate::lit::Lit;
-use crate::lit::LitFloat;
-use crate::op::{BinOp, UnOp};
-use crate::parse::{ParseStream, Result};
-use crate::path::{self, AngleBracketedGenericArguments};
-use crate::token;
-use crate::ty::Type;
 use proc_macro2::Delimiter::{self, Brace, Bracket, Parenthesis};
+use syn::parse::{ParseStream, Result};
+use syn::{
+    token, AngleBracketedGenericArguments, BinOp, ExprPath, Lifetime, Lit, LitFloat, Member, Token,
+    Type, UnOp,
+};
 
 pub(crate) fn scan_expr(input: ParseStream) -> Result<()> {
     let consume = |delimiter: Delimiter| {
@@ -44,13 +40,13 @@ pub(crate) fn scan_expr(input: ParseStream) -> Result<()> {
                         || (consume![..=] || consume![..] || consume![&] || consume![_])
                         || (consume(Brace) || consume(Bracket) || consume(Parenthesis)))
                     {
-                        path::parsing::qpath(input, true)?;
+                        input.parse::<ExprPath>()?;
                     }
                 }
             } else if input.parse::<Option<Lifetime>>()?.is_some() && !consume![:] {
                 break;
             } else if input.parse::<UnOp>().is_err() {
-                path::parsing::qpath(input, true)?;
+                input.parse::<ExprPath>()?;
                 initial = consume![!] || depth == 0 && input.peek(token::Brace);
             }
         } else if input.is_empty() || input.peek(Token![,]) {
@@ -65,9 +61,9 @@ pub(crate) fn scan_expr(input: ParseStream) -> Result<()> {
             initial = true;
         } else if consume![.] {
             if input.parse::<Option<LitFloat>>()?.is_none()
-                && (input.parse::<Member>()?.is_named() && consume![::])
+                && (matches!(input.parse()?, Member::Named(_)) && input.peek(Token![::]))
             {
-                AngleBracketedGenericArguments::do_parse(None, input)?;
+                input.parse::<AngleBracketedGenericArguments>()?;
             }
         } else if consume![as] {
             input.parse::<Type>()?;

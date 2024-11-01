@@ -307,6 +307,8 @@
     clippy::wildcard_imports,
 )]
 
+extern crate self as syn;
+
 #[cfg(feature = "proc-macro")]
 extern crate proc_macro;
 
