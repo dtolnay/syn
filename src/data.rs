@@ -322,7 +322,7 @@ pub(crate) mod parsing {
         loop {
             if initial {
                 if consume![&] {
-                    input.parse::<Option<Token![mut]>>()?;
+                    initial = consume![mut] || !consume![raw] || consume![const] || consume![mut];
                 } else if consume![if] || consume![match] || consume![while] {
                     depth += 1;
                 } else if input.parse::<Option<Lit>>()?.is_some()
