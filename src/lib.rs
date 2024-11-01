@@ -509,6 +509,9 @@ pub use crate::restriction::{FieldMutability, VisRestricted, Visibility};
 
 mod sealed;
 
+#[cfg(all(feature = "parsing", feature = "derive", not(feature = "full")))]
+mod scan_expr;
+
 mod span;
 
 #[cfg(all(feature = "parsing", feature = "printing"))]
