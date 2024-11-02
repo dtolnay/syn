@@ -264,6 +264,7 @@
     clippy::derivable_impls,
     clippy::diverging_sub_expression,
     clippy::doc_markdown,
+    clippy::enum_glob_use,
     clippy::expl_impl_clone_on_copy,
     clippy::explicit_auto_deref,
     clippy::if_not_else,
@@ -306,6 +307,8 @@
     clippy::used_underscore_binding,
     clippy::wildcard_imports,
 )]
+
+extern crate self as syn;
 
 #[cfg(feature = "proc-macro")]
 extern crate proc_macro;
@@ -508,6 +511,9 @@ mod restriction;
 pub use crate::restriction::{FieldMutability, VisRestricted, Visibility};
 
 mod sealed;
+
+#[cfg(all(feature = "parsing", feature = "derive", not(feature = "full")))]
+mod scan_expr;
 
 mod span;
 
