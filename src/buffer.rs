@@ -256,7 +256,9 @@ impl<'a> Cursor<'a> {
         None
     }
 
-    pub(crate) fn any_group(self) -> Option<(Cursor<'a>, Delimiter, DelimSpan, Cursor<'a>)> {
+    /// If the cursor is pointing at a `Group`, returns a cursor into the group
+    /// and one pointing to the next `TokenTree`.
+    pub fn any_group(self) -> Option<(Cursor<'a>, Delimiter, DelimSpan, Cursor<'a>)> {
         if let Entry::Group(group, end_offset) = self.entry() {
             let delimiter = group.delimiter();
             let span = group.delim_span();
