@@ -42,7 +42,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [stable, beta, 1.63.0, 1.61.0]
+        rust: [stable, beta, 1.65.0, 1.61.0]
         include:
           - rust: nightly
             components: rustc-dev
