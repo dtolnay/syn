@@ -275,7 +275,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str, val: &Operand) 
                         for node in &defs.types {
                             if node.ident == *inner {
                                 if let Data::Enum(variants) = &node.data {
-                                    if variants.get("None").map_or(false, Vec::is_empty) {
+                                    if variants.get("None").is_some_and(Vec::is_empty) {
                                         let ty = rust_type(ty);
                                         call = quote! {
                                             match #val.#ident {
