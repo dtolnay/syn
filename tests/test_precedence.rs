@@ -42,14 +42,19 @@ use crate::common::eq::SpanlessEq;
 use crate::common::parse;
 use quote::ToTokens;
 use rustc_ast::ast;
+use rustc_ast::ast::{Expr, ExprKind};
+use rustc_ast::mut_visit::MutVisitor;
 use rustc_ast::ptr::P;
 use rustc_ast_pretty::pprust;
 use rustc_span::edition::Edition;
+use rustc_span::DUMMY_SP;
 use std::fs;
+use std::mem;
 use std::path::Path;
 use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use syn::parse::Parser as _;
+use thin_vec::ThinVec;
 
 #[macro_use]
 mod macros;
@@ -184,6 +189,50 @@ fn test_expressions(path: &Path, edition: Edition, exprs: Vec<syn::Expr>) -> (us
                     "\nFAIL {} - failed to scan expr\n{}\n",
                     path.display(),
                     source_code,
+                );
+                continue;
+            }
+
+            struct FlattenParens;
+            impl MutVisitor for FlattenParens {
+                fn visit_expr(&mut self, e: &mut P<Expr>) {
+                    while let ExprKind::Paren(paren) = &mut e.kind {
+                        *e = mem::replace(
+                            paren,
+                            P(Expr {
+                                id: ast::DUMMY_NODE_ID,
+                                kind: ExprKind::Dummy,
+                                span: DUMMY_SP,
+                                attrs: ThinVec::new(),
+                                tokens: None,
+                            }),
+                        );
+                    }
+                    rustc_ast::mut_visit::walk_expr(self, e);
+                }
+            }
+
+            let mut expr = parse::librustc_expr(&source_code).unwrap();
+            FlattenParens.visit_expr(&mut expr);
+            let printed = pprust::expr_to_string(&expr);
+            let Some(mut expr2) = parse::librustc_expr(&printed) else {
+                failed += 1;
+                errorf!(
+                    "\nFAIL {}\nBEFORE:\n{}\nAFTER:\n{}\n",
+                    path.display(),
+                    source_code,
+                    printed,
+                );
+                continue;
+            };
+            FlattenParens.visit_expr(&mut expr2);
+            if !SpanlessEq::eq(&expr, &expr2) {
+                failed += 1;
+                errorf!(
+                    "\nFAIL {}\nBEFORE:\n{}\nAFTER:\n{}\n",
+                    path.display(),
+                    source_code,
+                    printed,
                 );
                 continue;
             }
