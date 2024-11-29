@@ -51,8 +51,11 @@ jobs:
             name: WebAssembly
             target: wasm32-unknown-unknown
           - rust: nightly
-            name: WASI
+            name: WASI preview1
             target: wasm32-wasip1
+          - rust: nightly
+            name: WASI preview2
+            target: wasm32-wasip2
           - rust: nightly
             name: Windows
             os: windows
