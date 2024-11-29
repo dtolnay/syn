@@ -1036,6 +1036,16 @@ impl IdentFragment for Member {
     }
 }
 
+#[cfg(any(feature = "parsing", feature = "printing"))]
+impl Member {
+    pub(crate) fn is_named(&self) -> bool {
+        match self {
+            Member::Named(_) => true,
+            Member::Unnamed(_) => false,
+        }
+    }
+}
+
 ast_struct! {
     /// The index of an unnamed tuple struct field.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
@@ -3021,15 +3031,6 @@ pub(crate) mod parsing {
         Ok(!trailing_dot)
     }
 
-    impl Member {
-        pub(crate) fn is_named(&self) -> bool {
-            match self {
-                Member::Named(_) => true,
-                Member::Unnamed(_) => false,
-            }
-        }
-    }
-
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for PointerMutability {
@@ -3410,8 +3411,8 @@ pub(crate) mod printing {
             true,
             false,
         );
-        let needs_group = if let Expr::Field(_) = &*e.func {
-            true
+        let needs_group = if let Expr::Field(func) = &*e.func {
+            func.member.is_named()
         } else {
             func_fixup.leading_precedence(&e.func) < Precedence::Unambiguous
         };
