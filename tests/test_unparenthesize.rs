@@ -12,7 +12,7 @@ use std::panic;
 use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use syn::visit_mut::{self, VisitMut};
-use syn::Expr;
+use syn::{Expr, Generics, LifetimeParam, TypeParam};
 
 #[macro_use]
 mod macros;
@@ -45,13 +45,55 @@ impl VisitMut for FlattenParens {
     }
 }
 
+struct AsIfPrinted;
+
+impl VisitMut for AsIfPrinted {
+    fn visit_generics_mut(&mut self, generics: &mut Generics) {
+        if generics.params.is_empty() {
+            generics.lt_token = None;
+            generics.gt_token = None;
+        }
+        if let Some(where_clause) = &generics.where_clause {
+            if where_clause.predicates.is_empty() {
+                generics.where_clause = None;
+            }
+        }
+        visit_mut::visit_generics_mut(self, generics);
+    }
+
+    fn visit_lifetime_param_mut(&mut self, param: &mut LifetimeParam) {
+        if param.bounds.is_empty() {
+            param.colon_token = None;
+        }
+        visit_mut::visit_lifetime_param_mut(self, param);
+    }
+
+    fn visit_type_param_mut(&mut self, param: &mut TypeParam) {
+        if param.bounds.is_empty() {
+            param.colon_token = None;
+        }
+        visit_mut::visit_type_param_mut(self, param);
+    }
+}
+
 fn test(path: &Path, failed: &AtomicUsize) {
     let content = fs::read_to_string(path).unwrap();
 
     match panic::catch_unwind(|| -> syn::Result<()> {
-        let mut syntax_tree = syn::parse_file(&content)?;
-        FlattenParens.visit_file_mut(&mut syntax_tree);
-        syn::parse2::<syn::File>(syntax_tree.to_token_stream())?;
+        let mut before = syn::parse_file(&content)?;
+        before.shebang = None;
+        FlattenParens.visit_file_mut(&mut before);
+        let printed = before.to_token_stream();
+        let mut after = syn::parse2::<syn::File>(printed.clone())?;
+        FlattenParens.visit_file_mut(&mut after);
+        // Normalize features that we expect Syn not to print.
+        AsIfPrinted.visit_file_mut(&mut before);
+        if before != after {
+            errorf!("=== {}\n", path.display());
+            if failed.fetch_add(1, Ordering::Relaxed) == 0 {
+                errorf!("BEFORE:\n{:#?}\nAFTER:\n{:#?}\n", before, after);
+            }
+        }
         Ok(())
     }) {
         Err(_) => {
