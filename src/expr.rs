@@ -3405,22 +3405,17 @@ pub(crate) mod printing {
     fn print_expr_call(e: &ExprCall, tokens: &mut TokenStream, fixup: FixupContext) {
         outer_attrs_to_tokens(&e.attrs, tokens);
 
-        let call_precedence = if let Expr::Field(_) = &*e.func {
-            Precedence::MIN
-        } else {
-            Precedence::Unambiguous
-        };
         let func_fixup = fixup.leftmost_subexpression_with_begin_operator(
             #[cfg(feature = "full")]
             true,
             false,
         );
-        print_subexpression(
-            &e.func,
-            func_fixup.leading_precedence(&e.func) < call_precedence,
-            tokens,
-            func_fixup,
-        );
+        let needs_group = if let Expr::Field(_) = &*e.func {
+            true
+        } else {
+            func_fixup.leading_precedence(&e.func) < Precedence::Unambiguous
+        };
+        print_subexpression(&e.func, needs_group, tokens, func_fixup);
 
         e.paren_token.surround(tokens, |tokens| {
             e.args.to_tokens(tokens);
