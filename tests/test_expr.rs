@@ -703,6 +703,7 @@ fn test_fixup() {
         quote! { (1 < 2) == (3 < 4) },
         quote! { { (let _ = ()) } },
         quote! { (#[attr] thing).field },
+        quote! { (self.f)() },
     ] {
         let original: Expr = syn::parse2(tokens).unwrap();
 
