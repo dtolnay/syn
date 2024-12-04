@@ -555,7 +555,7 @@ spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
 spanless_eq_enum!(AsmMacro; Asm GlobalAsm NakedAsm);
 spanless_eq_enum!(AssocItemConstraintKind; Equality(term) Bound(bounds));
 spanless_eq_enum!(AssocItemKind; Const(0) Fn(0) Type(0) MacCall(0) Delegation(0) DelegationMac(0));
-spanless_eq_enum!(AttrArgs; Empty Delimited(0) Eq(0 1));
+spanless_eq_enum!(AttrArgs; Empty Delimited(0) Eq(eq_span value));
 spanless_eq_enum!(AttrArgsEq; Ast(0) Hir(0));
 spanless_eq_enum!(AttrStyle; Outer Inner);
 spanless_eq_enum!(AttrTokenTree; Token(0 1) Delimited(0 1 2 3) AttrsTarget(0));
@@ -898,7 +898,7 @@ impl SpanlessEq for AttrKind {
                 SpanlessEq::eq(&path, &normal2.item.path)
                     && match &normal2.item.args {
                         AttrArgs::Empty | AttrArgs::Delimited(_) => false,
-                        AttrArgs::Eq(_span, value) => {
+                        AttrArgs::Eq { eq_span: _, value } => {
                             is_escaped_literal_attr_args(value, *unescaped)
                         }
                     }
