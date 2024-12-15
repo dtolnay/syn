@@ -30,18 +30,22 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/rustdoc/non_lifetime_binders.rs",
 
     // TODO: unsafe binders: `unsafe<'a> &'a T`
+    // https://github.com/dtolnay/syn/issues/1791
     "src/tools/rustfmt/tests/source/unsafe-binders.rs",
     "src/tools/rustfmt/tests/target/unsafe-binders.rs",
 
     // TODO: unsafe fields: `struct S { unsafe field: T }`
+    // https://github.com/dtolnay/syn/issues/1792
     "src/tools/rustfmt/tests/source/unsafe-field.rs",
     "src/tools/rustfmt/tests/target/unsafe-field.rs",
     "tests/ui/unsafe-fields/auxiliary/unsafe-fields-crate-dep.rs",
 
     // TODO: guard patterns: `match expr { (A if f()) | (B if g()) => {} }`
+    // https://github.com/dtolnay/syn/issues/1793
     "src/tools/rustfmt/tests/target/guard_patterns.rs",
 
     // TODO: struct field default: `struct S { field: i32 = 1 }`
+    // https://github.com/dtolnay/syn/issues/1774
     "tests/ui/structs/auxiliary/struct_field_default.rs",
     "tests/ui/structs/default-field-values-support.rs",
 
