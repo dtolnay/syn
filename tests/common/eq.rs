@@ -150,6 +150,8 @@ use rustc_ast::ast::TyAliasWhereClauses;
 use rustc_ast::ast::TyKind;
 use rustc_ast::ast::UintTy;
 use rustc_ast::ast::UnOp;
+use rustc_ast::ast::UnsafeBinderCastKind;
+use rustc_ast::ast::UnsafeBinderTy;
 use rustc_ast::ast::UnsafeSource;
 use rustc_ast::ast::UseTree;
 use rustc_ast::ast::UseTreeKind;
@@ -309,6 +311,7 @@ macro_rules! spanless_eq_partial_eq {
     };
 }
 
+spanless_eq_partial_eq!(());
 spanless_eq_partial_eq!(bool);
 spanless_eq_partial_eq!(u8);
 spanless_eq_partial_eq!(u16);
@@ -543,6 +546,7 @@ spanless_eq_struct!(Ty; id kind span tokens);
 spanless_eq_struct!(TyAlias; defaultness generics where_clauses bounds ty);
 spanless_eq_struct!(TyAliasWhereClause; !has_where_token span);
 spanless_eq_struct!(TyAliasWhereClauses; before after !split);
+spanless_eq_struct!(UnsafeBinderTy; generic_params inner_ty);
 spanless_eq_struct!(UseTree; prefix kind span);
 spanless_eq_struct!(Variant; attrs id span !vis ident data disr_expr is_placeholder);
 spanless_eq_struct!(Visibility; kind span tokens);
@@ -601,7 +605,7 @@ spanless_eq_enum!(MacStmtStyle; Semicolon Braces NoBraces);
 spanless_eq_enum!(MatchKind; Prefix Postfix);
 spanless_eq_enum!(MetaItemKind; Word List(0) NameValue(0));
 spanless_eq_enum!(MetaItemInner; MetaItem(0) Lit(0));
-spanless_eq_enum!(ModKind; Loaded(0 1 2) Unloaded);
+spanless_eq_enum!(ModKind; Loaded(0 1 2 3) Unloaded);
 spanless_eq_enum!(Movability; Static Movable);
 spanless_eq_enum!(Mutability; Mut Not);
 spanless_eq_enum!(PatFieldsRest; Rest None);
@@ -618,6 +622,7 @@ spanless_eq_enum!(TokenTree; Token(0 1) Delimited(0 1 2 3));
 spanless_eq_enum!(TraitObjectSyntax; Dyn DynStar None);
 spanless_eq_enum!(UintTy; Usize U8 U16 U32 U64 U128);
 spanless_eq_enum!(UnOp; Deref Not Neg);
+spanless_eq_enum!(UnsafeBinderCastKind; Wrap Unwrap);
 spanless_eq_enum!(UnsafeSource; CompilerGenerated UserProvided);
 spanless_eq_enum!(UseTreeKind; Simple(0) Nested(items span) Glob);
 spanless_eq_enum!(VariantData; Struct(fields recovered) Tuple(0 1) Unit(0));
@@ -633,7 +638,8 @@ spanless_eq_enum!(ExprKind; Array(0) ConstBlock(0) Call(0 1) MethodCall(0)
     Assign(0 1 2) AssignOp(0 1 2) Field(0 1) Index(0 1 2) Underscore
     Range(0 1 2) Path(0 1) AddrOf(0 1 2) Break(0 1) Continue(0) Ret(0)
     InlineAsm(0) OffsetOf(0 1) MacCall(0) Struct(0) Repeat(0 1) Paren(0) Try(0)
-    Yield(0) Yeet(0) Become(0) IncludedBytes(0) FormatArgs(0) Err(0) Dummy);
+    Yield(0) Yeet(0) Become(0) IncludedBytes(0) FormatArgs(0)
+    UnsafeBinderCast(0 1 2) Err(0) Dummy);
 spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
     InOut(reg late expr) SplitInOut(reg late in_expr out_expr) Const(anon_const)
     Sym(sym) Label(block));
@@ -647,8 +653,9 @@ spanless_eq_enum!(PatKind; Wild Ident(0 1 2) Struct(0 1 2 3) TupleStruct(0 1 2)
     Or(0) Path(0 1) Tuple(0) Box(0) Deref(0) Ref(0 1) Lit(0) Range(0 1 2)
     Slice(0) Rest Never Guard(0 1) Paren(0) MacCall(0) Err(0));
 spanless_eq_enum!(TyKind; Slice(0) Array(0 1) Ptr(0) Ref(0 1) PinnedRef(0 1)
-    BareFn(0) Never Tup(0) Path(0 1) TraitObject(0 1) ImplTrait(0 1) Paren(0)
-    Typeof(0) Infer ImplicitSelf MacCall(0) CVarArgs Pat(0 1) Dummy Err(0));
+    BareFn(0) UnsafeBinder(0) Never Tup(0) Path(0 1) TraitObject(0 1)
+    ImplTrait(0 1) Paren(0) Typeof(0) Infer ImplicitSelf MacCall(0) CVarArgs
+    Pat(0 1) Dummy Err(0));
 
 impl SpanlessEq for Ident {
     fn eq(&self, other: &Self) -> bool {
