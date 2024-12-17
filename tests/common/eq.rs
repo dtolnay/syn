@@ -15,7 +15,6 @@ use rustc_ast::ast::AssocItemConstraint;
 use rustc_ast::ast::AssocItemConstraintKind;
 use rustc_ast::ast::AssocItemKind;
 use rustc_ast::ast::AttrArgs;
-use rustc_ast::ast::AttrArgsEq;
 use rustc_ast::ast::AttrId;
 use rustc_ast::ast::AttrItem;
 use rustc_ast::ast::AttrKind;
@@ -559,8 +558,7 @@ spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
 spanless_eq_enum!(AsmMacro; Asm GlobalAsm NakedAsm);
 spanless_eq_enum!(AssocItemConstraintKind; Equality(term) Bound(bounds));
 spanless_eq_enum!(AssocItemKind; Const(0) Fn(0) Type(0) MacCall(0) Delegation(0) DelegationMac(0));
-spanless_eq_enum!(AttrArgs; Empty Delimited(0) Eq(eq_span value));
-spanless_eq_enum!(AttrArgsEq; Ast(0) Hir(0));
+spanless_eq_enum!(AttrArgs; Empty Delimited(0) Eq(eq_span expr));
 spanless_eq_enum!(AttrStyle; Outer Inner);
 spanless_eq_enum!(AttrTokenTree; Token(0 1) Delimited(0 1 2 3) AttrsTarget(0));
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
@@ -608,7 +606,7 @@ spanless_eq_enum!(MetaItemInner; MetaItem(0) Lit(0));
 spanless_eq_enum!(ModKind; Loaded(0 1 2 3) Unloaded);
 spanless_eq_enum!(Movability; Static Movable);
 spanless_eq_enum!(Mutability; Mut Not);
-spanless_eq_enum!(PatFieldsRest; Rest None);
+spanless_eq_enum!(PatFieldsRest; Rest Recovered(0) None);
 spanless_eq_enum!(PreciseCapturingArg; Lifetime(0) Arg(0 1));
 spanless_eq_enum!(RangeEnd; Included(0) Excluded);
 spanless_eq_enum!(RangeLimits; HalfOpen Closed);
@@ -835,16 +833,6 @@ fn is_escaped_literal_token(token: &Token, unescaped: Symbol) -> bool {
     }
 }
 
-fn is_escaped_literal_attr_args(value: &AttrArgsEq, unescaped: Symbol) -> bool {
-    match value {
-        AttrArgsEq::Ast(expr) => match &expr.kind {
-            ExprKind::Lit(lit) => is_escaped_lit(lit, unescaped),
-            _ => false,
-        },
-        AttrArgsEq::Hir(lit) => is_escaped_literal_meta_item_lit(lit, unescaped),
-    }
-}
-
 fn is_escaped_literal_meta_item_lit(lit: &MetaItemLit, unescaped: Symbol) -> bool {
     match lit {
         MetaItemLit {
@@ -905,9 +893,10 @@ impl SpanlessEq for AttrKind {
                 SpanlessEq::eq(&path, &normal2.item.path)
                     && match &normal2.item.args {
                         AttrArgs::Empty | AttrArgs::Delimited(_) => false,
-                        AttrArgs::Eq { eq_span: _, value } => {
-                            is_escaped_literal_attr_args(value, *unescaped)
-                        }
+                        AttrArgs::Eq { eq_span: _, expr } => match &expr.kind {
+                            ExprKind::Lit(lit) => is_escaped_lit(lit, *unescaped),
+                            _ => false,
+                        },
                     }
             }
             (AttrKind::Normal(_), AttrKind::DocComment(..)) => SpanlessEq::eq(other, self),
