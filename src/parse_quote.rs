@@ -53,11 +53,22 @@
 ///
 /// - [`Attribute`] — parses one attribute, allowing either outer like `#[...]`
 ///   or inner like `#![...]`
+/// - [`Vec<Attribute>`] — parses multiple attributes, including mixed kinds in
+///   any order
 /// - [`Punctuated<T, P>`] — parses zero or more `T` separated by punctuation
 ///   `P` with optional trailing punctuation
+/// - [`Vec<Arm>`] — parses arms separated by optional commas according to the
+///   same grammar as the inside of a `match` expression
 /// - [`Vec<Stmt>`] — parses the same as `Block::parse_within`
+/// - [`Pat`], [`Box<Pat>`] — parses the same as
+///   `Pat::parse_multi_with_leading_vert`
+/// - [`Field`] — parses a named or unnamed struct field
 ///
+/// [`Vec<Attribute>`]: Attribute
+/// [`Vec<Arm>`]: Arm
 /// [`Vec<Stmt>`]: Block::parse_within
+/// [`Pat`]: Pat::parse_multi_with_leading_vert
+/// [`Box<Pat>`]: Pat::parse_multi_with_leading_vert
 ///
 /// # Panics
 ///
