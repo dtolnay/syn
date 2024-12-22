@@ -140,7 +140,7 @@ use crate::punctuated::Punctuated;
 #[cfg(any(feature = "full", feature = "derive"))]
 use crate::{attr, Attribute, Field, FieldMutability, Ident, Type, Visibility};
 #[cfg(feature = "full")]
-use crate::{Block, Pat, Stmt};
+use crate::{Arm, Block, Pat, Stmt};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl ParseQuote for Attribute {
@@ -218,5 +218,12 @@ impl<T: Parse, P: Parse> ParseQuote for Punctuated<T, P> {
 impl ParseQuote for Vec<Stmt> {
     fn parse(input: ParseStream) -> Result<Self> {
         Block::parse_within(input)
+    }
+}
+
+#[cfg(feature = "full")]
+impl ParseQuote for Vec<Arm> {
+    fn parse(input: ParseStream) -> Result<Self> {
+        Arm::parse_multiple(input)
     }
 }
