@@ -3752,11 +3752,12 @@ pub(crate) mod printing {
     fn print_expr_range(e: &ExprRange, tokens: &mut TokenStream, fixup: FixupContext) {
         outer_attrs_to_tokens(&e.attrs, tokens);
         if let Some(start) = &e.start {
+            let start_fixup = fixup.leftmost_subexpression_with_begin_operator(true, false);
             print_subexpression(
                 start,
-                Precedence::of(start) <= Precedence::Range,
+                start_fixup.leading_precedence(start) <= Precedence::Range,
                 tokens,
-                fixup.leftmost_subexpression(),
+                start_fixup,
             );
         }
         e.limits.to_tokens(tokens);
