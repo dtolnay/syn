@@ -2,6 +2,7 @@ use crate::classify;
 use crate::expr::Expr;
 use crate::precedence::Precedence;
 
+#[cfg_attr(test, derive(PartialEq, Debug))]
 pub(crate) struct FixupContext {
     // Print expression such that it can be parsed back as a statement
     // consisting of the original expression.
@@ -341,5 +342,35 @@ impl Copy for FixupContext {}
 impl Clone for FixupContext {
     fn clone(&self) -> Self {
         *self
+    }
+}
+
+#[cfg(feature = "full")]
+#[test]
+fn test_leftmost_rightmost_invariant() {
+    const BITS: usize = 8;
+
+    for bits in 0u16..1 << BITS {
+        let mut i = 0;
+        let mut bit = || {
+            let mask = 1 << i;
+            i += 1;
+            (bits & mask) != 0
+        };
+        let fixup = FixupContext {
+            stmt: bit(),
+            leftmost_subexpression_in_stmt: bit(),
+            match_arm: bit(),
+            leftmost_subexpression_in_match_arm: bit(),
+            parenthesize_exterior_struct_lit: bit(),
+            next_operator_can_begin_expr: bit(),
+            next_operator_can_continue_expr: bit(),
+            next_operator_can_begin_generics: bit(),
+        };
+        assert_eq!(i, BITS);
+        assert_eq!(
+            fixup.leftmost_subexpression().rightmost_subexpression(),
+            fixup.rightmost_subexpression().leftmost_subexpression(),
+        );
     }
 }
