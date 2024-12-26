@@ -3328,7 +3328,7 @@ pub(crate) mod printing {
     fn print_expr_binary(e: &ExprBinary, tokens: &mut TokenStream, fixup: FixupContext) {
         outer_attrs_to_tokens(&e.attrs, tokens);
 
-        let left_fixup = fixup.leftmost_subexpression_with_begin_operator(
+        let left_fixup = fixup.leftmost_subexpression_with_operator(
             #[cfg(feature = "full")]
             match &e.op {
                 BinOp::Sub(_)
@@ -3414,7 +3414,7 @@ pub(crate) mod printing {
     fn print_expr_call(e: &ExprCall, tokens: &mut TokenStream, fixup: FixupContext) {
         outer_attrs_to_tokens(&e.attrs, tokens);
 
-        let func_fixup = fixup.leftmost_subexpression_with_begin_operator(
+        let func_fixup = fixup.leftmost_subexpression_with_operator(
             #[cfg(feature = "full")]
             true,
             false,
@@ -3591,7 +3591,7 @@ pub(crate) mod printing {
 
     fn print_expr_index(e: &ExprIndex, tokens: &mut TokenStream, fixup: FixupContext) {
         outer_attrs_to_tokens(&e.attrs, tokens);
-        let obj_fixup = fixup.leftmost_subexpression_with_begin_operator(
+        let obj_fixup = fixup.leftmost_subexpression_with_operator(
             #[cfg(feature = "full")]
             true,
             false,
@@ -3752,7 +3752,7 @@ pub(crate) mod printing {
     fn print_expr_range(e: &ExprRange, tokens: &mut TokenStream, fixup: FixupContext) {
         outer_attrs_to_tokens(&e.attrs, tokens);
         if let Some(start) = &e.start {
-            let start_fixup = fixup.leftmost_subexpression_with_begin_operator(true, false);
+            let start_fixup = fixup.leftmost_subexpression_with_operator(true, false);
             print_subexpression(
                 start,
                 start_fixup.precedence(start) <= Precedence::Range,

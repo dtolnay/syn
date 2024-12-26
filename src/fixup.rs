@@ -230,7 +230,7 @@ impl FixupContext {
     /// Transform this fixup into the one that should apply when printing a
     /// leftmost subexpression followed by punctuation that is legal as the
     /// first token of an expression.
-    pub fn leftmost_subexpression_with_begin_operator(
+    pub fn leftmost_subexpression_with_operator(
         self,
         #[cfg(feature = "full")] next_operator_can_begin_expr: bool,
         next_operator_can_begin_generics: bool,
