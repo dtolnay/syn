@@ -3282,7 +3282,7 @@ pub(crate) mod printing {
             &e.right,
             fixup.precedence(&e.right) < Precedence::Assign,
             tokens,
-            fixup.subsequent_subexpression(),
+            fixup.rightmost_subexpression(),
         );
     }
 
@@ -3362,7 +3362,7 @@ pub(crate) mod printing {
             &e.right,
             right_needs_group,
             tokens,
-            fixup.subsequent_subexpression(),
+            fixup.rightmost_subexpression(),
         );
     }
 
@@ -3399,7 +3399,7 @@ pub(crate) mod printing {
                 //                     ^---------------------------------^
                 e.label.is_none() && classify::expr_leading_label(value),
                 tokens,
-                fixup.subsequent_subexpression(),
+                fixup.rightmost_subexpression(),
             );
         }
     }
@@ -3766,7 +3766,7 @@ pub(crate) mod printing {
                 end,
                 fixup.precedence(end) <= Precedence::Range,
                 tokens,
-                fixup.subsequent_subexpression(),
+                fixup.rightmost_subexpression(),
             );
         }
     }
@@ -3789,7 +3789,7 @@ pub(crate) mod printing {
             &e.expr,
             fixup.precedence(&e.expr) < Precedence::Prefix,
             tokens,
-            fixup.subsequent_subexpression(),
+            fixup.rightmost_subexpression(),
         );
     }
 
@@ -3808,7 +3808,7 @@ pub(crate) mod printing {
             &e.expr,
             fixup.precedence(&e.expr) < Precedence::Prefix,
             tokens,
-            fixup.subsequent_subexpression(),
+            fixup.rightmost_subexpression(),
         );
     }
 
@@ -3838,7 +3838,7 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
         e.return_token.to_tokens(tokens);
         if let Some(expr) = &e.expr {
-            print_expr(expr, tokens, fixup.subsequent_subexpression());
+            print_expr(expr, tokens, fixup.rightmost_subexpression());
         }
     }
 
@@ -3918,7 +3918,7 @@ pub(crate) mod printing {
             &e.expr,
             fixup.precedence(&e.expr) < Precedence::Prefix,
             tokens,
-            fixup.subsequent_subexpression(),
+            fixup.rightmost_subexpression(),
         );
     }
 
@@ -3963,7 +3963,7 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
         e.yield_token.to_tokens(tokens);
         if let Some(expr) = &e.expr {
-            print_expr(expr, tokens, fixup.subsequent_subexpression());
+            print_expr(expr, tokens, fixup.rightmost_subexpression());
         }
     }
 

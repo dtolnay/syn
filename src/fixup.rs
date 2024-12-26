@@ -242,15 +242,18 @@ impl FixupContext {
         }
     }
 
-    /// Transform this fixup into the one that should apply when printing any
-    /// subexpression that is neither a leftmost subexpression nor surrounded in
-    /// delimiters.
+    /// Transform this fixup into the one that should apply when printing the
+    /// rightmost subexpression of the current expression.
     ///
-    /// This is for any subexpression that has a different first token than the
-    /// current expression, and is not surrounded by a paren/bracket/brace. For
-    /// example the `$b` in `$a + $b` and `-$b`, but not the one in `[$b]` or
-    /// `$a.f($b)`.
-    pub fn subsequent_subexpression(self) -> Self {
+    /// The rightmost subexpression is any subexpression that has a different
+    /// first token than the current expression, but has the same last token.
+    ///
+    /// For example in `$a + $b` and `-$b`, the subexpression `$b` is a
+    /// rightmost subexpression.
+    ///
+    /// Not every expression has a rightmost subexpression. For example neither
+    /// `[$b]` nor `$a.f($b)` have one.
+    pub fn rightmost_subexpression(self) -> Self {
         FixupContext {
             #[cfg(feature = "full")]
             stmt: false,
