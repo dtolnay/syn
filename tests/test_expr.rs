@@ -704,6 +704,8 @@ fn test_fixup() {
         quote! { { (let _ = ()) } },
         quote! { (#[attr] thing).field },
         quote! { (self.f)() },
+        quote! { (return)..=return },
+        quote! { 1 + (return)..=1 + return },
     ] {
         let original: Expr = syn::parse2(tokens).unwrap();
 

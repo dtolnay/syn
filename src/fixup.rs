@@ -323,7 +323,7 @@ impl FixupContext {
                 _ => {}
             }
         }
-        self.precedence(expr)
+        self.leading_precedence(expr)
     }
 
     fn precedence(self, expr: &Expr) -> Precedence {
