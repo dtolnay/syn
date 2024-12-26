@@ -3280,7 +3280,7 @@ pub(crate) mod printing {
         e.eq_token.to_tokens(tokens);
         print_subexpression(
             &e.right,
-            fixup.trailing_precedence(&e.right) < Precedence::Assign,
+            fixup.precedence(&e.right) < Precedence::Assign,
             tokens,
             fixup.subsequent_subexpression(),
         );
@@ -3348,8 +3348,8 @@ pub(crate) mod printing {
         );
 
         let binop_prec = Precedence::of_binop(&e.op);
-        let left_prec = left_fixup.leading_precedence(&e.left);
-        let right_prec = fixup.trailing_precedence(&e.right);
+        let left_prec = left_fixup.precedence(&e.left);
+        let right_prec = fixup.precedence(&e.right);
         let (left_needs_group, right_needs_group) = match binop_prec {
             Precedence::Assign => (left_prec <= Precedence::Range, right_prec < binop_prec),
             Precedence::Compare => (left_prec <= binop_prec, right_prec <= binop_prec),
@@ -3422,7 +3422,7 @@ pub(crate) mod printing {
         let needs_group = if let Expr::Field(func) = &*e.func {
             func.member.is_named()
         } else {
-            func_fixup.leading_precedence(&e.func) < Precedence::Unambiguous
+            func_fixup.precedence(&e.func) < Precedence::Unambiguous
         };
         print_subexpression(&e.func, needs_group, tokens, func_fixup);
 
@@ -3598,7 +3598,7 @@ pub(crate) mod printing {
         );
         print_subexpression(
             &e.expr,
-            obj_fixup.leading_precedence(&e.expr) < Precedence::Unambiguous,
+            obj_fixup.precedence(&e.expr) < Precedence::Unambiguous,
             tokens,
             obj_fixup,
         );
@@ -3755,7 +3755,7 @@ pub(crate) mod printing {
             let start_fixup = fixup.leftmost_subexpression_with_begin_operator(true, false);
             print_subexpression(
                 start,
-                start_fixup.leading_precedence(start) <= Precedence::Range,
+                start_fixup.precedence(start) <= Precedence::Range,
                 tokens,
                 start_fixup,
             );
@@ -3764,7 +3764,7 @@ pub(crate) mod printing {
         if let Some(end) = &e.end {
             print_subexpression(
                 end,
-                fixup.trailing_precedence(end) <= Precedence::Range,
+                fixup.precedence(end) <= Precedence::Range,
                 tokens,
                 fixup.subsequent_subexpression(),
             );
@@ -3787,7 +3787,7 @@ pub(crate) mod printing {
         e.mutability.to_tokens(tokens);
         print_subexpression(
             &e.expr,
-            fixup.trailing_precedence(&e.expr) < Precedence::Prefix,
+            fixup.precedence(&e.expr) < Precedence::Prefix,
             tokens,
             fixup.subsequent_subexpression(),
         );
@@ -3806,7 +3806,7 @@ pub(crate) mod printing {
         e.mutability.to_tokens(tokens);
         print_subexpression(
             &e.expr,
-            fixup.trailing_precedence(&e.expr) < Precedence::Prefix,
+            fixup.precedence(&e.expr) < Precedence::Prefix,
             tokens,
             fixup.subsequent_subexpression(),
         );
@@ -3916,7 +3916,7 @@ pub(crate) mod printing {
         e.op.to_tokens(tokens);
         print_subexpression(
             &e.expr,
-            fixup.trailing_precedence(&e.expr) < Precedence::Prefix,
+            fixup.precedence(&e.expr) < Precedence::Prefix,
             tokens,
             fixup.subsequent_subexpression(),
         );

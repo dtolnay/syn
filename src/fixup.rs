@@ -93,21 +93,21 @@ pub(crate) struct FixupContext {
 
     // This is the difference between:
     //
-    //     let _ = 1 + return 1;  // no parens if rightmost subexpression
-    //
-    //     let _ = 1 + (return 1) + 1;  // needs parens
-    //
-    #[cfg(feature = "full")]
-    parenthesize_exterior_jump: bool,
-
-    // This is the difference between:
-    //
     //     let _ = (return) - 1;  // without paren, this would return -1
     //
     //     let _ = return + 1;  // no paren because '+' cannot begin expr
     //
     #[cfg(feature = "full")]
     next_operator_can_begin_expr: bool,
+
+    // This is the difference between:
+    //
+    //     let _ = 1 + return 1;  // no parens if rightmost subexpression
+    //
+    //     let _ = 1 + (return 1) + 1;  // needs parens
+    //
+    #[cfg(feature = "full")]
+    next_operator_can_continue_expr: bool,
 
     // This is the difference between:
     //
@@ -134,9 +134,9 @@ impl FixupContext {
         #[cfg(feature = "full")]
         parenthesize_exterior_struct_lit: false,
         #[cfg(feature = "full")]
-        parenthesize_exterior_jump: false,
-        #[cfg(feature = "full")]
         next_operator_can_begin_expr: false,
+        #[cfg(feature = "full")]
+        next_operator_can_continue_expr: false,
         next_operator_can_begin_generics: false,
     };
 
@@ -195,7 +195,10 @@ impl FixupContext {
             leftmost_subexpression_in_match_arm: self.match_arm
                 || self.leftmost_subexpression_in_match_arm,
             #[cfg(feature = "full")]
-            parenthesize_exterior_jump: true,
+            next_operator_can_begin_expr: false,
+            #[cfg(feature = "full")]
+            next_operator_can_continue_expr: true,
+            next_operator_can_begin_generics: false,
             ..self
         }
     }
@@ -215,7 +218,10 @@ impl FixupContext {
             #[cfg(feature = "full")]
             leftmost_subexpression_in_match_arm: false,
             #[cfg(feature = "full")]
-            parenthesize_exterior_jump: true,
+            next_operator_can_begin_expr: false,
+            #[cfg(feature = "full")]
+            next_operator_can_continue_expr: true,
+            next_operator_can_begin_generics: false,
             ..self
         }
     }
@@ -285,12 +291,12 @@ impl FixupContext {
     #[cfg(feature = "full")]
     pub fn needs_group_as_let_scrutinee(self, expr: &Expr) -> bool {
         self.parenthesize_exterior_struct_lit && classify::confusable_with_adjacent_block(expr)
-            || self.trailing_precedence(expr) < Precedence::Let
+            || self.precedence(expr) < Precedence::Let
     }
 
-    /// Determines the effective precedence of a left subexpression. Some
-    /// expressions have lower precedence when adjacent to particular operators.
-    pub fn leading_precedence(self, expr: &Expr) -> Precedence {
+    /// Determines the effective precedence of a subexpression. Some expressions
+    /// have higher or lower precedence when adjacent to particular operators.
+    pub fn precedence(self, expr: &Expr) -> Precedence {
         #[cfg(feature = "full")]
         if self.next_operator_can_begin_expr {
             // Decrease precedence of value-less jumps when followed by an
@@ -300,15 +306,8 @@ impl FixupContext {
                 return Precedence::Jump;
             }
         }
-        self.precedence(expr)
-    }
-
-    /// Determines the effective precedence of a right subexpression. Some
-    /// expressions have higher precedence on the right side of a binary
-    /// operator than on the left.
-    pub fn trailing_precedence(self, expr: &Expr) -> Precedence {
         #[cfg(feature = "full")]
-        if !self.parenthesize_exterior_jump {
+        if !self.next_operator_can_continue_expr {
             match expr {
                 // Increase precedence of expressions that extend to the end of
                 // current statement or group.
@@ -323,10 +322,6 @@ impl FixupContext {
                 _ => {}
             }
         }
-        self.leading_precedence(expr)
-    }
-
-    fn precedence(self, expr: &Expr) -> Precedence {
         if self.next_operator_can_begin_generics {
             if let Expr::Cast(cast) = expr {
                 if classify::trailing_unparameterized_path(&cast.ty) {
