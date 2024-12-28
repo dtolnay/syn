@@ -68,133 +68,86 @@ pub(crate) fn requires_comma_to_be_match_arm(expr: &Expr) -> bool {
 }
 
 #[cfg(all(feature = "printing", feature = "full"))]
-pub(crate) fn confusable_with_adjacent_block(mut expr: &Expr) -> bool {
-    let mut stack = Vec::new();
-    let mut jump = false;
-    let mut tokens_right_of_empty_stack = false;
+pub(crate) fn confusable_with_adjacent_block(expr: &Expr) -> bool {
+    let jump = false;
+    let rightmost_subexpression = true;
+    return confusable(expr, jump, rightmost_subexpression);
 
-    while let Some(next) = match expr {
-        Expr::Assign(e) => {
-            stack.push((jump, &e.right));
-            Some((jump, &e.left))
-        }
-        Expr::Await(e) => {
-            tokens_right_of_empty_stack |= stack.is_empty();
-            Some((jump, &e.base))
-        }
-        Expr::Binary(e) => {
-            stack.push((jump, &e.right));
-            Some((jump, &e.left))
-        }
-        Expr::Break(e) => {
-            if let Some(value) = &e.expr {
-                if let Expr::Block(_) = **value {
-                    return true;
+    fn confusable(expr: &Expr, jump: bool, rightmost_subexpression: bool) -> bool {
+        match expr {
+            Expr::Assign(e) => {
+                confusable(&e.left, jump, false)
+                    || confusable(&e.right, jump, rightmost_subexpression)
+            }
+            Expr::Await(e) => confusable(&e.base, jump, false),
+            Expr::Binary(e) => {
+                confusable(&e.left, jump, false)
+                    || confusable(&e.right, jump, rightmost_subexpression)
+            }
+            Expr::Break(e) => {
+                if let Some(value) = &e.expr {
+                    matches!(**value, Expr::Block(_))
+                        || confusable(value, true, rightmost_subexpression)
+                } else {
+                    false
                 }
-                Some((true, value))
-            } else {
-                stack.pop()
             }
-        }
-        Expr::Call(e) => {
-            tokens_right_of_empty_stack |= stack.is_empty();
-            Some((jump, &e.func))
-        }
-        Expr::Cast(e) => {
-            tokens_right_of_empty_stack |= stack.is_empty();
-            Some((jump, &e.expr))
-        }
-        Expr::Closure(e) => Some((true, &e.body)),
-        Expr::Field(e) => {
-            tokens_right_of_empty_stack |= stack.is_empty();
-            Some((jump, &e.base))
-        }
-        Expr::Index(e) => {
-            tokens_right_of_empty_stack |= stack.is_empty();
-            Some((jump, &e.expr))
-        }
-        Expr::MethodCall(e) => {
-            tokens_right_of_empty_stack |= stack.is_empty();
-            Some((jump, &e.receiver))
-        }
-        Expr::Path(_) => {
-            if jump && stack.is_empty() && !tokens_right_of_empty_stack {
-                return true;
+            Expr::Call(e) => confusable(&e.func, jump, false),
+            Expr::Cast(e) => confusable(&e.expr, jump, false),
+            Expr::Closure(e) => confusable(&e.body, true, rightmost_subexpression),
+            Expr::Field(e) => confusable(&e.base, jump, false),
+            Expr::Index(e) => confusable(&e.expr, jump, false),
+            Expr::MethodCall(e) => confusable(&e.receiver, jump, false),
+            Expr::Path(_) => jump && rightmost_subexpression,
+            Expr::Range(e) => {
+                (match &e.start {
+                    Some(start) => confusable(start, jump, false),
+                    None => false,
+                } || match &e.end {
+                    Some(end) => {
+                        matches!(**end, Expr::Block(_))
+                            || confusable(end, jump, rightmost_subexpression)
+                    }
+                    None => false,
+                })
             }
-            stack.pop()
-        }
-        Expr::Range(e) => {
-            if let Some(Expr::Block(_)) = e.end.as_deref() {
-                return true;
-            }
-            match (&e.start, &e.end) {
-                (Some(start), Some(end)) => {
-                    stack.push((jump, end));
-                    Some((jump, start))
-                }
-                (Some(start), None) => {
-                    tokens_right_of_empty_stack |= stack.is_empty();
-                    Some((jump, start))
-                }
-                (None, Some(end)) => Some((jump, end)),
-                (None, None) => stack.pop(),
-            }
-        }
-        Expr::RawAddr(e) => Some((jump, &e.expr)),
-        Expr::Reference(e) => Some((jump, &e.expr)),
-        Expr::Return(e) => {
-            if e.expr.is_none() && stack.is_empty() && !tokens_right_of_empty_stack {
-                return true;
-            }
-            if let Some(value) = &e.expr {
-                Some((true, value))
-            } else {
-                stack.pop()
-            }
-        }
-        Expr::Struct(_) => return true,
-        Expr::Try(e) => {
-            tokens_right_of_empty_stack |= stack.is_empty();
-            Some((jump, &e.expr))
-        }
-        Expr::Unary(e) => Some((jump, &e.expr)),
-        Expr::Yield(e) => {
-            if e.expr.is_none() && stack.is_empty() && !tokens_right_of_empty_stack {
-                return true;
-            }
-            if let Some(value) = &e.expr {
-                Some((true, value))
-            } else {
-                stack.pop()
-            }
-        }
+            Expr::RawAddr(e) => confusable(&e.expr, jump, rightmost_subexpression),
+            Expr::Reference(e) => confusable(&e.expr, jump, rightmost_subexpression),
+            Expr::Return(e) => match &e.expr {
+                Some(expr) => confusable(expr, true, rightmost_subexpression),
+                None => rightmost_subexpression,
+            },
+            Expr::Struct(_) => !jump,
+            Expr::Try(e) => confusable(&e.expr, jump, false),
+            Expr::Unary(e) => confusable(&e.expr, jump, rightmost_subexpression),
+            Expr::Yield(e) => match &e.expr {
+                Some(expr) => confusable(expr, true, rightmost_subexpression),
+                None => rightmost_subexpression,
+            },
 
-        Expr::Array(_)
-        | Expr::Async(_)
-        | Expr::Block(_)
-        | Expr::Const(_)
-        | Expr::Continue(_)
-        | Expr::ForLoop(_)
-        | Expr::Group(_)
-        | Expr::If(_)
-        | Expr::Infer(_)
-        | Expr::Let(_)
-        | Expr::Lit(_)
-        | Expr::Loop(_)
-        | Expr::Macro(_)
-        | Expr::Match(_)
-        | Expr::Paren(_)
-        | Expr::Repeat(_)
-        | Expr::TryBlock(_)
-        | Expr::Tuple(_)
-        | Expr::Unsafe(_)
-        | Expr::Verbatim(_)
-        | Expr::While(_) => stack.pop(),
-    } {
-        (jump, expr) = next;
+            Expr::Array(_)
+            | Expr::Async(_)
+            | Expr::Block(_)
+            | Expr::Const(_)
+            | Expr::Continue(_)
+            | Expr::ForLoop(_)
+            | Expr::Group(_)
+            | Expr::If(_)
+            | Expr::Infer(_)
+            | Expr::Let(_)
+            | Expr::Lit(_)
+            | Expr::Loop(_)
+            | Expr::Macro(_)
+            | Expr::Match(_)
+            | Expr::Paren(_)
+            | Expr::Repeat(_)
+            | Expr::TryBlock(_)
+            | Expr::Tuple(_)
+            | Expr::Unsafe(_)
+            | Expr::Verbatim(_)
+            | Expr::While(_) => false,
+        }
     }
-
-    false
 }
 
 #[cfg(feature = "printing")]
