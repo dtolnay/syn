@@ -2867,6 +2867,7 @@ pub(crate) mod parsing {
                 || input.peek(Token![,])
                 || input.peek(Token![;])
                 || input.peek(Token![.]) && !input.peek(Token![..])
+                || input.peek(Token![=>])
                 || !allow_struct.0 && input.peek(token::Brace))
         {
             Ok(None)
