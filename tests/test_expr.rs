@@ -1,3 +1,4 @@
+#![cfg(not(miri))]
 #![allow(
     clippy::needless_lifetimes,
     clippy::single_element_loop,
