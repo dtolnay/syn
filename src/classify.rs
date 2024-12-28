@@ -70,58 +70,103 @@ pub(crate) fn requires_comma_to_be_match_arm(expr: &Expr) -> bool {
 #[cfg(all(feature = "printing", feature = "full"))]
 pub(crate) fn confusable_with_adjacent_block(mut expr: &Expr) -> bool {
     let mut stack = Vec::new();
+    let mut jump = false;
+    let mut tokens_right_of_empty_stack = false;
 
     while let Some(next) = match expr {
         Expr::Assign(e) => {
-            stack.push(&e.right);
-            Some(&e.left)
+            stack.push((jump, &e.right));
+            Some((jump, &e.left))
         }
-        Expr::Await(e) => Some(&e.base),
+        Expr::Await(e) => {
+            tokens_right_of_empty_stack |= stack.is_empty();
+            Some((jump, &e.base))
+        }
         Expr::Binary(e) => {
-            stack.push(&e.right);
-            Some(&e.left)
+            stack.push((jump, &e.right));
+            Some((jump, &e.left))
         }
         Expr::Break(e) => {
-            if let Some(Expr::Block(_)) = e.expr.as_deref() {
+            if let Some(value) = &e.expr {
+                if let Expr::Block(_) = **value {
+                    return true;
+                }
+                Some((true, value))
+            } else {
+                stack.pop()
+            }
+        }
+        Expr::Call(e) => {
+            tokens_right_of_empty_stack |= stack.is_empty();
+            Some((jump, &e.func))
+        }
+        Expr::Cast(e) => {
+            tokens_right_of_empty_stack |= stack.is_empty();
+            Some((jump, &e.expr))
+        }
+        Expr::Closure(e) => Some((true, &e.body)),
+        Expr::Field(e) => {
+            tokens_right_of_empty_stack |= stack.is_empty();
+            Some((jump, &e.base))
+        }
+        Expr::Index(e) => {
+            tokens_right_of_empty_stack |= stack.is_empty();
+            Some((jump, &e.expr))
+        }
+        Expr::MethodCall(e) => {
+            tokens_right_of_empty_stack |= stack.is_empty();
+            Some((jump, &e.receiver))
+        }
+        Expr::Path(_) => {
+            if jump && stack.is_empty() && !tokens_right_of_empty_stack {
                 return true;
             }
             stack.pop()
         }
-        Expr::Call(e) => Some(&e.func),
-        Expr::Cast(e) => Some(&e.expr),
-        Expr::Closure(e) => Some(&e.body),
-        Expr::Field(e) => Some(&e.base),
-        Expr::Index(e) => Some(&e.expr),
-        Expr::MethodCall(e) => Some(&e.receiver),
         Expr::Range(e) => {
             if let Some(Expr::Block(_)) = e.end.as_deref() {
                 return true;
             }
             match (&e.start, &e.end) {
-                (Some(start), end) => {
-                    stack.extend(end);
-                    Some(start)
+                (Some(start), Some(end)) => {
+                    stack.push((jump, end));
+                    Some((jump, start))
                 }
-                (None, Some(end)) => Some(end),
+                (Some(start), None) => {
+                    tokens_right_of_empty_stack |= stack.is_empty();
+                    Some((jump, start))
+                }
+                (None, Some(end)) => Some((jump, end)),
                 (None, None) => stack.pop(),
             }
         }
-        Expr::RawAddr(e) => Some(&e.expr),
-        Expr::Reference(e) => Some(&e.expr),
+        Expr::RawAddr(e) => Some((jump, &e.expr)),
+        Expr::Reference(e) => Some((jump, &e.expr)),
         Expr::Return(e) => {
-            if e.expr.is_none() && stack.is_empty() {
+            if e.expr.is_none() && stack.is_empty() && !tokens_right_of_empty_stack {
                 return true;
             }
-            stack.pop()
+            if let Some(value) = &e.expr {
+                Some((true, value))
+            } else {
+                stack.pop()
+            }
         }
         Expr::Struct(_) => return true,
-        Expr::Try(e) => Some(&e.expr),
-        Expr::Unary(e) => Some(&e.expr),
+        Expr::Try(e) => {
+            tokens_right_of_empty_stack |= stack.is_empty();
+            Some((jump, &e.expr))
+        }
+        Expr::Unary(e) => Some((jump, &e.expr)),
         Expr::Yield(e) => {
-            if e.expr.is_none() && stack.is_empty() {
+            if e.expr.is_none() && stack.is_empty() && !tokens_right_of_empty_stack {
                 return true;
             }
-            stack.pop()
+            if let Some(value) = &e.expr {
+                Some((true, value))
+            } else {
+                stack.pop()
+            }
         }
 
         Expr::Array(_)
@@ -139,7 +184,6 @@ pub(crate) fn confusable_with_adjacent_block(mut expr: &Expr) -> bool {
         | Expr::Macro(_)
         | Expr::Match(_)
         | Expr::Paren(_)
-        | Expr::Path(_)
         | Expr::Repeat(_)
         | Expr::TryBlock(_)
         | Expr::Tuple(_)
@@ -147,7 +191,7 @@ pub(crate) fn confusable_with_adjacent_block(mut expr: &Expr) -> bool {
         | Expr::Verbatim(_)
         | Expr::While(_) => stack.pop(),
     } {
-        expr = next;
+        (jump, expr) = next;
     }
 
     false
