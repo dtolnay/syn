@@ -3464,7 +3464,9 @@ pub(crate) mod printing {
             self.inputs.to_tokens(tokens);
             self.or2_token.to_tokens(tokens);
             self.output.to_tokens(tokens);
-            if matches!(self.output, ReturnType::Default) || matches!(*self.body, Expr::Block(_)) {
+            if matches!(self.output, ReturnType::Default)
+                || matches!(&*self.body, Expr::Block(body) if body.attrs.is_empty() && body.label.is_none())
+            {
                 self.body.to_tokens(tokens);
             } else {
                 token::Brace::default().surround(tokens, |tokens| {
