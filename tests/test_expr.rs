@@ -15,7 +15,7 @@ mod macros;
 
 mod common;
 
-use crate::common::visit::FlattenParens;
+use crate::common::visit::{AsIfPrinted, FlattenParens};
 use proc_macro2::{Delimiter, Group, Span};
 use quote::{quote, ToTokens as _};
 use std::process::ExitCode;
@@ -1172,11 +1172,16 @@ fn test_permutations() -> ExitCode {
             return;
         }};
     }
-    let mut assert = |expr: Expr| {
+    let mut assert = |mut original: Expr| {
         count += 1;
-        let tokens = expr.to_token_stream();
-        if syn::parse2::<Expr>(tokens.clone()).is_err() {
+        let tokens = original.to_token_stream();
+        let Ok(mut parsed) = syn::parse2::<Expr>(tokens.clone()) else {
             fail!("failed to parse: {}", tokens);
+        };
+        AsIfPrinted.visit_expr_mut(&mut original);
+        FlattenParens.visit_expr_mut(&mut parsed);
+        if original != parsed {
+            fail!("before: {}\nafter: {}", tokens, parsed.to_token_stream());
         }
     };
 
