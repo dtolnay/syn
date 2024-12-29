@@ -1,8 +1,31 @@
+use proc_macro2::{Delimiter, Group, TokenStream, TokenTree};
 use std::mem;
 use syn::visit_mut::{self, VisitMut};
 use syn::{Expr, File, Generics, LifetimeParam, MacroDelimiter, Stmt, StmtMacro, TypeParam};
 
 pub struct FlattenParens;
+
+impl FlattenParens {
+    pub fn visit_token_stream_mut(tokens: &mut TokenStream) {
+        *tokens = mem::take(tokens)
+            .into_iter()
+            .flat_map(|tt| {
+                if let TokenTree::Group(group) = tt {
+                    let delimiter = group.delimiter();
+                    let mut content = group.stream();
+                    Self::visit_token_stream_mut(&mut content);
+                    if let Delimiter::Parenthesis = delimiter {
+                        content
+                    } else {
+                        TokenStream::from(TokenTree::Group(Group::new(delimiter, content)))
+                    }
+                } else {
+                    TokenStream::from(tt)
+                }
+            })
+            .collect();
+    }
+}
 
 impl VisitMut for FlattenParens {
     fn visit_expr_mut(&mut self, e: &mut Expr) {
