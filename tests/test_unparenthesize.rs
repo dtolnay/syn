@@ -42,7 +42,6 @@ fn test(path: &Path, failed: &AtomicUsize) {
 
     match panic::catch_unwind(|| -> syn::Result<()> {
         let mut before = syn::parse_file(&content)?;
-        before.shebang = None;
         FlattenParens.visit_file_mut(&mut before);
         let printed = before.to_token_stream();
         let mut after = syn::parse2::<syn::File>(printed.clone())?;

@@ -1,6 +1,6 @@
 use std::mem;
 use syn::visit_mut::{self, VisitMut};
-use syn::{Expr, Generics, LifetimeParam, TypeParam};
+use syn::{Expr, File, Generics, LifetimeParam, TypeParam};
 
 pub struct FlattenParens;
 
@@ -16,6 +16,11 @@ impl VisitMut for FlattenParens {
 pub struct AsIfPrinted;
 
 impl VisitMut for AsIfPrinted {
+    fn visit_file_mut(&mut self, file: &mut File) {
+        file.shebang = None;
+        visit_mut::visit_file_mut(self, file);
+    }
+
     fn visit_generics_mut(&mut self, generics: &mut Generics) {
         if generics.params.is_empty() {
             generics.lt_token = None;
