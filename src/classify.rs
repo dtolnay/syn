@@ -86,7 +86,7 @@ pub(crate) fn confusable_with_adjacent_block(expr: &Expr) -> bool {
             }
             Expr::Break(e) => {
                 if let Some(value) = &e.expr {
-                    matches!(**value, Expr::Block(_))
+                    matches!(&**value, Expr::Block(block) if block.attrs.is_empty() && block.label.is_none())
                         || confusable(value, true, rightmost_subexpression)
                 } else {
                     jump && rightmost_subexpression
@@ -105,7 +105,7 @@ pub(crate) fn confusable_with_adjacent_block(expr: &Expr) -> bool {
                     None => false,
                 } || match &e.end {
                     Some(end) => {
-                        matches!(**end, Expr::Block(_))
+                        matches!(&**end, Expr::Block(block) if block.attrs.is_empty() && block.label.is_none())
                             || confusable(end, jump, rightmost_subexpression)
                     }
                     None => jump && rightmost_subexpression,
