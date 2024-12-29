@@ -898,6 +898,7 @@ fn test_permutations() -> ExitCode {
         });
 
         // Expr::Closure
+        f(parse_quote!(|| -> T {}));
         iter(depth, &mut |expr| {
             f(Expr::Closure(ExprClosure {
                 attrs: Vec::new(),
@@ -911,19 +912,6 @@ fn test_permutations() -> ExitCode {
                 or2_token: Token![|](Span::call_site()),
                 output: ReturnType::Default,
                 body: Box::new(expr.clone()),
-            }));
-            f(Expr::Closure(ExprClosure {
-                attrs: Vec::new(),
-                lifetimes: None,
-                constness: None,
-                movability: None,
-                asyncness: None,
-                capture: None,
-                or1_token: Token![|](Span::call_site()),
-                inputs: Punctuated::new(),
-                or2_token: Token![|](Span::call_site()),
-                output: ReturnType::Type(Token![->](Span::call_site()), parse_quote!(T)),
-                body: Box::new(expr),
             }));
         });
 
@@ -1198,6 +1186,6 @@ fn test_permutations() -> ExitCode {
     };
 
     iter(2, &mut assert);
-    assert_eq!(count, 134599);
+    assert_eq!(count, 133539);
     status
 }
