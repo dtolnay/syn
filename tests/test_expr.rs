@@ -3,7 +3,8 @@
     clippy::needless_lifetimes,
     clippy::single_element_loop,
     clippy::too_many_lines,
-    clippy::uninlined_format_args
+    clippy::uninlined_format_args,
+    clippy::unreadable_literal
 )]
 
 #[macro_use]
