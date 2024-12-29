@@ -208,7 +208,8 @@ pub(crate) mod parsing {
                 if ahead.peek2(Ident) || ahead.peek2(Token![try]) {
                     is_item_macro = true;
                 } else if ahead.peek2(token::Brace)
-                    && !(ahead.peek3(Token![.]) || ahead.peek3(Token![?]))
+                    && !(ahead.peek3(Token![.]) && !ahead.peek3(Token![..])
+                        || ahead.peek3(Token![?]))
                 {
                     input.advance_to(&ahead);
                     return stmt_mac(input, attrs, path).map(Stmt::Macro);
