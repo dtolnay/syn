@@ -267,6 +267,7 @@
     clippy::enum_glob_use,
     clippy::expl_impl_clone_on_copy,
     clippy::explicit_auto_deref,
+    clippy::fn_params_excessive_bools,
     clippy::if_not_else,
     clippy::inherent_to_string,
     clippy::into_iter_without_iter,

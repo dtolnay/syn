@@ -704,6 +704,8 @@ fn test_fixup() {
         quote! { if (break break) {} },
         quote! { if (return ..) {} },
         quote! { if (|| Struct {}) {} },
+        quote! { if (|| Struct {}.await) {} },
+        quote! { if break || Struct {}.await {} },
         quote! { if break 'outer 'block: {} {} },
         quote! { if ..'block: {} {} },
         quote! { if (break {}.await) {} },
