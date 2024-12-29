@@ -89,7 +89,7 @@ pub(crate) fn confusable_with_adjacent_block(expr: &Expr) -> bool {
                     matches!(**value, Expr::Block(_))
                         || confusable(value, true, rightmost_subexpression)
                 } else {
-                    false
+                    jump && rightmost_subexpression
                 }
             }
             Expr::Call(e) => confusable(&e.func, jump, false),
@@ -108,7 +108,7 @@ pub(crate) fn confusable_with_adjacent_block(expr: &Expr) -> bool {
                         matches!(**end, Expr::Block(_))
                             || confusable(end, jump, rightmost_subexpression)
                     }
-                    None => false,
+                    None => jump && rightmost_subexpression,
                 })
             }
             Expr::RawAddr(e) => confusable(&e.expr, jump, rightmost_subexpression),
@@ -117,7 +117,7 @@ pub(crate) fn confusable_with_adjacent_block(expr: &Expr) -> bool {
                 Some(expr) => confusable(expr, true, rightmost_subexpression),
                 None => rightmost_subexpression,
             },
-            Expr::Struct(_) => !jump,
+            Expr::Struct(_) => !jump || rightmost_subexpression,
             Expr::Try(e) => confusable(&e.expr, jump, false),
             Expr::Unary(e) => confusable(&e.expr, jump, rightmost_subexpression),
             Expr::Yield(e) => match &e.expr {
