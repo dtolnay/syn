@@ -1180,6 +1180,7 @@ fn test_permutations() -> ExitCode {
         });
     }
 
+    let mut count = 0;
     let mut status = ExitCode::SUCCESS;
     macro_rules! fail {
         ($($message:tt)*) => {{
@@ -1189,6 +1190,7 @@ fn test_permutations() -> ExitCode {
         }};
     }
     let mut assert = |expr: Expr| {
+        count += 1;
         let tokens = expr.to_token_stream();
         if syn::parse2::<Expr>(tokens.clone()).is_err() {
             fail!("failed to parse: {}", tokens);
@@ -1196,5 +1198,6 @@ fn test_permutations() -> ExitCode {
     };
 
     iter(2, &mut assert);
+    assert_eq!(count, 134599);
     status
 }
