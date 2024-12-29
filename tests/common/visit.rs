@@ -1,6 +1,6 @@
 use std::mem;
 use syn::visit_mut::{self, VisitMut};
-use syn::{Expr, File, Generics, LifetimeParam, TypeParam};
+use syn::{Expr, File, Generics, LifetimeParam, MacroDelimiter, Stmt, StmtMacro, TypeParam};
 
 pub struct FlattenParens;
 
@@ -39,6 +39,27 @@ impl VisitMut for AsIfPrinted {
             param.colon_token = None;
         }
         visit_mut::visit_lifetime_param_mut(self, param);
+    }
+
+    fn visit_stmt_mut(&mut self, stmt: &mut Stmt) {
+        if let Stmt::Expr(expr, semi) = stmt {
+            if let Expr::Macro(e) = expr {
+                if match e.mac.delimiter {
+                    MacroDelimiter::Brace(_) => true,
+                    MacroDelimiter::Paren(_) | MacroDelimiter::Bracket(_) => semi.is_some(),
+                } {
+                    let Expr::Macro(expr) = mem::replace(expr, Expr::PLACEHOLDER) else {
+                        unreachable!();
+                    };
+                    *stmt = Stmt::Macro(StmtMacro {
+                        attrs: expr.attrs,
+                        mac: expr.mac,
+                        semi_token: *semi,
+                    });
+                }
+            }
+        }
+        visit_mut::visit_stmt_mut(self, stmt);
     }
 
     fn visit_type_param_mut(&mut self, param: &mut TypeParam) {
