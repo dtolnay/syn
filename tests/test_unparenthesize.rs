@@ -1,22 +1,25 @@
 #![cfg(not(miri))]
+#![recursion_limit = "1024"]
+#![feature(rustc_private)]
 #![allow(
     clippy::manual_assert,
+    clippy::match_like_matches_macro,
     clippy::needless_lifetimes,
     clippy::uninlined_format_args
 )]
 
+use crate::common::visit::{AsIfPrinted, FlattenParens};
 use quote::ToTokens as _;
 use std::fs;
-use std::mem;
 use std::panic;
 use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use syn::visit_mut::{self, VisitMut};
-use syn::{Expr, Generics, LifetimeParam, TypeParam};
+use syn::visit_mut::VisitMut as _;
 
 #[macro_use]
 mod macros;
 
+mod common;
 mod repo;
 
 #[test]
@@ -31,48 +34,6 @@ fn test_unparenthesize() {
     let failed = failed.into_inner();
     if failed > 0 {
         panic!("{} failures", failed);
-    }
-}
-
-struct FlattenParens;
-
-impl VisitMut for FlattenParens {
-    fn visit_expr_mut(&mut self, e: &mut Expr) {
-        while let Expr::Paren(paren) = e {
-            *e = mem::replace(&mut *paren.expr, Expr::PLACEHOLDER);
-        }
-        visit_mut::visit_expr_mut(self, e);
-    }
-}
-
-struct AsIfPrinted;
-
-impl VisitMut for AsIfPrinted {
-    fn visit_generics_mut(&mut self, generics: &mut Generics) {
-        if generics.params.is_empty() {
-            generics.lt_token = None;
-            generics.gt_token = None;
-        }
-        if let Some(where_clause) = &generics.where_clause {
-            if where_clause.predicates.is_empty() {
-                generics.where_clause = None;
-            }
-        }
-        visit_mut::visit_generics_mut(self, generics);
-    }
-
-    fn visit_lifetime_param_mut(&mut self, param: &mut LifetimeParam) {
-        if param.bounds.is_empty() {
-            param.colon_token = None;
-        }
-        visit_mut::visit_lifetime_param_mut(self, param);
-    }
-
-    fn visit_type_param_mut(&mut self, param: &mut TypeParam) {
-        if param.bounds.is_empty() {
-            param.colon_token = None;
-        }
-        visit_mut::visit_type_param_mut(self, param);
     }
 }
 

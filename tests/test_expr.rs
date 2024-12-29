@@ -1,5 +1,8 @@
 #![cfg(not(miri))]
+#![recursion_limit = "1024"]
+#![feature(rustc_private)]
 #![allow(
+    clippy::match_like_matches_macro,
     clippy::needless_lifetimes,
     clippy::single_element_loop,
     clippy::too_many_lines,
@@ -10,12 +13,14 @@
 #[macro_use]
 mod macros;
 
+mod common;
+
+use crate::common::visit::FlattenParens;
 use proc_macro2::{Delimiter, Group, Span};
 use quote::{quote, ToTokens as _};
-use std::mem;
 use std::process::ExitCode;
 use syn::punctuated::Punctuated;
-use syn::visit_mut::{self, VisitMut};
+use syn::visit_mut::VisitMut as _;
 use syn::{
     parse_quote, token, Arm, BinOp, Block, Expr, ExprAssign, ExprAwait, ExprBinary, ExprBlock,
     ExprBreak, ExprCall, ExprCast, ExprClosure, ExprField, ExprForLoop, ExprIf, ExprIndex,
@@ -675,17 +680,6 @@ fn test_chained_comparison() {
 
 #[test]
 fn test_fixup() {
-    struct FlattenParens;
-
-    impl VisitMut for FlattenParens {
-        fn visit_expr_mut(&mut self, e: &mut Expr) {
-            while let Expr::Paren(paren) = e {
-                *e = mem::replace(&mut *paren.expr, Expr::PLACEHOLDER);
-            }
-            visit_mut::visit_expr_mut(self, e);
-        }
-    }
-
     for tokens in [
         quote! { 2 * (1 + 1) },
         quote! { 0 + (0 + 0) },
