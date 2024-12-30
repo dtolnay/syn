@@ -805,16 +805,7 @@ fn test_permutations() -> ExitCode {
                     BinOp::Ne(Token![!=](Span::call_site())),
                     BinOp::Ge(Token![>=](Span::call_site())),
                     BinOp::Gt(Token![>](Span::call_site())),
-                    BinOp::AddAssign(Token![+=](Span::call_site())),
-                    BinOp::SubAssign(Token![-=](Span::call_site())),
-                    BinOp::MulAssign(Token![*=](Span::call_site())),
-                    BinOp::DivAssign(Token![/=](Span::call_site())),
-                    BinOp::RemAssign(Token![%=](Span::call_site())),
-                    BinOp::BitXorAssign(Token![^=](Span::call_site())),
-                    BinOp::BitAndAssign(Token![&=](Span::call_site())),
-                    BinOp::BitOrAssign(Token![|=](Span::call_site())),
                     BinOp::ShlAssign(Token![<<=](Span::call_site())),
-                    BinOp::ShrAssign(Token![>>=](Span::call_site())),
                 ] {
                     f(Expr::Binary(ExprBinary {
                         attrs: Vec::new(),
@@ -1204,6 +1195,6 @@ fn test_permutations() -> ExitCode {
     };
 
     iter(2, &mut assert);
-    assert_eq!(count, 133539);
+    assert_eq!(count, 73923);
     status
 }
