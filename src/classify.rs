@@ -69,22 +69,19 @@ pub(crate) fn requires_comma_to_be_match_arm(expr: &Expr) -> bool {
 
 #[cfg(all(feature = "printing", feature = "full"))]
 pub(crate) fn confusable_with_adjacent_block(expr: &Expr) -> bool {
-    let jump = false;
-    let closure = false;
+    let allow_struct = false;
     let optional_leftmost_subexpression = false;
     let rightmost_subexpression = true;
     return confusable(
         expr,
-        jump,
-        closure,
+        allow_struct,
         optional_leftmost_subexpression,
         rightmost_subexpression,
     );
 
     fn confusable(
         expr: &Expr,
-        jump: bool,
-        closure: bool,
+        allow_struct: bool,
         optional_leftmost_subexpression: bool,
         rightmost_subexpression: bool,
     ) -> bool {
@@ -92,105 +89,94 @@ pub(crate) fn confusable_with_adjacent_block(expr: &Expr) -> bool {
             Expr::Assign(e) => {
                 confusable(
                     &e.left,
-                    jump,
-                    closure,
+                    allow_struct,
                     optional_leftmost_subexpression,
                     false,
-                ) || confusable(&e.right, jump, closure, false, rightmost_subexpression)
+                ) || confusable(&e.right, allow_struct, false, rightmost_subexpression)
             }
             Expr::Await(e) => confusable(
                 &e.base,
-                jump,
-                closure,
+                allow_struct,
                 optional_leftmost_subexpression,
                 false,
             ),
             Expr::Binary(e) => {
                 confusable(
                     &e.left,
-                    jump,
-                    closure,
+                    allow_struct,
                     optional_leftmost_subexpression,
                     false,
-                ) || confusable(&e.right, jump, closure, false, rightmost_subexpression)
+                ) || confusable(&e.right, allow_struct, false, rightmost_subexpression)
             }
             Expr::Block(e) => {
                 optional_leftmost_subexpression && e.attrs.is_empty() && e.label.is_none()
             }
             Expr::Break(e) => {
                 if let Some(value) = &e.expr {
-                    confusable(value, true, false, true, rightmost_subexpression)
+                    confusable(value, true, true, rightmost_subexpression)
                 } else {
-                    (jump || closure) && rightmost_subexpression
+                    allow_struct && rightmost_subexpression
                 }
             }
             Expr::Call(e) => confusable(
                 &e.func,
-                jump,
-                closure,
+                allow_struct,
                 optional_leftmost_subexpression,
                 false,
             ),
             Expr::Cast(e) => confusable(
                 &e.expr,
-                jump,
-                closure,
+                allow_struct,
                 optional_leftmost_subexpression,
                 false,
             ),
-            Expr::Closure(e) => confusable(&e.body, jump, true, false, rightmost_subexpression),
+            Expr::Closure(e) => confusable(&e.body, allow_struct, false, rightmost_subexpression),
             Expr::Field(e) => confusable(
                 &e.base,
-                jump,
-                closure,
+                allow_struct,
                 optional_leftmost_subexpression,
                 false,
             ),
             Expr::Index(e) => confusable(
                 &e.expr,
-                jump,
-                closure,
+                allow_struct,
                 optional_leftmost_subexpression,
                 false,
             ),
             Expr::MethodCall(e) => confusable(
                 &e.receiver,
-                jump,
-                closure,
+                allow_struct,
                 optional_leftmost_subexpression,
                 false,
             ),
-            Expr::Path(_) => (jump || closure) && rightmost_subexpression,
+            Expr::Path(_) => allow_struct && rightmost_subexpression,
             Expr::Range(e) => {
                 (match &e.start {
                     Some(start) => {
-                        confusable(start, jump, closure, optional_leftmost_subexpression, false)
+                        confusable(start, allow_struct, optional_leftmost_subexpression, false)
                     }
                     None => false,
                 } || match &e.end {
-                    Some(end) => confusable(end, jump, closure, true, rightmost_subexpression),
-                    None => (jump || closure) && rightmost_subexpression,
+                    Some(end) => confusable(end, allow_struct, true, rightmost_subexpression),
+                    None => allow_struct && rightmost_subexpression,
                 })
             }
-            Expr::RawAddr(e) => confusable(&e.expr, jump, closure, false, rightmost_subexpression),
-            Expr::Reference(e) => {
-                confusable(&e.expr, jump, closure, false, rightmost_subexpression)
-            }
+            Expr::RawAddr(e) => confusable(&e.expr, allow_struct, false, rightmost_subexpression),
+            Expr::Reference(e) => confusable(&e.expr, allow_struct, false, rightmost_subexpression),
             Expr::Return(e) => match &e.expr {
-                Some(expr) => confusable(expr, true, false, false, rightmost_subexpression),
+                Some(expr) => confusable(expr, true, false, rightmost_subexpression),
                 None => rightmost_subexpression,
             },
-            Expr::Struct(_) => !jump || rightmost_subexpression,
+            Expr::Struct(_) => !allow_struct,
             Expr::Try(e) => confusable(
                 &e.expr,
-                jump,
-                closure,
+                allow_struct,
                 optional_leftmost_subexpression,
                 false,
             ),
-            Expr::Unary(e) => confusable(&e.expr, jump, closure, false, rightmost_subexpression),
+            Expr::Unary(e) => confusable(&e.expr, allow_struct, false, rightmost_subexpression),
             Expr::Yield(e) => match &e.expr {
-                Some(expr) => confusable(expr, true, false, false, rightmost_subexpression),
+                Some(expr) => confusable(expr, true, false, rightmost_subexpression),
                 None => rightmost_subexpression,
             },
 
