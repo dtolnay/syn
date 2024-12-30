@@ -1191,6 +1191,16 @@ fn test_permutations() -> ExitCode {
         if original != parsed {
             fail!("before: {}\nafter: {}", tokens, parsed.to_token_stream());
         }
+        let mut tokens_no_paren = tokens.clone();
+        FlattenParens::visit_token_stream_mut(&mut tokens_no_paren);
+        if tokens.to_string() != tokens_no_paren.to_string() {
+            if let Ok(mut parsed2) = syn::parse2::<Expr>(tokens_no_paren) {
+                FlattenParens.visit_expr_mut(&mut parsed2);
+                if original == parsed2 {
+                    fail!("redundant parens: {}", tokens);
+                }
+            }
+        }
     };
 
     iter(2, &mut assert);
