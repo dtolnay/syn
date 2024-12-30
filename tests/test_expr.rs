@@ -408,6 +408,77 @@ fn test_range_precedence() {
 }
 
 #[test]
+fn test_ranges_dots_bailout() {
+    syn::parse_str::<Expr>(".. ?").unwrap_err();
+    syn::parse_str::<Expr>(".. .field").unwrap_err();
+
+    snapshot!("return .. ?" as Expr, @r"
+    Expr::Try {
+        expr: Expr::Return {
+            expr: Some(Expr::Range {
+                limits: RangeLimits::HalfOpen,
+            }),
+        },
+    }
+    ");
+
+    snapshot!("break .. ?" as Expr, @r"
+    Expr::Try {
+        expr: Expr::Break {
+            expr: Some(Expr::Range {
+                limits: RangeLimits::HalfOpen,
+            }),
+        },
+    }
+    ");
+
+    snapshot!("|| .. ?" as Expr, @r"
+    Expr::Try {
+        expr: Expr::Closure {
+            output: ReturnType::Default,
+            body: Expr::Range {
+                limits: RangeLimits::HalfOpen,
+            },
+        },
+    }
+    ");
+
+    snapshot!("return .. .field" as Expr, @r#"
+    Expr::Field {
+        base: Expr::Return {
+            expr: Some(Expr::Range {
+                limits: RangeLimits::HalfOpen,
+            }),
+        },
+        member: Member::Named("field"),
+    }
+    "#);
+
+    snapshot!("break .. .field" as Expr, @r#"
+    Expr::Field {
+        base: Expr::Break {
+            expr: Some(Expr::Range {
+                limits: RangeLimits::HalfOpen,
+            }),
+        },
+        member: Member::Named("field"),
+    }
+    "#);
+
+    snapshot!("|| .. .field" as Expr, @r#"
+    Expr::Field {
+        base: Expr::Closure {
+            output: ReturnType::Default,
+            body: Expr::Range {
+                limits: RangeLimits::HalfOpen,
+            },
+        },
+        member: Member::Named("field"),
+    }
+    "#);
+}
+
+#[test]
 fn test_ambiguous_label() {
     for stmt in [
         quote! {

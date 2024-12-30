@@ -1673,7 +1673,12 @@ pub(crate) mod parsing {
                     bracket_token: bracketed!(content in input),
                     index: content.parse()?,
                 });
-            } else if input.peek(Token![?]) {
+            } else if input.peek(Token![?])
+                && match e {
+                    Expr::Range(_) => false,
+                    _ => true,
+                }
+            {
                 e = Expr::Try(ExprTry {
                     attrs: Vec::new(),
                     expr: Box::new(e),
@@ -2867,6 +2872,7 @@ pub(crate) mod parsing {
                 || input.peek(Token![,])
                 || input.peek(Token![;])
                 || input.peek(Token![.]) && !input.peek(Token![..])
+                || input.peek(Token![?])
                 || input.peek(Token![=>])
                 || !allow_struct.0 && input.peek(token::Brace))
         {
