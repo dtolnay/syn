@@ -83,6 +83,15 @@ pub(crate) struct FixupContext {
 
     // This is the difference between:
     //
+    //     (..) + x  // parens because range cannot be lhs of a binop
+    //
+    //     &.. + x  // no parens because range is a right subexpression
+    //
+    #[cfg(feature = "full")]
+    rightmost_subexpression: bool,
+
+    // This is the difference between:
+    //
     //     if let _ = (Struct {}) {}  // needs parens
     //
     //     match () {
@@ -132,6 +141,8 @@ impl FixupContext {
         match_arm: false,
         #[cfg(feature = "full")]
         leftmost_subexpression_in_match_arm: false,
+        #[cfg(feature = "full")]
+        rightmost_subexpression: false,
         #[cfg(feature = "full")]
         parenthesize_exterior_struct_lit: false,
         #[cfg(feature = "full")]
@@ -196,6 +207,8 @@ impl FixupContext {
             leftmost_subexpression_in_match_arm: self.match_arm
                 || self.leftmost_subexpression_in_match_arm,
             #[cfg(feature = "full")]
+            rightmost_subexpression: false,
+            #[cfg(feature = "full")]
             next_operator_can_begin_expr: false,
             #[cfg(feature = "full")]
             next_operator_can_continue_expr: true,
@@ -218,6 +231,8 @@ impl FixupContext {
             match_arm: self.match_arm || self.leftmost_subexpression_in_match_arm,
             #[cfg(feature = "full")]
             leftmost_subexpression_in_match_arm: false,
+            #[cfg(feature = "full")]
+            rightmost_subexpression: false,
             #[cfg(feature = "full")]
             next_operator_can_begin_expr: false,
             #[cfg(feature = "full")]
@@ -264,6 +279,8 @@ impl FixupContext {
             match_arm: false,
             #[cfg(feature = "full")]
             leftmost_subexpression_in_match_arm: false,
+            #[cfg(feature = "full")]
+            rightmost_subexpression: true,
             ..self
         }
     }
@@ -309,6 +326,12 @@ impl FixupContext {
             if let Expr::Break(_) | Expr::Return(_) | Expr::Yield(_) = expr {
                 return Precedence::Jump;
             }
+        } else if self.rightmost_subexpression {
+            if let Expr::Range(range) = expr {
+                if range.start.is_none() && range.end.is_none() {
+                    return Precedence::Unambiguous;
+                }
+            }
         }
         #[cfg(feature = "full")]
         if !self.next_operator_can_continue_expr {
@@ -348,7 +371,7 @@ impl Clone for FixupContext {
 #[cfg(feature = "full")]
 #[test]
 fn test_leftmost_rightmost_invariant() {
-    const BITS: usize = 8;
+    const BITS: usize = 9;
 
     for bits in 0u16..1 << BITS {
         let mut i = 0;
@@ -362,6 +385,7 @@ fn test_leftmost_rightmost_invariant() {
             leftmost_subexpression_in_stmt: bit(),
             match_arm: bit(),
             leftmost_subexpression_in_match_arm: bit(),
+            rightmost_subexpression: bit(),
             parenthesize_exterior_struct_lit: bit(),
             next_operator_can_begin_expr: bit(),
             next_operator_can_continue_expr: bit(),
@@ -370,7 +394,10 @@ fn test_leftmost_rightmost_invariant() {
         assert_eq!(i, BITS);
         assert_eq!(
             fixup.leftmost_subexpression().rightmost_subexpression(),
-            fixup.rightmost_subexpression().leftmost_subexpression(),
+            FixupContext {
+                rightmost_subexpression: true,
+                ..fixup.rightmost_subexpression().leftmost_subexpression()
+            },
         );
     }
 }

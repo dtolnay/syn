@@ -400,6 +400,19 @@ fn test_range_precedence() {
     }
     "#);
 
+    snapshot!("() = .. + ()" as Expr, @r"
+    Expr::Binary {
+        left: Expr::Assign {
+            left: Expr::Tuple,
+            right: Expr::Range {
+                limits: RangeLimits::HalfOpen,
+            },
+        },
+        op: BinOp::Add,
+        right: Expr::Tuple,
+    }
+    ");
+
     // A range with a lower bound cannot be the upper bound of another range,
     // and a range with an upper bound cannot be the lower bound of another
     // range.

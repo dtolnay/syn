@@ -1315,9 +1315,8 @@ pub(crate) mod parsing {
     ) -> Result<Expr> {
         loop {
             let ahead = input.fork();
-            if let Expr::Range(ExprRange { end: Some(_), .. }) = lhs {
-                // A range with an upper bound cannot be the left-hand side of
-                // another binary operator.
+            if let Expr::Range(_) = lhs {
+                // A range cannot be the left-hand side of another binary operator.
                 break;
             } else if let Ok(op) = ahead.parse::<BinOp>() {
                 let precedence = Precedence::of_binop(&op);
@@ -2886,17 +2885,20 @@ pub(crate) mod parsing {
                 || input.peek(Token![?])
                 || input.peek(Token![=>])
                 || !allow_struct.0 && input.peek(token::Brace)
-                || input.peek(Token![=]) && !input.peek(Token![==])
-                || input.peek(Token![+=])
+                || input.peek(Token![=])
+                || input.peek(Token![+])
+                || input.peek(Token![/])
+                || input.peek(Token![%])
+                || input.peek(Token![^])
+                || input.peek(Token![>])
+                || input.peek(Token![<=])
+                || input.peek(Token![!=])
                 || input.peek(Token![-=])
                 || input.peek(Token![*=])
-                || input.peek(Token![/=])
-                || input.peek(Token![%=])
-                || input.peek(Token![^=])
                 || input.peek(Token![&=])
                 || input.peek(Token![|=])
                 || input.peek(Token![<<=])
-                || input.peek(Token![>>=]))
+                || input.peek(Token![as]))
         {
             Ok(None)
         } else {
