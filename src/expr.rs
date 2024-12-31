@@ -1324,6 +1324,11 @@ pub(crate) mod parsing {
                 if precedence < base {
                     break;
                 }
+                if precedence == Precedence::Assign {
+                    if let Expr::Range(_) = lhs {
+                        break;
+                    }
+                }
                 if precedence == Precedence::Compare {
                     if let Expr::Binary(lhs) = &lhs {
                         if Precedence::of_binop(&lhs.op) == Precedence::Compare {
@@ -1339,7 +1344,13 @@ pub(crate) mod parsing {
                     op,
                     right,
                 });
-            } else if Precedence::Assign >= base && input.peek(Token![=]) && !input.peek(Token![=>])
+            } else if Precedence::Assign >= base
+                && input.peek(Token![=])
+                && !input.peek(Token![=>])
+                && match lhs {
+                    Expr::Range(_) => false,
+                    _ => true,
+                }
             {
                 let eq_token: Token![=] = input.parse()?;
                 let right = parse_binop_rhs(input, allow_struct, Precedence::Assign)?;
@@ -2874,7 +2885,18 @@ pub(crate) mod parsing {
                 || input.peek(Token![.]) && !input.peek(Token![..])
                 || input.peek(Token![?])
                 || input.peek(Token![=>])
-                || !allow_struct.0 && input.peek(token::Brace))
+                || !allow_struct.0 && input.peek(token::Brace)
+                || input.peek(Token![=]) && !input.peek(Token![==])
+                || input.peek(Token![+=])
+                || input.peek(Token![-=])
+                || input.peek(Token![*=])
+                || input.peek(Token![/=])
+                || input.peek(Token![%=])
+                || input.peek(Token![^=])
+                || input.peek(Token![&=])
+                || input.peek(Token![|=])
+                || input.peek(Token![<<=])
+                || input.peek(Token![>>=]))
         {
             Ok(None)
         } else {
