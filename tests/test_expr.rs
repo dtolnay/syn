@@ -408,7 +408,7 @@ fn test_range_precedence() {
 }
 
 #[test]
-fn test_ranges_dots_bailout() {
+fn test_ranges_bailout() {
     syn::parse_str::<Expr>(".. ?").unwrap_err();
     syn::parse_str::<Expr>(".. .field").unwrap_err();
 
@@ -476,6 +476,29 @@ fn test_ranges_dots_bailout() {
         member: Member::Named("field"),
     }
     "#);
+
+    snapshot!("return .. = ()" as Expr, @r"
+    Expr::Assign {
+        left: Expr::Return {
+            expr: Some(Expr::Range {
+                limits: RangeLimits::HalfOpen,
+            }),
+        },
+        right: Expr::Tuple,
+    }
+    ");
+
+    snapshot!("return .. += ()" as Expr, @r"
+    Expr::Binary {
+        left: Expr::Return {
+            expr: Some(Expr::Range {
+                limits: RangeLimits::HalfOpen,
+            }),
+        },
+        op: BinOp::AddAssign,
+        right: Expr::Tuple,
+    }
+    ");
 }
 
 #[test]
