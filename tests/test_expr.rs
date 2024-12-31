@@ -401,15 +401,15 @@ fn test_range_precedence() {
     "#);
 
     snapshot!("() = .. + ()" as Expr, @r"
-    Expr::Assign {
-        left: Expr::Tuple,
-        right: Expr::Binary {
-            left: Expr::Range {
+    Expr::Binary {
+        left: Expr::Assign {
+            left: Expr::Tuple,
+            right: Expr::Range {
                 limits: RangeLimits::HalfOpen,
             },
-            op: BinOp::Add,
-            right: Expr::Tuple,
         },
+        op: BinOp::Add,
+        right: Expr::Tuple,
     }
     ");
 
