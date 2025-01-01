@@ -8,6 +8,7 @@
     clippy::manual_let_else,
     clippy::match_like_matches_macro,
     clippy::needless_lifetimes,
+    clippy::too_many_lines,
     clippy::uninlined_format_args
 )]
 
@@ -41,7 +42,9 @@ use std::panic;
 use std::path::Path;
 use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::time::Instant;
+use std::sync::{Arc, Condvar, Mutex};
+use std::thread;
+use std::time::{Duration, Instant};
 
 #[macro_use]
 mod macros;
@@ -69,6 +72,31 @@ fn test_round_trip() {
 }
 
 fn test(path: &Path, failed: &AtomicUsize, abort_after: usize) {
+    struct Guard<'a>(&'a Mutex<bool>, &'a Condvar);
+    impl<'a> Drop for Guard<'a> {
+        fn drop(&mut self) {
+            *self.0.lock().unwrap() = true;
+            self.1.notify_one();
+        }
+    }
+    let sync = Arc::new((Mutex::new(false), Condvar::new()));
+    let _guard = Guard(&sync.0, &sync.1);
+    thread::spawn({
+        let sync = Arc::clone(&sync);
+        let path = path.to_owned();
+        move || {
+            let (done, condvar) = &*sync;
+            let mut done = done.lock().unwrap();
+            while !*done {
+                done = condvar
+                    .wait_timeout(done, Duration::from_secs(1))
+                    .unwrap()
+                    .0;
+                errorf!("...waiting: {}\n", path.display());
+            }
+        }
+    });
+
     let failed = || {
         let prev_failed = failed.fetch_add(1, Ordering::Relaxed);
         if prev_failed + 1 >= abort_after {
