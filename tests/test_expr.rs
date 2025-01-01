@@ -16,17 +16,20 @@ mod macros;
 mod common;
 
 use crate::common::visit::{AsIfPrinted, FlattenParens};
-use proc_macro2::{Delimiter, Group, Span};
+use proc_macro2::{Delimiter, Group, Ident, Span, TokenStream};
 use quote::{quote, ToTokens as _};
 use std::process::ExitCode;
 use syn::punctuated::Punctuated;
 use syn::visit_mut::VisitMut as _;
 use syn::{
-    parse_quote, token, Arm, BinOp, Block, Expr, ExprAssign, ExprAwait, ExprBinary, ExprBlock,
-    ExprBreak, ExprCall, ExprCast, ExprClosure, ExprField, ExprForLoop, ExprIf, ExprIndex,
-    ExprMatch, ExprMethodCall, ExprRange, ExprRawAddr, ExprReference, ExprReturn, ExprTry,
-    ExprTuple, ExprUnary, ExprWhile, ExprYield, PointerMutability, RangeLimits, ReturnType, Stmt,
-    Token, UnOp,
+    parse_quote, token, AngleBracketedGenericArguments, Arm, BinOp, Block, Expr, ExprArray,
+    ExprAssign, ExprAsync, ExprAwait, ExprBinary, ExprBlock, ExprBreak, ExprCall, ExprCast,
+    ExprClosure, ExprConst, ExprContinue, ExprField, ExprForLoop, ExprIf, ExprIndex, ExprLit,
+    ExprLoop, ExprMacro, ExprMatch, ExprMethodCall, ExprPath, ExprRange, ExprRawAddr,
+    ExprReference, ExprReturn, ExprStruct, ExprTry, ExprTryBlock, ExprTuple, ExprUnary, ExprUnsafe,
+    ExprWhile, ExprYield, GenericArgument, Index, Label, Lifetime, Lit, LitInt, Macro,
+    MacroDelimiter, Member, Pat, PatWild, Path, PathArguments, PathSegment, PointerMutability,
+    QSelf, RangeLimits, ReturnType, Stmt, Token, Type, TypePath, UnOp,
 };
 
 #[test]
@@ -850,16 +853,67 @@ fn test_permutations() -> ExitCode {
         let span = Span::call_site();
 
         // Expr::Path
-        f(parse_quote!(x));
-        f(parse_quote!(x::<T>));
-        f(parse_quote!(<T as Trait>::CONST));
+        f(Expr::Path(ExprPath {
+            // `x`
+            attrs: Vec::new(),
+            qself: None,
+            path: Path::from(Ident::new("x", span)),
+        }));
+        f(Expr::Path(ExprPath {
+            // `x::<T>`
+            attrs: Vec::new(),
+            qself: None,
+            path: Path {
+                leading_colon: None,
+                segments: Punctuated::from_iter([PathSegment {
+                    ident: Ident::new("x", span),
+                    arguments: PathArguments::AngleBracketed(AngleBracketedGenericArguments {
+                        colon2_token: Some(Token![::](span)),
+                        lt_token: Token![<](span),
+                        args: Punctuated::from_iter([GenericArgument::Type(Type::Path(
+                            TypePath {
+                                qself: None,
+                                path: Path::from(Ident::new("T", span)),
+                            },
+                        ))]),
+                        gt_token: Token![>](span),
+                    }),
+                }]),
+            },
+        }));
+        f(Expr::Path(ExprPath {
+            // `<T as Trait>::CONST`
+            attrs: Vec::new(),
+            qself: Some(QSelf {
+                lt_token: Token![<](span),
+                ty: Box::new(Type::Path(TypePath {
+                    qself: None,
+                    path: Path::from(Ident::new("T", span)),
+                })),
+                position: 1,
+                as_token: Some(Token![as](span)),
+                gt_token: Token![>](span),
+            }),
+            path: Path {
+                leading_colon: None,
+                segments: Punctuated::from_iter([
+                    PathSegment::from(Ident::new("Trait", span)),
+                    PathSegment::from(Ident::new("CONST", span)),
+                ]),
+            },
+        }));
 
         let Some(depth) = depth.checked_sub(1) else {
             return;
         };
 
         // Expr::Array
-        f(parse_quote!([]));
+        f(Expr::Array(ExprArray {
+            // `[]`
+            attrs: Vec::new(),
+            bracket_token: token::Bracket(span),
+            elems: Punctuated::new(),
+        }));
 
         // Expr::Assign
         iter(depth, &mut |expr| {
@@ -882,7 +936,16 @@ fn test_permutations() -> ExitCode {
         });
 
         // Expr::Async
-        f(parse_quote!(async {}));
+        f(Expr::Async(ExprAsync {
+            // `async {}`
+            attrs: Vec::new(),
+            async_token: Token![async](span),
+            capture: None,
+            block: Block {
+                brace_token: token::Brace(span),
+                stmts: Vec::new(),
+            },
+        }));
 
         // Expr::Await
         iter(depth, &mut |expr| {
@@ -938,7 +1001,18 @@ fn test_permutations() -> ExitCode {
         });
 
         // Expr::Block
-        f(parse_quote!('a: {}));
+        f(Expr::Block(ExprBlock {
+            // `'a: {}`
+            attrs: Vec::new(),
+            label: Some(Label {
+                name: Lifetime::new("'a", span),
+                colon_token: Token![:](span),
+            }),
+            block: Block {
+                brace_token: token::Brace(span),
+                stmts: Vec::new(),
+            },
+        }));
         iter(depth, &mut |expr| {
             f(Expr::Block(ExprBlock {
                 // `{ $expr }`
@@ -961,8 +1035,20 @@ fn test_permutations() -> ExitCode {
         });
 
         // Expr::Break
-        f(parse_quote!(break));
-        f(parse_quote!(break 'a));
+        f(Expr::Break(ExprBreak {
+            // `break`
+            attrs: Vec::new(),
+            break_token: Token![break](span),
+            label: None,
+            expr: None,
+        }));
+        f(Expr::Break(ExprBreak {
+            // `break 'a`
+            attrs: Vec::new(),
+            break_token: Token![break](span),
+            label: Some(Lifetime::new("'a", span)),
+            expr: None,
+        }));
         iter(depth, &mut |expr| {
             f(Expr::Break(ExprBreak {
                 // `break $expr`
@@ -975,7 +1061,7 @@ fn test_permutations() -> ExitCode {
                 // `break 'a $expr`
                 attrs: Vec::new(),
                 break_token: Token![break](span),
-                label: Some(parse_quote!('a)),
+                label: Some(Lifetime::new("'a", span)),
                 expr: Some(Box::new(expr)),
             }));
         });
@@ -998,19 +1084,69 @@ fn test_permutations() -> ExitCode {
                 attrs: Vec::new(),
                 expr: Box::new(expr.clone()),
                 as_token: Token![as](span),
-                ty: parse_quote!(T),
+                ty: Box::new(Type::Path(TypePath {
+                    qself: None,
+                    path: Path::from(Ident::new("T", span)),
+                })),
             }));
             f(Expr::Cast(ExprCast {
                 // `$expr as Thing<T>`
                 attrs: Vec::new(),
                 expr: Box::new(expr),
                 as_token: Token![as](span),
-                ty: parse_quote!(Thing<T>),
+                ty: Box::new(Type::Path(TypePath {
+                    qself: None,
+                    path: Path {
+                        leading_colon: None,
+                        segments: Punctuated::from_iter([PathSegment {
+                            ident: Ident::new("Thing", span),
+                            arguments: PathArguments::AngleBracketed(
+                                AngleBracketedGenericArguments {
+                                    colon2_token: None,
+                                    lt_token: Token![<](span),
+                                    args: Punctuated::from_iter([GenericArgument::Type(
+                                        Type::Path(TypePath {
+                                            qself: None,
+                                            path: Path::from(Ident::new("T", span)),
+                                        }),
+                                    )]),
+                                    gt_token: Token![>](span),
+                                },
+                            ),
+                        }]),
+                    },
+                })),
             }));
         });
 
         // Expr::Closure
-        f(parse_quote!(|| -> T {}));
+        f(Expr::Closure(ExprClosure {
+            // `|| -> T {}`
+            attrs: Vec::new(),
+            lifetimes: None,
+            constness: None,
+            movability: None,
+            asyncness: None,
+            capture: None,
+            or1_token: Token![|](span),
+            inputs: Punctuated::new(),
+            or2_token: Token![|](span),
+            output: ReturnType::Type(
+                Token![->](span),
+                Box::new(Type::Path(TypePath {
+                    qself: None,
+                    path: Path::from(Ident::new("T", span)),
+                })),
+            ),
+            body: Box::new(Expr::Block(ExprBlock {
+                attrs: Vec::new(),
+                label: None,
+                block: Block {
+                    brace_token: token::Brace(span),
+                    stmts: Vec::new(),
+                },
+            })),
+        }));
         iter(depth, &mut |expr| {
             f(Expr::Closure(ExprClosure {
                 // `|| $expr`
@@ -1029,11 +1165,29 @@ fn test_permutations() -> ExitCode {
         });
 
         // Expr::Const
-        f(parse_quote!(const {}));
+        f(Expr::Const(ExprConst {
+            // `const {}`
+            attrs: Vec::new(),
+            const_token: Token![const](span),
+            block: Block {
+                brace_token: token::Brace(span),
+                stmts: Vec::new(),
+            },
+        }));
 
         // Expr::Continue
-        f(parse_quote!(continue));
-        f(parse_quote!(continue 'a));
+        f(Expr::Continue(ExprContinue {
+            // `continue`
+            attrs: Vec::new(),
+            continue_token: Token![continue](span),
+            label: None,
+        }));
+        f(Expr::Continue(ExprContinue {
+            // `continue 'a`
+            attrs: Vec::new(),
+            continue_token: Token![continue](span),
+            label: Some(Lifetime::new("'a", span)),
+        }));
 
         // Expr::Field
         iter(depth, &mut |expr| {
@@ -1042,14 +1196,14 @@ fn test_permutations() -> ExitCode {
                 attrs: Vec::new(),
                 base: Box::new(expr.clone()),
                 dot_token: Token![.](span),
-                member: parse_quote!(field),
+                member: Member::Named(Ident::new("field", span)),
             }));
             f(Expr::Field(ExprField {
                 // `$expr.0`
                 attrs: Vec::new(),
                 base: Box::new(expr),
                 dot_token: Token![.](span),
-                member: parse_quote!(0),
+                member: Member::Unnamed(Index { index: 0, span }),
             }));
         });
 
@@ -1060,20 +1214,35 @@ fn test_permutations() -> ExitCode {
                 attrs: Vec::new(),
                 label: None,
                 for_token: Token![for](span),
-                pat: parse_quote!(_),
+                pat: Box::new(Pat::Wild(PatWild {
+                    attrs: Vec::new(),
+                    underscore_token: Token![_](span),
+                })),
                 in_token: Token![in](span),
                 expr: Box::new(expr.clone()),
-                body: parse_quote!({}),
+                body: Block {
+                    brace_token: token::Brace(span),
+                    stmts: Vec::new(),
+                },
             }));
             f(Expr::ForLoop(ExprForLoop {
                 // `'a: for _ in $expr {}`
                 attrs: Vec::new(),
-                label: Some(parse_quote!('a:)),
+                label: Some(Label {
+                    name: Lifetime::new("'a", span),
+                    colon_token: Token![:](span),
+                }),
                 for_token: Token![for](span),
-                pat: parse_quote!(_),
+                pat: Box::new(Pat::Wild(PatWild {
+                    attrs: Vec::new(),
+                    underscore_token: Token![_](span),
+                })),
                 in_token: Token![in](span),
                 expr: Box::new(expr),
-                body: parse_quote!({}),
+                body: Block {
+                    brace_token: token::Brace(span),
+                    stmts: Vec::new(),
+                },
             }));
         });
 
@@ -1084,7 +1253,10 @@ fn test_permutations() -> ExitCode {
                 attrs: Vec::new(),
                 if_token: Token![if](span),
                 cond: Box::new(expr),
-                then_branch: parse_quote!({}),
+                then_branch: Block {
+                    brace_token: token::Brace(span),
+                    stmts: Vec::new(),
+                },
                 else_branch: None,
             }));
         });
@@ -1096,17 +1268,59 @@ fn test_permutations() -> ExitCode {
                 attrs: Vec::new(),
                 expr: Box::new(expr),
                 bracket_token: token::Bracket(span),
-                index: parse_quote!(0),
+                index: Box::new(Expr::Lit(ExprLit {
+                    attrs: Vec::new(),
+                    lit: Lit::Int(LitInt::new("0", span)),
+                })),
             }));
         });
 
         // Expr::Loop
-        f(parse_quote!(loop {}));
-        f(parse_quote!('a: loop {}));
+        f(Expr::Loop(ExprLoop {
+            // `loop {}`
+            attrs: Vec::new(),
+            label: None,
+            loop_token: Token![loop](span),
+            body: Block {
+                brace_token: token::Brace(span),
+                stmts: Vec::new(),
+            },
+        }));
+        f(Expr::Loop(ExprLoop {
+            // `'a: loop {}`
+            attrs: Vec::new(),
+            label: Some(Label {
+                name: Lifetime::new("'a", span),
+                colon_token: Token![:](span),
+            }),
+            loop_token: Token![loop](span),
+            body: Block {
+                brace_token: token::Brace(span),
+                stmts: Vec::new(),
+            },
+        }));
 
         // Expr::Macro
-        f(parse_quote!(m!()));
-        f(parse_quote!(m! {}));
+        f(Expr::Macro(ExprMacro {
+            // `m!()`
+            attrs: Vec::new(),
+            mac: Macro {
+                path: Path::from(Ident::new("m", span)),
+                bang_token: Token![!](span),
+                delimiter: MacroDelimiter::Paren(token::Paren(span)),
+                tokens: TokenStream::new(),
+            },
+        }));
+        f(Expr::Macro(ExprMacro {
+            // `m! {}`
+            attrs: Vec::new(),
+            mac: Macro {
+                path: Path::from(Ident::new("m", span)),
+                bang_token: Token![!](span),
+                delimiter: MacroDelimiter::Brace(token::Brace(span)),
+                tokens: TokenStream::new(),
+            },
+        }));
 
         // Expr::Match
         iter(depth, &mut |expr| {
@@ -1122,11 +1336,18 @@ fn test_permutations() -> ExitCode {
                 // `match x { _ => $expr }`
                 attrs: Vec::new(),
                 match_token: Token![match](span),
-                expr: parse_quote!(x),
+                expr: Box::new(Expr::Path(ExprPath {
+                    attrs: Vec::new(),
+                    qself: None,
+                    path: Path::from(Ident::new("x", span)),
+                })),
                 brace_token: token::Brace(span),
                 arms: Vec::from([Arm {
                     attrs: Vec::new(),
-                    pat: parse_quote!(_),
+                    pat: Pat::Wild(PatWild {
+                        attrs: Vec::new(),
+                        underscore_token: Token![_](span),
+                    }),
                     guard: None,
                     fat_arrow_token: Token![=>](span),
                     body: Box::new(expr.clone()),
@@ -1137,14 +1358,28 @@ fn test_permutations() -> ExitCode {
                 // `match x { _ if $expr => {} }`
                 attrs: Vec::new(),
                 match_token: Token![match](span),
-                expr: parse_quote!(x),
+                expr: Box::new(Expr::Path(ExprPath {
+                    attrs: Vec::new(),
+                    qself: None,
+                    path: Path::from(Ident::new("x", span)),
+                })),
                 brace_token: token::Brace(span),
                 arms: Vec::from([Arm {
                     attrs: Vec::new(),
-                    pat: parse_quote!(_),
+                    pat: Pat::Wild(PatWild {
+                        attrs: Vec::new(),
+                        underscore_token: Token![_](span),
+                    }),
                     guard: Some((Token![if](span), Box::new(expr))),
                     fat_arrow_token: Token![=>](span),
-                    body: parse_quote!({}),
+                    body: Box::new(Expr::Block(ExprBlock {
+                        attrs: Vec::new(),
+                        label: None,
+                        block: Block {
+                            brace_token: token::Brace(span),
+                            stmts: Vec::new(),
+                        },
+                    })),
                     comma: None,
                 }]),
             }));
@@ -1157,7 +1392,7 @@ fn test_permutations() -> ExitCode {
                 attrs: Vec::new(),
                 receiver: Box::new(expr.clone()),
                 dot_token: Token![.](span),
-                method: parse_quote!(method),
+                method: Ident::new("method", span),
                 turbofish: None,
                 paren_token: token::Paren(span),
                 args: Punctuated::new(),
@@ -1167,17 +1402,49 @@ fn test_permutations() -> ExitCode {
                 attrs: Vec::new(),
                 receiver: Box::new(expr),
                 dot_token: Token![.](span),
-                method: parse_quote!(method),
-                turbofish: Some(parse_quote!(::<T>)),
+                method: Ident::new("method", span),
+                turbofish: Some(AngleBracketedGenericArguments {
+                    colon2_token: Some(Token![::](span)),
+                    lt_token: Token![<](span),
+                    args: Punctuated::from_iter([GenericArgument::Type(Type::Path(TypePath {
+                        qself: None,
+                        path: Path::from(Ident::new("T", span)),
+                    }))]),
+                    gt_token: Token![>](span),
+                }),
                 paren_token: token::Paren(span),
                 args: Punctuated::new(),
             }));
         });
 
         // Expr::Range
-        f(parse_quote!(..));
-        f(parse_quote!(0..));
-        f(parse_quote!(..0));
+        f(Expr::Range(ExprRange {
+            // `..`
+            attrs: Vec::new(),
+            start: None,
+            limits: RangeLimits::HalfOpen(Token![..](span)),
+            end: None,
+        }));
+        f(Expr::Range(ExprRange {
+            // `0..`
+            attrs: Vec::new(),
+            start: Some(Box::new(Expr::Lit(ExprLit {
+                attrs: Vec::new(),
+                lit: Lit::Int(LitInt::new("0", span)),
+            }))),
+            limits: RangeLimits::HalfOpen(Token![..](span)),
+            end: None,
+        }));
+        f(Expr::Range(ExprRange {
+            // `..0`
+            attrs: Vec::new(),
+            start: None,
+            limits: RangeLimits::HalfOpen(Token![..](span)),
+            end: Some(Box::new(Expr::Lit(ExprLit {
+                attrs: Vec::new(),
+                lit: Lit::Int(LitInt::new("0", span)),
+            }))),
+        }));
         iter(depth, &mut |expr| {
             f(Expr::Range(ExprRange {
                 // `..$expr`
@@ -1226,7 +1493,12 @@ fn test_permutations() -> ExitCode {
         });
 
         // Expr::Return
-        f(parse_quote!(return));
+        f(Expr::Return(ExprReturn {
+            // `return`
+            attrs: Vec::new(),
+            return_token: Token![return](span),
+            expr: None,
+        }));
         iter(depth, &mut |expr| {
             f(Expr::Return(ExprReturn {
                 // `return $expr`
@@ -1237,7 +1509,16 @@ fn test_permutations() -> ExitCode {
         });
 
         // Expr::Struct
-        f(parse_quote!(Struct {}));
+        f(Expr::Struct(ExprStruct {
+            // `Struct {}`
+            attrs: Vec::new(),
+            qself: None,
+            path: Path::from(Ident::new("Struct", span)),
+            brace_token: token::Brace(span),
+            fields: Punctuated::new(),
+            dot2_token: None,
+            rest: None,
+        }));
 
         // Expr::Try
         iter(depth, &mut |expr| {
@@ -1250,7 +1531,15 @@ fn test_permutations() -> ExitCode {
         });
 
         // Expr::TryBlock
-        f(parse_quote!(try {}));
+        f(Expr::TryBlock(ExprTryBlock {
+            // `try {}`
+            attrs: Vec::new(),
+            try_token: Token![try](span),
+            block: Block {
+                brace_token: token::Brace(span),
+                stmts: Vec::new(),
+            },
+        }));
 
         // Expr::Unary
         iter(depth, &mut |expr| {
@@ -1269,7 +1558,15 @@ fn test_permutations() -> ExitCode {
         });
 
         // Expr::Unsafe
-        f(parse_quote!(unsafe {}));
+        f(Expr::Unsafe(ExprUnsafe {
+            // `unsafe {}`
+            attrs: Vec::new(),
+            unsafe_token: Token![unsafe](span),
+            block: Block {
+                brace_token: token::Brace(span),
+                stmts: Vec::new(),
+            },
+        }));
 
         // Expr::While
         iter(depth, &mut |expr| {
@@ -1279,20 +1576,34 @@ fn test_permutations() -> ExitCode {
                 label: None,
                 while_token: Token![while](span),
                 cond: Box::new(expr.clone()),
-                body: parse_quote!({}),
+                body: Block {
+                    brace_token: token::Brace(span),
+                    stmts: Vec::new(),
+                },
             }));
             f(Expr::While(ExprWhile {
                 // `'a: while $expr {}`
                 attrs: Vec::new(),
-                label: Some(parse_quote!('a:)),
+                label: Some(Label {
+                    name: Lifetime::new("'a", span),
+                    colon_token: Token![:](span),
+                }),
                 while_token: Token![while](span),
                 cond: Box::new(expr),
-                body: parse_quote!({}),
+                body: Block {
+                    brace_token: token::Brace(span),
+                    stmts: Vec::new(),
+                },
             }));
         });
 
         // Expr::Yield
-        f(parse_quote!(yield));
+        f(Expr::Yield(ExprYield {
+            // `yield`
+            attrs: Vec::new(),
+            yield_token: Token![yield](span),
+            expr: None,
+        }));
         iter(depth, &mut |expr| {
             f(Expr::Yield(ExprYield {
                 // `yield $expr`
