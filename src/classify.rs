@@ -113,7 +113,7 @@ pub(crate) fn confusable_with_adjacent_block(expr: &Expr) -> bool {
             }
             Expr::Break(e) => {
                 if let Some(value) = &e.expr {
-                    confusable(value, true, true, rightmost_subexpression)
+                    confusable(value, true, !allow_struct, rightmost_subexpression)
                 } else {
                     allow_struct && rightmost_subexpression
                 }
@@ -157,7 +157,9 @@ pub(crate) fn confusable_with_adjacent_block(expr: &Expr) -> bool {
                     }
                     None => false,
                 } || match &e.end {
-                    Some(end) => confusable(end, allow_struct, true, rightmost_subexpression),
+                    Some(end) => {
+                        confusable(end, allow_struct, !allow_struct, rightmost_subexpression)
+                    }
                     None => allow_struct && rightmost_subexpression,
                 })
             }
