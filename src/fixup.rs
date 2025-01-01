@@ -3,6 +3,13 @@ use crate::expr::Expr;
 use crate::precedence::Precedence;
 
 pub(crate) struct FixupContext {
+    #[cfg(feature = "full")]
+    #[allow(dead_code)]
+    previous_operator: Precedence,
+    #[cfg(feature = "full")]
+    #[allow(dead_code)]
+    next_operator: Precedence,
+
     // Print expression such that it can be parsed back as a statement
     // consisting of the original expression.
     //
@@ -133,6 +140,10 @@ impl FixupContext {
     /// on in a targeted fashion where needed.
     pub const NONE: Self = FixupContext {
         #[cfg(feature = "full")]
+        previous_operator: Precedence::MIN,
+        #[cfg(feature = "full")]
+        next_operator: Precedence::MIN,
+        #[cfg(feature = "full")]
         stmt: false,
         #[cfg(feature = "full")]
         leftmost_subexpression_in_stmt: false,
@@ -199,8 +210,11 @@ impl FixupContext {
         expr: &Expr,
         #[cfg(feature = "full")] next_operator_can_begin_expr: bool,
         next_operator_can_begin_generics: bool,
+        #[cfg(feature = "full")] precedence: Precedence,
     ) -> (Precedence, Self) {
         let fixup = FixupContext {
+            #[cfg(feature = "full")]
+            next_operator: precedence,
             #[cfg(feature = "full")]
             stmt: false,
             #[cfg(feature = "full")]
@@ -229,6 +243,8 @@ impl FixupContext {
     /// subexpressions.
     pub fn leftmost_subexpression_with_dot(self, expr: &Expr) -> (Precedence, Self) {
         let fixup = FixupContext {
+            #[cfg(feature = "full")]
+            next_operator: Precedence::Unambiguous,
             #[cfg(feature = "full")]
             stmt: self.stmt || self.leftmost_subexpression_in_stmt,
             #[cfg(feature = "full")]
@@ -261,13 +277,25 @@ impl FixupContext {
     ///
     /// Not every expression has a rightmost subexpression. For example neither
     /// `[$b]` nor `$a.f($b)` have one.
-    pub fn rightmost_subexpression(self, expr: &Expr) -> (Precedence, Self) {
-        let fixup = self.rightmost_subexpression_fixup();
+    pub fn rightmost_subexpression(
+        self,
+        expr: &Expr,
+        #[cfg(feature = "full")] precedence: Precedence,
+    ) -> (Precedence, Self) {
+        let fixup = self.rightmost_subexpression_fixup(
+            #[cfg(feature = "full")]
+            precedence,
+        );
         (fixup.precedence(expr), fixup)
     }
 
-    pub fn rightmost_subexpression_fixup(self) -> Self {
+    pub fn rightmost_subexpression_fixup(
+        self,
+        #[cfg(feature = "full")] precedence: Precedence,
+    ) -> Self {
         FixupContext {
+            #[cfg(feature = "full")]
+            previous_operator: precedence,
             #[cfg(feature = "full")]
             stmt: false,
             #[cfg(feature = "full")]
