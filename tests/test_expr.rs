@@ -847,6 +847,8 @@ fn test_fixup() {
 #[test]
 fn test_permutations() -> ExitCode {
     fn iter(depth: usize, f: &mut dyn FnMut(Expr)) {
+        let span = Span::call_site();
+
         // Expr::Path
         f(parse_quote!(x));
         f(parse_quote!(x::<T>));
@@ -865,13 +867,13 @@ fn test_permutations() -> ExitCode {
                 f(Expr::Assign(ExprAssign {
                     attrs: Vec::new(),
                     left: Box::new(simple.clone()),
-                    eq_token: Token![=](Span::call_site()),
+                    eq_token: Token![=](span),
                     right: Box::new(expr.clone()),
                 }));
                 f(Expr::Assign(ExprAssign {
                     attrs: Vec::new(),
                     left: Box::new(expr.clone()),
-                    eq_token: Token![=](Span::call_site()),
+                    eq_token: Token![=](span),
                     right: Box::new(simple),
                 }));
             });
@@ -885,8 +887,8 @@ fn test_permutations() -> ExitCode {
             f(Expr::Await(ExprAwait {
                 attrs: Vec::new(),
                 base: Box::new(base),
-                dot_token: Token![.](Span::call_site()),
-                await_token: Token![await](Span::call_site()),
+                dot_token: Token![.](span),
+                await_token: Token![await](span),
             }));
         });
 
@@ -894,25 +896,25 @@ fn test_permutations() -> ExitCode {
         iter(depth, &mut |expr| {
             iter(0, &mut |simple| {
                 for op in [
-                    BinOp::Add(Token![+](Span::call_site())),
-                    BinOp::Sub(Token![-](Span::call_site())),
-                    BinOp::Mul(Token![*](Span::call_site())),
-                    BinOp::Div(Token![/](Span::call_site())),
-                    BinOp::Rem(Token![%](Span::call_site())),
-                    BinOp::And(Token![&&](Span::call_site())),
-                    BinOp::Or(Token![||](Span::call_site())),
-                    BinOp::BitXor(Token![^](Span::call_site())),
-                    BinOp::BitAnd(Token![&](Span::call_site())),
-                    BinOp::BitOr(Token![|](Span::call_site())),
-                    BinOp::Shl(Token![<<](Span::call_site())),
-                    BinOp::Shr(Token![>>](Span::call_site())),
-                    BinOp::Eq(Token![==](Span::call_site())),
-                    BinOp::Lt(Token![<](Span::call_site())),
-                    BinOp::Le(Token![<=](Span::call_site())),
-                    BinOp::Ne(Token![!=](Span::call_site())),
-                    BinOp::Ge(Token![>=](Span::call_site())),
-                    BinOp::Gt(Token![>](Span::call_site())),
-                    BinOp::ShlAssign(Token![<<=](Span::call_site())),
+                    BinOp::Add(Token![+](span)),
+                    BinOp::Sub(Token![-](span)),
+                    BinOp::Mul(Token![*](span)),
+                    BinOp::Div(Token![/](span)),
+                    BinOp::Rem(Token![%](span)),
+                    BinOp::And(Token![&&](span)),
+                    BinOp::Or(Token![||](span)),
+                    BinOp::BitXor(Token![^](span)),
+                    BinOp::BitAnd(Token![&](span)),
+                    BinOp::BitOr(Token![|](span)),
+                    BinOp::Shl(Token![<<](span)),
+                    BinOp::Shr(Token![>>](span)),
+                    BinOp::Eq(Token![==](span)),
+                    BinOp::Lt(Token![<](span)),
+                    BinOp::Le(Token![<=](span)),
+                    BinOp::Ne(Token![!=](span)),
+                    BinOp::Ge(Token![>=](span)),
+                    BinOp::Gt(Token![>](span)),
+                    BinOp::ShlAssign(Token![<<=](span)),
                 ] {
                     f(Expr::Binary(ExprBinary {
                         attrs: Vec::new(),
@@ -937,7 +939,7 @@ fn test_permutations() -> ExitCode {
                 attrs: Vec::new(),
                 label: None,
                 block: Block {
-                    brace_token: token::Brace(Span::call_site()),
+                    brace_token: token::Brace(span),
                     stmts: Vec::from([Stmt::Expr(expr.clone(), None)]),
                 },
             }));
@@ -945,11 +947,8 @@ fn test_permutations() -> ExitCode {
                 attrs: Vec::new(),
                 label: None,
                 block: Block {
-                    brace_token: token::Brace(Span::call_site()),
-                    stmts: Vec::from([Stmt::Expr(
-                        expr.clone(),
-                        Some(Token![;](Span::call_site())),
-                    )]),
+                    brace_token: token::Brace(span),
+                    stmts: Vec::from([Stmt::Expr(expr.clone(), Some(Token![;](span)))]),
                 },
             }));
         });
@@ -960,13 +959,13 @@ fn test_permutations() -> ExitCode {
         iter(depth, &mut |expr| {
             f(Expr::Break(ExprBreak {
                 attrs: Vec::new(),
-                break_token: Token![break](Span::call_site()),
+                break_token: Token![break](span),
                 label: None,
                 expr: Some(Box::new(expr.clone())),
             }));
             f(Expr::Break(ExprBreak {
                 attrs: Vec::new(),
-                break_token: Token![break](Span::call_site()),
+                break_token: Token![break](span),
                 label: Some(parse_quote!('a)),
                 expr: Some(Box::new(expr)),
             }));
@@ -977,7 +976,7 @@ fn test_permutations() -> ExitCode {
             f(Expr::Call(ExprCall {
                 attrs: Vec::new(),
                 func: Box::new(expr),
-                paren_token: token::Paren(Span::call_site()),
+                paren_token: token::Paren(span),
                 args: Punctuated::new(),
             }));
         });
@@ -987,13 +986,13 @@ fn test_permutations() -> ExitCode {
             f(Expr::Cast(ExprCast {
                 attrs: Vec::new(),
                 expr: Box::new(expr.clone()),
-                as_token: Token![as](Span::call_site()),
+                as_token: Token![as](span),
                 ty: parse_quote!(T),
             }));
             f(Expr::Cast(ExprCast {
                 attrs: Vec::new(),
                 expr: Box::new(expr),
-                as_token: Token![as](Span::call_site()),
+                as_token: Token![as](span),
                 ty: parse_quote!(Thing<T>),
             }));
         });
@@ -1008,9 +1007,9 @@ fn test_permutations() -> ExitCode {
                 movability: None,
                 asyncness: None,
                 capture: None,
-                or1_token: Token![|](Span::call_site()),
+                or1_token: Token![|](span),
                 inputs: Punctuated::new(),
-                or2_token: Token![|](Span::call_site()),
+                or2_token: Token![|](span),
                 output: ReturnType::Default,
                 body: Box::new(expr.clone()),
             }));
@@ -1028,13 +1027,13 @@ fn test_permutations() -> ExitCode {
             f(Expr::Field(ExprField {
                 attrs: Vec::new(),
                 base: Box::new(expr.clone()),
-                dot_token: Token![.](Span::call_site()),
+                dot_token: Token![.](span),
                 member: parse_quote!(field),
             }));
             f(Expr::Field(ExprField {
                 attrs: Vec::new(),
                 base: Box::new(expr),
-                dot_token: Token![.](Span::call_site()),
+                dot_token: Token![.](span),
                 member: parse_quote!(0),
             }));
         });
@@ -1044,18 +1043,18 @@ fn test_permutations() -> ExitCode {
             f(Expr::ForLoop(ExprForLoop {
                 attrs: Vec::new(),
                 label: None,
-                for_token: Token![for](Span::call_site()),
+                for_token: Token![for](span),
                 pat: parse_quote!(_),
-                in_token: Token![in](Span::call_site()),
+                in_token: Token![in](span),
                 expr: Box::new(expr.clone()),
                 body: parse_quote!({}),
             }));
             f(Expr::ForLoop(ExprForLoop {
                 attrs: Vec::new(),
                 label: Some(parse_quote!('a:)),
-                for_token: Token![for](Span::call_site()),
+                for_token: Token![for](span),
                 pat: parse_quote!(_),
-                in_token: Token![in](Span::call_site()),
+                in_token: Token![in](span),
                 expr: Box::new(expr),
                 body: parse_quote!({}),
             }));
@@ -1065,7 +1064,7 @@ fn test_permutations() -> ExitCode {
         iter(depth, &mut |expr| {
             f(Expr::If(ExprIf {
                 attrs: Vec::new(),
-                if_token: Token![if](Span::call_site()),
+                if_token: Token![if](span),
                 cond: Box::new(expr),
                 then_branch: parse_quote!({}),
                 else_branch: None,
@@ -1077,7 +1076,7 @@ fn test_permutations() -> ExitCode {
             f(Expr::Index(ExprIndex {
                 attrs: Vec::new(),
                 expr: Box::new(expr),
-                bracket_token: token::Bracket(Span::call_site()),
+                bracket_token: token::Bracket(span),
                 index: parse_quote!(0),
             }));
         });
@@ -1094,35 +1093,35 @@ fn test_permutations() -> ExitCode {
         iter(depth, &mut |expr| {
             f(Expr::Match(ExprMatch {
                 attrs: Vec::new(),
-                match_token: Token![match](Span::call_site()),
+                match_token: Token![match](span),
                 expr: Box::new(expr.clone()),
-                brace_token: token::Brace(Span::call_site()),
+                brace_token: token::Brace(span),
                 arms: Vec::new(),
             }));
             f(Expr::Match(ExprMatch {
                 attrs: Vec::new(),
-                match_token: Token![match](Span::call_site()),
+                match_token: Token![match](span),
                 expr: parse_quote!(x),
-                brace_token: token::Brace(Span::call_site()),
+                brace_token: token::Brace(span),
                 arms: Vec::from([Arm {
                     attrs: Vec::new(),
                     pat: parse_quote!(_),
                     guard: None,
-                    fat_arrow_token: Token![=>](Span::call_site()),
+                    fat_arrow_token: Token![=>](span),
                     body: Box::new(expr.clone()),
                     comma: None,
                 }]),
             }));
             f(Expr::Match(ExprMatch {
                 attrs: Vec::new(),
-                match_token: Token![match](Span::call_site()),
+                match_token: Token![match](span),
                 expr: parse_quote!(x),
-                brace_token: token::Brace(Span::call_site()),
+                brace_token: token::Brace(span),
                 arms: Vec::from([Arm {
                     attrs: Vec::new(),
                     pat: parse_quote!(_),
-                    guard: Some((Token![if](Span::call_site()), Box::new(expr))),
-                    fat_arrow_token: Token![=>](Span::call_site()),
+                    guard: Some((Token![if](span), Box::new(expr))),
+                    fat_arrow_token: Token![=>](span),
                     body: parse_quote!({}),
                     comma: None,
                 }]),
@@ -1134,19 +1133,19 @@ fn test_permutations() -> ExitCode {
             f(Expr::MethodCall(ExprMethodCall {
                 attrs: Vec::new(),
                 receiver: Box::new(expr.clone()),
-                dot_token: Token![.](Span::call_site()),
+                dot_token: Token![.](span),
                 method: parse_quote!(method),
                 turbofish: None,
-                paren_token: token::Paren(Span::call_site()),
+                paren_token: token::Paren(span),
                 args: Punctuated::new(),
             }));
             f(Expr::MethodCall(ExprMethodCall {
                 attrs: Vec::new(),
                 receiver: Box::new(expr),
-                dot_token: Token![.](Span::call_site()),
+                dot_token: Token![.](span),
                 method: parse_quote!(method),
                 turbofish: Some(parse_quote!(::<T>)),
-                paren_token: token::Paren(Span::call_site()),
+                paren_token: token::Paren(span),
                 args: Punctuated::new(),
             }));
         });
@@ -1159,13 +1158,13 @@ fn test_permutations() -> ExitCode {
             f(Expr::Range(ExprRange {
                 attrs: Vec::new(),
                 start: None,
-                limits: RangeLimits::HalfOpen(Token![..](Span::call_site())),
+                limits: RangeLimits::HalfOpen(Token![..](span)),
                 end: Some(Box::new(expr.clone())),
             }));
             f(Expr::Range(ExprRange {
                 attrs: Vec::new(),
                 start: Some(Box::new(expr.clone())),
-                limits: RangeLimits::HalfOpen(Token![..](Span::call_site())),
+                limits: RangeLimits::HalfOpen(Token![..](span)),
                 end: None,
             }));
         });
@@ -1174,9 +1173,9 @@ fn test_permutations() -> ExitCode {
         iter(depth, &mut |expr| {
             f(Expr::RawAddr(ExprRawAddr {
                 attrs: Vec::new(),
-                and_token: Token![&](Span::call_site()),
-                raw: Token![raw](Span::call_site()),
-                mutability: PointerMutability::Const(Token![const](Span::call_site())),
+                and_token: Token![&](span),
+                raw: Token![raw](span),
+                mutability: PointerMutability::Const(Token![const](span)),
                 expr: Box::new(expr),
             }));
         });
@@ -1185,14 +1184,14 @@ fn test_permutations() -> ExitCode {
         iter(depth, &mut |expr| {
             f(Expr::Reference(ExprReference {
                 attrs: Vec::new(),
-                and_token: Token![&](Span::call_site()),
+                and_token: Token![&](span),
                 mutability: None,
                 expr: Box::new(expr.clone()),
             }));
             f(Expr::Reference(ExprReference {
                 attrs: Vec::new(),
-                and_token: Token![&](Span::call_site()),
-                mutability: Some(Token![mut](Span::call_site())),
+                and_token: Token![&](span),
+                mutability: Some(Token![mut](span)),
                 expr: Box::new(expr),
             }));
         });
@@ -1202,7 +1201,7 @@ fn test_permutations() -> ExitCode {
         iter(depth, &mut |expr| {
             f(Expr::Return(ExprReturn {
                 attrs: Vec::new(),
-                return_token: Token![return](Span::call_site()),
+                return_token: Token![return](span),
                 expr: Some(Box::new(expr)),
             }));
         });
@@ -1215,7 +1214,7 @@ fn test_permutations() -> ExitCode {
             f(Expr::Try(ExprTry {
                 attrs: Vec::new(),
                 expr: Box::new(expr),
-                question_token: Token![?](Span::call_site()),
+                question_token: Token![?](span),
             }));
         });
 
@@ -1225,9 +1224,9 @@ fn test_permutations() -> ExitCode {
         // Expr::Unary
         iter(depth, &mut |expr| {
             for op in [
-                UnOp::Deref(Token![*](Span::call_site())),
-                UnOp::Not(Token![!](Span::call_site())),
-                UnOp::Neg(Token![-](Span::call_site())),
+                UnOp::Deref(Token![*](span)),
+                UnOp::Not(Token![!](span)),
+                UnOp::Neg(Token![-](span)),
             ] {
                 f(Expr::Unary(ExprUnary {
                     attrs: Vec::new(),
@@ -1245,14 +1244,14 @@ fn test_permutations() -> ExitCode {
             f(Expr::While(ExprWhile {
                 attrs: Vec::new(),
                 label: None,
-                while_token: Token![while](Span::call_site()),
+                while_token: Token![while](span),
                 cond: Box::new(expr.clone()),
                 body: parse_quote!({}),
             }));
             f(Expr::While(ExprWhile {
                 attrs: Vec::new(),
                 label: Some(parse_quote!('a:)),
-                while_token: Token![while](Span::call_site()),
+                while_token: Token![while](span),
                 cond: Box::new(expr),
                 body: parse_quote!({}),
             }));
@@ -1263,7 +1262,7 @@ fn test_permutations() -> ExitCode {
         iter(depth, &mut |expr| {
             f(Expr::Yield(ExprYield {
                 attrs: Vec::new(),
-                yield_token: Token![yield](Span::call_site()),
+                yield_token: Token![yield](span),
                 expr: Some(Box::new(expr)),
             }));
         });
