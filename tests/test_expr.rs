@@ -865,12 +865,14 @@ fn test_permutations() -> ExitCode {
         iter(depth, &mut |expr| {
             iter(0, &mut |simple| {
                 f(Expr::Assign(ExprAssign {
+                    // `x = $expr`
                     attrs: Vec::new(),
                     left: Box::new(simple.clone()),
                     eq_token: Token![=](span),
                     right: Box::new(expr.clone()),
                 }));
                 f(Expr::Assign(ExprAssign {
+                    // `$expr = x`
                     attrs: Vec::new(),
                     left: Box::new(expr.clone()),
                     eq_token: Token![=](span),
@@ -883,10 +885,11 @@ fn test_permutations() -> ExitCode {
         f(parse_quote!(async {}));
 
         // Expr::Await
-        iter(depth, &mut |base| {
+        iter(depth, &mut |expr| {
             f(Expr::Await(ExprAwait {
+                // `$expr.await`
                 attrs: Vec::new(),
-                base: Box::new(base),
+                base: Box::new(expr),
                 dot_token: Token![.](span),
                 await_token: Token![await](span),
             }));
@@ -917,12 +920,14 @@ fn test_permutations() -> ExitCode {
                     BinOp::ShlAssign(Token![<<=](span)),
                 ] {
                     f(Expr::Binary(ExprBinary {
+                        // `x + $expr`
                         attrs: Vec::new(),
                         left: Box::new(simple.clone()),
                         op,
                         right: Box::new(expr.clone()),
                     }));
                     f(Expr::Binary(ExprBinary {
+                        // `$expr + x`
                         attrs: Vec::new(),
                         left: Box::new(expr.clone()),
                         op,
@@ -936,6 +941,7 @@ fn test_permutations() -> ExitCode {
         f(parse_quote!('a: {}));
         iter(depth, &mut |expr| {
             f(Expr::Block(ExprBlock {
+                // `{ $expr }`
                 attrs: Vec::new(),
                 label: None,
                 block: Block {
@@ -944,6 +950,7 @@ fn test_permutations() -> ExitCode {
                 },
             }));
             f(Expr::Block(ExprBlock {
+                // `{ $expr; }`
                 attrs: Vec::new(),
                 label: None,
                 block: Block {
@@ -958,12 +965,14 @@ fn test_permutations() -> ExitCode {
         f(parse_quote!(break 'a));
         iter(depth, &mut |expr| {
             f(Expr::Break(ExprBreak {
+                // `break $expr`
                 attrs: Vec::new(),
                 break_token: Token![break](span),
                 label: None,
                 expr: Some(Box::new(expr.clone())),
             }));
             f(Expr::Break(ExprBreak {
+                // `break 'a $expr`
                 attrs: Vec::new(),
                 break_token: Token![break](span),
                 label: Some(parse_quote!('a)),
@@ -974,6 +983,7 @@ fn test_permutations() -> ExitCode {
         // Expr::Call
         iter(depth, &mut |expr| {
             f(Expr::Call(ExprCall {
+                // `$expr()`
                 attrs: Vec::new(),
                 func: Box::new(expr),
                 paren_token: token::Paren(span),
@@ -984,12 +994,14 @@ fn test_permutations() -> ExitCode {
         // Expr::Cast
         iter(depth, &mut |expr| {
             f(Expr::Cast(ExprCast {
+                // `$expr as T`
                 attrs: Vec::new(),
                 expr: Box::new(expr.clone()),
                 as_token: Token![as](span),
                 ty: parse_quote!(T),
             }));
             f(Expr::Cast(ExprCast {
+                // `$expr as Thing<T>`
                 attrs: Vec::new(),
                 expr: Box::new(expr),
                 as_token: Token![as](span),
@@ -1001,6 +1013,7 @@ fn test_permutations() -> ExitCode {
         f(parse_quote!(|| -> T {}));
         iter(depth, &mut |expr| {
             f(Expr::Closure(ExprClosure {
+                // `|| $expr`
                 attrs: Vec::new(),
                 lifetimes: None,
                 constness: None,
@@ -1025,12 +1038,14 @@ fn test_permutations() -> ExitCode {
         // Expr::Field
         iter(depth, &mut |expr| {
             f(Expr::Field(ExprField {
+                // `$expr.field`
                 attrs: Vec::new(),
                 base: Box::new(expr.clone()),
                 dot_token: Token![.](span),
                 member: parse_quote!(field),
             }));
             f(Expr::Field(ExprField {
+                // `$expr.0`
                 attrs: Vec::new(),
                 base: Box::new(expr),
                 dot_token: Token![.](span),
@@ -1041,6 +1056,7 @@ fn test_permutations() -> ExitCode {
         // Expr::ForLoop
         iter(depth, &mut |expr| {
             f(Expr::ForLoop(ExprForLoop {
+                // `for _ in $expr {}`
                 attrs: Vec::new(),
                 label: None,
                 for_token: Token![for](span),
@@ -1050,6 +1066,7 @@ fn test_permutations() -> ExitCode {
                 body: parse_quote!({}),
             }));
             f(Expr::ForLoop(ExprForLoop {
+                // `'a: for _ in $expr {}`
                 attrs: Vec::new(),
                 label: Some(parse_quote!('a:)),
                 for_token: Token![for](span),
@@ -1063,6 +1080,7 @@ fn test_permutations() -> ExitCode {
         // Expr::If
         iter(depth, &mut |expr| {
             f(Expr::If(ExprIf {
+                // `if $expr {}`
                 attrs: Vec::new(),
                 if_token: Token![if](span),
                 cond: Box::new(expr),
@@ -1074,6 +1092,7 @@ fn test_permutations() -> ExitCode {
         // Expr::Index
         iter(depth, &mut |expr| {
             f(Expr::Index(ExprIndex {
+                // `$expr[0]`
                 attrs: Vec::new(),
                 expr: Box::new(expr),
                 bracket_token: token::Bracket(span),
@@ -1092,6 +1111,7 @@ fn test_permutations() -> ExitCode {
         // Expr::Match
         iter(depth, &mut |expr| {
             f(Expr::Match(ExprMatch {
+                // `match $expr {}`
                 attrs: Vec::new(),
                 match_token: Token![match](span),
                 expr: Box::new(expr.clone()),
@@ -1099,6 +1119,7 @@ fn test_permutations() -> ExitCode {
                 arms: Vec::new(),
             }));
             f(Expr::Match(ExprMatch {
+                // `match x { _ => $expr }`
                 attrs: Vec::new(),
                 match_token: Token![match](span),
                 expr: parse_quote!(x),
@@ -1113,6 +1134,7 @@ fn test_permutations() -> ExitCode {
                 }]),
             }));
             f(Expr::Match(ExprMatch {
+                // `match x { _ if $expr => {} }`
                 attrs: Vec::new(),
                 match_token: Token![match](span),
                 expr: parse_quote!(x),
@@ -1131,6 +1153,7 @@ fn test_permutations() -> ExitCode {
         // Expr::MethodCall
         iter(depth, &mut |expr| {
             f(Expr::MethodCall(ExprMethodCall {
+                // `$expr.method()`
                 attrs: Vec::new(),
                 receiver: Box::new(expr.clone()),
                 dot_token: Token![.](span),
@@ -1140,6 +1163,7 @@ fn test_permutations() -> ExitCode {
                 args: Punctuated::new(),
             }));
             f(Expr::MethodCall(ExprMethodCall {
+                // `$expr.method::<T>()`
                 attrs: Vec::new(),
                 receiver: Box::new(expr),
                 dot_token: Token![.](span),
@@ -1156,12 +1180,14 @@ fn test_permutations() -> ExitCode {
         f(parse_quote!(..0));
         iter(depth, &mut |expr| {
             f(Expr::Range(ExprRange {
+                // `..$expr`
                 attrs: Vec::new(),
                 start: None,
                 limits: RangeLimits::HalfOpen(Token![..](span)),
                 end: Some(Box::new(expr.clone())),
             }));
             f(Expr::Range(ExprRange {
+                // `$expr..`
                 attrs: Vec::new(),
                 start: Some(Box::new(expr.clone())),
                 limits: RangeLimits::HalfOpen(Token![..](span)),
@@ -1172,6 +1198,7 @@ fn test_permutations() -> ExitCode {
         // Expr::RawAddr
         iter(depth, &mut |expr| {
             f(Expr::RawAddr(ExprRawAddr {
+                // `&raw const $expr`
                 attrs: Vec::new(),
                 and_token: Token![&](span),
                 raw: Token![raw](span),
@@ -1183,12 +1210,14 @@ fn test_permutations() -> ExitCode {
         // Expr::Reference
         iter(depth, &mut |expr| {
             f(Expr::Reference(ExprReference {
+                // `&$expr`
                 attrs: Vec::new(),
                 and_token: Token![&](span),
                 mutability: None,
                 expr: Box::new(expr.clone()),
             }));
             f(Expr::Reference(ExprReference {
+                // `&mut $expr`
                 attrs: Vec::new(),
                 and_token: Token![&](span),
                 mutability: Some(Token![mut](span)),
@@ -1200,6 +1229,7 @@ fn test_permutations() -> ExitCode {
         f(parse_quote!(return));
         iter(depth, &mut |expr| {
             f(Expr::Return(ExprReturn {
+                // `return $expr`
                 attrs: Vec::new(),
                 return_token: Token![return](span),
                 expr: Some(Box::new(expr)),
@@ -1212,6 +1242,7 @@ fn test_permutations() -> ExitCode {
         // Expr::Try
         iter(depth, &mut |expr| {
             f(Expr::Try(ExprTry {
+                // `$expr?`
                 attrs: Vec::new(),
                 expr: Box::new(expr),
                 question_token: Token![?](span),
@@ -1229,6 +1260,7 @@ fn test_permutations() -> ExitCode {
                 UnOp::Neg(Token![-](span)),
             ] {
                 f(Expr::Unary(ExprUnary {
+                    // `*$expr`
                     attrs: Vec::new(),
                     op,
                     expr: Box::new(expr.clone()),
@@ -1242,6 +1274,7 @@ fn test_permutations() -> ExitCode {
         // Expr::While
         iter(depth, &mut |expr| {
             f(Expr::While(ExprWhile {
+                // `while $expr {}`
                 attrs: Vec::new(),
                 label: None,
                 while_token: Token![while](span),
@@ -1249,6 +1282,7 @@ fn test_permutations() -> ExitCode {
                 body: parse_quote!({}),
             }));
             f(Expr::While(ExprWhile {
+                // `'a: while $expr {}`
                 attrs: Vec::new(),
                 label: Some(parse_quote!('a:)),
                 while_token: Token![while](span),
@@ -1261,6 +1295,7 @@ fn test_permutations() -> ExitCode {
         f(parse_quote!(yield));
         iter(depth, &mut |expr| {
             f(Expr::Yield(ExprYield {
+                // `yield $expr`
                 attrs: Vec::new(),
                 yield_token: Token![yield](span),
                 expr: Some(Box::new(expr)),
