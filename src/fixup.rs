@@ -1,13 +1,15 @@
 use crate::classify;
 use crate::expr::Expr;
+#[cfg(feature = "full")]
+use crate::expr::{ExprBreak, ExprRawAddr, ExprReference, ExprReturn, ExprUnary, ExprYield};
 use crate::precedence::Precedence;
+#[cfg(feature = "full")]
+use crate::ty::ReturnType;
 
 pub(crate) struct FixupContext {
     #[cfg(feature = "full")]
-    #[allow(dead_code)]
     previous_operator: Precedence,
     #[cfg(feature = "full")]
-    #[allow(dead_code)]
     next_operator: Precedence,
 
     // Print expression such that it can be parsed back as a statement
@@ -89,15 +91,6 @@ pub(crate) struct FixupContext {
 
     // This is the difference between:
     //
-    //     (..) + x  // parens because range cannot be lhs of a binop
-    //
-    //     &.. + x  // no parens because range is a right subexpression
-    //
-    #[cfg(feature = "full")]
-    rightmost_subexpression: bool,
-
-    // This is the difference between:
-    //
     //     if let _ = (Struct {}) {}  // needs parens
     //
     //     match () {
@@ -151,8 +144,6 @@ impl FixupContext {
         match_arm: false,
         #[cfg(feature = "full")]
         leftmost_subexpression_in_match_arm: false,
-        #[cfg(feature = "full")]
-        rightmost_subexpression: false,
         #[cfg(feature = "full")]
         parenthesize_exterior_struct_lit: false,
         #[cfg(feature = "full")]
@@ -225,8 +216,6 @@ impl FixupContext {
             leftmost_subexpression_in_match_arm: self.match_arm
                 || self.leftmost_subexpression_in_match_arm,
             #[cfg(feature = "full")]
-            rightmost_subexpression: false,
-            #[cfg(feature = "full")]
             next_operator_can_begin_expr,
             #[cfg(feature = "full")]
             next_operator_can_continue_expr: true,
@@ -234,7 +223,7 @@ impl FixupContext {
             ..self
         };
 
-        (fixup.precedence(expr), fixup)
+        (fixup.leftmost_subexpression_precedence(expr), fixup)
     }
 
     /// Transform this fixup into the one that should apply when printing a
@@ -254,8 +243,6 @@ impl FixupContext {
             #[cfg(feature = "full")]
             leftmost_subexpression_in_match_arm: false,
             #[cfg(feature = "full")]
-            rightmost_subexpression: false,
-            #[cfg(feature = "full")]
             next_operator_can_begin_expr: false,
             #[cfg(feature = "full")]
             next_operator_can_continue_expr: true,
@@ -263,7 +250,20 @@ impl FixupContext {
             ..self
         };
 
-        (fixup.precedence(expr), fixup)
+        (fixup.leftmost_subexpression_precedence(expr), fixup)
+    }
+
+    fn leftmost_subexpression_precedence(self, expr: &Expr) -> Precedence {
+        #[cfg(feature = "full")]
+        if !self.next_operator_can_begin_expr || self.next_operator == Precedence::Range {
+            if let Scan::Bailout = scan_right(expr, self, false, 0, 0) {
+                if scan_left(expr, self) {
+                    return Precedence::Unambiguous;
+                }
+            }
+        }
+
+        self.precedence(expr)
     }
 
     /// Transform this fixup into the one that should apply when printing the
@@ -286,7 +286,7 @@ impl FixupContext {
             #[cfg(feature = "full")]
             precedence,
         );
-        (fixup.precedence(expr), fixup)
+        (fixup.rightmost_subexpression_precedence(expr), fixup)
     }
 
     pub fn rightmost_subexpression_fixup(
@@ -304,10 +304,31 @@ impl FixupContext {
             match_arm: false,
             #[cfg(feature = "full")]
             leftmost_subexpression_in_match_arm: false,
-            #[cfg(feature = "full")]
-            rightmost_subexpression: true,
             ..self
         }
+    }
+
+    fn rightmost_subexpression_precedence(self, expr: &Expr) -> Precedence {
+        let default_prec = self.precedence(expr);
+
+        #[cfg(feature = "full")]
+        if default_prec < Precedence::Prefix
+            && (!self.next_operator_can_begin_expr || self.next_operator == Precedence::Range)
+        {
+            if let Scan::Bailout | Scan::Fail = scan_right(
+                expr,
+                self,
+                self.previous_operator == Precedence::Range,
+                1,
+                0,
+            ) {
+                if scan_left(expr, self) {
+                    return Precedence::Prefix;
+                }
+            }
+        }
+
+        default_prec
     }
 
     /// Determine whether parentheses are needed around the given expression to
@@ -348,16 +369,14 @@ impl FixupContext {
             // Decrease precedence of value-less jumps when followed by an
             // operator that would otherwise get interpreted as beginning a
             // value for the jump.
-            if let Expr::Break(_) | Expr::Return(_) | Expr::Yield(_) = expr {
+            if let Expr::Break(ExprBreak { expr: None, .. })
+            | Expr::Return(ExprReturn { expr: None, .. })
+            | Expr::Yield(ExprYield { expr: None, .. }) = expr
+            {
                 return Precedence::Jump;
             }
-        } else if self.rightmost_subexpression {
-            if let Expr::Range(range) = expr {
-                if range.start.is_none() && range.end.is_none() {
-                    return Precedence::Unambiguous;
-                }
-            }
         }
+
         #[cfg(feature = "full")]
         if !self.next_operator_can_continue_expr {
             match expr {
@@ -374,6 +393,7 @@ impl FixupContext {
                 _ => {}
             }
         }
+
         if self.next_operator_can_begin_generics {
             if let Expr::Cast(cast) = expr {
                 if classify::trailing_unparameterized_path(&cast.ty) {
@@ -381,6 +401,7 @@ impl FixupContext {
                 }
             }
         }
+
         Precedence::of(expr)
     }
 }
@@ -390,5 +411,273 @@ impl Copy for FixupContext {}
 impl Clone for FixupContext {
     fn clone(&self) -> Self {
         *self
+    }
+}
+
+#[cfg(feature = "full")]
+enum Scan {
+    Fail,
+    Bailout,
+    Consume,
+}
+
+#[cfg(feature = "full")]
+impl Copy for Scan {}
+
+#[cfg(feature = "full")]
+impl Clone for Scan {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+#[cfg(feature = "full")]
+fn scan_left(expr: &Expr, fixup: FixupContext) -> bool {
+    match expr {
+        Expr::Assign(_) => fixup.previous_operator <= Precedence::Assign,
+        Expr::Binary(e) => match Precedence::of_binop(&e.op) {
+            Precedence::Assign => fixup.previous_operator <= Precedence::Assign,
+            binop_prec => fixup.previous_operator < binop_prec,
+        },
+        Expr::Range(e) => e.start.is_none() || fixup.previous_operator < Precedence::Assign,
+        _ => true,
+    }
+}
+
+#[cfg(feature = "full")]
+fn scan_right(
+    expr: &Expr,
+    fixup: FixupContext,
+    range: bool,
+    fail_offset: u8,
+    bailout_offset: u8,
+) -> Scan {
+    match expr {
+        Expr::Assign(e) => {
+            if match fixup.next_operator {
+                Precedence::Unambiguous => fail_offset >= 2,
+                _ => bailout_offset >= 1,
+            } {
+                return Scan::Consume;
+            }
+            let right_fixup = fixup.rightmost_subexpression_fixup(Precedence::Assign);
+            let scan = scan_right(
+                &e.right,
+                right_fixup,
+                false,
+                match fixup.next_operator {
+                    Precedence::Unambiguous => fail_offset,
+                    _ => 1,
+                },
+                1,
+            );
+            if let Scan::Bailout | Scan::Consume = scan {
+                return Scan::Consume;
+            }
+            if right_fixup.rightmost_subexpression_precedence(&e.right) < Precedence::Assign {
+                Scan::Consume
+            } else if let Precedence::Unambiguous = fixup.next_operator {
+                Scan::Fail
+            } else {
+                Scan::Bailout
+            }
+        }
+        Expr::Binary(e) => {
+            if match fixup.next_operator {
+                Precedence::Unambiguous => fail_offset >= 2,
+                _ => bailout_offset >= 1,
+            } {
+                return Scan::Consume;
+            }
+            let binop_prec = Precedence::of_binop(&e.op);
+            let right_fixup = fixup.rightmost_subexpression_fixup(binop_prec);
+            let scan = scan_right(
+                &e.right,
+                right_fixup,
+                range && binop_prec != Precedence::Assign,
+                match fixup.next_operator {
+                    Precedence::Unambiguous => fail_offset,
+                    _ => 1,
+                },
+                match (binop_prec, fixup.next_operator) {
+                    (Precedence::Assign, _) => 1,
+                    (_, Precedence::Assign | Precedence::Range) if range => 0,
+                    _ => 1,
+                },
+            );
+            if match (scan, fixup.next_operator) {
+                (Scan::Fail, _) => false,
+                (Scan::Bailout, _) if binop_prec == Precedence::Assign => true,
+                (Scan::Bailout, Precedence::Assign | Precedence::Range) => !range,
+                (Scan::Bailout | Scan::Consume, _) => true,
+            } {
+                return Scan::Consume;
+            }
+            let right_prec = right_fixup.rightmost_subexpression_precedence(&e.right);
+            let right_needs_group = match binop_prec {
+                Precedence::Assign => right_prec < binop_prec,
+                _ => right_prec <= binop_prec,
+            };
+            if right_needs_group {
+                Scan::Consume
+            } else if let (Scan::Fail, Precedence::Unambiguous) = (scan, fixup.next_operator) {
+                Scan::Fail
+            } else {
+                Scan::Bailout
+            }
+        }
+        Expr::RawAddr(ExprRawAddr { expr, .. })
+        | Expr::Reference(ExprReference { expr, .. })
+        | Expr::Unary(ExprUnary { expr, .. }) => {
+            if match fixup.next_operator {
+                Precedence::Unambiguous => fail_offset >= 2,
+                _ => bailout_offset >= 1,
+            } {
+                return Scan::Consume;
+            }
+            let right_fixup = fixup.rightmost_subexpression_fixup(Precedence::Prefix);
+            let scan = scan_right(
+                expr,
+                right_fixup,
+                range,
+                match fixup.next_operator {
+                    Precedence::Unambiguous => fail_offset,
+                    _ => 1,
+                },
+                match fixup.next_operator {
+                    Precedence::Assign | Precedence::Range if range => 0,
+                    _ => 1,
+                },
+            );
+            if match (scan, fixup.next_operator) {
+                (Scan::Fail, _) => false,
+                (Scan::Bailout, Precedence::Assign | Precedence::Range) => !range,
+                (Scan::Bailout | Scan::Consume, _) => true,
+            } {
+                return Scan::Consume;
+            }
+            if right_fixup.rightmost_subexpression_precedence(expr) < Precedence::Prefix {
+                Scan::Consume
+            } else if let (Scan::Fail, Precedence::Unambiguous) = (scan, fixup.next_operator) {
+                Scan::Fail
+            } else {
+                Scan::Bailout
+            }
+        }
+        Expr::Range(e) => match &e.end {
+            Some(end) => {
+                if fail_offset >= 2 {
+                    return Scan::Consume;
+                }
+                let right_fixup = fixup.rightmost_subexpression_fixup(Precedence::Range);
+                let scan = scan_right(
+                    end,
+                    right_fixup,
+                    true,
+                    fail_offset,
+                    match fixup.next_operator {
+                        Precedence::Assign | Precedence::Range => 0,
+                        _ => 1,
+                    },
+                );
+                if match (scan, fixup.next_operator) {
+                    (Scan::Fail, _) => false,
+                    (Scan::Bailout, Precedence::Assign | Precedence::Range) => false,
+                    (Scan::Bailout | Scan::Consume, _) => true,
+                } {
+                    return Scan::Consume;
+                }
+                if right_fixup.rightmost_subexpression_precedence(end) <= Precedence::Range {
+                    Scan::Consume
+                } else {
+                    Scan::Fail
+                }
+            }
+            None => match fixup.next_operator {
+                Precedence::Range => Scan::Consume,
+                _ => Scan::Fail,
+            },
+        },
+        Expr::Break(e) => match &e.expr {
+            Some(value) => {
+                if bailout_offset >= 1 || e.label.is_none() && classify::expr_leading_label(value) {
+                    return Scan::Consume;
+                }
+                let right_fixup = fixup.rightmost_subexpression_fixup(Precedence::Jump);
+                match scan_right(value, right_fixup, false, 1, 1) {
+                    Scan::Fail => Scan::Bailout,
+                    Scan::Bailout | Scan::Consume => Scan::Consume,
+                }
+            }
+            None => match fixup.next_operator {
+                Precedence::Assign if range => Scan::Fail,
+                _ => Scan::Consume,
+            },
+        },
+        Expr::Return(ExprReturn { expr, .. }) | Expr::Yield(ExprYield { expr, .. }) => match expr {
+            Some(e) => {
+                if bailout_offset >= 1 {
+                    return Scan::Consume;
+                }
+                let right_fixup = fixup.rightmost_subexpression_fixup(Precedence::Jump);
+                match scan_right(e, right_fixup, false, 1, 1) {
+                    Scan::Fail => Scan::Bailout,
+                    Scan::Bailout | Scan::Consume => Scan::Consume,
+                }
+            }
+            None => match fixup.next_operator {
+                Precedence::Assign if range => Scan::Fail,
+                _ => Scan::Consume,
+            },
+        },
+        Expr::Closure(e) => {
+            if matches!(e.output, ReturnType::Default)
+                || matches!(&*e.body, Expr::Block(body) if body.attrs.is_empty() && body.label.is_none())
+            {
+                if bailout_offset >= 1 {
+                    return Scan::Consume;
+                }
+                let right_fixup = fixup.rightmost_subexpression_fixup(Precedence::Jump);
+                match scan_right(&e.body, right_fixup, false, 1, 1) {
+                    Scan::Fail => Scan::Bailout,
+                    Scan::Bailout | Scan::Consume => Scan::Consume,
+                }
+            } else {
+                Scan::Consume
+            }
+        }
+        Expr::Array(_)
+        | Expr::Async(_)
+        | Expr::Await(_)
+        | Expr::Block(_)
+        | Expr::Call(_)
+        | Expr::Cast(_)
+        | Expr::Const(_)
+        | Expr::Continue(_)
+        | Expr::Field(_)
+        | Expr::ForLoop(_)
+        | Expr::Group(_)
+        | Expr::If(_)
+        | Expr::Index(_)
+        | Expr::Infer(_)
+        | Expr::Let(_)
+        | Expr::Lit(_)
+        | Expr::Loop(_)
+        | Expr::Macro(_)
+        | Expr::Match(_)
+        | Expr::MethodCall(_)
+        | Expr::Paren(_)
+        | Expr::Path(_)
+        | Expr::Repeat(_)
+        | Expr::Struct(_)
+        | Expr::Try(_)
+        | Expr::TryBlock(_)
+        | Expr::Tuple(_)
+        | Expr::Unsafe(_)
+        | Expr::Verbatim(_)
+        | Expr::While(_) => match fixup.next_operator {
+            Precedence::Assign | Precedence::Range if range => Scan::Fail,
+            _ => Scan::Consume,
+        },
     }
 }
