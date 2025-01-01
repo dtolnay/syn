@@ -3306,7 +3306,7 @@ pub(crate) mod printing {
             &e.left,
             Precedence::of(&e.left) <= Precedence::Range,
             tokens,
-            fixup.leftmost_subexpression(),
+            fixup.leftmost_subexpression_with_operator(false, false),
         );
         e.eq_token.to_tokens(tokens);
         print_subexpression(
@@ -3475,7 +3475,11 @@ pub(crate) mod printing {
             &e.expr,
             Precedence::of(&e.expr) < Precedence::Cast,
             tokens,
-            fixup.leftmost_subexpression(),
+            fixup.leftmost_subexpression_with_operator(
+                #[cfg(feature = "full")]
+                false,
+                false,
+            ),
         );
         e.as_token.to_tokens(tokens);
         e.ty.to_tokens(tokens);
