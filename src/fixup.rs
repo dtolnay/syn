@@ -195,7 +195,11 @@ impl FixupContext {
     ///
     /// Not every expression has a leftmost subexpression. For example neither
     /// `-$a` nor `[$a]` have one.
-    pub fn leftmost_subexpression(self) -> Self {
+    pub fn leftmost_subexpression_with_operator(
+        self,
+        #[cfg(feature = "full")] next_operator_can_begin_expr: bool,
+        next_operator_can_begin_generics: bool,
+    ) -> Self {
         FixupContext {
             #[cfg(feature = "full")]
             stmt: false,
@@ -209,10 +213,10 @@ impl FixupContext {
             #[cfg(feature = "full")]
             rightmost_subexpression: false,
             #[cfg(feature = "full")]
-            next_operator_can_begin_expr: false,
+            next_operator_can_begin_expr,
             #[cfg(feature = "full")]
             next_operator_can_continue_expr: true,
-            next_operator_can_begin_generics: false,
+            next_operator_can_begin_generics,
             ..self
         }
     }
@@ -239,22 +243,6 @@ impl FixupContext {
             next_operator_can_continue_expr: true,
             next_operator_can_begin_generics: false,
             ..self
-        }
-    }
-
-    /// Transform this fixup into the one that should apply when printing a
-    /// leftmost subexpression followed by punctuation that is legal as the
-    /// first token of an expression.
-    pub fn leftmost_subexpression_with_operator(
-        self,
-        #[cfg(feature = "full")] next_operator_can_begin_expr: bool,
-        next_operator_can_begin_generics: bool,
-    ) -> Self {
-        FixupContext {
-            #[cfg(feature = "full")]
-            next_operator_can_begin_expr,
-            next_operator_can_begin_generics,
-            ..self.leftmost_subexpression()
         }
     }
 
@@ -393,10 +381,14 @@ fn test_leftmost_rightmost_invariant() {
         };
         assert_eq!(i, BITS);
         assert_eq!(
-            fixup.leftmost_subexpression().rightmost_subexpression(),
+            fixup
+                .leftmost_subexpression_with_operator(false, false)
+                .rightmost_subexpression(),
             FixupContext {
                 rightmost_subexpression: true,
-                ..fixup.rightmost_subexpression().leftmost_subexpression()
+                ..fixup
+                    .rightmost_subexpression()
+                    .leftmost_subexpression_with_operator(false, false)
             },
         );
     }
