@@ -1577,7 +1577,6 @@ fn test_permutations() -> ExitCode {
         }
     }
 
-    let mut count = 0;
     let mut failures = 0;
     macro_rules! fail {
         ($($message:tt)*) => {{
@@ -1587,7 +1586,6 @@ fn test_permutations() -> ExitCode {
         }};
     }
     let mut assert = |mut original: Expr| {
-        count += 1;
         let tokens = original.to_token_stream();
         let Ok(mut parsed) = syn::parse2::<Expr>(tokens.clone()) else {
             fail!(
@@ -1619,8 +1617,7 @@ fn test_permutations() -> ExitCode {
         }
     };
 
-    iter(2, &mut assert);
-    assert_eq!(count, 505);
+    iter(4, &mut assert);
     if failures > 0 {
         eprintln!("FAILURES: {failures}");
         ExitCode::FAILURE
