@@ -1615,11 +1615,11 @@ fn test_permutations() -> ExitCode {
     }
 
     let mut count = 0;
-    let mut status = ExitCode::SUCCESS;
+    let mut failures = 0;
     macro_rules! fail {
         ($($message:tt)*) => {{
             eprintln!($($message)*);
-            status = ExitCode::FAILURE;
+            failures += 1;
             return;
         }};
     }
@@ -1648,5 +1648,10 @@ fn test_permutations() -> ExitCode {
 
     iter(2, &mut assert);
     assert_eq!(count, 73923);
-    status
+    if failures > 0 {
+        eprintln!("FAILURES: {failures}");
+        ExitCode::FAILURE
+    } else {
+        ExitCode::SUCCESS
+    }
 }
