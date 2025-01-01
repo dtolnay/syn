@@ -830,6 +830,7 @@ fn test_fixup() {
         quote! { (self.f)() },
         quote! { (return)..=return },
         quote! { 1 + (return)..=1 + return },
+        quote! { .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. },
     ] {
         let original: Expr = syn::parse2(tokens).unwrap();
 
