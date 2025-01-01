@@ -1627,12 +1627,22 @@ fn test_permutations() -> ExitCode {
         count += 1;
         let tokens = original.to_token_stream();
         let Ok(mut parsed) = syn::parse2::<Expr>(tokens.clone()) else {
-            fail!("failed to parse: {}", tokens);
+            fail!(
+                "failed to parse: {}\n{:#?}",
+                tokens,
+                crate::macros::debug::Lite(&original),
+            );
         };
         AsIfPrinted.visit_expr_mut(&mut original);
         FlattenParens.visit_expr_mut(&mut parsed);
         if original != parsed {
-            fail!("before: {}\nafter: {}", tokens, parsed.to_token_stream());
+            fail!(
+                "before: {}\n{:#?}\nafter: {}\n{:#?}",
+                tokens,
+                crate::macros::debug::Lite(&original),
+                parsed.to_token_stream(),
+                crate::macros::debug::Lite(&parsed),
+            );
         }
         let mut tokens_no_paren = tokens.clone();
         FlattenParens::visit_token_stream_mut(&mut tokens_no_paren);
