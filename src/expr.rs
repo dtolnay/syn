@@ -3218,7 +3218,7 @@ pub(crate) mod printing {
             Expr::Call(e) => print_expr_call(e, tokens, fixup),
             Expr::Cast(e) => print_expr_cast(e, tokens, fixup),
             #[cfg(feature = "full")]
-            Expr::Closure(e) => e.to_tokens(tokens),
+            Expr::Closure(e) => print_expr_closure(e, tokens, fixup),
             #[cfg(feature = "full")]
             Expr::Const(e) => e.to_tokens(tokens),
             #[cfg(feature = "full")]
@@ -3485,25 +3485,30 @@ pub(crate) mod printing {
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for ExprClosure {
         fn to_tokens(&self, tokens: &mut TokenStream) {
-            outer_attrs_to_tokens(&self.attrs, tokens);
-            self.lifetimes.to_tokens(tokens);
-            self.constness.to_tokens(tokens);
-            self.movability.to_tokens(tokens);
-            self.asyncness.to_tokens(tokens);
-            self.capture.to_tokens(tokens);
-            self.or1_token.to_tokens(tokens);
-            self.inputs.to_tokens(tokens);
-            self.or2_token.to_tokens(tokens);
-            self.output.to_tokens(tokens);
-            if matches!(self.output, ReturnType::Default)
-                || matches!(&*self.body, Expr::Block(body) if body.attrs.is_empty() && body.label.is_none())
-            {
-                self.body.to_tokens(tokens);
-            } else {
-                token::Brace::default().surround(tokens, |tokens| {
-                    print_expr(&self.body, tokens, FixupContext::new_stmt());
-                });
-            }
+            print_expr_closure(self, tokens, FixupContext::NONE);
+        }
+    }
+
+    #[cfg(feature = "full")]
+    fn print_expr_closure(e: &ExprClosure, tokens: &mut TokenStream, fixup: FixupContext) {
+        outer_attrs_to_tokens(&e.attrs, tokens);
+        e.lifetimes.to_tokens(tokens);
+        e.constness.to_tokens(tokens);
+        e.movability.to_tokens(tokens);
+        e.asyncness.to_tokens(tokens);
+        e.capture.to_tokens(tokens);
+        e.or1_token.to_tokens(tokens);
+        e.inputs.to_tokens(tokens);
+        e.or2_token.to_tokens(tokens);
+        e.output.to_tokens(tokens);
+        if matches!(e.output, ReturnType::Default)
+            || matches!(&*e.body, Expr::Block(body) if body.attrs.is_empty() && body.label.is_none())
+        {
+            print_expr(&e.body, tokens, fixup.rightmost_subexpression());
+        } else {
+            token::Brace::default().surround(tokens, |tokens| {
+                print_expr(&e.body, tokens, FixupContext::new_stmt());
+            });
         }
     }
 
