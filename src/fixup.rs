@@ -196,10 +196,11 @@ impl FixupContext {
     /// `-$a` nor `[$a]` have one.
     pub fn leftmost_subexpression_with_operator(
         self,
+        expr: &Expr,
         #[cfg(feature = "full")] next_operator_can_begin_expr: bool,
         next_operator_can_begin_generics: bool,
-    ) -> Self {
-        FixupContext {
+    ) -> (Precedence, Self) {
+        let fixup = FixupContext {
             #[cfg(feature = "full")]
             stmt: false,
             #[cfg(feature = "full")]
@@ -217,15 +218,17 @@ impl FixupContext {
             next_operator_can_continue_expr: true,
             next_operator_can_begin_generics,
             ..self
-        }
+        };
+
+        (fixup.precedence(expr), fixup)
     }
 
     /// Transform this fixup into the one that should apply when printing a
     /// leftmost subexpression followed by a `.` or `?` token, which confer
     /// different statement boundary rules compared to other leftmost
     /// subexpressions.
-    pub fn leftmost_subexpression_with_dot(self) -> Self {
-        FixupContext {
+    pub fn leftmost_subexpression_with_dot(self, expr: &Expr) -> (Precedence, Self) {
+        let fixup = FixupContext {
             #[cfg(feature = "full")]
             stmt: self.stmt || self.leftmost_subexpression_in_stmt,
             #[cfg(feature = "full")]
@@ -242,7 +245,9 @@ impl FixupContext {
             next_operator_can_continue_expr: true,
             next_operator_can_begin_generics: false,
             ..self
-        }
+        };
+
+        (fixup.precedence(expr), fixup)
     }
 
     /// Transform this fixup into the one that should apply when printing the
@@ -256,7 +261,12 @@ impl FixupContext {
     ///
     /// Not every expression has a rightmost subexpression. For example neither
     /// `[$b]` nor `$a.f($b)` have one.
-    pub fn rightmost_subexpression(self) -> Self {
+    pub fn rightmost_subexpression(self, expr: &Expr) -> (Precedence, Self) {
+        let fixup = self.rightmost_subexpression_fixup();
+        (fixup.precedence(expr), fixup)
+    }
+
+    pub fn rightmost_subexpression_fixup(self) -> Self {
         FixupContext {
             #[cfg(feature = "full")]
             stmt: false,
@@ -304,7 +314,7 @@ impl FixupContext {
 
     /// Determines the effective precedence of a subexpression. Some expressions
     /// have higher or lower precedence when adjacent to particular operators.
-    pub fn precedence(self, expr: &Expr) -> Precedence {
+    fn precedence(self, expr: &Expr) -> Precedence {
         #[cfg(feature = "full")]
         if self.next_operator_can_begin_expr {
             // Decrease precedence of value-less jumps when followed by an
