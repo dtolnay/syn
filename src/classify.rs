@@ -63,7 +63,7 @@ pub(crate) fn requires_comma_to_be_match_arm(expr: &Expr) -> bool {
         | Expr::Tuple(_)
         | Expr::Unary(_)
         | Expr::Yield(_)
-        | Expr::Verbatim(_) => true
+        | Expr::Verbatim(_) => true,
     }
 }
 
