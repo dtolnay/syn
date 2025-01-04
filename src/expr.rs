@@ -3161,7 +3161,7 @@ pub(crate) mod printing {
         );
     }
 
-    fn print_subexpression(
+    pub(crate) fn print_subexpression(
         expr: &Expr,
         needs_group: bool,
         tokens: &mut TokenStream,
