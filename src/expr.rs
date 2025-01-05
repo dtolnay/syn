@@ -3151,16 +3151,6 @@ pub(crate) mod printing {
     #[cfg(not(feature = "full"))]
     pub(crate) fn outer_attrs_to_tokens(_attrs: &[Attribute], _tokens: &mut TokenStream) {}
 
-    #[cfg(feature = "full")]
-    fn print_condition(expr: &Expr, tokens: &mut TokenStream) {
-        print_subexpression(
-            expr,
-            classify::confusable_with_adjacent_block(expr),
-            tokens,
-            FixupContext::new_condition(),
-        );
-    }
-
     pub(crate) fn print_subexpression(
         expr: &Expr,
         needs_group: bool,
@@ -3193,7 +3183,7 @@ pub(crate) mod printing {
 
     pub(crate) fn print_expr(expr: &Expr, tokens: &mut TokenStream, mut fixup: FixupContext) {
         #[cfg(feature = "full")]
-        let needs_group = fixup.would_cause_statement_boundary(expr);
+        let needs_group = fixup.parenthesize(expr);
         #[cfg(not(feature = "full"))]
         let needs_group = false;
 
@@ -3430,7 +3420,7 @@ pub(crate) mod printing {
                 //                     ^---------------------------------^
                 e.label.is_none() && classify::expr_leading_label(value),
                 tokens,
-                fixup.rightmost_subexpression_fixup(Precedence::Jump),
+                fixup.rightmost_subexpression_fixup(true, true, Precedence::Jump),
             );
         }
     }
@@ -3513,7 +3503,7 @@ pub(crate) mod printing {
             print_expr(
                 &e.body,
                 tokens,
-                fixup.rightmost_subexpression_fixup(Precedence::Jump),
+                fixup.rightmost_subexpression_fixup(false, false, Precedence::Jump),
             );
         } else {
             token::Brace::default().surround(tokens, |tokens| {
@@ -3574,7 +3564,7 @@ pub(crate) mod printing {
             self.for_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
             self.in_token.to_tokens(tokens);
-            print_condition(&self.expr, tokens);
+            print_expr(&self.expr, tokens, FixupContext::new_condition());
             self.body.brace_token.surround(tokens, |tokens| {
                 inner_attrs_to_tokens(&self.attrs, tokens);
                 tokens.append_all(&self.body.stmts);
@@ -3601,7 +3591,7 @@ pub(crate) mod printing {
             let mut expr = self;
             loop {
                 expr.if_token.to_tokens(tokens);
-                print_condition(&expr.cond, tokens);
+                print_expr(&expr.cond, tokens, FixupContext::new_condition());
                 expr.then_branch.to_tokens(tokens);
 
                 let (else_token, else_) = match &expr.else_branch {
@@ -3682,12 +3672,8 @@ pub(crate) mod printing {
         e.let_token.to_tokens(tokens);
         e.pat.to_tokens(tokens);
         e.eq_token.to_tokens(tokens);
-        print_subexpression(
-            &e.expr,
-            fixup.needs_group_as_let_scrutinee(&e.expr),
-            tokens,
-            FixupContext::NONE,
-        );
+        let (right_prec, right_fixup) = fixup.rightmost_subexpression(&e.expr, Precedence::Let);
+        print_subexpression(&e.expr, right_prec < Precedence::Let, tokens, right_fixup);
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
@@ -3726,7 +3712,7 @@ pub(crate) mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.match_token.to_tokens(tokens);
-            print_condition(&self.expr, tokens);
+            print_expr(&self.expr, tokens, FixupContext::new_condition());
             self.brace_token.surround(tokens, |tokens| {
                 inner_attrs_to_tokens(&self.attrs, tokens);
                 for (i, arm) in self.arms.iter().enumerate() {
@@ -3811,7 +3797,8 @@ pub(crate) mod printing {
         }
         e.limits.to_tokens(tokens);
         if let Some(end) = &e.end {
-            let (right_prec, right_fixup) = fixup.rightmost_subexpression(end, Precedence::Range);
+            let right_fixup = fixup.rightmost_subexpression_fixup(false, true, Precedence::Range);
+            let right_prec = right_fixup.rightmost_subexpression_precedence(end);
             print_subexpression(end, right_prec <= Precedence::Range, tokens, right_fixup);
         }
     }
@@ -3892,7 +3879,7 @@ pub(crate) mod printing {
             print_expr(
                 expr,
                 tokens,
-                fixup.rightmost_subexpression_fixup(Precedence::Jump),
+                fixup.rightmost_subexpression_fixup(true, false, Precedence::Jump),
             );
         }
     }
@@ -4003,7 +3990,7 @@ pub(crate) mod printing {
             outer_attrs_to_tokens(&self.attrs, tokens);
             self.label.to_tokens(tokens);
             self.while_token.to_tokens(tokens);
-            print_condition(&self.cond, tokens);
+            print_expr(&self.cond, tokens, FixupContext::new_condition());
             self.body.brace_token.surround(tokens, |tokens| {
                 inner_attrs_to_tokens(&self.attrs, tokens);
                 tokens.append_all(&self.body.stmts);
@@ -4027,7 +4014,7 @@ pub(crate) mod printing {
             print_expr(
                 expr,
                 tokens,
-                fixup.rightmost_subexpression_fixup(Precedence::Jump),
+                fixup.rightmost_subexpression_fixup(true, false, Precedence::Jump),
             );
         }
     }
