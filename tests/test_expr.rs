@@ -843,9 +843,11 @@ fn test_fixup() {
 
         assert!(
             original == reconstructed,
-            "original: {}\nreconstructed: {}",
+            "original: {}\n{:#?}\nreconstructed: {}\n{:#?}",
             original.to_token_stream(),
+            crate::macros::debug::Lite(&original),
             reconstructed.to_token_stream(),
+            crate::macros::debug::Lite(&reconstructed),
         );
     }
 }
