@@ -357,7 +357,7 @@ impl FixupContext {
             }
             _ => default_prec <= self.previous_operator,
         } && match self.next_operator {
-            Precedence::Range => true,
+            Precedence::Range | Precedence::Or | Precedence::And => true,
             _ => !self.next_operator_can_begin_expr,
         } {
             if let Scan::Bailout | Scan::Fail = scan_right(expr, self, self.previous_operator, 1, 0)
@@ -700,6 +700,37 @@ fn scan_right(
                 Scan::Consume
             }
         }
+        Expr::Let(e) => {
+            if bailout_offset >= 1 {
+                return Scan::Consume;
+            }
+            let right_fixup = fixup.rightmost_subexpression_fixup(false, false, Precedence::Let);
+            let scan = scan_right(
+                &e.expr,
+                right_fixup,
+                Precedence::Let,
+                1,
+                if fixup.next_operator < Precedence::Let {
+                    0
+                } else {
+                    1
+                },
+            );
+            match scan {
+                Scan::Fail | Scan::Bailout if fixup.next_operator < Precedence::Let => {
+                    return Scan::Bailout;
+                }
+                Scan::Consume => return Scan::Consume,
+                _ => {}
+            }
+            if right_fixup.rightmost_subexpression_precedence(&e.expr) < Precedence::Let {
+                Scan::Consume
+            } else if let Scan::Fail = scan {
+                Scan::Bailout
+            } else {
+                Scan::Consume
+            }
+        }
         Expr::Array(_)
         | Expr::Async(_)
         | Expr::Await(_)
@@ -714,7 +745,6 @@ fn scan_right(
         | Expr::If(_)
         | Expr::Index(_)
         | Expr::Infer(_)
-        | Expr::Let(_)
         | Expr::Lit(_)
         | Expr::Loop(_)
         | Expr::Macro(_)
@@ -731,6 +761,9 @@ fn scan_right(
         | Expr::Verbatim(_)
         | Expr::While(_) => match fixup.next_operator {
             Precedence::Assign | Precedence::Range if precedence == Precedence::Range => Scan::Fail,
+            _ if precedence == Precedence::Let && fixup.next_operator < Precedence::Let => {
+                Scan::Fail
+            }
             _ => consume_by_precedence,
         },
     }
