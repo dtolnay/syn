@@ -6,7 +6,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
-colored = "2"
+colored = "3"
 proc-macro2 = { version = "1", features = ["span-locations"] }
 
 [dependencies.syn]
