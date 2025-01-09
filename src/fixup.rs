@@ -511,9 +511,6 @@ fn scan_right(
                 1,
             );
             if let Scan::Bailout | Scan::Consume = scan {
-                return Scan::Consume;
-            }
-            if right_fixup.rightmost_subexpression_precedence(&e.right) < Precedence::Assign {
                 Scan::Consume
             } else if let Precedence::Unambiguous = fixup.next_operator {
                 Scan::Fail
@@ -552,11 +549,8 @@ fn scan_right(
             } {
                 return Scan::Consume;
             }
-            let right_prec = right_fixup.rightmost_subexpression_precedence(&e.right);
-            let right_needs_group = match binop_prec {
-                Precedence::Assign => right_prec < binop_prec,
-                _ => right_prec <= binop_prec,
-            };
+            let right_needs_group = binop_prec != Precedence::Assign
+                && right_fixup.rightmost_subexpression_precedence(&e.right) <= binop_prec;
             if right_needs_group {
                 Scan::Consume
             } else if let (Scan::Fail, Precedence::Unambiguous) = (scan, fixup.next_operator) {
