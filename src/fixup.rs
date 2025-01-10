@@ -351,9 +351,15 @@ impl FixupContext {
         let default_prec = self.precedence(expr);
 
         #[cfg(feature = "full")]
-        if default_prec < Precedence::Prefix
-            && (!self.next_operator_can_begin_expr || self.next_operator == Precedence::Range)
-        {
+        if match self.previous_operator {
+            Precedence::Assign | Precedence::Let | Precedence::Prefix => {
+                default_prec < self.previous_operator
+            }
+            _ => default_prec <= self.previous_operator,
+        } && match self.next_operator {
+            Precedence::Range => true,
+            _ => !self.next_operator_can_begin_expr,
+        } {
             if let Scan::Bailout | Scan::Fail = scan_right(expr, self, self.previous_operator, 1, 0)
             {
                 if scan_left(expr, self) {
