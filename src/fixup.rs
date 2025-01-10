@@ -475,6 +475,7 @@ fn scan_left(expr: &Expr, fixup: FixupContext) -> bool {
             Precedence::Assign => fixup.previous_operator <= Precedence::Assign,
             binop_prec => fixup.previous_operator < binop_prec,
         },
+        Expr::Cast(_) => fixup.previous_operator < Precedence::Cast,
         Expr::Range(e) => e.start.is_none() || fixup.previous_operator < Precedence::Assign,
         _ => true,
     }
