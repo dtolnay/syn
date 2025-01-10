@@ -547,6 +547,9 @@ fn scan_right(
                 return Scan::Consume;
             }
             let binop_prec = Precedence::of_binop(&e.op);
+            if binop_prec == Precedence::Compare && fixup.next_operator == Precedence::Compare {
+                return Scan::Consume;
+            }
             let right_fixup = fixup.rightmost_subexpression_fixup(false, false, binop_prec);
             let scan = scan_right(
                 &e.right,
@@ -639,10 +642,13 @@ fn scan_right(
                     Scan::Fail
                 }
             }
-            None => match fixup.next_operator {
-                Precedence::Range => Scan::Consume,
-                _ => Scan::Fail,
-            },
+            None => {
+                if fixup.next_operator_can_begin_expr {
+                    Scan::Consume
+                } else {
+                    Scan::Fail
+                }
+            }
         },
         Expr::Break(e) => match &e.expr {
             Some(value) => {

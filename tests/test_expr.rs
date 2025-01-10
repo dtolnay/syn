@@ -799,6 +799,7 @@ fn test_fixup() {
         quote! { (1 + 1).abs() },
         quote! { (lo..hi)[..] },
         quote! { (a..b)..(c..d) },
+        quote! { (x > ..) > x },
         quote! { (&mut fut).await },
         quote! { &mut (x as i32) },
         quote! { -(x as i32) },
