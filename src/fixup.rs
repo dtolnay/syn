@@ -639,10 +639,13 @@ fn scan_right(
                     Scan::Fail
                 }
             }
-            None => match fixup.next_operator {
-                Precedence::Range => Scan::Consume,
-                _ => Scan::Fail,
-            },
+            None => {
+                if fixup.next_operator_can_begin_expr {
+                    Scan::Consume
+                } else {
+                    Scan::Fail
+                }
+            }
         },
         Expr::Break(e) => match &e.expr {
             Some(value) => {
