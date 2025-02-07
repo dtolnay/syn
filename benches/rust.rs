@@ -58,7 +58,6 @@ mod librustc_parse {
     extern crate rustc_span;
 
     use crate::repo;
-    use rustc_data_structures::sync::Lrc;
     use rustc_error_messages::FluentBundle;
     use rustc_errors::emitter::Emitter;
     use rustc_errors::registry::Registry;
@@ -68,6 +67,7 @@ mod librustc_parse {
     use rustc_span::source_map::{FilePathMapping, SourceMap};
     use rustc_span::FileName;
     use std::path::Path;
+    use std::sync::Arc;
 
     pub fn bench(path: &Path, content: &str) -> Result<(), ()> {
         struct SilentEmitter;
@@ -90,7 +90,7 @@ mod librustc_parse {
 
         let edition = repo::edition(path).parse().unwrap();
         rustc_span::create_session_if_not_set_then(edition, |_| {
-            let source_map = Lrc::new(SourceMap::new(FilePathMapping::empty()));
+            let source_map = Arc::new(SourceMap::new(FilePathMapping::empty()));
             let emitter = Box::new(SilentEmitter);
             let handler = DiagCtxt::new(emitter);
             let sess = ParseSess::with_dcx(handler, source_map);

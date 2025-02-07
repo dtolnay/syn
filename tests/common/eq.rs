@@ -174,13 +174,13 @@ use rustc_ast::tokenstream::{
     Spacing, TokenStream, TokenTree,
 };
 use rustc_data_structures::packed::Pu128;
-use rustc_data_structures::sync::Lrc;
 use rustc_span::source_map::Spanned;
 use rustc_span::symbol::{sym, Ident};
 use rustc_span::{ErrorGuaranteed, Span, Symbol, SyntaxContext, DUMMY_SP};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::hash::{BuildHasher, Hash};
+use std::sync::Arc;
 use thin_vec::ThinVec;
 
 pub trait SpanlessEq {
@@ -199,7 +199,7 @@ impl<T: ?Sized + SpanlessEq> SpanlessEq for P<T> {
     }
 }
 
-impl<T: ?Sized + SpanlessEq> SpanlessEq for Lrc<T> {
+impl<T: ?Sized + SpanlessEq> SpanlessEq for Arc<T> {
     fn eq(&self, other: &Self) -> bool {
         SpanlessEq::eq(&**self, &**other)
     }
