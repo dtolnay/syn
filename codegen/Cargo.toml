@@ -12,7 +12,7 @@ json = ["syn-codegen/serde"]
 
 [dependencies]
 anyhow = "1"
-color-backtrace = "0.6"
+color-backtrace = "0.7"
 indexmap = { version = "2", features = ["serde"] }
 indoc = "2"
 inflections = "1.1"
