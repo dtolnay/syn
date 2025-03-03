@@ -1,4 +1,5 @@
 #![allow(
+    clippy::elidable_lifetime_names,
     clippy::needless_lifetimes,
     clippy::shadow_unrelated,
     clippy::too_many_lines,

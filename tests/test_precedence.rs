@@ -19,6 +19,7 @@
 #![allow(
     clippy::blocks_in_conditions,
     clippy::doc_markdown,
+    clippy::elidable_lifetime_names,
     clippy::explicit_deref_methods,
     clippy::let_underscore_untyped,
     clippy::manual_assert,

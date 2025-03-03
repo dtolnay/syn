@@ -264,6 +264,7 @@
     clippy::derivable_impls,
     clippy::diverging_sub_expression,
     clippy::doc_markdown,
+    clippy::elidable_lifetime_names,
     clippy::enum_glob_use,
     clippy::expl_impl_clone_on_copy,
     clippy::explicit_auto_deref,

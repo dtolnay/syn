@@ -1,4 +1,5 @@
 #![allow(
+    clippy::elidable_lifetime_names,
     clippy::map_unwrap_or,
     clippy::needless_lifetimes,
     clippy::uninlined_format_args

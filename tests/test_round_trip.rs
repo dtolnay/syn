@@ -4,6 +4,7 @@
 #![feature(rustc_private)]
 #![allow(
     clippy::blocks_in_conditions,
+    clippy::elidable_lifetime_names,
     clippy::manual_assert,
     clippy::manual_let_else,
     clippy::match_like_matches_macro,

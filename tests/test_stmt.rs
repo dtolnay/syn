@@ -1,5 +1,6 @@
 #![allow(
     clippy::assertions_on_result_states,
+    clippy::elidable_lifetime_names,
     clippy::needless_lifetimes,
     clippy::non_ascii_literal,
     clippy::uninlined_format_args

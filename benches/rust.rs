@@ -8,6 +8,7 @@
 #![allow(
     clippy::arc_with_non_send_sync,
     clippy::cast_lossless,
+    clippy::elidable_lifetime_names,
     clippy::let_underscore_untyped,
     clippy::manual_let_else,
     clippy::match_like_matches_macro,
