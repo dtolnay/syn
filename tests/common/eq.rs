@@ -557,7 +557,7 @@ spanless_eq_struct!(Visibility; kind span tokens);
 spanless_eq_struct!(WhereBoundPredicate; bound_generic_params bounded_ty bounds);
 spanless_eq_struct!(WhereClause; has_where_token predicates span);
 spanless_eq_struct!(WhereEqPredicate; lhs_ty rhs_ty);
-spanless_eq_struct!(WherePredicate; kind id span);
+spanless_eq_struct!(WherePredicate; attrs kind id span is_placeholder);
 spanless_eq_struct!(WhereRegionPredicate; lifetime bounds);
 spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
 spanless_eq_enum!(AsmMacro; Asm GlobalAsm NakedAsm);
@@ -775,7 +775,7 @@ fn doc_comment<'a>(
         match trees.next() {
             Some(TokenTree::Token(
                 Token {
-                    kind: TokenKind::Not,
+                    kind: TokenKind::Bang,
                     span: _,
                 },
                 _spacing,
