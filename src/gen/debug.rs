@@ -1205,6 +1205,7 @@ impl Debug for crate::Field {
         formatter.field("ident", &self.ident);
         formatter.field("colon_token", &self.colon_token);
         formatter.field("ty", &self.ty);
+        formatter.field("default", &self.default);
         formatter.finish()
     }
 }

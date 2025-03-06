@@ -2011,6 +2011,10 @@ where
     }
     skip!(node.colon_token);
     v.visit_type(&node.ty);
+    if let Some(it) = &node.default {
+        skip!((it).0);
+        v.visit_expr(&(it).1);
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]

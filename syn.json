@@ -2010,6 +2010,18 @@
         },
         "ty": {
           "syn": "Type"
+        },
+        "default": {
+          "option": {
+            "tuple": [
+              {
+                "token": "Eq"
+              },
+              {
+                "syn": "Expr"
+              }
+            ]
+          }
         }
       }
     },

@@ -1777,6 +1777,20 @@ impl Debug for Lite<syn::Field> {
             formatter.field("colon_token", &Present);
         }
         formatter.field("ty", Lite(&self.value.ty));
+        if let Some(val) = &self.value.default {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print((syn::token::Eq, syn::Expr));
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some(")?;
+                    Debug::fmt(Lite(&self.0.1), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("default", Print::ref_cast(val));
+        }
         formatter.finish()
     }
 }

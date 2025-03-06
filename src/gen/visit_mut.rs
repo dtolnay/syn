@@ -1929,6 +1929,10 @@ where
     }
     skip!(node.colon_token);
     v.visit_type_mut(&mut node.ty);
+    if let Some(it) = &mut node.default {
+        skip!((it).0);
+        v.visit_expr_mut(&mut (it).1);
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]

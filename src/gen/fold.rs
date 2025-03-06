@@ -1960,6 +1960,7 @@ where
         ident: (node.ident).map(|it| f.fold_ident(it)),
         colon_token: node.colon_token,
         ty: f.fold_type(node.ty),
+        default: (node.default).map(|it| ((it).0, f.fold_expr((it).1))),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

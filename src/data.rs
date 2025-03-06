@@ -196,6 +196,11 @@ ast_struct! {
         pub colon_token: Option<Token![:]>,
 
         pub ty: Type,
+
+        /// Default value: `field_name: i32 = 1`
+        ///
+        /// `#![feature(default_field_values)]`
+        pub default: Option<(Token![=], Expr)>,
     }
 }
 
@@ -345,6 +350,11 @@ pub(crate) mod parsing {
             } else {
                 input.parse()?
             };
+            let mut default: Option<(Token![=], Expr)> = None;
+            if input.peek(Token![=]) {
+                let eq_token: Token![=] = input.parse()?;
+                default = Some((eq_token, input.parse()?));
+            }
 
             Ok(Field {
                 attrs,
@@ -353,6 +363,7 @@ pub(crate) mod parsing {
                 ident: Some(ident),
                 colon_token: Some(colon_token),
                 ty,
+                default,
             })
         }
 
@@ -366,6 +377,7 @@ pub(crate) mod parsing {
                 ident: None,
                 colon_token: None,
                 ty: input.parse()?,
+                default: None,
             })
         }
     }

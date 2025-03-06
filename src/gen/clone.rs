@@ -789,6 +789,7 @@ impl Clone for crate::Field {
             ident: self.ident.clone(),
             colon_token: self.colon_token.clone(),
             ty: self.ty.clone(),
+            default: self.default.clone(),
         }
     }
 }

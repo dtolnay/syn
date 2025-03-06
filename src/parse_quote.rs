@@ -149,7 +149,7 @@ impl<T: Parse> ParseQuote for T {
 
 use crate::punctuated::Punctuated;
 #[cfg(any(feature = "full", feature = "derive"))]
-use crate::{attr, Attribute, Field, FieldMutability, Ident, Type, Visibility};
+use crate::{attr, Attribute, Expr, Field, FieldMutability, Ident, Type, Visibility};
 #[cfg(feature = "full")]
 use crate::{Arm, Block, Pat, Stmt};
 
@@ -194,6 +194,12 @@ impl ParseQuote for Field {
 
         let ty: Type = input.parse()?;
 
+        let mut default: Option<(Token![=], Expr)> = None;
+        if is_named && input.peek(Token![=]) {
+            let eq_token: Token![=] = input.parse()?;
+            default = Some((eq_token, input.parse()?));
+        }
+
         Ok(Field {
             attrs,
             vis,
@@ -201,6 +207,7 @@ impl ParseQuote for Field {
             ident,
             colon_token,
             ty,
+            default,
         })
     }
 }
