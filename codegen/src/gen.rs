@@ -3,7 +3,7 @@ use inflections::Inflect;
 use proc_macro2::{Ident, Span, TokenStream};
 use syn_codegen::{Data, Definitions, Features, Node};
 
-pub const TERMINAL_TYPES: &[&str] = &["Span", "Ident"];
+pub const TERMINAL_TYPES: &[&str] = &["Ident", "Span"];
 
 pub fn under_name(name: &str) -> Ident {
     Ident::new(&name.to_snake_case(), Span::call_site())
