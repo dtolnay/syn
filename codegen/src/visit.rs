@@ -97,7 +97,7 @@ fn visit(
 fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Definitions) {
     let under_name = gen::under_name(&s.ident);
     let ident = Ident::new(&s.ident, Span::call_site());
-    let ty = if let "Ident" | "Span" = s.ident.as_str() {
+    let ty = if gen::TERMINAL_TYPES.contains(&s.ident.as_str()) {
         quote!(proc_macro2::#ident)
     } else {
         quote!(crate::#ident)
