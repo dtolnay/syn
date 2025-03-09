@@ -207,9 +207,15 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
         };
     }
 
+    let traits_body = if s.ident == "Span" {
+        quote!(i)
+    } else {
+        quote!(#fold_fn(self, i))
+    };
+
     traits.extend(quote! {
         fn #fold_fn(&mut self, i: #ty) -> #ty {
-            #fold_fn(self, i)
+            #traits_body
         }
     });
 

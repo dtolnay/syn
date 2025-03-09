@@ -183,9 +183,17 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
         Some(quote!('ast))
     };
 
+    let traits_body = if s.ident == "Span" {
+        None
+    } else {
+        Some(quote! {
+            #visit_fn(self, i);
+        })
+    };
+
     traits.extend(quote! {
         fn #visit_fn(&mut self, i: &#ast_lifetime #ty) {
-            #visit_fn(self, i);
+            #traits_body
         }
     });
 

@@ -793,7 +793,7 @@ pub trait Fold {
         fold_signature(self, i)
     }
     fn fold_span(&mut self, i: proc_macro2::Span) -> proc_macro2::Span {
-        fold_span(self, i)
+        i
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]

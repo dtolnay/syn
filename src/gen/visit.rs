@@ -740,9 +740,7 @@ pub trait Visit<'ast> {
     fn visit_signature(&mut self, i: &'ast crate::Signature) {
         visit_signature(self, i);
     }
-    fn visit_span(&mut self, i: &proc_macro2::Span) {
-        visit_span(self, i);
-    }
+    fn visit_span(&mut self, i: &proc_macro2::Span) {}
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_static_mutability(&mut self, i: &'ast crate::StaticMutability) {

@@ -748,9 +748,7 @@ pub trait VisitMut {
     fn visit_signature_mut(&mut self, i: &mut crate::Signature) {
         visit_signature_mut(self, i);
     }
-    fn visit_span_mut(&mut self, i: &mut proc_macro2::Span) {
-        visit_span_mut(self, i);
-    }
+    fn visit_span_mut(&mut self, i: &mut proc_macro2::Span) {}
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_static_mutability_mut(&mut self, i: &mut crate::StaticMutability) {

@@ -186,9 +186,17 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
         }
     }
 
+    let traits_body = if s.ident == "Span" {
+        None
+    } else {
+        Some(quote! {
+            #visit_mut_fn(self, i);
+        })
+    };
+
     traits.extend(quote! {
         fn #visit_mut_fn(&mut self, i: &mut #ty) {
-            #visit_mut_fn(self, i);
+            #traits_body
         }
     });
 
