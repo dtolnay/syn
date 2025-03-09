@@ -207,7 +207,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
         };
     }
 
-    let traits_body = if s.ident == "Span" {
+    let traits_body = if s.ident == "Span" || s.ident == "TokenStream" {
         quote!(i)
     } else {
         quote!(#fold_fn(self, i))
@@ -219,14 +219,16 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
         }
     });
 
-    impls.extend(quote! {
-        pub fn #fold_fn<F>(f: &mut F, node: #ty) -> #ty
-        where
-            F: Fold + ?Sized,
-        {
-            #fold_impl
-        }
-    });
+    if s.ident != "TokenStream" {
+        impls.extend(quote! {
+            pub fn #fold_fn<F>(f: &mut F, node: #ty) -> #ty
+            where
+                F: Fold + ?Sized,
+            {
+                #fold_impl
+            }
+        });
+    }
 
     if s.ident == "Attribute" {
         let features = cfg::features(&s.features, DocCfg::Ordinary);
