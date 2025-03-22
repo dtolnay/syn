@@ -167,6 +167,7 @@ use rustc_ast::ast::WhereEqPredicate;
 use rustc_ast::ast::WherePredicate;
 use rustc_ast::ast::WherePredicateKind;
 use rustc_ast::ast::WhereRegionPredicate;
+use rustc_ast::ast::YieldKind;
 use rustc_ast::ptr::P;
 use rustc_ast::token::{
     self, CommentKind, Delimiter, IdentIsRaw, Lit, Nonterminal, Token, TokenKind,
@@ -632,6 +633,7 @@ spanless_eq_enum!(UseTreeKind; Simple(0) Nested(items span) Glob);
 spanless_eq_enum!(VariantData; Struct(fields recovered) Tuple(0 1) Unit(0));
 spanless_eq_enum!(VisibilityKind; Public Restricted(path id shorthand) Inherited);
 spanless_eq_enum!(WherePredicateKind; BoundPredicate(0) RegionPredicate(0) EqPredicate(0));
+spanless_eq_enum!(YieldKind; Prefix(0) Postfix(0));
 spanless_eq_enum!(CoroutineKind; Async(span closure_id return_impl_trait_id)
     Gen(span closure_id return_impl_trait_id)
     AsyncGen(span closure_id return_impl_trait_id));
