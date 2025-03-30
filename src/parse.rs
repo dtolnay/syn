@@ -502,7 +502,7 @@ impl<'a> ParseBuffer<'a> {
     ///     }
     /// }
     /// ```
-    pub fn call<T>(&'a self, function: fn(ParseStream<'a>) -> Result<T>) -> Result<T> {
+    pub fn call<T>(&'a self, function: impl FnOnce(ParseStream<'a>) -> Result<T>) -> Result<T> {
         function(self)
     }
 
