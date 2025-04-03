@@ -169,9 +169,7 @@ use rustc_ast::ast::WherePredicateKind;
 use rustc_ast::ast::WhereRegionPredicate;
 use rustc_ast::ast::YieldKind;
 use rustc_ast::ptr::P;
-use rustc_ast::token::{
-    self, CommentKind, Delimiter, IdentIsRaw, Lit, Nonterminal, Token, TokenKind,
-};
+use rustc_ast::token::{self, CommentKind, Delimiter, IdentIsRaw, Lit, Token, TokenKind};
 use rustc_ast::tokenstream::{
     AttrTokenStream, AttrTokenTree, AttrsTarget, DelimSpacing, DelimSpan, LazyAttrTokenStream,
     Spacing, TokenStream, TokenTree,
@@ -713,16 +711,6 @@ impl SpanlessEq for TokenKind {
                 TokenKind::DotDotEq | TokenKind::DotDotDot => true,
                 _ => false,
             },
-            (TokenKind::Interpolated(this), TokenKind::Interpolated(other)) => {
-                let this = this.as_ref();
-                let other = other.as_ref();
-                match (this, other) {
-                    (Nonterminal::NtExpr(this), Nonterminal::NtExpr(other)) => {
-                        SpanlessEq::eq(this, other)
-                    }
-                    _ => this == other,
-                }
-            }
             _ => self == other,
         }
     }
@@ -826,16 +814,6 @@ fn is_escaped_literal_token(token: &Token, unescaped: Symbol) -> bool {
         } => match MetaItemLit::from_token_lit(*lit, DUMMY_SP) {
             Ok(lit) => is_escaped_literal_meta_item_lit(&lit, unescaped),
             Err(_) => false,
-        },
-        Token {
-            kind: TokenKind::Interpolated(nonterminal),
-            span: _,
-        } => match nonterminal.as_ref() {
-            Nonterminal::NtExpr(expr) => match &expr.kind {
-                ExprKind::Lit(lit) => is_escaped_lit(lit, unescaped),
-                _ => false,
-            },
-            _ => false,
         },
         _ => false,
     }
