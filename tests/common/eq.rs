@@ -11,6 +11,7 @@ use rustc_ast::ast::AngleBracketedArgs;
 use rustc_ast::ast::AnonConst;
 use rustc_ast::ast::Arm;
 use rustc_ast::ast::AsmMacro;
+use rustc_ast::ast::AssignOpKind;
 use rustc_ast::ast::AssocItemConstraint;
 use rustc_ast::ast::AssocItemConstraintKind;
 use rustc_ast::ast::AssocItemKind;
@@ -632,6 +633,8 @@ spanless_eq_enum!(VariantData; Struct(fields recovered) Tuple(0 1) Unit(0));
 spanless_eq_enum!(VisibilityKind; Public Restricted(path id shorthand) Inherited);
 spanless_eq_enum!(WherePredicateKind; BoundPredicate(0) RegionPredicate(0) EqPredicate(0));
 spanless_eq_enum!(YieldKind; Prefix(0) Postfix(0));
+spanless_eq_enum!(AssignOpKind; AddAssign SubAssign MulAssign DivAssign
+    RemAssign BitXorAssign BitAndAssign BitOrAssign ShlAssign ShrAssign);
 spanless_eq_enum!(CoroutineKind; Async(span closure_id return_impl_trait_id)
     Gen(span closure_id return_impl_trait_id)
     AsyncGen(span closure_id return_impl_trait_id));
