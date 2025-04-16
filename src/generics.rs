@@ -103,6 +103,18 @@ impl Default for Generics {
 }
 
 impl Generics {
+    /// Determines whether the struct has any generic parameters, `<` or `>`
+    /// tokens or a `where` clause.
+    pub fn is_empty(&self) -> bool {
+        let Self {
+            lt_token,
+            params,
+            gt_token,
+            where_clause,
+        } = self;
+        lt_token.is_none() && params.is_empty() && gt_token.is_none() && where_clause.is_none()
+    }
+
     return_impl_trait! {
         /// Iterator over the lifetime parameters in `self.params`.
         pub fn lifetimes(&self) -> impl Iterator<Item = &LifetimeParam> [Lifetimes] {
