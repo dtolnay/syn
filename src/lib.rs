@@ -279,7 +279,6 @@
     clippy::manual_let_else,
     clippy::manual_map,
     clippy::match_like_matches_macro,
-    clippy::match_on_vec_items,
     clippy::match_same_arms,
     clippy::match_wildcard_for_single_variants, // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6984
     clippy::missing_errors_doc,
