@@ -47,6 +47,7 @@ use rustc_ast::ptr::P;
 use rustc_ast_pretty::pprust;
 use rustc_span::edition::Edition;
 use std::fs;
+use std::mem;
 use std::path::Path;
 use std::process;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -206,7 +207,7 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
         ExprKind, GenericArg, GenericBound, Local, LocalKind, Pat, PolyTraitRef, Stmt, StmtKind,
         StructExpr, StructRest, TraitBoundModifiers, Ty,
     };
-    use rustc_ast::mut_visit::{visit_clobber, walk_flat_map_assoc_item, MutVisitor};
+    use rustc_ast::mut_visit::{walk_flat_map_assoc_item, MutVisitor};
     use rustc_ast::visit::{AssocCtxt, BoundKind};
     use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
     use rustc_span::DUMMY_SP;
@@ -280,13 +281,16 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
             match e.kind {
                 ExprKind::Block(..) | ExprKind::If(..) | ExprKind::Let(..) => {}
                 ExprKind::Binary(..) if contains_let_chain(e) => {}
-                _ => visit_clobber(&mut **e, |inner| Expr {
-                    id: ast::DUMMY_NODE_ID,
-                    kind: ExprKind::Paren(P(inner)),
-                    span: DUMMY_SP,
-                    attrs: ThinVec::new(),
-                    tokens: None,
-                }),
+                _ => {
+                    let inner = mem::replace(e, Expr::dummy());
+                    **e = Expr {
+                        id: ast::DUMMY_NODE_ID,
+                        kind: ExprKind::Paren(inner),
+                        span: DUMMY_SP,
+                        attrs: ThinVec::new(),
+                        tokens: None,
+                    };
+                }
             }
         }
 
@@ -319,7 +323,7 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
             }
         }
 
-        fn visit_block(&mut self, block: &mut P<Block>) {
+        fn visit_block(&mut self, block: &mut Block) {
             self.visit_id(&mut block.id);
             block
                 .stmts
@@ -327,7 +331,7 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
             self.visit_span(&mut block.span);
         }
 
-        fn visit_local(&mut self, local: &mut P<Local>) {
+        fn visit_local(&mut self, local: &mut Local) {
             match &mut local.kind {
                 LocalKind::Decl => {}
                 LocalKind::Init(init) => {
