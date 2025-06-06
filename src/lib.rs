@@ -308,6 +308,7 @@
     clippy::used_underscore_binding,
     clippy::wildcard_imports,
 )]
+#![allow(unknown_lints, mismatched_lifetime_syntaxes)]
 
 extern crate self as syn;
 
