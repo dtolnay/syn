@@ -43,7 +43,6 @@ use crate::common::eq::SpanlessEq;
 use crate::common::parse;
 use quote::ToTokens;
 use rustc_ast::ast;
-use rustc_ast::ptr::P;
 use rustc_ast_pretty::pprust;
 use rustc_span::edition::Edition;
 use std::fs;
@@ -197,11 +196,11 @@ fn test_expressions(path: &Path, edition: Edition, exprs: Vec<syn::Expr>) -> (us
     (passed, failed)
 }
 
-fn librustc_parse_and_rewrite(input: &str) -> Option<P<ast::Expr>> {
+fn librustc_parse_and_rewrite(input: &str) -> Option<Box<ast::Expr>> {
     parse::librustc_expr(input).map(librustc_parenthesize)
 }
 
-fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
+fn librustc_parenthesize(mut librustc_expr: Box<ast::Expr>) -> Box<ast::Expr> {
     use rustc_ast::ast::{
         AssocItem, AssocItemKind, Attribute, BinOpKind, Block, BoundConstness, Expr, ExprField,
         ExprKind, GenericArg, GenericBound, Local, LocalKind, Pat, PolyTraitRef, Stmt, StmtKind,
@@ -276,7 +275,7 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
     }
 
     impl MutVisitor for FullyParenthesize {
-        fn visit_expr(&mut self, e: &mut P<Expr>) {
+        fn visit_expr(&mut self, e: &mut Box<Expr>) {
             noop_visit_expr(e, self);
             match e.kind {
                 ExprKind::Block(..) | ExprKind::If(..) | ExprKind::Let(..) => {}
@@ -346,9 +345,9 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
 
         fn flat_map_assoc_item(
             &mut self,
-            item: P<AssocItem>,
+            item: Box<AssocItem>,
             ctxt: AssocCtxt,
-        ) -> SmallVec<[P<AssocItem>; 1]> {
+        ) -> SmallVec<[Box<AssocItem>; 1]> {
             match &item.kind {
                 AssocItemKind::Const(const_item)
                     if !const_item.generics.params.is_empty()
@@ -363,11 +362,11 @@ fn librustc_parenthesize(mut librustc_expr: P<ast::Expr>) -> P<ast::Expr> {
         // We don't want to look at expressions that might appear in patterns or
         // types yet. We'll look into comparing those in the future. For now
         // focus on expressions appearing in other places.
-        fn visit_pat(&mut self, pat: &mut P<Pat>) {
+        fn visit_pat(&mut self, pat: &mut Box<Pat>) {
             let _ = pat;
         }
 
-        fn visit_ty(&mut self, ty: &mut P<Ty>) {
+        fn visit_ty(&mut self, ty: &mut Box<Ty>) {
             let _ = ty;
         }
 

@@ -169,7 +169,6 @@ use rustc_ast::ast::WherePredicate;
 use rustc_ast::ast::WherePredicateKind;
 use rustc_ast::ast::WhereRegionPredicate;
 use rustc_ast::ast::YieldKind;
-use rustc_ast::ptr::P;
 use rustc_ast::token::{self, CommentKind, Delimiter, IdentIsRaw, Lit, Token, TokenKind};
 use rustc_ast::tokenstream::{
     AttrTokenStream, AttrTokenTree, AttrsTarget, DelimSpacing, DelimSpan, LazyAttrTokenStream,
@@ -190,12 +189,6 @@ pub trait SpanlessEq {
 }
 
 impl<T: ?Sized + SpanlessEq> SpanlessEq for Box<T> {
-    fn eq(&self, other: &Self) -> bool {
-        SpanlessEq::eq(&**self, &**other)
-    }
-}
-
-impl<T: ?Sized + SpanlessEq> SpanlessEq for P<T> {
     fn eq(&self, other: &Self) -> bool {
         SpanlessEq::eq(&**self, &**other)
     }
