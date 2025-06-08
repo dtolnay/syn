@@ -28,7 +28,8 @@
     clippy::match_wildcard_for_single_variants,
     clippy::needless_lifetimes,
     clippy::too_many_lines,
-    clippy::uninlined_format_args
+    clippy::uninlined_format_args,
+    clippy::unnecessary_box_returns
 )]
 
 extern crate rustc_ast;
