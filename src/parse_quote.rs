@@ -194,6 +194,8 @@ impl ParseQuote for Field {
 
         let ty: Type = input.parse()?;
 
+        // TODO: Once `Field` supports default_field_values, parse them here
+
         Ok(Field {
             attrs,
             vis,

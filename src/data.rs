@@ -334,6 +334,7 @@ pub(crate) mod parsing {
 
             let colon_token: Token![:] = input.parse()?;
 
+            let type_start = input.fork();
             let ty: Type = if unnamed_field
                 && (input.peek(Token![struct])
                     || input.peek(Token![union]) && input.peek2(token::Brace))
@@ -344,6 +345,19 @@ pub(crate) mod parsing {
                 Type::Verbatim(verbatim::between(&begin, input))
             } else {
                 input.parse()?
+            };
+
+            let ty = if input.peek(Token![=]) {
+                // We don't support parsing default_field_values, a (currently unstable) feature (see https://github.com/rust-lang/rfcs/pull/3681)
+                // because `Field` is not `non_exhaustive`, and so can't have new fields added to it.
+                // We know that this isn't the correct semantics; the default field value is not part of the type.
+                // However, for parsing purposes, it is in type position.
+                // We use a similar solution for negative inherent impls, e.g. `impl !SomeType {}`
+                input.parse::<Token![=]>()?;
+                input.parse::<Expr>()?;
+                Type::Verbatim(verbatim::between(&type_start, input))
+            } else {
+                ty
             };
 
             Ok(Field {
