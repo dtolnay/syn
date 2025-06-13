@@ -834,6 +834,7 @@ fn test_fixup() {
         quote! { #[attr] (x = 1) },
         quote! { #[attr] (x += 1) },
         quote! { #[attr] (1 as T) },
+        quote! { (return #[attr] (x + ..)).field },
         quote! { (self.f)() },
         quote! { (return)..=return },
         quote! { 1 + (return)..=1 + return },
