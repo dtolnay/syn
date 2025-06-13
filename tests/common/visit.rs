@@ -30,7 +30,18 @@ impl FlattenParens {
 impl VisitMut for FlattenParens {
     fn visit_expr_mut(&mut self, e: &mut Expr) {
         while let Expr::Paren(paren) = e {
+            let paren_attrs = mem::take(&mut paren.attrs);
             *e = mem::replace(&mut *paren.expr, Expr::PLACEHOLDER);
+            if !paren_attrs.is_empty() {
+                let nested_attrs = match e {
+                    Expr::Assign(e) => &mut e.attrs,
+                    Expr::Binary(e) => &mut e.attrs,
+                    Expr::Cast(e) => &mut e.attrs,
+                    _ => unimplemented!(),
+                };
+                assert!(nested_attrs.is_empty());
+                *nested_attrs = paren_attrs;
+            }
         }
         visit_mut::visit_expr_mut(self, e);
     }
