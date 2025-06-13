@@ -275,6 +275,67 @@ fn test_impl_visibility() {
 }
 
 #[test]
+fn test_struct_default_field_values() {
+    let tokens = quote! {
+        struct Foo {
+            field: i32 = const { 42 },
+        }
+    };
+    snapshot!(tokens as Item, @r#"
+    Item::Struct {
+        vis: Visibility::Inherited,
+        ident: "Foo",
+        generics: Generics,
+        fields: Fields::Named {
+            named: [
+                Field {
+                    vis: Visibility::Inherited,
+                    ident: Some("field"),
+                    colon_token: Some,
+                    ty: Type::Verbatim(`i32 = const { 42 }`),
+                },
+                Token![,],
+            ],
+        },
+    }
+    "#);
+}
+
+#[test]
+fn test_enum_default_field_values() {
+    let tokens = quote! {
+        enum Foo {
+            Bar {
+                field: i32 = 42,
+            }
+        }
+    };
+    snapshot!(tokens as Item, @r#"
+    Item::Enum {
+        vis: Visibility::Inherited,
+        ident: "Foo",
+        generics: Generics,
+        variants: [
+            Variant {
+                ident: "Bar",
+                fields: Fields::Named {
+                    named: [
+                        Field {
+                            vis: Visibility::Inherited,
+                            ident: Some("field"),
+                            colon_token: Some,
+                            ty: Type::Verbatim(`i32 = 42`),
+                        },
+                        Token![,],
+                    ],
+                },
+            },
+        ],
+    }
+    "#);
+}
+
+#[test]
 fn test_impl_type_parameter_defaults() {
     #[cfg(any())]
     impl<T = ()> () {}
