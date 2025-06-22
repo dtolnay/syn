@@ -9,7 +9,7 @@
 )]
 
 #[macro_use]
-mod macros;
+mod snapshot;
 
 mod debug;
 

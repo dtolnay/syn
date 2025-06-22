@@ -13,6 +13,8 @@
 
 #[macro_use]
 mod macros;
+#[macro_use]
+mod snapshot;
 
 mod common;
 mod debug;
