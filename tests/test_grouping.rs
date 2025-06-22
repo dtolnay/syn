@@ -7,6 +7,8 @@
 #[macro_use]
 mod macros;
 
+mod debug;
+
 use proc_macro2::{Delimiter, Group, Literal, Punct, Spacing, TokenStream, TokenTree};
 use syn::Expr;
 

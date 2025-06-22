@@ -9,6 +9,8 @@
 #[macro_use]
 mod macros;
 
+mod debug;
+
 use quote::quote;
 use syn::{DeriveInput, ItemFn, TypeParamBound, WhereClause, WherePredicate};
 

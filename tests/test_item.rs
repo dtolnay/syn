@@ -7,6 +7,8 @@
 #[macro_use]
 mod macros;
 
+mod debug;
+
 use proc_macro2::{Delimiter, Group, Ident, Span, TokenStream, TokenTree};
 use quote::quote;
 use syn::{Item, ItemTrait};

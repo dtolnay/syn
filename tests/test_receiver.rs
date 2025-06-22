@@ -7,6 +7,8 @@
 #[macro_use]
 mod macros;
 
+mod debug;
+
 use syn::{parse_quote, TraitItemFn};
 
 #[test]

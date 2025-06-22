@@ -9,6 +9,8 @@
 #[macro_use]
 mod macros;
 
+mod debug;
+
 use syn::{Meta, MetaList, MetaNameValue};
 
 #[test]

@@ -7,6 +7,8 @@
 #[macro_use]
 mod macros;
 
+mod debug;
+
 use syn::punctuated::Punctuated;
 use syn::{parse_quote, Attribute, Field, Lit, Pat, Stmt, Token};
 

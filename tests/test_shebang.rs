@@ -7,6 +7,8 @@
 #[macro_use]
 mod macros;
 
+mod debug;
+
 #[test]
 fn test_basic() {
     let content = "#!/usr/bin/env rustx\nfn main() {}";

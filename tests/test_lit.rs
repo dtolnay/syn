@@ -11,6 +11,8 @@
 #[macro_use]
 mod macros;
 
+mod debug;
+
 use proc_macro2::{Delimiter, Group, Literal, Span, TokenStream, TokenTree};
 use quote::ToTokens;
 use std::ffi::CStr;

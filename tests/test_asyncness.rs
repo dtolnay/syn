@@ -7,6 +7,8 @@
 #[macro_use]
 mod macros;
 
+mod debug;
+
 use syn::{Expr, Item};
 
 #[test]
