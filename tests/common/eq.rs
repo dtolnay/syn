@@ -500,7 +500,7 @@ spanless_eq_struct!(FnHeader; constness coroutine_kind safety ext);
 spanless_eq_struct!(FnSig; header decl span);
 spanless_eq_struct!(ForeignMod; extern_span safety abi items);
 spanless_eq_struct!(FormatArgPosition; index kind span);
-spanless_eq_struct!(FormatArgs; span template arguments uncooked_fmt_str);
+spanless_eq_struct!(FormatArgs; span template arguments uncooked_fmt_str is_source_literal);
 spanless_eq_struct!(FormatArgument; kind expr);
 spanless_eq_struct!(FormatOptions; width precision alignment fill sign alternate zero_pad debug_hex);
 spanless_eq_struct!(FormatPlaceholder; argument span format_trait format_options);
