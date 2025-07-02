@@ -176,8 +176,8 @@ use rustc_ast::tokenstream::{
 };
 use rustc_data_structures::packed::Pu128;
 use rustc_span::source_map::Spanned;
-use rustc_span::symbol::{sym, Ident};
-use rustc_span::{ErrorGuaranteed, Span, Symbol, SyntaxContext, DUMMY_SP};
+use rustc_span::symbol::{sym, ByteSymbol, Ident, Symbol};
+use rustc_span::{ErrorGuaranteed, Span, SyntaxContext, DUMMY_SP};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::hash::{BuildHasher, Hash};
@@ -318,6 +318,7 @@ spanless_eq_partial_eq!(str);
 spanless_eq_partial_eq!(String);
 spanless_eq_partial_eq!(Pu128);
 spanless_eq_partial_eq!(Symbol);
+spanless_eq_partial_eq!(ByteSymbol);
 spanless_eq_partial_eq!(CommentKind);
 spanless_eq_partial_eq!(Delimiter);
 spanless_eq_partial_eq!(InlineAsmOptions);
