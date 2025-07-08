@@ -21,7 +21,7 @@ use rustc_ast::ast::AttrItem;
 use rustc_ast::ast::AttrKind;
 use rustc_ast::ast::AttrStyle;
 use rustc_ast::ast::Attribute;
-use rustc_ast::ast::BareFnTy;
+use rustc_ast::ast::FnPtrTy;
 use rustc_ast::ast::BinOpKind;
 use rustc_ast::ast::BindingMode;
 use rustc_ast::ast::Block;
@@ -481,7 +481,6 @@ spanless_eq_struct!(AttrItem; unsafety path args tokens);
 spanless_eq_struct!(AttrTokenStream; 0);
 spanless_eq_struct!(Attribute; kind id style span);
 spanless_eq_struct!(AttrsTarget; attrs tokens);
-spanless_eq_struct!(BareFnTy; safety ext generic_params decl decl_span);
 spanless_eq_struct!(BindingMode; 0 1);
 spanless_eq_struct!(Block; stmts id rules span tokens);
 spanless_eq_struct!(Closure; binder capture_clause constness coroutine_kind movability fn_decl body !fn_decl_span !fn_arg_span);
@@ -499,6 +498,7 @@ spanless_eq_struct!(Fn; defaultness ident generics sig contract define_opaque bo
 spanless_eq_struct!(FnContract; requires ensures);
 spanless_eq_struct!(FnDecl; inputs output);
 spanless_eq_struct!(FnHeader; constness coroutine_kind safety ext);
+spanless_eq_struct!(FnPtrTy; safety ext generic_params decl decl_span);
 spanless_eq_struct!(FnSig; header decl span);
 spanless_eq_struct!(ForeignMod; extern_span safety abi items);
 spanless_eq_struct!(FormatArgPosition; index kind span);
@@ -656,7 +656,7 @@ spanless_eq_enum!(PatKind; Missing Wild Ident(0 1 2) Struct(0 1 2 3)
     TupleStruct(0 1 2) Or(0) Path(0 1) Tuple(0) Box(0) Deref(0) Ref(0 1) Expr(0)
     Range(0 1 2) Slice(0) Rest Never Guard(0 1) Paren(0) MacCall(0) Err(0));
 spanless_eq_enum!(TyKind; Slice(0) Array(0 1) Ptr(0) Ref(0 1) PinnedRef(0 1)
-    BareFn(0) UnsafeBinder(0) Never Tup(0) Path(0 1) TraitObject(0 1)
+    FnPtr(0) UnsafeBinder(0) Never Tup(0) Path(0 1) TraitObject(0 1)
     ImplTrait(0 1) Paren(0) Typeof(0) Infer ImplicitSelf MacCall(0) CVarArgs
     Pat(0 1) Dummy Err(0));
 
