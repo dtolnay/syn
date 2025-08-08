@@ -185,7 +185,7 @@ fn introspect_type(item: &syn::Type, lookup: &Lookup) -> types::Type {
             if mac.path.segments.last().unwrap().ident == "Token" =>
         {
             let content = mac.tokens.to_string();
-            let ty = lookup.tokens.get(&content).unwrap().to_string();
+            let ty = lookup.tokens.get(&content).unwrap().clone();
 
             types::Type::Token(ty)
         }
@@ -422,7 +422,7 @@ mod parsing {
             expansion.parse::<Token![$]>()?;
             let path: Path = expansion.parse()?;
             let ty = path.segments.last().unwrap().ident.to_string();
-            tokens.insert(token, ty.to_string());
+            tokens.insert(token, ty.clone());
         }
         Ok(tokens)
     }
