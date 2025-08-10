@@ -3858,12 +3858,6 @@ impl Debug for Lite<syn::TraitBound> {
         if self.value.paren_token.is_some() {
             formatter.field("paren_token", &Present);
         }
-        match self.value.modifier {
-            syn::TraitBoundModifier::None => {}
-            _ => {
-                formatter.field("modifier", Lite(&self.value.modifier));
-            }
-        }
         if let Some(val) = &self.value.lifetimes {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -3877,6 +3871,12 @@ impl Debug for Lite<syn::TraitBound> {
                 }
             }
             formatter.field("lifetimes", Print::ref_cast(val));
+        }
+        match self.value.modifier {
+            syn::TraitBoundModifier::None => {}
+            _ => {
+                formatter.field("modifier", Lite(&self.value.modifier));
+            }
         }
         formatter.field("path", Lite(&self.value.path));
         formatter.finish()

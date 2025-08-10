@@ -4575,13 +4575,13 @@
             "group": "Paren"
           }
         },
-        "modifier": {
-          "syn": "TraitBoundModifier"
-        },
         "lifetimes": {
           "option": {
             "syn": "BoundLifetimes"
           }
+        },
+        "modifier": {
+          "syn": "TraitBoundModifier"
         },
         "path": {
           "syn": "Path"

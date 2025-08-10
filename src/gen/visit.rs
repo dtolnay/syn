@@ -3395,10 +3395,10 @@ where
     V: Visit<'ast> + ?Sized,
 {
     skip!(node.paren_token);
-    v.visit_trait_bound_modifier(&node.modifier);
     if let Some(it) = &node.lifetimes {
         v.visit_bound_lifetimes(it);
     }
+    v.visit_trait_bound_modifier(&node.modifier);
     v.visit_path(&node.path);
 }
 #[cfg(any(feature = "derive", feature = "full"))]

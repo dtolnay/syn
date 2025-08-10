@@ -441,8 +441,8 @@ pub(crate) mod parsing {
                         Type::Path(TypePath { qself: None, path }) => {
                             TypeParamBound::Trait(TraitBound {
                                 paren_token: Some(paren_token),
-                                modifier: TraitBoundModifier::None,
                                 lifetimes: None,
+                                modifier: TraitBoundModifier::None,
                                 path,
                             })
                         }
@@ -534,8 +534,8 @@ pub(crate) mod parsing {
                 let mut bounds = Punctuated::new();
                 bounds.push_value(TypeParamBound::Trait(TraitBound {
                     paren_token: None,
-                    modifier: TraitBoundModifier::None,
                     lifetimes,
+                    modifier: TraitBoundModifier::None,
                     path: ty.path,
                 }));
                 if allow_plus {

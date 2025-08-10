@@ -3230,10 +3230,10 @@ where
     V: VisitMut + ?Sized,
 {
     skip!(node.paren_token);
-    v.visit_trait_bound_modifier_mut(&mut node.modifier);
     if let Some(it) = &mut node.lifetimes {
         v.visit_bound_lifetimes_mut(it);
     }
+    v.visit_trait_bound_modifier_mut(&mut node.modifier);
     v.visit_path_mut(&mut node.path);
 }
 #[cfg(any(feature = "derive", feature = "full"))]

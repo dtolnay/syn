@@ -2316,8 +2316,8 @@ impl Hash for crate::TraitBound {
         H: Hasher,
     {
         self.paren_token.hash(state);
-        self.modifier.hash(state);
         self.lifetimes.hash(state);
+        self.modifier.hash(state);
         self.path.hash(state);
     }
 }

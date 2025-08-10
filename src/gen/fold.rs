@@ -3340,8 +3340,8 @@ where
 {
     crate::TraitBound {
         paren_token: node.paren_token,
-        modifier: f.fold_trait_bound_modifier(node.modifier),
         lifetimes: (node.lifetimes).map(|it| f.fold_bound_lifetimes(it)),
+        modifier: f.fold_trait_bound_modifier(node.modifier),
         path: f.fold_path(node.path),
     }
 }

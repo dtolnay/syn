@@ -2620,8 +2620,8 @@ impl Debug for crate::TraitBound {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("TraitBound");
         formatter.field("paren_token", &self.paren_token);
-        formatter.field("modifier", &self.modifier);
         formatter.field("lifetimes", &self.lifetimes);
+        formatter.field("modifier", &self.modifier);
         formatter.field("path", &self.path);
         formatter.finish()
     }

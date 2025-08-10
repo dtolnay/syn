@@ -412,9 +412,9 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TraitBound {
         pub paren_token: Option<token::Paren>,
-        pub modifier: TraitBoundModifier,
         /// The `for<'a>` in `for<'a> Foo<&'a T>`
         pub lifetimes: Option<BoundLifetimes>,
+        pub modifier: TraitBoundModifier,
         /// The `Foo<&'a T>` in `for<'a> Foo<&'a T>`
         pub path: Path,
     }
@@ -845,8 +845,8 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for TraitBound {
         fn parse(input: ParseStream) -> Result<Self> {
-            let modifier: TraitBoundModifier = input.parse()?;
             let lifetimes: Option<BoundLifetimes> = input.parse()?;
+            let modifier: TraitBoundModifier = input.parse()?;
 
             let mut path: Path = input.parse()?;
             if path.segments.last().unwrap().arguments.is_empty()
@@ -860,8 +860,8 @@ pub(crate) mod parsing {
 
             Ok(TraitBound {
                 paren_token: None,
-                modifier,
                 lifetimes,
+                modifier,
                 path,
             })
         }
@@ -1270,8 +1270,8 @@ pub(crate) mod printing {
     impl ToTokens for TraitBound {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             let to_tokens = |tokens: &mut TokenStream| {
-                self.modifier.to_tokens(tokens);
                 self.lifetimes.to_tokens(tokens);
+                self.modifier.to_tokens(tokens);
                 self.path.to_tokens(tokens);
             };
             match &self.paren_token {

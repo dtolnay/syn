@@ -284,3 +284,105 @@ fn test_where_clause_at_end_of_input() {
 
     assert_eq!(input.predicates.len(), 0);
 }
+
+#[test]
+fn test_trait_bound_field_order() {
+    // Test that TraitBound fields are parsed and serialized in the correct order
+    // to match the Rust compiler's AST structure: lifetimes, then modifiers, then path
+    // Also test comprehensive parsing scenarios and round-trip consistency
+
+    use syn::{parse_quote, TraitBound, TypeParamBound};
+
+    // Test 1: Basic trait bound without lifetimes or modifier
+    let bound: TraitBound = parse_quote!(Clone);
+    assert!(bound.paren_token.is_none());
+    assert!(bound.lifetimes.is_none());
+    assert!(matches!(bound.modifier, syn::TraitBoundModifier::None));
+    assert_eq!(bound.path.segments.len(), 1);
+    assert_eq!(bound.path.segments[0].ident, "Clone");
+
+    // Test 2: Trait bound with optional modifier
+    let bound: TraitBound = parse_quote!(?Sized);
+    assert!(bound.paren_token.is_none());
+    assert!(bound.lifetimes.is_none());
+    assert!(matches!(bound.modifier, syn::TraitBoundModifier::Maybe(_)));
+    assert_eq!(bound.path.segments.len(), 1);
+    assert_eq!(bound.path.segments[0].ident, "Sized");
+
+    // Test 3: Trait bound with lifetimes
+    let type_bound: TypeParamBound = parse_quote!(for<'a> Fn(&'a str));
+    if let TypeParamBound::Trait(bound) = type_bound {
+        assert!(bound.paren_token.is_none());
+        assert!(bound.lifetimes.is_some());
+        assert!(matches!(bound.modifier, syn::TraitBoundModifier::None));
+        assert_eq!(bound.path.segments.len(), 1);
+        assert_eq!(bound.path.segments[0].ident, "Fn");
+    } else {
+        panic!("Expected trait bound");
+    }
+
+    // Test 4: Trait bound with both lifetimes and modifier (lifetimes first)
+    let type_bound: TypeParamBound = parse_quote!(for<'a> ?Clone);
+    if let TypeParamBound::Trait(bound) = type_bound {
+        assert!(bound.paren_token.is_none());
+        assert!(bound.lifetimes.is_some());
+        assert!(matches!(bound.modifier, syn::TraitBoundModifier::Maybe(_)));
+        assert_eq!(bound.path.segments.len(), 1);
+        assert_eq!(bound.path.segments[0].ident, "Clone");
+    } else {
+        panic!("Expected trait bound");
+    }
+
+    // Test 5: Complex trait bound with multiple lifetimes and path
+    let type_bound: TypeParamBound = parse_quote!(for<'a, 'b> Iterator<Item = &'a str>);
+    if let TypeParamBound::Trait(bound) = type_bound {
+        assert!(bound.paren_token.is_none());
+        assert!(bound.lifetimes.is_some());
+        let lifetimes = bound.lifetimes.as_ref().unwrap();
+        assert_eq!(lifetimes.lifetimes.len(), 2);
+        assert!(matches!(bound.modifier, syn::TraitBoundModifier::None));
+
+        // Verify field access order matches expected struct layout
+        let _ = (
+            &bound.paren_token, // first field
+            &bound.lifetimes,   // second field (moved here from third)
+            &bound.modifier,    // third field (moved here from second)
+            &bound.path,        // fourth field
+        );
+    } else {
+        panic!("Expected trait bound");
+    }
+
+    // Test 6: Complex path with lifetimes and modifier
+    let type_bound: TypeParamBound = parse_quote!(for<'a> ?std::fmt::Debug);
+    if let TypeParamBound::Trait(bound) = type_bound {
+        assert!(bound.lifetimes.is_some());
+        assert!(matches!(bound.modifier, syn::TraitBoundModifier::Maybe(_)));
+        assert_eq!(bound.path.segments.len(), 3);
+        assert_eq!(bound.path.segments[0].ident, "std");
+        assert_eq!(bound.path.segments[1].ident, "fmt");
+        assert_eq!(bound.path.segments[2].ident, "Debug");
+    } else {
+        panic!("Expected trait bound");
+    }
+
+    // Test 7: Verify that parsing and printing produces consistent results
+    let original = "for<'a, 'b> ?Iterator<Item = &'a str>";
+    let parsed: syn::TypeParamBound = syn::parse_str(original).unwrap();
+    let printed = quote::quote!(#parsed).to_string();
+    let reparsed: syn::TypeParamBound = syn::parse_str(&printed).unwrap();
+
+    // Ensure round-trip consistency
+    if let (syn::TypeParamBound::Trait(orig), syn::TypeParamBound::Trait(reparsed)) = (parsed, reparsed) {
+        assert_eq!(orig.lifetimes.is_some(), reparsed.lifetimes.is_some());
+        assert_eq!(orig.modifier, reparsed.modifier);
+        assert_eq!(orig.path.segments.len(), reparsed.path.segments.len());
+    } else {
+        panic!("Expected trait bounds");
+    }
+
+    // Test 8: Verify that invalid syntax fails to parse
+    // Modifiers cannot come before lifetimes in valid Rust syntax
+    let result = syn::parse_str::<TraitBound>("?for<'a> Clone");
+    assert!(result.is_err(), "Invalid syntax should fail to parse");
+}

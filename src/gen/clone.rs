@@ -1830,8 +1830,8 @@ impl Clone for crate::TraitBound {
     fn clone(&self) -> Self {
         crate::TraitBound {
             paren_token: self.paren_token.clone(),
-            modifier: self.modifier.clone(),
             lifetimes: self.lifetimes.clone(),
+            modifier: self.modifier.clone(),
             path: self.path.clone(),
         }
     }

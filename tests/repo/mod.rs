@@ -49,6 +49,11 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/structs/auxiliary/struct_field_default.rs",
     "tests/ui/structs/default-field-values-support.rs",
 
+    // Incorrect syntax: modifier before lifetime binder `?for<>` - rustc correctly rejects this
+    // but rust-analyzer parser incorrectly accepts it. Syn follows rustc's behavior.
+    // https://github.com/rust-lang/rust-analyzer/pull/20417
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/question_for_type_trait_bound.rs",
+
     // TODO: return type notation: `where T: Trait<method(): Send>` and `where T::method(..): Send`
     // https://github.com/dtolnay/syn/issues/1434
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/return_type_syntax_in_path.rs",
