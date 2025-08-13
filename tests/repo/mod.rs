@@ -533,10 +533,9 @@ pub fn clone_rust() {
 }
 
 fn download_and_unpack() -> Result<()> {
-    let url = format!(
-        "https://github.com/rust-lang/rust/archive/{}.tar.gz",
-        REVISION
-    );
+    let url = format!("https://github.com/rust-lang/rust/archive/{REVISION}.tar.gz");
+    errorf!("downloading {url}\n");
+
     let response = reqwest::blocking::get(url)?.error_for_status()?;
     let progress = Progress::new(response);
     let decoder = GzDecoder::new(progress);
