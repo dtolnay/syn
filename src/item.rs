@@ -2593,7 +2593,6 @@ pub(crate) mod parsing {
             input.parse::<Token![const]>()?;
         }
 
-        let begin = input.fork();
         let polarity = if input.peek(Token![!]) && !input.peek2(token::Brace) {
             Some(input.parse::<Token![!]>()?)
         } else {
@@ -2631,13 +2630,14 @@ pub(crate) mod parsing {
                 trait_ = None;
             }
             self_ty = input.parse()?;
+        } else if let Some(polarity) = polarity {
+            return Err(Error::new(
+                polarity.span,
+                "inherent impls cannot be negative",
+            ));
         } else {
             trait_ = None;
-            self_ty = if polarity.is_none() {
-                first_ty
-            } else {
-                Type::Verbatim(verbatim::between(&begin, input))
-            };
+            self_ty = first_ty;
         }
 
         generics.where_clause = input.parse()?;

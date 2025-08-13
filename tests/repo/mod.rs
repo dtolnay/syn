@@ -222,7 +222,11 @@ static EXCLUDE_FILES: &[&str] = &[
     // Rustc bug: https://github.com/rust-lang/rust/issues/132080
     "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0073_safe_declarations_in_extern_blocks.rs",
 
-    // Compile-fail expr parameter in const generic position: f::<1 + 2>()
+    // Negative inherent impl: `impl !Box<JoinHandle> {}`
+    "src/tools/rustfmt/tests/source/negative-impl.rs",
+    "src/tools/rustfmt/tests/target/negative-impl.rs",
+
+    // Compile-fail expr parameter in const generic position: `f::<1 + 2>()`
     "tests/ui/const-generics/early/closing-args-token.rs",
     "tests/ui/const-generics/early/const-expression-parameter.rs",
 
