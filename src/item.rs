@@ -1617,7 +1617,7 @@ pub(crate) mod parsing {
         // test/ui/rfc-2565-param-attrs/param-attrs-pretty.rs
         // because the rest of the test case is valuable.
         if input.peek(Ident) && input.peek2(Token![<]) {
-            let span = input.fork().parse::<Ident>()?.span();
+            let span = input.span();
             return Ok(FnArgOrVariadic::FnArg(FnArg::Typed(PatType {
                 attrs,
                 pat: Box::new(Pat::Wild(PatWild {
