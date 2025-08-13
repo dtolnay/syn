@@ -899,7 +899,7 @@ pub(crate) mod parsing {
         pub(crate) fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
             let impl_token: Token![impl] = input.parse()?;
             let allow_precise_capture = true;
-            let allow_conditionally_const = false;
+            let allow_conditionally_const = true;
             let bounds = TypeParamBound::parse_multiple(
                 input,
                 allow_plus,
