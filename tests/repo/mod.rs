@@ -27,25 +27,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/clippy/tests/ui/trait_duplication_in_bounds.rs",
     "src/tools/rust-analyzer/crates/test-utils/src/minicore.rs",
 
-    // TODO: const supertraits: `trait Baz: const Bar {}`
-    // https://github.com/dtolnay/syn/issues/1894
-    "tests/ui/traits/const-traits/auxiliary/minicore.rs",
-    "tests/ui/traits/const-traits/const-via-item-bound.rs",
-
-    // TODO: unconditionally const trait bound syntax: `T: const FnOnce<Arg, Output = Ret>`
-    // https://github.com/dtolnay/syn/issues/1885
-    "library/core/src/intrinsics/mod.rs",
-    "tests/ui/generic-const-items/const-trait-impl.rs",
-    "tests/ui/traits/const-traits/assoc-type-const-bound-usage-1.rs",
-    "tests/ui/traits/const-traits/const-bound-in-host.rs",
-    "tests/ui/traits/const-traits/const-drop.rs",
-    "tests/ui/traits/const-traits/const-in-closure.rs",
-    "tests/ui/traits/const-traits/dont-ice-on-const-pred-for-bounds.rs",
-    "tests/ui/traits/const-traits/imply-always-const.rs",
-    "tests/ui/traits/const-traits/minicore-const-fn-early-bound.rs",
-    "tests/ui/traits/const-traits/predicate-entailment-passes.rs",
-    "tests/ui/traits/const-traits/unconstrained-var-specialization.rs",
-
     // TODO: conditionally const trait bound with lifetime bindar: `T: for<'a> [const] async Trait<'a>`
     // https://github.com/dtolnay/syn/issues/1888
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/for_binder_bound.rs",
