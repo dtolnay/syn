@@ -15,6 +15,7 @@ use std::path::{Path, PathBuf};
 use tar::Archive;
 use walkdir::{DirEntry, WalkDir};
 
+// nightly-2024-12-15
 const REVISION: &str = "0aeaa5eb22180fdf12a8489e63c4daa18da6f236";
 
 #[rustfmt::skip]
