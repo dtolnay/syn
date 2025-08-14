@@ -715,11 +715,11 @@ pub(crate) mod parsing {
                     }
                     bounds.push_value({
                         let allow_precise_capture = false;
-                        let allow_tilde_const = true;
+                        let allow_conditionally_const = true;
                         TypeParamBound::parse_single(
                             input,
                             allow_precise_capture,
-                            allow_tilde_const,
+                            allow_conditionally_const,
                         )?
                     });
                     if !input.peek(Token![+]) {
@@ -752,8 +752,8 @@ pub(crate) mod parsing {
     impl Parse for TypeParamBound {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_precise_capture = true;
-            let allow_tilde_const = true;
-            Self::parse_single(input, allow_precise_capture, allow_tilde_const)
+            let allow_conditionally_const = true;
+            Self::parse_single(input, allow_precise_capture, allow_conditionally_const)
         }
     }
 
@@ -761,7 +761,7 @@ pub(crate) mod parsing {
         pub(crate) fn parse_single(
             input: ParseStream,
             #[cfg_attr(not(feature = "full"), allow(unused_variables))] allow_precise_capture: bool,
-            allow_tilde_const: bool,
+            allow_conditionally_const: bool,
         ) -> Result<Self> {
             if input.peek(Lifetime) {
                 return input.parse().map(TypeParamBound::Lifetime);
@@ -793,12 +793,12 @@ pub(crate) mod parsing {
                 (None, input)
             };
 
-            let is_tilde_const =
+            let is_conditionally_const =
                 cfg!(feature = "full") && content.peek(Token![~]) && content.peek2(Token![const]);
-            if is_tilde_const {
+            if is_conditionally_const {
                 let tilde_token: Token![~] = content.parse()?;
                 let const_token: Token![const] = content.parse()?;
-                if !allow_tilde_const {
+                if !allow_conditionally_const {
                     let msg = "`~const` is not allowed here";
                     return Err(error::new2(tilde_token.span, const_token.span, msg));
                 }
@@ -807,7 +807,7 @@ pub(crate) mod parsing {
             let mut bound: TraitBound = content.parse()?;
             bound.paren_token = paren_token;
 
-            if is_tilde_const {
+            if is_conditionally_const {
                 Ok(TypeParamBound::Verbatim(verbatim::between(&begin, input)))
             } else {
                 Ok(TypeParamBound::Trait(bound))
@@ -818,11 +818,12 @@ pub(crate) mod parsing {
             input: ParseStream,
             allow_plus: bool,
             allow_precise_capture: bool,
-            allow_tilde_const: bool,
+            allow_conditionally_const: bool,
         ) -> Result<Punctuated<Self, Token![+]>> {
             let mut bounds = Punctuated::new();
             loop {
-                let bound = Self::parse_single(input, allow_precise_capture, allow_tilde_const)?;
+                let bound =
+                    Self::parse_single(input, allow_precise_capture, allow_conditionally_const)?;
                 bounds.push_value(bound);
                 if !(allow_plus && input.peek(Token![+])) {
                     break;
@@ -993,11 +994,11 @@ pub(crate) mod parsing {
                             }
                             bounds.push_value({
                                 let allow_precise_capture = false;
-                                let allow_tilde_const = true;
+                                let allow_conditionally_const = true;
                                 TypeParamBound::parse_single(
                                     input,
                                     allow_precise_capture,
-                                    allow_tilde_const,
+                                    allow_conditionally_const,
                                 )?
                             });
                             if !input.peek(Token![+]) {

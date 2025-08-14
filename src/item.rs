@@ -1208,11 +1208,11 @@ pub(crate) mod parsing {
                     }
                     bounds.push_value({
                         let allow_precise_capture = false;
-                        let allow_tilde_const = true;
+                        let allow_conditionally_const = true;
                         TypeParamBound::parse_single(
                             input,
                             allow_precise_capture,
-                            allow_tilde_const,
+                            allow_conditionally_const,
                         )?
                     });
                     if input.peek(Token![where]) || input.peek(Token![=]) || input.peek(Token![;]) {
@@ -2233,8 +2233,12 @@ pub(crate) mod parsing {
                 }
                 supertraits.push_value({
                     let allow_precise_capture = false;
-                    let allow_tilde_const = true;
-                    TypeParamBound::parse_single(input, allow_precise_capture, allow_tilde_const)?
+                    let allow_conditionally_const = true;
+                    TypeParamBound::parse_single(
+                        input,
+                        allow_precise_capture,
+                        allow_conditionally_const,
+                    )?
                 });
                 if input.peek(Token![where]) || input.peek(token::Brace) {
                     break;
@@ -2305,8 +2309,12 @@ pub(crate) mod parsing {
             }
             bounds.push_value({
                 let allow_precise_capture = false;
-                let allow_tilde_const = false;
-                TypeParamBound::parse_single(input, allow_precise_capture, allow_tilde_const)?
+                let allow_conditionally_const = false;
+                TypeParamBound::parse_single(
+                    input,
+                    allow_precise_capture,
+                    allow_conditionally_const,
+                )?
             });
             if input.peek(Token![where]) || input.peek(Token![;]) {
                 break;
