@@ -33,7 +33,7 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/traits/const-traits/const-via-item-bound.rs",
 
     // TODO: conditionally const trait bounds: `T: [const] Trait`
-    // https://github.com/dtolnay/syn/issues/1885
+    // https://github.com/dtolnay/syn/issues/1883
     "library/core/src/array/mod.rs",
     "library/core/src/cell.rs",
     "library/core/src/clone.rs",
