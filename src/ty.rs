@@ -929,7 +929,7 @@ pub(crate) mod parsing {
                         }
                     }
                     TypeParamBound::Verbatim(_) => {
-                        // ~const Trait
+                        // `[const] Trait`
                         at_least_one_trait = true;
                         break;
                     }

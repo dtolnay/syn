@@ -514,7 +514,9 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::attr::Attribute;
-    use crate::error::{self, Result};
+    #[cfg(feature = "full")]
+    use crate::error;
+    use crate::error::{Error, Result};
     use crate::ext::IdentExt as _;
     use crate::generics::{
         BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeParam, PredicateLifetime,
@@ -793,14 +795,14 @@ pub(crate) mod parsing {
                 (None, input)
             };
 
-            let is_conditionally_const =
-                cfg!(feature = "full") && content.peek(Token![~]) && content.peek2(Token![const]);
+            let is_conditionally_const = cfg!(feature = "full") && content.peek(token::Bracket);
             if is_conditionally_const {
-                let tilde_token: Token![~] = content.parse()?;
-                let const_token: Token![const] = content.parse()?;
+                let conditionally_const;
+                let bracket_token = bracketed!(conditionally_const in content);
+                conditionally_const.parse::<Token![const]>()?;
                 if !allow_conditionally_const {
-                    let msg = "`~const` is not allowed here";
-                    return Err(error::new2(tilde_token.span, const_token.span, msg));
+                    let msg = "`[const]` is not allowed here";
+                    return Err(Error::new(bracket_token.span.join(), msg));
                 }
             }
 
@@ -834,7 +836,7 @@ pub(crate) mod parsing {
                     || input.peek(Token![?])
                     || input.peek(Lifetime)
                     || input.peek(token::Paren)
-                    || input.peek(Token![~]))
+                    || (allow_conditionally_const && input.peek(token::Bracket)))
                 {
                     break;
                 }
