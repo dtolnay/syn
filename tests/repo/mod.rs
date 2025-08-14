@@ -46,16 +46,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/traits/const-traits/predicate-entailment-passes.rs",
     "tests/ui/traits/const-traits/unconstrained-var-specialization.rs",
 
-    // TODO: conditionally const impl Trait: `impl [const] FnOnce()`
-    // https://github.com/dtolnay/syn/issues/1884
-    "library/core/src/option.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/const_trait_bound.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/maybe_const_trait_bound.rs",
-    "tests/ui/traits/const-traits/const-closure-issue-125866-pass.rs",
-    "tests/ui/traits/const-traits/const-cond-for-rpitit.rs",
-    "tests/ui/traits/const-traits/const-impl-trait.rs",
-    "tests/ui/traits/const-traits/dont-prefer-param-env-for-infer-self-ty.rs",
-
     // TODO: conditionally const trait bound with lifetime bindar: `T: for<'a> [const] async Trait<'a>`
     // https://github.com/dtolnay/syn/issues/1888
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/for_binder_bound.rs",
