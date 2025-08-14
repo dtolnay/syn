@@ -46,9 +46,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/traits/const-traits/predicate-entailment-passes.rs",
     "tests/ui/traits/const-traits/unconstrained-var-specialization.rs",
 
-    // TODO: unconditionally const impl Trait: `impl const Trait`
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/const_trait_bound.rs",
-
     // TODO: conditionally const trait bound with lifetime bindar: `T: for<'a> [const] async Trait<'a>`
     // https://github.com/dtolnay/syn/issues/1888
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/for_binder_bound.rs",

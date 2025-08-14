@@ -792,6 +792,7 @@ pub(crate) mod parsing {
             };
 
             let is_conditionally_const = cfg!(feature = "full") && content.peek(token::Bracket);
+            let is_unconditionally_const = cfg!(feature = "full") && content.peek(Token![const]);
             if is_conditionally_const {
                 let conditionally_const;
                 let bracket_token = bracketed!(conditionally_const in content);
@@ -800,12 +801,18 @@ pub(crate) mod parsing {
                     let msg = "`[const]` is not allowed here";
                     return Err(Error::new(bracket_token.span.join(), msg));
                 }
+            } else if is_unconditionally_const {
+                let const_token: Token![const] = content.parse()?;
+                if !allow_const {
+                    let msg = "`const` is not allowed here";
+                    return Err(Error::new(const_token.span, msg));
+                }
             }
 
             let mut bound: TraitBound = content.parse()?;
             bound.paren_token = paren_token;
 
-            if is_conditionally_const {
+            if is_conditionally_const || is_unconditionally_const {
                 Ok(TypeParamBound::Verbatim(verbatim::between(&begin, input)))
             } else {
                 Ok(TypeParamBound::Trait(bound))
@@ -831,7 +838,7 @@ pub(crate) mod parsing {
                     || input.peek(Token![?])
                     || input.peek(Lifetime)
                     || input.peek(token::Paren)
-                    || (allow_const && input.peek(token::Bracket)))
+                    || (allow_const && (input.peek(token::Bracket) || input.peek(Token![const]))))
                 {
                     break;
                 }
