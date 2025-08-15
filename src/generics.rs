@@ -850,8 +850,11 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for TraitBound {
         fn parse(input: ParseStream) -> Result<Self> {
+            let mut lifetimes: Option<BoundLifetimes> = input.parse()?;
             let modifier: TraitBoundModifier = input.parse()?;
-            let lifetimes: Option<BoundLifetimes> = input.parse()?;
+            if lifetimes.is_none() && matches!(modifier, TraitBoundModifier::Maybe(_)) {
+                lifetimes = input.parse()?;
+            }
 
             let mut path: Path = input.parse()?;
             if path.segments.last().unwrap().arguments.is_empty()
@@ -861,6 +864,16 @@ pub(crate) mod parsing {
                 let args: ParenthesizedGenericArguments = input.parse()?;
                 let parenthesized = PathArguments::Parenthesized(args);
                 path.segments.last_mut().unwrap().arguments = parenthesized;
+            }
+
+            if lifetimes.is_some() {
+                match modifier {
+                    TraitBoundModifier::None => {}
+                    TraitBoundModifier::Maybe(maybe) => {
+                        let msg = "`for<...>` binder not allowed with `?` trait polarity modifier";
+                        return Err(Error::new(maybe.span, msg));
+                    }
+                }
             }
 
             Ok(TraitBound {
