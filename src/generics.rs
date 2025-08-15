@@ -765,8 +765,6 @@ pub(crate) mod parsing {
                 return input.parse().map(TypeParamBound::Lifetime);
             }
 
-            let begin = input.fork();
-
             #[cfg(feature = "full")]
             {
                 if input.peek(Token![use]) {
@@ -784,6 +782,8 @@ pub(crate) mod parsing {
                 }
             }
 
+            let begin = input.fork();
+
             let content;
             let (paren_token, content) = if input.peek(token::Paren) {
                 (Some(parenthesized!(content in input)), &content)
@@ -791,31 +791,11 @@ pub(crate) mod parsing {
                 (None, input)
             };
 
-            let is_conditionally_const = cfg!(feature = "full") && content.peek(token::Bracket);
-            let is_unconditionally_const = cfg!(feature = "full") && content.peek(Token![const]);
-            if is_conditionally_const {
-                let conditionally_const;
-                let bracket_token = bracketed!(conditionally_const in content);
-                conditionally_const.parse::<Token![const]>()?;
-                if !allow_const {
-                    let msg = "`[const]` is not allowed here";
-                    return Err(Error::new(bracket_token.span.join(), msg));
-                }
-            } else if is_unconditionally_const {
-                let const_token: Token![const] = content.parse()?;
-                if !allow_const {
-                    let msg = "`const` is not allowed here";
-                    return Err(Error::new(const_token.span, msg));
-                }
-            }
-
-            let mut bound: TraitBound = content.parse()?;
-            bound.paren_token = paren_token;
-
-            if is_conditionally_const || is_unconditionally_const {
-                Ok(TypeParamBound::Verbatim(verbatim::between(&begin, input)))
-            } else {
+            if let Some(mut bound) = TraitBound::do_parse(content, allow_const)? {
+                bound.paren_token = paren_token;
                 Ok(TypeParamBound::Trait(bound))
+            } else {
+                Ok(TypeParamBound::Verbatim(verbatim::between(&begin, input)))
             }
         }
 
@@ -850,6 +830,31 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for TraitBound {
         fn parse(input: ParseStream) -> Result<Self> {
+            let allow_const = false;
+            Self::do_parse(input, allow_const).map(Option::unwrap)
+        }
+    }
+
+    impl TraitBound {
+        fn do_parse(input: ParseStream, allow_const: bool) -> Result<Option<Self>> {
+            let is_conditionally_const = cfg!(feature = "full") && input.peek(token::Bracket);
+            let is_unconditionally_const = cfg!(feature = "full") && input.peek(Token![const]);
+            if is_conditionally_const {
+                let conditionally_const;
+                let bracket_token = bracketed!(conditionally_const in input);
+                conditionally_const.parse::<Token![const]>()?;
+                if !allow_const {
+                    let msg = "`[const]` is not allowed here";
+                    return Err(Error::new(bracket_token.span.join(), msg));
+                }
+            } else if is_unconditionally_const {
+                let const_token: Token![const] = input.parse()?;
+                if !allow_const {
+                    let msg = "`const` is not allowed here";
+                    return Err(Error::new(const_token.span, msg));
+                }
+            }
+
             let mut lifetimes: Option<BoundLifetimes> = input.parse()?;
             let modifier: TraitBoundModifier = input.parse()?;
             if lifetimes.is_none() && matches!(modifier, TraitBoundModifier::Maybe(_)) {
@@ -876,12 +881,16 @@ pub(crate) mod parsing {
                 }
             }
 
-            Ok(TraitBound {
-                paren_token: None,
-                modifier,
-                lifetimes,
-                path,
-            })
+            if is_conditionally_const || is_unconditionally_const {
+                Ok(None)
+            } else {
+                Ok(Some(TraitBound {
+                    paren_token: None,
+                    modifier,
+                    lifetimes,
+                    path,
+                }))
+            }
         }
     }
 
