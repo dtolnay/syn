@@ -837,6 +837,8 @@ pub(crate) mod parsing {
 
     impl TraitBound {
         fn do_parse(input: ParseStream, allow_const: bool) -> Result<Option<Self>> {
+            let mut lifetimes: Option<BoundLifetimes> = input.parse()?;
+
             let is_conditionally_const = cfg!(feature = "full") && input.peek(token::Bracket);
             let is_unconditionally_const = cfg!(feature = "full") && input.peek(Token![const]);
             if is_conditionally_const {
@@ -855,7 +857,6 @@ pub(crate) mod parsing {
                 }
             }
 
-            let mut lifetimes: Option<BoundLifetimes> = input.parse()?;
             let modifier: TraitBoundModifier = input.parse()?;
             if lifetimes.is_none() && matches!(modifier, TraitBoundModifier::Maybe(_)) {
                 lifetimes = input.parse()?;
