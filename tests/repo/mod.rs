@@ -27,9 +27,12 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/clippy/tests/ui/trait_duplication_in_bounds.rs",
     "src/tools/rust-analyzer/crates/test-utils/src/minicore.rs",
 
-    // TODO: conditionally const trait bound with lifetime bindar: `T: for<'a> [const] async Trait<'a>`
-    // https://github.com/dtolnay/syn/issues/1888
+    // TODO: async trait bounds: `T: async Trait`
+    // https://github.com/dtolnay/syn/issues/1901
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/for_binder_bound.rs",
+
+    // TODO: bound lifetime with lifetime bound: `T: for<'a: 'b> Trait<'a>`
+    // https://github.com/dtolnay/syn/issues/1900
     "tests/ui/traits/const-traits/conditionally-const-trait-bound-syntax.rs",
 
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
