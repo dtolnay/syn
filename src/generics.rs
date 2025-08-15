@@ -671,8 +671,23 @@ pub(crate) mod parsing {
                 lifetimes: {
                     let mut lifetimes = Punctuated::new();
                     while !input.peek(Token![>]) {
-                        let lifetime_param: LifetimeParam = input.parse()?;
-                        lifetimes.push_value(GenericParam::Lifetime(lifetime_param));
+                        let attrs = input.call(Attribute::parse_outer)?;
+
+                        let lookahead = input.lookahead1();
+                        if lookahead.peek(Lifetime) {
+                            lifetimes.push_value(GenericParam::Lifetime(LifetimeParam {
+                                attrs,
+                                ..input.parse()?
+                            }));
+                        } else if cfg!(feature = "full") && lookahead.peek(Ident) {
+                            lifetimes.push_value(GenericParam::Type(TypeParam {
+                                attrs,
+                                ..input.parse()?
+                            }));
+                        } else {
+                            return Err(lookahead.error());
+                        }
+
                         if input.peek(Token![>]) {
                             break;
                         }
