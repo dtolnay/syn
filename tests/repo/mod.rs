@@ -31,10 +31,6 @@ static EXCLUDE_FILES: &[&str] = &[
     // https://github.com/dtolnay/syn/issues/1901
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/for_binder_bound.rs",
 
-    // TODO: bound lifetime with lifetime bound: `T: for<'a: 'b> Trait<'a>`
-    // https://github.com/dtolnay/syn/issues/1900
-    "tests/ui/traits/const-traits/conditionally-const-trait-bound-syntax.rs",
-
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
     // https://github.com/dtolnay/syn/issues/1435
     "src/tools/rustfmt/tests/source/issue_5721.rs",
