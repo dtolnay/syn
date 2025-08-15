@@ -381,6 +381,7 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/field_expr.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/generic_arg_bounds.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/global_asm.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/question_for_type_trait_bound.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/ref_expr.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/use_tree_abs_star.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0015_use_tree.rs",
