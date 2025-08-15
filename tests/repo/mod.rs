@@ -282,9 +282,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/closure_range_method_call.rs",
     "src/tools/rustfmt/tests/source/issue-4808.rs",
 
-    // Rustc bug: https://github.com/rust-lang/rust/issues/132080
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/ok/0073_safe_declarations_in_extern_blocks.rs",
-
     // Negative inherent impl: `impl !Box<JoinHandle> {}`
     "src/tools/rustfmt/tests/source/negative-impl.rs",
     "src/tools/rustfmt/tests/target/negative-impl.rs",
