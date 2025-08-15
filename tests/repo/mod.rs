@@ -20,6 +20,11 @@ const REVISION: &str = "3672a55b7cfd0a12e7097197b6242872473ffaa7";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
+    // TODO: non-lifetime binders on closures: `let _ = for<T> || {}`
+    // https://github.com/dtolnay/syn/issues/1906
+    "src/tools/rustfmt/tests/target/non-lifetime-binders.rs",
+    "src/tools/rustfmt/tests/source/non-lifetime-binders.rs",
+
     // TODO: const traits: `pub const trait Trait {}`
     // https://github.com/dtolnay/syn/issues/1887
     "src/tools/clippy/tests/ui/assign_ops.rs",
@@ -307,10 +312,6 @@ static EXCLUDE_FILES: &[&str] = &[
 
     // Lifetimes and types out of order in angle bracketed path arguments
     "tests/ui/parser/constraints-before-generic-args-syntactic-pass.rs",
-
-    // Const parameter in lifetime binder: `for<const C: usize> [T; C]: Sized`
-    "src/tools/rustfmt/tests/target/non-lifetime-binders.rs",
-    "src/tools/rustfmt/tests/source/non-lifetime-binders.rs",
 
     // Deprecated anonymous parameter syntax in traits
     "src/tools/rustfmt/tests/source/trait.rs",
