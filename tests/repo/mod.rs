@@ -34,9 +34,7 @@ static EXCLUDE_FILES: &[&str] = &[
     // TODO: non-lifetime binders: `where for<'a, T> &'a Struct<T>: Trait`
     // https://github.com/dtolnay/syn/issues/1435
     "src/tools/rustfmt/tests/source/issue_5721.rs",
-    "src/tools/rustfmt/tests/source/non-lifetime-binders.rs",
     "src/tools/rustfmt/tests/target/issue_5721.rs",
-    "src/tools/rustfmt/tests/target/non-lifetime-binders.rs",
     "tests/rustdoc-json/non_lifetime_binders.rs",
     "tests/rustdoc/inline_cross/auxiliary/non_lifetime_binders.rs",
     "tests/rustdoc/non_lifetime_binders.rs",
@@ -321,6 +319,10 @@ static EXCLUDE_FILES: &[&str] = &[
 
     // Lifetimes and types out of order in angle bracketed path arguments
     "tests/ui/parser/constraints-before-generic-args-syntactic-pass.rs",
+
+    // Const parameter in lifetime binder: `for<const C: usize> [T; C]: Sized`
+    "src/tools/rustfmt/tests/target/non-lifetime-binders.rs",
+    "src/tools/rustfmt/tests/source/non-lifetime-binders.rs",
 
     // Deprecated anonymous parameter syntax in traits
     "src/tools/rustfmt/tests/source/trait.rs",
