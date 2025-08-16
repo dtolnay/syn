@@ -909,7 +909,7 @@ pub(crate) mod parsing {
     use crate::error::{Error, Result};
     use crate::expr::Expr;
     use crate::ext::IdentExt as _;
-    use crate::generics::{Generics, TypeParamBound};
+    use crate::generics::{self, Generics, TypeParamBound};
     use crate::ident::Ident;
     use crate::item::{
         FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
@@ -2567,15 +2567,7 @@ pub(crate) mod parsing {
         let unsafety: Option<Token![unsafe]> = input.parse()?;
         let impl_token: Token![impl] = input.parse()?;
 
-        let has_generics = input.peek(Token![<])
-            && (input.peek2(Token![>])
-                || input.peek2(Token![#])
-                || (input.peek2(Ident) || input.peek2(Lifetime))
-                    && (input.peek3(Token![:])
-                        || input.peek3(Token![,])
-                        || input.peek3(Token![>])
-                        || input.peek3(Token![=]))
-                || input.peek2(Token![const]));
+        let has_generics = generics::parsing::choose_generics_over_qpath(input);
         let mut generics: Generics = if has_generics {
             input.parse()?
         } else {

@@ -926,8 +926,15 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for WhereClause {
         fn parse(input: ParseStream) -> Result<Self> {
+            let where_token: Token![where] = input.parse()?;
+
+            if choose_generics_over_qpath(input) {
+                return Err(input
+                    .error("generic parameters on `where` clauses are reserved for future use"));
+            }
+
             Ok(WhereClause {
-                where_token: input.parse()?,
+                where_token,
                 predicates: {
                     let mut predicates = Punctuated::new();
                     loop {
@@ -1085,6 +1092,47 @@ pub(crate) mod parsing {
                 Err(lookahead.error())
             }
         }
+    }
+
+    pub(crate) fn choose_generics_over_qpath(input: ParseStream) -> bool {
+        // Rust syntax has an ambiguity between generic parameters and qualified
+        // paths. In `impl <T> :: Thing<T, U> {}` this may either be a generic
+        // inherent impl `impl<T> ::Thing<T, U>` or a non-generic inherent impl
+        // for an associated type `impl <T>::Thing<T, U>`.
+        //
+        // After `<` the following continuations can only begin generics, not a
+        // qualified path:
+        //
+        //     `<` `>`                  - empty generic parameters
+        //     `<` `#`                  - generic parameters with attribute
+        //     `<` LIFETIME `>`         - single lifetime parameter
+        //     `<` (LIFETIME|IDENT) `,` - first generic parameter in a list
+        //     `<` (LIFETIME|IDENT) `:` - generic parameter with bounds
+        //     `<` (LIFETIME|IDENT) `=` - generic parameter with a default
+        //     `<` const                - generic const parameter
+        //
+        // The only truly ambiguous case is:
+        //
+        //     `<` IDENT `>` `::` IDENT ...
+        //
+        // which we disambiguate in favor of generics because this is almost
+        // always the expected one in the context of real-world code.
+        input.peek(Token![<])
+            && (input.peek2(Token![>])
+                || input.peek2(Token![#])
+                || (input.peek2(Lifetime) || input.peek2(Ident))
+                    && (input.peek3(Token![>])
+                        || input.peek3(Token![,])
+                        || input.peek3(Token![:]) && !input.peek3(Token![::])
+                        || input.peek3(Token![=]))
+                || input.peek2(Token![const]))
+    }
+
+    #[cfg(feature = "full")]
+    pub(crate) fn choose_generics_over_qpath_after_keyword(input: ParseStream) -> bool {
+        let input = input.fork();
+        input.call(Ident::parse_any).unwrap(); // `impl` or `for` or `where`
+        choose_generics_over_qpath(&input)
     }
 }
 
