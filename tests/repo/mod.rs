@@ -27,10 +27,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/clippy/tests/ui/trait_duplication_in_bounds.rs",
     "src/tools/rust-analyzer/crates/test-utils/src/minicore.rs",
 
-    // TODO: async trait bounds: `T: async Trait`
-    // https://github.com/dtolnay/syn/issues/1901
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/for_binder_bound.rs",
-
     // TODO: unsafe binders: `unsafe<'a> &'a T`
     // https://github.com/dtolnay/syn/issues/1791
     "src/tools/rustfmt/tests/source/unsafe-binders.rs",
@@ -139,6 +135,7 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/miri/tests/pass/async-closure-captures.rs",
     "src/tools/miri/tests/pass/async-closure-drop.rs",
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/async_trait_bound.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/for_binder_bound.rs",
     "src/tools/rustfmt/tests/target/asyncness.rs",
     "tests/coverage/async_closure.rs",
     "tests/ui/async-await/async-closures/async-fn-mut-for-async-fn.rs",
