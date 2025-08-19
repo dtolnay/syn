@@ -86,7 +86,7 @@ fn introspect_item(item: &AstItem, lookup: &Lookup) -> types::Node {
                     types::Data::Private
                 }
             },
-            exhaustive: true,
+            exhaustive: !is_non_exhaustive(&item.ast.attrs),
         },
         Data::Union(..) => panic!("union not supported"),
     }
@@ -307,7 +307,7 @@ mod parsing {
     }
 
     pub fn ast_struct(input: ParseStream) -> Result<AstItem> {
-        input.call(Attribute::parse_outer)?;
+        let attrs = input.call(Attribute::parse_outer)?;
         input.parse::<Token![pub]>()?;
         input.parse::<Token![struct]>()?;
         let ident: Ident = input.parse()?;
@@ -315,6 +315,7 @@ mod parsing {
         let rest: TokenStream = input.parse()?;
         Ok(AstItem {
             ast: syn::parse2(quote! {
+                #(#attrs)*
                 pub struct #ident #rest
             })?,
             features,
