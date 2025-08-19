@@ -722,13 +722,11 @@ impl SpanlessEq for TokenStream {
         let mut this_trees = self.iter();
         let mut other_trees = other.iter();
         loop {
-            let this = match this_trees.next() {
-                None => return other_trees.next().is_none(),
-                Some(tree) => tree,
+            let Some(this) = this_trees.next() else {
+                return other_trees.next().is_none();
             };
-            let other = match other_trees.next() {
-                None => return false,
-                Some(tree) => tree,
+            let Some(other) = other_trees.next() else {
+                return false;
             };
             if SpanlessEq::eq(this, other) {
                 continue;
@@ -774,9 +772,9 @@ fn doc_comment<'a>(
             _ => return false,
         }
     }
-    let stream = match trees.next() {
-        Some(TokenTree::Delimited(_span, _spacing, Delimiter::Bracket, stream)) => stream,
-        _ => return false,
+    let Some(TokenTree::Delimited(_span, _spacing, Delimiter::Bracket, stream)) = trees.next()
+    else {
+        return false;
     };
     let mut trees = stream.iter();
     match trees.next() {
