@@ -27,5 +27,3 @@ syn-codegen = { path = "../json", default-features = false }
 toml = { version = "0.9", default-features = false, features = ["parse", "serde"] }
 
 [workspace]
-[patch.crates-io]
-syn = { path = ".." }
