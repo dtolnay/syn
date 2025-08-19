@@ -306,8 +306,10 @@ mod parsing {
         }
     }
 
-    // Parses a simple AstStruct without the `pub struct` prefix.
-    fn ast_struct_inner(input: ParseStream) -> Result<AstItem> {
+    pub fn ast_struct(input: ParseStream) -> Result<AstItem> {
+        input.call(Attribute::parse_outer)?;
+        input.parse::<Token![pub]>()?;
+        input.parse::<Token![struct]>()?;
         let ident: Ident = input.parse()?;
         let features = full(input);
         let rest: TokenStream = input.parse()?;
@@ -317,14 +319,6 @@ mod parsing {
             })?,
             features,
         })
-    }
-
-    pub fn ast_struct(input: ParseStream) -> Result<AstItem> {
-        input.call(Attribute::parse_outer)?;
-        input.parse::<Token![pub]>()?;
-        input.parse::<Token![struct]>()?;
-        let res = input.call(ast_struct_inner)?;
-        Ok(res)
     }
 
     pub fn ast_enum(input: ParseStream) -> Result<AstItem> {
