@@ -593,7 +593,7 @@ spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0) ParenthesizedE
 spanless_eq_enum!(GenericBound; Trait(0) Outlives(0) Use(0 1));
 spanless_eq_enum!(GenericParamKind; Lifetime Type(default) Const(ty span default));
 spanless_eq_enum!(ImplPolarity; Positive Negative(0));
-spanless_eq_enum!(Inline; Yes No);
+spanless_eq_enum!(Inline; Yes No(had_parse_error));
 spanless_eq_enum!(InlineAsmRegOrRegClass; Reg(0) RegClass(0));
 spanless_eq_enum!(InlineAsmTemplatePiece; String(0) Placeholder(operand_idx modifier span));
 spanless_eq_enum!(IntTy; Isize I8 I16 I32 I64 I128);
@@ -605,7 +605,7 @@ spanless_eq_enum!(MacStmtStyle; Semicolon Braces NoBraces);
 spanless_eq_enum!(MatchKind; Prefix Postfix);
 spanless_eq_enum!(MetaItemKind; Word List(0) NameValue(0));
 spanless_eq_enum!(MetaItemInner; MetaItem(0) Lit(0));
-spanless_eq_enum!(ModKind; Loaded(0 1 2 3) Unloaded);
+spanless_eq_enum!(ModKind; Loaded(0 1 2) Unloaded);
 spanless_eq_enum!(Movability; Static Movable);
 spanless_eq_enum!(Mutability; Mut Not);
 spanless_eq_enum!(Parens; Yes No);
