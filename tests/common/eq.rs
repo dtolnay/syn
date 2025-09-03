@@ -609,7 +609,7 @@ spanless_eq_enum!(ModKind; Loaded(0 1 2) Unloaded);
 spanless_eq_enum!(Movability; Static Movable);
 spanless_eq_enum!(Mutability; Mut Not);
 spanless_eq_enum!(Parens; Yes No);
-spanless_eq_enum!(PatFieldsRest; Rest Recovered(0) None);
+spanless_eq_enum!(PatFieldsRest; Rest(0) Recovered(0) None);
 spanless_eq_enum!(PreciseCapturingArg; Lifetime(0) Arg(0 1));
 spanless_eq_enum!(RangeEnd; Included(0) Excluded);
 spanless_eq_enum!(RangeLimits; HalfOpen Closed);
