@@ -1302,7 +1302,7 @@ mod value {
                             let (byte, rest) = backslash_x(s);
                             s = rest;
                             assert!(byte <= 0x7F, "invalid \\x byte in string literal");
-                            char::from_u32(u32::from(byte)).unwrap()
+                            char::from(byte)
                         }
                         b'u' => {
                             let (ch, rest) = backslash_u(s);
@@ -1583,7 +1583,7 @@ mod value {
                         let (byte, rest) = backslash_x(s);
                         s = rest;
                         assert!(byte <= 0x7F, "invalid \\x byte in character literal");
-                        char::from_u32(u32::from(byte)).unwrap()
+                        char::from(byte)
                     }
                     b'u' => {
                         let (ch, rest) = backslash_u(s);
