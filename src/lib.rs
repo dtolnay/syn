@@ -551,7 +551,7 @@ mod verbatim;
 mod whitespace;
 
 #[rustfmt::skip] // https://github.com/rust-lang/rustfmt/issues/6176
-mod gen {
+mod r#gen {
     /// Syntax tree traversal to transform the nodes of an owned syntax tree.
     ///
     /// Each method of the [`Fold`] trait is a hook that can be overridden to
@@ -869,15 +869,15 @@ mod gen {
 
 #[cfg(feature = "fold")]
 #[cfg_attr(docsrs, doc(cfg(feature = "fold")))]
-pub use crate::gen::fold;
+pub use crate::r#gen::fold;
 
 #[cfg(feature = "visit")]
 #[cfg_attr(docsrs, doc(cfg(feature = "visit")))]
-pub use crate::gen::visit;
+pub use crate::r#gen::visit;
 
 #[cfg(feature = "visit-mut")]
 #[cfg_attr(docsrs, doc(cfg(feature = "visit-mut")))]
-pub use crate::gen::visit_mut;
+pub use crate::r#gen::visit_mut;
 
 // Not public API.
 #[doc(hidden)]
