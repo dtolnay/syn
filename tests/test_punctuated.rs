@@ -83,3 +83,10 @@ fn may_dangle() {
         }
     }
 }
+
+#[test]
+#[should_panic = "attempt to subtract with overflow"]
+fn index_out_of_bounds() {
+    let p = Punctuated::<syn::Ident, Token![,]>::new();
+    let _ = p[0].clone();
+}
