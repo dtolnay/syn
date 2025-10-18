@@ -326,6 +326,7 @@ fn test_where_clause_at_end_of_input() {
 
 // Regression test for https://github.com/dtolnay/syn/issues/1718
 #[test]
+#[allow(clippy::map_unwrap_or)]
 fn no_opaque_drop() {
     let mut generics = Generics::default();
 
