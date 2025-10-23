@@ -621,7 +621,7 @@ spanless_eq_enum!(StructRest; Base(0) Rest(0) None);
 spanless_eq_enum!(Term; Ty(0) Const(0));
 spanless_eq_enum!(TokenTree; Token(0 1) Delimited(0 1 2 3));
 spanless_eq_enum!(TraitObjectSyntax; Dyn None);
-spanless_eq_enum!(TyPatKind; Range(0 1 2) Or(0) Err(0));
+spanless_eq_enum!(TyPatKind; Range(0 1 2) NotNull Or(0) Err(0));
 spanless_eq_enum!(UintTy; Usize U8 U16 U32 U64 U128);
 spanless_eq_enum!(UnOp; Deref Not Neg);
 spanless_eq_enum!(UnsafeBinderCastKind; Wrap Unwrap);
