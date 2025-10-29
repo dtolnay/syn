@@ -356,7 +356,7 @@ pub fn generate(defs: &Definitions) -> Result<()> {
     file::write(
         TESTS_DEBUG_SRC,
         quote! {
-            // False positive: https://github.com/rust-lang/rust/issues/78586#issuecomment-1722680482
+            // False positive: https://github.com/rust-lang/rust/issues/115922
             #![allow(repr_transparent_external_private_fields)]
 
             #![allow(clippy::match_wildcard_for_single_variants)]
