@@ -494,7 +494,7 @@ spanless_eq_struct!(Expr; id kind span attrs !tokens);
 spanless_eq_struct!(ExprField; attrs id span ident expr is_shorthand is_placeholder);
 spanless_eq_struct!(FieldDef; attrs id span vis safety ident ty default is_placeholder);
 spanless_eq_struct!(Fn; defaultness ident generics sig contract define_opaque body);
-spanless_eq_struct!(FnContract; requires ensures);
+spanless_eq_struct!(FnContract; declarations requires ensures);
 spanless_eq_struct!(FnDecl; inputs output);
 spanless_eq_struct!(FnHeader; constness coroutine_kind safety ext);
 spanless_eq_struct!(FnPtrTy; safety ext generic_params decl decl_span);
