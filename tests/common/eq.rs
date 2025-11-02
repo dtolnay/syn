@@ -142,6 +142,7 @@ use rustc_ast::ast::StructExpr;
 use rustc_ast::ast::StructRest;
 use rustc_ast::ast::Term;
 use rustc_ast::ast::Trait;
+use rustc_ast::ast::TraitAlias;
 use rustc_ast::ast::TraitBoundModifiers;
 use rustc_ast::ast::TraitImplHeader;
 use rustc_ast::ast::TraitObjectSyntax;
@@ -537,6 +538,7 @@ spanless_eq_struct!(StrLit; symbol suffix symbol_unescaped style span);
 spanless_eq_struct!(StructExpr; qself path fields rest);
 spanless_eq_struct!(Token; kind span);
 spanless_eq_struct!(Trait; constness safety is_auto ident generics bounds items);
+spanless_eq_struct!(TraitAlias; constness ident generics bounds);
 spanless_eq_struct!(TraitBoundModifiers; constness asyncness polarity);
 spanless_eq_struct!(TraitImplHeader; defaultness safety constness polarity trait_ref);
 spanless_eq_struct!(TraitRef; path ref_id);
@@ -646,7 +648,7 @@ spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
     Sym(sym) Label(block));
 spanless_eq_enum!(ItemKind; ExternCrate(0 1) Use(0) Static(0) Const(0) Fn(0)
     Mod(0 1 2) ForeignMod(0) GlobalAsm(0) TyAlias(0) Enum(0 1 2) Struct(0 1 2)
-    Union(0 1 2) Trait(0) TraitAlias(0 1 2) Impl(0) MacCall(0) MacroDef(0 1)
+    Union(0 1 2) Trait(0) TraitAlias(0) Impl(0) MacCall(0) MacroDef(0 1)
     Delegation(0) DelegationMac(0));
 spanless_eq_enum!(LitKind; Str(0 1) ByteStr(0 1) CStr(0 1) Byte(0) Char(0)
     Int(0 1) Float(0 1) Bool(0) Err(0));
