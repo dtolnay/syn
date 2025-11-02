@@ -4,8 +4,8 @@ use crate::sealed::lookahead::Sealed;
 use crate::span::IntoSpans;
 use crate::token::{CustomToken, Token};
 use proc_macro2::{Delimiter, Span};
-use std::borrow::Borrow;
 use std::cell::RefCell;
+use std::fmt::{self, Display};
 
 /// Support for checking the next token in a stream to decide how to parse.
 ///
@@ -140,27 +140,24 @@ impl<'a> Lookahead1<'a> {
                 error::new_at(self.scope, self.cursor, message)
             }
             _ => {
-                let message = format!(
-                    "expected one of: {}",
-                    DisplayJoined(", ", comparisons.as_slice())
-                );
+                let message = format!("expected one of: {}", CommaSeparated(&comparisons));
                 error::new_at(self.scope, self.cursor, message)
             }
         }
     }
 }
 
-pub(crate) struct DisplayJoined<'a, S: Borrow<str>>(pub &'static str, pub &'a [S]);
+struct CommaSeparated<'a>(&'a [&'a str]);
 
-impl<'a, S: Borrow<str>> std::fmt::Display for DisplayJoined<'a, S> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut sep = false;
-        for s in self.1 {
-            if sep {
-                f.write_str(self.0)?;
+impl<'a> Display for CommaSeparated<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut first = true;
+        for &s in self.0 {
+            if !first {
+                f.write_str(", ")?;
             }
-            sep = true;
-            f.write_str(s.borrow())?;
+            f.write_str(s)?;
+            first = false;
         }
         Ok(())
     }
