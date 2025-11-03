@@ -224,7 +224,7 @@ impl Error {
     /// [`parse_macro_input!`]: crate::parse_macro_input!
     pub fn to_compile_error(&self) -> TokenStream {
         let mut ts = TokenStream::new();
-        for msg in self.messages.as_slice() {
+        for msg in &self.messages {
             ts.extend(ErrorMessage::to_compile_error(msg));
         }
         ts
