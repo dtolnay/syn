@@ -27,6 +27,8 @@ use crate::error::Result;
 use crate::parse::{Parse, ParseStream};
 #[cfg(feature = "parsing")]
 use crate::token::Token;
+#[cfg(all(feature = "fold", any(feature = "full", feature = "derive")))]
+use std::collections::VecDeque;
 #[cfg(feature = "extra-traits")]
 use std::fmt::{self, Debug};
 #[cfg(feature = "extra-traits")]
@@ -1111,19 +1113,19 @@ where
     V: ?Sized,
     F: FnMut(&mut V, T) -> T,
 {
-    use std::collections::VecDeque;
-
     let Punctuated { inner, last } = punctuated;
 
-    // VecDeque trick prevents allocation of new Vec<(T, P)>
-    let mut q = VecDeque::from(inner);
-    for _ in 0..q.len() {
-        if let Some((t, p)) = q.pop_front() {
-            q.push_back((f(fold, t), p));
+    // Convert into VecDeque to prevent needing to allocate a new Vec<(T, P)>
+    // for the folded elements.
+    let mut inner = VecDeque::from(inner);
+    for _ in 0..inner.len() {
+        if let Some((t, p)) = inner.pop_front() {
+            inner.push_back((f(fold, t), p));
         }
     }
+
     Punctuated {
-        inner: Vec::from(q),
+        inner: Vec::from(inner),
         last: match last {
             Some(t) => Some(Box::new(f(fold, *t))),
             None => None,
