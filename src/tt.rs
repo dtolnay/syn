@@ -17,19 +17,10 @@ impl<'a> PartialEq for TokenTreeHelper<'a> {
                     _ => return false,
                 }
 
-                let s1 = g1.stream().into_iter();
-                let mut s2 = g2.stream().into_iter();
+                let tokens1 = TokenStreamHelper(&g1.stream());
+                let tokens2 = TokenStreamHelper(&g2.stream());
 
-                for item1 in s1 {
-                    let item2 = match s2.next() {
-                        Some(item) => item,
-                        None => return false,
-                    };
-                    if TokenTreeHelper(&item1) != TokenTreeHelper(&item2) {
-                        return false;
-                    }
-                }
-                s2.next().is_none()
+                tokens1.eq(&tokens2)
             }
             (TokenTree::Punct(o1), TokenTree::Punct(o2)) => {
                 o1.as_char() == o2.as_char()
@@ -82,24 +73,36 @@ pub(crate) struct TokenStreamHelper<'a>(pub &'a TokenStream);
 
 impl<'a> PartialEq for TokenStreamHelper<'a> {
     fn eq(&self, other: &Self) -> bool {
-        let left = self.0.clone().into_iter().collect::<Vec<_>>();
-        let right = other.0.clone().into_iter().collect::<Vec<_>>();
-        if left.len() != right.len() {
+        let left = self.0.clone().into_iter();
+        let mut right = other.0.clone().into_iter();
+
+        debug_assert_eq!(left.size_hint().0, self.0.clone().into_iter().count());
+        debug_assert_eq!(right.size_hint().0, other.0.clone().into_iter().count());
+
+        if left.size_hint() != right.size_hint() {
             return false;
         }
-        for (a, b) in left.into_iter().zip(right) {
-            if TokenTreeHelper(&a) != TokenTreeHelper(&b) {
+
+        for item1 in left {
+            let item2 = match right.next() {
+                Some(item) => item,
+                None => return false,
+            };
+            if TokenTreeHelper(&item1) != TokenTreeHelper(&item2) {
                 return false;
             }
         }
-        true
+        right.next().is_none()
     }
 }
 
 impl<'a> Hash for TokenStreamHelper<'a> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let tokens = self.0.clone().into_iter().collect::<Vec<_>>();
-        tokens.len().hash(state);
+        let tokens = self.0.clone().into_iter();
+
+        debug_assert_eq!(tokens.size_hint().0, self.0.clone().into_iter().count());
+
+        tokens.size_hint().0.hash(state);
         for tt in tokens {
             TokenTreeHelper(&tt).hash(state);
         }
