@@ -212,12 +212,13 @@ impl LitStr {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
         use proc_macro2::Group;
+        use quote::TokenStreamExt;
 
         // Token stream with every span replaced by the given one.
         fn respan_token_stream(stream: TokenStream, span: Span) -> TokenStream {
             let mut tokens = TokenStream::new();
             for token in stream.into_iter() {
-                tokens.extend(Some(respan_token_tree(token, span)));
+                tokens.append(respan_token_tree(token, span));
             }
             tokens
         }
