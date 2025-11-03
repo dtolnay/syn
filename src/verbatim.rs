@@ -1,7 +1,6 @@
 use crate::parse::ParseStream;
 use proc_macro2::{Delimiter, TokenStream};
 use std::cmp::Ordering;
-use std::iter;
 
 pub(crate) fn between<'a>(begin: ParseStream<'a>, end: ParseStream<'a>) -> TokenStream {
     let end = end.cursor();
@@ -26,7 +25,7 @@ pub(crate) fn between<'a>(begin: ParseStream<'a>, end: ParseStream<'a>) -> Token
             }
         }
 
-        tokens.extend(iter::once(tt));
+        tokens.extend(TokenStream::from(tt));
         cursor = next;
     }
     tokens
