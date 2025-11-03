@@ -17,19 +17,10 @@ impl<'a> PartialEq for TokenTreeHelper<'a> {
                     _ => return false,
                 }
 
-                let s1 = g1.stream().into_iter();
-                let mut s2 = g2.stream().into_iter();
+                let tokens1 = TokenStreamHelper(&g1.stream());
+                let tokens2 = TokenStreamHelper(&g2.stream());
 
-                for item1 in s1 {
-                    let item2 = match s2.next() {
-                        Some(item) => item,
-                        None => return false,
-                    };
-                    if TokenTreeHelper(&item1) != TokenTreeHelper(&item2) {
-                        return false;
-                    }
-                }
-                s2.next().is_none()
+                tokens1.eq(&tokens2)
             }
             (TokenTree::Punct(o1), TokenTree::Punct(o2)) => {
                 o1.as_char() == o2.as_char()
@@ -101,7 +92,7 @@ impl<'a> PartialEq for TokenStreamHelper<'a> {
                 return false;
             }
         }
-        true
+        right.next().is_none()
     }
 }
 
