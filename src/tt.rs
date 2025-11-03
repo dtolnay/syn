@@ -98,9 +98,9 @@ impl<'a> PartialEq for TokenStreamHelper<'a> {
 
 impl<'a> Hash for TokenStreamHelper<'a> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let tts = self.0.clone().into_iter().collect::<Vec<_>>();
-        tts.len().hash(state);
-        for tt in tts {
+        let tokens = self.0.clone().into_iter().collect::<Vec<_>>();
+        tokens.len().hash(state);
+        for tt in tokens {
             TokenTreeHelper(&tt).hash(state);
         }
     }

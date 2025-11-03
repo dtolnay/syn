@@ -590,13 +590,13 @@ fn do_load_file(
                 let features = get_features(&item.attrs, features);
 
                 // Try to parse the AstItem declaration out of the item.
-                let tts = item.mac.tokens.clone();
+                let tokens = item.mac.tokens.clone();
                 let mut found = if item.mac.path.is_ident("ast_struct") {
-                    parsing::ast_struct.parse2(tts)
+                    parsing::ast_struct.parse2(tokens)
                 } else if item.mac.path.is_ident("ast_enum") {
-                    parsing::ast_enum.parse2(tts)
+                    parsing::ast_enum.parse2(tokens)
                 } else if item.mac.path.is_ident("ast_enum_of_structs") {
-                    parsing::ast_enum_of_structs.parse2(tts)
+                    parsing::ast_enum_of_structs.parse2(tokens)
                 } else {
                     continue;
                 }?;
