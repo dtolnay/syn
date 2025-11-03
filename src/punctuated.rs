@@ -1106,13 +1106,20 @@ where
     V: ?Sized,
     F: FnMut(&mut V, T) -> T,
 {
+    use std::collections::VecDeque;
+
+    let Punctuated { inner, last } = punctuated;
+
+    // VecDeque trick prevents allocation of new Vec<(T, P)>
+    let mut q = VecDeque::from(inner);
+    for _ in 0..q.len() {
+        if let Some((t, p)) = q.pop_front() {
+            q.push_back((f(fold, t), p));
+        }
+    }
     Punctuated {
-        inner: punctuated
-            .inner
-            .into_iter()
-            .map(|(t, p)| (f(fold, t), p))
-            .collect(),
-        last: match punctuated.last {
+        inner: Vec::from(q),
+        last: match last {
             Some(t) => Some(Box::new(f(fold, *t))),
             None => None,
         },
