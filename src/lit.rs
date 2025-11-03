@@ -217,7 +217,7 @@ impl LitStr {
         fn respan_token_stream(stream: TokenStream, span: Span) -> TokenStream {
             let mut tokens = TokenStream::new();
             for token in stream.into_iter() {
-                tokens.extend(TokenStream::from(respan_token_tree(token, span)));
+                tokens.extend(Some(respan_token_tree(token, span)));
             }
             tokens
         }
