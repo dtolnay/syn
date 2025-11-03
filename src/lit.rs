@@ -216,7 +216,7 @@ impl LitStr {
         // Token stream with every span replaced by the given one.
         fn respan_token_stream(stream: TokenStream, span: Span) -> TokenStream {
             let mut tokens = TokenStream::new();
-            for token in stream.into_iter() {
+            for token in stream {
                 tokens.extend(Some(respan_token_tree(token, span)));
             }
             tokens
