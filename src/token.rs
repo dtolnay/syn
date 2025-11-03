@@ -987,7 +987,7 @@ pub(crate) mod parsing {
                     return Ok((ident.span(), rest));
                 }
             }
-            Err(cursor.error(format!("expected `{}`", token)))
+            Err(cursor.error(format_args!("expected `{}`", token)))
         })
     }
 
@@ -1028,7 +1028,7 @@ pub(crate) mod parsing {
                 }
             }
 
-            Err(Error::new(spans[0], format!("expected `{}`", token)))
+            Err(Error::new(spans[0], format_args!("expected `{}`", token)))
         })
     }
 

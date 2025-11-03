@@ -3112,7 +3112,7 @@ pub(crate) mod parsing {
         } else {
             return Ok(());
         };
-        let msg = format!("casts cannot be followed by {}", kind);
+        let msg = format_args!("casts cannot be followed by {}", kind);
         Err(input.error(msg))
     }
 }

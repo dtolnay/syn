@@ -132,15 +132,16 @@ impl<'a> Lookahead1<'a> {
                 }
             }
             1 => {
-                let message = format!("expected {}", comparisons[0]);
+                let message = format_args!("expected {}", comparisons[0]);
                 error::new_at(self.scope, self.cursor, message)
             }
             2 => {
-                let message = format!("expected {} or {}", comparisons[0], comparisons[1]);
+                let message = format_args!("expected {} or {}", comparisons[0], comparisons[1]);
                 error::new_at(self.scope, self.cursor, message)
             }
             _ => {
-                let message = format!("expected one of: {}", CommaSeparated(&comparisons));
+                let comparisons = CommaSeparated(&comparisons);
+                let message = format_args!("expected one of: {}", comparisons);
                 error::new_at(self.scope, self.cursor, message)
             }
         }

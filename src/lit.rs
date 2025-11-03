@@ -246,7 +246,7 @@ impl LitStr {
         if !suffix.is_empty() {
             return Err(Error::new(
                 self.span(),
-                format!("unexpected suffix `{}` on string literal", suffix),
+                format_args!("unexpected suffix `{}` on string literal", suffix),
             ));
         }
 

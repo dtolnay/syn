@@ -247,7 +247,7 @@ impl Attribute {
             Meta::Path(path) => Err(crate::error::new2(
                 path.segments.first().unwrap().ident.span(),
                 path.segments.last().unwrap().ident.span(),
-                format!(
+                format_args!(
                     "expected attribute arguments in parentheses: {}[{}(...)]",
                     parsing::DisplayAttrStyle(&self.style),
                     parsing::DisplayPath(path),
@@ -535,7 +535,7 @@ impl Meta {
             Meta::Path(path) => Err(crate::error::new2(
                 path.segments.first().unwrap().ident.span(),
                 path.segments.last().unwrap().ident.span(),
-                format!(
+                format_args!(
                     "expected attribute arguments in parentheses: `{}(...)`",
                     parsing::DisplayPath(path),
                 ),
@@ -553,7 +553,7 @@ impl Meta {
             Meta::Path(path) => Err(crate::error::new2(
                 path.segments.first().unwrap().ident.span(),
                 path.segments.last().unwrap().ident.span(),
-                format!(
+                format_args!(
                     "expected a value for this attribute: `{} = ...`",
                     parsing::DisplayPath(path),
                 ),
