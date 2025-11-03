@@ -17,10 +17,7 @@ impl<'a> PartialEq for TokenTreeHelper<'a> {
                     _ => return false,
                 }
 
-                let tokens1 = TokenStreamHelper(&g1.stream());
-                let tokens2 = TokenStreamHelper(&g2.stream());
-
-                tokens1.eq(&tokens2)
+                TokenStreamHelper(&g1.stream()) == TokenStreamHelper(&g2.stream())
             }
             (TokenTree::Punct(o1), TokenTree::Punct(o2)) => {
                 o1.as_char() == o2.as_char()
@@ -76,13 +73,6 @@ impl<'a> PartialEq for TokenStreamHelper<'a> {
         let left = self.0.clone().into_iter();
         let mut right = other.0.clone().into_iter();
 
-        debug_assert_eq!(left.size_hint().0, self.0.clone().into_iter().count());
-        debug_assert_eq!(right.size_hint().0, other.0.clone().into_iter().count());
-
-        if left.size_hint() != right.size_hint() {
-            return false;
-        }
-
         for item1 in left {
             let item2 = match right.next() {
                 Some(item) => item,
@@ -92,6 +82,7 @@ impl<'a> PartialEq for TokenStreamHelper<'a> {
                 return false;
             }
         }
+
         right.next().is_none()
     }
 }
@@ -100,9 +91,8 @@ impl<'a> Hash for TokenStreamHelper<'a> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let tokens = self.0.clone().into_iter();
 
-        debug_assert_eq!(tokens.size_hint().0, self.0.clone().into_iter().count());
+        tokens.clone().count().hash(state);
 
-        tokens.size_hint().0.hash(state);
         for tt in tokens {
             TokenTreeHelper(&tt).hash(state);
         }
