@@ -285,13 +285,13 @@ impl<'a> Cursor<'a> {
     /// Copies all remaining tokens visible from this cursor into a
     /// `TokenStream`.
     pub fn token_stream(self) -> TokenStream {
-        let mut tts = Vec::new();
+        let mut tts = TokenStream::new();
         let mut cursor = self;
         while let Some((tt, rest)) = cursor.token_tree() {
-            tts.push(tt);
+            tts.extend(TokenStream::from(tt));
             cursor = rest;
         }
-        tts.into_iter().collect()
+        tts
     }
 
     /// If the cursor is pointing at a `TokenTree`, returns it along with a
