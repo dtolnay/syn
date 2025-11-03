@@ -1,12 +1,10 @@
-use proc_macro2::{Delimiter, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Spacing, TokenStream, TokenTree};
 use std::hash::{Hash, Hasher};
 
 pub(crate) struct TokenTreeHelper<'a>(pub &'a TokenTree);
 
 impl<'a> PartialEq for TokenTreeHelper<'a> {
     fn eq(&self, other: &Self) -> bool {
-        use proc_macro2::Spacing;
-
         match (self.0, other.0) {
             (TokenTree::Group(g1), TokenTree::Group(g2)) => {
                 match (g1.delimiter(), g2.delimiter()) {
@@ -35,8 +33,6 @@ impl<'a> PartialEq for TokenTreeHelper<'a> {
 
 impl<'a> Hash for TokenTreeHelper<'a> {
     fn hash<H: Hasher>(&self, h: &mut H) {
-        use proc_macro2::Spacing;
-
         match self.0 {
             TokenTree::Group(g) => {
                 0u8.hash(h);
