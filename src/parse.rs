@@ -1072,13 +1072,17 @@ impl<'a> ParseBuffer<'a> {
         // existence of a StepCursor<'c, 'a> as proof that it is safe to cast
         // from Cursor<'c> to Cursor<'a>. If needed outside of Syn, it would be
         // safe to expose that API as a method on StepCursor.
-        let (node, rest) = function(StepCursor {
+        match function(StepCursor {
             scope: self.scope,
             cursor: self.cell.get(),
             marker: PhantomData,
-        })?;
-        self.cell.set(rest);
-        Ok(node)
+        }) {
+            Ok((node, rest)) => {
+                self.cell.set(rest);
+                Ok(node)
+            }
+            Err(err) => Err(err),
+        }
     }
 
     /// Returns the `Span` of the next token in the parse stream, or
