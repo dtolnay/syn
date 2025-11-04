@@ -334,7 +334,7 @@ pub(crate) mod parsing {
     fn stmt_expr(
         input: ParseStream,
         allow_nosemi: AllowNoSemi,
-        mut attrs: Vec<Attribute>,
+        attrs: Vec<Attribute>,
     ) -> Result<Stmt> {
         let mut e = Expr::parse_with_earlier_boundary_rule(input)?;
 
@@ -383,8 +383,7 @@ pub(crate) mod parsing {
                 | Expr::Verbatim(_) => break,
             };
         }
-        attrs.extend(attr_target.replace_attrs(Vec::new()));
-        attr_target.replace_attrs(attrs);
+        attr_target.do_extend_attrs(attrs);
 
         let semi_token: Option<Token![;]> = input.parse()?;
 
