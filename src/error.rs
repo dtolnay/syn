@@ -1,6 +1,6 @@
 #[cfg(feature = "parsing")]
 use crate::buffer::Cursor;
-use crate::ext::TokenStreamExt as _;
+use crate::ext::{PunctExt as _, TokenStreamExt as _};
 use crate::thread::ThreadBound;
 use proc_macro2::{
     Delimiter, Group, Ident, LexError, Literal, Punct, Spacing, Span, TokenStream, TokenTree,
@@ -281,20 +281,34 @@ impl ErrorMessage {
             None => (Span::call_site(), Span::call_site()),
         };
 
-        fn punct(ch: char, spacing: Spacing, span: Span) -> TokenTree {
-            let mut punct = Punct::new(ch, spacing);
-            punct.set_span(span);
-            TokenTree::Punct(punct)
-        }
-
         // ::core::compile_error!($message)
-        tokens.append(punct(':', Spacing::Joint, start));
-        tokens.append(punct(':', Spacing::Alone, start));
+        tokens.append(TokenTree::Punct(Punct::new_spanned(
+            ':',
+            Spacing::Joint,
+            start,
+        )));
+        tokens.append(TokenTree::Punct(Punct::new_spanned(
+            ':',
+            Spacing::Alone,
+            start,
+        )));
         tokens.append(TokenTree::Ident(Ident::new("core", start)));
-        tokens.append(punct(':', Spacing::Joint, start));
-        tokens.append(punct(':', Spacing::Alone, start));
+        tokens.append(TokenTree::Punct(Punct::new_spanned(
+            ':',
+            Spacing::Joint,
+            start,
+        )));
+        tokens.append(TokenTree::Punct(Punct::new_spanned(
+            ':',
+            Spacing::Alone,
+            start,
+        )));
         tokens.append(TokenTree::Ident(Ident::new("compile_error", start)));
-        tokens.append(punct('!', Spacing::Alone, start));
+        tokens.append(TokenTree::Punct(Punct::new_spanned(
+            '!',
+            Spacing::Alone,
+            start,
+        )));
         tokens.append(TokenTree::Group({
             let mut group = Group::new(
                 Delimiter::Brace,
