@@ -1,4 +1,4 @@
-use crate::error::TokenStreamExt2;
+use crate::error::TokenStreamExt2 as _;
 use crate::parse::ParseStream;
 use proc_macro2::{Delimiter, TokenStream};
 use std::cmp::Ordering;
