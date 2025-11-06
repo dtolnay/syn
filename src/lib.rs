@@ -384,8 +384,6 @@ pub use crate::expr::{
     ExprWhile, ExprYield,
 };
 
-#[cfg(feature = "parsing")]
-#[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
 pub mod ext;
 
 #[cfg(feature = "full")]
