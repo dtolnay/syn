@@ -12,7 +12,7 @@ use crate::parse::Peek;
 use crate::sealed::lookahead;
 #[cfg(feature = "parsing")]
 use crate::token::CustomToken;
-use proc_macro2::{Ident, TokenStream, TokenTree};
+use proc_macro2::{Ident, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::iter;
 
 /// Additional methods for `Ident` not provided by proc-macro2 or libproc_macro.
@@ -139,6 +139,18 @@ pub(crate) trait TokenStreamExt {
 impl TokenStreamExt for TokenStream {
     fn append(&mut self, token: TokenTree) {
         self.extend(iter::once(token));
+    }
+}
+
+pub(crate) trait PunctExt {
+    fn new_spanned(ch: char, spacing: Spacing, span: Span) -> Self;
+}
+
+impl PunctExt for Punct {
+    fn new_spanned(ch: char, spacing: Spacing, span: Span) -> Self {
+        let mut punct = Punct::new(ch, spacing);
+        punct.set_span(span);
+        punct
     }
 }
 
