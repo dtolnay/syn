@@ -10,8 +10,6 @@ use std::ffi::{CStr, CString};
 use std::fmt::{self, Display};
 #[cfg(feature = "extra-traits")]
 use std::hash::{Hash, Hasher};
-#[cfg(feature = "parsing")]
-use std::iter;
 use std::str::{self, FromStr};
 
 ast_enum_of_structs! {
@@ -217,9 +215,11 @@ impl LitStr {
 
         // Token stream with every span replaced by the given one.
         fn respan_token_stream(stream: TokenStream, span: Span) -> TokenStream {
+            use crate::error::TokenStreamExt2;
+
             let mut tokens = TokenStream::new();
             for token in stream {
-                tokens.extend(iter::once(respan_token_tree(token, span)));
+                tokens.append(respan_token_tree(token, span));
             }
             tokens
         }
