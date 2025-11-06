@@ -109,7 +109,7 @@ use proc_macro2::{Delimiter, Ident};
 #[cfg(feature = "parsing")]
 use proc_macro2::{Literal, Punct, TokenTree};
 #[cfg(feature = "printing")]
-use quote::{ToTokens, TokenStreamExt};
+use quote::{ToTokens, TokenStreamExt as _};
 #[cfg(feature = "extra-traits")]
 use std::cmp;
 #[cfg(feature = "extra-traits")]
@@ -1058,7 +1058,7 @@ pub(crate) mod parsing {
 #[cfg(feature = "printing")]
 pub(crate) mod printing {
     use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream};
-    use quote::TokenStreamExt;
+    use quote::TokenStreamExt as _;
 
     #[doc(hidden)]
     pub fn punct(s: &str, spans: &[Span], tokens: &mut TokenStream) {
