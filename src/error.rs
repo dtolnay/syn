@@ -282,11 +282,9 @@ impl ErrorMessage {
         };
 
         fn punct(ch: char, spacing: Spacing, span: Span) -> TokenTree {
-            TokenTree::Punct({
-                let mut punct = Punct::new(ch, spacing);
-                punct.set_span(span);
-                punct
-            })
+            let mut punct = Punct::new(ch, spacing);
+            punct.set_span(span);
+            TokenTree::Punct(punct)
         }
 
         // ::core::compile_error!($message)
@@ -300,12 +298,11 @@ impl ErrorMessage {
         tokens.append(TokenTree::Group({
             let mut group = Group::new(
                 Delimiter::Brace,
-                TokenTree::Literal({
+                TokenStream::from({
                     let mut string = Literal::string(&self.message);
                     string.set_span(end);
-                    string
-                })
-                .into(),
+                    TokenTree::Literal(string)
+                }),
             );
             group.set_span(end);
             group

@@ -1,4 +1,6 @@
 #[cfg(feature = "parsing")]
+use crate::ext::TokenStreamExt2 as _;
+#[cfg(feature = "parsing")]
 use crate::lookahead;
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, Parser};
@@ -215,8 +217,6 @@ impl LitStr {
 
         // Token stream with every span replaced by the given one.
         fn respan_token_stream(stream: TokenStream, span: Span) -> TokenStream {
-            use crate::ext::TokenStreamExt2 as _;
-
             let mut tokens = TokenStream::new();
             for token in stream {
                 tokens.append(respan_token_tree(token, span));
