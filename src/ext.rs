@@ -132,11 +132,11 @@ impl CustomToken for private::IdentAny {
 #[cfg(feature = "parsing")]
 impl lookahead::Sealed for private::PeekFn {}
 
-pub(crate) trait TokenStreamExt2 {
+pub(crate) trait TokenStreamExt {
     fn append(&mut self, token: TokenTree);
 }
 
-impl TokenStreamExt2 for TokenStream {
+impl TokenStreamExt for TokenStream {
     fn append(&mut self, token: TokenTree) {
         self.extend(iter::once(token));
     }

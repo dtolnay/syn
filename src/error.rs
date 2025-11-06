@@ -1,6 +1,6 @@
 #[cfg(feature = "parsing")]
 use crate::buffer::Cursor;
-use crate::ext::TokenStreamExt2 as _;
+use crate::ext::TokenStreamExt as _;
 use crate::thread::ThreadBound;
 use proc_macro2::{
     Delimiter, Group, Ident, LexError, Literal, Punct, Spacing, Span, TokenStream, TokenTree,

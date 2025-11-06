@@ -1,5 +1,5 @@
 #[cfg(feature = "parsing")]
-use crate::ext::TokenStreamExt2 as _;
+use crate::ext::TokenStreamExt as _;
 #[cfg(feature = "parsing")]
 use crate::lookahead;
 #[cfg(feature = "parsing")]
