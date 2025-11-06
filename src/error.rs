@@ -7,8 +7,8 @@ use proc_macro2::{
 #[cfg(feature = "printing")]
 use quote::ToTokens;
 use std::fmt::{self, Debug, Display};
-use std::slice;
 use std::vec;
+use std::{iter, slice};
 
 /// The result of a Syn parser.
 pub type Result<T> = std::result::Result<T, Error>;
@@ -225,7 +225,7 @@ impl Error {
     pub fn to_compile_error(&self) -> TokenStream {
         let mut tokens = TokenStream::new();
         for msg in &self.messages {
-            tokens.extend(ErrorMessage::to_compile_error(msg));
+            ErrorMessage::to_compile_error(msg, &mut tokens);
         }
         tokens
     }
@@ -274,53 +274,51 @@ impl Error {
 }
 
 impl ErrorMessage {
-    fn to_compile_error(&self) -> TokenStream {
+    fn to_compile_error(&self, tokens: &mut TokenStream) {
         let (start, end) = match self.span.get() {
             Some(range) => (range.start, range.end),
             None => (Span::call_site(), Span::call_site()),
         };
 
+        fn punct(ch: char, spacing: Spacing, span: Span) -> TokenTree {
+            TokenTree::Punct({
+                let mut punct = Punct::new(ch, spacing);
+                punct.set_span(span);
+                punct
+            })
+        }
+
         // ::core::compile_error!($message)
-        TokenStream::from_iter([
-            TokenTree::Punct({
-                let mut punct = Punct::new(':', Spacing::Joint);
-                punct.set_span(start);
-                punct
-            }),
-            TokenTree::Punct({
-                let mut punct = Punct::new(':', Spacing::Alone);
-                punct.set_span(start);
-                punct
-            }),
-            TokenTree::Ident(Ident::new("core", start)),
-            TokenTree::Punct({
-                let mut punct = Punct::new(':', Spacing::Joint);
-                punct.set_span(start);
-                punct
-            }),
-            TokenTree::Punct({
-                let mut punct = Punct::new(':', Spacing::Alone);
-                punct.set_span(start);
-                punct
-            }),
-            TokenTree::Ident(Ident::new("compile_error", start)),
-            TokenTree::Punct({
-                let mut punct = Punct::new('!', Spacing::Alone);
-                punct.set_span(start);
-                punct
-            }),
-            TokenTree::Group({
-                let mut group = Group::new(Delimiter::Brace, {
-                    TokenStream::from_iter([TokenTree::Literal({
-                        let mut string = Literal::string(&self.message);
-                        string.set_span(end);
-                        string
-                    })])
-                });
-                group.set_span(end);
-                group
-            }),
-        ])
+        tokens.append(punct(':', Spacing::Joint, start));
+        tokens.append(punct(':', Spacing::Alone, start));
+        tokens.append(TokenTree::Ident(Ident::new("core", start)));
+        tokens.append(punct(':', Spacing::Joint, start));
+        tokens.append(punct(':', Spacing::Alone, start));
+        tokens.append(TokenTree::Ident(Ident::new("compile_error", start)));
+        tokens.append(punct('!', Spacing::Alone, start));
+        tokens.append(TokenTree::Group({
+            let mut group = Group::new(
+                Delimiter::Brace,
+                TokenTree::Literal({
+                    let mut string = Literal::string(&self.message);
+                    string.set_span(end);
+                    string
+                })
+                .into(),
+            );
+            group.set_span(end);
+            group
+        }));
+    }
+}
+
+pub(crate) trait TokenStreamExt2 {
+    fn append(&mut self, token: TokenTree);
+}
+
+impl TokenStreamExt2 for TokenStream {
+    fn append(&mut self, token: TokenTree) {
+        self.extend(iter::once(token));
     }
 }
 
