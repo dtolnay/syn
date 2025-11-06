@@ -215,7 +215,7 @@ impl LitStr {
 
         // Token stream with every span replaced by the given one.
         fn respan_token_stream(stream: TokenStream, span: Span) -> TokenStream {
-            use crate::error::TokenStreamExt2 as _;
+            use crate::ext::TokenStreamExt2 as _;
 
             let mut tokens = TokenStream::new();
             for token in stream {

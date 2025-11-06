@@ -12,7 +12,8 @@ use crate::parse::Peek;
 use crate::sealed::lookahead;
 #[cfg(feature = "parsing")]
 use crate::token::CustomToken;
-use proc_macro2::Ident;
+use proc_macro2::{Ident, TokenStream, TokenTree};
+use std::iter;
 
 /// Additional methods for `Ident` not provided by proc-macro2 or libproc_macro.
 ///
@@ -130,6 +131,16 @@ impl CustomToken for private::IdentAny {
 
 #[cfg(feature = "parsing")]
 impl lookahead::Sealed for private::PeekFn {}
+
+pub(crate) trait TokenStreamExt2 {
+    fn append(&mut self, token: TokenTree);
+}
+
+impl TokenStreamExt2 for TokenStream {
+    fn append(&mut self, token: TokenTree) {
+        self.extend(iter::once(token));
+    }
+}
 
 mod private {
     use proc_macro2::Ident;

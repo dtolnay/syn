@@ -1,5 +1,6 @@
 #[cfg(feature = "parsing")]
 use crate::buffer::Cursor;
+use crate::ext::TokenStreamExt2 as _;
 use crate::thread::ThreadBound;
 use proc_macro2::{
     Delimiter, Group, Ident, LexError, Literal, Punct, Spacing, Span, TokenStream, TokenTree,
@@ -7,8 +8,8 @@ use proc_macro2::{
 #[cfg(feature = "printing")]
 use quote::ToTokens;
 use std::fmt::{self, Debug, Display};
+use std::slice;
 use std::vec;
-use std::{iter, slice};
 
 /// The result of a Syn parser.
 pub type Result<T> = std::result::Result<T, Error>;
@@ -309,16 +310,6 @@ impl ErrorMessage {
             group.set_span(end);
             group
         }));
-    }
-}
-
-pub(crate) trait TokenStreamExt2 {
-    fn append(&mut self, token: TokenTree);
-}
-
-impl TokenStreamExt2 for TokenStream {
-    fn append(&mut self, token: TokenTree) {
-        self.extend(iter::once(token));
     }
 }
 
