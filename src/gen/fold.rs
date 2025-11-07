@@ -2796,6 +2796,7 @@ where
 {
     crate::Local {
         attrs: f.fold_attributes(node.attrs),
+        super_token: node.super_token,
         let_token: node.let_token,
         pat: f.fold_pat(node.pat),
         init: (node.init).map(|it| f.fold_local_init(it)),
