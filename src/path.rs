@@ -1,5 +1,5 @@
 #[cfg(feature = "parsing")]
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::expr::Expr;
 use crate::generics::TypeParamBound;
 use crate::ident::Ident;
@@ -94,14 +94,18 @@ impl Path {
     #[cfg(feature = "parsing")]
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn require_ident(&self) -> Result<&Ident> {
-        self.get_ident().ok_or_else(|| {
-            crate::error::new2(
-                self.segments.first().unwrap().ident.span(),
-                self.segments.last().unwrap().ident.span(),
-                "expected this path to be an identifier",
-            )
-        })
+        self.get_ident()
+            .ok_or_else(|| path_error(self, "expected this path to be an identifier".to_string()))
     }
+}
+
+#[cfg(feature = "parsing")]
+pub(crate) fn path_error(path: &Path, message: String) -> Error {
+    crate::error::new3(
+        path.segments.first().unwrap().ident.span(),
+        path.segments.last().unwrap().ident.span(),
+        message,
+    )
 }
 
 ast_struct! {

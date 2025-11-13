@@ -8,6 +8,8 @@ use crate::mac::MacroDelimiter;
 use crate::meta::{self, ParseNestedMeta};
 #[cfg(feature = "parsing")]
 use crate::parse::{Parse, ParseStream, Parser};
+#[cfg(feature = "parsing")]
+use crate::path::path_error;
 use crate::path::Path;
 use crate::token;
 use proc_macro2::TokenStream;
@@ -244,9 +246,8 @@ impl Attribute {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn parse_args_with<F: Parser>(&self, parser: F) -> Result<F::Output> {
         match &self.meta {
-            Meta::Path(path) => Err(crate::error::new2(
-                path.segments.first().unwrap().ident.span(),
-                path.segments.last().unwrap().ident.span(),
+            Meta::Path(path) => Err(path_error(
+                path,
                 format!(
                     "expected attribute arguments in parentheses: {}[{}(...)]",
                     parsing::DisplayAttrStyle(&self.style),
@@ -532,9 +533,8 @@ impl Meta {
     pub fn require_list(&self) -> Result<&MetaList> {
         match self {
             Meta::List(meta) => Ok(meta),
-            Meta::Path(path) => Err(crate::error::new2(
-                path.segments.first().unwrap().ident.span(),
-                path.segments.last().unwrap().ident.span(),
+            Meta::Path(path) => Err(path_error(
+                path,
                 format!(
                     "expected attribute arguments in parentheses: `{}(...)`",
                     parsing::DisplayPath(path),
@@ -550,9 +550,8 @@ impl Meta {
     pub fn require_name_value(&self) -> Result<&MetaNameValue> {
         match self {
             Meta::NameValue(meta) => Ok(meta),
-            Meta::Path(path) => Err(crate::error::new2(
-                path.segments.first().unwrap().ident.span(),
-                path.segments.last().unwrap().ident.span(),
+            Meta::Path(path) => Err(path_error(
+                path,
                 format!(
                     "expected a value for this attribute: `{} = ...`",
                     parsing::DisplayPath(path),
