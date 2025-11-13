@@ -774,11 +774,13 @@ pub(crate) mod parsing {
 
     impl<'a> Display for DisplayPath<'a> {
         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-            for (i, segment) in self.0.segments.iter().enumerate() {
-                if i > 0 || self.0.leading_colon.is_some() {
+            let mut first = true;
+            for segment in self.0.segments.iter() {
+                if !first || self.0.leading_colon.is_some() {
                     formatter.write_str("::")?;
                 }
-                write!(formatter, "{}", segment.ident)?;
+                first = false;
+                segment.ident.fmt(formatter)?;
             }
             Ok(())
         }
