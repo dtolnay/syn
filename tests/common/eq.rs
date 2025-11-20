@@ -510,7 +510,7 @@ spanless_eq_struct!(FormatOptions; width precision alignment fill sign alternate
 spanless_eq_struct!(FormatPlaceholder; argument span format_trait format_options);
 spanless_eq_struct!(GenericParam; id ident attrs bounds is_placeholder kind !colon_span);
 spanless_eq_struct!(Generics; params where_clause span);
-spanless_eq_struct!(Impl; generics of_trait self_ty items);
+spanless_eq_struct!(Impl; generics constness of_trait self_ty items);
 spanless_eq_struct!(InlineAsm; asm_macro template template_strs operands clobber_abis options line_spans);
 spanless_eq_struct!(InlineAsmSym; id qself path);
 spanless_eq_struct!(Item<K>; attrs id span vis kind !tokens);
@@ -542,7 +542,7 @@ spanless_eq_struct!(Token; kind span);
 spanless_eq_struct!(Trait; constness safety is_auto ident generics bounds items);
 spanless_eq_struct!(TraitAlias; constness ident generics bounds);
 spanless_eq_struct!(TraitBoundModifiers; constness asyncness polarity);
-spanless_eq_struct!(TraitImplHeader; defaultness safety constness polarity trait_ref);
+spanless_eq_struct!(TraitImplHeader; defaultness safety polarity trait_ref);
 spanless_eq_struct!(TraitRef; path ref_id);
 spanless_eq_struct!(Ty; id kind span tokens);
 spanless_eq_struct!(TyAlias; defaultness ident generics after_where_clause bounds ty);
