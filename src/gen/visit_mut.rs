@@ -2676,6 +2676,7 @@ where
     V: VisitMut + ?Sized,
 {
     v.visit_attributes_mut(&mut node.attrs);
+    skip!(node.super_token);
     skip!(node.let_token);
     v.visit_pat_mut(&mut node.pat);
     if let Some(it) = &mut node.init {

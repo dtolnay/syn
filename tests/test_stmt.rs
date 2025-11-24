@@ -195,6 +195,27 @@ fn test_let_else() {
 }
 
 #[test]
+fn test_super_let() {
+    let tokens = quote! {
+        super let x = 0;
+    };
+
+    snapshot!(tokens as Stmt, @r#"
+    Stmt::Local {
+        super_token: Some,
+        pat: Pat::Ident {
+            ident: "x",
+        },
+        init: Some(LocalInit {
+            expr: Expr::Lit {
+                lit: 0,
+            },
+        }),
+    }
+    "#);
+}
+
+#[test]
 fn test_macros() {
     let tokens = quote! {
         fn main() {

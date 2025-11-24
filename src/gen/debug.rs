@@ -2023,6 +2023,7 @@ impl crate::Local {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
+        formatter.field("super_token", &self.super_token);
         formatter.field("let_token", &self.let_token);
         formatter.field("pat", &self.pat);
         formatter.field("init", &self.init);

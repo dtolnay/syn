@@ -2815,6 +2815,7 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
+    skip!(node.super_token);
     skip!(node.let_token);
     v.visit_pat(&node.pat);
     if let Some(it) = &node.init {

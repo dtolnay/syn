@@ -3529,6 +3529,11 @@
             "syn": "Attribute"
           }
         },
+        "super_token": {
+          "option": {
+            "token": "Super"
+          }
+        },
         "let_token": {
           "token": "Let"
         },

@@ -1375,7 +1375,8 @@ impl Eq for crate::Local {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::Local {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.pat == other.pat && self.init == other.init
+        self.attrs == other.attrs && self.super_token == other.super_token
+            && self.pat == other.pat && self.init == other.init
     }
 }
 #[cfg(feature = "full")]

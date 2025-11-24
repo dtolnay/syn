@@ -1765,6 +1765,7 @@ impl Hash for crate::Local {
         H: Hasher,
     {
         self.attrs.hash(state);
+        self.super_token.hash(state);
         self.pat.hash(state);
         self.init.hash(state);
     }

@@ -42,6 +42,7 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct Local {
         pub attrs: Vec<Attribute>,
+        pub super_token: Option<Token![super]>,
         pub let_token: Token![let],
         pub pat: Pat,
         pub init: Option<LocalInit>,
@@ -217,7 +218,9 @@ pub(crate) mod parsing {
             }
         }
 
-        if input.peek(Token![let]) && !input.peek(token::Group) {
+        if (input.peek(Token![let]) || (input.peek(Token![super]) && input.peek2(Token![let])))
+            && !input.peek(token::Group)
+        {
             stmt_local(input, attrs).map(Stmt::Local)
         } else if input.peek(Token![pub])
             || input.peek(Token![crate]) && !input.peek2(Token![::])
@@ -281,6 +284,7 @@ pub(crate) mod parsing {
     }
 
     fn stmt_local(input: ParseStream, attrs: Vec<Attribute>) -> Result<Local> {
+        let super_token: Option<Token![super]> = input.parse()?;
         let let_token: Token![let] = input.parse()?;
 
         let mut pat = Pat::parse_single(input)?;
@@ -324,6 +328,7 @@ pub(crate) mod parsing {
 
         Ok(Local {
             attrs,
+            super_token,
             let_token,
             pat,
             init,
@@ -449,6 +454,7 @@ pub(crate) mod printing {
     impl ToTokens for Local {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             expr::printing::outer_attrs_to_tokens(&self.attrs, tokens);
+            self.super_token.to_tokens(tokens);
             self.let_token.to_tokens(tokens);
             self.pat.to_tokens(tokens);
             if let Some(init) = &self.init {

@@ -2974,6 +2974,9 @@ impl Debug for Lite<syn::Local> {
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
+        if self.value.super_token.is_some() {
+            formatter.field("super_token", &Present);
+        }
         formatter.field("pat", Lite(&self.value.pat));
         if let Some(val) = &self.value.init {
             #[derive(RefCast)]
@@ -3789,6 +3792,9 @@ impl Debug for Lite<syn::Stmt> {
                 let mut formatter = formatter.debug_struct("Stmt::Local");
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
+                }
+                if _val.super_token.is_some() {
+                    formatter.field("super_token", &Present);
                 }
                 formatter.field("pat", Lite(&_val.pat));
                 if let Some(val) = &_val.init {
