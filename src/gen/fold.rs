@@ -123,8 +123,24 @@ pub trait Fold {
     }
     #[cfg(feature = "derive")]
     #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+    fn fold_data_enum_with_default(
+        &mut self,
+        i: crate::DataEnumWithDefault,
+    ) -> crate::DataEnumWithDefault {
+        fold_data_enum_with_default(self, i)
+    }
+    #[cfg(feature = "derive")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
     fn fold_data_struct(&mut self, i: crate::DataStruct) -> crate::DataStruct {
         fold_data_struct(self, i)
+    }
+    #[cfg(feature = "derive")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+    fn fold_data_struct_with_default(
+        &mut self,
+        i: crate::DataStructWithDefault,
+    ) -> crate::DataStructWithDefault {
+        fold_data_struct_with_default(self, i)
     }
     #[cfg(feature = "derive")]
     #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
@@ -133,8 +149,24 @@ pub trait Fold {
     }
     #[cfg(feature = "derive")]
     #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+    fn fold_data_with_default(
+        &mut self,
+        i: crate::DataWithDefault,
+    ) -> crate::DataWithDefault {
+        fold_data_with_default(self, i)
+    }
+    #[cfg(feature = "derive")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
     fn fold_derive_input(&mut self, i: crate::DeriveInput) -> crate::DeriveInput {
         fold_derive_input(self, i)
+    }
+    #[cfg(feature = "derive")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+    fn fold_derive_input_with_default(
+        &mut self,
+        i: crate::DeriveInputWithDefault,
+    ) -> crate::DeriveInputWithDefault {
+        fold_derive_input_with_default(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -364,6 +396,14 @@ pub trait Fold {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn fold_field_with_default(
+        &mut self,
+        i: crate::FieldWithDefault,
+    ) -> crate::FieldWithDefault {
+        fold_field_with_default(self, i)
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_fields(&mut self, i: crate::Fields) -> crate::Fields {
         fold_fields(self, i)
     }
@@ -374,13 +414,45 @@ pub trait Fold {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn fold_fields_named_with_default(
+        &mut self,
+        i: crate::FieldsNamedWithDefault,
+    ) -> crate::FieldsNamedWithDefault {
+        fold_fields_named_with_default(self, i)
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_fields_unnamed(&mut self, i: crate::FieldsUnnamed) -> crate::FieldsUnnamed {
         fold_fields_unnamed(self, i)
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn fold_fields_unnamed_with_default(
+        &mut self,
+        i: crate::FieldsUnnamedWithDefault,
+    ) -> crate::FieldsUnnamedWithDefault {
+        fold_fields_unnamed_with_default(self, i)
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn fold_fields_with_default(
+        &mut self,
+        i: crate::FieldsWithDefault,
+    ) -> crate::FieldsWithDefault {
+        fold_fields_with_default(self, i)
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_file(&mut self, i: crate::File) -> crate::File {
         fold_file(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_file_with_default(
+        &mut self,
+        i: crate::FileWithDefault,
+    ) -> crate::FileWithDefault {
+        fold_file_with_default(self, i)
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -497,6 +569,14 @@ pub trait Fold {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_item_enum_with_default(
+        &mut self,
+        i: crate::ItemEnumWithDefault,
+    ) -> crate::ItemEnumWithDefault {
+        fold_item_enum_with_default(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_item_extern_crate(
         &mut self,
         i: crate::ItemExternCrate,
@@ -533,6 +613,14 @@ pub trait Fold {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_item_mod_with_default(
+        &mut self,
+        i: crate::ItemModWithDefault,
+    ) -> crate::ItemModWithDefault {
+        fold_item_mod_with_default(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_item_static(&mut self, i: crate::ItemStatic) -> crate::ItemStatic {
         fold_item_static(self, i)
     }
@@ -540,6 +628,14 @@ pub trait Fold {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_item_struct(&mut self, i: crate::ItemStruct) -> crate::ItemStruct {
         fold_item_struct(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_item_struct_with_default(
+        &mut self,
+        i: crate::ItemStructWithDefault,
+    ) -> crate::ItemStructWithDefault {
+        fold_item_struct_with_default(self, i)
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -568,6 +664,14 @@ pub trait Fold {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_item_use(&mut self, i: crate::ItemUse) -> crate::ItemUse {
         fold_item_use(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_item_with_default(
+        &mut self,
+        i: crate::ItemWithDefault,
+    ) -> crate::ItemWithDefault {
+        fold_item_with_default(self, i)
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -1001,6 +1105,14 @@ pub trait Fold {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn fold_variant_with_default(
+        &mut self,
+        i: crate::VariantWithDefault,
+    ) -> crate::VariantWithDefault {
+        fold_variant_with_default(self, i)
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_vis_restricted(&mut self, i: crate::VisRestricted) -> crate::VisRestricted {
         fold_vis_restricted(self, i)
     }
@@ -1281,6 +1393,21 @@ where
 }
 #[cfg(feature = "derive")]
 #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+pub fn fold_data_enum_with_default<F>(
+    f: &mut F,
+    node: crate::DataEnumWithDefault,
+) -> crate::DataEnumWithDefault
+where
+    F: Fold + ?Sized,
+{
+    crate::DataEnumWithDefault {
+        enum_token: node.enum_token,
+        brace_token: node.brace_token,
+        variants: crate::punctuated::fold(node.variants, f, F::fold_variant_with_default),
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
 pub fn fold_data_struct<F>(f: &mut F, node: crate::DataStruct) -> crate::DataStruct
 where
     F: Fold + ?Sized,
@@ -1288,6 +1415,21 @@ where
     crate::DataStruct {
         struct_token: node.struct_token,
         fields: f.fold_fields(node.fields),
+        semi_token: node.semi_token,
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+pub fn fold_data_struct_with_default<F>(
+    f: &mut F,
+    node: crate::DataStructWithDefault,
+) -> crate::DataStructWithDefault
+where
+    F: Fold + ?Sized,
+{
+    crate::DataStructWithDefault {
+        struct_token: node.struct_token,
+        fields: f.fold_fields_with_default(node.fields),
         semi_token: node.semi_token,
     }
 }
@@ -1304,6 +1446,27 @@ where
 }
 #[cfg(feature = "derive")]
 #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+pub fn fold_data_with_default<F>(
+    f: &mut F,
+    node: crate::DataWithDefault,
+) -> crate::DataWithDefault
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        crate::DataWithDefault::Struct(_binding_0) => {
+            crate::DataWithDefault::Struct(f.fold_data_struct_with_default(_binding_0))
+        }
+        crate::DataWithDefault::Enum(_binding_0) => {
+            crate::DataWithDefault::Enum(f.fold_data_enum_with_default(_binding_0))
+        }
+        crate::DataWithDefault::Union(_binding_0) => {
+            crate::DataWithDefault::Union(f.fold_data_union(_binding_0))
+        }
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
 pub fn fold_derive_input<F>(f: &mut F, node: crate::DeriveInput) -> crate::DeriveInput
 where
     F: Fold + ?Sized,
@@ -1314,6 +1477,23 @@ where
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
         data: f.fold_data(node.data),
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+pub fn fold_derive_input_with_default<F>(
+    f: &mut F,
+    node: crate::DeriveInputWithDefault,
+) -> crate::DeriveInputWithDefault
+where
+    F: Fold + ?Sized,
+{
+    crate::DeriveInputWithDefault {
+        attrs: f.fold_attributes(node.attrs),
+        vis: f.fold_visibility(node.vis),
+        ident: f.fold_ident(node.ident),
+        generics: f.fold_generics(node.generics),
+        data: f.fold_data_with_default(node.data),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2011,6 +2191,25 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn fold_field_with_default<F>(
+    f: &mut F,
+    node: crate::FieldWithDefault,
+) -> crate::FieldWithDefault
+where
+    F: Fold + ?Sized,
+{
+    crate::FieldWithDefault {
+        attrs: f.fold_attributes(node.attrs),
+        vis: f.fold_visibility(node.vis),
+        mutability: f.fold_field_mutability(node.mutability),
+        ident: (node.ident).map(|it| f.fold_ident(it)),
+        colon_token: node.colon_token,
+        ty: f.fold_type(node.ty),
+        default: (node.default).map(|it| ((it).0, f.fold_expr((it).1))),
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_fields<F>(f: &mut F, node: crate::Fields) -> crate::Fields
 where
     F: Fold + ?Sized,
@@ -2038,6 +2237,20 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn fold_fields_named_with_default<F>(
+    f: &mut F,
+    node: crate::FieldsNamedWithDefault,
+) -> crate::FieldsNamedWithDefault
+where
+    F: Fold + ?Sized,
+{
+    crate::FieldsNamedWithDefault {
+        brace_token: node.brace_token,
+        named: crate::punctuated::fold(node.named, f, F::fold_field_with_default),
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_fields_unnamed<F>(
     f: &mut F,
     node: crate::FieldsUnnamed,
@@ -2050,6 +2263,41 @@ where
         unnamed: crate::punctuated::fold(node.unnamed, f, F::fold_field),
     }
 }
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn fold_fields_unnamed_with_default<F>(
+    f: &mut F,
+    node: crate::FieldsUnnamedWithDefault,
+) -> crate::FieldsUnnamedWithDefault
+where
+    F: Fold + ?Sized,
+{
+    crate::FieldsUnnamedWithDefault {
+        paren_token: node.paren_token,
+        unnamed: crate::punctuated::fold(node.unnamed, f, F::fold_field_with_default),
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn fold_fields_with_default<F>(
+    f: &mut F,
+    node: crate::FieldsWithDefault,
+) -> crate::FieldsWithDefault
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        crate::FieldsWithDefault::Named(_binding_0) => {
+            crate::FieldsWithDefault::Named(f.fold_fields_named_with_default(_binding_0))
+        }
+        crate::FieldsWithDefault::Unnamed(_binding_0) => {
+            crate::FieldsWithDefault::Unnamed(
+                f.fold_fields_unnamed_with_default(_binding_0),
+            )
+        }
+        crate::FieldsWithDefault::Unit => crate::FieldsWithDefault::Unit,
+    }
+}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn fold_file<F>(f: &mut F, node: crate::File) -> crate::File
@@ -2060,6 +2308,21 @@ where
         shebang: node.shebang,
         attrs: f.fold_attributes(node.attrs),
         items: fold_vec(node.items, f, F::fold_item),
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_file_with_default<F>(
+    f: &mut F,
+    node: crate::FileWithDefault,
+) -> crate::FileWithDefault
+where
+    F: Fold + ?Sized,
+{
+    crate::FileWithDefault {
+        shebang: node.shebang,
+        attrs: f.fold_attributes(node.attrs),
+        items: fold_vec(node.items, f, F::fold_item_with_default),
     }
 }
 #[cfg(feature = "full")]
@@ -2441,6 +2704,25 @@ where
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_item_enum_with_default<F>(
+    f: &mut F,
+    node: crate::ItemEnumWithDefault,
+) -> crate::ItemEnumWithDefault
+where
+    F: Fold + ?Sized,
+{
+    crate::ItemEnumWithDefault {
+        attrs: f.fold_attributes(node.attrs),
+        vis: f.fold_visibility(node.vis),
+        enum_token: node.enum_token,
+        ident: f.fold_ident(node.ident),
+        generics: f.fold_generics(node.generics),
+        brace_token: node.brace_token,
+        variants: crate::punctuated::fold(node.variants, f, F::fold_variant_with_default),
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn fold_item_extern_crate<F>(
     f: &mut F,
     node: crate::ItemExternCrate,
@@ -2537,6 +2819,26 @@ where
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_item_mod_with_default<F>(
+    f: &mut F,
+    node: crate::ItemModWithDefault,
+) -> crate::ItemModWithDefault
+where
+    F: Fold + ?Sized,
+{
+    crate::ItemModWithDefault {
+        attrs: f.fold_attributes(node.attrs),
+        vis: f.fold_visibility(node.vis),
+        unsafety: node.unsafety,
+        mod_token: node.mod_token,
+        ident: f.fold_ident(node.ident),
+        content: (node.content)
+            .map(|it| ((it).0, fold_vec((it).1, f, F::fold_item_with_default))),
+        semi: node.semi,
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn fold_item_static<F>(f: &mut F, node: crate::ItemStatic) -> crate::ItemStatic
 where
     F: Fold + ?Sized,
@@ -2567,6 +2869,25 @@ where
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
         fields: f.fold_fields(node.fields),
+        semi_token: node.semi_token,
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_item_struct_with_default<F>(
+    f: &mut F,
+    node: crate::ItemStructWithDefault,
+) -> crate::ItemStructWithDefault
+where
+    F: Fold + ?Sized,
+{
+    crate::ItemStructWithDefault {
+        attrs: f.fold_attributes(node.attrs),
+        vis: f.fold_visibility(node.vis),
+        struct_token: node.struct_token,
+        ident: f.fold_ident(node.ident),
+        generics: f.fold_generics(node.generics),
+        fields: f.fold_fields_with_default(node.fields),
         semi_token: node.semi_token,
     }
 }
@@ -2660,6 +2981,36 @@ where
         leading_colon: node.leading_colon,
         tree: f.fold_use_tree(node.tree),
         semi_token: node.semi_token,
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_item_with_default<F>(
+    f: &mut F,
+    node: crate::ItemWithDefault,
+) -> crate::ItemWithDefault
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        crate::ItemWithDefault::StructWithDefault(_binding_0) => {
+            crate::ItemWithDefault::StructWithDefault(
+                f.fold_item_struct_with_default(_binding_0),
+            )
+        }
+        crate::ItemWithDefault::EnumWithDefault(_binding_0) => {
+            crate::ItemWithDefault::EnumWithDefault(
+                f.fold_item_enum_with_default(_binding_0),
+            )
+        }
+        crate::ItemWithDefault::ModWithDefault(_binding_0) => {
+            crate::ItemWithDefault::ModWithDefault(
+                f.fold_item_mod_with_default(_binding_0),
+            )
+        }
+        crate::ItemWithDefault::Other(_binding_0) => {
+            crate::ItemWithDefault::Other(f.fold_item(_binding_0))
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -3830,6 +4181,22 @@ where
         attrs: f.fold_attributes(node.attrs),
         ident: f.fold_ident(node.ident),
         fields: f.fold_fields(node.fields),
+        discriminant: (node.discriminant).map(|it| ((it).0, f.fold_expr((it).1))),
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn fold_variant_with_default<F>(
+    f: &mut F,
+    node: crate::VariantWithDefault,
+) -> crate::VariantWithDefault
+where
+    F: Fold + ?Sized,
+{
+    crate::VariantWithDefault {
+        attrs: f.fold_attributes(node.attrs),
+        ident: f.fold_ident(node.ident),
+        fields: f.fold_fields_with_default(node.fields),
         discriminant: (node.discriminant).map(|it| ((it).0, f.fold_expr((it).1))),
     }
 }

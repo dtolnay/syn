@@ -116,8 +116,18 @@ pub trait Visit<'ast> {
     }
     #[cfg(feature = "derive")]
     #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+    fn visit_data_enum_with_default(&mut self, i: &'ast crate::DataEnumWithDefault) {
+        visit_data_enum_with_default(self, i);
+    }
+    #[cfg(feature = "derive")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
     fn visit_data_struct(&mut self, i: &'ast crate::DataStruct) {
         visit_data_struct(self, i);
+    }
+    #[cfg(feature = "derive")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+    fn visit_data_struct_with_default(&mut self, i: &'ast crate::DataStructWithDefault) {
+        visit_data_struct_with_default(self, i);
     }
     #[cfg(feature = "derive")]
     #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
@@ -126,8 +136,21 @@ pub trait Visit<'ast> {
     }
     #[cfg(feature = "derive")]
     #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+    fn visit_data_with_default(&mut self, i: &'ast crate::DataWithDefault) {
+        visit_data_with_default(self, i);
+    }
+    #[cfg(feature = "derive")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
     fn visit_derive_input(&mut self, i: &'ast crate::DeriveInput) {
         visit_derive_input(self, i);
+    }
+    #[cfg(feature = "derive")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+    fn visit_derive_input_with_default(
+        &mut self,
+        i: &'ast crate::DeriveInputWithDefault,
+    ) {
+        visit_derive_input_with_default(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -351,6 +374,11 @@ pub trait Visit<'ast> {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_field_with_default(&mut self, i: &'ast crate::FieldWithDefault) {
+        visit_field_with_default(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_fields(&mut self, i: &'ast crate::Fields) {
         visit_fields(self, i);
     }
@@ -361,13 +389,39 @@ pub trait Visit<'ast> {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_fields_named_with_default(
+        &mut self,
+        i: &'ast crate::FieldsNamedWithDefault,
+    ) {
+        visit_fields_named_with_default(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_fields_unnamed(&mut self, i: &'ast crate::FieldsUnnamed) {
         visit_fields_unnamed(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_fields_unnamed_with_default(
+        &mut self,
+        i: &'ast crate::FieldsUnnamedWithDefault,
+    ) {
+        visit_fields_unnamed_with_default(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_fields_with_default(&mut self, i: &'ast crate::FieldsWithDefault) {
+        visit_fields_with_default(self, i);
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_file(&mut self, i: &'ast crate::File) {
         visit_file(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_file_with_default(&mut self, i: &'ast crate::FileWithDefault) {
+        visit_file_with_default(self, i);
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -469,6 +523,11 @@ pub trait Visit<'ast> {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_item_enum_with_default(&mut self, i: &'ast crate::ItemEnumWithDefault) {
+        visit_item_enum_with_default(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_item_extern_crate(&mut self, i: &'ast crate::ItemExternCrate) {
         visit_item_extern_crate(self, i);
     }
@@ -499,6 +558,11 @@ pub trait Visit<'ast> {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_item_mod_with_default(&mut self, i: &'ast crate::ItemModWithDefault) {
+        visit_item_mod_with_default(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_item_static(&mut self, i: &'ast crate::ItemStatic) {
         visit_item_static(self, i);
     }
@@ -506,6 +570,11 @@ pub trait Visit<'ast> {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_item_struct(&mut self, i: &'ast crate::ItemStruct) {
         visit_item_struct(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_item_struct_with_default(&mut self, i: &'ast crate::ItemStructWithDefault) {
+        visit_item_struct_with_default(self, i);
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -531,6 +600,11 @@ pub trait Visit<'ast> {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_item_use(&mut self, i: &'ast crate::ItemUse) {
         visit_item_use(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_item_with_default(&mut self, i: &'ast crate::ItemWithDefault) {
+        visit_item_with_default(self, i);
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -924,6 +998,11 @@ pub trait Visit<'ast> {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_variant_with_default(&mut self, i: &'ast crate::VariantWithDefault) {
+        visit_variant_with_default(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_vis_restricted(&mut self, i: &'ast crate::VisRestricted) {
         visit_vis_restricted(self, i);
     }
@@ -1270,6 +1349,22 @@ where
 }
 #[cfg(feature = "derive")]
 #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+pub fn visit_data_enum_with_default<'ast, V>(
+    v: &mut V,
+    node: &'ast crate::DataEnumWithDefault,
+)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    skip!(node.enum_token);
+    skip!(node.brace_token);
+    for el in Punctuated::pairs(&node.variants) {
+        let it = el.value();
+        v.visit_variant_with_default(it);
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
 pub fn visit_data_struct<'ast, V>(v: &mut V, node: &'ast crate::DataStruct)
 where
     V: Visit<'ast> + ?Sized,
@@ -1280,12 +1375,43 @@ where
 }
 #[cfg(feature = "derive")]
 #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+pub fn visit_data_struct_with_default<'ast, V>(
+    v: &mut V,
+    node: &'ast crate::DataStructWithDefault,
+)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    skip!(node.struct_token);
+    v.visit_fields_with_default(&node.fields);
+    skip!(node.semi_token);
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
 pub fn visit_data_union<'ast, V>(v: &mut V, node: &'ast crate::DataUnion)
 where
     V: Visit<'ast> + ?Sized,
 {
     skip!(node.union_token);
     v.visit_fields_named(&node.fields);
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+pub fn visit_data_with_default<'ast, V>(v: &mut V, node: &'ast crate::DataWithDefault)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    match node {
+        crate::DataWithDefault::Struct(_binding_0) => {
+            v.visit_data_struct_with_default(_binding_0);
+        }
+        crate::DataWithDefault::Enum(_binding_0) => {
+            v.visit_data_enum_with_default(_binding_0);
+        }
+        crate::DataWithDefault::Union(_binding_0) => {
+            v.visit_data_union(_binding_0);
+        }
+    }
 }
 #[cfg(feature = "derive")]
 #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
@@ -1300,6 +1426,23 @@ where
     v.visit_ident(&node.ident);
     v.visit_generics(&node.generics);
     v.visit_data(&node.data);
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+pub fn visit_derive_input_with_default<'ast, V>(
+    v: &mut V,
+    node: &'ast crate::DeriveInputWithDefault,
+)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    v.visit_visibility(&node.vis);
+    v.visit_ident(&node.ident);
+    v.visit_generics(&node.generics);
+    v.visit_data_with_default(&node.data);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -2049,6 +2192,27 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_field_with_default<'ast, V>(v: &mut V, node: &'ast crate::FieldWithDefault)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    v.visit_visibility(&node.vis);
+    v.visit_field_mutability(&node.mutability);
+    if let Some(it) = &node.ident {
+        v.visit_ident(it);
+    }
+    skip!(node.colon_token);
+    v.visit_type(&node.ty);
+    if let Some(it) = &node.default {
+        skip!((it).0);
+        v.visit_expr(&(it).1);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_fields<'ast, V>(v: &mut V, node: &'ast crate::Fields)
 where
     V: Visit<'ast> + ?Sized,
@@ -2077,6 +2241,21 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_fields_named_with_default<'ast, V>(
+    v: &mut V,
+    node: &'ast crate::FieldsNamedWithDefault,
+)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    skip!(node.brace_token);
+    for el in Punctuated::pairs(&node.named) {
+        let it = el.value();
+        v.visit_field_with_default(it);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_fields_unnamed<'ast, V>(v: &mut V, node: &'ast crate::FieldsUnnamed)
 where
     V: Visit<'ast> + ?Sized,
@@ -2085,6 +2264,40 @@ where
     for el in Punctuated::pairs(&node.unnamed) {
         let it = el.value();
         v.visit_field(it);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_fields_unnamed_with_default<'ast, V>(
+    v: &mut V,
+    node: &'ast crate::FieldsUnnamedWithDefault,
+)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    skip!(node.paren_token);
+    for el in Punctuated::pairs(&node.unnamed) {
+        let it = el.value();
+        v.visit_field_with_default(it);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_fields_with_default<'ast, V>(
+    v: &mut V,
+    node: &'ast crate::FieldsWithDefault,
+)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    match node {
+        crate::FieldsWithDefault::Named(_binding_0) => {
+            v.visit_fields_named_with_default(_binding_0);
+        }
+        crate::FieldsWithDefault::Unnamed(_binding_0) => {
+            v.visit_fields_unnamed_with_default(_binding_0);
+        }
+        crate::FieldsWithDefault::Unit => {}
     }
 }
 #[cfg(feature = "full")]
@@ -2099,6 +2312,20 @@ where
     }
     for it in &node.items {
         v.visit_item(it);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_file_with_default<'ast, V>(v: &mut V, node: &'ast crate::FileWithDefault)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    skip!(node.shebang);
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    for it in &node.items {
+        v.visit_item_with_default(it);
     }
 }
 #[cfg(feature = "full")]
@@ -2469,6 +2696,28 @@ where
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_item_enum_with_default<'ast, V>(
+    v: &mut V,
+    node: &'ast crate::ItemEnumWithDefault,
+)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    v.visit_visibility(&node.vis);
+    skip!(node.enum_token);
+    v.visit_ident(&node.ident);
+    v.visit_generics(&node.generics);
+    skip!(node.brace_token);
+    for el in Punctuated::pairs(&node.variants) {
+        let it = el.value();
+        v.visit_variant_with_default(it);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_item_extern_crate<'ast, V>(v: &mut V, node: &'ast crate::ItemExternCrate)
 where
     V: Visit<'ast> + ?Sized,
@@ -2577,6 +2826,30 @@ where
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_item_mod_with_default<'ast, V>(
+    v: &mut V,
+    node: &'ast crate::ItemModWithDefault,
+)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    v.visit_visibility(&node.vis);
+    skip!(node.unsafety);
+    skip!(node.mod_token);
+    v.visit_ident(&node.ident);
+    if let Some(it) = &node.content {
+        skip!((it).0);
+        for it in &(it).1 {
+            v.visit_item_with_default(it);
+        }
+    }
+    skip!(node.semi);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_item_static<'ast, V>(v: &mut V, node: &'ast crate::ItemStatic)
 where
     V: Visit<'ast> + ?Sized,
@@ -2608,6 +2881,25 @@ where
     v.visit_ident(&node.ident);
     v.visit_generics(&node.generics);
     v.visit_fields(&node.fields);
+    skip!(node.semi_token);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_item_struct_with_default<'ast, V>(
+    v: &mut V,
+    node: &'ast crate::ItemStructWithDefault,
+)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    v.visit_visibility(&node.vis);
+    skip!(node.struct_token);
+    v.visit_ident(&node.ident);
+    v.visit_generics(&node.generics);
+    v.visit_fields_with_default(&node.fields);
     skip!(node.semi_token);
 }
 #[cfg(feature = "full")]
@@ -2704,6 +2996,27 @@ where
     skip!(node.leading_colon);
     v.visit_use_tree(&node.tree);
     skip!(node.semi_token);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_item_with_default<'ast, V>(v: &mut V, node: &'ast crate::ItemWithDefault)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    match node {
+        crate::ItemWithDefault::StructWithDefault(_binding_0) => {
+            v.visit_item_struct_with_default(_binding_0);
+        }
+        crate::ItemWithDefault::EnumWithDefault(_binding_0) => {
+            v.visit_item_enum_with_default(_binding_0);
+        }
+        crate::ItemWithDefault::ModWithDefault(_binding_0) => {
+            v.visit_item_mod_with_default(_binding_0);
+        }
+        crate::ItemWithDefault::Other(_binding_0) => {
+            v.visit_item(_binding_0);
+        }
+    }
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -3880,6 +4193,25 @@ where
     }
     v.visit_ident(&node.ident);
     v.visit_fields(&node.fields);
+    if let Some(it) = &node.discriminant {
+        skip!((it).0);
+        v.visit_expr(&(it).1);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_variant_with_default<'ast, V>(
+    v: &mut V,
+    node: &'ast crate::VariantWithDefault,
+)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    v.visit_ident(&node.ident);
+    v.visit_fields_with_default(&node.fields);
     if let Some(it) = &node.discriminant {
         skip!((it).0);
         v.visit_expr(&(it).1);

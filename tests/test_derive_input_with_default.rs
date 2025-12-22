@@ -1,7 +1,3 @@
-// These tests are also duplicated in "test_derive_input_with_default", but for the "default field values" version of the derive input
-// If editing these tests, if there is an equivalent test in the other file, you should edit that too.
-// If adding a new test, you should also add it to the other file.
-
 #![allow(
     clippy::assertions_on_result_states,
     clippy::elidable_lifetime_names,
@@ -17,26 +13,7 @@ mod snapshot;
 mod debug;
 
 use quote::quote;
-use syn::{Data, DeriveInput};
-
-#[test]
-fn test_unit() {
-    let input = quote! {
-        struct Unit;
-    };
-
-    snapshot!(input as DeriveInput, @r#"
-    DeriveInput {
-        vis: Visibility::Inherited,
-        ident: "Unit",
-        generics: Generics,
-        data: Data::Struct {
-            fields: Fields::Unit,
-            semi_token: Some,
-        },
-    }
-    "#);
-}
+use syn::{DataWithDefault, DeriveInputWithDefault};
 
 #[test]
 fn test_struct() {
@@ -44,12 +21,12 @@ fn test_struct() {
         #[derive(Debug, Clone)]
         pub struct Item {
             pub ident: Ident,
-            pub attrs: Vec<Attribute>
+            pub attrs: Vec<Attribute> = Vec::new()
         }
     };
 
-    snapshot!(input as DeriveInput, @r#"
-    DeriveInput {
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
         attrs: [
             Attribute {
                 style: AttrStyle::Outer,
@@ -69,10 +46,10 @@ fn test_struct() {
         vis: Visibility::Public,
         ident: "Item",
         generics: Generics,
-        data: Data::Struct {
-            fields: Fields::Named {
+        data: DataWithDefault::Struct(DataStructWithDefault {
+            fields: FieldsWithDefault::Named(FieldsNamedWithDefault {
                 named: [
-                    Field {
+                    FieldWithDefault {
                         vis: Visibility::Public,
                         ident: Some("ident"),
                         colon_token: Some,
@@ -87,7 +64,7 @@ fn test_struct() {
                         },
                     },
                     Token![,],
-                    Field {
+                    FieldWithDefault {
                         vis: Visibility::Public,
                         ident: Some("attrs"),
                         colon_token: Some,
@@ -113,10 +90,25 @@ fn test_struct() {
                                 ],
                             },
                         },
+                        default: Some(Expr::Call {
+                            func: Expr::Path {
+                                path: Path {
+                                    segments: [
+                                        PathSegment {
+                                            ident: "Vec",
+                                        },
+                                        Token![::],
+                                        PathSegment {
+                                            ident: "new",
+                                        },
+                                    ],
+                                },
+                            },
+                        }),
                     },
                 ],
-            },
-        },
+            }),
+        }),
     }
     "#);
 
@@ -136,6 +128,217 @@ fn test_struct() {
 }
 
 #[test]
+fn test_fields_on_named_struct() {
+    let input = quote! {
+        struct S {
+            foo: i32 = 10,
+            pub bar: String,
+        }
+    };
+
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
+        vis: Visibility::Inherited,
+        ident: "S",
+        generics: Generics,
+        data: DataWithDefault::Struct(DataStructWithDefault {
+            fields: FieldsWithDefault::Named(FieldsNamedWithDefault {
+                named: [
+                    FieldWithDefault {
+                        vis: Visibility::Inherited,
+                        ident: Some("foo"),
+                        colon_token: Some,
+                        ty: Type::Path {
+                            path: Path {
+                                segments: [
+                                    PathSegment {
+                                        ident: "i32",
+                                    },
+                                ],
+                            },
+                        },
+                        default: Some(Expr::Lit {
+                            lit: 10,
+                        }),
+                    },
+                    Token![,],
+                    FieldWithDefault {
+                        vis: Visibility::Public,
+                        ident: Some("bar"),
+                        colon_token: Some,
+                        ty: Type::Path {
+                            path: Path {
+                                segments: [
+                                    PathSegment {
+                                        ident: "String",
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                    Token![,],
+                ],
+            }),
+        }),
+    }
+    "#);
+
+    let data = match input.data {
+        DataWithDefault::Struct(data) => data,
+        _ => panic!("expected a struct"),
+    };
+
+    snapshot!(data.fields.into_iter().collect::<Vec<_>>(), @r#"
+    [
+        FieldWithDefault {
+            vis: Visibility::Inherited,
+            ident: Some("foo"),
+            colon_token: Some,
+            ty: Type::Path {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "i32",
+                        },
+                    ],
+                },
+            },
+            default: Some(Expr::Lit {
+                lit: 10,
+            }),
+        },
+        FieldWithDefault {
+            vis: Visibility::Public,
+            ident: Some("bar"),
+            colon_token: Some,
+            ty: Type::Path {
+                path: Path {
+                    segments: [
+                        PathSegment {
+                            ident: "String",
+                        },
+                    ],
+                },
+            },
+        },
+    ]
+    "#);
+}
+
+#[test]
+#[cfg(feature = "full")]
+fn test_enum_fields() {
+    let input = quote! {
+        pub enum DefaultField {
+            Variant {
+                field: u32 = 10,
+                field_2: i32
+            },
+            Variant2 {
+                no_default_values: u8
+            }
+        }
+    };
+
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
+        vis: Visibility::Public,
+        ident: "DefaultField",
+        generics: Generics,
+        data: DataWithDefault::Enum(DataEnumWithDefault {
+            variants: [
+                VariantWithDefault {
+                    ident: "Variant",
+                    fields: FieldsWithDefault::Named(FieldsNamedWithDefault {
+                        named: [
+                            FieldWithDefault {
+                                vis: Visibility::Inherited,
+                                ident: Some("field"),
+                                colon_token: Some,
+                                ty: Type::Path {
+                                    path: Path {
+                                        segments: [
+                                            PathSegment {
+                                                ident: "u32",
+                                            },
+                                        ],
+                                    },
+                                },
+                                default: Some(Expr::Lit {
+                                    lit: 10,
+                                }),
+                            },
+                            Token![,],
+                            FieldWithDefault {
+                                vis: Visibility::Inherited,
+                                ident: Some("field_2"),
+                                colon_token: Some,
+                                ty: Type::Path {
+                                    path: Path {
+                                        segments: [
+                                            PathSegment {
+                                                ident: "i32",
+                                            },
+                                        ],
+                                    },
+                                },
+                            },
+                        ],
+                    }),
+                },
+                Token![,],
+                VariantWithDefault {
+                    ident: "Variant2",
+                    fields: FieldsWithDefault::Named(FieldsNamedWithDefault {
+                        named: [
+                            FieldWithDefault {
+                                vis: Visibility::Inherited,
+                                ident: Some("no_default_values"),
+                                colon_token: Some,
+                                ty: Type::Path {
+                                    path: Path {
+                                        segments: [
+                                            PathSegment {
+                                                ident: "u8",
+                                            },
+                                        ],
+                                    },
+                                },
+                            },
+                        ],
+                    }),
+                },
+            ],
+        }),
+    }
+    "#);
+}
+
+// Even though the DeriveInputWithDefault shares most of the parsing code with the derive input feature, we duplicate
+// all of the tests which don't use the feature, to ensure that the shared code is integrated properly
+// These are duplicates of the tests in "test_derive_input"
+// If editing these tests, if there is an equivalent test in the other file, you should edit that too.
+
+#[test]
+fn test_unit() {
+    let input = quote! {
+        struct Unit;
+    };
+
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
+        vis: Visibility::Inherited,
+        ident: "Unit",
+        generics: Generics,
+        data: DataWithDefault::Struct(DataStructWithDefault {
+            fields: FieldsWithDefault::Unit,
+            semi_token: Some,
+        }),
+    }
+    "#);
+}
+
+#[test]
 fn test_union() {
     let input = quote! {
         union MaybeUninit<T> {
@@ -144,8 +347,8 @@ fn test_union() {
         }
     };
 
-    snapshot!(input as DeriveInput, @r#"
-    DeriveInput {
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
         vis: Visibility::Inherited,
         ident: "MaybeUninit",
         generics: Generics {
@@ -157,7 +360,7 @@ fn test_union() {
             ],
             gt_token: Some,
         },
-        data: Data::Union {
+        data: DataWithDefault::Union(DataUnion {
             fields: FieldsNamed {
                 named: [
                     Field {
@@ -183,7 +386,7 @@ fn test_union() {
                     },
                 ],
             },
-        },
+        }),
     }
     "#);
 }
@@ -205,8 +408,8 @@ fn test_enum() {
         }
     };
 
-    snapshot!(input as DeriveInput, @r#"
-    DeriveInput {
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
         attrs: [
             Attribute {
                 style: AttrStyle::Outer,
@@ -249,13 +452,13 @@ fn test_enum() {
             ],
             gt_token: Some,
         },
-        data: Data::Enum {
+        data: DataWithDefault::Enum(DataEnumWithDefault {
             variants: [
-                Variant {
+                VariantWithDefault {
                     ident: "Ok",
-                    fields: Fields::Unnamed {
+                    fields: FieldsWithDefault::Unnamed(FieldsUnnamedWithDefault {
                         unnamed: [
-                            Field {
+                            FieldWithDefault {
                                 vis: Visibility::Inherited,
                                 ty: Type::Path {
                                     path: Path {
@@ -268,14 +471,14 @@ fn test_enum() {
                                 },
                             },
                         ],
-                    },
+                    }),
                 },
                 Token![,],
-                Variant {
+                VariantWithDefault {
                     ident: "Err",
-                    fields: Fields::Unnamed {
+                    fields: FieldsWithDefault::Unnamed(FieldsUnnamedWithDefault {
                         unnamed: [
-                            Field {
+                            FieldWithDefault {
                                 vis: Visibility::Inherited,
                                 ty: Type::Path {
                                     path: Path {
@@ -288,20 +491,20 @@ fn test_enum() {
                                 },
                             },
                         ],
-                    },
+                    }),
                 },
                 Token![,],
-                Variant {
+                VariantWithDefault {
                     ident: "Surprise",
-                    fields: Fields::Unit,
+                    fields: FieldsWithDefault::Unit,
                     discriminant: Some(Expr::Lit {
                         lit: 0isize,
                     }),
                 },
                 Token![,],
-                Variant {
+                VariantWithDefault {
                     ident: "ProcMacroHack",
-                    fields: Fields::Unit,
+                    fields: FieldsWithDefault::Unit,
                     discriminant: Some(Expr::Field {
                         base: Expr::Tuple {
                             elems: [
@@ -320,7 +523,7 @@ fn test_enum() {
                     }),
                 },
             ],
-        },
+        }),
     }
     "#);
 
@@ -358,7 +561,7 @@ fn test_attr_with_non_mod_style_path() {
         struct S;
     };
 
-    syn::parse2::<DeriveInput>(input).unwrap_err();
+    syn::parse2::<DeriveInputWithDefault>(input).unwrap_err();
 }
 
 #[test]
@@ -368,8 +571,8 @@ fn test_attr_with_mod_style_path_with_self() {
         struct S;
     };
 
-    snapshot!(input as DeriveInput, @r#"
-    DeriveInput {
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
         attrs: [
             Attribute {
                 style: AttrStyle::Outer,
@@ -389,10 +592,10 @@ fn test_attr_with_mod_style_path_with_self() {
         vis: Visibility::Inherited,
         ident: "S",
         generics: Generics,
-        data: Data::Struct {
-            fields: Fields::Unit,
+        data: DataWithDefault::Struct(DataStructWithDefault {
+            fields: FieldsWithDefault::Unit,
             semi_token: Some,
-        },
+        }),
     }
     "#);
 
@@ -418,8 +621,8 @@ fn test_pub_restricted() {
         pub(in m) struct Z(pub(in m::n) u8);
     };
 
-    snapshot!(input as DeriveInput, @r#"
-    DeriveInput {
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
         vis: Visibility::Restricted {
             in_token: Some,
             path: Path {
@@ -432,10 +635,10 @@ fn test_pub_restricted() {
         },
         ident: "Z",
         generics: Generics,
-        data: Data::Struct {
-            fields: Fields::Unnamed {
+        data: DataWithDefault::Struct(DataStructWithDefault {
+            fields: FieldsWithDefault::Unnamed(FieldsUnnamedWithDefault {
                 unnamed: [
-                    Field {
+                    FieldWithDefault {
                         vis: Visibility::Restricted {
                             in_token: Some,
                             path: Path {
@@ -461,9 +664,9 @@ fn test_pub_restricted() {
                         },
                     },
                 ],
-            },
+            }),
             semi_token: Some,
-        },
+        }),
     }
     "#);
 }
@@ -474,8 +677,8 @@ fn test_pub_restricted_crate() {
         pub(crate) struct S;
     };
 
-    snapshot!(input as DeriveInput, @r#"
-    DeriveInput {
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
         vis: Visibility::Restricted {
             path: Path {
                 segments: [
@@ -487,10 +690,10 @@ fn test_pub_restricted_crate() {
         },
         ident: "S",
         generics: Generics,
-        data: Data::Struct {
-            fields: Fields::Unit,
+        data: DataWithDefault::Struct(DataStructWithDefault {
+            fields: FieldsWithDefault::Unit,
             semi_token: Some,
-        },
+        }),
     }
     "#);
 }
@@ -501,8 +704,8 @@ fn test_pub_restricted_super() {
         pub(super) struct S;
     };
 
-    snapshot!(input as DeriveInput, @r#"
-    DeriveInput {
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
         vis: Visibility::Restricted {
             path: Path {
                 segments: [
@@ -514,10 +717,10 @@ fn test_pub_restricted_super() {
         },
         ident: "S",
         generics: Generics,
-        data: Data::Struct {
-            fields: Fields::Unit,
+        data: DataWithDefault::Struct(DataStructWithDefault {
+            fields: FieldsWithDefault::Unit,
             semi_token: Some,
-        },
+        }),
     }
     "#);
 }
@@ -528,8 +731,8 @@ fn test_pub_restricted_in_super() {
         pub(in super) struct S;
     };
 
-    snapshot!(input as DeriveInput, @r#"
-    DeriveInput {
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
         vis: Visibility::Restricted {
             in_token: Some,
             path: Path {
@@ -542,10 +745,10 @@ fn test_pub_restricted_in_super() {
         },
         ident: "S",
         generics: Generics,
-        data: Data::Struct {
-            fields: Fields::Unit,
+        data: DataWithDefault::Struct(DataStructWithDefault {
+            fields: FieldsWithDefault::Unit,
             semi_token: Some,
-        },
+        }),
     }
     "#);
 }
@@ -556,116 +759,24 @@ fn test_fields_on_unit_struct() {
         struct S;
     };
 
-    snapshot!(input as DeriveInput, @r#"
-    DeriveInput {
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
         vis: Visibility::Inherited,
         ident: "S",
         generics: Generics,
-        data: Data::Struct {
-            fields: Fields::Unit,
+        data: DataWithDefault::Struct(DataStructWithDefault {
+            fields: FieldsWithDefault::Unit,
             semi_token: Some,
-        },
+        }),
     }
     "#);
 
     let data = match input.data {
-        Data::Struct(data) => data,
+        DataWithDefault::Struct(data) => data,
         _ => panic!("expected a struct"),
     };
 
     assert_eq!(0, data.fields.iter().count());
-}
-
-#[test]
-fn test_fields_on_named_struct() {
-    let input = quote! {
-        struct S {
-            foo: i32,
-            pub bar: String,
-        }
-    };
-
-    snapshot!(input as DeriveInput, @r#"
-    DeriveInput {
-        vis: Visibility::Inherited,
-        ident: "S",
-        generics: Generics,
-        data: Data::Struct {
-            fields: Fields::Named {
-                named: [
-                    Field {
-                        vis: Visibility::Inherited,
-                        ident: Some("foo"),
-                        colon_token: Some,
-                        ty: Type::Path {
-                            path: Path {
-                                segments: [
-                                    PathSegment {
-                                        ident: "i32",
-                                    },
-                                ],
-                            },
-                        },
-                    },
-                    Token![,],
-                    Field {
-                        vis: Visibility::Public,
-                        ident: Some("bar"),
-                        colon_token: Some,
-                        ty: Type::Path {
-                            path: Path {
-                                segments: [
-                                    PathSegment {
-                                        ident: "String",
-                                    },
-                                ],
-                            },
-                        },
-                    },
-                    Token![,],
-                ],
-            },
-        },
-    }
-    "#);
-
-    let data = match input.data {
-        Data::Struct(data) => data,
-        _ => panic!("expected a struct"),
-    };
-
-    snapshot!(data.fields.into_iter().collect::<Vec<_>>(), @r#"
-    [
-        Field {
-            vis: Visibility::Inherited,
-            ident: Some("foo"),
-            colon_token: Some,
-            ty: Type::Path {
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "i32",
-                        },
-                    ],
-                },
-            },
-        },
-        Field {
-            vis: Visibility::Public,
-            ident: Some("bar"),
-            colon_token: Some,
-            ty: Type::Path {
-                path: Path {
-                    segments: [
-                        PathSegment {
-                            ident: "String",
-                        },
-                    ],
-                },
-            },
-        },
-    ]
-    "#);
 }
 
 #[test]
@@ -674,15 +785,15 @@ fn test_fields_on_tuple_struct() {
         struct S(i32, pub String);
     };
 
-    snapshot!(input as DeriveInput, @r#"
-    DeriveInput {
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
         vis: Visibility::Inherited,
         ident: "S",
         generics: Generics,
-        data: Data::Struct {
-            fields: Fields::Unnamed {
+        data: DataWithDefault::Struct(DataStructWithDefault {
+            fields: FieldsWithDefault::Unnamed(FieldsUnnamedWithDefault {
                 unnamed: [
-                    Field {
+                    FieldWithDefault {
                         vis: Visibility::Inherited,
                         ty: Type::Path {
                             path: Path {
@@ -695,7 +806,7 @@ fn test_fields_on_tuple_struct() {
                         },
                     },
                     Token![,],
-                    Field {
+                    FieldWithDefault {
                         vis: Visibility::Public,
                         ty: Type::Path {
                             path: Path {
@@ -708,20 +819,20 @@ fn test_fields_on_tuple_struct() {
                         },
                     },
                 ],
-            },
+            }),
             semi_token: Some,
-        },
+        }),
     }
     "#);
 
     let data = match input.data {
-        Data::Struct(data) => data,
+        DataWithDefault::Struct(data) => data,
         _ => panic!("expected a struct"),
     };
 
     snapshot!(data.fields.iter().collect::<Vec<_>>(), @r#"
     [
-        Field {
+        FieldWithDefault {
             vis: Visibility::Inherited,
             ty: Type::Path {
                 path: Path {
@@ -733,7 +844,7 @@ fn test_fields_on_tuple_struct() {
                 },
             },
         },
-        Field {
+        FieldWithDefault {
             vis: Visibility::Public,
             ty: Type::Path {
                 path: Path {
@@ -756,15 +867,15 @@ fn test_ambiguous_crate() {
         struct S(crate::X);
     };
 
-    snapshot!(input as DeriveInput, @r#"
-    DeriveInput {
+    snapshot!(input as DeriveInputWithDefault, @r#"
+    DeriveInputWithDefault {
         vis: Visibility::Inherited,
         ident: "S",
         generics: Generics,
-        data: Data::Struct {
-            fields: Fields::Unnamed {
+        data: DataWithDefault::Struct(DataStructWithDefault {
+            fields: FieldsWithDefault::Unnamed(FieldsUnnamedWithDefault {
                 unnamed: [
-                    Field {
+                    FieldWithDefault {
                         vis: Visibility::Inherited,
                         ty: Type::Path {
                             path: Path {
@@ -781,9 +892,9 @@ fn test_ambiguous_crate() {
                         },
                     },
                 ],
-            },
+            }),
             semi_token: Some,
-        },
+        }),
     }
     "#);
 }

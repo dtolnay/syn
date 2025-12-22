@@ -589,6 +589,30 @@
       }
     },
     {
+      "ident": "DataEnumWithDefault",
+      "features": {
+        "any": [
+          "derive"
+        ]
+      },
+      "fields": {
+        "enum_token": {
+          "token": "Enum"
+        },
+        "brace_token": {
+          "group": "Brace"
+        },
+        "variants": {
+          "punctuated": {
+            "element": {
+              "syn": "VariantWithDefault"
+            },
+            "punct": "Comma"
+          }
+        }
+      }
+    },
+    {
       "ident": "DataStruct",
       "features": {
         "any": [
@@ -601,6 +625,27 @@
         },
         "fields": {
           "syn": "Fields"
+        },
+        "semi_token": {
+          "option": {
+            "token": "Semi"
+          }
+        }
+      }
+    },
+    {
+      "ident": "DataStructWithDefault",
+      "features": {
+        "any": [
+          "derive"
+        ]
+      },
+      "fields": {
+        "struct_token": {
+          "token": "Struct"
+        },
+        "fields": {
+          "syn": "FieldsWithDefault"
         },
         "semi_token": {
           "option": {
@@ -623,6 +668,31 @@
         "fields": {
           "syn": "FieldsNamed"
         }
+      }
+    },
+    {
+      "ident": "DataWithDefault",
+      "features": {
+        "any": [
+          "derive"
+        ]
+      },
+      "variants": {
+        "Struct": [
+          {
+            "syn": "DataStructWithDefault"
+          }
+        ],
+        "Enum": [
+          {
+            "syn": "DataEnumWithDefault"
+          }
+        ],
+        "Union": [
+          {
+            "syn": "DataUnion"
+          }
+        ]
       }
     },
     {
@@ -649,6 +719,33 @@
         },
         "data": {
           "syn": "Data"
+        }
+      }
+    },
+    {
+      "ident": "DeriveInputWithDefault",
+      "features": {
+        "any": [
+          "derive"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "vis": {
+          "syn": "Visibility"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "generics": {
+          "syn": "Generics"
+        },
+        "data": {
+          "syn": "DataWithDefault"
         }
       }
     },
@@ -2082,6 +2179,53 @@
       }
     },
     {
+      "ident": "FieldWithDefault",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "vis": {
+          "syn": "Visibility"
+        },
+        "mutability": {
+          "syn": "FieldMutability"
+        },
+        "ident": {
+          "option": {
+            "proc_macro2": "Ident"
+          }
+        },
+        "colon_token": {
+          "option": {
+            "token": "Colon"
+          }
+        },
+        "ty": {
+          "syn": "Type"
+        },
+        "default": {
+          "option": {
+            "tuple": [
+              {
+                "token": "Eq"
+              },
+              {
+                "syn": "Expr"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
       "ident": "Fields",
       "features": {
         "any": [
@@ -2126,6 +2270,28 @@
       }
     },
     {
+      "ident": "FieldsNamedWithDefault",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "brace_token": {
+          "group": "Brace"
+        },
+        "named": {
+          "punctuated": {
+            "element": {
+              "syn": "FieldWithDefault"
+            },
+            "punct": "Comma"
+          }
+        }
+      }
+    },
+    {
       "ident": "FieldsUnnamed",
       "features": {
         "any": [
@@ -2145,6 +2311,50 @@
             "punct": "Comma"
           }
         }
+      }
+    },
+    {
+      "ident": "FieldsUnnamedWithDefault",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "paren_token": {
+          "group": "Paren"
+        },
+        "unnamed": {
+          "punctuated": {
+            "element": {
+              "syn": "FieldWithDefault"
+            },
+            "punct": "Comma"
+          }
+        }
+      }
+    },
+    {
+      "ident": "FieldsWithDefault",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "variants": {
+        "Named": [
+          {
+            "syn": "FieldsNamedWithDefault"
+          }
+        ],
+        "Unnamed": [
+          {
+            "syn": "FieldsUnnamedWithDefault"
+          }
+        ],
+        "Unit": []
       }
     },
     {
@@ -2168,6 +2378,31 @@
         "items": {
           "vec": {
             "syn": "Item"
+          }
+        }
+      }
+    },
+    {
+      "ident": "FileWithDefault",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "shebang": {
+          "option": {
+            "std": "String"
+          }
+        },
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "items": {
+          "vec": {
+            "syn": "ItemWithDefault"
           }
         }
       }
@@ -2824,6 +3059,44 @@
       }
     },
     {
+      "ident": "ItemEnumWithDefault",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "vis": {
+          "syn": "Visibility"
+        },
+        "enum_token": {
+          "token": "Enum"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "generics": {
+          "syn": "Generics"
+        },
+        "brace_token": {
+          "group": "Brace"
+        },
+        "variants": {
+          "punctuated": {
+            "element": {
+              "syn": "VariantWithDefault"
+            },
+            "punct": "Comma"
+          }
+        }
+      }
+    },
+    {
       "ident": "ItemExternCrate",
       "features": {
         "any": [
@@ -3060,6 +3333,54 @@
       }
     },
     {
+      "ident": "ItemModWithDefault",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "vis": {
+          "syn": "Visibility"
+        },
+        "unsafety": {
+          "option": {
+            "token": "Unsafe"
+          }
+        },
+        "mod_token": {
+          "token": "Mod"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "content": {
+          "option": {
+            "tuple": [
+              {
+                "group": "Brace"
+              },
+              {
+                "vec": {
+                  "syn": "ItemWithDefault"
+                }
+              }
+            ]
+          }
+        },
+        "semi": {
+          "option": {
+            "token": "Semi"
+          }
+        }
+      }
+    },
+    {
       "ident": "ItemStatic",
       "features": {
         "any": [
@@ -3132,6 +3453,41 @@
         },
         "fields": {
           "syn": "Fields"
+        },
+        "semi_token": {
+          "option": {
+            "token": "Semi"
+          }
+        }
+      }
+    },
+    {
+      "ident": "ItemStructWithDefault",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "vis": {
+          "syn": "Visibility"
+        },
+        "struct_token": {
+          "token": "Struct"
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "generics": {
+          "syn": "Generics"
+        },
+        "fields": {
+          "syn": "FieldsWithDefault"
         },
         "semi_token": {
           "option": {
@@ -3343,6 +3699,37 @@
           "token": "Semi"
         }
       }
+    },
+    {
+      "ident": "ItemWithDefault",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "variants": {
+        "StructWithDefault": [
+          {
+            "syn": "ItemStructWithDefault"
+          }
+        ],
+        "EnumWithDefault": [
+          {
+            "syn": "ItemEnumWithDefault"
+          }
+        ],
+        "ModWithDefault": [
+          {
+            "syn": "ItemModWithDefault"
+          }
+        ],
+        "Other": [
+          {
+            "syn": "Item"
+          }
+        ]
+      },
+      "exhaustive": false
     },
     {
       "ident": "Label",
@@ -5472,6 +5859,40 @@
         },
         "fields": {
           "syn": "Fields"
+        },
+        "discriminant": {
+          "option": {
+            "tuple": [
+              {
+                "token": "Eq"
+              },
+              {
+                "syn": "Expr"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "ident": "VariantWithDefault",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "ident": {
+          "proc_macro2": "Ident"
+        },
+        "fields": {
+          "syn": "FieldsWithDefault"
         },
         "discriminant": {
           "option": {

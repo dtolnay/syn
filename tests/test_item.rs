@@ -11,7 +11,7 @@ mod debug;
 
 use proc_macro2::{Delimiter, Group, Ident, Span, TokenStream, TokenTree};
 use quote::quote;
-use syn::{Item, ItemTrait};
+use syn::{Item, ItemTrait, ItemWithDefault};
 
 #[test]
 fn test_macro_variable_attr() {
@@ -312,5 +312,97 @@ fn test_impl_trait_trailing_plus() {
             stmts: [],
         },
     }
+    "#);
+}
+
+#[test]
+fn test_struct_default_field_values() {
+    let tokens = quote! {
+        struct Foo {
+            field: i32 = const { 42 },
+        }
+    };
+    snapshot!(tokens as ItemWithDefault, @r#"
+    ItemWithDefault::StructWithDefault(ItemStructWithDefault {
+        vis: Visibility::Inherited,
+        ident: "Foo",
+        generics: Generics,
+        fields: FieldsWithDefault::Named(FieldsNamedWithDefault {
+            named: [
+                FieldWithDefault {
+                    vis: Visibility::Inherited,
+                    ident: Some("field"),
+                    colon_token: Some,
+                    ty: Type::Path {
+                        path: Path {
+                            segments: [
+                                PathSegment {
+                                    ident: "i32",
+                                },
+                            ],
+                        },
+                    },
+                    default: Some(Expr::Const {
+                        block: Block {
+                            stmts: [
+                                Stmt::Expr(
+                                    Expr::Lit {
+                                        lit: 42,
+                                    },
+                                    None,
+                                ),
+                            ],
+                        },
+                    }),
+                },
+                Token![,],
+            ],
+        }),
+    })
+    "#);
+}
+
+#[test]
+fn test_enum_default_field_values() {
+    let tokens = quote! {
+        enum Foo {
+            Bar {
+                field: i32 = 42,
+            }
+        }
+    };
+    snapshot!(tokens as ItemWithDefault, @r#"
+    ItemWithDefault::EnumWithDefault(ItemEnumWithDefault {
+        vis: Visibility::Inherited,
+        ident: "Foo",
+        generics: Generics,
+        variants: [
+            VariantWithDefault {
+                ident: "Bar",
+                fields: FieldsWithDefault::Named(FieldsNamedWithDefault {
+                    named: [
+                        FieldWithDefault {
+                            vis: Visibility::Inherited,
+                            ident: Some("field"),
+                            colon_token: Some,
+                            ty: Type::Path {
+                                path: Path {
+                                    segments: [
+                                        PathSegment {
+                                            ident: "i32",
+                                        },
+                                    ],
+                                },
+                            },
+                            default: Some(Expr::Lit {
+                                lit: 42,
+                            }),
+                        },
+                        Token![,],
+                    ],
+                }),
+            },
+        ],
+    })
     "#);
 }

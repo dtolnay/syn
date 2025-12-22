@@ -202,9 +202,31 @@ impl Clone for crate::DataEnum {
 }
 #[cfg(feature = "derive")]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::DataEnumWithDefault {
+    fn clone(&self) -> Self {
+        crate::DataEnumWithDefault {
+            enum_token: self.enum_token.clone(),
+            brace_token: self.brace_token.clone(),
+            variants: self.variants.clone(),
+        }
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::DataStruct {
     fn clone(&self) -> Self {
         crate::DataStruct {
+            struct_token: self.struct_token.clone(),
+            fields: self.fields.clone(),
+            semi_token: self.semi_token.clone(),
+        }
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::DataStructWithDefault {
+    fn clone(&self) -> Self {
+        crate::DataStructWithDefault {
             struct_token: self.struct_token.clone(),
             fields: self.fields.clone(),
             semi_token: self.semi_token.clone(),
@@ -223,9 +245,37 @@ impl Clone for crate::DataUnion {
 }
 #[cfg(feature = "derive")]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::DataWithDefault {
+    fn clone(&self) -> Self {
+        match self {
+            crate::DataWithDefault::Struct(v0) => {
+                crate::DataWithDefault::Struct(v0.clone())
+            }
+            crate::DataWithDefault::Enum(v0) => crate::DataWithDefault::Enum(v0.clone()),
+            crate::DataWithDefault::Union(v0) => {
+                crate::DataWithDefault::Union(v0.clone())
+            }
+        }
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::DeriveInput {
     fn clone(&self) -> Self {
         crate::DeriveInput {
+            attrs: self.attrs.clone(),
+            vis: self.vis.clone(),
+            ident: self.ident.clone(),
+            generics: self.generics.clone(),
+            data: self.data.clone(),
+        }
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::DeriveInputWithDefault {
+    fn clone(&self) -> Self {
+        crate::DeriveInputWithDefault {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
             ident: self.ident.clone(),
@@ -827,6 +877,21 @@ impl Clone for crate::FieldValue {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::FieldWithDefault {
+    fn clone(&self) -> Self {
+        crate::FieldWithDefault {
+            attrs: self.attrs.clone(),
+            vis: self.vis.clone(),
+            mutability: self.mutability.clone(),
+            ident: self.ident.clone(),
+            colon_token: self.colon_token.clone(),
+            ty: self.ty.clone(),
+            default: self.default.clone(),
+        }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::Fields {
     fn clone(&self) -> Self {
         match self {
@@ -848,6 +913,16 @@ impl Clone for crate::FieldsNamed {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::FieldsNamedWithDefault {
+    fn clone(&self) -> Self {
+        crate::FieldsNamedWithDefault {
+            brace_token: self.brace_token.clone(),
+            named: self.named.clone(),
+        }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::FieldsUnnamed {
     fn clone(&self) -> Self {
         crate::FieldsUnnamed {
@@ -856,11 +931,47 @@ impl Clone for crate::FieldsUnnamed {
         }
     }
 }
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::FieldsUnnamedWithDefault {
+    fn clone(&self) -> Self {
+        crate::FieldsUnnamedWithDefault {
+            paren_token: self.paren_token.clone(),
+            unnamed: self.unnamed.clone(),
+        }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::FieldsWithDefault {
+    fn clone(&self) -> Self {
+        match self {
+            crate::FieldsWithDefault::Named(v0) => {
+                crate::FieldsWithDefault::Named(v0.clone())
+            }
+            crate::FieldsWithDefault::Unnamed(v0) => {
+                crate::FieldsWithDefault::Unnamed(v0.clone())
+            }
+            crate::FieldsWithDefault::Unit => crate::FieldsWithDefault::Unit,
+        }
+    }
+}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::File {
     fn clone(&self) -> Self {
         crate::File {
+            shebang: self.shebang.clone(),
+            attrs: self.attrs.clone(),
+            items: self.items.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::FileWithDefault {
+    fn clone(&self) -> Self {
+        crate::FileWithDefault {
             shebang: self.shebang.clone(),
             attrs: self.attrs.clone(),
             items: self.items.clone(),
@@ -1141,6 +1252,21 @@ impl Clone for crate::ItemEnum {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::ItemEnumWithDefault {
+    fn clone(&self) -> Self {
+        crate::ItemEnumWithDefault {
+            attrs: self.attrs.clone(),
+            vis: self.vis.clone(),
+            enum_token: self.enum_token.clone(),
+            ident: self.ident.clone(),
+            generics: self.generics.clone(),
+            brace_token: self.brace_token.clone(),
+            variants: self.variants.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::ItemExternCrate {
     fn clone(&self) -> Self {
         crate::ItemExternCrate {
@@ -1225,6 +1351,21 @@ impl Clone for crate::ItemMod {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::ItemModWithDefault {
+    fn clone(&self) -> Self {
+        crate::ItemModWithDefault {
+            attrs: self.attrs.clone(),
+            vis: self.vis.clone(),
+            unsafety: self.unsafety.clone(),
+            mod_token: self.mod_token.clone(),
+            ident: self.ident.clone(),
+            content: self.content.clone(),
+            semi: self.semi.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::ItemStatic {
     fn clone(&self) -> Self {
         crate::ItemStatic {
@@ -1246,6 +1387,21 @@ impl Clone for crate::ItemStatic {
 impl Clone for crate::ItemStruct {
     fn clone(&self) -> Self {
         crate::ItemStruct {
+            attrs: self.attrs.clone(),
+            vis: self.vis.clone(),
+            struct_token: self.struct_token.clone(),
+            ident: self.ident.clone(),
+            generics: self.generics.clone(),
+            fields: self.fields.clone(),
+            semi_token: self.semi_token.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::ItemStructWithDefault {
+    fn clone(&self) -> Self {
+        crate::ItemStructWithDefault {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
             struct_token: self.struct_token.clone(),
@@ -1333,6 +1489,26 @@ impl Clone for crate::ItemUse {
             leading_colon: self.leading_colon.clone(),
             tree: self.tree.clone(),
             semi_token: self.semi_token.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::ItemWithDefault {
+    fn clone(&self) -> Self {
+        match self {
+            crate::ItemWithDefault::StructWithDefault(v0) => {
+                crate::ItemWithDefault::StructWithDefault(v0.clone())
+            }
+            crate::ItemWithDefault::EnumWithDefault(v0) => {
+                crate::ItemWithDefault::EnumWithDefault(v0.clone())
+            }
+            crate::ItemWithDefault::ModWithDefault(v0) => {
+                crate::ItemWithDefault::ModWithDefault(v0.clone())
+            }
+            crate::ItemWithDefault::Other(v0) => {
+                crate::ItemWithDefault::Other(v0.clone())
+            }
         }
     }
 }
@@ -2211,6 +2387,18 @@ impl Clone for crate::Variadic {
 impl Clone for crate::Variant {
     fn clone(&self) -> Self {
         crate::Variant {
+            attrs: self.attrs.clone(),
+            ident: self.ident.clone(),
+            fields: self.fields.clone(),
+            discriminant: self.discriminant.clone(),
+        }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::VariantWithDefault {
+    fn clone(&self) -> Self {
+        crate::VariantWithDefault {
             attrs: self.attrs.clone(),
             ident: self.ident.clone(),
             fields: self.fields.clone(),
