@@ -345,7 +345,7 @@ impl LitCStr {
 
 impl LitByte {
     pub fn new(value: u8, span: Span) -> Self {
-        let mut token = Literal::u8_suffixed(value);
+        let mut token = Literal::byte_character(value);
         token.set_span(span);
         LitByte {
             repr: Box::new(LitRepr {
