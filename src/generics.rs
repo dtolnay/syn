@@ -705,7 +705,11 @@ pub(crate) mod parsing {
             let mut bounds = Punctuated::new();
             if colon_token.is_some() {
                 loop {
-                    if input.peek(Token![,]) || input.peek(Token![>]) || input.peek(Token![=]) {
+                    if input.is_empty()
+                        || input.peek(Token![,])
+                        || input.peek(Token![>])
+                        || input.peek(Token![=])
+                    {
                         break;
                     }
                     bounds.push_value({
