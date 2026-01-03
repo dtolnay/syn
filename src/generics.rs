@@ -644,7 +644,7 @@ pub(crate) mod parsing {
                     let mut bounds = Punctuated::new();
                     if has_colon {
                         loop {
-                            if input.peek(Token![,]) || input.peek(Token![>]) {
+                            if input.is_empty() || input.peek(Token![,]) || input.peek(Token![>]) {
                                 break;
                             }
                             let value = input.parse()?;
