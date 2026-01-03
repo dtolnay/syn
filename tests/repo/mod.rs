@@ -237,10 +237,6 @@ static EXCLUDE_FILES: &[&str] = &[
     // https://github.com/dtolnay/syn/issues/1705
     "src/tools/rustfmt/tests/target/cfg_attribute_in_where.rs",
 
-    // TODO: super let
-    // https://github.com/dtolnay/syn/issues/1889
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/let_stmt.rs",
-
     // TODO: "ergonomic clones": `f(obj.use)`, `thread::spawn(use || f(obj))`, `async use`
     // https://github.com/dtolnay/syn/issues/1802
     "tests/codegen-llvm/ergonomic-clones/closure.rs",
