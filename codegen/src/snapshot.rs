@@ -363,7 +363,7 @@ pub fn generate(defs: &Definitions) -> Result<()> {
 
             use super::{Lite, Present};
             use ref_cast::RefCast;
-            use std::fmt::{self, Debug, Display};
+            use core::fmt::{self, Debug, Display};
 
             #impls
         },

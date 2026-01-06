@@ -7,11 +7,13 @@
 
 use crate::ext::TokenStreamExt as _;
 use crate::Lifetime;
+use alloc::boxed::Box;
+use alloc::vec::Vec;
+use core::cmp::Ordering;
+use core::marker::PhantomData;
+use core::ptr;
 use proc_macro2::extra::DelimSpan;
 use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
-use std::cmp::Ordering;
-use std::marker::PhantomData;
-use std::ptr;
 
 /// Internal type which is used instead of `TokenTree` to represent a token tree
 /// within a `TokenBuffer`.
