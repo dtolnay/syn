@@ -367,6 +367,17 @@ impl crate::DataEnum {
 }
 #[cfg(feature = "derive")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::DataEnumWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("DataEnumWithDefault");
+        formatter.field("enum_token", &self.enum_token);
+        formatter.field("brace_token", &self.brace_token);
+        formatter.field("variants", &self.variants);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::DataStruct {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         self.debug(formatter, "DataStruct")
@@ -376,6 +387,17 @@ impl Debug for crate::DataStruct {
 impl crate::DataStruct {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("struct_token", &self.struct_token);
+        formatter.field("fields", &self.fields);
+        formatter.field("semi_token", &self.semi_token);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::DataStructWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("DataStructWithDefault");
         formatter.field("struct_token", &self.struct_token);
         formatter.field("fields", &self.fields);
         formatter.field("semi_token", &self.semi_token);
@@ -400,9 +422,46 @@ impl crate::DataUnion {
 }
 #[cfg(feature = "derive")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::DataWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("DataWithDefault::")?;
+        match self {
+            crate::DataWithDefault::Struct(v0) => {
+                let mut formatter = formatter.debug_tuple("Struct");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::DataWithDefault::Enum(v0) => {
+                let mut formatter = formatter.debug_tuple("Enum");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::DataWithDefault::Union(v0) => {
+                let mut formatter = formatter.debug_tuple("Union");
+                formatter.field(v0);
+                formatter.finish()
+            }
+        }
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::DeriveInput {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("DeriveInput");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("vis", &self.vis);
+        formatter.field("ident", &self.ident);
+        formatter.field("generics", &self.generics);
+        formatter.field("data", &self.data);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::DeriveInputWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("DeriveInputWithDefault");
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
         formatter.field("ident", &self.ident);
@@ -1244,6 +1303,21 @@ impl Debug for crate::FieldValue {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::FieldWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("FieldWithDefault");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("vis", &self.vis);
+        formatter.field("mutability", &self.mutability);
+        formatter.field("ident", &self.ident);
+        formatter.field("colon_token", &self.colon_token);
+        formatter.field("ty", &self.ty);
+        formatter.field("default", &self.default);
+        formatter.finish()
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::Fields {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("Fields::")?;
@@ -1272,6 +1346,16 @@ impl crate::FieldsNamed {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::FieldsNamedWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("FieldsNamedWithDefault");
+        formatter.field("brace_token", &self.brace_token);
+        formatter.field("named", &self.named);
+        formatter.finish()
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::FieldsUnnamed {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         self.debug(formatter, "FieldsUnnamed")
@@ -1286,11 +1370,52 @@ impl crate::FieldsUnnamed {
         formatter.finish()
     }
 }
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::FieldsUnnamedWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("FieldsUnnamedWithDefault");
+        formatter.field("paren_token", &self.paren_token);
+        formatter.field("unnamed", &self.unnamed);
+        formatter.finish()
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::FieldsWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("FieldsWithDefault::")?;
+        match self {
+            crate::FieldsWithDefault::Named(v0) => {
+                let mut formatter = formatter.debug_tuple("Named");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::FieldsWithDefault::Unnamed(v0) => {
+                let mut formatter = formatter.debug_tuple("Unnamed");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::FieldsWithDefault::Unit => formatter.write_str("Unit"),
+        }
+    }
+}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::File {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("File");
+        formatter.field("shebang", &self.shebang);
+        formatter.field("attrs", &self.attrs);
+        formatter.field("items", &self.items);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::FileWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("FileWithDefault");
         formatter.field("shebang", &self.shebang);
         formatter.field("attrs", &self.attrs);
         formatter.field("items", &self.items);
@@ -1681,6 +1806,21 @@ impl crate::ItemEnum {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::ItemEnumWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ItemEnumWithDefault");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("vis", &self.vis);
+        formatter.field("enum_token", &self.enum_token);
+        formatter.field("ident", &self.ident);
+        formatter.field("generics", &self.generics);
+        formatter.field("brace_token", &self.brace_token);
+        formatter.field("variants", &self.variants);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::ItemExternCrate {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         self.debug(formatter, "ItemExternCrate")
@@ -1801,6 +1941,21 @@ impl crate::ItemMod {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::ItemModWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ItemModWithDefault");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("vis", &self.vis);
+        formatter.field("unsafety", &self.unsafety);
+        formatter.field("mod_token", &self.mod_token);
+        formatter.field("ident", &self.ident);
+        formatter.field("content", &self.content);
+        formatter.field("semi", &self.semi);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::ItemStatic {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         self.debug(formatter, "ItemStatic")
@@ -1834,6 +1989,21 @@ impl Debug for crate::ItemStruct {
 impl crate::ItemStruct {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
+        formatter.field("vis", &self.vis);
+        formatter.field("struct_token", &self.struct_token);
+        formatter.field("ident", &self.ident);
+        formatter.field("generics", &self.generics);
+        formatter.field("fields", &self.fields);
+        formatter.field("semi_token", &self.semi_token);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::ItemStructWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ItemStructWithDefault");
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
         formatter.field("struct_token", &self.struct_token);
@@ -1952,6 +2122,35 @@ impl crate::ItemUse {
         formatter.field("tree", &self.tree);
         formatter.field("semi_token", &self.semi_token);
         formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::ItemWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("ItemWithDefault::")?;
+        match self {
+            crate::ItemWithDefault::StructWithDefault(v0) => {
+                let mut formatter = formatter.debug_tuple("StructWithDefault");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::ItemWithDefault::EnumWithDefault(v0) => {
+                let mut formatter = formatter.debug_tuple("EnumWithDefault");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::ItemWithDefault::ModWithDefault(v0) => {
+                let mut formatter = formatter.debug_tuple("ModWithDefault");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::ItemWithDefault::Other(v0) => {
+                let mut formatter = formatter.debug_tuple("Other");
+                formatter.field(v0);
+                formatter.finish()
+            }
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -3166,6 +3365,18 @@ impl Debug for crate::Variadic {
 impl Debug for crate::Variant {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("Variant");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("ident", &self.ident);
+        formatter.field("fields", &self.fields);
+        formatter.field("discriminant", &self.discriminant);
+        formatter.finish()
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::VariantWithDefault {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("VariantWithDefault");
         formatter.field("attrs", &self.attrs);
         formatter.field("ident", &self.ident);
         formatter.field("fields", &self.fields);

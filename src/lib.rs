@@ -203,6 +203,36 @@
 //!
 //! <br>
 //!
+//! # Default Field Values
+//!
+//! Syn has support for the `default_field_values` Rust feature ([rfcs#3681]).
+//! However, adding the fields necessary for this directly to Syn was not possible without
+//! breaking backwards compatibility.
+//! As such, this support is instead only present in "version 2" of several major structs.
+//! These are indicated with the `WithDefault` suffix.
+//! For example, if you wish to use the a default field value in a derive macro,
+//! you should use `DeriveInputWithDefault`.
+//!
+//! Note that even if your derive macro does not make use of default fields, they
+//! will now be skipped in parsing, so existing macros do not need to update
+//! for this feature.
+//! However, this cannot be relied upon for attribute procedural macros, as
+//! when you re-print the struct/enum, the default values may inadvertently
+//! not be retained.
+//!
+//! In the hierarchy of items with default field values (e.g. [`ItemWithDefault`]),
+//! structs defined within inner blocks currently do *not* support default field values.
+//! That is, if you tried `fn x() { struct Y { x: u32 = 10 } }`, that would give a parse error.
+//! This is done for simplicity of implementation, as it would otherwise require the parallel
+//! hierarchy cover nearly all of Syn.
+//!
+//! We expect these types to be folded into their non-suffixed equivalents in the
+//! next breaking release.
+//!
+//! [rfcs#3681]: https://github.com/rust-lang/rfcs/pull/3681
+//!
+//! <br>
+//!
 //! # Debugging
 //!
 //! When developing a procedural macro it can be helpful to look at what the
@@ -350,13 +380,19 @@ mod custom_punctuation;
 mod data;
 #[cfg(any(feature = "full", feature = "derive"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
-pub use crate::data::{Field, Fields, FieldsNamed, FieldsUnnamed, Variant};
+pub use crate::data::{
+    Field, FieldWithDefault, Fields, FieldsNamed, FieldsNamedWithDefault, FieldsUnnamed,
+    FieldsUnnamedWithDefault, FieldsWithDefault, Variant, VariantWithDefault,
+};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 mod derive;
 #[cfg(feature = "derive")]
 #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
-pub use crate::derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
+pub use crate::derive::{
+    Data, DataEnum, DataEnumWithDefault, DataStruct, DataStructWithDefault, DataUnion,
+    DataWithDefault, DeriveInput, DeriveInputWithDefault,
+};
 
 mod drops;
 
@@ -389,7 +425,7 @@ pub mod ext;
 mod file;
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub use crate::file::File;
+pub use crate::file::{File, FileWithDefault};
 
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 mod fixup;
@@ -424,10 +460,11 @@ mod item;
 pub use crate::item::{
     FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
     ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType, ImplRestriction, Item,
-    ItemConst, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod,
-    ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
-    Signature, StaticMutability, TraitItem, TraitItemConst, TraitItemFn, TraitItemMacro,
-    TraitItemType, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
+    ItemConst, ItemEnum, ItemEnumWithDefault, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl,
+    ItemMacro, ItemMod, ItemModWithDefault, ItemStatic, ItemStruct, ItemStructWithDefault,
+    ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, ItemWithDefault, Receiver, Signature,
+    StaticMutability, TraitItem, TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType,
+    UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
 };
 
 mod lifetime;
@@ -1003,6 +1040,39 @@ pub fn parse_file(mut content: &str) -> Result<File> {
     }
 
     let mut file: File = parse_str(content)?;
+    file.shebang = shebang;
+    Ok(file)
+}
+
+/// Parse the content of a file of Rust code, with support for the default field values feature.
+///
+/// See [`parse_file`] for full docs.
+///
+/// Struct and enum items output by this function support having default field values set.
+#[cfg(all(feature = "parsing", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "full"))))]
+pub fn parse_file_with_default(mut content: &str) -> Result<FileWithDefault> {
+    // Strip the BOM if it is present
+    const BOM: &str = "\u{feff}";
+    if content.starts_with(BOM) {
+        content = &content[BOM.len()..];
+    }
+
+    let mut shebang = None;
+    if content.starts_with("#!") {
+        let rest = whitespace::skip(&content[2..]);
+        if !rest.starts_with('[') {
+            if let Some(idx) = content.find('\n') {
+                shebang = Some(content[..idx].to_string());
+                content = &content[idx..];
+            } else {
+                shebang = Some(content.to_string());
+                content = "";
+            }
+        }
+    }
+
+    let mut file: FileWithDefault = parse_str(content)?;
     file.shebang = shebang;
     Ok(file)
 }

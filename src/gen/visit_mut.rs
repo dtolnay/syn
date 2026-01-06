@@ -124,8 +124,21 @@ pub trait VisitMut {
     }
     #[cfg(feature = "derive")]
     #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+    fn visit_data_enum_with_default_mut(&mut self, i: &mut crate::DataEnumWithDefault) {
+        visit_data_enum_with_default_mut(self, i);
+    }
+    #[cfg(feature = "derive")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
     fn visit_data_struct_mut(&mut self, i: &mut crate::DataStruct) {
         visit_data_struct_mut(self, i);
+    }
+    #[cfg(feature = "derive")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+    fn visit_data_struct_with_default_mut(
+        &mut self,
+        i: &mut crate::DataStructWithDefault,
+    ) {
+        visit_data_struct_with_default_mut(self, i);
     }
     #[cfg(feature = "derive")]
     #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
@@ -134,8 +147,21 @@ pub trait VisitMut {
     }
     #[cfg(feature = "derive")]
     #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+    fn visit_data_with_default_mut(&mut self, i: &mut crate::DataWithDefault) {
+        visit_data_with_default_mut(self, i);
+    }
+    #[cfg(feature = "derive")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
     fn visit_derive_input_mut(&mut self, i: &mut crate::DeriveInput) {
         visit_derive_input_mut(self, i);
+    }
+    #[cfg(feature = "derive")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+    fn visit_derive_input_with_default_mut(
+        &mut self,
+        i: &mut crate::DeriveInputWithDefault,
+    ) {
+        visit_derive_input_with_default_mut(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -359,6 +385,11 @@ pub trait VisitMut {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_field_with_default_mut(&mut self, i: &mut crate::FieldWithDefault) {
+        visit_field_with_default_mut(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_fields_mut(&mut self, i: &mut crate::Fields) {
         visit_fields_mut(self, i);
     }
@@ -369,13 +400,39 @@ pub trait VisitMut {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_fields_named_with_default_mut(
+        &mut self,
+        i: &mut crate::FieldsNamedWithDefault,
+    ) {
+        visit_fields_named_with_default_mut(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_fields_unnamed_mut(&mut self, i: &mut crate::FieldsUnnamed) {
         visit_fields_unnamed_mut(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_fields_unnamed_with_default_mut(
+        &mut self,
+        i: &mut crate::FieldsUnnamedWithDefault,
+    ) {
+        visit_fields_unnamed_with_default_mut(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_fields_with_default_mut(&mut self, i: &mut crate::FieldsWithDefault) {
+        visit_fields_with_default_mut(self, i);
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_file_mut(&mut self, i: &mut crate::File) {
         visit_file_mut(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_file_with_default_mut(&mut self, i: &mut crate::FileWithDefault) {
+        visit_file_with_default_mut(self, i);
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -477,6 +534,11 @@ pub trait VisitMut {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_item_enum_with_default_mut(&mut self, i: &mut crate::ItemEnumWithDefault) {
+        visit_item_enum_with_default_mut(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_item_extern_crate_mut(&mut self, i: &mut crate::ItemExternCrate) {
         visit_item_extern_crate_mut(self, i);
     }
@@ -507,6 +569,11 @@ pub trait VisitMut {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_item_mod_with_default_mut(&mut self, i: &mut crate::ItemModWithDefault) {
+        visit_item_mod_with_default_mut(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_item_static_mut(&mut self, i: &mut crate::ItemStatic) {
         visit_item_static_mut(self, i);
     }
@@ -514,6 +581,14 @@ pub trait VisitMut {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_item_struct_mut(&mut self, i: &mut crate::ItemStruct) {
         visit_item_struct_mut(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_item_struct_with_default_mut(
+        &mut self,
+        i: &mut crate::ItemStructWithDefault,
+    ) {
+        visit_item_struct_with_default_mut(self, i);
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -539,6 +614,11 @@ pub trait VisitMut {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_item_use_mut(&mut self, i: &mut crate::ItemUse) {
         visit_item_use_mut(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_item_with_default_mut(&mut self, i: &mut crate::ItemWithDefault) {
+        visit_item_with_default_mut(self, i);
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -932,6 +1012,11 @@ pub trait VisitMut {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_variant_with_default_mut(&mut self, i: &mut crate::VariantWithDefault) {
+        visit_variant_with_default_mut(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_vis_restricted_mut(&mut self, i: &mut crate::VisRestricted) {
         visit_vis_restricted_mut(self, i);
     }
@@ -1270,12 +1355,41 @@ where
 }
 #[cfg(feature = "derive")]
 #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+pub fn visit_data_enum_with_default_mut<V>(
+    v: &mut V,
+    node: &mut crate::DataEnumWithDefault,
+)
+where
+    V: VisitMut + ?Sized,
+{
+    skip!(node.enum_token);
+    skip!(node.brace_token);
+    for mut el in Punctuated::pairs_mut(&mut node.variants) {
+        let it = el.value_mut();
+        v.visit_variant_with_default_mut(it);
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
 pub fn visit_data_struct_mut<V>(v: &mut V, node: &mut crate::DataStruct)
 where
     V: VisitMut + ?Sized,
 {
     skip!(node.struct_token);
     v.visit_fields_mut(&mut node.fields);
+    skip!(node.semi_token);
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+pub fn visit_data_struct_with_default_mut<V>(
+    v: &mut V,
+    node: &mut crate::DataStructWithDefault,
+)
+where
+    V: VisitMut + ?Sized,
+{
+    skip!(node.struct_token);
+    v.visit_fields_with_default_mut(&mut node.fields);
     skip!(node.semi_token);
 }
 #[cfg(feature = "derive")]
@@ -1289,6 +1403,24 @@ where
 }
 #[cfg(feature = "derive")]
 #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+pub fn visit_data_with_default_mut<V>(v: &mut V, node: &mut crate::DataWithDefault)
+where
+    V: VisitMut + ?Sized,
+{
+    match node {
+        crate::DataWithDefault::Struct(_binding_0) => {
+            v.visit_data_struct_with_default_mut(_binding_0);
+        }
+        crate::DataWithDefault::Enum(_binding_0) => {
+            v.visit_data_enum_with_default_mut(_binding_0);
+        }
+        crate::DataWithDefault::Union(_binding_0) => {
+            v.visit_data_union_mut(_binding_0);
+        }
+    }
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
 pub fn visit_derive_input_mut<V>(v: &mut V, node: &mut crate::DeriveInput)
 where
     V: VisitMut + ?Sized,
@@ -1298,6 +1430,21 @@ where
     v.visit_ident_mut(&mut node.ident);
     v.visit_generics_mut(&mut node.generics);
     v.visit_data_mut(&mut node.data);
+}
+#[cfg(feature = "derive")]
+#[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+pub fn visit_derive_input_with_default_mut<V>(
+    v: &mut V,
+    node: &mut crate::DeriveInputWithDefault,
+)
+where
+    V: VisitMut + ?Sized,
+{
+    v.visit_attributes_mut(&mut node.attrs);
+    v.visit_visibility_mut(&mut node.vis);
+    v.visit_ident_mut(&mut node.ident);
+    v.visit_generics_mut(&mut node.generics);
+    v.visit_data_with_default_mut(&mut node.data);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -1963,6 +2110,25 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_field_with_default_mut<V>(v: &mut V, node: &mut crate::FieldWithDefault)
+where
+    V: VisitMut + ?Sized,
+{
+    v.visit_attributes_mut(&mut node.attrs);
+    v.visit_visibility_mut(&mut node.vis);
+    v.visit_field_mutability_mut(&mut node.mutability);
+    if let Some(it) = &mut node.ident {
+        v.visit_ident_mut(it);
+    }
+    skip!(node.colon_token);
+    v.visit_type_mut(&mut node.ty);
+    if let Some(it) = &mut node.default {
+        skip!((it).0);
+        v.visit_expr_mut(&mut (it).1);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_fields_mut<V>(v: &mut V, node: &mut crate::Fields)
 where
     V: VisitMut + ?Sized,
@@ -1991,6 +2157,21 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_fields_named_with_default_mut<V>(
+    v: &mut V,
+    node: &mut crate::FieldsNamedWithDefault,
+)
+where
+    V: VisitMut + ?Sized,
+{
+    skip!(node.brace_token);
+    for mut el in Punctuated::pairs_mut(&mut node.named) {
+        let it = el.value_mut();
+        v.visit_field_with_default_mut(it);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_fields_unnamed_mut<V>(v: &mut V, node: &mut crate::FieldsUnnamed)
 where
     V: VisitMut + ?Sized,
@@ -1999,6 +2180,37 @@ where
     for mut el in Punctuated::pairs_mut(&mut node.unnamed) {
         let it = el.value_mut();
         v.visit_field_mut(it);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_fields_unnamed_with_default_mut<V>(
+    v: &mut V,
+    node: &mut crate::FieldsUnnamedWithDefault,
+)
+where
+    V: VisitMut + ?Sized,
+{
+    skip!(node.paren_token);
+    for mut el in Punctuated::pairs_mut(&mut node.unnamed) {
+        let it = el.value_mut();
+        v.visit_field_with_default_mut(it);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_fields_with_default_mut<V>(v: &mut V, node: &mut crate::FieldsWithDefault)
+where
+    V: VisitMut + ?Sized,
+{
+    match node {
+        crate::FieldsWithDefault::Named(_binding_0) => {
+            v.visit_fields_named_with_default_mut(_binding_0);
+        }
+        crate::FieldsWithDefault::Unnamed(_binding_0) => {
+            v.visit_fields_unnamed_with_default_mut(_binding_0);
+        }
+        crate::FieldsWithDefault::Unit => {}
     }
 }
 #[cfg(feature = "full")]
@@ -2011,6 +2223,18 @@ where
     v.visit_attributes_mut(&mut node.attrs);
     for it in &mut node.items {
         v.visit_item_mut(it);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_file_with_default_mut<V>(v: &mut V, node: &mut crate::FileWithDefault)
+where
+    V: VisitMut + ?Sized,
+{
+    skip!(node.shebang);
+    v.visit_attributes_mut(&mut node.attrs);
+    for it in &mut node.items {
+        v.visit_item_with_default_mut(it);
     }
 }
 #[cfg(feature = "full")]
@@ -2360,6 +2584,26 @@ where
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_item_enum_with_default_mut<V>(
+    v: &mut V,
+    node: &mut crate::ItemEnumWithDefault,
+)
+where
+    V: VisitMut + ?Sized,
+{
+    v.visit_attributes_mut(&mut node.attrs);
+    v.visit_visibility_mut(&mut node.vis);
+    skip!(node.enum_token);
+    v.visit_ident_mut(&mut node.ident);
+    v.visit_generics_mut(&mut node.generics);
+    skip!(node.brace_token);
+    for mut el in Punctuated::pairs_mut(&mut node.variants) {
+        let it = el.value_mut();
+        v.visit_variant_with_default_mut(it);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_item_extern_crate_mut<V>(v: &mut V, node: &mut crate::ItemExternCrate)
 where
     V: VisitMut + ?Sized,
@@ -2456,6 +2700,28 @@ where
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_item_mod_with_default_mut<V>(
+    v: &mut V,
+    node: &mut crate::ItemModWithDefault,
+)
+where
+    V: VisitMut + ?Sized,
+{
+    v.visit_attributes_mut(&mut node.attrs);
+    v.visit_visibility_mut(&mut node.vis);
+    skip!(node.unsafety);
+    skip!(node.mod_token);
+    v.visit_ident_mut(&mut node.ident);
+    if let Some(it) = &mut node.content {
+        skip!((it).0);
+        for it in &mut (it).1 {
+            v.visit_item_with_default_mut(it);
+        }
+    }
+    skip!(node.semi);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_item_static_mut<V>(v: &mut V, node: &mut crate::ItemStatic)
 where
     V: VisitMut + ?Sized,
@@ -2483,6 +2749,23 @@ where
     v.visit_ident_mut(&mut node.ident);
     v.visit_generics_mut(&mut node.generics);
     v.visit_fields_mut(&mut node.fields);
+    skip!(node.semi_token);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_item_struct_with_default_mut<V>(
+    v: &mut V,
+    node: &mut crate::ItemStructWithDefault,
+)
+where
+    V: VisitMut + ?Sized,
+{
+    v.visit_attributes_mut(&mut node.attrs);
+    v.visit_visibility_mut(&mut node.vis);
+    skip!(node.struct_token);
+    v.visit_ident_mut(&mut node.ident);
+    v.visit_generics_mut(&mut node.generics);
+    v.visit_fields_with_default_mut(&mut node.fields);
     skip!(node.semi_token);
 }
 #[cfg(feature = "full")]
@@ -2569,6 +2852,27 @@ where
     skip!(node.leading_colon);
     v.visit_use_tree_mut(&mut node.tree);
     skip!(node.semi_token);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_item_with_default_mut<V>(v: &mut V, node: &mut crate::ItemWithDefault)
+where
+    V: VisitMut + ?Sized,
+{
+    match node {
+        crate::ItemWithDefault::StructWithDefault(_binding_0) => {
+            v.visit_item_struct_with_default_mut(_binding_0);
+        }
+        crate::ItemWithDefault::EnumWithDefault(_binding_0) => {
+            v.visit_item_enum_with_default_mut(_binding_0);
+        }
+        crate::ItemWithDefault::ModWithDefault(_binding_0) => {
+            v.visit_item_mod_with_default_mut(_binding_0);
+        }
+        crate::ItemWithDefault::Other(_binding_0) => {
+            v.visit_item_mut(_binding_0);
+        }
+    }
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -3698,6 +4002,20 @@ where
     v.visit_attributes_mut(&mut node.attrs);
     v.visit_ident_mut(&mut node.ident);
     v.visit_fields_mut(&mut node.fields);
+    if let Some(it) = &mut node.discriminant {
+        skip!((it).0);
+        v.visit_expr_mut(&mut (it).1);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_variant_with_default_mut<V>(v: &mut V, node: &mut crate::VariantWithDefault)
+where
+    V: VisitMut + ?Sized,
+{
+    v.visit_attributes_mut(&mut node.attrs);
+    v.visit_ident_mut(&mut node.ident);
+    v.visit_fields_with_default_mut(&mut node.fields);
     if let Some(it) = &mut node.discriminant {
         skip!((it).0);
         v.visit_expr_mut(&mut (it).1);

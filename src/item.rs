@@ -1,6 +1,11 @@
 use crate::attr::Attribute;
 use crate::data::{Fields, FieldsNamed, Variant};
-use crate::derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
+
+use crate::data::{FieldsWithDefault, VariantWithDefault};
+use crate::derive::{
+    Data, DataEnum, DataEnumWithDefault, DataStruct, DataStructWithDefault, DataUnion,
+    DataWithDefault, DeriveInput, DeriveInputWithDefault,
+};
 use crate::expr::Expr;
 use crate::generics::{Generics, TypeParamBound};
 use crate::ident::Ident;
@@ -16,6 +21,17 @@ use crate::ty::{Abi, ReturnType, Type};
 use proc_macro2::TokenStream;
 #[cfg(feature = "parsing")]
 use std::mem;
+
+ast_enum_of_structs! {
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    #[non_exhaustive]
+    pub enum ItemWithDefault {
+        StructWithDefault(ItemStructWithDefault),
+        EnumWithDefault(ItemEnumWithDefault),
+        ModWithDefault(ItemModWithDefault),
+        Other(Item),
+    }
+}
 
 ast_enum_of_structs! {
     /// Things that can appear directly inside of a module or scope.
@@ -130,6 +146,22 @@ ast_struct! {
 }
 
 ast_struct! {
+    /// An enum definition: `enum Foo<A, B> { A(A), B(B) }`.
+    ///
+    /// The variants of this enum can have default field values.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    pub struct ItemEnumWithDefault {
+        pub attrs: Vec<Attribute>,
+        pub vis: Visibility,
+        pub enum_token: Token![enum],
+        pub ident: Ident,
+        pub generics: Generics,
+        pub brace_token: token::Brace,
+        pub variants: Punctuated<VariantWithDefault, Token![,]>,
+    }
+}
+
+ast_struct! {
     /// An `extern crate` item: `extern crate serde`.
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct ItemExternCrate {
@@ -212,6 +244,20 @@ ast_struct! {
 }
 
 ast_struct! {
+    /// A module or module declaration: `mod m` or `mod m { ... }`.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    pub struct ItemModWithDefault {
+        pub attrs: Vec<Attribute>,
+        pub vis: Visibility,
+        pub unsafety: Option<Token![unsafe]>,
+        pub mod_token: Token![mod],
+        pub ident: Ident,
+        pub content: Option<(token::Brace, Vec<ItemWithDefault>)>,
+        pub semi: Option<Token![;]>,
+    }
+}
+
+ast_struct! {
     /// A static item: `static BIKE: Shed = Shed(42)`.
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct ItemStatic {
@@ -238,6 +284,20 @@ ast_struct! {
         pub ident: Ident,
         pub generics: Generics,
         pub fields: Fields,
+        pub semi_token: Option<Token![;]>,
+    }
+}
+
+ast_struct! {
+    /// A struct definition: `struct Foo<A> { x: A }`.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    pub struct ItemStructWithDefault {
+        pub attrs: Vec<Attribute>,
+        pub vis: Visibility,
+        pub struct_token: Token![struct],
+        pub ident: Ident,
+        pub generics: Generics,
+        pub fields: FieldsWithDefault,
         pub semi_token: Option<Token![;]>,
     }
 }
@@ -414,6 +474,88 @@ impl From<ItemUnion> for DeriveInput {
             ident: input.ident,
             generics: input.generics,
             data: Data::Union(DataUnion {
+                union_token: input.union_token,
+                fields: input.fields,
+            }),
+        }
+    }
+}
+
+impl From<DeriveInputWithDefault> for ItemWithDefault {
+    fn from(input: DeriveInputWithDefault) -> ItemWithDefault {
+        match input.data {
+            DataWithDefault::Struct(data) => {
+                ItemWithDefault::StructWithDefault(ItemStructWithDefault {
+                    attrs: input.attrs,
+                    vis: input.vis,
+                    struct_token: data.struct_token,
+                    ident: input.ident,
+                    generics: input.generics,
+                    fields: data.fields,
+                    semi_token: data.semi_token,
+                })
+            }
+            DataWithDefault::Enum(data) => ItemWithDefault::EnumWithDefault(ItemEnumWithDefault {
+                attrs: input.attrs,
+                vis: input.vis,
+                enum_token: data.enum_token,
+                ident: input.ident,
+                generics: input.generics,
+                brace_token: data.brace_token,
+                variants: data.variants,
+            }),
+            DataWithDefault::Union(data) => ItemWithDefault::Other(Item::Union(ItemUnion {
+                attrs: input.attrs,
+                vis: input.vis,
+                union_token: data.union_token,
+                ident: input.ident,
+                generics: input.generics,
+                fields: data.fields,
+            })),
+        }
+    }
+}
+
+impl From<ItemStructWithDefault> for DeriveInputWithDefault {
+    fn from(input: ItemStructWithDefault) -> DeriveInputWithDefault {
+        DeriveInputWithDefault {
+            attrs: input.attrs,
+            vis: input.vis,
+            ident: input.ident,
+            generics: input.generics,
+            data: DataWithDefault::Struct(DataStructWithDefault {
+                struct_token: input.struct_token,
+                fields: input.fields,
+                semi_token: input.semi_token,
+            }),
+        }
+    }
+}
+
+impl From<ItemEnumWithDefault> for DeriveInputWithDefault {
+    fn from(input: ItemEnumWithDefault) -> DeriveInputWithDefault {
+        DeriveInputWithDefault {
+            attrs: input.attrs,
+            vis: input.vis,
+            ident: input.ident,
+            generics: input.generics,
+            data: DataWithDefault::Enum(DataEnumWithDefault {
+                enum_token: input.enum_token,
+                brace_token: input.brace_token,
+                variants: input.variants,
+            }),
+        }
+    }
+}
+
+impl From<ItemUnion> for DeriveInputWithDefault {
+    fn from(input: ItemUnion) -> DeriveInputWithDefault {
+        DeriveInputWithDefault {
+            attrs: input.attrs,
+            vis: input.vis,
+            ident: input.ident,
+            generics: input.generics,
+            data: DataWithDefault::Union(DataUnion {
                 union_token: input.union_token,
                 fields: input.fields,
             }),
@@ -914,8 +1056,9 @@ pub(crate) mod parsing {
     use crate::item::{
         FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
         ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType, Item, ItemConst,
-        ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod,
-        ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
+        ItemEnum, ItemEnumWithDefault, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl,
+        ItemMacro, ItemMod, ItemModWithDefault, ItemStatic, ItemStruct, ItemStructWithDefault,
+        ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, ItemWithDefault, Receiver,
         Signature, StaticMutability, TraitItem, TraitItemConst, TraitItemFn, TraitItemMacro,
         TraitItemType, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
     };
@@ -940,6 +1083,47 @@ pub(crate) mod parsing {
             let begin = input.fork();
             let attrs = input.call(Attribute::parse_outer)?;
             parse_rest_of_item(begin, attrs, input)
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Parse for ItemWithDefault {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let begin = input.fork();
+            let attrs = input.call(Attribute::parse_outer)?;
+            parse_rest_of_item_with_default(begin, attrs, input)
+        }
+    }
+
+    pub(crate) fn parse_rest_of_item_with_default(
+        begin: ParseBuffer,
+        mut attrs: Vec<Attribute>,
+        input: ParseStream,
+    ) -> Result<ItemWithDefault> {
+        let ahead = input.fork();
+        let _vis: Visibility = ahead.parse()?;
+
+        let lookahead = ahead.lookahead1();
+        if lookahead.peek(Token![struct]) {
+            let mut item: ItemStructWithDefault = input.parse()?;
+            // This line is defensive; structs don't support inner attributes.
+            attrs.extend(item.attrs);
+            item.attrs = attrs;
+            Ok(ItemWithDefault::StructWithDefault(item))
+        } else if lookahead.peek(Token![enum]) {
+            let mut item: ItemEnumWithDefault = input.parse()?;
+            // This line is defensive; enums don't support inner attributes.
+            attrs.extend(item.attrs);
+            item.attrs = attrs;
+            Ok(ItemWithDefault::EnumWithDefault(item))
+        } else if lookahead.peek(Token![mod]) {
+            let mut item: ItemModWithDefault = input.parse()?;
+            // This line is *not* defensive; modules do support inner attributes!
+            attrs.extend(item.attrs);
+            item.attrs = attrs;
+            input.parse().map(ItemWithDefault::ModWithDefault)
+        } else {
+            parse_rest_of_item(begin, attrs, input).map(ItemWithDefault::Other)
         }
     }
 
@@ -1764,19 +1948,62 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for ItemMod {
         fn parse(input: ParseStream) -> Result<Self> {
-            let mut attrs = input.call(Attribute::parse_outer)?;
-            let vis: Visibility = input.parse()?;
-            let unsafety: Option<Token![unsafe]> = input.parse()?;
-            let mod_token: Token![mod] = input.parse()?;
-            let ident: Ident = if input.peek(Token![try]) {
-                input.call(Ident::parse_any)
-            } else {
-                input.parse()
-            }?;
+            let (mut module, items) = parse_module(input)?;
+            module.content = items;
+            Ok(module)
+        }
+    }
 
-            let lookahead = input.lookahead1();
-            if lookahead.peek(Token![;]) {
-                Ok(ItemMod {
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Parse for ItemModWithDefault {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let (
+                ItemMod {
+                    attrs,
+                    vis,
+                    unsafety,
+                    mod_token,
+                    ident,
+                    semi,
+                    content: _,
+                },
+                items,
+            ) = parse_module(input)?;
+            Ok(ItemModWithDefault {
+                attrs,
+                vis,
+                unsafety,
+                mod_token,
+                ident,
+                content: items,
+                semi,
+            })
+        }
+    }
+
+    /// Attempt to parse a module declaration.
+    /// Parses the module's content as `Content`; this allows sharing the same code for default field values
+    /// internally, whilst still supporting all the properties of modules.
+    ///
+    /// The `content` field of the returned value will always be `None`.
+    #[allow(clippy::type_complexity)]
+    fn parse_module<Content: Parse>(
+        input: &ParseBuffer<'_>,
+    ) -> Result<(ItemMod, Option<(token::Brace, Vec<Content>)>)> {
+        let mut attrs = input.call(Attribute::parse_outer)?;
+        let vis: Visibility = input.parse()?;
+        let unsafety: Option<Token![unsafe]> = input.parse()?;
+        let mod_token: Token![mod] = input.parse()?;
+        let ident: Ident = if input.peek(Token![try]) {
+            input.call(Ident::parse_any)
+        } else {
+            input.parse()
+        }?;
+
+        let lookahead = input.lookahead1();
+        if lookahead.peek(Token![;]) {
+            Ok((
+                ItemMod {
                     attrs,
                     vis,
                     unsafety,
@@ -1784,29 +2011,33 @@ pub(crate) mod parsing {
                     ident,
                     content: None,
                     semi: Some(input.parse()?),
-                })
-            } else if lookahead.peek(token::Brace) {
-                let content;
-                let brace_token = braced!(content in input);
-                attr::parsing::parse_inner(&content, &mut attrs)?;
+                },
+                None,
+            ))
+        } else if lookahead.peek(token::Brace) {
+            let content;
+            let brace_token = braced!(content in input);
+            attr::parsing::parse_inner(&content, &mut attrs)?;
 
-                let mut items = Vec::new();
-                while !content.is_empty() {
-                    items.push(content.parse()?);
-                }
+            let mut items = Vec::new();
+            while !content.is_empty() {
+                items.push(content.parse()?);
+            }
 
-                Ok(ItemMod {
+            Ok((
+                ItemMod {
                     attrs,
                     vis,
                     unsafety,
                     mod_token,
                     ident,
-                    content: Some((brace_token, items)),
+                    content: None,
                     semi: None,
-                })
-            } else {
-                Err(lookahead.error())
-            }
+                },
+                Some((brace_token, items)),
+            ))
+        } else {
+            Err(lookahead.error())
         }
     }
 
@@ -2112,6 +2343,30 @@ pub(crate) mod parsing {
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Parse for ItemStructWithDefault {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let attrs = input.call(Attribute::parse_outer)?;
+            let vis = input.parse::<Visibility>()?;
+            let struct_token = input.parse::<Token![struct]>()?;
+            let ident = input.parse::<Ident>()?;
+            let generics = input.parse::<Generics>()?;
+            let (where_clause, fields, semi_token) = derive::parsing::data_struct(input)?;
+            Ok(ItemStructWithDefault {
+                attrs,
+                vis,
+                struct_token,
+                ident,
+                generics: Generics {
+                    where_clause,
+                    ..generics
+                },
+                fields,
+                semi_token,
+            })
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for ItemEnum {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
@@ -2121,6 +2376,30 @@ pub(crate) mod parsing {
             let generics = input.parse::<Generics>()?;
             let (where_clause, brace_token, variants) = derive::parsing::data_enum(input)?;
             Ok(ItemEnum {
+                attrs,
+                vis,
+                enum_token,
+                ident,
+                generics: Generics {
+                    where_clause,
+                    ..generics
+                },
+                brace_token,
+                variants,
+            })
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Parse for ItemEnumWithDefault {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let attrs = input.call(Attribute::parse_outer)?;
+            let vis = input.parse::<Visibility>()?;
+            let enum_token = input.parse::<Token![enum]>()?;
+            let ident = input.parse::<Ident>()?;
+            let generics = input.parse::<Generics>()?;
+            let (where_clause, brace_token, variants) = derive::parsing::data_enum(input)?;
+            Ok(ItemEnumWithDefault {
                 attrs,
                 vis,
                 enum_token,
@@ -2935,16 +3214,16 @@ mod printing {
     use crate::item::{
         ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType, ImplItemConst,
         ImplItemFn, ImplItemMacro, ImplItemType, ItemConst, ItemEnum, ItemExternCrate, ItemFn,
-        ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait,
-        ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Signature, StaticMutability,
-        TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob, UseGroup, UseName,
-        UsePath, UseRename, Variadic,
+        ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemModWithDefault, ItemStatic, ItemStruct,
+        ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Signature,
+        StaticMutability, TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob,
+        UseGroup, UseName, UsePath, UseRename, Variadic,
     };
     use crate::mac::MacroDelimiter;
-    use crate::path;
     use crate::path::printing::PathStyle;
     use crate::print::TokensOrDefault;
     use crate::ty::Type;
+    use crate::{path, FieldsWithDefault, ItemEnumWithDefault, ItemStructWithDefault};
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt as _};
 
@@ -3040,6 +3319,25 @@ mod printing {
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for ItemModWithDefault {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.unsafety.to_tokens(tokens);
+            self.mod_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            if let Some((brace, items)) = &self.content {
+                brace.surround(tokens, |tokens| {
+                    tokens.append_all(self.attrs.inner());
+                    tokens.append_all(items);
+                });
+            } else {
+                TokensOrDefault(&self.semi).to_tokens(tokens);
+            }
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for ItemForeignMod {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
@@ -3081,6 +3379,20 @@ mod printing {
             });
         }
     }
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for ItemEnumWithDefault {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.enum_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
+            self.brace_token.surround(tokens, |tokens| {
+                self.variants.to_tokens(tokens);
+            });
+        }
+    }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for ItemStruct {
@@ -3101,6 +3413,31 @@ mod printing {
                     TokensOrDefault(&self.semi_token).to_tokens(tokens);
                 }
                 Fields::Unit => {
+                    self.generics.where_clause.to_tokens(tokens);
+                    TokensOrDefault(&self.semi_token).to_tokens(tokens);
+                }
+            }
+        }
+    }
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for ItemStructWithDefault {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.vis.to_tokens(tokens);
+            self.struct_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            match &self.fields {
+                FieldsWithDefault::Named(fields) => {
+                    self.generics.where_clause.to_tokens(tokens);
+                    fields.to_tokens(tokens);
+                }
+                FieldsWithDefault::Unnamed(fields) => {
+                    fields.to_tokens(tokens);
+                    self.generics.where_clause.to_tokens(tokens);
+                    TokensOrDefault(&self.semi_token).to_tokens(tokens);
+                }
+                FieldsWithDefault::Unit => {
                     self.generics.where_clause.to_tokens(tokens);
                     TokensOrDefault(&self.semi_token).to_tokens(tokens);
                 }

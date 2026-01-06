@@ -2,13 +2,14 @@ use proc_macro2::TokenStream;
 use quote::{quote, quote_spanned};
 use syn::spanned::Spanned;
 use syn::{
-    parse_macro_input, parse_quote, Data, DeriveInput, Fields, GenericParam, Generics, Index,
+    parse_macro_input, parse_quote, DataWithDefault, DeriveInputWithDefault, FieldsWithDefault,
+    GenericParam, Generics, Index,
 };
 
 #[proc_macro_derive(HeapSize)]
 pub fn derive_heap_size(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     // Parse the input tokens into a syntax tree.
-    let input = parse_macro_input!(input as DeriveInput);
+    let input = parse_macro_input!(input as DeriveInputWithDefault);
 
     // Used in the quasi-quotation below as `#name`.
     let name = input.ident;
@@ -44,11 +45,11 @@ fn add_trait_bounds(mut generics: Generics) -> Generics {
 }
 
 // Generate an expression to sum up the heap size of each field.
-fn heap_size_sum(data: &Data) -> TokenStream {
+fn heap_size_sum(data: &DataWithDefault) -> TokenStream {
     match *data {
-        Data::Struct(ref data) => {
+        DataWithDefault::Struct(ref data) => {
             match data.fields {
-                Fields::Named(ref fields) => {
+                FieldsWithDefault::Named(ref fields) => {
                     // Expands to an expression like
                     //
                     //     0 + self.x.heap_size() + self.y.heap_size() + self.z.heap_size()
@@ -71,7 +72,7 @@ fn heap_size_sum(data: &Data) -> TokenStream {
                         0 #(+ #recurse)*
                     }
                 }
-                Fields::Unnamed(ref fields) => {
+                FieldsWithDefault::Unnamed(ref fields) => {
                     // Expands to an expression like
                     //
                     //     0 + self.0.heap_size() + self.1.heap_size() + self.2.heap_size()
@@ -85,12 +86,12 @@ fn heap_size_sum(data: &Data) -> TokenStream {
                         0 #(+ #recurse)*
                     }
                 }
-                Fields::Unit => {
+                FieldsWithDefault::Unit => {
                     // Unit structs cannot own more than 0 bytes of heap memory.
                     quote!(0)
                 }
             }
         }
-        Data::Enum(_) | Data::Union(_) => unimplemented!(),
+        DataWithDefault::Enum(_) | DataWithDefault::Union(_) => unimplemented!(),
     }
 }

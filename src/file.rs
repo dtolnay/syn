@@ -1,5 +1,6 @@
 use crate::attr::Attribute;
 use crate::item::Item;
+use crate::ItemWithDefault;
 
 ast_struct! {
     /// A complete file of Rust source code.
@@ -83,11 +84,27 @@ ast_struct! {
     }
 }
 
+ast_struct! {
+    /// A complete file of Rust source code.
+    ///
+    /// Equivalent to [`File`], but with support for the `default_field_values` feature.
+    ///
+    /// Typically `FileWithDefault` objects are created with [`parse_file_with_default`].
+    ///
+    /// [`parse_file_with_default`]: crate::parse_file_with_default
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    pub struct FileWithDefault {
+        pub shebang: Option<String>,
+        pub attrs: Vec<Attribute>,
+        pub items: Vec<ItemWithDefault>,
+    }
+}
+
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::attr::Attribute;
     use crate::error::Result;
-    use crate::file::File;
+    use crate::file::{File, FileWithDefault};
     use crate::parse::{Parse, ParseStream};
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
@@ -106,17 +123,42 @@ pub(crate) mod parsing {
             })
         }
     }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Parse for FileWithDefault {
+        fn parse(input: ParseStream) -> Result<Self> {
+            Ok(FileWithDefault {
+                shebang: None,
+                attrs: input.call(Attribute::parse_inner)?,
+                items: {
+                    let mut items = Vec::new();
+                    while !input.is_empty() {
+                        items.push(input.parse()?);
+                    }
+                    items
+                },
+            })
+        }
+    }
 }
 
 #[cfg(feature = "printing")]
 mod printing {
-    use crate::attr::FilterAttrs;
     use crate::file::File;
+    use crate::{attr::FilterAttrs, file::FileWithDefault};
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt as _};
 
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for File {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.inner());
+            tokens.append_all(&self.items);
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for FileWithDefault {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.inner());
             tokens.append_all(&self.items);
