@@ -233,10 +233,10 @@ pub fn generate(defs: &Definitions) -> Result<()> {
             #![allow(unused_variables)]
             #![allow(clippy::needless_pass_by_ref_mut)]
 
-            #[cfg(any(feature = "derive", feature = "full"))]
-            use alloc::vec::Vec;
             #[cfg(any(feature = "full", feature = "derive"))]
             use crate::punctuated::Punctuated;
+            #[cfg(any(feature = "derive", feature = "full"))]
+            use alloc::vec::Vec;
 
             #full_macro
 

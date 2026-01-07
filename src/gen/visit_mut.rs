@@ -3,10 +3,10 @@
 
 #![allow(unused_variables)]
 #![allow(clippy::needless_pass_by_ref_mut)]
-#[cfg(any(feature = "derive", feature = "full"))]
-use alloc::vec::Vec;
 #[cfg(any(feature = "full", feature = "derive"))]
 use crate::punctuated::Punctuated;
+#[cfg(any(feature = "derive", feature = "full"))]
+use alloc::vec::Vec;
 #[cfg(feature = "full")]
 macro_rules! full {
     ($e:expr) => {

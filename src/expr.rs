@@ -719,8 +719,8 @@ impl Expr {
     /// An unspecified invalid expression.
     ///
     /// ```
-    /// use quote::ToTokens;
     /// use core::mem;
+    /// use quote::ToTokens;
     /// use syn::{parse_quote, Expr};
     ///
     /// fn unparenthesize(e: &mut Expr) {

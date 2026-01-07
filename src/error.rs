@@ -5,7 +5,8 @@ use crate::thread::ThreadBound;
 #[cfg(feature = "parsing")]
 use alloc::format;
 use alloc::string::{String, ToString};
-use alloc::vec::{self, Vec};
+use alloc::vec;
+use alloc::vec::Vec;
 use core::fmt::{self, Debug, Display};
 use core::slice;
 use proc_macro2::{
@@ -164,7 +165,7 @@ impl Error {
 
         fn new(span: Span, message: String) -> Error {
             Error {
-                messages: alloc::vec![ErrorMessage {
+                messages: vec![ErrorMessage {
                     span: ThreadBound::new(SpanRange {
                         start: span,
                         end: span,
@@ -198,7 +199,7 @@ impl Error {
             let start = iter.next().map_or_else(Span::call_site, |t| t.span());
             let end = iter.last().map_or(start, |t| t.span());
             Error {
-                messages: alloc::vec![ErrorMessage {
+                messages: vec![ErrorMessage {
                     span: ThreadBound::new(SpanRange { start, end }),
                     message,
                 }],
@@ -343,7 +344,7 @@ pub(crate) fn new2<T: Display>(start: Span, end: Span, message: T) -> Error {
 
     fn new2(start: Span, end: Span, message: String) -> Error {
         Error {
-            messages: alloc::vec![ErrorMessage {
+            messages: vec![ErrorMessage {
                 span: ThreadBound::new(SpanRange { start, end }),
                 message,
             }],
@@ -404,7 +405,7 @@ impl Clone for SpanRange {
 
 impl Copy for SpanRange {}
 
-// TODO(MSRV 1.81.0): impl core::error::Error.
+// TODO: impl core::error::Error (requires Rust 1.81+)
 impl std::error::Error for Error {}
 
 impl From<LexError> for Error {
@@ -433,7 +434,7 @@ impl Iterator for IntoIter {
 
     fn next(&mut self) -> Option<Self::Item> {
         Some(Error {
-            messages: alloc::vec![self.messages.next()?],
+            messages: vec![self.messages.next()?],
         })
     }
 }
@@ -458,7 +459,7 @@ impl<'a> Iterator for Iter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         Some(Error {
-            messages: alloc::vec![self.messages.next()?.clone()],
+            messages: vec![self.messages.next()?.clone()],
         })
     }
 }

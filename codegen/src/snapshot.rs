@@ -362,8 +362,8 @@ pub fn generate(defs: &Definitions) -> Result<()> {
             #![allow(clippy::match_wildcard_for_single_variants)]
 
             use super::{Lite, Present};
-            use ref_cast::RefCast;
             use core::fmt::{self, Debug, Display};
+            use ref_cast::RefCast;
 
             #impls
         },

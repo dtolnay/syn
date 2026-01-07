@@ -885,6 +885,9 @@ pub use crate::gen::visit_mut;
 #[path = "export.rs"]
 pub mod __private;
 
+#[cfg(all(feature = "parsing", feature = "full"))]
+use alloc::string::ToString;
+
 /// Parse tokens of source code into the chosen syntax tree node.
 ///
 /// This is preferred over parsing a string because tokens are able to preserve
@@ -966,7 +969,6 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 /// # Examples
 ///
 /// ```no_run
-/// # // TODO(MSRV 1.81.0): use core::error::Error.
 /// use std::error::Error;
 /// use std::fs;
 /// use std::io::Read;
@@ -987,8 +989,6 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 #[cfg(all(feature = "parsing", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "full"))))]
 pub fn parse_file(mut content: &str) -> Result<File> {
-    use alloc::string::ToString;
-
     // Strip the BOM if it is present
     const BOM: &str = "\u{feff}";
     if content.starts_with(BOM) {
