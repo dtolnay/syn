@@ -248,6 +248,7 @@
 //! - **`proc-macro`** *(enabled by default)* — Runtime dependency on the
 //!   dynamic library libproc_macro from rustc toolchain.
 
+#![no_std]
 #![doc(html_root_url = "https://docs.rs/syn/2.0.113")]
 #![cfg_attr(docsrs, feature(doc_cfg), doc(auto_cfg = false))]
 #![deny(unsafe_op_in_unsafe_fn)]
@@ -308,6 +309,9 @@
     clippy::wildcard_imports,
 )]
 #![allow(unknown_lints, mismatched_lifetime_syntaxes)]
+
+extern crate alloc;
+extern crate std;
 
 extern crate self as syn;
 
@@ -962,6 +966,7 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 /// # Examples
 ///
 /// ```no_run
+/// # // TODO(MSRV 1.81.0): use core::error::Error.
 /// use std::error::Error;
 /// use std::fs;
 /// use std::io::Read;
@@ -982,6 +987,8 @@ pub fn parse_str<T: parse::Parse>(s: &str) -> Result<T> {
 #[cfg(all(feature = "parsing", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(all(feature = "parsing", feature = "full"))))]
 pub fn parse_file(mut content: &str) -> Result<File> {
+    use alloc::string::ToString;
+
     // Strip the BOM if it is present
     const BOM: &str = "\u{feff}";
     if content.starts_with(BOM) {

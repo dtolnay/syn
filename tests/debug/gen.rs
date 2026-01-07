@@ -5,7 +5,7 @@
 #![allow(clippy::match_wildcard_for_single_variants)]
 use super::{Lite, Present};
 use ref_cast::RefCast;
-use std::fmt::{self, Debug, Display};
+use core::fmt::{self, Debug, Display};
 impl Debug for Lite<syn::Abi> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("Abi");
