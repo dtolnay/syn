@@ -893,8 +893,7 @@ impl SpanlessEq for AttrKind {
                 SpanlessEq::eq(&path, &normal2.item.path)
                     && match &normal2.item.args {
                         AttrItemKind::Parsed(_)
-                        | AttrItemKind::Unparsed(AttrArgs::Empty)
-                        | AttrItemKind::Unparsed(AttrArgs::Delimited(_)) => false,
+                        | AttrItemKind::Unparsed(AttrArgs::Empty | AttrArgs::Delimited(_)) => false,
                         AttrItemKind::Unparsed(AttrArgs::Eq { eq_span: _, expr }) => {
                             match &expr.kind {
                                 ExprKind::Lit(lit) => is_escaped_lit(lit, *unescaped),
