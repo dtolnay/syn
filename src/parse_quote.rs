@@ -133,7 +133,7 @@ pub fn parse<T: ParseQuote>(token_stream: TokenStream) -> T {
     let parser = T::parse;
     match parser.parse2(token_stream) {
         Ok(t) => t,
-        Err(err) => panic!("{}", err),
+        Err(err) => crate::panic_with_location!("{}", err),
     }
 }
 

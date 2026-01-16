@@ -424,7 +424,7 @@ impl LitInt {
     pub fn new(repr: &str, span: Span) -> Self {
         let (digits, suffix) = match value::parse_lit_int(repr) {
             Some(parse) => parse,
-            None => panic!("not an integer literal: `{}`", repr),
+            None => crate::panic_with_location!("not an integer literal: `{}`", repr),
         };
 
         let mut token: Literal = repr.parse().unwrap();
@@ -504,7 +504,7 @@ impl From<Literal> for LitInt {
                 }),
             }
         } else {
-            panic!("not an integer literal: `{}`", repr);
+            crate::panic_with_location!("not an integer literal: `{}`", repr);
         }
     }
 }
@@ -520,7 +520,7 @@ impl LitFloat {
     pub fn new(repr: &str, span: Span) -> Self {
         let (digits, suffix) = match value::parse_lit_float(repr) {
             Some(parse) => parse,
-            None => panic!("not a float literal: `{}`", repr),
+            None => crate::panic_with_location!("not a float literal: `{}`", repr),
         };
 
         let mut token: Literal = repr.parse().unwrap();
@@ -578,7 +578,7 @@ impl From<Literal> for LitFloat {
                 }),
             }
         } else {
-            panic!("not a float literal: `{}`", repr);
+            crate::panic_with_location!("not a float literal: `{}`", repr);
         }
     }
 }

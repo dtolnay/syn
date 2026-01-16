@@ -504,7 +504,7 @@ where
     let mut nomore = false;
     for pair in i {
         if nomore {
-            panic!("punctuated extended with items after a Pair::End");
+            crate::panic_with_location!("punctuated extended with items after a Pair::End");
         }
         match pair {
             Pair::Punctuated(a, b) => punctuated.inner.push((a, b)),
