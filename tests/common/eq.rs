@@ -35,6 +35,7 @@ use rustc_ast::ast::CaptureBy;
 use rustc_ast::ast::Closure;
 use rustc_ast::ast::ClosureBinder;
 use rustc_ast::ast::Const;
+use rustc_ast::ast::ConstBlockItem;
 use rustc_ast::ast::ConstItem;
 use rustc_ast::ast::ConstItemRhs;
 use rustc_ast::ast::CoroutineKind;
@@ -493,6 +494,7 @@ spanless_eq_struct!(AttrsTarget; attrs tokens);
 spanless_eq_struct!(BindingMode; 0 1);
 spanless_eq_struct!(Block; stmts id rules span tokens);
 spanless_eq_struct!(Closure; binder capture_clause constness coroutine_kind movability fn_decl body !fn_decl_span !fn_arg_span);
+spanless_eq_struct!(ConstBlockItem; id span block);
 spanless_eq_struct!(ConstItem; defaultness ident generics ty rhs define_opaque);
 spanless_eq_struct!(Crate; attrs items spans id is_placeholder);
 spanless_eq_struct!(Delegation; id qself path ident rename body from_glob);
@@ -662,10 +664,10 @@ spanless_eq_enum!(ExprKind; Array(0) ConstBlock(0) Call(0 1) MethodCall(0)
 spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
     InOut(reg late expr) SplitInOut(reg late in_expr out_expr) Const(anon_const)
     Sym(sym) Label(block));
-spanless_eq_enum!(ItemKind; ExternCrate(0 1) Use(0) Static(0) Const(0) Fn(0)
-    Mod(0 1 2) ForeignMod(0) GlobalAsm(0) TyAlias(0) Enum(0 1 2) Struct(0 1 2)
-    Union(0 1 2) Trait(0) TraitAlias(0) Impl(0) MacCall(0) MacroDef(0 1)
-    Delegation(0) DelegationMac(0));
+spanless_eq_enum!(ItemKind; ExternCrate(0 1) Use(0) Static(0) Const(0)
+    ConstBlock(0) Fn(0) Mod(0 1 2) ForeignMod(0) GlobalAsm(0) TyAlias(0)
+    Enum(0 1 2) Struct(0 1 2) Union(0 1 2) Trait(0) TraitAlias(0) Impl(0)
+    MacCall(0) MacroDef(0 1) Delegation(0) DelegationMac(0));
 spanless_eq_enum!(LitKind; Str(0 1) ByteStr(0 1) CStr(0 1) Byte(0) Char(0)
     Int(0 1) Float(0 1) Bool(0) Err(0));
 spanless_eq_enum!(PatKind; Missing Wild Ident(0 1 2) Struct(0 1 2 3)
