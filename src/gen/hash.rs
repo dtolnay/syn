@@ -2711,6 +2711,23 @@ impl Hash for crate::UnOp {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::Unsafety {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            crate::Unsafety::Safe(_) => {
+                state.write_u8(0u8);
+            }
+            crate::Unsafety::Unsafe(_) => {
+                state.write_u8(1u8);
+            }
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::UseGlob {
     fn hash<H>(&self, _state: &mut H)
     where

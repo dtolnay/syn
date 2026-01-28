@@ -3067,6 +3067,25 @@ impl Debug for crate::UnOp {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::Unsafety {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Unsafety::")?;
+        match self {
+            crate::Unsafety::Safe(v0) => {
+                let mut formatter = formatter.debug_tuple("Safe");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::Unsafety::Unsafe(v0) => {
+                let mut formatter = formatter.debug_tuple("Unsafe");
+                formatter.field(v0);
+                formatter.finish()
+            }
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::UseGlob {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("UseGlob");

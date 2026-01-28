@@ -2133,6 +2133,16 @@ impl Clone for crate::UnOp {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::Unsafety {
+    fn clone(&self) -> Self {
+        match self {
+            crate::Unsafety::Safe(v0) => crate::Unsafety::Safe(v0.clone()),
+            crate::Unsafety::Unsafe(v0) => crate::Unsafety::Unsafe(v0.clone()),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::UseGlob {
     fn clone(&self) -> Self {
         crate::UseGlob {

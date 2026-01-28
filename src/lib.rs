@@ -431,7 +431,7 @@ pub use crate::item::{
     ItemConst, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod,
     ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
     Signature, StaticMutability, TraitItem, TraitItemConst, TraitItemFn, TraitItemMacro,
-    TraitItemType, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
+    TraitItemType, Unsafety, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
 };
 
 mod lifetime;

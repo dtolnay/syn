@@ -894,6 +894,11 @@ pub trait VisitMut {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_unsafety_mut(&mut self, i: &mut crate::Unsafety) {
+        visit_unsafety_mut(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_use_glob_mut(&mut self, i: &mut crate::UseGlob) {
         visit_use_glob_mut(self, i);
     }
@@ -3159,7 +3164,9 @@ where
 {
     skip!(node.constness);
     skip!(node.asyncness);
-    skip!(node.unsafety);
+    if let Some(it) = &mut node.unsafety {
+        v.visit_unsafety_mut(it);
+    }
     if let Some(it) = &mut node.abi {
         v.visit_abi_mut(it);
     }
@@ -3601,6 +3608,21 @@ where
             skip!(_binding_0);
         }
         crate::UnOp::Neg(_binding_0) => {
+            skip!(_binding_0);
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_unsafety_mut<V>(v: &mut V, node: &mut crate::Unsafety)
+where
+    V: VisitMut + ?Sized,
+{
+    match node {
+        crate::Unsafety::Safe(_binding_0) => {
+            skip!(_binding_0);
+        }
+        crate::Unsafety::Unsafe(_binding_0) => {
             skip!(_binding_0);
         }
     }

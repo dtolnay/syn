@@ -4448,7 +4448,7 @@
         },
         "unsafety": {
           "option": {
-            "token": "Unsafe"
+            "syn": "Unsafety"
           }
         },
         "abi": {
@@ -5293,6 +5293,26 @@
         ]
       },
       "exhaustive": false
+    },
+    {
+      "ident": "Unsafety",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "variants": {
+        "Safe": [
+          {
+            "token": "Safe"
+          }
+        ],
+        "Unsafe": [
+          {
+            "token": "Unsafe"
+          }
+        ]
+      }
     },
     {
       "ident": "UseGlob",

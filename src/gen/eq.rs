@@ -2153,6 +2153,20 @@ impl PartialEq for crate::UnOp {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::Unsafety {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::Unsafety {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (crate::Unsafety::Safe(_), crate::Unsafety::Safe(_)) => true,
+            (crate::Unsafety::Unsafe(_), crate::Unsafety::Unsafe(_)) => true,
+            _ => false,
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::UseGlob {}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]

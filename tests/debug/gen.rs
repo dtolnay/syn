@@ -3730,8 +3730,19 @@ impl Debug for Lite<syn::Signature> {
         if self.value.asyncness.is_some() {
             formatter.field("asyncness", &Present);
         }
-        if self.value.unsafety.is_some() {
-            formatter.field("unsafety", &Present);
+        if let Some(val) = &self.value.unsafety {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::Unsafety);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some(")?;
+                    Debug::fmt(Lite(&self.0), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("unsafety", Print::ref_cast(val));
         }
         if let Some(val) = &self.value.abi {
             #[derive(RefCast)]
@@ -4545,6 +4556,20 @@ impl Debug for Lite<syn::UnOp> {
                 Ok(())
             }
             _ => unreachable!(),
+        }
+    }
+}
+impl Debug for Lite<syn::Unsafety> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match &self.value {
+            syn::Unsafety::Safe(_val) => {
+                formatter.write_str("Unsafety::Safe")?;
+                Ok(())
+            }
+            syn::Unsafety::Unsafe(_val) => {
+                formatter.write_str("Unsafety::Unsafe")?;
+                Ok(())
+            }
         }
     }
 }

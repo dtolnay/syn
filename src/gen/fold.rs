@@ -965,6 +965,11 @@ pub trait Fold {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_unsafety(&mut self, i: crate::Unsafety) -> crate::Unsafety {
+        fold_unsafety(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_use_glob(&mut self, i: crate::UseGlob) -> crate::UseGlob {
         fold_use_glob(self, i)
     }
@@ -3274,7 +3279,7 @@ where
     crate::Signature {
         constness: node.constness,
         asyncness: node.asyncness,
-        unsafety: node.unsafety,
+        unsafety: (node.unsafety).map(|it| f.fold_unsafety(it)),
         abi: (node.abi).map(|it| f.fold_abi(it)),
         fn_token: node.fn_token,
         ident: f.fold_ident(node.ident),
@@ -3730,6 +3735,17 @@ where
         crate::UnOp::Deref(_binding_0) => crate::UnOp::Deref(_binding_0),
         crate::UnOp::Not(_binding_0) => crate::UnOp::Not(_binding_0),
         crate::UnOp::Neg(_binding_0) => crate::UnOp::Neg(_binding_0),
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_unsafety<F>(f: &mut F, node: crate::Unsafety) -> crate::Unsafety
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        crate::Unsafety::Safe(_binding_0) => crate::Unsafety::Safe(_binding_0),
+        crate::Unsafety::Unsafe(_binding_0) => crate::Unsafety::Unsafe(_binding_0),
     }
 }
 #[cfg(feature = "full")]
