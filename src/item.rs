@@ -558,6 +558,7 @@ ast_struct! {
     pub struct ForeignItemStatic {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        pub unsafety: Option<Unsafety>,
         pub static_token: Token![static],
         pub mutability: StaticMutability,
         pub ident: Ident,
@@ -1897,12 +1898,11 @@ pub(crate) mod parsing {
                     && ahead.peek2(Token![static]))
             {
                 let vis = input.parse()?;
-                let unsafety: Option<Token![unsafe]> = input.parse()?;
-                let safe =
-                    unsafety.is_none() && token::parsing::peek_keyword(input.cursor(), "safe");
-                if safe {
-                    token::parsing::keyword(input, "safe")?;
-                }
+                let unsafety = if peek_unsafety(input) {
+                    Some(input.parse()?)
+                } else {
+                    None
+                };
                 let static_token = input.parse()?;
                 let mutability = input.parse()?;
                 let ident = input.parse()?;
@@ -1914,12 +1914,13 @@ pub(crate) mod parsing {
                     input.parse::<Expr>()?;
                 }
                 let semi_token: Token![;] = input.parse()?;
-                if unsafety.is_some() || safe || has_value {
+                if  has_value {
                     Ok(ForeignItem::Verbatim(verbatim::between(&begin, input)))
                 } else {
                     Ok(ForeignItem::Static(ForeignItemStatic {
                         attrs: Vec::new(),
                         vis,
+                        unsafety,
                         static_token,
                         mutability,
                         ident,
@@ -1978,6 +1979,7 @@ pub(crate) mod parsing {
             Ok(ForeignItemStatic {
                 attrs: input.call(Attribute::parse_outer)?,
                 vis: input.parse()?,
+                unsafety: if peek_unsafety(input) { Some(input.parse()?) } else { None },
                 static_token: input.parse()?,
                 mutability: input.parse()?,
                 ident: input.parse()?,
@@ -3397,6 +3399,9 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
+            if let Some(unsafety) = &self.unsafety {
+                unsafety.to_tokens(tokens);
+            }
             self.static_token.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
             self.ident.to_tokens(tokens);

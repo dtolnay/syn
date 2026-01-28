@@ -929,8 +929,8 @@ impl Eq for crate::ForeignItemStatic {}
 impl PartialEq for crate::ForeignItemStatic {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis
-            && self.mutability == other.mutability && self.ident == other.ident
-            && self.ty == other.ty
+            && self.unsafety == other.unsafety && self.mutability == other.mutability
+            && self.ident == other.ident && self.ty == other.ty
     }
 }
 #[cfg(feature = "full")]

@@ -2183,6 +2183,9 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
+    if let Some(it) = &node.unsafety {
+        v.visit_unsafety(it);
+    }
     skip!(node.static_token);
     v.visit_static_mutability(&node.mutability);
     v.visit_ident(&node.ident);

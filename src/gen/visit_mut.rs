@@ -2088,6 +2088,9 @@ where
 {
     v.visit_attributes_mut(&mut node.attrs);
     v.visit_visibility_mut(&mut node.vis);
+    if let Some(it) = &mut node.unsafety {
+        v.visit_unsafety_mut(it);
+    }
     skip!(node.static_token);
     v.visit_static_mutability_mut(&mut node.mutability);
     v.visit_ident_mut(&mut node.ident);

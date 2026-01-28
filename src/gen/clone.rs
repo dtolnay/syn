@@ -920,6 +920,7 @@ impl Clone for crate::ForeignItemStatic {
         crate::ForeignItemStatic {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
+            unsafety: self.unsafety.clone(),
             static_token: self.static_token.clone(),
             mutability: self.mutability.clone(),
             ident: self.ident.clone(),

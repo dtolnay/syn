@@ -1382,6 +1382,7 @@ impl crate::ForeignItemStatic {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
+        formatter.field("unsafety", &self.unsafety);
         formatter.field("static_token", &self.static_token);
         formatter.field("mutability", &self.mutability);
         formatter.field("ident", &self.ident);

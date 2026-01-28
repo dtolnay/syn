@@ -1919,6 +1919,20 @@ impl Debug for Lite<syn::ForeignItem> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
+                if let Some(val) = &_val.unsafety {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::Unsafety);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some(")?;
+                            Debug::fmt(Lite(&self.0), formatter)?;
+                            formatter.write_str(")")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("unsafety", Print::ref_cast(val));
+                }
                 match _val.mutability {
                     syn::StaticMutability::None => {}
                     _ => {
@@ -1992,6 +2006,20 @@ impl Debug for Lite<syn::ForeignItemStatic> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
+        if let Some(val) = &self.value.unsafety {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::Unsafety);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some(")?;
+                    Debug::fmt(Lite(&self.0), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("unsafety", Print::ref_cast(val));
+        }
         match self.value.mutability {
             syn::StaticMutability::None => {}
             _ => {

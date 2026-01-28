@@ -2291,6 +2291,11 @@
         "vis": {
           "syn": "Visibility"
         },
+        "unsafety": {
+          "option": {
+            "syn": "Unsafety"
+          }
+        },
         "static_token": {
           "token": "Static"
         },
