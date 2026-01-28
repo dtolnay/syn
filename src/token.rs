@@ -726,6 +726,7 @@ define_keywords! {
     "raw"         pub struct Raw
     "ref"         pub struct Ref
     "return"      pub struct Return
+    "safe"        pub struct Safe
     "Self"        pub struct SelfType
     "self"        pub struct SelfValue
     "static"      pub struct Static
@@ -905,6 +906,7 @@ macro_rules! Token {
     [raw]         => { $crate::token::Raw };
     [ref]         => { $crate::token::Ref };
     [return]      => { $crate::token::Return };
+    [safe]        => { $crate::token::Safe };
     [Self]        => { $crate::token::SelfType };
     [self]        => { $crate::token::SelfValue };
     [static]      => { $crate::token::Static };

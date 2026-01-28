@@ -5097,6 +5097,11 @@ impl Debug for Lite<syn::token::Return> {
         formatter.write_str("Token![return]")
     }
 }
+impl Debug for Lite<syn::token::Safe> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Token![safe]")
+    }
+}
 impl Debug for Lite<syn::token::SelfType> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("Token![Self]")
