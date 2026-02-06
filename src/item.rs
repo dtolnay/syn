@@ -547,7 +547,7 @@ ast_struct! {
     pub struct ForeignItemFn {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
-        pub sig: Signature,
+        pub sig: ForeignSignature,
         pub semi_token: Token![;],
     }
 }
@@ -589,6 +589,51 @@ ast_struct! {
         pub semi_token: Option<Token![;]>,
     }
 }
+
+ast_struct! {
+    /// A function signature in a trait or implementation in an extern block:
+    /// `extern { unsafe fn initialize(&self) }`.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    pub struct ForeignSignature {
+        pub constness: Option<Token![const]>,
+        pub asyncness: Option<Token![async]>,
+        pub safety: ForeignFnSafety,
+        pub abi: Option<Abi>,
+        pub fn_token: Token![fn],
+        pub ident: Ident,
+        pub generics: Generics,
+        pub paren_token: token::Paren,
+        pub inputs: Punctuated<FnArg, Token![,]>,
+        pub variadic: Option<Variadic>,
+        pub output: ReturnType,
+    }
+}
+
+impl ForeignSignature {
+    /// A method's `self` receiver, such as `&self` or `self: Box<Self>`.
+    pub fn receiver(&self) -> Option<&Receiver> {
+        let arg = self.inputs.first()?;
+        match arg {
+            FnArg::Receiver(receiver) => Some(receiver),
+            FnArg::Typed(_) => None,
+        }
+    }
+}
+
+ast_enum! {
+    /// The safety of a `ForeignItemFn`
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    pub enum ForeignFnSafety {
+        /// The function is qualified as `unsafe`
+        Unsafe(Token![unsafe]),
+        /// The function is qualified as `safe`
+        Safe(Token![safe]),
+        /// The function is not qualified as `unsafe` or `safe`
+        None
+    }
+}
+
+
 
 ast_enum_of_structs! {
     /// An item declaration within the definition of a trait.
@@ -914,12 +959,13 @@ pub(crate) mod parsing {
     use crate::generics::{self, Generics, TypeParamBound};
     use crate::ident::Ident;
     use crate::item::{
-        FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
-        ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType, Item, ItemConst,
-        ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod,
-        ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
-        Signature, StaticMutability, TraitItem, TraitItemConst, TraitItemFn, TraitItemMacro,
-        TraitItemType, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
+        FnArg, ForeignFnSafety, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic,
+        ForeignItemType, ForeignSignature, ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro,
+        ImplItemType, Item, ItemConst, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl,
+        ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion,
+        ItemUse, Receiver, Signature, StaticMutability, TraitItem, TraitItemConst, TraitItemFn,
+        TraitItemMacro, TraitItemType, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree,
+        Variadic,
     };
     use crate::lifetime::Lifetime;
     use crate::lit::LitStr;
@@ -1510,20 +1556,66 @@ pub(crate) mod parsing {
     impl Parse for Signature {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_safe = false;
-            parse_signature(input, allow_safe).map(Option::unwrap)
+            parse_signature(input, allow_safe).map(|(sig, _safety)| sig)
         }
     }
 
-    fn parse_signature(input: ParseStream, allow_safe: bool) -> Result<Option<Signature>> {
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Parse for ForeignSignature {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let allow_safe = true;
+            let (
+                Signature {
+                    constness,
+                    asyncness,
+                    unsafety,
+                    abi,
+                    fn_token,
+                    ident,
+                    generics,
+                    paren_token,
+                    inputs,
+                    variadic,
+                    output,
+                },
+                safety,
+            ) = parse_signature(input, allow_safe)?;
+
+            let safety = match (unsafety, safety) {
+                (Some(unsafety), None) => ForeignFnSafety::Unsafe(unsafety),
+                (None, Some(safety)) => ForeignFnSafety::Safe(safety),
+                (None, None) => ForeignFnSafety::None,
+                (Some(_), Some(_)) => unreachable!(),
+            };
+
+            Ok(ForeignSignature {
+                constness,
+                asyncness,
+                safety,
+                abi,
+                fn_token,
+                ident,
+                generics,
+                paren_token,
+                inputs,
+                variadic,
+                output,
+            })
+        }
+    }
+
+    fn parse_signature(
+        input: ParseStream,
+        allow_safe: bool,
+    ) -> Result<(Signature, Option<Token![safe]>)> {
         let constness: Option<Token![const]> = input.parse()?;
         let asyncness: Option<Token![async]> = input.parse()?;
         let unsafety: Option<Token![unsafe]> = input.parse()?;
-        let safe = allow_safe
-            && unsafety.is_none()
-            && token::parsing::peek_keyword(input.cursor(), "safe");
-        if safe {
-            token::parsing::keyword(input, "safe")?;
-        }
+        let safety: Option<Token![safe]> = if allow_safe && unsafety.is_none() {
+            input.parse()?
+        } else {
+            None
+        };
         let abi: Option<Abi> = input.parse()?;
         let fn_token: Token![fn] = input.parse()?;
         let ident: Ident = input.parse()?;
@@ -1536,10 +1628,8 @@ pub(crate) mod parsing {
         let output: ReturnType = input.parse()?;
         generics.where_clause = input.parse()?;
 
-        Ok(if safe {
-            None
-        } else {
-            Some(Signature {
+        Ok((
+            Signature {
                 constness,
                 asyncness,
                 unsafety,
@@ -1551,8 +1641,9 @@ pub(crate) mod parsing {
                 inputs,
                 variadic,
                 output,
-            })
-        })
+            },
+            safety,
+        ))
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
@@ -1851,8 +1942,7 @@ pub(crate) mod parsing {
             let allow_safe = true;
             let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead, allow_safe) {
                 let vis: Visibility = input.parse()?;
-                let sig = parse_signature(input, allow_safe)?;
-                let has_safe = sig.is_none();
+                let sig: ForeignSignature = input.parse()?;
                 let has_body = input.peek(token::Brace);
                 let semi_token: Option<Token![;]> = if has_body {
                     let content;
@@ -1863,13 +1953,13 @@ pub(crate) mod parsing {
                 } else {
                     Some(input.parse()?)
                 };
-                if has_safe || has_body {
+                if has_body {
                     Ok(ForeignItem::Verbatim(verbatim::between(&begin, input)))
                 } else {
                     Ok(ForeignItem::Fn(ForeignItemFn {
                         attrs: Vec::new(),
                         vis,
-                        sig: sig.unwrap(),
+                        sig,
                         semi_token: semi_token.unwrap(),
                     }))
                 }
@@ -1943,7 +2033,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
-            let sig: Signature = input.parse()?;
+            let sig: ForeignSignature = input.parse()?;
             let semi_token: Token![;] = input.parse()?;
             Ok(ForeignItemFn {
                 attrs,
@@ -2937,12 +3027,12 @@ mod printing {
     use crate::attr::FilterAttrs;
     use crate::data::Fields;
     use crate::item::{
-        ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType, ImplItemConst,
-        ImplItemFn, ImplItemMacro, ImplItemType, ItemConst, ItemEnum, ItemExternCrate, ItemFn,
-        ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait,
-        ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Signature, StaticMutability,
-        TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob, UseGroup, UseName,
-        UsePath, UseRename, Variadic,
+        ForeignFnSafety, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
+        ForeignSignature, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType, ItemConst,
+        ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod,
+        ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
+        Signature, StaticMutability, TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType,
+        UseGlob, UseGroup, UseName, UsePath, UseRename, Variadic,
     };
     use crate::mac::MacroDelimiter;
     use crate::path;
@@ -3409,6 +3499,41 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.mac.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for ForeignSignature {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            self.constness.to_tokens(tokens);
+            self.asyncness.to_tokens(tokens);
+            self.safety.to_tokens(tokens);
+            self.abi.to_tokens(tokens);
+            self.fn_token.to_tokens(tokens);
+            self.ident.to_tokens(tokens);
+            self.generics.to_tokens(tokens);
+            self.paren_token.surround(tokens, |tokens| {
+                self.inputs.to_tokens(tokens);
+                if let Some(variadic) = &self.variadic {
+                    if !self.inputs.empty_or_trailing() {
+                        <Token![,]>::default().to_tokens(tokens);
+                    }
+                    variadic.to_tokens(tokens);
+                }
+            });
+            self.output.to_tokens(tokens);
+            self.generics.where_clause.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for ForeignFnSafety {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                ForeignFnSafety::Unsafe(unsafety) => unsafety.to_tokens(tokens),
+                ForeignFnSafety::Safe(safety) => safety.to_tokens(tokens),
+                ForeignFnSafety::None => {}
+            }
         }
     }
 
