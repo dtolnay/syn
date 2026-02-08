@@ -258,7 +258,7 @@ impl<K: Eq + Hash, V: SpanlessEq, S: BuildHasher> SpanlessEq for HashMap<K, V, S
             && self.iter().all(|(key, this_v)| {
                 other
                     .get(key)
-                    .map_or(false, |other_v| SpanlessEq::eq(this_v, other_v))
+                    .is_some_and(|other_v| SpanlessEq::eq(this_v, other_v))
             })
     }
 }
