@@ -76,11 +76,6 @@ pub trait VisitMut {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn visit_bare_fn_arg_mut(&mut self, i: &mut crate::FnPtrArg) {
-        visit_bare_fn_arg_mut(self, i);
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_bare_variadic_mut(&mut self, i: &mut crate::BareVariadic) {
         visit_bare_variadic_mut(self, i);
     }
@@ -383,6 +378,11 @@ pub trait VisitMut {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_fn_arg_mut(&mut self, i: &mut crate::FnArg) {
         visit_fn_arg_mut(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_fn_ptr_arg_mut(&mut self, i: &mut crate::FnPtrArg) {
+        visit_fn_ptr_arg_mut(self, i);
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -814,8 +814,8 @@ pub trait VisitMut {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn visit_type_bare_fn_mut(&mut self, i: &mut crate::TypeFnPtr) {
-        visit_type_bare_fn_mut(self, i);
+    fn visit_type_fn_ptr_mut(&mut self, i: &mut crate::TypeFnPtr) {
+        visit_type_fn_ptr_mut(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -1046,19 +1046,6 @@ where
     v.visit_attr_style_mut(&mut node.style);
     skip!(node.bracket_token);
     v.visit_meta_mut(&mut node.meta);
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn visit_bare_fn_arg_mut<V>(v: &mut V, node: &mut crate::FnPtrArg)
-where
-    V: VisitMut + ?Sized,
-{
-    v.visit_attributes_mut(&mut node.attrs);
-    if let Some(it) = &mut node.name {
-        v.visit_ident_mut(&mut (it).0);
-        skip!((it).1);
-    }
-    v.visit_type_mut(&mut node.ty);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -2029,6 +2016,19 @@ where
             v.visit_pat_type_mut(_binding_0);
         }
     }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_fn_ptr_arg_mut<V>(v: &mut V, node: &mut crate::FnPtrArg)
+where
+    V: VisitMut + ?Sized,
+{
+    v.visit_attributes_mut(&mut node.attrs);
+    if let Some(it) = &mut node.name {
+        v.visit_ident_mut(&mut (it).0);
+        skip!((it).1);
+    }
+    v.visit_type_mut(&mut node.ty);
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -3348,7 +3348,7 @@ where
             v.visit_type_array_mut(_binding_0);
         }
         crate::Type::FnPtr(_binding_0) => {
-            v.visit_type_bare_fn_mut(_binding_0);
+            v.visit_type_fn_ptr_mut(_binding_0);
         }
         crate::Type::Group(_binding_0) => {
             v.visit_type_group_mut(_binding_0);
@@ -3404,7 +3404,7 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn visit_type_bare_fn_mut<V>(v: &mut V, node: &mut crate::TypeFnPtr)
+pub fn visit_type_fn_ptr_mut<V>(v: &mut V, node: &mut crate::TypeFnPtr)
 where
     V: VisitMut + ?Sized,
 {
@@ -3419,7 +3419,7 @@ where
     skip!(node.paren_token);
     for mut el in Punctuated::pairs_mut(&mut node.inputs) {
         let it = el.value_mut();
-        v.visit_bare_fn_arg_mut(it);
+        v.visit_fn_ptr_arg_mut(it);
     }
     if let Some(it) = &mut node.variadic {
         v.visit_bare_variadic_mut(it);

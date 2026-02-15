@@ -186,37 +186,6 @@
       }
     },
     {
-      "ident": "FnPtrArg",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "name": {
-          "option": {
-            "tuple": [
-              {
-                "proc_macro2": "Ident"
-              },
-              {
-                "token": "Colon"
-              }
-            ]
-          }
-        },
-        "ty": {
-          "syn": "Type"
-        }
-      }
-    },
-    {
       "ident": "BareVariadic",
       "features": {
         "any": [
@@ -2190,6 +2159,37 @@
             "syn": "PatType"
           }
         ]
+      }
+    },
+    {
+      "ident": "FnPtrArg",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "name": {
+          "option": {
+            "tuple": [
+              {
+                "proc_macro2": "Ident"
+              },
+              {
+                "token": "Colon"
+              }
+            ]
+          }
+        },
+        "ty": {
+          "syn": "Type"
+        }
       }
     },
     {

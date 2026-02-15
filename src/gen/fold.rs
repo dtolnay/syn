@@ -74,11 +74,6 @@ pub trait Fold {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn fold_bare_fn_arg(&mut self, i: crate::FnPtrArg) -> crate::FnPtrArg {
-        fold_bare_fn_arg(self, i)
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_bare_variadic(&mut self, i: crate::BareVariadic) -> crate::BareVariadic {
         fold_bare_variadic(self, i)
     }
@@ -390,6 +385,11 @@ pub trait Fold {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_fn_arg(&mut self, i: crate::FnArg) -> crate::FnArg {
         fold_fn_arg(self, i)
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn fold_fn_ptr_arg(&mut self, i: crate::FnPtrArg) -> crate::FnPtrArg {
+        fold_fn_ptr_arg(self, i)
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -879,8 +879,8 @@ pub trait Fold {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn fold_type_bare_fn(&mut self, i: crate::TypeFnPtr) -> crate::TypeFnPtr {
-        fold_type_bare_fn(self, i)
+    fn fold_type_fn_ptr(&mut self, i: crate::TypeFnPtr) -> crate::TypeFnPtr {
+        fold_type_fn_ptr(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -1117,18 +1117,6 @@ where
         style: f.fold_attr_style(node.style),
         bracket_token: node.bracket_token,
         meta: f.fold_meta(node.meta),
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn fold_bare_fn_arg<F>(f: &mut F, node: crate::FnPtrArg) -> crate::FnPtrArg
-where
-    F: Fold + ?Sized,
-{
-    crate::FnPtrArg {
-        attrs: f.fold_attributes(node.attrs),
-        name: (node.name).map(|it| (f.fold_ident((it).0), (it).1)),
-        ty: f.fold_type(node.ty),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2079,6 +2067,18 @@ where
         crate::FnArg::Typed(_binding_0) => {
             crate::FnArg::Typed(f.fold_pat_type(_binding_0))
         }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn fold_fn_ptr_arg<F>(f: &mut F, node: crate::FnPtrArg) -> crate::FnPtrArg
+where
+    F: Fold + ?Sized,
+{
+    crate::FnPtrArg {
+        attrs: f.fold_attributes(node.attrs),
+        name: (node.name).map(|it| (f.fold_ident((it).0), (it).1)),
+        ty: f.fold_type(node.ty),
     }
 }
 #[cfg(feature = "full")]
@@ -3468,7 +3468,7 @@ where
             crate::Type::Array(f.fold_type_array(_binding_0))
         }
         crate::Type::FnPtr(_binding_0) => {
-            crate::Type::FnPtr(f.fold_type_bare_fn(_binding_0))
+            crate::Type::FnPtr(f.fold_type_fn_ptr(_binding_0))
         }
         crate::Type::Group(_binding_0) => {
             crate::Type::Group(f.fold_type_group(_binding_0))
@@ -3522,7 +3522,7 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn fold_type_bare_fn<F>(f: &mut F, node: crate::TypeFnPtr) -> crate::TypeFnPtr
+pub fn fold_type_fn_ptr<F>(f: &mut F, node: crate::TypeFnPtr) -> crate::TypeFnPtr
 where
     F: Fold + ?Sized,
 {
@@ -3532,7 +3532,7 @@ where
         abi: (node.abi).map(|it| f.fold_abi(it)),
         fn_token: node.fn_token,
         paren_token: node.paren_token,
-        inputs: crate::punctuated::fold(node.inputs, f, F::fold_bare_fn_arg),
+        inputs: crate::punctuated::fold(node.inputs, f, F::fold_fn_ptr_arg),
         variadic: (node.variadic).map(|it| f.fold_bare_variadic(it)),
         output: f.fold_return_type(node.output),
     }

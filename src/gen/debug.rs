@@ -98,17 +98,6 @@ impl Debug for crate::Attribute {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Debug for crate::FnPtrArg {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("FnPtrArg");
-        formatter.field("attrs", &self.attrs);
-        formatter.field("name", &self.name);
-        formatter.field("ty", &self.ty);
-        formatter.finish()
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::BareVariadic {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("BareVariadic");
@@ -1314,6 +1303,17 @@ impl Debug for crate::FnArg {
                 formatter.finish()
             }
         }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::FnPtrArg {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("FnPtrArg");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("name", &self.name);
+        formatter.field("ty", &self.ty);
+        formatter.finish()
     }
 }
 #[cfg(feature = "full")]

@@ -86,17 +86,6 @@ impl Clone for crate::Attribute {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
-impl Clone for crate::FnPtrArg {
-    fn clone(&self) -> Self {
-        crate::FnPtrArg {
-            attrs: self.attrs.clone(),
-            name: self.name.clone(),
-            ty: self.ty.clone(),
-        }
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::BareVariadic {
     fn clone(&self) -> Self {
         crate::BareVariadic {
@@ -874,6 +863,17 @@ impl Clone for crate::FnArg {
         match self {
             crate::FnArg::Receiver(v0) => crate::FnArg::Receiver(v0.clone()),
             crate::FnArg::Typed(v0) => crate::FnArg::Typed(v0.clone()),
+        }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::FnPtrArg {
+    fn clone(&self) -> Self {
+        crate::FnPtrArg {
+            attrs: self.attrs.clone(),
+            name: self.name.clone(),
+            ty: self.ty.clone(),
         }
     }
 }

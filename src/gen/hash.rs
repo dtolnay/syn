@@ -95,18 +95,6 @@ impl Hash for crate::Attribute {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Hash for crate::FnPtrArg {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.attrs.hash(state);
-        self.name.hash(state);
-        self.ty.hash(state);
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::BareVariadic {
     fn hash<H>(&self, state: &mut H)
     where
@@ -1137,6 +1125,18 @@ impl Hash for crate::FnArg {
                 v0.hash(state);
             }
         }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::FnPtrArg {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.attrs.hash(state);
+        self.name.hash(state);
+        self.ty.hash(state);
     }
 }
 #[cfg(feature = "full")]
