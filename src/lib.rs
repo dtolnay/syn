@@ -300,6 +300,7 @@
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::trivially_copy_pass_by_ref,
+    clippy::type_complexity,
     clippy::unconditional_recursion, // https://github.com/rust-lang/rust-clippy/issues/12133
     clippy::uninhabited_references,
     clippy::uninlined_format_args,
