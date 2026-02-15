@@ -129,9 +129,9 @@ impl Debug for Lite<syn::Attribute> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::BareFnArg> {
+impl Debug for Lite<syn::FnPtrArg> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("BareFnArg");
+        let mut formatter = formatter.debug_struct("FnPtrArg");
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
@@ -4280,9 +4280,9 @@ impl Debug for Lite<syn::TypeArray> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::TypeBareFn> {
+impl Debug for Lite<syn::TypeFnPtr> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("TypeBareFn");
+        let mut formatter = formatter.debug_struct("TypeFnPtr");
         if let Some(val) = &self.value.lifetimes {
             #[derive(RefCast)]
             #[repr(transparent)]

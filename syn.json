@@ -186,7 +186,7 @@
       }
     },
     {
-      "ident": "BareFnArg",
+      "ident": "FnPtrArg",
       "features": {
         "any": [
           "derive",
@@ -4902,7 +4902,7 @@
       }
     },
     {
-      "ident": "TypeBareFn",
+      "ident": "TypeFnPtr",
       "features": {
         "any": [
           "derive",
@@ -4934,7 +4934,7 @@
         "inputs": {
           "punctuated": {
             "element": {
-              "syn": "BareFnArg"
+              "syn": "FnPtrArg"
             },
             "punct": "Comma"
           }

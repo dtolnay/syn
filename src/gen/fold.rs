@@ -74,7 +74,7 @@ pub trait Fold {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn fold_bare_fn_arg(&mut self, i: crate::BareFnArg) -> crate::BareFnArg {
+    fn fold_bare_fn_arg(&mut self, i: crate::FnPtrArg) -> crate::FnPtrArg {
         fold_bare_fn_arg(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
@@ -879,7 +879,7 @@ pub trait Fold {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn fold_type_bare_fn(&mut self, i: crate::TypeBareFn) -> crate::TypeBareFn {
+    fn fold_type_bare_fn(&mut self, i: crate::TypeFnPtr) -> crate::TypeFnPtr {
         fold_type_bare_fn(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
@@ -1121,11 +1121,11 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn fold_bare_fn_arg<F>(f: &mut F, node: crate::BareFnArg) -> crate::BareFnArg
+pub fn fold_bare_fn_arg<F>(f: &mut F, node: crate::FnPtrArg) -> crate::FnPtrArg
 where
     F: Fold + ?Sized,
 {
-    crate::BareFnArg {
+    crate::FnPtrArg {
         attrs: f.fold_attributes(node.attrs),
         name: (node.name).map(|it| (f.fold_ident((it).0), (it).1)),
         ty: f.fold_type(node.ty),
@@ -3522,11 +3522,11 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn fold_type_bare_fn<F>(f: &mut F, node: crate::TypeBareFn) -> crate::TypeBareFn
+pub fn fold_type_bare_fn<F>(f: &mut F, node: crate::TypeFnPtr) -> crate::TypeFnPtr
 where
     F: Fold + ?Sized,
 {
-    crate::TypeBareFn {
+    crate::TypeFnPtr {
         lifetimes: (node.lifetimes).map(|it| f.fold_bound_lifetimes(it)),
         unsafety: node.unsafety,
         abi: (node.abi).map(|it| f.fold_abi(it)),

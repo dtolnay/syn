@@ -86,9 +86,9 @@ impl Clone for crate::Attribute {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
-impl Clone for crate::BareFnArg {
+impl Clone for crate::FnPtrArg {
     fn clone(&self) -> Self {
-        crate::BareFnArg {
+        crate::FnPtrArg {
             attrs: self.attrs.clone(),
             name: self.name.clone(),
             ty: self.ty.clone(),
@@ -1951,9 +1951,9 @@ impl Clone for crate::TypeArray {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
-impl Clone for crate::TypeBareFn {
+impl Clone for crate::TypeFnPtr {
     fn clone(&self) -> Self {
-        crate::TypeBareFn {
+        crate::TypeFnPtr {
             lifetimes: self.lifetimes.clone(),
             unsafety: self.unsafety.clone(),
             abi: self.abi.clone(),

@@ -95,7 +95,7 @@ impl Hash for crate::Attribute {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Hash for crate::BareFnArg {
+impl Hash for crate::FnPtrArg {
     fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,
@@ -2509,7 +2509,7 @@ impl Hash for crate::TypeArray {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Hash for crate::TypeBareFn {
+impl Hash for crate::TypeFnPtr {
     fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,

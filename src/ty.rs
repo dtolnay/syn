@@ -27,7 +27,7 @@ ast_enum_of_structs! {
         Array(TypeArray),
 
         /// A function pointer type: `fn(usize) -> bool`.
-        FnPtr(TypeBareFn),
+        FnPtr(TypeFnPtr),
 
         /// A type contained within invisible delimiters.
         Group(TypeGroup),
@@ -103,15 +103,15 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A bare function type: `fn(usize) -> bool`.
+    /// A function pointer type: `fn(usize) -> bool`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub struct TypeBareFn {
+    pub struct TypeFnPtr {
         pub lifetimes: Option<BoundLifetimes>,
         pub unsafety: Option<Token![unsafe]>,
         pub abi: Option<Abi>,
         pub fn_token: Token![fn],
         pub paren_token: token::Paren,
-        pub inputs: Punctuated<BareFnArg, Token![,]>,
+        pub inputs: Punctuated<FnPtrArg, Token![,]>,
         pub variadic: Option<BareVariadic>,
         pub output: ReturnType,
     }
@@ -241,7 +241,7 @@ ast_struct! {
 ast_struct! {
     /// An argument in a function type: the `usize` in `fn(usize) -> bool`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub struct BareFnArg {
+    pub struct FnPtrArg {
         pub attrs: Vec<Attribute>,
         pub name: Option<(Ident, Token![:])>,
         pub ty: Type,
@@ -287,7 +287,7 @@ pub(crate) mod parsing {
     use crate::punctuated::Punctuated;
     use crate::token;
     use crate::ty::{
-        Abi, BareFnArg, BareVariadic, ReturnType, Type, TypeArray, TypeBareFn, TypeGroup,
+        Abi, FnPtrArg, BareVariadic, ReturnType, Type, TypeArray, TypeFnPtr, TypeGroup,
         TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
         TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
@@ -505,7 +505,7 @@ pub(crate) mod parsing {
             || lookahead.peek(Token![unsafe])
             || lookahead.peek(Token![extern])
         {
-            let mut bare_fn: TypeBareFn = input.parse()?;
+            let mut bare_fn: TypeFnPtr = input.parse()?;
             bare_fn.lifetimes = lifetimes;
             Ok(Type::FnPtr(bare_fn))
         } else if lookahead.peek(Ident)
@@ -675,12 +675,12 @@ pub(crate) mod parsing {
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
-    impl Parse for TypeBareFn {
+    impl Parse for TypeFnPtr {
         fn parse(input: ParseStream) -> Result<Self> {
             let args;
             let mut variadic = None;
 
-            Ok(TypeBareFn {
+            Ok(TypeFnPtr {
                 lifetimes: input.parse()?,
                 unsafety: input.parse()?,
                 abi: input.parse()?,
@@ -704,7 +704,7 @@ pub(crate) mod parsing {
 
                         let allow_self = inputs.is_empty();
                         let arg = parse_bare_fn_arg(&args, allow_self)?;
-                        inputs.push_value(BareFnArg { attrs, ..arg });
+                        inputs.push_value(FnPtrArg { attrs, ..arg });
                         if args.is_empty() {
                             break;
                         }
@@ -980,14 +980,14 @@ pub(crate) mod parsing {
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
-    impl Parse for BareFnArg {
+    impl Parse for FnPtrArg {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_self = false;
             parse_bare_fn_arg(input, allow_self)
         }
     }
 
-    fn parse_bare_fn_arg(input: ParseStream, allow_self: bool) -> Result<BareFnArg> {
+    fn parse_bare_fn_arg(input: ParseStream, allow_self: bool) -> Result<FnPtrArg> {
         let attrs = input.call(Attribute::parse_outer)?;
 
         let begin = input.fork();
@@ -1032,7 +1032,7 @@ pub(crate) mod parsing {
             }
         };
 
-        Ok(BareFnArg { attrs, name, ty })
+        Ok(FnPtrArg { attrs, name, ty })
     }
 
     fn parse_bare_variadic(input: ParseStream, attrs: Vec<Attribute>) -> Result<BareVariadic> {
@@ -1079,7 +1079,7 @@ mod printing {
     use crate::path::printing::PathStyle;
     use crate::print::TokensOrDefault;
     use crate::ty::{
-        Abi, BareFnArg, BareVariadic, ReturnType, TypeArray, TypeBareFn, TypeGroup, TypeImplTrait,
+        Abi, FnPtrArg, BareVariadic, ReturnType, TypeArray, TypeFnPtr, TypeGroup, TypeImplTrait,
         TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice,
         TypeTraitObject, TypeTuple,
     };
@@ -1131,7 +1131,7 @@ mod printing {
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
-    impl ToTokens for TypeBareFn {
+    impl ToTokens for TypeFnPtr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.lifetimes.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
@@ -1241,7 +1241,7 @@ mod printing {
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
-    impl ToTokens for BareFnArg {
+    impl ToTokens for FnPtrArg {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             if let Some((name, colon)) = &self.name {
