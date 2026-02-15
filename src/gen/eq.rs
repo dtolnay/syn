@@ -1925,7 +1925,7 @@ impl PartialEq for crate::Type {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (crate::Type::Array(self0), crate::Type::Array(other0)) => self0 == other0,
-            (crate::Type::BareFn(self0), crate::Type::BareFn(other0)) => self0 == other0,
+            (crate::Type::FnPtr(self0), crate::Type::FnPtr(other0)) => self0 == other0,
             (crate::Type::Group(self0), crate::Type::Group(other0)) => self0 == other0,
             (crate::Type::ImplTrait(self0), crate::Type::ImplTrait(other0)) => {
                 self0 == other0

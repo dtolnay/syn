@@ -4803,9 +4803,9 @@
             "syn": "TypeArray"
           }
         ],
-        "BareFn": [
+        "FnPtr": [
           {
-            "syn": "TypeBareFn"
+            "syn": "TypeFnPtr"
           }
         ],
         "Group": [

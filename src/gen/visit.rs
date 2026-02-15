@@ -3521,7 +3521,7 @@ where
         crate::Type::Array(_binding_0) => {
             v.visit_type_array(_binding_0);
         }
-        crate::Type::BareFn(_binding_0) => {
+        crate::Type::FnPtr(_binding_0) => {
             v.visit_type_bare_fn(_binding_0);
         }
         crate::Type::Group(_binding_0) => {

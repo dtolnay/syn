@@ -3467,8 +3467,8 @@ where
         crate::Type::Array(_binding_0) => {
             crate::Type::Array(f.fold_type_array(_binding_0))
         }
-        crate::Type::BareFn(_binding_0) => {
-            crate::Type::BareFn(f.fold_type_bare_fn(_binding_0))
+        crate::Type::FnPtr(_binding_0) => {
+            crate::Type::FnPtr(f.fold_type_bare_fn(_binding_0))
         }
         crate::Type::Group(_binding_0) => {
             crate::Type::Group(f.fold_type_group(_binding_0))

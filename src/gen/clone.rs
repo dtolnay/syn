@@ -1920,7 +1920,7 @@ impl Clone for crate::Type {
     fn clone(&self) -> Self {
         match self {
             crate::Type::Array(v0) => crate::Type::Array(v0.clone()),
-            crate::Type::BareFn(v0) => crate::Type::BareFn(v0.clone()),
+            crate::Type::FnPtr(v0) => crate::Type::FnPtr(v0.clone()),
             crate::Type::Group(v0) => crate::Type::Group(v0.clone()),
             crate::Type::ImplTrait(v0) => crate::Type::ImplTrait(v0.clone()),
             crate::Type::Infer(v0) => crate::Type::Infer(v0.clone()),

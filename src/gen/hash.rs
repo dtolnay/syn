@@ -2437,7 +2437,7 @@ impl Hash for crate::Type {
                 state.write_u8(0u8);
                 v0.hash(state);
             }
-            crate::Type::BareFn(v0) => {
+            crate::Type::FnPtr(v0) => {
                 state.write_u8(1u8);
                 v0.hash(state);
             }

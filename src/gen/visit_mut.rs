@@ -3347,7 +3347,7 @@ where
         crate::Type::Array(_binding_0) => {
             v.visit_type_array_mut(_binding_0);
         }
-        crate::Type::BareFn(_binding_0) => {
+        crate::Type::FnPtr(_binding_0) => {
             v.visit_type_bare_fn_mut(_binding_0);
         }
         crate::Type::Group(_binding_0) => {

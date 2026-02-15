@@ -26,8 +26,8 @@ ast_enum_of_structs! {
         /// A fixed size array type: `[T; n]`.
         Array(TypeArray),
 
-        /// A bare function type: `fn(usize) -> bool`.
-        BareFn(TypeBareFn),
+        /// A function pointer type: `fn(usize) -> bool`.
+        FnPtr(TypeBareFn),
 
         /// A type contained within invisible delimiters.
         Group(TypeGroup),
@@ -77,7 +77,7 @@ ast_enum_of_structs! {
         //         #![cfg_attr(test, deny(non_exhaustive_omitted_patterns))]
         //
         //         Type::Array(ty) => {...}
-        //         Type::BareFn(ty) => {...}
+        //         Type::FnPtr(ty) => {...}
         //         ...
         //         Type::Verbatim(ty) => {...}
         //
@@ -507,7 +507,7 @@ pub(crate) mod parsing {
         {
             let mut bare_fn: TypeBareFn = input.parse()?;
             bare_fn.lifetimes = lifetimes;
-            Ok(Type::BareFn(bare_fn))
+            Ok(Type::FnPtr(bare_fn))
         } else if lookahead.peek(Ident)
             || input.peek(Token![super])
             || input.peek(Token![self])
