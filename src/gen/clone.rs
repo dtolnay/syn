@@ -1389,6 +1389,7 @@ impl Clone for crate::Local {
     fn clone(&self) -> Self {
         crate::Local {
             attrs: self.attrs.clone(),
+            super_token: self.super_token.clone(),
             let_token: self.let_token.clone(),
             pat: self.pat.clone(),
             init: self.init.clone(),
