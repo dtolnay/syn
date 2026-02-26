@@ -2291,6 +2291,11 @@
         "vis": {
           "syn": "Visibility"
         },
+        "unsafety": {
+          "option": {
+            "syn": "Unsafety"
+          }
+        },
         "static_token": {
           "token": "Static"
         },
@@ -4448,7 +4453,7 @@
         },
         "unsafety": {
           "option": {
-            "token": "Unsafe"
+            "syn": "Unsafety"
           }
         },
         "abi": {
@@ -5295,6 +5300,26 @@
       "exhaustive": false
     },
     {
+      "ident": "Unsafety",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "variants": {
+        "Safe": [
+          {
+            "token": "Safe"
+          }
+        ],
+        "Unsafe": [
+          {
+            "token": "Unsafe"
+          }
+        ]
+      }
+    },
+    {
       "ident": "UseGlob",
       "features": {
         "any": [
@@ -5654,6 +5679,7 @@
     "Raw": "raw",
     "Ref": "ref",
     "Return": "return",
+    "Safe": "safe",
     "SelfType": "Self",
     "SelfValue": "self",
     "Semi": ";",
