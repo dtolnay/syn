@@ -98,17 +98,6 @@ impl Debug for crate::Attribute {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Debug for crate::BareFnArg {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("BareFnArg");
-        formatter.field("attrs", &self.attrs);
-        formatter.field("name", &self.name);
-        formatter.field("ty", &self.ty);
-        formatter.finish()
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::BareVariadic {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("BareVariadic");
@@ -1314,6 +1303,17 @@ impl Debug for crate::FnArg {
                 formatter.finish()
             }
         }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::FnPtrArg {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("FnPtrArg");
+        formatter.field("attrs", &self.attrs);
+        formatter.field("name", &self.name);
+        formatter.field("ty", &self.ty);
+        formatter.finish()
     }
 }
 #[cfg(feature = "full")]
@@ -2745,7 +2745,7 @@ impl Debug for crate::Type {
         formatter.write_str("Type::")?;
         match self {
             crate::Type::Array(v0) => v0.debug(formatter, "Array"),
-            crate::Type::BareFn(v0) => v0.debug(formatter, "BareFn"),
+            crate::Type::FnPtr(v0) => v0.debug(formatter, "FnPtr"),
             crate::Type::Group(v0) => v0.debug(formatter, "Group"),
             crate::Type::ImplTrait(v0) => v0.debug(formatter, "ImplTrait"),
             crate::Type::Infer(v0) => v0.debug(formatter, "Infer"),
@@ -2786,13 +2786,13 @@ impl crate::TypeArray {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Debug for crate::TypeBareFn {
+impl Debug for crate::TypeFnPtr {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        self.debug(formatter, "TypeBareFn")
+        self.debug(formatter, "TypeFnPtr")
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
-impl crate::TypeBareFn {
+impl crate::TypeFnPtr {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("lifetimes", &self.lifetimes);
