@@ -427,12 +427,13 @@ mod item;
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub use crate::item::{
-    FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
-    ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType, ImplRestriction, Item,
-    ItemConst, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod,
-    ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
-    Signature, StaticMutability, TraitItem, TraitItemConst, TraitItemFn, TraitItemMacro,
-    TraitItemType, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
+    FnArg, ForeignFnSafety, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic,
+    ForeignItemType, ForeignSignature, ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro,
+    ImplItemType, ImplRestriction, Item, ItemConst, ItemEnum, ItemExternCrate, ItemFn,
+    ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait,
+    ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Signature, StaticMutability, TraitItem,
+    TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob, UseGroup, UseName,
+    UsePath, UseRename, UseTree, Variadic,
 };
 
 mod lifetime;

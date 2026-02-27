@@ -376,6 +376,11 @@ pub trait Visit<'ast> {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_foreign_fn_safety(&mut self, i: &'ast crate::ForeignFnSafety) {
+        visit_foreign_fn_safety(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_foreign_item(&mut self, i: &'ast crate::ForeignItem) {
         visit_foreign_item(self, i);
     }
@@ -398,6 +403,11 @@ pub trait Visit<'ast> {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_foreign_item_type(&mut self, i: &'ast crate::ForeignItemType) {
         visit_foreign_item_type(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_foreign_signature(&mut self, i: &'ast crate::ForeignSignature) {
+        visit_foreign_signature(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -2118,6 +2128,22 @@ where
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_foreign_fn_safety<'ast, V>(v: &mut V, node: &'ast crate::ForeignFnSafety)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    match node {
+        crate::ForeignFnSafety::Unsafe(_binding_0) => {
+            skip!(_binding_0);
+        }
+        crate::ForeignFnSafety::Safe(_binding_0) => {
+            skip!(_binding_0);
+        }
+        crate::ForeignFnSafety::None => {}
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_foreign_item<'ast, V>(v: &mut V, node: &'ast crate::ForeignItem)
 where
     V: Visit<'ast> + ?Sized,
@@ -2150,7 +2176,7 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
-    v.visit_signature(&node.sig);
+    v.visit_foreign_signature(&node.sig);
     skip!(node.semi_token);
 }
 #[cfg(feature = "full")]
@@ -2199,6 +2225,31 @@ where
     v.visit_ident(&node.ident);
     v.visit_generics(&node.generics);
     skip!(node.semi_token);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_foreign_signature<'ast, V>(v: &mut V, node: &'ast crate::ForeignSignature)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    skip!(node.constness);
+    skip!(node.asyncness);
+    v.visit_foreign_fn_safety(&node.safety);
+    if let Some(it) = &node.abi {
+        v.visit_abi(it);
+    }
+    skip!(node.fn_token);
+    v.visit_ident(&node.ident);
+    v.visit_generics(&node.generics);
+    skip!(node.paren_token);
+    for el in Punctuated::pairs(&node.inputs) {
+        let it = el.value();
+        v.visit_fn_arg(it);
+    }
+    if let Some(it) = &node.variadic {
+        v.visit_variadic(it);
+    }
+    v.visit_return_type(&node.output);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
