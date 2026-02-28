@@ -37,18 +37,18 @@ impl Lifetime {
     /// ```
     pub fn new(symbol: &str, span: Span) -> Self {
         if !symbol.starts_with('\'') {
-            panic!(
+            crate::panic_with_location!(
                 "lifetime name must start with apostrophe as in \"'a\", got {:?}",
                 symbol
             );
         }
 
         if symbol == "'" {
-            panic!("lifetime name must not be empty");
+            crate::panic_with_location!("lifetime name must not be empty");
         }
 
         if !crate::ident::xid_ok(&symbol[1..]) {
-            panic!("{:?} is not a valid lifetime name", symbol);
+            crate::panic_with_location!("{:?} is not a valid lifetime name", symbol);
         }
 
         Lifetime {

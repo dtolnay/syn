@@ -22,7 +22,7 @@ pub(crate) fn between<'a>(begin: ParseStream<'a>, end: ParseStream<'a>) -> Token
                 cursor = inside;
                 continue;
             } else {
-                panic!("verbatim end must not be inside a delimited group");
+                crate::panic_with_location!("verbatim end must not be inside a delimited group");
             }
         }
 
