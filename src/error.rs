@@ -271,8 +271,56 @@ impl Error {
         self.to_compile_error()
     }
 
-    /// Add another error message to self such that when `to_compile_error()` is
-    /// called, both errors will be emitted together.
+    /// Combine multiple errors into a single [`syn::Error`]
+    ///
+    /// Adds the error to self so that when `to_compile_error()` is called,
+    /// all errors will be emitted together. Accumulating and emitting many
+    /// errors at once helps developer tools highlight multiple problems that
+    /// need to be fixed instead of just the first problem.
+    ///
+    /// To hold zero or more errors, you can collect them in a [`std::collections::VecDeque`]
+    /// and convert them into a single [`syn::Error`] using [`syn::Error::combine`].
+    /// For example:
+    ///
+    /// ```rust
+    /// use std::collections::VecDeque;
+    /// use syn::parse::{Parse, ParseStream};
+    ///
+    /// fn parse_attrs<T>(attrs: &[syn::Attribute]) -> Result<Vec<T>, syn::Error>
+    /// where
+    ///     T: Parse
+    /// {
+    ///     let mut errors: VecDeque<syn::Error> = VecDeque::new();
+    ///
+    ///     // Logic that may error ...
+    ///
+    ///     if let Some(mut error) = errors.pop_front() {
+    ///         for e in errors {
+    ///             error.combine(e);
+    ///         }
+    ///         Err(error)
+    ///     } else {
+    ///         # let out = todo!();
+    ///         Ok(out)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// Errors can be iterated over once combined. This capability helps
+    /// unit testing multiple errors. For example:
+    ///
+    /// ```rust
+    /// # use proc_macro2::Span;
+    /// # let span = Span::call_site();
+    ///
+    /// let mut error = syn::Error::new(span, "first error");
+    /// error.combine(syn::Error::new(span, "second error"));
+    ///
+    /// assert_eq!(
+    ///     vec!["first error".to_string(), "second error".to_string()],
+    ///     error.into_iter().map(|x| x.to_string()).collect::<Vec<_>>()
+    /// )
+    /// ```
     pub fn combine(&mut self, another: Error) {
         self.messages.extend(another.messages);
     }
