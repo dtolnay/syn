@@ -884,6 +884,11 @@ pub trait Visit<'ast> {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_unsafety(&mut self, i: &'ast crate::Unsafety) {
+        visit_unsafety(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_use_glob(&mut self, i: &'ast crate::UseGlob) {
         visit_use_glob(self, i);
     }
@@ -2178,6 +2183,9 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
+    if let Some(it) = &node.unsafety {
+        v.visit_unsafety(it);
+    }
     skip!(node.static_token);
     v.visit_static_mutability(&node.mutability);
     v.visit_ident(&node.ident);
@@ -3320,7 +3328,9 @@ where
 {
     skip!(node.constness);
     skip!(node.asyncness);
-    skip!(node.unsafety);
+    if let Some(it) = &node.unsafety {
+        v.visit_unsafety(it);
+    }
     if let Some(it) = &node.abi {
         v.visit_abi(it);
     }
@@ -3777,6 +3787,21 @@ where
             skip!(_binding_0);
         }
         crate::UnOp::Neg(_binding_0) => {
+            skip!(_binding_0);
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_unsafety<'ast, V>(v: &mut V, node: &'ast crate::Unsafety)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    match node {
+        crate::Unsafety::Safe(_binding_0) => {
+            skip!(_binding_0);
+        }
+        crate::Unsafety::Unsafe(_binding_0) => {
             skip!(_binding_0);
         }
     }
