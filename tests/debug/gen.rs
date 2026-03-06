@@ -1901,6 +1901,21 @@ impl Debug for Lite<syn::FnArg> {
         }
     }
 }
+impl Debug for Lite<syn::ForeignFnSafety> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match &self.value {
+            syn::ForeignFnSafety::Unsafe(_val) => {
+                formatter.write_str("ForeignFnSafety::Unsafe")?;
+                Ok(())
+            }
+            syn::ForeignFnSafety::Safe(_val) => {
+                formatter.write_str("ForeignFnSafety::Safe")?;
+                Ok(())
+            }
+            syn::ForeignFnSafety::None => formatter.write_str("ForeignFnSafety::None"),
+        }
+    }
+}
 impl Debug for Lite<syn::ForeignItem> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match &self.value {
@@ -2012,6 +2027,58 @@ impl Debug for Lite<syn::ForeignItemType> {
         formatter.field("vis", Lite(&self.value.vis));
         formatter.field("ident", Lite(&self.value.ident));
         formatter.field("generics", Lite(&self.value.generics));
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::ForeignSignature> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ForeignSignature");
+        if self.value.constness.is_some() {
+            formatter.field("constness", &Present);
+        }
+        if self.value.asyncness.is_some() {
+            formatter.field("asyncness", &Present);
+        }
+        match self.value.safety {
+            syn::ForeignFnSafety::None => {}
+            _ => {
+                formatter.field("safety", Lite(&self.value.safety));
+            }
+        }
+        if let Some(val) = &self.value.abi {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::Abi);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some(")?;
+                    Debug::fmt(Lite(&self.0), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("abi", Print::ref_cast(val));
+        }
+        formatter.field("ident", Lite(&self.value.ident));
+        formatter.field("generics", Lite(&self.value.generics));
+        if !self.value.inputs.is_empty() {
+            formatter.field("inputs", Lite(&self.value.inputs));
+        }
+        if let Some(val) = &self.value.variadic {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::Variadic);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some(")?;
+                    Debug::fmt(Lite(&self.0), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("variadic", Print::ref_cast(val));
+        }
+        formatter.field("output", Lite(&self.value.output));
         formatter.finish()
     }
 }
@@ -5095,6 +5162,11 @@ impl Debug for Lite<syn::token::Ref> {
 impl Debug for Lite<syn::token::Return> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("Token![return]")
+    }
+}
+impl Debug for Lite<syn::token::Safe> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Token![safe]")
     }
 }
 impl Debug for Lite<syn::token::SelfType> {
