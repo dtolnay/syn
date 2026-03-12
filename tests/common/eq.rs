@@ -187,9 +187,8 @@ use rustc_ast::tokenstream::{
     Spacing, TokenStream, TokenTree,
 };
 use rustc_data_structures::packed::Pu128;
-use rustc_span::source_map::Spanned;
 use rustc_span::symbol::{sym, ByteSymbol, Ident, Symbol};
-use rustc_span::{ErrorGuaranteed, Span, SyntaxContext, DUMMY_SP};
+use rustc_span::{ErrorGuaranteed, Span, Spanned, SyntaxContext, DUMMY_SP};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::hash::{BuildHasher, Hash};
