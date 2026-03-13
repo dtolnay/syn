@@ -1382,6 +1382,7 @@ impl crate::ForeignItemStatic {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
+        formatter.field("unsafety", &self.unsafety);
         formatter.field("static_token", &self.static_token);
         formatter.field("mutability", &self.mutability);
         formatter.field("ident", &self.ident);
@@ -3059,6 +3060,25 @@ impl Debug for crate::UnOp {
             }
             crate::UnOp::Neg(v0) => {
                 let mut formatter = formatter.debug_tuple("Neg");
+                formatter.field(v0);
+                formatter.finish()
+            }
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::Unsafety {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Unsafety::")?;
+        match self {
+            crate::Unsafety::Safe(v0) => {
+                let mut formatter = formatter.debug_tuple("Safe");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::Unsafety::Unsafe(v0) => {
+                let mut formatter = formatter.debug_tuple("Unsafe");
                 formatter.field(v0);
                 formatter.finish()
             }

@@ -920,6 +920,7 @@ impl Clone for crate::ForeignItemStatic {
         crate::ForeignItemStatic {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
+            unsafety: self.unsafety.clone(),
             static_token: self.static_token.clone(),
             mutability: self.mutability.clone(),
             ident: self.ident.clone(),
@@ -2129,6 +2130,16 @@ impl Copy for crate::UnOp {}
 impl Clone for crate::UnOp {
     fn clone(&self) -> Self {
         *self
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::Unsafety {
+    fn clone(&self) -> Self {
+        match self {
+            crate::Unsafety::Safe(v0) => crate::Unsafety::Safe(v0.clone()),
+            crate::Unsafety::Unsafe(v0) => crate::Unsafety::Unsafe(v0.clone()),
+        }
     }
 }
 #[cfg(feature = "full")]
