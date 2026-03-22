@@ -176,6 +176,8 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub defaultness: Option<Token![default]>,
         pub unsafety: Option<Token![unsafe]>,
+        /// The `const` keyword in `const impl`, used for const trait impls.
+        pub constness: Option<Token![const]>,
         pub impl_token: Token![impl],
         pub generics: Generics,
         /// Trait this impl implements.
@@ -1022,43 +1024,55 @@ pub(crate) mod parsing {
                 }
             }
         } else if lookahead.peek(Token![const]) {
-            let vis = input.parse()?;
-            let const_token: Token![const] = input.parse()?;
-            let lookahead = input.lookahead1();
-            let ident = if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
-                input.call(Ident::parse_any)?
-            } else {
-                return Err(lookahead.error());
-            };
-            let mut generics: Generics = input.parse()?;
-            let colon_token = input.parse()?;
-            let ty = input.parse()?;
-            let value = if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
-                let expr: Expr = input.parse()?;
-                Some((eq_token, expr))
-            } else {
-                None
-            };
-            generics.where_clause = input.parse()?;
-            let semi_token: Token![;] = input.parse()?;
-            match value {
-                Some((eq_token, expr))
-                    if generics.lt_token.is_none() && generics.where_clause.is_none() =>
-                {
-                    Ok(Item::Const(ItemConst {
-                        attrs: Vec::new(),
-                        vis,
-                        const_token,
-                        ident,
-                        generics,
-                        colon_token,
-                        ty,
-                        eq_token,
-                        expr: Box::new(expr),
-                        semi_token,
-                    }))
+            // Check for "const impl" (issue #1972)
+            ahead.parse::<Token![const]>()?;
+            if ahead.peek(Token![impl]) {
+                let allow_verbatim_impl = true;
+                if let Some(item) = parse_impl(input, allow_verbatim_impl)? {
+                    Ok(Item::Impl(item))
+                } else {
+                    Ok(Item::Verbatim(verbatim::between(&begin, input)))
                 }
-                _ => Ok(Item::Verbatim(verbatim::between(&begin, input))),
+            } else {
+                // Parse as const item
+                let vis = input.parse()?;
+                let const_token: Token![const] = input.parse()?;
+                let lookahead = input.lookahead1();
+                let ident = if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                    input.call(Ident::parse_any)?
+                } else {
+                    return Err(lookahead.error());
+                };
+                let mut generics: Generics = input.parse()?;
+                let colon_token = input.parse()?;
+                let ty = input.parse()?;
+                let value = if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
+                    let expr: Expr = input.parse()?;
+                    Some((eq_token, expr))
+                } else {
+                    None
+                };
+                generics.where_clause = input.parse()?;
+                let semi_token: Token![;] = input.parse()?;
+                match value {
+                    Some((eq_token, expr))
+                        if generics.lt_token.is_none() && generics.where_clause.is_none() =>
+                    {
+                        Ok(Item::Const(ItemConst {
+                            attrs: Vec::new(),
+                            vis,
+                            const_token,
+                            ident,
+                            generics,
+                            colon_token,
+                            ty,
+                            eq_token,
+                            expr: Box::new(expr),
+                            semi_token,
+                        }))
+                    }
+                    _ => Ok(Item::Verbatim(verbatim::between(&begin, input))),
+                }
             }
         } else if lookahead.peek(Token![unsafe]) {
             ahead.parse::<Token![unsafe]>()?;
@@ -2593,6 +2607,13 @@ pub(crate) mod parsing {
         let has_visibility = allow_verbatim_impl && input.parse::<Visibility>()?.is_some();
         let defaultness: Option<Token![default]> = input.parse()?;
         let unsafety: Option<Token![unsafe]> = input.parse()?;
+        // Parse `const` before `impl` keyword (e.g., `const impl Trait for Type {}`).
+        // Only parse if followed by `impl` to distinguish from `*const` pointer types.
+        let mut constness: Option<Token![const]> = if input.peek(Token![const]) && input.peek2(Token![impl]) {
+            Some(input.parse()?)
+        } else {
+            None
+        };
         let impl_token: Token![impl] = input.parse()?;
 
         let has_generics = generics::parsing::choose_generics_over_qpath(input);
@@ -2602,11 +2623,10 @@ pub(crate) mod parsing {
             Generics::default()
         };
 
-        let is_const_impl = allow_verbatim_impl
-            && (input.peek(Token![const]) || input.peek(Token![?]) && input.peek2(Token![const]));
-        if is_const_impl {
-            input.parse::<Option<Token![?]>>()?;
-            input.parse::<Token![const]>()?;
+        // Parse `const` after `impl` keyword for `impl const Trait for Type {}` syntax.
+        // Only parse if `const` wasn't already parsed before `impl`.
+        if constness.is_none() && input.peek(Token![const]) {
+            constness = Some(input.parse()?);
         }
 
         let polarity = if input.peek(Token![!]) && !input.peek2(token::Brace) {
@@ -2667,13 +2687,14 @@ pub(crate) mod parsing {
             items.push(content.parse()?);
         }
 
-        if has_visibility || is_const_impl || is_impl_for && trait_.is_none() {
+        if has_visibility || is_impl_for && trait_.is_none() {
             Ok(None)
         } else {
             Ok(Some(ItemImpl {
                 attrs,
                 defaultness,
                 unsafety,
+                constness,
                 impl_token,
                 generics,
                 trait_,
@@ -3192,6 +3213,7 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.defaultness.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
+            self.constness.to_tokens(tokens);
             self.impl_token.to_tokens(tokens);
             self.generics.to_tokens(tokens);
             if let Some((polarity, path, for_token)) = &self.trait_ {
