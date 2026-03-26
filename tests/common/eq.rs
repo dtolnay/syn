@@ -85,6 +85,7 @@ use rustc_ast::ast::GenericBound;
 use rustc_ast::ast::GenericParam;
 use rustc_ast::ast::GenericParamKind;
 use rustc_ast::ast::Generics;
+use rustc_ast::ast::Guard;
 use rustc_ast::ast::Impl;
 use rustc_ast::ast::ImplPolarity;
 use rustc_ast::ast::ImplRestriction;
@@ -522,6 +523,7 @@ spanless_eq_struct!(FormatOptions; width precision alignment fill sign alternate
 spanless_eq_struct!(FormatPlaceholder; argument span format_trait format_options);
 spanless_eq_struct!(GenericParam; id ident attrs bounds is_placeholder kind !colon_span);
 spanless_eq_struct!(Generics; params where_clause span);
+spanless_eq_struct!(Guard; cond span_with_leading_if);
 spanless_eq_struct!(Impl; generics constness of_trait self_ty items);
 spanless_eq_struct!(ImplRestriction; kind span tokens);
 spanless_eq_struct!(InlineAsm; asm_macro template template_strs operands clobber_abis options line_spans);
