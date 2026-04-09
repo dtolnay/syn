@@ -204,8 +204,8 @@ longer trigger or be less helpful than it used to be.
 ## Debugging
 
 When developing a procedural macro it can be helpful to look at what the
-generated code looks like. Use `cargo rustc -- -Zunstable-options
---pretty=expanded` or the [`cargo expand`] subcommand.
+generated code looks like. Use `cargo rustc -- -Zunstable-options -Zunpretty=expanded`
+or the [`cargo expand`] subcommand.
 
 [`cargo expand`]: https://github.com/dtolnay/cargo-expand
 
