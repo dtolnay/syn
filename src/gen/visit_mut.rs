@@ -2411,6 +2411,7 @@ where
     v.visit_attributes_mut(&mut node.attrs);
     skip!(node.defaultness);
     skip!(node.unsafety);
+    skip!(node.constness);
     skip!(node.impl_token);
     v.visit_generics_mut(&mut node.generics);
     if let Some(it) = &mut node.trait_ {
