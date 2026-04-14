@@ -549,7 +549,7 @@ spanless_eq_struct!(Path; span segments tokens);
 spanless_eq_struct!(PathSegment; ident id args);
 spanless_eq_struct!(PolyTraitRef; bound_generic_params modifiers trait_ref span parens);
 spanless_eq_struct!(QSelf; ty path_span position);
-spanless_eq_struct!(StaticItem; ident ty safety mutability expr define_opaque);
+spanless_eq_struct!(StaticItem; ident ty safety mutability expr define_opaque eii_impls);
 spanless_eq_struct!(Stmt; id kind span);
 spanless_eq_struct!(StrLit; symbol suffix symbol_unescaped style span);
 spanless_eq_struct!(StructExpr; qself path fields rest);
