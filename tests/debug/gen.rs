@@ -2955,12 +2955,12 @@ impl Debug for Lite<syn::LitChar> {
 }
 impl Debug for Lite<syn::LitFloat> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "{}", & self.value)
+        write!(formatter, "{}", self.value)
     }
 }
 impl Debug for Lite<syn::LitInt> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "{}", & self.value)
+        write!(formatter, "{}", self.value)
     }
 }
 impl Debug for Lite<syn::LitStr> {

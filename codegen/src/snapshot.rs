@@ -300,7 +300,7 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str, val: &Operand) 
         }
         Data::Private => {
             if node.ident == "LitInt" || node.ident == "LitFloat" {
-                let val = val.ref_tokens();
+                let val = val.tokens();
                 quote! {
                     write!(formatter, "{}", #val)
                 }
