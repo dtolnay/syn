@@ -1014,3 +1014,25 @@ pub fn parse_file(mut content: &str) -> Result<File> {
     file.shebang = shebang;
     Ok(file)
 }
+
+/// `panic!` macro that includes location information [file:line:column]
+/// when inside of a proc-macro, because otherwise you don't get this information without
+/// -Zmacro-backtrace, and enabling it is an extra step which makes debugging proc macros harder
+macro_rules! panic_with_location {
+    ($message:literal $($tt:tt)*) => {{
+        #[cfg(feature = "proc-macro")]
+        let is_available = proc_macro::is_available();
+        #[cfg(not(feature = "proc-macro"))]
+        let is_available = false;
+        if is_available {
+            let location = core::panic::Location::caller();
+            let file = location.file();
+            let line = location.line();
+            let column = location.column();
+            ::core::panic!(concat!("[{}:{}:{}] ", $message), file, line, column $($tt)*)
+        } else {
+            ::core::panic!($message $($tt)*)
+        }
+    }};
+}
+pub(crate) use panic_with_location;
