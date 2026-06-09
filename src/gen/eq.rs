@@ -929,8 +929,8 @@ impl Eq for crate::ForeignItemStatic {}
 impl PartialEq for crate::ForeignItemStatic {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis
-            && self.mutability == other.mutability && self.ident == other.ident
-            && self.ty == other.ty
+            && self.unsafety == other.unsafety && self.mutability == other.mutability
+            && self.ident == other.ident && self.ty == other.ty
     }
 }
 #[cfg(feature = "full")]
@@ -2147,6 +2147,20 @@ impl PartialEq for crate::UnOp {
             (crate::UnOp::Deref(_), crate::UnOp::Deref(_)) => true,
             (crate::UnOp::Not(_), crate::UnOp::Not(_)) => true,
             (crate::UnOp::Neg(_), crate::UnOp::Neg(_)) => true,
+            _ => false,
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::Unsafety {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::Unsafety {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (crate::Unsafety::Safe(_), crate::Unsafety::Safe(_)) => true,
+            (crate::Unsafety::Unsafe(_), crate::Unsafety::Unsafe(_)) => true,
             _ => false,
         }
     }

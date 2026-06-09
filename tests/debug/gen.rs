@@ -1919,6 +1919,20 @@ impl Debug for Lite<syn::ForeignItem> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
+                if let Some(val) = &_val.unsafety {
+                    #[derive(RefCast)]
+                    #[repr(transparent)]
+                    struct Print(syn::Unsafety);
+                    impl Debug for Print {
+                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                            formatter.write_str("Some(")?;
+                            Debug::fmt(Lite(&self.0), formatter)?;
+                            formatter.write_str(")")?;
+                            Ok(())
+                        }
+                    }
+                    formatter.field("unsafety", Print::ref_cast(val));
+                }
                 match _val.mutability {
                     syn::StaticMutability::None => {}
                     _ => {
@@ -1992,6 +2006,20 @@ impl Debug for Lite<syn::ForeignItemStatic> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
+        if let Some(val) = &self.value.unsafety {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::Unsafety);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some(")?;
+                    Debug::fmt(Lite(&self.0), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("unsafety", Print::ref_cast(val));
+        }
         match self.value.mutability {
             syn::StaticMutability::None => {}
             _ => {
@@ -3730,8 +3758,19 @@ impl Debug for Lite<syn::Signature> {
         if self.value.asyncness.is_some() {
             formatter.field("asyncness", &Present);
         }
-        if self.value.unsafety.is_some() {
-            formatter.field("unsafety", &Present);
+        if let Some(val) = &self.value.unsafety {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::Unsafety);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some(")?;
+                    Debug::fmt(Lite(&self.0), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("unsafety", Print::ref_cast(val));
         }
         if let Some(val) = &self.value.abi {
             #[derive(RefCast)]
@@ -4548,6 +4587,20 @@ impl Debug for Lite<syn::UnOp> {
         }
     }
 }
+impl Debug for Lite<syn::Unsafety> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match &self.value {
+            syn::Unsafety::Safe(_val) => {
+                formatter.write_str("Unsafety::Safe")?;
+                Ok(())
+            }
+            syn::Unsafety::Unsafe(_val) => {
+                formatter.write_str("Unsafety::Unsafe")?;
+                Ok(())
+            }
+        }
+    }
+}
 impl Debug for Lite<syn::UseGlob> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("UseGlob");
@@ -5095,6 +5148,11 @@ impl Debug for Lite<syn::token::Ref> {
 impl Debug for Lite<syn::token::Return> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("Token![return]")
+    }
+}
+impl Debug for Lite<syn::token::Safe> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Token![safe]")
     }
 }
 impl Debug for Lite<syn::token::SelfType> {
