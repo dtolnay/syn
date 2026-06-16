@@ -192,7 +192,7 @@ use rustc_ast::tokenstream::{
 };
 use rustc_data_structures::packed::Pu128;
 use rustc_span::symbol::{sym, ByteSymbol, Ident, Symbol};
-use rustc_span::{ErrorGuaranteed, Span, Spanned, SyntaxContext, DUMMY_SP};
+use rustc_span::{ErrorGuaranteed, LocalExpnId, Span, Spanned, SyntaxContext, DUMMY_SP};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::hash::{BuildHasher, Hash};
@@ -310,6 +310,7 @@ spanless_eq_true!(AttrId);
 spanless_eq_true!(NodeId);
 spanless_eq_true!(SyntaxContext);
 spanless_eq_true!(Spacing);
+spanless_eq_true!(LocalExpnId);
 
 macro_rules! spanless_eq_partial_eq {
     ($name:ty) => {
@@ -595,7 +596,7 @@ spanless_eq_enum!(ClosureBinder; NotPresent For(span generic_params));
 spanless_eq_enum!(Const; Yes(0) No);
 spanless_eq_enum!(ConstItemRhsKind; Body(rhs) TypeConst(rhs));
 spanless_eq_enum!(Defaultness; Implicit Default(0) Final(0));
-spanless_eq_enum!(DelegationSource; Single List Glob);
+spanless_eq_enum!(DelegationSource; Single List(0) Glob);
 spanless_eq_enum!(DelegationSuffixes; List(0) Glob(0));
 spanless_eq_enum!(EarlyParsedAttribute; CfgTrace(0) CfgAttrTrace);
 spanless_eq_enum!(Extern; None Implicit(0) Explicit(0 1));
