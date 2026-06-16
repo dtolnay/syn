@@ -656,7 +656,7 @@ spanless_eq_enum!(UnsafeSource; CompilerGenerated UserProvided);
 spanless_eq_enum!(UseTreeKind; Simple(0) Nested(items span) Glob(0));
 spanless_eq_enum!(VariantData; Struct(fields recovered) Tuple(0 1) Unit(0));
 spanless_eq_enum!(VisibilityKind; Public Restricted(path id shorthand) Inherited);
-spanless_eq_enum!(WherePredicateKind; BoundPredicate(0) RegionPredicate(0) EqPredicate(0));
+spanless_eq_enum!(WherePredicateKind; BoundPredicate(0) RegionPredicate(0));
 spanless_eq_enum!(YieldKind; Prefix(0) Postfix(0));
 spanless_eq_enum!(AssignOpKind; AddAssign SubAssign MulAssign DivAssign
     RemAssign BitXorAssign BitAndAssign BitOrAssign ShlAssign ShrAssign);
