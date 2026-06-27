@@ -2945,6 +2945,11 @@
             "token": "Unsafe"
           }
         },
+        "constness": {
+          "option": {
+            "token": "Const"
+          }
+        },
         "impl_token": {
           "token": "Impl"
         },

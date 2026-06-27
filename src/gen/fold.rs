@@ -2502,6 +2502,7 @@ where
         attrs: f.fold_attributes(node.attrs),
         defaultness: node.defaultness,
         unsafety: node.unsafety,
+        constness: node.constness,
         impl_token: node.impl_token,
         generics: f.fold_generics(node.generics),
         trait_: (node.trait_).map(|it| ((it).0, f.fold_path((it).1), (it).2)),

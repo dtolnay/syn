@@ -1187,6 +1187,7 @@ impl Clone for crate::ItemImpl {
             attrs: self.attrs.clone(),
             defaultness: self.defaultness.clone(),
             unsafety: self.unsafety.clone(),
+            constness: self.constness.clone(),
             impl_token: self.impl_token.clone(),
             generics: self.generics.clone(),
             trait_: self.trait_.clone(),
