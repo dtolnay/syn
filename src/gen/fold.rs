@@ -393,6 +393,14 @@ pub trait Fold {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_foreign_fn_safety(
+        &mut self,
+        i: crate::ForeignFnSafety,
+    ) -> crate::ForeignFnSafety {
+        fold_foreign_fn_safety(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_foreign_item(&mut self, i: crate::ForeignItem) -> crate::ForeignItem {
         fold_foreign_item(self, i)
     }
@@ -424,6 +432,14 @@ pub trait Fold {
         i: crate::ForeignItemType,
     ) -> crate::ForeignItemType {
         fold_foreign_item_type(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_foreign_signature(
+        &mut self,
+        i: crate::ForeignSignature,
+    ) -> crate::ForeignSignature {
+        fold_foreign_signature(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -2083,6 +2099,25 @@ where
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_foreign_fn_safety<F>(
+    f: &mut F,
+    node: crate::ForeignFnSafety,
+) -> crate::ForeignFnSafety
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        crate::ForeignFnSafety::Unsafe(_binding_0) => {
+            crate::ForeignFnSafety::Unsafe(_binding_0)
+        }
+        crate::ForeignFnSafety::Safe(_binding_0) => {
+            crate::ForeignFnSafety::Safe(_binding_0)
+        }
+        crate::ForeignFnSafety::None => crate::ForeignFnSafety::None,
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn fold_foreign_item<F>(f: &mut F, node: crate::ForeignItem) -> crate::ForeignItem
 where
     F: Fold + ?Sized,
@@ -2117,7 +2152,7 @@ where
     crate::ForeignItemFn {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
-        sig: f.fold_signature(node.sig),
+        sig: f.fold_foreign_signature(node.sig),
         semi_token: node.semi_token,
     }
 }
@@ -2172,6 +2207,29 @@ where
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
         semi_token: node.semi_token,
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_foreign_signature<F>(
+    f: &mut F,
+    node: crate::ForeignSignature,
+) -> crate::ForeignSignature
+where
+    F: Fold + ?Sized,
+{
+    crate::ForeignSignature {
+        constness: node.constness,
+        asyncness: node.asyncness,
+        safety: f.fold_foreign_fn_safety(node.safety),
+        abi: (node.abi).map(|it| f.fold_abi(it)),
+        fn_token: node.fn_token,
+        ident: f.fold_ident(node.ident),
+        generics: f.fold_generics(node.generics),
+        paren_token: node.paren_token,
+        inputs: crate::punctuated::fold(node.inputs, f, F::fold_fn_arg),
+        variadic: (node.variadic).map(|it| f.fold_variadic(it)),
+        output: f.fold_return_type(node.output),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

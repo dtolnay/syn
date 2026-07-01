@@ -1318,6 +1318,26 @@ impl Debug for crate::FnArg {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::ForeignFnSafety {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("ForeignFnSafety::")?;
+        match self {
+            crate::ForeignFnSafety::Unsafe(v0) => {
+                let mut formatter = formatter.debug_tuple("Unsafe");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::ForeignFnSafety::Safe(v0) => {
+                let mut formatter = formatter.debug_tuple("Safe");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::ForeignFnSafety::None => formatter.write_str("None"),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::ForeignItem {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("ForeignItem::")?;
@@ -1408,6 +1428,25 @@ impl crate::ForeignItemType {
         formatter.field("ident", &self.ident);
         formatter.field("generics", &self.generics);
         formatter.field("semi_token", &self.semi_token);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::ForeignSignature {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ForeignSignature");
+        formatter.field("constness", &self.constness);
+        formatter.field("asyncness", &self.asyncness);
+        formatter.field("safety", &self.safety);
+        formatter.field("abi", &self.abi);
+        formatter.field("fn_token", &self.fn_token);
+        formatter.field("ident", &self.ident);
+        formatter.field("generics", &self.generics);
+        formatter.field("paren_token", &self.paren_token);
+        formatter.field("inputs", &self.inputs);
+        formatter.field("variadic", &self.variadic);
+        formatter.field("output", &self.output);
         formatter.finish()
     }
 }

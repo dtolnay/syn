@@ -879,6 +879,19 @@ impl Clone for crate::FnArg {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::ForeignFnSafety {
+    fn clone(&self) -> Self {
+        match self {
+            crate::ForeignFnSafety::Unsafe(v0) => {
+                crate::ForeignFnSafety::Unsafe(v0.clone())
+            }
+            crate::ForeignFnSafety::Safe(v0) => crate::ForeignFnSafety::Safe(v0.clone()),
+            crate::ForeignFnSafety::None => crate::ForeignFnSafety::None,
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::ForeignItem {
     fn clone(&self) -> Self {
         match self {
@@ -940,6 +953,25 @@ impl Clone for crate::ForeignItemType {
             ident: self.ident.clone(),
             generics: self.generics.clone(),
             semi_token: self.semi_token.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::ForeignSignature {
+    fn clone(&self) -> Self {
+        crate::ForeignSignature {
+            constness: self.constness.clone(),
+            asyncness: self.asyncness.clone(),
+            safety: self.safety.clone(),
+            abi: self.abi.clone(),
+            fn_token: self.fn_token.clone(),
+            ident: self.ident.clone(),
+            generics: self.generics.clone(),
+            paren_token: self.paren_token.clone(),
+            inputs: self.inputs.clone(),
+            variadic: self.variadic.clone(),
+            output: self.output.clone(),
         }
     }
 }

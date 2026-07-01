@@ -1141,6 +1141,26 @@ impl Hash for crate::FnArg {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::ForeignFnSafety {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            crate::ForeignFnSafety::Unsafe(_) => {
+                state.write_u8(0u8);
+            }
+            crate::ForeignFnSafety::Safe(_) => {
+                state.write_u8(1u8);
+            }
+            crate::ForeignFnSafety::None => {
+                state.write_u8(2u8);
+            }
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::ForeignItem {
     fn hash<H>(&self, state: &mut H)
     where
@@ -1219,6 +1239,24 @@ impl Hash for crate::ForeignItemType {
         self.vis.hash(state);
         self.ident.hash(state);
         self.generics.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::ForeignSignature {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.constness.hash(state);
+        self.asyncness.hash(state);
+        self.safety.hash(state);
+        self.abi.hash(state);
+        self.ident.hash(state);
+        self.generics.hash(state);
+        self.inputs.hash(state);
+        self.variadic.hash(state);
+        self.output.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
