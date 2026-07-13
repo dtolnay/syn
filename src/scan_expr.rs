@@ -116,7 +116,8 @@ static CLOSURE_RET: [(Input, Action); 2] = [
     (Otherwise, SetState(&INIT)),
 ];
 
-static CONST: [(Input, Action); 2] = [
+static CONST: [(Input, Action); 3] = [
+    (Keyword("move"), SetState(&CONST)),
     (Punct("|"), SetState(&CLOSURE_ARGS)),
     (ConsumeBrace, SetState(&POSTFIX)),
 ];
