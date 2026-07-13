@@ -20,10 +20,6 @@ const REVISION: &str = "77cf889bc178ddb44d6a1c78e5a820b5abb31d8d";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: const move closures
-    "tests/ui/consts/const-closure-hkl.rs",
-    "tests/ui/traits/const-traits/const-closure-parse-not-item.rs",
-
     // TODO: attribute on tail-call
     "tests/ui/explicit-tail-calls/default-trait-method.rs",
 
