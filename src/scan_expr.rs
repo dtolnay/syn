@@ -32,7 +32,7 @@ enum Action {
     Finish,
 }
 
-static INIT: [(Input, Action); 28] = [
+static INIT: [(Input, Action); 29] = [
     (ConsumeDelimiter, SetState(&POSTFIX)),
     (Keyword("async"), SetState(&ASYNC)),
     (Keyword("break"), SetState(&BREAK_LABEL)),
@@ -46,6 +46,7 @@ static INIT: [(Input, Action); 28] = [
     (Keyword("move"), SetState(&CLOSURE)),
     (Keyword("return"), SetState(&RETURN)),
     (Keyword("static"), SetState(&CLOSURE)),
+    (Keyword("try"), SetState(&BLOCK)),
     (Keyword("unsafe"), SetState(&BLOCK)),
     (Keyword("while"), IncDepth),
     (Keyword("yield"), SetState(&RETURN)),
