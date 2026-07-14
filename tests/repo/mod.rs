@@ -20,9 +20,6 @@ const REVISION: &str = "77cf889bc178ddb44d6a1c78e5a820b5abb31d8d";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: attribute on tail-call
-    "tests/ui/explicit-tail-calls/default-trait-method.rs",
-
     // TODO: const traits: `pub const trait Trait {}`
     // https://github.com/dtolnay/syn/issues/1887
     "library/core/src/alloc/mod.rs",
