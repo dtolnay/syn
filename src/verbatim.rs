@@ -3,7 +3,7 @@ use crate::ext::TokenStreamExt as _;
 use core::cmp::Ordering;
 use proc_macro2::{Delimiter, TokenStream};
 
-pub(crate) fn between<'a>(begin: Cursor<'a>, end: Cursor<'a>) -> TokenStream {
+pub(crate) fn between(begin: Cursor, end: Cursor) -> TokenStream {
     let mut cursor = begin;
     assert!(crate::buffer::same_buffer(end, cursor));
 
