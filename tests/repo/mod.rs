@@ -662,10 +662,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/pretty/try-blocks.rs",
     "tests/ui/try-block/try-block-heterogeneous.rs",
 
-    // TODO: field-representing types: `builtin # field_of(Type, ident)`
-    // https://github.com/dtolnay/syn/issues/1989
-    "src/tools/rustfmt/tests/target/field-representing-types.rs",
-
     // TODO: `|| .. .method()`
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/closure_range_method_call.rs",
     "src/tools/rustfmt/tests/source/issue-4808.rs",
