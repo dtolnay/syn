@@ -82,6 +82,7 @@ ast_struct! {
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::attr::Attribute;
+    use crate::buffer::Cursor;
     use crate::classify;
     use crate::error::Result;
     use crate::expr::{Expr, ExprBlock, ExprMacro};
@@ -89,7 +90,7 @@ pub(crate) mod parsing {
     use crate::item;
     use crate::mac::{self, Macro};
     use crate::parse::discouraged::Speculative as _;
-    use crate::parse::{Parse, ParseBuffer, ParseStream};
+    use crate::parse::{Parse, ParseStream};
     use crate::pat::{Pat, PatType};
     use crate::path::Path;
     use crate::stmt::{Block, Local, LocalInit, Stmt, StmtMacro};
@@ -202,9 +203,9 @@ pub(crate) mod parsing {
     }
 
     fn parse_stmt(input: ParseStream, allow_nosemi: AllowNoSemi) -> Result<Stmt> {
-        let begin = input.fork();
+        let begin = input.cursor();
         let attrs = input.call(Attribute::parse_outer)?;
-        let attrs_end = input.fork();
+        let attrs_end = input.cursor();
 
         // brace-style macros; paren and bracket macros get parsed as
         // expression statements.
@@ -339,11 +340,11 @@ pub(crate) mod parsing {
     }
 
     fn stmt_expr(
-        begin: ParseBuffer,
+        begin: Cursor,
         input: ParseStream,
         allow_nosemi: AllowNoSemi,
         mut attrs: Vec<Attribute>,
-        attrs_end: ParseBuffer,
+        attrs_end: Cursor,
     ) -> Result<Stmt> {
         let mut e = Expr::parse_with_earlier_boundary_rule(input)?;
 
@@ -395,7 +396,7 @@ pub(crate) mod parsing {
 
         if !attrs.is_empty() {
             if let Expr::Verbatim(expr_tokens) = attr_target {
-                let mut attr_tokens = verbatim::between(&begin, &attrs_end);
+                let mut attr_tokens = verbatim::between(begin, attrs_end);
                 attr_tokens.extend(mem::replace(expr_tokens, TokenStream::new()));
                 *expr_tokens = attr_tokens;
             } else {
