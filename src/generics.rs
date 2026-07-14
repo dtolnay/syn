@@ -780,7 +780,7 @@ pub(crate) mod parsing {
                 }
             }
 
-            let begin = input.fork();
+            let begin = input.cursor();
 
             let content;
             let (paren_token, content) = if input.peek(token::Paren) {
@@ -793,7 +793,10 @@ pub(crate) mod parsing {
                 bound.paren_token = paren_token;
                 Ok(TypeParamBound::Trait(bound))
             } else {
-                Ok(TypeParamBound::Verbatim(verbatim::between(&begin, input)))
+                Ok(TypeParamBound::Verbatim(verbatim::between(
+                    begin,
+                    input.cursor(),
+                )))
             }
         }
 

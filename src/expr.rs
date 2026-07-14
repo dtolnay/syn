@@ -1176,6 +1176,8 @@ pub(crate) mod parsing {
     use crate::attr;
     use crate::attr::Attribute;
     #[cfg(feature = "full")]
+    use crate::buffer::Cursor;
+    #[cfg(feature = "full")]
     use crate::classify;
     use crate::error::{Error, Result};
     #[cfg(feature = "full")]
@@ -1199,8 +1201,6 @@ pub(crate) mod parsing {
     use crate::mac::{self, Macro};
     use crate::op::BinOp;
     use crate::parse::discouraged::Speculative as _;
-    #[cfg(feature = "full")]
-    use crate::parse::ParseBuffer;
     use crate::parse::{Parse, ParseStream};
     #[cfg(feature = "full")]
     use crate::pat::{Pat, PatType};
@@ -1519,7 +1519,7 @@ pub(crate) mod parsing {
     // box <trailer>
     #[cfg(feature = "full")]
     fn unary_expr(input: ParseStream, allow_struct: AllowStruct) -> Result<Expr> {
-        let begin = input.fork();
+        let begin = input.cursor();
         let attrs = input.call(expr_attrs)?;
         if input.peek(token::Group) {
             return trailer_expr(begin, attrs, input, allow_struct);
@@ -1595,7 +1595,7 @@ pub(crate) mod parsing {
     // <atom> ? ...
     #[cfg(feature = "full")]
     fn trailer_expr(
-        begin: ParseBuffer,
+        begin: Cursor,
         mut attrs: Vec<Attribute>,
         input: ParseStream,
         allow_struct: AllowStruct,
@@ -1604,7 +1604,7 @@ pub(crate) mod parsing {
         let mut e = trailer_helper(input, atom)?;
 
         if let Expr::Verbatim(tokens) = &mut e {
-            *tokens = verbatim::between(&begin, input);
+            *tokens = verbatim::between(begin, input.cursor());
         } else if !attrs.is_empty() {
             if let Expr::Range(range) = e {
                 let spans: &[Span] = match &range.limits {
@@ -1920,7 +1920,7 @@ pub(crate) mod parsing {
                 let content;
                 braced!(content in scan);
                 if content.parse::<Expr>().is_ok() && content.is_empty() {
-                    let expr_block = verbatim::between(input, &scan);
+                    let expr_block = verbatim::between(input.cursor(), scan.cursor());
                     input.advance_to(&scan);
                     return Ok(Expr::Verbatim(expr_block));
                 }
@@ -1931,7 +1931,7 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     fn expr_builtin(input: ParseStream) -> Result<Expr> {
-        let begin = input.fork();
+        let begin = input.cursor();
 
         token::parsing::keyword(input, "builtin")?;
         input.parse::<Token![#]>()?;
@@ -1941,7 +1941,7 @@ pub(crate) mod parsing {
         parenthesized!(args in input);
         args.parse::<TokenStream>()?;
 
-        Ok(Expr::Verbatim(verbatim::between(&begin, input)))
+        Ok(Expr::Verbatim(verbatim::between(begin, input.cursor())))
     }
 
     fn path_or_macro_or_struct(
@@ -2499,10 +2499,10 @@ pub(crate) mod parsing {
 
     #[cfg(feature = "full")]
     fn expr_become(input: ParseStream) -> Result<Expr> {
-        let begin = input.fork();
+        let begin = input.cursor();
         input.parse::<Token![become]>()?;
         input.parse::<Expr>()?;
-        Ok(Expr::Verbatim(verbatim::between(&begin, input)))
+        Ok(Expr::Verbatim(verbatim::between(begin, input.cursor())))
     }
 
     #[cfg(feature = "full")]

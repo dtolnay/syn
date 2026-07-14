@@ -324,7 +324,7 @@ pub(crate) mod parsing {
         allow_plus: bool,
         allow_group_generic: bool,
     ) -> Result<Type> {
-        let begin = input.fork();
+        let begin = input.cursor();
 
         if input.peek(token::Group) {
             let mut group: TypeGroup = input.parse()?;
@@ -573,7 +573,7 @@ pub(crate) mod parsing {
             let star_token: Option<Token![*]> = input.parse()?;
             let bounds = TypeTraitObject::parse_bounds(dyn_span, input, allow_plus)?;
             Ok(if star_token.is_some() {
-                Type::Verbatim(verbatim::between(&begin, input))
+                Type::Verbatim(verbatim::between(begin, input.cursor()))
             } else {
                 Type::TraitObject(TypeTraitObject {
                     dyn_token: Some(dyn_token),
@@ -990,7 +990,7 @@ pub(crate) mod parsing {
     fn parse_bare_fn_arg(input: ParseStream, allow_self: bool) -> Result<BareFnArg> {
         let attrs = input.call(Attribute::parse_outer)?;
 
-        let begin = input.fork();
+        let begin = input.cursor();
 
         let has_mut_self = allow_self && input.peek(Token![mut]) && input.peek2(Token![self]);
         if has_mut_self {
@@ -1028,7 +1028,7 @@ pub(crate) mod parsing {
             Some(ty) if !has_mut_self => ty,
             _ => {
                 name = None;
-                Type::Verbatim(verbatim::between(&begin, input))
+                Type::Verbatim(verbatim::between(begin, input.cursor()))
             }
         };
 

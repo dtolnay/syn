@@ -431,11 +431,11 @@ pub(crate) mod parsing {
 
             #[cfg(not(feature = "full"))]
             {
-                let begin = input.fork();
+                let begin = input.cursor();
                 let content;
                 braced!(content in input);
                 content.parse::<Expr>()?;
-                let verbatim = verbatim::between(&begin, input);
+                let verbatim = verbatim::between(begin, input.cursor());
                 return Ok(Expr::Verbatim(verbatim));
             }
         }

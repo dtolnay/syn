@@ -274,13 +274,13 @@ pub(crate) mod parsing {
                 let discriminant: Expr = input.parse()?;
                 #[cfg(not(feature = "full"))]
                 let discriminant = {
-                    let begin = input.fork();
+                    let begin = input.cursor();
                     let ahead = input.fork();
                     let mut discriminant: Result<Expr> = ahead.parse();
                     if discriminant.is_ok() {
                         input.advance_to(&ahead);
                     } else if scan_expr(input).is_ok() {
-                        discriminant = Ok(Expr::Verbatim(verbatim::between(&begin, input)));
+                        discriminant = Ok(Expr::Verbatim(verbatim::between(begin, input.cursor())));
                     }
                     discriminant?
                 };
@@ -339,10 +339,10 @@ pub(crate) mod parsing {
                 && (input.peek(Token![struct])
                     || input.peek(Token![union]) && input.peek2(token::Brace))
             {
-                let begin = input.fork();
+                let begin = input.cursor();
                 input.call(Ident::parse_any)?;
                 input.parse::<FieldsNamed>()?;
-                Type::Verbatim(verbatim::between(&begin, input))
+                Type::Verbatim(verbatim::between(begin, input.cursor()))
             } else {
                 input.parse()?
             };
