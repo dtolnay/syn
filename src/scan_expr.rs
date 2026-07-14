@@ -117,7 +117,7 @@ static CLOSURE_RET: [(Input, Action); 2] = [
 ];
 
 static CONST: [(Input, Action); 3] = [
-    (Keyword("move"), SetState(&CONST)),
+    (Keyword("move"), SetState(&CLOSURE)),
     (Punct("|"), SetState(&CLOSURE_ARGS)),
     (ConsumeBrace, SetState(&POSTFIX)),
 ];
