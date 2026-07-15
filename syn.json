@@ -186,73 +186,6 @@
       }
     },
     {
-      "ident": "BareFnArg",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "name": {
-          "option": {
-            "tuple": [
-              {
-                "proc_macro2": "Ident"
-              },
-              {
-                "token": "Colon"
-              }
-            ]
-          }
-        },
-        "ty": {
-          "syn": "Type"
-        }
-      }
-    },
-    {
-      "ident": "BareVariadic",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "name": {
-          "option": {
-            "tuple": [
-              {
-                "proc_macro2": "Ident"
-              },
-              {
-                "token": "Colon"
-              }
-            ]
-          }
-        },
-        "dots": {
-          "token": "DotDotDot"
-        },
-        "comma": {
-          "option": {
-            "token": "Comma"
-          }
-        }
-      }
-    },
-    {
       "ident": "BinOp",
       "features": {
         "any": [
@@ -2190,6 +2123,73 @@
             "syn": "PatType"
           }
         ]
+      }
+    },
+    {
+      "ident": "FnPtrArg",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "name": {
+          "option": {
+            "tuple": [
+              {
+                "proc_macro2": "Ident"
+              },
+              {
+                "token": "Colon"
+              }
+            ]
+          }
+        },
+        "ty": {
+          "syn": "Type"
+        }
+      }
+    },
+    {
+      "ident": "FnPtrVariadic",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "name": {
+          "option": {
+            "tuple": [
+              {
+                "proc_macro2": "Ident"
+              },
+              {
+                "token": "Colon"
+              }
+            ]
+          }
+        },
+        "dots": {
+          "token": "DotDotDot"
+        },
+        "comma": {
+          "option": {
+            "token": "Comma"
+          }
+        }
       }
     },
     {
@@ -4816,9 +4816,9 @@
             "syn": "TypeArray"
           }
         ],
-        "BareFn": [
+        "FnPtr": [
           {
-            "syn": "TypeBareFn"
+            "syn": "TypeFnPtr"
           }
         ],
         "Group": [
@@ -4915,7 +4915,7 @@
       }
     },
     {
-      "ident": "TypeBareFn",
+      "ident": "TypeFnPtr",
       "features": {
         "any": [
           "derive",
@@ -4947,14 +4947,14 @@
         "inputs": {
           "punctuated": {
             "element": {
-              "syn": "BareFnArg"
+              "syn": "FnPtrArg"
             },
             "punct": "Comma"
           }
         },
         "variadic": {
           "option": {
-            "syn": "BareVariadic"
+            "syn": "FnPtrVariadic"
           }
         },
         "output": {
