@@ -186,42 +186,6 @@
       }
     },
     {
-      "ident": "BareVariadic",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "name": {
-          "option": {
-            "tuple": [
-              {
-                "proc_macro2": "Ident"
-              },
-              {
-                "token": "Colon"
-              }
-            ]
-          }
-        },
-        "dots": {
-          "token": "DotDotDot"
-        },
-        "comma": {
-          "option": {
-            "token": "Comma"
-          }
-        }
-      }
-    },
-    {
       "ident": "BinOp",
       "features": {
         "any": [
@@ -2189,6 +2153,42 @@
         },
         "ty": {
           "syn": "Type"
+        }
+      }
+    },
+    {
+      "ident": "FnPtrVariadic",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "name": {
+          "option": {
+            "tuple": [
+              {
+                "proc_macro2": "Ident"
+              },
+              {
+                "token": "Colon"
+              }
+            ]
+          }
+        },
+        "dots": {
+          "token": "DotDotDot"
+        },
+        "comma": {
+          "option": {
+            "token": "Comma"
+          }
         }
       }
     },
@@ -4954,7 +4954,7 @@
         },
         "variadic": {
           "option": {
-            "syn": "BareVariadic"
+            "syn": "FnPtrVariadic"
           }
         },
         "output": {

@@ -112,7 +112,7 @@ ast_struct! {
         pub fn_token: Token![fn],
         pub paren_token: token::Paren,
         pub inputs: Punctuated<FnPtrArg, Token![,]>,
-        pub variadic: Option<BareVariadic>,
+        pub variadic: Option<FnPtrVariadic>,
         pub output: ReturnType,
     }
 }
@@ -251,7 +251,7 @@ ast_struct! {
 ast_struct! {
     /// The variadic argument of a function pointer like `fn(usize, ...)`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub struct BareVariadic {
+    pub struct FnPtrVariadic {
         pub attrs: Vec<Attribute>,
         pub name: Option<(Ident, Token![:])>,
         pub dots: Token![...],
@@ -287,7 +287,7 @@ pub(crate) mod parsing {
     use crate::punctuated::Punctuated;
     use crate::token;
     use crate::ty::{
-        Abi, BareVariadic, FnPtrArg, ReturnType, Type, TypeArray, TypeFnPtr, TypeGroup,
+        Abi, FnPtrArg, FnPtrVariadic, ReturnType, Type, TypeArray, TypeFnPtr, TypeGroup,
         TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
         TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
@@ -709,7 +709,7 @@ pub(crate) mod parsing {
                                     && args.peek2(Token![:])
                                     && args.peek3(Token![...]))
                         {
-                            variadic = Some(parse_bare_variadic(&args, attrs)?);
+                            variadic = Some(parse_fn_ptr_variadic(&args, attrs)?);
                             break;
                         }
 
@@ -1046,8 +1046,8 @@ pub(crate) mod parsing {
         Ok(FnPtrArg { attrs, name, ty })
     }
 
-    fn parse_bare_variadic(input: ParseStream, attrs: Vec<Attribute>) -> Result<BareVariadic> {
-        Ok(BareVariadic {
+    fn parse_fn_ptr_variadic(input: ParseStream, attrs: Vec<Attribute>) -> Result<FnPtrVariadic> {
+        Ok(FnPtrVariadic {
             attrs,
             name: if input.peek(Ident) || input.peek(Token![_]) {
                 let name = input.call(Ident::parse_any)?;
@@ -1090,7 +1090,7 @@ mod printing {
     use crate::path::printing::PathStyle;
     use crate::print::TokensOrDefault;
     use crate::ty::{
-        Abi, BareVariadic, FnPtrArg, ReturnType, TypeArray, TypeFnPtr, TypeGroup, TypeImplTrait,
+        Abi, FnPtrArg, FnPtrVariadic, ReturnType, TypeArray, TypeFnPtr, TypeGroup, TypeImplTrait,
         TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice,
         TypeTraitObject, TypeTuple,
     };
@@ -1264,7 +1264,7 @@ mod printing {
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
-    impl ToTokens for BareVariadic {
+    impl ToTokens for FnPtrVariadic {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             if let Some((name, colon)) = &self.name {

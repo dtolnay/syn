@@ -84,16 +84,6 @@ impl PartialEq for crate::Attribute {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Eq for crate::BareVariadic {}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for crate::BareVariadic {
-    fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.name == other.name && self.comma == other.comma
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::BinOp {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
@@ -870,6 +860,16 @@ impl Eq for crate::FnPtrArg {}
 impl PartialEq for crate::FnPtrArg {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.name == other.name && self.ty == other.ty
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::FnPtrVariadic {}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::FnPtrVariadic {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs && self.name == other.name && self.comma == other.comma
     }
 }
 #[cfg(feature = "full")]
