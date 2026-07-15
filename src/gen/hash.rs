@@ -2644,7 +2644,6 @@ impl Hash for crate::TypePtr {
     where
         H: Hasher,
     {
-        self.const_token.hash(state);
         self.mutability.hash(state);
         self.elem.hash(state);
     }

@@ -184,8 +184,7 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypePtr {
         pub star_token: Token![*],
-        pub const_token: Option<Token![const]>,
-        pub mutability: Option<Token![mut]>,
+        pub mutability: PointerMutability,
         pub elem: Box<Type>,
     }
 }
@@ -662,21 +661,9 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for TypePtr {
         fn parse(input: ParseStream) -> Result<Self> {
-            let star_token: Token![*] = input.parse()?;
-
-            let lookahead = input.lookahead1();
-            let (const_token, mutability) = if lookahead.peek(Token![const]) {
-                (Some(input.parse()?), None)
-            } else if lookahead.peek(Token![mut]) {
-                (None, Some(input.parse()?))
-            } else {
-                return Err(lookahead.error());
-            };
-
             Ok(TypePtr {
-                star_token,
-                const_token,
-                mutability,
+                star_token: input.parse()?,
+                mutability: input.parse()?,
                 elem: Box::new(input.call(Type::without_plus)?),
             })
         }
@@ -1112,7 +1099,6 @@ mod printing {
     use crate::attr::FilterAttrs;
     use crate::path;
     use crate::path::printing::PathStyle;
-    use crate::print::TokensOrDefault;
     use crate::ty::{
         Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, TypeArray, TypeFnPtr,
         TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
@@ -1145,12 +1131,7 @@ mod printing {
     impl ToTokens for TypePtr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.star_token.to_tokens(tokens);
-            match &self.mutability {
-                Some(tok) => tok.to_tokens(tokens),
-                None => {
-                    TokensOrDefault(&self.const_token).to_tokens(tokens);
-                }
-            }
+            self.mutability.to_tokens(tokens);
             self.elem.to_tokens(tokens);
         }
     }

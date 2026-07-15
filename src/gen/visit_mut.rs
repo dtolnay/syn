@@ -3545,8 +3545,7 @@ where
     V: VisitMut + ?Sized,
 {
     skip!(node.star_token);
-    skip!(node.const_token);
-    skip!(node.mutability);
+    v.visit_pointer_mutability_mut(&mut node.mutability);
     v.visit_type_mut(&mut *node.elem);
 }
 #[cfg(any(feature = "derive", feature = "full"))]

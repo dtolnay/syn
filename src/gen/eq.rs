@@ -2094,8 +2094,7 @@ impl Eq for crate::TypePtr {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::TypePtr {
     fn eq(&self, other: &Self) -> bool {
-        self.const_token == other.const_token && self.mutability == other.mutability
-            && self.elem == other.elem
+        self.mutability == other.mutability && self.elem == other.elem
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

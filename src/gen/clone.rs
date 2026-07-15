@@ -2083,7 +2083,6 @@ impl Clone for crate::TypePtr {
     fn clone(&self) -> Self {
         crate::TypePtr {
             star_token: self.star_token.clone(),
-            const_token: self.const_token.clone(),
             mutability: self.mutability.clone(),
             elem: self.elem.clone(),
         }

@@ -3718,8 +3718,7 @@ where
     V: Visit<'ast> + ?Sized,
 {
     skip!(node.star_token);
-    skip!(node.const_token);
-    skip!(node.mutability);
+    v.visit_pointer_mutability(&node.mutability);
     v.visit_type(&*node.elem);
 }
 #[cfg(any(feature = "derive", feature = "full"))]

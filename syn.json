@@ -5170,15 +5170,8 @@
         "star_token": {
           "token": "Star"
         },
-        "const_token": {
-          "option": {
-            "token": "Const"
-          }
-        },
         "mutability": {
-          "option": {
-            "token": "Mut"
-          }
+          "syn": "PointerMutability"
         },
         "elem": {
           "box": {

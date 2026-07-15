@@ -2974,7 +2974,6 @@ impl crate::TypePtr {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("star_token", &self.star_token);
-        formatter.field("const_token", &self.const_token);
         formatter.field("mutability", &self.mutability);
         formatter.field("elem", &self.elem);
         formatter.finish()

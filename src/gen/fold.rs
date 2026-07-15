@@ -3683,8 +3683,7 @@ where
 {
     crate::TypePtr {
         star_token: node.star_token,
-        const_token: node.const_token,
-        mutability: node.mutability,
+        mutability: f.fold_pointer_mutability(node.mutability),
         elem: Box::new(f.fold_type(*node.elem)),
     }
 }

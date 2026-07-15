@@ -4162,12 +4162,7 @@ impl Debug for Lite<syn::Type> {
             }
             syn::Type::Ptr(_val) => {
                 let mut formatter = formatter.debug_struct("Type::Ptr");
-                if _val.const_token.is_some() {
-                    formatter.field("const_token", &Present);
-                }
-                if _val.mutability.is_some() {
-                    formatter.field("mutability", &Present);
-                }
+                formatter.field("mutability", Lite(&_val.mutability));
                 formatter.field("elem", Lite(&_val.elem));
                 formatter.finish()
             }
@@ -4421,12 +4416,7 @@ impl Debug for Lite<syn::TypePath> {
 impl Debug for Lite<syn::TypePtr> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("TypePtr");
-        if self.value.const_token.is_some() {
-            formatter.field("const_token", &Present);
-        }
-        if self.value.mutability.is_some() {
-            formatter.field("mutability", &Present);
-        }
+        formatter.field("mutability", Lite(&self.value.mutability));
         formatter.field("elem", Lite(&self.value.elem));
         formatter.finish()
     }
