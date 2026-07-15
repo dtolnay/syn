@@ -441,8 +441,6 @@ mod lifetime;
 pub use crate::lifetime::Lifetime;
 
 mod lit;
-#[doc(hidden)] // https://github.com/dtolnay/syn/issues/1566
-pub use crate::lit::StrStyle;
 #[doc(inline)]
 pub use crate::lit::{
     Lit, LitBool, LitByte, LitByteStr, LitCStr, LitChar, LitFloat, LitInt, LitStr,
