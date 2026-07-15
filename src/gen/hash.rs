@@ -1382,16 +1382,6 @@ impl Hash for crate::ImplItemType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Hash for crate::ImplRestriction {
-    fn hash<H>(&self, _state: &mut H)
-    where
-        H: Hasher,
-    {
-        match *self {}
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::Item {
     fn hash<H>(&self, state: &mut H)
     where
@@ -1616,9 +1606,8 @@ impl Hash for crate::ItemTrait {
     {
         self.attrs.hash(state);
         self.vis.hash(state);
+        self.modifiers.hash(state);
         self.unsafety.hash(state);
-        self.auto_token.hash(state);
-        self.restriction.hash(state);
         self.ident.hash(state);
         self.generics.hash(state);
         self.colon_token.hash(state);
@@ -2416,6 +2405,16 @@ impl Hash for crate::TraitItemType {
         self.colon_token.hash(state);
         self.bounds.hash(state);
         self.default.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::TraitModifiers {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.auto_token.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

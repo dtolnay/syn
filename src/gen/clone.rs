@@ -1065,13 +1065,6 @@ impl Clone for crate::ImplItemType {
         }
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
-impl Clone for crate::ImplRestriction {
-    fn clone(&self) -> Self {
-        match *self {}
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::Index {
@@ -1263,9 +1256,8 @@ impl Clone for crate::ItemTrait {
         crate::ItemTrait {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
+            modifiers: self.modifiers.clone(),
             unsafety: self.unsafety.clone(),
-            auto_token: self.auto_token.clone(),
-            restriction: self.restriction.clone(),
             trait_token: self.trait_token.clone(),
             ident: self.ident.clone(),
             generics: self.generics.clone(),
@@ -1910,6 +1902,15 @@ impl Clone for crate::TraitItemType {
             bounds: self.bounds.clone(),
             default: self.default.clone(),
             semi_token: self.semi_token.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::TraitModifiers {
+    fn clone(&self) -> Self {
+        crate::TraitModifiers {
+            auto_token: self.auto_token.clone(),
         }
     }
 }

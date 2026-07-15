@@ -1588,13 +1588,6 @@ impl crate::ImplItemType {
         formatter.finish()
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Debug for crate::ImplRestriction {
-    fn fmt(&self, _formatter: &mut fmt::Formatter) -> fmt::Result {
-        match *self {}
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::Index {
@@ -1857,9 +1850,8 @@ impl crate::ItemTrait {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("unsafety", &self.unsafety);
-        formatter.field("auto_token", &self.auto_token);
-        formatter.field("restriction", &self.restriction);
         formatter.field("trait_token", &self.trait_token);
         formatter.field("ident", &self.ident);
         formatter.field("generics", &self.generics);
@@ -2729,6 +2721,15 @@ impl crate::TraitItemType {
         formatter.field("bounds", &self.bounds);
         formatter.field("default", &self.default);
         formatter.field("semi_token", &self.semi_token);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::TraitModifiers {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("TraitModifiers");
+        formatter.field("auto_token", &self.auto_token);
         formatter.finish()
     }
 }

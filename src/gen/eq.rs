@@ -1088,16 +1088,6 @@ impl PartialEq for crate::ImplItemType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Eq for crate::ImplRestriction {}
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for crate::ImplRestriction {
-    fn eq(&self, _other: &Self) -> bool {
-        match *self {}
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::Item {}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
@@ -1256,9 +1246,9 @@ impl Eq for crate::ItemTrait {}
 impl PartialEq for crate::ItemTrait {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis
-            && self.unsafety == other.unsafety && self.auto_token == other.auto_token
-            && self.restriction == other.restriction && self.ident == other.ident
-            && self.generics == other.generics && self.colon_token == other.colon_token
+            && self.modifiers == other.modifiers && self.unsafety == other.unsafety
+            && self.ident == other.ident && self.generics == other.generics
+            && self.colon_token == other.colon_token
             && self.supertraits == other.supertraits && self.items == other.items
     }
 }
@@ -1907,6 +1897,16 @@ impl PartialEq for crate::TraitItemType {
         self.attrs == other.attrs && self.ident == other.ident
             && self.generics == other.generics && self.colon_token == other.colon_token
             && self.bounds == other.bounds && self.default == other.default
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::TraitModifiers {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::TraitModifiers {
+    fn eq(&self, other: &Self) -> bool {
+        self.auto_token == other.auto_token
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

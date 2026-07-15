@@ -250,9 +250,8 @@ ast_struct! {
     pub struct ItemTrait {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        pub modifiers: TraitModifiers,
         pub unsafety: Option<Token![unsafe]>,
-        pub auto_token: Option<Token![auto]>,
-        pub restriction: Option<ImplRestriction>,
         pub trait_token: Token![trait],
         pub ident: Ident,
         pub generics: Generics,
@@ -260,6 +259,22 @@ ast_struct! {
         pub supertraits: Punctuated<TypeParamBound, Token![+]>,
         pub brace_token: token::Brace,
         pub items: Vec<TraitItem>,
+    }
+}
+
+ast_struct! {
+    /// Information about constness, auto, and impl restrictions on a `trait`
+    /// item.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    #[non_exhaustive]
+    pub struct TraitModifiers {
+        pub auto_token: Option<Token![auto]>,
+    }
+}
+
+impl Default for TraitModifiers {
+    fn default() -> Self {
+        TraitModifiers { auto_token: None }
     }
 }
 
@@ -887,23 +902,6 @@ ast_enum! {
     }
 }
 
-ast_enum! {
-    /// Unused, but reserved for RFC 3323 restrictions.
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    #[non_exhaustive]
-    pub enum ImplRestriction {}
-
-
-    // TODO: https://rust-lang.github.io/rfcs/3323-restrictions.html
-    //
-    // pub struct ImplRestriction {
-    //     pub impl_token: Token![impl],
-    //     pub paren_token: token::Paren,
-    //     pub in_token: Option<Token![in]>,
-    //     pub path: Box<Path>,
-    // }
-}
-
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::attr::{self, Attribute};
@@ -920,7 +918,8 @@ pub(crate) mod parsing {
         ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod,
         ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
         Signature, StaticMutability, TraitItem, TraitItemConst, TraitItemFn, TraitItemMacro,
-        TraitItemType, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
+        TraitItemType, TraitModifiers, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree,
+        Variadic,
     };
     use crate::lifetime::Lifetime;
     use crate::lit::LitStr;
@@ -2290,9 +2289,8 @@ pub(crate) mod parsing {
         Ok(ItemTrait {
             attrs,
             vis,
+            modifiers: TraitModifiers { auto_token },
             unsafety,
-            auto_token,
-            restriction: None,
             trait_token,
             ident,
             generics,
@@ -3176,7 +3174,7 @@ mod printing {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
-            self.auto_token.to_tokens(tokens);
+            self.modifiers.auto_token.to_tokens(tokens);
             self.trait_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);
