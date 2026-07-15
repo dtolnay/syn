@@ -41,6 +41,7 @@ fn test_macro_variable_attr() {
             },
         ],
         vis: Visibility::Inherited,
+        modifiers: FnModifiers,
         sig: Signature {
             ident: "f",
             generics: Generics,
@@ -297,6 +298,7 @@ fn test_impl_trait_trailing_plus() {
     snapshot!(tokens as Item, @r#"
     Item::Fn {
         vis: Visibility::Inherited,
+        modifiers: FnModifiers,
         sig: Signature {
             ident: "f",
             generics: Generics,

@@ -1292,6 +1292,14 @@ impl Debug for crate::FnArg {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::FnModifiers {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("FnModifiers");
+        formatter.finish()
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::FnPtrArg {
@@ -1346,6 +1354,7 @@ impl crate::ForeignItemFn {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("sig", &self.sig);
         formatter.field("semi_token", &self.semi_token);
         formatter.finish()
@@ -1549,6 +1558,7 @@ impl crate::ImplItemFn {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("defaultness", &self.defaultness);
         formatter.field("sig", &self.sig);
         formatter.field("block", &self.block);
@@ -1723,6 +1733,7 @@ impl crate::ItemFn {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("sig", &self.sig);
         formatter.field("block", &self.block);
         formatter.finish()
@@ -2705,6 +2716,7 @@ impl crate::TraitItemFn {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("sig", &self.sig);
         formatter.field("default", &self.default);
         formatter.field("semi_token", &self.semi_token);

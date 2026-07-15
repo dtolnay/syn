@@ -151,8 +151,22 @@ ast_struct! {
     pub struct ItemFn {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        pub modifiers: FnModifiers,
         pub sig: Signature,
         pub block: Box<Block>,
+    }
+}
+
+ast_struct! {
+    /// Information about function contracts and restrictions.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    #[non_exhaustive]
+    pub struct FnModifiers {}
+}
+
+impl Default for FnModifiers {
+    fn default() -> Self {
+        FnModifiers {}
     }
 }
 
@@ -582,6 +596,7 @@ ast_struct! {
     pub struct ForeignItemFn {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        pub modifiers: FnModifiers,
         pub sig: Signature,
         pub semi_token: Token![;],
     }
@@ -691,6 +706,7 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct TraitItemFn {
         pub attrs: Vec<Attribute>,
+        pub modifiers: FnModifiers,
         pub sig: Signature,
         pub default: Option<Block>,
         pub semi_token: Option<Token![;]>,
@@ -792,6 +808,7 @@ ast_struct! {
     pub struct ImplItemFn {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        pub modifiers: FnModifiers,
         pub defaultness: Option<Token![default]>,
         pub sig: Signature,
         pub block: Block,
@@ -933,13 +950,13 @@ pub(crate) mod parsing {
     use crate::generics::{self, Generics, TypeParamBound};
     use crate::ident::Ident;
     use crate::item::{
-        FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
-        ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType, ImplModifiers, Item,
-        ItemConst, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod,
-        ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
-        Signature, StaticMutability, TraitItem, TraitItemConst, TraitItemFn, TraitItemMacro,
-        TraitItemType, TraitModifiers, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree,
-        Variadic,
+        FnArg, FnModifiers, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic,
+        ForeignItemType, ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType,
+        ImplModifiers, Item, ItemConst, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod,
+        ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType,
+        ItemUnion, ItemUse, Receiver, Signature, StaticMutability, TraitItem, TraitItemConst,
+        TraitItemFn, TraitItemMacro, TraitItemType, TraitModifiers, UseGlob, UseGroup, UseName,
+        UsePath, UseRename, UseTree, Variadic,
     };
     use crate::lifetime::Lifetime;
     use crate::lit::LitStr;
@@ -1599,6 +1616,7 @@ pub(crate) mod parsing {
         Ok(ItemFn {
             attrs,
             vis,
+            modifiers: FnModifiers::default(),
             sig,
             block: Box::new(Block { brace_token, stmts }),
         })
@@ -1916,6 +1934,7 @@ pub(crate) mod parsing {
                     Ok(ForeignItem::Fn(ForeignItemFn {
                         attrs: Vec::new(),
                         vis,
+                        modifiers: FnModifiers::default(),
                         sig: sig.unwrap(),
                         semi_token: semi_token.unwrap(),
                     }))
@@ -1998,6 +2017,7 @@ pub(crate) mod parsing {
             Ok(ForeignItemFn {
                 attrs,
                 vis,
+                modifiers: FnModifiers::default(),
                 sig,
                 semi_token,
             })
@@ -2534,6 +2554,7 @@ pub(crate) mod parsing {
 
             Ok(TraitItemFn {
                 attrs,
+                modifiers: FnModifiers::default(),
                 sig,
                 default: brace_token.map(|brace_token| Block { brace_token, stmts }),
                 semi_token,
@@ -2894,6 +2915,7 @@ pub(crate) mod parsing {
         Ok(Some(ImplItemFn {
             attrs,
             vis,
+            modifiers: FnModifiers::default(),
             defaultness,
             sig,
             block,

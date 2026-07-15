@@ -1857,6 +1857,12 @@ impl Debug for Lite<syn::FnArg> {
         }
     }
 }
+impl Debug for Lite<syn::FnModifiers> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("FnModifiers");
+        formatter.finish()
+    }
+}
 impl Debug for Lite<syn::FnPtrArg> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("FnPtrArg");
@@ -1916,6 +1922,7 @@ impl Debug for Lite<syn::ForeignItem> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("sig", Lite(&_val.sig));
                 formatter.finish()
             }
@@ -1974,6 +1981,7 @@ impl Debug for Lite<syn::ForeignItemFn> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("sig", Lite(&self.value.sig));
         formatter.finish()
     }
@@ -2156,6 +2164,7 @@ impl Debug for Lite<syn::ImplItem> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 if _val.defaultness.is_some() {
                     formatter.field("defaultness", &Present);
                 }
@@ -2223,6 +2232,7 @@ impl Debug for Lite<syn::ImplItemFn> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         if self.value.defaultness.is_some() {
             formatter.field("defaultness", &Present);
         }
@@ -2336,6 +2346,7 @@ impl Debug for Lite<syn::Item> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("sig", Lite(&_val.sig));
                 formatter.field("block", Lite(&_val.block));
                 formatter.finish()
@@ -2611,6 +2622,7 @@ impl Debug for Lite<syn::ItemFn> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("sig", Lite(&self.value.sig));
         formatter.field("block", Lite(&self.value.block));
         formatter.finish()
@@ -3893,6 +3905,7 @@ impl Debug for Lite<syn::TraitItem> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("sig", Lite(&_val.sig));
                 if let Some(val) = &_val.default {
                     #[derive(RefCast)]
@@ -3996,6 +4009,7 @@ impl Debug for Lite<syn::TraitItemFn> {
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("sig", Lite(&self.value.sig));
         if let Some(val) = &self.value.default {
             #[derive(RefCast)]

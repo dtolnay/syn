@@ -381,6 +381,11 @@ pub trait Fold {
     fn fold_fn_arg(&mut self, i: crate::FnArg) -> crate::FnArg {
         fold_fn_arg(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_fn_modifiers(&mut self, i: crate::FnModifiers) -> crate::FnModifiers {
+        fold_fn_modifiers(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_fn_ptr_arg(&mut self, i: crate::FnPtrArg) -> crate::FnPtrArg {
@@ -2073,6 +2078,14 @@ where
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_fn_modifiers<F>(f: &mut F, node: crate::FnModifiers) -> crate::FnModifiers
+where
+    F: Fold + ?Sized,
+{
+    node
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_fn_ptr_arg<F>(f: &mut F, node: crate::FnPtrArg) -> crate::FnPtrArg
@@ -2137,6 +2150,7 @@ where
     crate::ForeignItemFn {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
+        modifiers: f.fold_fn_modifiers(node.modifiers),
         sig: f.fold_signature(node.sig),
         semi_token: node.semi_token,
     }
@@ -2328,6 +2342,7 @@ where
     crate::ImplItemFn {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
+        modifiers: f.fold_fn_modifiers(node.modifiers),
         defaultness: node.defaultness,
         sig: f.fold_signature(node.sig),
         block: f.fold_block(node.block),
@@ -2502,6 +2517,7 @@ where
     crate::ItemFn {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
+        modifiers: f.fold_fn_modifiers(node.modifiers),
         sig: f.fold_signature(node.sig),
         block: Box::new(f.fold_block(*node.block)),
     }
@@ -3456,6 +3472,7 @@ where
 {
     crate::TraitItemFn {
         attrs: f.fold_attributes(node.attrs),
+        modifiers: f.fold_fn_modifiers(node.modifiers),
         sig: f.fold_signature(node.sig),
         default: (node.default).map(|it| f.fold_block(it)),
         semi_token: node.semi_token,

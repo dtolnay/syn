@@ -374,6 +374,11 @@ pub trait VisitMut {
     fn visit_fn_arg_mut(&mut self, i: &mut crate::FnArg) {
         visit_fn_arg_mut(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_fn_modifiers_mut(&mut self, i: &mut crate::FnModifiers) {
+        visit_fn_modifiers_mut(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_fn_ptr_arg_mut(&mut self, i: &mut crate::FnPtrArg) {
@@ -2017,6 +2022,12 @@ where
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_fn_modifiers_mut<V>(v: &mut V, node: &mut crate::FnModifiers)
+where
+    V: VisitMut + ?Sized,
+{}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_fn_ptr_arg_mut<V>(v: &mut V, node: &mut crate::FnPtrArg)
@@ -2076,6 +2087,7 @@ where
 {
     v.visit_attributes_mut(&mut node.attrs);
     v.visit_visibility_mut(&mut node.vis);
+    v.visit_fn_modifiers_mut(&mut node.modifiers);
     v.visit_signature_mut(&mut node.sig);
     skip!(node.semi_token);
 }
@@ -2242,6 +2254,7 @@ where
 {
     v.visit_attributes_mut(&mut node.attrs);
     v.visit_visibility_mut(&mut node.vis);
+    v.visit_fn_modifiers_mut(&mut node.modifiers);
     skip!(node.defaultness);
     v.visit_signature_mut(&mut node.sig);
     v.visit_block_mut(&mut node.block);
@@ -2406,6 +2419,7 @@ where
 {
     v.visit_attributes_mut(&mut node.attrs);
     v.visit_visibility_mut(&mut node.vis);
+    v.visit_fn_modifiers_mut(&mut node.modifiers);
     v.visit_signature_mut(&mut node.sig);
     v.visit_block_mut(&mut *node.block);
 }
@@ -3322,6 +3336,7 @@ where
     V: VisitMut + ?Sized,
 {
     v.visit_attributes_mut(&mut node.attrs);
+    v.visit_fn_modifiers_mut(&mut node.modifiers);
     v.visit_signature_mut(&mut node.sig);
     if let Some(it) = &mut node.default {
         v.visit_block_mut(it);

@@ -19,6 +19,7 @@ fn test_basic() {
         items: [
             Item::Fn {
                 vis: Visibility::Inherited,
+                modifiers: FnModifiers,
                 sig: Signature {
                     ident: "main",
                     generics: Generics,
@@ -58,6 +59,7 @@ fn test_comment() {
         items: [
             Item::Fn {
                 vis: Visibility::Inherited,
+                modifiers: FnModifiers,
                 sig: Signature {
                     ident: "main",
                     generics: Generics,
