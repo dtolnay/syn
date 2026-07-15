@@ -2124,7 +2124,7 @@ impl Hash for crate::PathSegment {
         self.arguments.hash(state);
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::PointerMutability {
     fn hash<H>(&self, state: &mut H)
@@ -2644,7 +2644,6 @@ impl Hash for crate::TypePtr {
     where
         H: Hasher,
     {
-        self.const_token.hash(state);
         self.mutability.hash(state);
         self.elem.hash(state);
     }

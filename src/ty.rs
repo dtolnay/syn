@@ -184,8 +184,7 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypePtr {
         pub star_token: Token![*],
-        pub const_token: Option<Token![const]>,
-        pub mutability: Option<Token![mut]>,
+        pub mutability: PointerMutability,
         pub elem: Box<Type>,
     }
 }
@@ -238,6 +237,16 @@ ast_struct! {
     }
 }
 
+ast_enum! {
+    /// Mutability of a raw pointer (`*const T`, `*mut T`), in which non-mutable
+    /// isn't the implicit default.
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
+    pub enum PointerMutability {
+        Const(Token![const]),
+        Mut(Token![mut]),
+    }
+}
+
 ast_struct! {
     /// An argument in a function type: the `usize` in `fn(usize) -> bool`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
@@ -287,8 +296,8 @@ pub(crate) mod parsing {
     use crate::punctuated::Punctuated;
     use crate::token;
     use crate::ty::{
-        Abi, FnPtrArg, FnPtrVariadic, ReturnType, Type, TypeArray, TypeFnPtr, TypeGroup,
-        TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
+        Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, Type, TypeArray, TypeFnPtr,
+        TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
         TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
     use crate::verbatim;
@@ -652,21 +661,9 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for TypePtr {
         fn parse(input: ParseStream) -> Result<Self> {
-            let star_token: Token![*] = input.parse()?;
-
-            let lookahead = input.lookahead1();
-            let (const_token, mutability) = if lookahead.peek(Token![const]) {
-                (Some(input.parse()?), None)
-            } else if lookahead.peek(Token![mut]) {
-                (None, Some(input.parse()?))
-            } else {
-                return Err(lookahead.error());
-            };
-
             Ok(TypePtr {
-                star_token,
-                const_token,
-                mutability,
+                star_token: input.parse()?,
+                mutability: input.parse()?,
                 elem: Box::new(input.call(Type::without_plus)?),
             })
         }
@@ -1081,6 +1078,20 @@ pub(crate) mod parsing {
             }
         }
     }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Parse for PointerMutability {
+        fn parse(input: ParseStream) -> Result<Self> {
+            let lookahead = input.lookahead1();
+            if lookahead.peek(Token![const]) {
+                Ok(PointerMutability::Const(input.parse()?))
+            } else if lookahead.peek(Token![mut]) {
+                Ok(PointerMutability::Mut(input.parse()?))
+            } else {
+                Err(lookahead.error())
+            }
+        }
+    }
 }
 
 #[cfg(feature = "printing")]
@@ -1088,11 +1099,10 @@ mod printing {
     use crate::attr::FilterAttrs;
     use crate::path;
     use crate::path::printing::PathStyle;
-    use crate::print::TokensOrDefault;
     use crate::ty::{
-        Abi, FnPtrArg, FnPtrVariadic, ReturnType, TypeArray, TypeFnPtr, TypeGroup, TypeImplTrait,
-        TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice,
-        TypeTraitObject, TypeTuple,
+        Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, TypeArray, TypeFnPtr,
+        TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
+        TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt as _};
@@ -1121,12 +1131,7 @@ mod printing {
     impl ToTokens for TypePtr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.star_token.to_tokens(tokens);
-            match &self.mutability {
-                Some(tok) => tok.to_tokens(tokens),
-                None => {
-                    TokensOrDefault(&self.const_token).to_tokens(tokens);
-                }
-            }
+            self.mutability.to_tokens(tokens);
             self.elem.to_tokens(tokens);
         }
     }
@@ -1281,6 +1286,16 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.extern_token.to_tokens(tokens);
             self.name.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for PointerMutability {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                PointerMutability::Const(const_token) => const_token.to_tokens(tokens),
+                PointerMutability::Mut(mut_token) => mut_token.to_tokens(tokens),
+            }
         }
     }
 }

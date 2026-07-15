@@ -372,7 +372,7 @@ pub use crate::error::{Error, Result};
 mod expr;
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub use crate::expr::{Arm, Label, PointerMutability, RangeLimits};
+pub use crate::expr::{Arm, Label, RangeLimits};
 #[cfg(any(feature = "full", feature = "derive"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::expr::{
@@ -540,9 +540,9 @@ mod ty;
 #[cfg(any(feature = "full", feature = "derive"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::ty::{
-    Abi, FnPtrArg, FnPtrVariadic, ReturnType, Type, TypeArray, TypeFnPtr, TypeGroup, TypeImplTrait,
-    TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice,
-    TypeTraitObject, TypeTuple,
+    Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, Type, TypeArray, TypeFnPtr,
+    TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
+    TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
 };
 
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "parsing"))]

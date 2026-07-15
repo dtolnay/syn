@@ -20,9 +20,9 @@ use crate::punctuated::Punctuated;
 #[cfg(feature = "full")]
 use crate::stmt::Block;
 use crate::token;
-#[cfg(feature = "full")]
-use crate::ty::ReturnType;
 use crate::ty::Type;
+#[cfg(feature = "full")]
+use crate::ty::{PointerMutability, ReturnType};
 use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "printing")]
@@ -1159,17 +1159,6 @@ ast_enum! {
     }
 }
 
-#[cfg(feature = "full")]
-ast_enum! {
-    /// Mutability of a raw pointer (`*const T`, `*mut T`), in which non-mutable
-    /// isn't the implicit default.
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    pub enum PointerMutability {
-        Const(Token![const]),
-        Mut(Token![mut]),
-    }
-}
-
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     #[cfg(feature = "full")]
@@ -1185,7 +1174,7 @@ pub(crate) mod parsing {
         Arm, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak, ExprClosure,
         ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet, ExprLoop, ExprMatch,
         ExprRange, ExprRawAddr, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprUnsafe,
-        ExprWhile, ExprYield, Label, PointerMutability, RangeLimits,
+        ExprWhile, ExprYield, Label, RangeLimits,
     };
     use crate::expr::{
         Expr, ExprBinary, ExprCall, ExprCast, ExprField, ExprGroup, ExprIndex, ExprLit, ExprMacro,
@@ -1212,7 +1201,7 @@ pub(crate) mod parsing {
     use crate::token;
     use crate::ty;
     #[cfg(feature = "full")]
-    use crate::ty::{ReturnType, Type};
+    use crate::ty::{PointerMutability, ReturnType, Type};
     use crate::verbatim;
     use alloc::boxed::Box;
     use alloc::format;
@@ -3085,21 +3074,6 @@ pub(crate) mod parsing {
         Ok(!trailing_dot)
     }
 
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
-    impl Parse for PointerMutability {
-        fn parse(input: ParseStream) -> Result<Self> {
-            let lookahead = input.lookahead1();
-            if lookahead.peek(Token![const]) {
-                Ok(PointerMutability::Const(input.parse()?))
-            } else if lookahead.peek(Token![mut]) {
-                Ok(PointerMutability::Mut(input.parse()?))
-            } else {
-                Err(lookahead.error())
-            }
-        }
-    }
-
     fn check_cast(input: ParseStream) -> Result<()> {
         let kind = if input.peek(Token![.]) && !input.peek(Token![..]) {
             if input.peek2(Token![await]) {
@@ -3135,7 +3109,7 @@ pub(crate) mod printing {
         Arm, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak, ExprClosure,
         ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet, ExprLoop, ExprMatch,
         ExprRange, ExprRawAddr, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprUnsafe,
-        ExprWhile, ExprYield, Label, PointerMutability, RangeLimits,
+        ExprWhile, ExprYield, Label, RangeLimits,
     };
     use crate::expr::{
         Expr, ExprBinary, ExprCall, ExprCast, ExprField, ExprGroup, ExprIndex, ExprLit, ExprMacro,
@@ -4162,17 +4136,6 @@ pub(crate) mod printing {
             match self {
                 RangeLimits::HalfOpen(t) => t.to_tokens(tokens),
                 RangeLimits::Closed(t) => t.to_tokens(tokens),
-            }
-        }
-    }
-
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
-    impl ToTokens for PointerMutability {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            match self {
-                PointerMutability::Const(const_token) => const_token.to_tokens(tokens),
-                PointerMutability::Mut(mut_token) => mut_token.to_tokens(tokens),
             }
         }
     }
