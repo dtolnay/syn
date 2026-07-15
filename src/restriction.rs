@@ -37,26 +37,6 @@ ast_struct! {
     }
 }
 
-ast_enum! {
-    /// Unused, but reserved for RFC 3323 restrictions.
-    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
-    #[non_exhaustive]
-    pub enum FieldMutability {
-        None,
-
-        // TODO: https://rust-lang.github.io/rfcs/3323-restrictions.html
-        //
-        // FieldMutability::Restricted(MutRestricted)
-        //
-        // pub struct MutRestricted {
-        //     pub mut_token: Token![mut],
-        //     pub paren_token: token::Paren,
-        //     pub in_token: Option<Token![in]>,
-        //     pub path: Box<Path>,
-        // }
-    }
-}
-
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::error::Result;

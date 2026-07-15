@@ -1928,8 +1928,8 @@
         "vis": {
           "syn": "Visibility"
         },
-        "mutability": {
-          "syn": "FieldMutability"
+        "modifiers": {
+          "syn": "FieldModifiers"
         },
         "ident": {
           "option": {
@@ -1947,16 +1947,14 @@
       }
     },
     {
-      "ident": "FieldMutability",
+      "ident": "FieldModifiers",
       "features": {
         "any": [
           "derive",
           "full"
         ]
       },
-      "variants": {
-        "None": []
-      },
+      "fields": {},
       "exhaustive": false
     },
     {
