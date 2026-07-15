@@ -471,14 +471,6 @@ pub trait Fold {
     fn fold_impl_item_type(&mut self, i: crate::ImplItemType) -> crate::ImplItemType {
         fold_impl_item_type(self, i)
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    fn fold_impl_restriction(
-        &mut self,
-        i: crate::ImplRestriction,
-    ) -> crate::ImplRestriction {
-        fold_impl_restriction(self, i)
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_index(&mut self, i: crate::Index) -> crate::Index {
@@ -866,6 +858,14 @@ pub trait Fold {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_trait_item_type(&mut self, i: crate::TraitItemType) -> crate::TraitItemType {
         fold_trait_item_type(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_trait_modifiers(
+        &mut self,
+        i: crate::TraitModifiers,
+    ) -> crate::TraitModifiers {
+        fold_trait_modifiers(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -2341,17 +2341,6 @@ where
         semi_token: node.semi_token,
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub fn fold_impl_restriction<F>(
-    f: &mut F,
-    node: crate::ImplRestriction,
-) -> crate::ImplRestriction
-where
-    F: Fold + ?Sized,
-{
-    match node {}
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_index<F>(f: &mut F, node: crate::Index) -> crate::Index
@@ -2583,9 +2572,8 @@ where
     crate::ItemTrait {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
+        modifiers: f.fold_trait_modifiers(node.modifiers),
         unsafety: node.unsafety,
-        auto_token: node.auto_token,
-        restriction: (node.restriction).map(|it| f.fold_impl_restriction(it)),
         trait_token: node.trait_token,
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
@@ -3452,6 +3440,19 @@ where
         bounds: crate::punctuated::fold(node.bounds, f, F::fold_type_param_bound),
         default: (node.default).map(|it| ((it).0, f.fold_type((it).1))),
         semi_token: node.semi_token,
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_trait_modifiers<F>(
+    f: &mut F,
+    node: crate::TraitModifiers,
+) -> crate::TraitModifiers
+where
+    F: Fold + ?Sized,
+{
+    crate::TraitModifiers {
+        auto_token: node.auto_token,
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

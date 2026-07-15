@@ -2622,16 +2622,6 @@
       }
     },
     {
-      "ident": "ImplRestriction",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "variants": {},
-      "exhaustive": false
-    },
-    {
       "ident": "Index",
       "features": {
         "any": [
@@ -3156,19 +3146,12 @@
         "vis": {
           "syn": "Visibility"
         },
+        "modifiers": {
+          "syn": "TraitModifiers"
+        },
         "unsafety": {
           "option": {
             "token": "Unsafe"
-          }
-        },
-        "auto_token": {
-          "option": {
-            "token": "Auto"
-          }
-        },
-        "restriction": {
-          "option": {
-            "syn": "ImplRestriction"
           }
         },
         "trait_token": {
@@ -4788,6 +4771,22 @@
           "token": "Semi"
         }
       }
+    },
+    {
+      "ident": "TraitModifiers",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "auto_token": {
+          "option": {
+            "token": "Auto"
+          }
+        }
+      },
+      "exhaustive": false
     },
     {
       "ident": "Type",

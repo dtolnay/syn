@@ -452,11 +452,6 @@ pub trait VisitMut {
     fn visit_impl_item_type_mut(&mut self, i: &mut crate::ImplItemType) {
         visit_impl_item_type_mut(self, i);
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    fn visit_impl_restriction_mut(&mut self, i: &mut crate::ImplRestriction) {
-        visit_impl_restriction_mut(self, i);
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_index_mut(&mut self, i: &mut crate::Index) {
@@ -801,6 +796,11 @@ pub trait VisitMut {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_trait_item_type_mut(&mut self, i: &mut crate::TraitItemType) {
         visit_trait_item_type_mut(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_trait_modifiers_mut(&mut self, i: &mut crate::TraitModifiers) {
+        visit_trait_modifiers_mut(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -2252,14 +2252,6 @@ where
     v.visit_type_mut(&mut node.ty);
     skip!(node.semi_token);
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub fn visit_impl_restriction_mut<V>(v: &mut V, node: &mut crate::ImplRestriction)
-where
-    V: VisitMut + ?Sized,
-{
-    match *node {}
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_index_mut<V>(v: &mut V, node: &mut crate::Index)
@@ -2495,11 +2487,8 @@ where
 {
     v.visit_attributes_mut(&mut node.attrs);
     v.visit_visibility_mut(&mut node.vis);
+    v.visit_trait_modifiers_mut(&mut node.modifiers);
     skip!(node.unsafety);
-    skip!(node.auto_token);
-    if let Some(it) = &mut node.restriction {
-        v.visit_impl_restriction_mut(it);
-    }
     skip!(node.trait_token);
     v.visit_ident_mut(&mut node.ident);
     v.visit_generics_mut(&mut node.generics);
@@ -3334,6 +3323,14 @@ where
         v.visit_type_mut(&mut (it).1);
     }
     skip!(node.semi_token);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_trait_modifiers_mut<V>(v: &mut V, node: &mut crate::TraitModifiers)
+where
+    V: VisitMut + ?Sized,
+{
+    skip!(node.auto_token);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]

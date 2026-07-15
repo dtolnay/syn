@@ -2247,11 +2247,6 @@ impl Debug for Lite<syn::ImplItemType> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::ImplRestriction> {
-    fn fmt(&self, _formatter: &mut fmt::Formatter) -> fmt::Result {
-        unreachable!()
-    }
-}
 impl Debug for Lite<syn::Index> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("Index");
@@ -2465,25 +2460,9 @@ impl Debug for Lite<syn::Item> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 if _val.unsafety.is_some() {
                     formatter.field("unsafety", &Present);
-                }
-                if _val.auto_token.is_some() {
-                    formatter.field("auto_token", &Present);
-                }
-                if let Some(val) = &_val.restriction {
-                    #[derive(RefCast)]
-                    #[repr(transparent)]
-                    struct Print(syn::ImplRestriction);
-                    impl Debug for Print {
-                        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                            formatter.write_str("Some(")?;
-                            Debug::fmt(Lite(&self.0), formatter)?;
-                            formatter.write_str(")")?;
-                            Ok(())
-                        }
-                    }
-                    formatter.field("restriction", Print::ref_cast(val));
                 }
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
@@ -2780,25 +2759,9 @@ impl Debug for Lite<syn::ItemTrait> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         if self.value.unsafety.is_some() {
             formatter.field("unsafety", &Present);
-        }
-        if self.value.auto_token.is_some() {
-            formatter.field("auto_token", &Present);
-        }
-        if let Some(val) = &self.value.restriction {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print(syn::ImplRestriction);
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some(")?;
-                    Debug::fmt(Lite(&self.0), formatter)?;
-                    formatter.write_str(")")?;
-                    Ok(())
-                }
-            }
-            formatter.field("restriction", Print::ref_cast(val));
         }
         formatter.field("ident", Lite(&self.value.ident));
         formatter.field("generics", Lite(&self.value.generics));
@@ -4081,6 +4044,15 @@ impl Debug for Lite<syn::TraitItemType> {
                 }
             }
             formatter.field("default", Print::ref_cast(val));
+        }
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::TraitModifiers> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("TraitModifiers");
+        if self.value.auto_token.is_some() {
+            formatter.field("auto_token", &Present);
         }
         formatter.finish()
     }

@@ -152,6 +152,7 @@ fn test_supertraits() {
     snapshot!(tokens as ItemTrait, @r#"
     ItemTrait {
         vis: Visibility::Inherited,
+        modifiers: TraitModifiers,
         ident: "Trait",
         generics: Generics {
             where_clause: Some(WhereClause),
@@ -164,6 +165,7 @@ fn test_supertraits() {
     snapshot!(tokens as ItemTrait, @r#"
     ItemTrait {
         vis: Visibility::Inherited,
+        modifiers: TraitModifiers,
         ident: "Trait",
         generics: Generics {
             where_clause: Some(WhereClause),
@@ -177,6 +179,7 @@ fn test_supertraits() {
     snapshot!(tokens as ItemTrait, @r#"
     ItemTrait {
         vis: Visibility::Inherited,
+        modifiers: TraitModifiers,
         ident: "Trait",
         generics: Generics {
             where_clause: Some(WhereClause),
@@ -202,6 +205,7 @@ fn test_supertraits() {
     snapshot!(tokens as ItemTrait, @r#"
     ItemTrait {
         vis: Visibility::Inherited,
+        modifiers: TraitModifiers,
         ident: "Trait",
         generics: Generics {
             where_clause: Some(WhereClause),
@@ -236,6 +240,7 @@ fn test_type_empty_bounds() {
     snapshot!(tokens as ItemTrait, @r#"
     ItemTrait {
         vis: Visibility::Inherited,
+        modifiers: TraitModifiers,
         ident: "Foo",
         generics: Generics,
         items: [
