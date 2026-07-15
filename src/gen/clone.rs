@@ -1065,6 +1065,16 @@ impl Clone for crate::ImplItemType {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::ImplModifiers {
+    fn clone(&self) -> Self {
+        crate::ImplModifiers {
+            defaultness: self.defaultness.clone(),
+            polarity: self.polarity.clone(),
+        }
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::Index {
@@ -1178,7 +1188,7 @@ impl Clone for crate::ItemImpl {
     fn clone(&self) -> Self {
         crate::ItemImpl {
             attrs: self.attrs.clone(),
-            defaultness: self.defaultness.clone(),
+            modifiers: self.modifiers.clone(),
             unsafety: self.unsafety.clone(),
             impl_token: self.impl_token.clone(),
             generics: self.generics.clone(),

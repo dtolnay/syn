@@ -471,6 +471,11 @@ pub trait Fold {
     fn fold_impl_item_type(&mut self, i: crate::ImplItemType) -> crate::ImplItemType {
         fold_impl_item_type(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_impl_modifiers(&mut self, i: crate::ImplModifiers) -> crate::ImplModifiers {
+        fold_impl_modifiers(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_index(&mut self, i: crate::Index) -> crate::Index {
@@ -2341,6 +2346,20 @@ where
         semi_token: node.semi_token,
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_impl_modifiers<F>(
+    f: &mut F,
+    node: crate::ImplModifiers,
+) -> crate::ImplModifiers
+where
+    F: Fold + ?Sized,
+{
+    crate::ImplModifiers {
+        defaultness: node.defaultness,
+        polarity: node.polarity,
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_index<F>(f: &mut F, node: crate::Index) -> crate::Index
@@ -2489,11 +2508,11 @@ where
 {
     crate::ItemImpl {
         attrs: f.fold_attributes(node.attrs),
-        defaultness: node.defaultness,
+        modifiers: f.fold_impl_modifiers(node.modifiers),
         unsafety: node.unsafety,
         impl_token: node.impl_token,
         generics: f.fold_generics(node.generics),
-        trait_: (node.trait_).map(|it| ((it).0, f.fold_path((it).1), (it).2)),
+        trait_: (node.trait_).map(|it| (f.fold_path((it).0), (it).1)),
         self_ty: Box::new(f.fold_type(*node.self_ty)),
         brace_token: node.brace_token,
         items: fold_vec(node.items, f, F::fold_impl_item),

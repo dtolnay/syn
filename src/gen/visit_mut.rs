@@ -452,6 +452,11 @@ pub trait VisitMut {
     fn visit_impl_item_type_mut(&mut self, i: &mut crate::ImplItemType) {
         visit_impl_item_type_mut(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_impl_modifiers_mut(&mut self, i: &mut crate::ImplModifiers) {
+        visit_impl_modifiers_mut(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_index_mut(&mut self, i: &mut crate::Index) {
@@ -2252,6 +2257,15 @@ where
     v.visit_type_mut(&mut node.ty);
     skip!(node.semi_token);
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_impl_modifiers_mut<V>(v: &mut V, node: &mut crate::ImplModifiers)
+where
+    V: VisitMut + ?Sized,
+{
+    skip!(node.defaultness);
+    skip!(node.polarity);
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_index_mut<V>(v: &mut V, node: &mut crate::Index)
@@ -2401,14 +2415,13 @@ where
     V: VisitMut + ?Sized,
 {
     v.visit_attributes_mut(&mut node.attrs);
-    skip!(node.defaultness);
+    v.visit_impl_modifiers_mut(&mut node.modifiers);
     skip!(node.unsafety);
     skip!(node.impl_token);
     v.visit_generics_mut(&mut node.generics);
     if let Some(it) = &mut node.trait_ {
-        skip!((it).0);
-        v.visit_path_mut(&mut (it).1);
-        skip!((it).2);
+        v.visit_path_mut(&mut (it).0);
+        skip!((it).1);
     }
     v.visit_type_mut(&mut *node.self_ty);
     skip!(node.brace_token);

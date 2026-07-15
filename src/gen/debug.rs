@@ -1588,6 +1588,16 @@ impl crate::ImplItemType {
         formatter.finish()
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::ImplModifiers {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ImplModifiers");
+        formatter.field("defaultness", &self.defaultness);
+        formatter.field("polarity", &self.polarity);
+        formatter.finish()
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::Index {
@@ -1742,7 +1752,7 @@ impl crate::ItemImpl {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
-        formatter.field("defaultness", &self.defaultness);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("unsafety", &self.unsafety);
         formatter.field("impl_token", &self.impl_token);
         formatter.field("generics", &self.generics);

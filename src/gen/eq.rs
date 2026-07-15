@@ -1088,6 +1088,16 @@ impl PartialEq for crate::ImplItemType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::ImplModifiers {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::ImplModifiers {
+    fn eq(&self, other: &Self) -> bool {
+        self.defaultness == other.defaultness && self.polarity == other.polarity
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::Item {}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
@@ -1185,7 +1195,7 @@ impl Eq for crate::ItemImpl {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::ItemImpl {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.defaultness == other.defaultness
+        self.attrs == other.attrs && self.modifiers == other.modifiers
             && self.unsafety == other.unsafety && self.generics == other.generics
             && self.trait_ == other.trait_ && self.self_ty == other.self_ty
             && self.items == other.items
