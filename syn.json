@@ -4510,10 +4510,8 @@
             "token": "Async"
           }
         },
-        "unsafety": {
-          "option": {
-            "token": "Unsafe"
-          }
+        "safety": {
+          "syn": "Safety"
         },
         "abi": {
           "option": {

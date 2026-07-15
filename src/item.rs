@@ -848,7 +848,7 @@ ast_struct! {
     pub struct Signature {
         pub constness: Option<Token![const]>,
         pub asyncness: Option<Token![async]>,
-        pub unsafety: Option<Token![unsafe]>,
+        pub safety: Safety,
         pub abi: Option<Abi>,
         pub fn_token: Token![fn],
         pub ident: Ident,
@@ -1566,20 +1566,18 @@ pub(crate) mod parsing {
     impl Parse for Signature {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_safe = false;
-            parse_signature(input, allow_safe).map(Option::unwrap)
+            parse_signature(input, allow_safe)
         }
     }
 
-    fn parse_signature(input: ParseStream, allow_safe: bool) -> Result<Option<Signature>> {
+    fn parse_signature(input: ParseStream, allow_safe: bool) -> Result<Signature> {
         let constness: Option<Token![const]> = input.parse()?;
         let asyncness: Option<Token![async]> = input.parse()?;
-        let unsafety: Option<Token![unsafe]> = input.parse()?;
-        let safe = allow_safe
-            && unsafety.is_none()
-            && token::parsing::peek_keyword(input.cursor(), "safe");
-        if safe {
-            token::parsing::keyword(input, "safe")?;
-        }
+        let safety = if allow_safe {
+            Safety::parse_safe_or_unsafe(input)
+        } else {
+            Safety::parse_unsafe_only(input)
+        }?;
         let abi: Option<Abi> = input.parse()?;
         let fn_token: Token![fn] = input.parse()?;
         let ident: Ident = input.parse()?;
@@ -1592,22 +1590,18 @@ pub(crate) mod parsing {
         let output: ReturnType = input.parse()?;
         generics.where_clause = input.parse()?;
 
-        Ok(if safe {
-            None
-        } else {
-            Some(Signature {
-                constness,
-                asyncness,
-                unsafety,
-                abi,
-                fn_token,
-                ident,
-                generics,
-                paren_token,
-                inputs,
-                variadic,
-                output,
-            })
+        Ok(Signature {
+            constness,
+            asyncness,
+            safety,
+            abi,
+            fn_token,
+            ident,
+            generics,
+            paren_token,
+            inputs,
+            variadic,
+            output,
         })
     }
 
@@ -1952,7 +1946,6 @@ pub(crate) mod parsing {
             let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead, allow_safe) {
                 let vis: Visibility = input.parse()?;
                 let sig = parse_signature(input, allow_safe)?;
-                let has_safe = sig.is_none();
                 let has_body = input.peek(token::Brace);
                 let semi_token: Option<Token![;]> = if has_body {
                     let content;
@@ -1963,7 +1956,7 @@ pub(crate) mod parsing {
                 } else {
                     Some(input.parse()?)
                 };
-                if has_safe || has_body {
+                if has_body {
                     Ok(ForeignItem::Verbatim(verbatim::between(
                         begin,
                         input.cursor(),
@@ -1973,7 +1966,7 @@ pub(crate) mod parsing {
                         attrs: Vec::new(),
                         vis,
                         modifiers: FnModifiers::default(),
-                        sig: sig.unwrap(),
+                        sig,
                         semi_token: semi_token.unwrap(),
                     }))
                 }
@@ -3543,7 +3536,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.constness.to_tokens(tokens);
             self.asyncness.to_tokens(tokens);
-            self.unsafety.to_tokens(tokens);
+            self.safety.to_tokens(tokens);
             self.abi.to_tokens(tokens);
             self.fn_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);

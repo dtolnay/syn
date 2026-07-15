@@ -1816,7 +1816,7 @@ impl Clone for crate::Signature {
         crate::Signature {
             constness: self.constness.clone(),
             asyncness: self.asyncness.clone(),
-            unsafety: self.unsafety.clone(),
+            safety: self.safety.clone(),
             abi: self.abi.clone(),
             fn_token: self.fn_token.clone(),
             ident: self.ident.clone(),

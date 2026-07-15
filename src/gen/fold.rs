@@ -3349,7 +3349,7 @@ where
     crate::Signature {
         constness: node.constness,
         asyncness: node.asyncness,
-        unsafety: node.unsafety,
+        safety: f.fold_safety(node.safety),
         abi: (node.abi).map(|it| f.fold_abi(it)),
         fn_token: node.fn_token,
         ident: f.fold_ident(node.ident),

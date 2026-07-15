@@ -21,6 +21,7 @@ fn test_async_fn() {
         modifiers: FnModifiers,
         sig: Signature {
             asyncness: Some,
+            safety: Safety::Default,
             ident: "process",
             generics: Generics,
             output: ReturnType::Default,

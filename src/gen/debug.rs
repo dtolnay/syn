@@ -2597,7 +2597,7 @@ impl Debug for crate::Signature {
         let mut formatter = formatter.debug_struct("Signature");
         formatter.field("constness", &self.constness);
         formatter.field("asyncness", &self.asyncness);
-        formatter.field("unsafety", &self.unsafety);
+        formatter.field("safety", &self.safety);
         formatter.field("abi", &self.abi);
         formatter.field("fn_token", &self.fn_token);
         formatter.field("ident", &self.ident);

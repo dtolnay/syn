@@ -3379,7 +3379,7 @@ where
 {
     skip!(node.constness);
     skip!(node.asyncness);
-    skip!(node.unsafety);
+    v.visit_safety(&node.safety);
     if let Some(it) = &node.abi {
         v.visit_abi(it);
     }

@@ -3731,9 +3731,7 @@ impl Debug for Lite<syn::Signature> {
         if self.value.asyncness.is_some() {
             formatter.field("asyncness", &Present);
         }
-        if self.value.unsafety.is_some() {
-            formatter.field("unsafety", &Present);
-        }
+        formatter.field("safety", Lite(&self.value.safety));
         if let Some(val) = &self.value.abi {
             #[derive(RefCast)]
             #[repr(transparent)]

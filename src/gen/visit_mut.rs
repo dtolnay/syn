@@ -3218,7 +3218,7 @@ where
 {
     skip!(node.constness);
     skip!(node.asyncness);
-    skip!(node.unsafety);
+    v.visit_safety_mut(&mut node.safety);
     if let Some(it) = &mut node.abi {
         v.visit_abi_mut(it);
     }
