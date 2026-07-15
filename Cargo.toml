@@ -19,6 +19,7 @@ keywords = ["macros", "syn"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/dtolnay/syn"
 rust-version = "1.71"
+publish = false
 
 [features]
 default = ["derive", "parsing", "printing", "clone-impls", "proc-macro"]
