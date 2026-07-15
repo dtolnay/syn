@@ -2572,6 +2572,26 @@ impl Debug for crate::ReturnType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::Safety {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Safety::")?;
+        match self {
+            crate::Safety::Safe(v0) => {
+                let mut formatter = formatter.debug_tuple("Safe");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::Safety::Unsafe(v0) => {
+                let mut formatter = formatter.debug_tuple("Unsafe");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::Safety::Default => formatter.write_str("Default"),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::Signature {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("Signature");

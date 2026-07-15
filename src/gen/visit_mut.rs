@@ -762,6 +762,11 @@ pub trait VisitMut {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_safety_mut(&mut self, i: &mut crate::Safety) {
+        visit_safety_mut(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_signature_mut(&mut self, i: &mut crate::Signature) {
         visit_signature_mut(self, i);
     }
@@ -3187,6 +3192,22 @@ where
             skip!(_binding_0);
             v.visit_type_mut(&mut **_binding_1);
         }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_safety_mut<V>(v: &mut V, node: &mut crate::Safety)
+where
+    V: VisitMut + ?Sized,
+{
+    match node {
+        crate::Safety::Safe(_binding_0) => {
+            skip!(_binding_0);
+        }
+        crate::Safety::Unsafe(_binding_0) => {
+            skip!(_binding_0);
+        }
+        crate::Safety::Default => {}
     }
 }
 #[cfg(feature = "full")]

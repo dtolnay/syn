@@ -752,6 +752,11 @@ pub trait Visit<'ast> {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_safety(&mut self, i: &'ast crate::Safety) {
+        visit_safety(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_signature(&mut self, i: &'ast crate::Signature) {
         visit_signature(self, i);
     }
@@ -3348,6 +3353,22 @@ where
             skip!(_binding_0);
             v.visit_type(&**_binding_1);
         }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_safety<'ast, V>(v: &mut V, node: &'ast crate::Safety)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    match node {
+        crate::Safety::Safe(_binding_0) => {
+            skip!(_binding_0);
+        }
+        crate::Safety::Unsafe(_binding_0) => {
+            skip!(_binding_0);
+        }
+        crate::Safety::Default => {}
     }
 }
 #[cfg(feature = "full")]

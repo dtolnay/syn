@@ -871,6 +871,25 @@ impl Signature {
     }
 }
 
+ast_enum! {
+    /// Safe, unsafe or default.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    pub enum Safety {
+        /// The item is qualified as `safe`.
+        Safe(Token![safe]),
+        /// The item is qualified as `unsafe`.
+        Unsafe(Token![unsafe]),
+        /// The item is not qualified either way.
+        Default,
+    }
+}
+
+impl Default for Safety {
+    fn default() -> Self {
+        Safety::Default
+    }
+}
+
 ast_enum_of_structs! {
     /// An argument in a function signature: the `n: usize` in `fn f(n: usize)`.
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -954,9 +973,9 @@ pub(crate) mod parsing {
         ForeignItemType, ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType,
         ImplModifiers, Item, ItemConst, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod,
         ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType,
-        ItemUnion, ItemUse, Receiver, Signature, StaticMutability, TraitItem, TraitItemConst,
-        TraitItemFn, TraitItemMacro, TraitItemType, TraitModifiers, UseGlob, UseGroup, UseName,
-        UsePath, UseRename, UseTree, Variadic,
+        ItemUnion, ItemUse, Receiver, Safety, Signature, StaticMutability, TraitItem,
+        TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, TraitModifiers, UseGlob,
+        UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
     };
     use crate::lifetime::Lifetime;
     use crate::lit::LitStr;
@@ -1590,6 +1609,19 @@ pub(crate) mod parsing {
                 output,
             })
         })
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Parse for Safety {
+        fn parse(input: ParseStream) -> Result<Self> {
+            if let Some(token) = input.parse::<Option<Token![safe]>>()? {
+                Ok(Safety::Safe(token))
+            } else if let Some(token) = input.parse::<Option<Token![unsafe]>>()? {
+                Ok(Safety::Unsafe(token))
+            } else {
+                Ok(Safety::Default)
+            }
+        }
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
@@ -3028,9 +3060,9 @@ mod printing {
         ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType, ImplItemConst,
         ImplItemFn, ImplItemMacro, ImplItemType, ItemConst, ItemEnum, ItemExternCrate, ItemFn,
         ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait,
-        ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Signature, StaticMutability,
-        TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob, UseGroup, UseName,
-        UsePath, UseRename, Variadic,
+        ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Safety, Signature,
+        StaticMutability, TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob,
+        UseGroup, UseName, UsePath, UseRename, Variadic,
     };
     use crate::mac::MacroDelimiter;
     use crate::path;
@@ -3521,6 +3553,17 @@ mod printing {
             });
             self.output.to_tokens(tokens);
             self.generics.where_clause.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for Safety {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                Safety::Safe(token) => token.to_tokens(tokens),
+                Safety::Unsafe(token) => token.to_tokens(tokens),
+                Safety::Default => {}
+            }
         }
     }
 

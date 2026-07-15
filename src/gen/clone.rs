@@ -1800,6 +1800,17 @@ impl Clone for crate::ReturnType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::Safety {
+    fn clone(&self) -> Self {
+        match self {
+            crate::Safety::Safe(v0) => crate::Safety::Safe(v0.clone()),
+            crate::Safety::Unsafe(v0) => crate::Safety::Unsafe(v0.clone()),
+            crate::Safety::Default => crate::Safety::Default,
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::Signature {
     fn clone(&self) -> Self {
         crate::Signature {

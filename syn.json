@@ -4472,6 +4472,27 @@
       }
     },
     {
+      "ident": "Safety",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "variants": {
+        "Safe": [
+          {
+            "token": "Safe"
+          }
+        ],
+        "Unsafe": [
+          {
+            "token": "Unsafe"
+          }
+        ],
+        "Default": []
+      }
+    },
+    {
       "ident": "Signature",
       "features": {
         "any": [

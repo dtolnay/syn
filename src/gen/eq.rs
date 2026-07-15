@@ -1791,6 +1791,21 @@ impl PartialEq for crate::ReturnType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::Safety {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::Safety {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (crate::Safety::Safe(_), crate::Safety::Safe(_)) => true,
+            (crate::Safety::Unsafe(_), crate::Safety::Unsafe(_)) => true,
+            (crate::Safety::Default, crate::Safety::Default) => true,
+            _ => false,
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::Signature {}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]

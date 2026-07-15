@@ -808,6 +808,11 @@ pub trait Fold {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_safety(&mut self, i: crate::Safety) -> crate::Safety {
+        fold_safety(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_signature(&mut self, i: crate::Signature) -> crate::Signature {
         fold_signature(self, i)
     }
@@ -3321,6 +3326,18 @@ where
         crate::ReturnType::Type(_binding_0, _binding_1) => {
             crate::ReturnType::Type(_binding_0, Box::new(f.fold_type(*_binding_1)))
         }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_safety<F>(f: &mut F, node: crate::Safety) -> crate::Safety
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        crate::Safety::Safe(_binding_0) => crate::Safety::Safe(_binding_0),
+        crate::Safety::Unsafe(_binding_0) => crate::Safety::Unsafe(_binding_0),
+        crate::Safety::Default => crate::Safety::Default,
     }
 }
 #[cfg(feature = "full")]

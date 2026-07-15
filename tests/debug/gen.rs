@@ -3707,6 +3707,21 @@ impl Debug for Lite<syn::ReturnType> {
         }
     }
 }
+impl Debug for Lite<syn::Safety> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match &self.value {
+            syn::Safety::Safe(_val) => {
+                formatter.write_str("Safety::Safe")?;
+                Ok(())
+            }
+            syn::Safety::Unsafe(_val) => {
+                formatter.write_str("Safety::Unsafe")?;
+                Ok(())
+            }
+            syn::Safety::Default => formatter.write_str("Safety::Default"),
+        }
+    }
+}
 impl Debug for Lite<syn::Signature> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("Signature");

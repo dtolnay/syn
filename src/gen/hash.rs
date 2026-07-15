@@ -2260,6 +2260,26 @@ impl Hash for crate::ReturnType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::Safety {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            crate::Safety::Safe(_) => {
+                state.write_u8(0u8);
+            }
+            crate::Safety::Unsafe(_) => {
+                state.write_u8(1u8);
+            }
+            crate::Safety::Default => {
+                state.write_u8(2u8);
+            }
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::Signature {
     fn hash<H>(&self, state: &mut H)
     where
