@@ -340,11 +340,11 @@ pub trait Fold {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn fold_field_mutability(
+    fn fold_field_modifiers(
         &mut self,
-        i: crate::FieldMutability,
-    ) -> crate::FieldMutability {
-        fold_field_mutability(self, i)
+        i: crate::FieldModifiers,
+    ) -> crate::FieldModifiers {
+        fold_field_modifiers(self, i)
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -1948,7 +1948,7 @@ where
     crate::Field {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
-        mutability: f.fold_field_mutability(node.mutability),
+        modifiers: f.fold_field_modifiers(node.modifiers),
         ident: (node.ident).map(|it| f.fold_ident(it)),
         colon_token: node.colon_token,
         ty: f.fold_type(node.ty),
@@ -1956,16 +1956,14 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn fold_field_mutability<F>(
+pub fn fold_field_modifiers<F>(
     f: &mut F,
-    node: crate::FieldMutability,
-) -> crate::FieldMutability
+    node: crate::FieldModifiers,
+) -> crate::FieldModifiers
 where
     F: Fold + ?Sized,
 {
-    match node {
-        crate::FieldMutability::None => crate::FieldMutability::None,
-    }
+    node
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]

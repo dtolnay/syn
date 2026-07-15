@@ -336,8 +336,8 @@ pub trait VisitMut {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn visit_field_mutability_mut(&mut self, i: &mut crate::FieldMutability) {
-        visit_field_mutability_mut(self, i);
+    fn visit_field_modifiers_mut(&mut self, i: &mut crate::FieldModifiers) {
+        visit_field_modifiers_mut(self, i);
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -1902,7 +1902,7 @@ where
 {
     v.visit_attributes_mut(&mut node.attrs);
     v.visit_visibility_mut(&mut node.vis);
-    v.visit_field_mutability_mut(&mut node.mutability);
+    v.visit_field_modifiers_mut(&mut node.modifiers);
     if let Some(it) = &mut node.ident {
         v.visit_ident_mut(it);
     }
@@ -1911,14 +1911,10 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn visit_field_mutability_mut<V>(v: &mut V, node: &mut crate::FieldMutability)
+pub fn visit_field_modifiers_mut<V>(v: &mut V, node: &mut crate::FieldModifiers)
 where
     V: VisitMut + ?Sized,
-{
-    match node {
-        crate::FieldMutability::None => {}
-    }
-}
+{}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_field_pat_mut<V>(v: &mut V, node: &mut crate::FieldPat)

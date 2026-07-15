@@ -996,7 +996,7 @@ impl Hash for crate::Field {
     {
         self.attrs.hash(state);
         self.vis.hash(state);
-        self.mutability.hash(state);
+        self.modifiers.hash(state);
         self.ident.hash(state);
         self.colon_token.hash(state);
         self.ty.hash(state);
@@ -1004,17 +1004,11 @@ impl Hash for crate::Field {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Hash for crate::FieldMutability {
-    fn hash<H>(&self, state: &mut H)
+impl Hash for crate::FieldModifiers {
+    fn hash<H>(&self, _state: &mut H)
     where
         H: Hasher,
-    {
-        match self {
-            crate::FieldMutability::None => {
-                state.write_u8(0u8);
-            }
-        }
-    }
+    {}
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]

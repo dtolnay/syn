@@ -2,7 +2,7 @@ use crate::attr::Attribute;
 use crate::expr::{Expr, Index, Member};
 use crate::ident::Ident;
 use crate::punctuated::{self, Punctuated};
-use crate::restriction::{FieldMutability, Visibility};
+use crate::restriction::Visibility;
 use crate::token;
 use crate::ty::Type;
 use alloc::vec::Vec;
@@ -187,7 +187,7 @@ ast_struct! {
 
         pub vis: Visibility,
 
-        pub mutability: FieldMutability,
+        pub modifiers: FieldModifiers,
 
         /// Name of the field, if any.
         ///
@@ -197,6 +197,19 @@ ast_struct! {
         pub colon_token: Option<Token![:]>,
 
         pub ty: Type,
+    }
+}
+
+ast_struct! {
+    /// Information about field mutability and safety.
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[non_exhaustive]
+    pub struct FieldModifiers {}
+}
+
+impl Default for FieldModifiers {
+    fn default() -> Self {
+        FieldModifiers {}
     }
 }
 
@@ -240,7 +253,7 @@ impl<'a> Clone for Members<'a> {
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::attr::Attribute;
-    use crate::data::{Field, Fields, FieldsNamed, FieldsUnnamed, Variant};
+    use crate::data::{Field, FieldModifiers, Fields, FieldsNamed, FieldsUnnamed, Variant};
     use crate::error::Result;
     use crate::expr::Expr;
     use crate::ext::IdentExt as _;
@@ -248,7 +261,7 @@ pub(crate) mod parsing {
     #[cfg(not(feature = "full"))]
     use crate::parse::discouraged::Speculative as _;
     use crate::parse::{Parse, ParseStream};
-    use crate::restriction::{FieldMutability, Visibility};
+    use crate::restriction::Visibility;
     #[cfg(not(feature = "full"))]
     use crate::scan_expr::scan_expr;
     use crate::token;
@@ -350,7 +363,7 @@ pub(crate) mod parsing {
             Ok(Field {
                 attrs,
                 vis,
-                mutability: FieldMutability::None,
+                modifiers: FieldModifiers::default(),
                 ident: Some(ident),
                 colon_token: Some(colon_token),
                 ty,
@@ -363,7 +376,7 @@ pub(crate) mod parsing {
             Ok(Field {
                 attrs: input.call(Attribute::parse_outer)?,
                 vis: input.parse()?,
-                mutability: FieldMutability::None,
+                modifiers: FieldModifiers::default(),
                 ident: None,
                 colon_token: None,
                 ty: input.parse()?,

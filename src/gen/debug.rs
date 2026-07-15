@@ -1178,7 +1178,7 @@ impl Debug for crate::Field {
         let mut formatter = formatter.debug_struct("Field");
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
-        formatter.field("mutability", &self.mutability);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("ident", &self.ident);
         formatter.field("colon_token", &self.colon_token);
         formatter.field("ty", &self.ty);
@@ -1187,12 +1187,10 @@ impl Debug for crate::Field {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Debug for crate::FieldMutability {
+impl Debug for crate::FieldModifiers {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.write_str("FieldMutability::")?;
-        match self {
-            crate::FieldMutability::None => formatter.write_str("None"),
-        }
+        let mut formatter = formatter.debug_struct("FieldModifiers");
+        formatter.finish()
     }
 }
 #[cfg(feature = "full")]

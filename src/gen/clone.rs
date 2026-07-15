@@ -762,7 +762,7 @@ impl Clone for crate::Field {
         crate::Field {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
-            mutability: self.mutability.clone(),
+            modifiers: self.modifiers.clone(),
             ident: self.ident.clone(),
             colon_token: self.colon_token.clone(),
             ty: self.ty.clone(),
@@ -771,11 +771,9 @@ impl Clone for crate::Field {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
-impl Clone for crate::FieldMutability {
+impl Clone for crate::FieldModifiers {
     fn clone(&self) -> Self {
-        match self {
-            crate::FieldMutability::None => crate::FieldMutability::None,
-        }
+        crate::FieldModifiers {}
     }
 }
 #[cfg(feature = "full")]

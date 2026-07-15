@@ -153,7 +153,7 @@ impl<T: Parse> ParseQuote for T {
 
 use crate::punctuated::Punctuated;
 #[cfg(any(feature = "full", feature = "derive"))]
-use crate::{attr, Attribute, Field, FieldMutability, Ident, Type, Visibility};
+use crate::{attr, Attribute, Field, FieldModifiers, Ident, Type, Visibility};
 #[cfg(feature = "full")]
 use crate::{Arm, Block, Pat, Stmt};
 
@@ -201,7 +201,7 @@ impl ParseQuote for Field {
         Ok(Field {
             attrs,
             vis,
-            mutability: FieldMutability::None,
+            modifiers: FieldModifiers::default(),
             ident,
             colon_token,
             ty,

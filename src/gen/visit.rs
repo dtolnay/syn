@@ -326,8 +326,8 @@ pub trait Visit<'ast> {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn visit_field_mutability(&mut self, i: &'ast crate::FieldMutability) {
-        visit_field_mutability(self, i);
+    fn visit_field_modifiers(&mut self, i: &'ast crate::FieldModifiers) {
+        visit_field_modifiers(self, i);
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -1978,7 +1978,7 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
-    v.visit_field_mutability(&node.mutability);
+    v.visit_field_modifiers(&node.modifiers);
     if let Some(it) = &node.ident {
         v.visit_ident(it);
     }
@@ -1987,14 +1987,10 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn visit_field_mutability<'ast, V>(v: &mut V, node: &'ast crate::FieldMutability)
+pub fn visit_field_modifiers<'ast, V>(v: &mut V, node: &'ast crate::FieldModifiers)
 where
     V: Visit<'ast> + ?Sized,
-{
-    match node {
-        crate::FieldMutability::None => {}
-    }
-}
+{}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_field_pat<'ast, V>(v: &mut V, node: &'ast crate::FieldPat)

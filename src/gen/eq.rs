@@ -748,20 +748,18 @@ impl Eq for crate::Field {}
 impl PartialEq for crate::Field {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis
-            && self.mutability == other.mutability && self.ident == other.ident
+            && self.modifiers == other.modifiers && self.ident == other.ident
             && self.colon_token == other.colon_token && self.ty == other.ty
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Eq for crate::FieldMutability {}
+impl Eq for crate::FieldModifiers {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for crate::FieldMutability {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (crate::FieldMutability::None, crate::FieldMutability::None) => true,
-        }
+impl PartialEq for crate::FieldModifiers {
+    fn eq(&self, _other: &Self) -> bool {
+        true
     }
 }
 #[cfg(feature = "full")]

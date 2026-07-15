@@ -1702,12 +1702,7 @@ impl Debug for Lite<syn::Field> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
-        match self.value.mutability {
-            syn::FieldMutability::None => {}
-            _ => {
-                formatter.field("mutability", Lite(&self.value.mutability));
-            }
-        }
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         if let Some(val) = &self.value.ident {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -1729,12 +1724,10 @@ impl Debug for Lite<syn::Field> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::FieldMutability> {
+impl Debug for Lite<syn::FieldModifiers> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        match &self.value {
-            syn::FieldMutability::None => formatter.write_str("FieldMutability::None"),
-            _ => unreachable!(),
-        }
+        let mut formatter = formatter.debug_struct("FieldModifiers");
+        formatter.finish()
     }
 }
 impl Debug for Lite<syn::FieldPat> {
