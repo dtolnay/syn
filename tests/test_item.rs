@@ -184,6 +184,7 @@ fn test_supertraits() {
         colon_token: Some,
         supertraits: [
             TypeParamBound::Trait(TraitBound {
+                modifiers: TraitBoundModifiers,
                 path: Path {
                     segments: [
                         PathSegment {
@@ -208,6 +209,7 @@ fn test_supertraits() {
         colon_token: Some,
         supertraits: [
             TypeParamBound::Trait(TraitBound {
+                modifiers: TraitBoundModifiers,
                 path: Path {
                     segments: [
                         PathSegment {
@@ -297,6 +299,7 @@ fn test_impl_trait_trailing_plus() {
                 Type::ImplTrait {
                     bounds: [
                         TypeParamBound::Trait(TraitBound {
+                            modifiers: TraitBoundModifiers,
                             path: Path {
                                 segments: [
                                     PathSegment {

@@ -2620,7 +2620,7 @@ impl Debug for crate::TraitBound {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("TraitBound");
         formatter.field("paren_token", &self.paren_token);
-        formatter.field("modifier", &self.modifier);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("lifetimes", &self.lifetimes);
         formatter.field("path", &self.path);
         formatter.finish()
@@ -2628,17 +2628,11 @@ impl Debug for crate::TraitBound {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Debug for crate::TraitBoundModifier {
+impl Debug for crate::TraitBoundModifiers {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.write_str("TraitBoundModifier::")?;
-        match self {
-            crate::TraitBoundModifier::None => formatter.write_str("None"),
-            crate::TraitBoundModifier::Maybe(v0) => {
-                let mut formatter = formatter.debug_tuple("Maybe");
-                formatter.field(v0);
-                formatter.finish()
-            }
-        }
+        let mut formatter = formatter.debug_struct("TraitBoundModifiers");
+        formatter.field("maybe", &self.maybe);
+        formatter.finish()
     }
 }
 #[cfg(feature = "full")]

@@ -413,7 +413,7 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TraitBound {
         pub paren_token: Option<token::Paren>,
-        pub modifier: TraitBoundModifier,
+        pub modifiers: TraitBoundModifiers,
         /// The `for<'a>` in `for<'a> Foo<&'a T>`
         pub lifetimes: Option<BoundLifetimes>,
         /// The `Foo<&'a T>` in `for<'a> Foo<&'a T>`
@@ -421,13 +421,19 @@ ast_struct! {
     }
 }
 
-ast_enum! {
+ast_struct! {
     /// A modifier on a trait bound, currently only used for the `?` in
     /// `?Sized`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub enum TraitBoundModifier {
-        None,
-        Maybe(Token![?]),
+    #[non_exhaustive]
+    pub struct TraitBoundModifiers {
+        pub maybe: Option<Token![?]>,
+    }
+}
+
+impl Default for TraitBoundModifiers {
+    fn default() -> Self {
+        TraitBoundModifiers { maybe: None }
     }
 }
 
@@ -521,7 +527,7 @@ pub(crate) mod parsing {
     use crate::ext::IdentExt as _;
     use crate::generics::{
         BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeParam, PredicateLifetime,
-        PredicateType, TraitBound, TraitBoundModifier, TypeParam, TypeParamBound, WhereClause,
+        PredicateType, TraitBound, TraitBoundModifiers, TypeParam, TypeParamBound, WhereClause,
         WherePredicate,
     };
     #[cfg(feature = "full")]
@@ -858,8 +864,8 @@ pub(crate) mod parsing {
                 }
             }
 
-            let modifier: TraitBoundModifier = input.parse()?;
-            if lifetimes.is_none() && matches!(modifier, TraitBoundModifier::Maybe(_)) {
+            let maybe: Option<Token![?]> = input.parse()?;
+            if lifetimes.is_none() && maybe.is_some() {
                 lifetimes = input.parse()?;
             }
 
@@ -874,12 +880,9 @@ pub(crate) mod parsing {
             }
 
             if lifetimes.is_some() {
-                match modifier {
-                    TraitBoundModifier::None => {}
-                    TraitBoundModifier::Maybe(maybe) => {
-                        let msg = "`for<...>` binder not allowed with `?` trait polarity modifier";
-                        return Err(Error::new(maybe.span, msg));
-                    }
+                if let Some(maybe) = maybe {
+                    let msg = "`for<...>` binder not allowed with `?` trait polarity modifier";
+                    return Err(Error::new(maybe.span, msg));
                 }
             }
 
@@ -888,21 +891,10 @@ pub(crate) mod parsing {
             } else {
                 Ok(Some(TraitBound {
                     paren_token: None,
-                    modifier,
+                    modifiers: TraitBoundModifiers { maybe },
                     lifetimes,
                     path,
                 }))
-            }
-        }
-    }
-
-    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
-    impl Parse for TraitBoundModifier {
-        fn parse(input: ParseStream) -> Result<Self> {
-            if input.peek(Token![?]) {
-                input.parse().map(TraitBoundModifier::Maybe)
-            } else {
-                Ok(TraitBoundModifier::None)
             }
         }
     }
@@ -1154,8 +1146,8 @@ pub(crate) mod printing {
     use crate::fixup::FixupContext;
     use crate::generics::{
         BoundLifetimes, ConstParam, GenericParam, Generics, ImplGenerics, LifetimeParam,
-        PredicateLifetime, PredicateType, TraitBound, TraitBoundModifier, Turbofish, TypeGenerics,
-        TypeParam, WhereClause,
+        PredicateLifetime, PredicateType, TraitBound, Turbofish, TypeGenerics, TypeParam,
+        WhereClause,
     };
     #[cfg(feature = "full")]
     use crate::generics::{CapturedParam, PreciseCapture};
@@ -1347,23 +1339,13 @@ pub(crate) mod printing {
     impl ToTokens for TraitBound {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             let to_tokens = |tokens: &mut TokenStream| {
-                self.modifier.to_tokens(tokens);
+                self.modifiers.maybe.to_tokens(tokens);
                 self.lifetimes.to_tokens(tokens);
                 self.path.to_tokens(tokens);
             };
             match &self.paren_token {
                 Some(paren) => paren.surround(tokens, to_tokens),
                 None => to_tokens(tokens),
-            }
-        }
-    }
-
-    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
-    impl ToTokens for TraitBoundModifier {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            match self {
-                TraitBoundModifier::None => {}
-                TraitBoundModifier::Maybe(t) => t.to_tokens(tokens),
             }
         }
     }

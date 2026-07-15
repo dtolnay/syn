@@ -87,6 +87,7 @@ fn test_split_for_impl() {
                         },
                         bounds: [
                             TypeParamBound::Trait(TraitBound {
+                                modifiers: TraitBoundModifiers,
                                 path: Path {
                                     segments: [
                                         PathSegment {
@@ -151,6 +152,7 @@ fn test_type_param_bound() {
     let tokens = quote!(Debug);
     snapshot!(tokens as TypeParamBound, @r#"
     TypeParamBound::Trait(TraitBound {
+        modifiers: TraitBoundModifiers,
         path: Path {
             segments: [
                 PathSegment {
@@ -164,7 +166,9 @@ fn test_type_param_bound() {
     let tokens = quote!(?Sized);
     snapshot!(tokens as TypeParamBound, @r#"
     TypeParamBound::Trait(TraitBound {
-        modifier: TraitBoundModifier::Maybe,
+        modifiers: TraitBoundModifiers {
+            maybe: Some,
+        },
         path: Path {
             segments: [
                 PathSegment {
@@ -178,6 +182,7 @@ fn test_type_param_bound() {
     let tokens = quote!(for<'a> Trait);
     snapshot!(tokens as TypeParamBound, @r#"
     TypeParamBound::Trait(TraitBound {
+        modifiers: TraitBoundModifiers,
         lifetimes: Some(BoundLifetimes {
             lifetimes: [
                 GenericParam::Lifetime(LifetimeParam {
@@ -251,6 +256,7 @@ fn test_fn_precedence_in_where_clause() {
                             },
                             bounds: [
                                 TypeParamBound::Trait(TraitBound {
+                                    modifiers: TraitBoundModifiers,
                                     path: Path {
                                         segments: [
                                             PathSegment {
@@ -274,6 +280,7 @@ fn test_fn_precedence_in_where_clause() {
                                 }),
                                 Token![+],
                                 TypeParamBound::Trait(TraitBound {
+                                    modifiers: TraitBoundModifiers,
                                     path: Path {
                                         segments: [
                                             PathSegment {

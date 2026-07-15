@@ -830,11 +830,11 @@ pub trait Fold {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn fold_trait_bound_modifier(
+    fn fold_trait_bound_modifiers(
         &mut self,
-        i: crate::TraitBoundModifier,
-    ) -> crate::TraitBoundModifier {
-        fold_trait_bound_modifier(self, i)
+        i: crate::TraitBoundModifiers,
+    ) -> crate::TraitBoundModifiers {
+        fold_trait_bound_modifiers(self, i)
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -3344,25 +3344,22 @@ where
 {
     crate::TraitBound {
         paren_token: node.paren_token,
-        modifier: f.fold_trait_bound_modifier(node.modifier),
+        modifiers: f.fold_trait_bound_modifiers(node.modifiers),
         lifetimes: (node.lifetimes).map(|it| f.fold_bound_lifetimes(it)),
         path: f.fold_path(node.path),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn fold_trait_bound_modifier<F>(
+pub fn fold_trait_bound_modifiers<F>(
     f: &mut F,
-    node: crate::TraitBoundModifier,
-) -> crate::TraitBoundModifier
+    node: crate::TraitBoundModifiers,
+) -> crate::TraitBoundModifiers
 where
     F: Fold + ?Sized,
 {
-    match node {
-        crate::TraitBoundModifier::None => crate::TraitBoundModifier::None,
-        crate::TraitBoundModifier::Maybe(_binding_0) => {
-            crate::TraitBoundModifier::Maybe(_binding_0)
-        }
+    crate::TraitBoundModifiers {
+        maybe: node.maybe,
     }
 }
 #[cfg(feature = "full")]

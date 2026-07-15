@@ -774,8 +774,8 @@ pub trait VisitMut {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn visit_trait_bound_modifier_mut(&mut self, i: &mut crate::TraitBoundModifier) {
-        visit_trait_bound_modifier_mut(self, i);
+    fn visit_trait_bound_modifiers_mut(&mut self, i: &mut crate::TraitBoundModifiers) {
+        visit_trait_bound_modifiers_mut(self, i);
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -3232,7 +3232,7 @@ where
     V: VisitMut + ?Sized,
 {
     skip!(node.paren_token);
-    v.visit_trait_bound_modifier_mut(&mut node.modifier);
+    v.visit_trait_bound_modifiers_mut(&mut node.modifiers);
     if let Some(it) = &mut node.lifetimes {
         v.visit_bound_lifetimes_mut(it);
     }
@@ -3240,16 +3240,14 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn visit_trait_bound_modifier_mut<V>(v: &mut V, node: &mut crate::TraitBoundModifier)
+pub fn visit_trait_bound_modifiers_mut<V>(
+    v: &mut V,
+    node: &mut crate::TraitBoundModifiers,
+)
 where
     V: VisitMut + ?Sized,
 {
-    match node {
-        crate::TraitBoundModifier::None => {}
-        crate::TraitBoundModifier::Maybe(_binding_0) => {
-            skip!(_binding_0);
-        }
-    }
+    skip!(node.maybe);
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
