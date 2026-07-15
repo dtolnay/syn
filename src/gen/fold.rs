@@ -897,6 +897,14 @@ pub trait Fold {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn fold_tuple_element_type(
+        &mut self,
+        i: crate::TupleElementType,
+    ) -> crate::TupleElementType {
+        fold_tuple_element_type(self, i)
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_type(&mut self, i: crate::Type) -> crate::Type {
         fold_type(self, i)
     }
@@ -3548,6 +3556,20 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn fold_tuple_element_type<F>(
+    f: &mut F,
+    node: crate::TupleElementType,
+) -> crate::TupleElementType
+where
+    F: Fold + ?Sized,
+{
+    crate::TupleElementType {
+        attrs: f.fold_attributes(node.attrs),
+        ty: f.fold_type(node.ty),
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_type<F>(f: &mut F, node: crate::Type) -> crate::Type
 where
     F: Fold + ?Sized,
@@ -3805,7 +3827,7 @@ where
 {
     crate::TypeTuple {
         paren_token: node.paren_token,
-        elems: crate::punctuated::fold(node.elems, f, F::fold_type),
+        elems: crate::punctuated::fold(node.elems, f, F::fold_tuple_element_type),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

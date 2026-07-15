@@ -224,7 +224,7 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeTuple {
         pub paren_token: token::Paren,
-        pub elems: Punctuated<Type, Token![,]>,
+        pub elems: Punctuated<TupleElementType, Token![,]>,
     }
 }
 
@@ -281,6 +281,14 @@ ast_enum! {
     }
 }
 
+ast_struct! {
+    /// A type inside a tuple, including its attributes.
+    pub struct TupleElementType {
+        pub attrs: Vec<Attribute>,
+        pub ty: Type,
+    }
+}
+
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::attr::Attribute;
@@ -296,9 +304,9 @@ pub(crate) mod parsing {
     use crate::punctuated::Punctuated;
     use crate::token;
     use crate::ty::{
-        Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, Type, TypeArray, TypeFnPtr,
-        TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
-        TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
+        Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, TupleElementType, Type,
+        TypeArray, TypeFnPtr, TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen,
+        TypePath, TypePtr, TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
     use crate::verbatim;
     use alloc::boxed::Box;
@@ -435,10 +443,16 @@ pub(crate) mod parsing {
                     paren_token,
                     elems: {
                         let mut elems = Punctuated::new();
-                        elems.push_value(first);
+                        elems.push_value(TupleElementType {
+                            attrs: Vec::new(),
+                            ty: first,
+                        });
                         elems.push_punct(content.parse()?);
                         while !content.is_empty() {
-                            elems.push_value(content.parse()?);
+                            elems.push_value(TupleElementType {
+                                attrs: Vec::new(),
+                                ty: content.parse()?,
+                            });
                             if content.is_empty() {
                                 break;
                             }
@@ -765,10 +779,16 @@ pub(crate) mod parsing {
                 paren_token,
                 elems: {
                     let mut elems = Punctuated::new();
-                    elems.push_value(first);
+                    elems.push_value(TupleElementType {
+                        attrs: Vec::new(),
+                        ty: first,
+                    });
                     elems.push_punct(content.parse()?);
                     while !content.is_empty() {
-                        elems.push_value(content.parse()?);
+                        elems.push_value(TupleElementType {
+                            attrs: Vec::new(),
+                            ty: content.parse()?,
+                        });
                         if content.is_empty() {
                             break;
                         }
@@ -1092,6 +1112,17 @@ pub(crate) mod parsing {
             }
         }
     }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Parse for TupleElementType {
+        fn parse(input: ParseStream) -> Result<Self> {
+            // TODO https://github.com/rust-lang/rfcs/pull/3532 parse attributes
+            Ok(TupleElementType {
+                attrs: Vec::new(),
+                ty: input.parse()?,
+            })
+        }
+    }
 }
 
 #[cfg(feature = "printing")]
@@ -1100,9 +1131,9 @@ mod printing {
     use crate::path;
     use crate::path::printing::PathStyle;
     use crate::ty::{
-        Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, TypeArray, TypeFnPtr,
-        TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
-        TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
+        Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, TupleElementType, TypeArray,
+        TypeFnPtr, TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath,
+        TypePtr, TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt as _};
@@ -1296,6 +1327,14 @@ mod printing {
                 PointerMutability::Const(const_token) => const_token.to_tokens(tokens),
                 PointerMutability::Mut(mut_token) => mut_token.to_tokens(tokens),
             }
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for TupleElementType {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.ty.to_tokens(tokens);
         }
     }
 }

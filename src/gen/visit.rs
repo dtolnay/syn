@@ -819,6 +819,11 @@ pub trait Visit<'ast> {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_tuple_element_type(&mut self, i: &'ast crate::TupleElementType) {
+        visit_tuple_element_type(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_type(&mut self, i: &'ast crate::Type) {
         visit_type(self, i);
     }
@@ -3583,6 +3588,17 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_tuple_element_type<'ast, V>(v: &mut V, node: &'ast crate::TupleElementType)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    v.visit_type(&node.ty);
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_type<'ast, V>(v: &mut V, node: &'ast crate::Type)
 where
     V: Visit<'ast> + ?Sized,
@@ -3829,7 +3845,7 @@ where
     skip!(node.paren_token);
     for el in Punctuated::pairs(&node.elems) {
         let it = el.value();
-        v.visit_type(it);
+        v.visit_tuple_element_type(it);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
