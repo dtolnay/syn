@@ -5709,6 +5709,7 @@
     "Raw": "raw",
     "Ref": "ref",
     "Return": "return",
+    "Safe": "safe",
     "SelfType": "Self",
     "SelfValue": "self",
     "Semi": ";",
