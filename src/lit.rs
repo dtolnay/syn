@@ -491,24 +491,6 @@ impl LitInt {
     }
 }
 
-impl From<Literal> for LitInt {
-    #[track_caller]
-    fn from(token: Literal) -> Self {
-        let repr = token.to_string();
-        if let Some((digits, suffix)) = value::parse_lit_int(&repr) {
-            LitInt {
-                repr: Box::new(LitIntRepr {
-                    token,
-                    digits,
-                    suffix,
-                }),
-            }
-        } else {
-            panic!("not an integer literal: `{}`", repr);
-        }
-    }
-}
-
 impl Display for LitInt {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         self.repr.token.fmt(formatter)
@@ -562,24 +544,6 @@ impl LitFloat {
 
     pub fn token(&self) -> Literal {
         self.repr.token.clone()
-    }
-}
-
-impl From<Literal> for LitFloat {
-    #[track_caller]
-    fn from(token: Literal) -> Self {
-        let repr = token.to_string();
-        if let Some((digits, suffix)) = value::parse_lit_float(&repr) {
-            LitFloat {
-                repr: Box::new(LitFloatRepr {
-                    token,
-                    digits,
-                    suffix,
-                }),
-            }
-        } else {
-            panic!("not a float literal: `{}`", repr);
-        }
     }
 }
 
