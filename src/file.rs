@@ -80,9 +80,17 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct File {
         pub shebang: Option<String>,
+        pub frontmatter: Option<Frontmatter>,
         pub attrs: Vec<Attribute>,
         pub items: Vec<Item>,
     }
+}
+
+ast_struct! {
+    /// A `---` fenced frontmatter section.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    #[non_exhaustive]
+    pub struct Frontmatter {}
 }
 
 #[cfg(feature = "parsing")]
@@ -98,6 +106,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(File {
                 shebang: None,
+                frontmatter: None,
                 attrs: input.call(Attribute::parse_inner)?,
                 items: {
                     let mut items = Vec::new();

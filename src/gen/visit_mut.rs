@@ -409,6 +409,11 @@ pub trait VisitMut {
     fn visit_foreign_item_type_mut(&mut self, i: &mut crate::ForeignItemType) {
         visit_foreign_item_type_mut(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_frontmatter_mut(&mut self, i: &mut crate::Frontmatter) {
+        visit_frontmatter_mut(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_generic_argument_mut(&mut self, i: &mut crate::GenericArgument) {
@@ -1989,6 +1994,9 @@ where
     V: VisitMut + ?Sized,
 {
     skip!(node.shebang);
+    if let Some(it) = &mut node.frontmatter {
+        v.visit_frontmatter_mut(it);
+    }
     v.visit_attributes_mut(&mut node.attrs);
     for it in &mut node.items {
         v.visit_item_mut(it);
@@ -2109,6 +2117,12 @@ where
     v.visit_generics_mut(&mut node.generics);
     skip!(node.semi_token);
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_frontmatter_mut<V>(v: &mut V, node: &mut crate::Frontmatter)
+where
+    V: VisitMut + ?Sized,
+{}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_generic_argument_mut<V>(v: &mut V, node: &mut crate::GenericArgument)

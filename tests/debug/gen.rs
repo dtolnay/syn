@@ -1814,6 +1814,20 @@ impl Debug for Lite<syn::File> {
             }
             formatter.field("shebang", Print::ref_cast(val));
         }
+        if let Some(val) = &self.value.frontmatter {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print(syn::Frontmatter);
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some(")?;
+                    Debug::fmt(Lite(&self.0), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("frontmatter", Print::ref_cast(val));
+        }
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
@@ -2004,6 +2018,12 @@ impl Debug for Lite<syn::ForeignItemType> {
         formatter.field("vis", Lite(&self.value.vis));
         formatter.field("ident", Lite(&self.value.ident));
         formatter.field("generics", Lite(&self.value.generics));
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::Frontmatter> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("Frontmatter");
         formatter.finish()
     }
 }

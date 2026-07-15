@@ -399,6 +399,11 @@ pub trait Visit<'ast> {
     fn visit_foreign_item_type(&mut self, i: &'ast crate::ForeignItemType) {
         visit_foreign_item_type(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_frontmatter(&mut self, i: &'ast crate::Frontmatter) {
+        visit_frontmatter(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_generic_argument(&mut self, i: &'ast crate::GenericArgument) {
@@ -2069,6 +2074,9 @@ where
     V: Visit<'ast> + ?Sized,
 {
     skip!(node.shebang);
+    if let Some(it) = &node.frontmatter {
+        v.visit_frontmatter(it);
+    }
     for it in &node.attrs {
         v.visit_attribute(it);
     }
@@ -2206,6 +2214,12 @@ where
     v.visit_generics(&node.generics);
     skip!(node.semi_token);
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_frontmatter<'ast, V>(v: &mut V, node: &'ast crate::Frontmatter)
+where
+    V: Visit<'ast> + ?Sized,
+{}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_generic_argument<'ast, V>(v: &mut V, node: &'ast crate::GenericArgument)

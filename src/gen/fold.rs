@@ -425,6 +425,11 @@ pub trait Fold {
     ) -> crate::ForeignItemType {
         fold_foreign_item_type(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_frontmatter(&mut self, i: crate::Frontmatter) -> crate::Frontmatter {
+        fold_frontmatter(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_generic_argument(
@@ -2048,6 +2053,7 @@ where
 {
     crate::File {
         shebang: node.shebang,
+        frontmatter: (node.frontmatter).map(|it| f.fold_frontmatter(it)),
         attrs: f.fold_attributes(node.attrs),
         items: fold_vec(node.items, f, F::fold_item),
     }
@@ -2187,6 +2193,14 @@ where
         generics: f.fold_generics(node.generics),
         semi_token: node.semi_token,
     }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_frontmatter<F>(f: &mut F, node: crate::Frontmatter) -> crate::Frontmatter
+where
+    F: Fold + ?Sized,
+{
+    node
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
