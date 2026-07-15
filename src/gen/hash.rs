@@ -1382,6 +1382,17 @@ impl Hash for crate::ImplItemType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::ImplModifiers {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.defaultness.hash(state);
+        self.polarity.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::Item {
     fn hash<H>(&self, state: &mut H)
     where
@@ -1531,7 +1542,7 @@ impl Hash for crate::ItemImpl {
         H: Hasher,
     {
         self.attrs.hash(state);
-        self.defaultness.hash(state);
+        self.modifiers.hash(state);
         self.unsafety.hash(state);
         self.generics.hash(state);
         self.trait_.hash(state);

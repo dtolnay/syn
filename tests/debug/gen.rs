@@ -2247,6 +2247,18 @@ impl Debug for Lite<syn::ImplItemType> {
         formatter.finish()
     }
 }
+impl Debug for Lite<syn::ImplModifiers> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ImplModifiers");
+        if self.value.defaultness.is_some() {
+            formatter.field("defaultness", &Present);
+        }
+        if self.value.polarity.is_some() {
+            formatter.field("polarity", &Present);
+        }
+        formatter.finish()
+    }
+}
 impl Debug for Lite<syn::Index> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("Index");
@@ -2334,9 +2346,7 @@ impl Debug for Lite<syn::Item> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
-                if _val.defaultness.is_some() {
-                    formatter.field("defaultness", &Present);
-                }
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 if _val.unsafety.is_some() {
                     formatter.field("unsafety", &Present);
                 }
@@ -2344,19 +2354,11 @@ impl Debug for Lite<syn::Item> {
                 if let Some(val) = &_val.trait_ {
                     #[derive(RefCast)]
                     #[repr(transparent)]
-                    struct Print((Option<syn::token::Not>, syn::Path, syn::token::For));
+                    struct Print((syn::Path, syn::token::For));
                     impl Debug for Print {
                         fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                             formatter.write_str("Some(")?;
-                            Debug::fmt(
-                                &(
-                                    &super::Option {
-                                        present: self.0.0.is_some(),
-                                    },
-                                    Lite(&self.0.1),
-                                ),
-                                formatter,
-                            )?;
+                            Debug::fmt(Lite(&self.0.0), formatter)?;
                             formatter.write_str(")")?;
                             Ok(())
                         }
@@ -2623,9 +2625,7 @@ impl Debug for Lite<syn::ItemImpl> {
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
-        if self.value.defaultness.is_some() {
-            formatter.field("defaultness", &Present);
-        }
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         if self.value.unsafety.is_some() {
             formatter.field("unsafety", &Present);
         }
@@ -2633,19 +2633,11 @@ impl Debug for Lite<syn::ItemImpl> {
         if let Some(val) = &self.value.trait_ {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print((Option<syn::token::Not>, syn::Path, syn::token::For));
+            struct Print((syn::Path, syn::token::For));
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some(")?;
-                    Debug::fmt(
-                        &(
-                            &super::Option {
-                                present: self.0.0.is_some(),
-                            },
-                            Lite(&self.0.1),
-                        ),
-                        formatter,
-                    )?;
+                    Debug::fmt(Lite(&self.0.0), formatter)?;
                     formatter.write_str(")")?;
                     Ok(())
                 }

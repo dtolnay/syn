@@ -60,12 +60,13 @@ fn test_negative_impl() {
     let tokens = quote! {
         impl ! {}
     };
-    snapshot!(tokens as Item, @r#"
+    snapshot!(tokens as Item, @"
     Item::Impl {
+        modifiers: ImplModifiers,
         generics: Generics,
         self_ty: Type::Never,
     }
-    "#);
+    ");
 
     let tokens = quote! {
         impl !Trait {}
@@ -80,17 +81,17 @@ fn test_negative_impl() {
     };
     snapshot!(tokens as Item, @r#"
     Item::Impl {
+        modifiers: ImplModifiers {
+            polarity: Some,
+        },
         generics: Generics,
-        trait_: Some((
-            Some,
-            Path {
-                segments: [
-                    PathSegment {
-                        ident: "Trait",
-                    },
-                ],
-            },
-        )),
+        trait_: Some(Path {
+            segments: [
+                PathSegment {
+                    ident: "Trait",
+                },
+            ],
+        }),
         self_ty: Type::Path {
             path: Path {
                 segments: [
@@ -117,17 +118,15 @@ fn test_macro_variable_impl() {
 
     snapshot!(tokens as Item, @r#"
     Item::Impl {
+        modifiers: ImplModifiers,
         generics: Generics,
-        trait_: Some((
-            None,
-            Path {
-                segments: [
-                    PathSegment {
-                        ident: "Trait",
-                    },
-                ],
-            },
-        )),
+        trait_: Some(Path {
+            segments: [
+                PathSegment {
+                    ident: "Trait",
+                },
+            ],
+        }),
         self_ty: Type::Group {
             elem: Type::Path {
                 path: Path {
@@ -272,6 +271,7 @@ fn test_impl_type_parameter_defaults() {
     };
     snapshot!(tokens as Item, @r#"
     Item::Impl {
+        modifiers: ImplModifiers,
         generics: Generics {
             lt_token: Some,
             params: [

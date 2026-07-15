@@ -2622,6 +2622,27 @@
       }
     },
     {
+      "ident": "ImplModifiers",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "defaultness": {
+          "option": {
+            "token": "Default"
+          }
+        },
+        "polarity": {
+          "option": {
+            "token": "Not"
+          }
+        }
+      },
+      "exhaustive": false
+    },
+    {
       "ident": "Index",
       "features": {
         "any": [
@@ -2925,10 +2946,8 @@
             "syn": "Attribute"
           }
         },
-        "defaultness": {
-          "option": {
-            "token": "Default"
-          }
+        "modifiers": {
+          "syn": "ImplModifiers"
         },
         "unsafety": {
           "option": {
@@ -2944,11 +2963,6 @@
         "trait_": {
           "option": {
             "tuple": [
-              {
-                "option": {
-                  "token": "Not"
-                }
-              },
               {
                 "syn": "Path"
               },

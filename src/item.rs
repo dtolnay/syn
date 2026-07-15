@@ -174,16 +174,36 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct ItemImpl {
         pub attrs: Vec<Attribute>,
-        pub defaultness: Option<Token![default]>,
+        pub modifiers: ImplModifiers,
         pub unsafety: Option<Token![unsafe]>,
         pub impl_token: Token![impl],
         pub generics: Generics,
         /// Trait this impl implements.
-        pub trait_: Option<(Option<Token![!]>, Path, Token![for])>,
+        pub trait_: Option<(Path, Token![for])>,
         /// The Self type of the impl.
         pub self_ty: Box<Type>,
         pub brace_token: token::Brace,
         pub items: Vec<ImplItem>,
+    }
+}
+
+ast_struct! {
+    /// Information about constness, polarity, and defaultness on an `impl`
+    /// item.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    #[non_exhaustive]
+    pub struct ImplModifiers {
+        pub defaultness: Option<Token![default]>,
+        pub polarity: Option<Token![!]>,
+    }
+}
+
+impl Default for ImplModifiers {
+    fn default() -> Self {
+        ImplModifiers {
+            defaultness: None,
+            polarity: None,
+        }
     }
 }
 
@@ -914,8 +934,8 @@ pub(crate) mod parsing {
     use crate::ident::Ident;
     use crate::item::{
         FnArg, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType,
-        ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType, Item, ItemConst,
-        ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod,
+        ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType, ImplModifiers, Item,
+        ItemConst, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod, ItemImpl, ItemMacro, ItemMod,
         ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver,
         Signature, StaticMutability, TraitItem, TraitItemConst, TraitItemFn, TraitItemMacro,
         TraitItemType, TraitModifiers, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree,
@@ -2652,7 +2672,7 @@ pub(crate) mod parsing {
                     first_ty = *ty.elem;
                 }
                 if let Type::Path(TypePath { qself: None, path }) = first_ty {
-                    trait_ = Some((polarity, path, for_token));
+                    trait_ = Some((path, for_token));
                 } else {
                     unreachable!();
                 }
@@ -2691,7 +2711,10 @@ pub(crate) mod parsing {
         } else {
             Ok(Some(ItemImpl {
                 attrs,
-                defaultness,
+                modifiers: ImplModifiers {
+                    defaultness,
+                    polarity,
+                },
                 unsafety,
                 impl_token,
                 generics,
@@ -3209,12 +3232,12 @@ mod printing {
     impl ToTokens for ItemImpl {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
-            self.defaultness.to_tokens(tokens);
+            self.modifiers.defaultness.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);
             self.impl_token.to_tokens(tokens);
             self.generics.to_tokens(tokens);
-            if let Some((polarity, path, for_token)) = &self.trait_ {
-                polarity.to_tokens(tokens);
+            self.modifiers.polarity.to_tokens(tokens);
+            if let Some((path, for_token)) = &self.trait_ {
                 path.to_tokens(tokens);
                 for_token.to_tokens(tokens);
             }
