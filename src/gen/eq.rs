@@ -1375,7 +1375,8 @@ impl Eq for crate::Local {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::Local {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.pat == other.pat && self.init == other.init
+        self.attrs == other.attrs && self.modifiers == other.modifiers
+            && self.pat == other.pat && self.init == other.init
     }
 }
 #[cfg(feature = "full")]
@@ -1386,6 +1387,16 @@ impl Eq for crate::LocalInit {}
 impl PartialEq for crate::LocalInit {
     fn eq(&self, other: &Self) -> bool {
         self.expr == other.expr && self.diverge == other.diverge
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::LocalModifiers {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::LocalModifiers {
+    fn eq(&self, _other: &Self) -> bool {
+        true
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

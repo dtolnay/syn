@@ -3527,6 +3527,9 @@
         "let_token": {
           "token": "Let"
         },
+        "modifiers": {
+          "syn": "LocalModifiers"
+        },
         "pat": {
           "syn": "Pat"
         },
@@ -3571,6 +3574,16 @@
           }
         }
       }
+    },
+    {
+      "ident": "LocalModifiers",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {},
+      "exhaustive": false
     },
     {
       "ident": "Macro",

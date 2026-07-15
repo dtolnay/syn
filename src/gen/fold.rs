@@ -620,6 +620,14 @@ pub trait Fold {
     fn fold_local_init(&mut self, i: crate::LocalInit) -> crate::LocalInit {
         fold_local_init(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_local_modifiers(
+        &mut self,
+        i: crate::LocalModifiers,
+    ) -> crate::LocalModifiers {
+        fold_local_modifiers(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_macro(&mut self, i: crate::Macro) -> crate::Macro {
@@ -2809,6 +2817,7 @@ where
     crate::Local {
         attrs: f.fold_attributes(node.attrs),
         let_token: node.let_token,
+        modifiers: f.fold_local_modifiers(node.modifiers),
         pat: f.fold_pat(node.pat),
         init: (node.init).map(|it| f.fold_local_init(it)),
         semi_token: node.semi_token,
@@ -2825,6 +2834,17 @@ where
         expr: Box::new(f.fold_expr(*node.expr)),
         diverge: (node.diverge).map(|it| ((it).0, Box::new(f.fold_expr(*(it).1)))),
     }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_local_modifiers<F>(
+    f: &mut F,
+    node: crate::LocalModifiers,
+) -> crate::LocalModifiers
+where
+    F: Fold + ?Sized,
+{
+    node
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]

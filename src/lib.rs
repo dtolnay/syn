@@ -528,7 +528,7 @@ pub mod spanned;
 mod stmt;
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub use crate::stmt::{Block, Local, LocalInit, Stmt, StmtMacro};
+pub use crate::stmt::{Block, Local, LocalInit, LocalModifiers, Stmt, StmtMacro};
 
 mod thread;
 

@@ -22,6 +22,7 @@ fn test_raw_operator() {
 
     snapshot!(stmt, @r#"
     Stmt::Local {
+        modifiers: LocalModifiers,
         pat: Pat::Wild,
         init: Some(LocalInit {
             expr: Expr::RawAddr {
@@ -47,6 +48,7 @@ fn test_raw_variable() {
 
     snapshot!(stmt, @r#"
     Stmt::Local {
+        modifiers: LocalModifiers,
         pat: Pat::Wild,
         init: Some(LocalInit {
             expr: Expr::Reference {
@@ -131,8 +133,9 @@ fn test_let_dot_dot() {
         let .. = 10;
     };
 
-    snapshot!(tokens as Stmt, @r#"
+    snapshot!(tokens as Stmt, @"
     Stmt::Local {
+        modifiers: LocalModifiers,
         pat: Pat::Rest,
         init: Some(LocalInit {
             expr: Expr::Lit {
@@ -140,7 +143,7 @@ fn test_let_dot_dot() {
             },
         }),
     }
-    "#);
+    ");
 }
 
 #[test]
@@ -151,6 +154,7 @@ fn test_let_else() {
 
     snapshot!(tokens as Stmt, @r#"
     Stmt::Local {
+        modifiers: LocalModifiers,
         pat: Pat::TupleStruct {
             path: Path {
                 segments: [

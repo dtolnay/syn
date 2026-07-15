@@ -1390,6 +1390,7 @@ impl Clone for crate::Local {
         crate::Local {
             attrs: self.attrs.clone(),
             let_token: self.let_token.clone(),
+            modifiers: self.modifiers.clone(),
             pat: self.pat.clone(),
             init: self.init.clone(),
             semi_token: self.semi_token.clone(),
@@ -1405,6 +1406,13 @@ impl Clone for crate::LocalInit {
             expr: self.expr.clone(),
             diverge: self.diverge.clone(),
         }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::LocalModifiers {
+    fn clone(&self) -> Self {
+        crate::LocalModifiers {}
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
