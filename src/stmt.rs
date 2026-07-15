@@ -45,6 +45,7 @@ ast_struct! {
     pub struct Local {
         pub attrs: Vec<Attribute>,
         pub let_token: Token![let],
+        pub modifiers: LocalModifiers,
         pub pat: Pat,
         pub init: Option<LocalInit>,
         pub semi_token: Token![;],
@@ -62,6 +63,19 @@ ast_struct! {
         pub eq_token: Token![=],
         pub expr: Box<Expr>,
         pub diverge: Option<(Token![else], Box<Expr>)>,
+    }
+}
+
+ast_struct! {
+    /// Information about local binding scope on a `let` statement.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    #[non_exhaustive]
+    pub struct LocalModifiers {}
+}
+
+impl Default for LocalModifiers {
+    fn default() -> Self {
+        LocalModifiers {}
     }
 }
 
@@ -93,7 +107,7 @@ pub(crate) mod parsing {
     use crate::parse::{Parse, ParseStream};
     use crate::pat::{Pat, PatType};
     use crate::path::Path;
-    use crate::stmt::{Block, Local, LocalInit, Stmt, StmtMacro};
+    use crate::stmt::{Block, Local, LocalInit, LocalModifiers, Stmt, StmtMacro};
     use crate::token;
     use crate::ty::Type;
     use crate::verbatim;
@@ -333,6 +347,7 @@ pub(crate) mod parsing {
         Ok(Local {
             attrs,
             let_token,
+            modifiers: LocalModifiers::default(),
             pat,
             init,
             semi_token,

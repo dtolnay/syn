@@ -2921,6 +2921,7 @@ impl Debug for Lite<syn::Local> {
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("pat", Lite(&self.value.pat));
         if let Some(val) = &self.value.init {
             #[derive(RefCast)]
@@ -2957,6 +2958,12 @@ impl Debug for Lite<syn::LocalInit> {
             }
             formatter.field("diverge", Print::ref_cast(val));
         }
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::LocalModifiers> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("LocalModifiers");
         formatter.finish()
     }
 }
@@ -3737,6 +3744,7 @@ impl Debug for Lite<syn::Stmt> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("pat", Lite(&_val.pat));
                 if let Some(val) = &_val.init {
                     #[derive(RefCast)]

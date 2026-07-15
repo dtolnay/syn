@@ -2024,6 +2024,7 @@ impl crate::Local {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("let_token", &self.let_token);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("pat", &self.pat);
         formatter.field("init", &self.init);
         formatter.field("semi_token", &self.semi_token);
@@ -2038,6 +2039,14 @@ impl Debug for crate::LocalInit {
         formatter.field("eq_token", &self.eq_token);
         formatter.field("expr", &self.expr);
         formatter.field("diverge", &self.diverge);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::LocalModifiers {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("LocalModifiers");
         formatter.finish()
     }
 }

@@ -582,6 +582,11 @@ pub trait Visit<'ast> {
     fn visit_local_init(&mut self, i: &'ast crate::LocalInit) {
         visit_local_init(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_local_modifiers(&mut self, i: &'ast crate::LocalModifiers) {
+        visit_local_modifiers(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_macro(&mut self, i: &'ast crate::Macro) {
@@ -2814,6 +2819,7 @@ where
         v.visit_attribute(it);
     }
     skip!(node.let_token);
+    v.visit_local_modifiers(&node.modifiers);
     v.visit_pat(&node.pat);
     if let Some(it) = &node.init {
         v.visit_local_init(it);
@@ -2833,6 +2839,12 @@ where
         v.visit_expr(&*(it).1);
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_local_modifiers<'ast, V>(v: &mut V, node: &'ast crate::LocalModifiers)
+where
+    V: Visit<'ast> + ?Sized,
+{}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_macro<'ast, V>(v: &mut V, node: &'ast crate::Macro)

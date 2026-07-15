@@ -156,9 +156,10 @@ fn test_vec_stmt() {
         let _;
         true
     };
-    snapshot!(stmts, @r#"
+    snapshot!(stmts, @"
     [
         Stmt::Local {
+            modifiers: LocalModifiers,
             pat: Pat::Wild,
         },
         Stmt::Expr(
@@ -170,5 +171,5 @@ fn test_vec_stmt() {
             None,
         ),
     ]
-    "#);
+    ");
 }
