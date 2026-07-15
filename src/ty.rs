@@ -111,7 +111,7 @@ ast_struct! {
         pub abi: Option<Abi>,
         pub fn_token: Token![fn],
         pub paren_token: token::Paren,
-        pub inputs: Punctuated<BareFnArg, Token![,]>,
+        pub inputs: Punctuated<FnPtrArg, Token![,]>,
         pub variadic: Option<BareVariadic>,
         pub output: ReturnType,
     }
@@ -241,7 +241,7 @@ ast_struct! {
 ast_struct! {
     /// An argument in a function type: the `usize` in `fn(usize) -> bool`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub struct BareFnArg {
+    pub struct FnPtrArg {
         pub attrs: Vec<Attribute>,
         pub name: Option<(Ident, Token![:])>,
         pub ty: Type,
@@ -287,7 +287,7 @@ pub(crate) mod parsing {
     use crate::punctuated::Punctuated;
     use crate::token;
     use crate::ty::{
-        Abi, BareFnArg, BareVariadic, ReturnType, Type, TypeArray, TypeFnPtr, TypeGroup,
+        Abi, BareVariadic, FnPtrArg, ReturnType, Type, TypeArray, TypeFnPtr, TypeGroup,
         TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
         TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
@@ -714,8 +714,8 @@ pub(crate) mod parsing {
                         }
 
                         let allow_self = inputs.is_empty();
-                        let arg = parse_bare_fn_arg(&args, allow_self)?;
-                        inputs.push_value(BareFnArg { attrs, ..arg });
+                        let arg = parse_fn_ptr_arg(&args, allow_self)?;
+                        inputs.push_value(FnPtrArg { attrs, ..arg });
                         if args.is_empty() {
                             break;
                         }
@@ -991,14 +991,14 @@ pub(crate) mod parsing {
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
-    impl Parse for BareFnArg {
+    impl Parse for FnPtrArg {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_self = false;
-            parse_bare_fn_arg(input, allow_self)
+            parse_fn_ptr_arg(input, allow_self)
         }
     }
 
-    fn parse_bare_fn_arg(input: ParseStream, allow_self: bool) -> Result<BareFnArg> {
+    fn parse_fn_ptr_arg(input: ParseStream, allow_self: bool) -> Result<FnPtrArg> {
         let attrs = input.call(Attribute::parse_outer)?;
 
         let begin = input.cursor();
@@ -1043,7 +1043,7 @@ pub(crate) mod parsing {
             }
         };
 
-        Ok(BareFnArg { attrs, name, ty })
+        Ok(FnPtrArg { attrs, name, ty })
     }
 
     fn parse_bare_variadic(input: ParseStream, attrs: Vec<Attribute>) -> Result<BareVariadic> {
@@ -1090,7 +1090,7 @@ mod printing {
     use crate::path::printing::PathStyle;
     use crate::print::TokensOrDefault;
     use crate::ty::{
-        Abi, BareFnArg, BareVariadic, ReturnType, TypeArray, TypeFnPtr, TypeGroup, TypeImplTrait,
+        Abi, BareVariadic, FnPtrArg, ReturnType, TypeArray, TypeFnPtr, TypeGroup, TypeImplTrait,
         TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice,
         TypeTraitObject, TypeTuple,
     };
@@ -1252,7 +1252,7 @@ mod printing {
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
-    impl ToTokens for BareFnArg {
+    impl ToTokens for FnPtrArg {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             if let Some((name, colon)) = &self.name {
