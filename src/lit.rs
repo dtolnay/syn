@@ -804,18 +804,6 @@ pub_if_not_doc! {
     }
 }
 
-/// The style of a string literal, either plain quoted or a raw string like
-/// `r##"data"##`.
-#[doc(hidden)] // https://github.com/dtolnay/syn/issues/1566
-pub enum StrStyle {
-    /// An ordinary string like `"data"`.
-    Cooked,
-    /// A raw string like `r##"data"##`.
-    ///
-    /// The unsigned integer is the number of `#` symbols used.
-    Raw(usize),
-}
-
 #[cfg(feature = "parsing")]
 pub_if_not_doc! {
     #[doc(hidden)]
