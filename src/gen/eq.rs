@@ -937,7 +937,7 @@ impl Eq for crate::ForeignItemStatic {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::ForeignItemStatic {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.vis == other.vis
+        self.attrs == other.attrs && self.vis == other.vis && self.safety == other.safety
             && self.mutability == other.mutability && self.ident == other.ident
             && self.ty == other.ty
     }

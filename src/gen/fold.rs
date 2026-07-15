@@ -2187,6 +2187,7 @@ where
     crate::ForeignItemStatic {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
+        safety: f.fold_safety(node.safety),
         static_token: node.static_token,
         mutability: f.fold_static_mutability(node.mutability),
         ident: f.fold_ident(node.ident),

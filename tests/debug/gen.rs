@@ -1932,6 +1932,7 @@ impl Debug for Lite<syn::ForeignItem> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
+                formatter.field("safety", Lite(&_val.safety));
                 match _val.mutability {
                     syn::StaticMutability::None => {}
                     _ => {
@@ -2006,6 +2007,7 @@ impl Debug for Lite<syn::ForeignItemStatic> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
+        formatter.field("safety", Lite(&self.value.safety));
         match self.value.mutability {
             syn::StaticMutability::None => {}
             _ => {

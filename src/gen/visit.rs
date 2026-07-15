@@ -2209,6 +2209,7 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
+    v.visit_safety(&node.safety);
     skip!(node.static_token);
     v.visit_static_mutability(&node.mutability);
     v.visit_ident(&node.ident);

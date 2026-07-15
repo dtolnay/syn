@@ -1207,6 +1207,7 @@ impl Hash for crate::ForeignItemStatic {
     {
         self.attrs.hash(state);
         self.vis.hash(state);
+        self.safety.hash(state);
         self.mutability.hash(state);
         self.ident.hash(state);
         self.ty.hash(state);

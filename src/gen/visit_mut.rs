@@ -2114,6 +2114,7 @@ where
 {
     v.visit_attributes_mut(&mut node.attrs);
     v.visit_visibility_mut(&mut node.vis);
+    v.visit_safety_mut(&mut node.safety);
     skip!(node.static_token);
     v.visit_static_mutability_mut(&mut node.mutability);
     v.visit_ident_mut(&mut node.ident);

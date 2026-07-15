@@ -2307,6 +2307,9 @@
         "vis": {
           "syn": "Visibility"
         },
+        "safety": {
+          "syn": "Safety"
+        },
         "static_token": {
           "token": "Static"
         },
