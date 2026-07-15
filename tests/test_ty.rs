@@ -229,6 +229,7 @@ fn test_trait_object() {
         dyn_token: Some,
         bounds: [
             TypeParamBound::Trait(TraitBound {
+                modifiers: TraitBoundModifiers,
                 lifetimes: Some(BoundLifetimes {
                     lifetimes: [
                         GenericParam::Lifetime(LifetimeParam {
@@ -271,6 +272,7 @@ fn test_trait_object() {
             },
             Token![+],
             TypeParamBound::Trait(TraitBound {
+                modifiers: TraitBoundModifiers,
                 path: Path {
                     segments: [
                         PathSegment {
@@ -296,6 +298,7 @@ fn test_trailing_plus() {
     Type::ImplTrait {
         bounds: [
             TypeParamBound::Trait(TraitBound {
+                modifiers: TraitBoundModifiers,
                 path: Path {
                     segments: [
                         PathSegment {
@@ -316,6 +319,7 @@ fn test_trailing_plus() {
         dyn_token: Some,
         bounds: [
             TypeParamBound::Trait(TraitBound {
+                modifiers: TraitBoundModifiers,
                 path: Path {
                     segments: [
                         PathSegment {
@@ -335,6 +339,7 @@ fn test_trailing_plus() {
     Type::TraitObject {
         bounds: [
             TypeParamBound::Trait(TraitBound {
+                modifiers: TraitBoundModifiers,
                 path: Path {
                     segments: [
                         PathSegment {
@@ -412,6 +417,7 @@ fn test_impl_trait_use() {
     Type::ImplTrait {
         bounds: [
             TypeParamBound::Trait(TraitBound {
+                modifiers: TraitBoundModifiers,
                 path: Path {
                     segments: [
                         PathSegment {
@@ -448,6 +454,7 @@ fn test_impl_trait_use() {
     Type::ImplTrait {
         bounds: [
             TypeParamBound::Trait(TraitBound {
+                modifiers: TraitBoundModifiers,
                 path: Path {
                     segments: [
                         PathSegment {

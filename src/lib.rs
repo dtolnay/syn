@@ -405,7 +405,7 @@ mod generics;
 #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::generics::{
     BoundLifetimes, ConstParam, GenericParam, Generics, LifetimeParam, PredicateLifetime,
-    PredicateType, TraitBound, TraitBoundModifier, TypeParam, TypeParamBound, WhereClause,
+    PredicateType, TraitBound, TraitBoundModifiers, TypeParam, TypeParamBound, WhereClause,
     WherePredicate,
 };
 #[cfg(feature = "full")]

@@ -4575,8 +4575,8 @@
             "group": "Paren"
           }
         },
-        "modifier": {
-          "syn": "TraitBoundModifier"
+        "modifiers": {
+          "syn": "TraitBoundModifiers"
         },
         "lifetimes": {
           "option": {
@@ -4589,21 +4589,21 @@
       }
     },
     {
-      "ident": "TraitBoundModifier",
+      "ident": "TraitBoundModifiers",
       "features": {
         "any": [
           "derive",
           "full"
         ]
       },
-      "variants": {
-        "None": [],
-        "Maybe": [
-          {
+      "fields": {
+        "maybe": {
+          "option": {
             "token": "Question"
           }
-        ]
-      }
+        }
+      },
+      "exhaustive": false
     },
     {
       "ident": "TraitItem",

@@ -277,7 +277,7 @@ pub(crate) mod parsing {
     use crate::attr::Attribute;
     use crate::error::{self, Result};
     use crate::ext::IdentExt as _;
-    use crate::generics::{BoundLifetimes, TraitBound, TraitBoundModifier, TypeParamBound};
+    use crate::generics::{BoundLifetimes, TraitBound, TraitBoundModifiers, TypeParamBound};
     use crate::ident::Ident;
     use crate::lifetime::Lifetime;
     use crate::mac::{self, Macro};
@@ -445,7 +445,7 @@ pub(crate) mod parsing {
                         Type::Path(TypePath { qself: None, path }) => {
                             TypeParamBound::Trait(TraitBound {
                                 paren_token: Some(paren_token),
-                                modifier: TraitBoundModifier::None,
+                                modifiers: TraitBoundModifiers::default(),
                                 lifetimes: None,
                                 path,
                             })
@@ -549,7 +549,7 @@ pub(crate) mod parsing {
                 let mut bounds = Punctuated::new();
                 bounds.push_value(TypeParamBound::Trait(TraitBound {
                     paren_token: None,
-                    modifier: TraitBoundModifier::None,
+                    modifiers: TraitBoundModifiers::default(),
                     lifetimes,
                     path: ty.path,
                 }));
