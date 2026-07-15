@@ -837,6 +837,7 @@ impl Clone for crate::File {
     fn clone(&self) -> Self {
         crate::File {
             shebang: self.shebang.clone(),
+            frontmatter: self.frontmatter.clone(),
             attrs: self.attrs.clone(),
             items: self.items.clone(),
         }
@@ -939,6 +940,13 @@ impl Clone for crate::ForeignItemType {
             generics: self.generics.clone(),
             semi_token: self.semi_token.clone(),
         }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::Frontmatter {
+    fn clone(&self) -> Self {
+        crate::Frontmatter {}
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

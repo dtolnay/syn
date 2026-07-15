@@ -394,7 +394,7 @@ pub mod ext;
 mod file;
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub use crate::file::File;
+pub use crate::file::{File, Frontmatter};
 
 #[cfg(all(any(feature = "full", feature = "derive"), feature = "printing"))]
 mod fixup;

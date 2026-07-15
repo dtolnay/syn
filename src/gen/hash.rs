@@ -1086,6 +1086,7 @@ impl Hash for crate::File {
         H: Hasher,
     {
         self.shebang.hash(state);
+        self.frontmatter.hash(state);
         self.attrs.hash(state);
         self.items.hash(state);
     }
@@ -1214,6 +1215,14 @@ impl Hash for crate::ForeignItemType {
         self.ident.hash(state);
         self.generics.hash(state);
     }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::Frontmatter {
+    fn hash<H>(&self, _state: &mut H)
+    where
+        H: Hasher,
+    {}
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]

@@ -1267,6 +1267,7 @@ impl Debug for crate::File {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("File");
         formatter.field("shebang", &self.shebang);
+        formatter.field("frontmatter", &self.frontmatter);
         formatter.field("attrs", &self.attrs);
         formatter.field("items", &self.items);
         formatter.finish()
@@ -1406,6 +1407,14 @@ impl crate::ForeignItemType {
         formatter.field("ident", &self.ident);
         formatter.field("generics", &self.generics);
         formatter.field("semi_token", &self.semi_token);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::Frontmatter {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("Frontmatter");
         formatter.finish()
     }
 }

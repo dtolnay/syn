@@ -830,8 +830,8 @@ impl Eq for crate::File {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::File {
     fn eq(&self, other: &Self) -> bool {
-        self.shebang == other.shebang && self.attrs == other.attrs
-            && self.items == other.items
+        self.shebang == other.shebang && self.frontmatter == other.frontmatter
+            && self.attrs == other.attrs && self.items == other.items
     }
 }
 #[cfg(feature = "full")]
@@ -940,6 +940,16 @@ impl PartialEq for crate::ForeignItemType {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis && self.ident == other.ident
             && self.generics == other.generics
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::Frontmatter {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::Frontmatter {
+    fn eq(&self, _other: &Self) -> bool {
+        true
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

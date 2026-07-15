@@ -2091,6 +2091,11 @@
             "std": "String"
           }
         },
+        "frontmatter": {
+          "option": {
+            "syn": "Frontmatter"
+          }
+        },
         "attrs": {
           "vec": {
             "syn": "Attribute"
@@ -2340,6 +2345,16 @@
           "token": "Semi"
         }
       }
+    },
+    {
+      "ident": "Frontmatter",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {},
+      "exhaustive": false
     },
     {
       "ident": "GenericArgument",
