@@ -364,6 +364,11 @@ pub trait Visit<'ast> {
     fn visit_fn_arg(&mut self, i: &'ast crate::FnArg) {
         visit_fn_arg(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_fn_modifiers(&mut self, i: &'ast crate::FnModifiers) {
+        visit_fn_modifiers(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_fn_ptr_arg(&mut self, i: &'ast crate::FnPtrArg) {
@@ -2099,6 +2104,12 @@ where
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_fn_modifiers<'ast, V>(v: &mut V, node: &'ast crate::FnModifiers)
+where
+    V: Visit<'ast> + ?Sized,
+{}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_fn_ptr_arg<'ast, V>(v: &mut V, node: &'ast crate::FnPtrArg)
@@ -2164,6 +2175,7 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
+    v.visit_fn_modifiers(&node.modifiers);
     v.visit_signature(&node.sig);
     skip!(node.semi_token);
 }
@@ -2341,6 +2353,7 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
+    v.visit_fn_modifiers(&node.modifiers);
     skip!(node.defaultness);
     v.visit_signature(&node.sig);
     v.visit_block(&node.block);
@@ -2517,6 +2530,7 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
+    v.visit_fn_modifiers(&node.modifiers);
     v.visit_signature(&node.sig);
     v.visit_block(&*node.block);
 }
@@ -3489,6 +3503,7 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
+    v.visit_fn_modifiers(&node.modifiers);
     v.visit_signature(&node.sig);
     if let Some(it) = &node.default {
         v.visit_block(it);

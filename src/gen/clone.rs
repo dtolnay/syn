@@ -853,6 +853,13 @@ impl Clone for crate::FnArg {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::FnModifiers {
+    fn clone(&self) -> Self {
+        crate::FnModifiers {}
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::FnPtrArg {
@@ -896,6 +903,7 @@ impl Clone for crate::ForeignItemFn {
         crate::ForeignItemFn {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
+            modifiers: self.modifiers.clone(),
             sig: self.sig.clone(),
             semi_token: self.semi_token.clone(),
         }
@@ -1037,6 +1045,7 @@ impl Clone for crate::ImplItemFn {
         crate::ImplItemFn {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
+            modifiers: self.modifiers.clone(),
             defaultness: self.defaultness.clone(),
             sig: self.sig.clone(),
             block: self.block.clone(),
@@ -1170,6 +1179,7 @@ impl Clone for crate::ItemFn {
         crate::ItemFn {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
+            modifiers: self.modifiers.clone(),
             sig: self.sig.clone(),
             block: self.block.clone(),
         }
@@ -1896,6 +1906,7 @@ impl Clone for crate::TraitItemFn {
     fn clone(&self) -> Self {
         crate::TraitItemFn {
             attrs: self.attrs.clone(),
+            modifiers: self.modifiers.clone(),
             sig: self.sig.clone(),
             default: self.default.clone(),
             semi_token: self.semi_token.clone(),

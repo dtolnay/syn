@@ -2129,6 +2129,16 @@
       }
     },
     {
+      "ident": "FnModifiers",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {},
+      "exhaustive": false
+    },
+    {
       "ident": "FnPtrArg",
       "features": {
         "any": [
@@ -2246,6 +2256,9 @@
         },
         "vis": {
           "syn": "Visibility"
+        },
+        "modifiers": {
+          "syn": "FnModifiers"
         },
         "sig": {
           "syn": "Signature"
@@ -2556,6 +2569,9 @@
         },
         "vis": {
           "syn": "Visibility"
+        },
+        "modifiers": {
+          "syn": "FnModifiers"
         },
         "defaultness": {
           "option": {
@@ -2904,6 +2920,9 @@
         },
         "vis": {
           "syn": "Visibility"
+        },
+        "modifiers": {
+          "syn": "FnModifiers"
         },
         "sig": {
           "syn": "Signature"
@@ -4722,6 +4741,9 @@
           "vec": {
             "syn": "Attribute"
           }
+        },
+        "modifiers": {
+          "syn": "FnModifiers"
         },
         "sig": {
           "syn": "Signature"

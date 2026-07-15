@@ -232,6 +232,7 @@ fn test_fn_precedence_in_where_clause() {
     snapshot!(input as ItemFn, @r#"
     ItemFn {
         vis: Visibility::Inherited,
+        modifiers: FnModifiers,
         sig: Signature {
             ident: "f",
             generics: Generics {

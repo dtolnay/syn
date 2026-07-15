@@ -850,6 +850,16 @@ impl PartialEq for crate::FnArg {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::FnModifiers {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::FnModifiers {
+    fn eq(&self, _other: &Self) -> bool {
+        true
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::FnPtrArg {}
@@ -905,7 +915,8 @@ impl Eq for crate::ForeignItemFn {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::ForeignItemFn {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.vis == other.vis && self.sig == other.sig
+        self.attrs == other.attrs && self.vis == other.vis
+            && self.modifiers == other.modifiers && self.sig == other.sig
     }
 }
 #[cfg(feature = "full")]
@@ -1067,8 +1078,8 @@ impl Eq for crate::ImplItemFn {}
 impl PartialEq for crate::ImplItemFn {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis
-            && self.defaultness == other.defaultness && self.sig == other.sig
-            && self.block == other.block
+            && self.modifiers == other.modifiers && self.defaultness == other.defaultness
+            && self.sig == other.sig && self.block == other.block
     }
 }
 #[cfg(feature = "full")]
@@ -1181,7 +1192,8 @@ impl Eq for crate::ItemFn {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::ItemFn {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.vis == other.vis && self.sig == other.sig
+        self.attrs == other.attrs && self.vis == other.vis
+            && self.modifiers == other.modifiers && self.sig == other.sig
             && self.block == other.block
     }
 }
@@ -1901,8 +1913,9 @@ impl Eq for crate::TraitItemFn {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::TraitItemFn {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.sig == other.sig
-            && self.default == other.default && self.semi_token == other.semi_token
+        self.attrs == other.attrs && self.modifiers == other.modifiers
+            && self.sig == other.sig && self.default == other.default
+            && self.semi_token == other.semi_token
     }
 }
 #[cfg(feature = "full")]

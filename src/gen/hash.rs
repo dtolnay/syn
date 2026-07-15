@@ -1110,6 +1110,14 @@ impl Hash for crate::FnArg {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::FnModifiers {
+    fn hash<H>(&self, _state: &mut H)
+    where
+        H: Hasher,
+    {}
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::FnPtrArg {
@@ -1174,6 +1182,7 @@ impl Hash for crate::ForeignItemFn {
     {
         self.attrs.hash(state);
         self.vis.hash(state);
+        self.modifiers.hash(state);
         self.sig.hash(state);
     }
 }
@@ -1351,6 +1360,7 @@ impl Hash for crate::ImplItemFn {
     {
         self.attrs.hash(state);
         self.vis.hash(state);
+        self.modifiers.hash(state);
         self.defaultness.hash(state);
         self.sig.hash(state);
         self.block.hash(state);
@@ -1520,6 +1530,7 @@ impl Hash for crate::ItemFn {
     {
         self.attrs.hash(state);
         self.vis.hash(state);
+        self.modifiers.hash(state);
         self.sig.hash(state);
         self.block.hash(state);
     }
@@ -2398,6 +2409,7 @@ impl Hash for crate::TraitItemFn {
         H: Hasher,
     {
         self.attrs.hash(state);
+        self.modifiers.hash(state);
         self.sig.hash(state);
         self.default.hash(state);
         self.semi_token.hash(state);
