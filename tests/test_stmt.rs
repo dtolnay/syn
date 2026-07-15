@@ -91,6 +91,7 @@ fn test_none_group() {
         modifiers: FnModifiers,
         sig: Signature {
             asyncness: Some,
+            safety: Safety::Default,
             ident: "f",
             generics: Generics,
             output: ReturnType::Default,
@@ -215,6 +216,7 @@ fn test_macros() {
         vis: Visibility::Inherited,
         modifiers: FnModifiers,
         sig: Signature {
+            safety: Safety::Default,
             ident: "main",
             generics: Generics,
             output: ReturnType::Default,

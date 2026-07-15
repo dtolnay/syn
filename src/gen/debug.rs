@@ -1390,6 +1390,7 @@ impl crate::ForeignItemStatic {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
+        formatter.field("safety", &self.safety);
         formatter.field("static_token", &self.static_token);
         formatter.field("mutability", &self.mutability);
         formatter.field("ident", &self.ident);
@@ -2572,12 +2573,32 @@ impl Debug for crate::ReturnType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::Safety {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Safety::")?;
+        match self {
+            crate::Safety::Safe(v0) => {
+                let mut formatter = formatter.debug_tuple("Safe");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::Safety::Unsafe(v0) => {
+                let mut formatter = formatter.debug_tuple("Unsafe");
+                formatter.field(v0);
+                formatter.finish()
+            }
+            crate::Safety::Default => formatter.write_str("Default"),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::Signature {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("Signature");
         formatter.field("constness", &self.constness);
         formatter.field("asyncness", &self.asyncness);
-        formatter.field("unsafety", &self.unsafety);
+        formatter.field("safety", &self.safety);
         formatter.field("abi", &self.abi);
         formatter.field("fn_token", &self.fn_token);
         formatter.field("ident", &self.ident);

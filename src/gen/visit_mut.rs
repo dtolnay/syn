@@ -762,6 +762,11 @@ pub trait VisitMut {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_safety_mut(&mut self, i: &mut crate::Safety) {
+        visit_safety_mut(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_signature_mut(&mut self, i: &mut crate::Signature) {
         visit_signature_mut(self, i);
     }
@@ -2109,6 +2114,7 @@ where
 {
     v.visit_attributes_mut(&mut node.attrs);
     v.visit_visibility_mut(&mut node.vis);
+    v.visit_safety_mut(&mut node.safety);
     skip!(node.static_token);
     v.visit_static_mutability_mut(&mut node.mutability);
     v.visit_ident_mut(&mut node.ident);
@@ -3191,13 +3197,29 @@ where
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_safety_mut<V>(v: &mut V, node: &mut crate::Safety)
+where
+    V: VisitMut + ?Sized,
+{
+    match node {
+        crate::Safety::Safe(_binding_0) => {
+            skip!(_binding_0);
+        }
+        crate::Safety::Unsafe(_binding_0) => {
+            skip!(_binding_0);
+        }
+        crate::Safety::Default => {}
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_signature_mut<V>(v: &mut V, node: &mut crate::Signature)
 where
     V: VisitMut + ?Sized,
 {
     skip!(node.constness);
     skip!(node.asyncness);
-    skip!(node.unsafety);
+    v.visit_safety_mut(&mut node.safety);
     if let Some(it) = &mut node.abi {
         v.visit_abi_mut(it);
     }

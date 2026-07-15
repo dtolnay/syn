@@ -1207,6 +1207,7 @@ impl Hash for crate::ForeignItemStatic {
     {
         self.attrs.hash(state);
         self.vis.hash(state);
+        self.safety.hash(state);
         self.mutability.hash(state);
         self.ident.hash(state);
         self.ty.hash(state);
@@ -2260,6 +2261,26 @@ impl Hash for crate::ReturnType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::Safety {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            crate::Safety::Safe(_) => {
+                state.write_u8(0u8);
+            }
+            crate::Safety::Unsafe(_) => {
+                state.write_u8(1u8);
+            }
+            crate::Safety::Default => {
+                state.write_u8(2u8);
+            }
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::Signature {
     fn hash<H>(&self, state: &mut H)
     where
@@ -2267,7 +2288,7 @@ impl Hash for crate::Signature {
     {
         self.constness.hash(state);
         self.asyncness.hash(state);
-        self.unsafety.hash(state);
+        self.safety.hash(state);
         self.abi.hash(state);
         self.ident.hash(state);
         self.generics.hash(state);

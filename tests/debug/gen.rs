@@ -1932,6 +1932,7 @@ impl Debug for Lite<syn::ForeignItem> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
+                formatter.field("safety", Lite(&_val.safety));
                 match _val.mutability {
                     syn::StaticMutability::None => {}
                     _ => {
@@ -2006,6 +2007,7 @@ impl Debug for Lite<syn::ForeignItemStatic> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
+        formatter.field("safety", Lite(&self.value.safety));
         match self.value.mutability {
             syn::StaticMutability::None => {}
             _ => {
@@ -3707,6 +3709,21 @@ impl Debug for Lite<syn::ReturnType> {
         }
     }
 }
+impl Debug for Lite<syn::Safety> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match &self.value {
+            syn::Safety::Safe(_val) => {
+                formatter.write_str("Safety::Safe")?;
+                Ok(())
+            }
+            syn::Safety::Unsafe(_val) => {
+                formatter.write_str("Safety::Unsafe")?;
+                Ok(())
+            }
+            syn::Safety::Default => formatter.write_str("Safety::Default"),
+        }
+    }
+}
 impl Debug for Lite<syn::Signature> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("Signature");
@@ -3716,9 +3733,7 @@ impl Debug for Lite<syn::Signature> {
         if self.value.asyncness.is_some() {
             formatter.field("asyncness", &Present);
         }
-        if self.value.unsafety.is_some() {
-            formatter.field("unsafety", &Present);
-        }
+        formatter.field("safety", Lite(&self.value.safety));
         if let Some(val) = &self.value.abi {
             #[derive(RefCast)]
             #[repr(transparent)]
@@ -5074,6 +5089,11 @@ impl Debug for Lite<syn::token::Ref> {
 impl Debug for Lite<syn::token::Return> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str("Token![return]")
+    }
+}
+impl Debug for Lite<syn::token::Safe> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("Token![safe]")
     }
 }
 impl Debug for Lite<syn::token::SelfType> {

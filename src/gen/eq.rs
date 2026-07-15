@@ -937,7 +937,7 @@ impl Eq for crate::ForeignItemStatic {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::ForeignItemStatic {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.vis == other.vis
+        self.attrs == other.attrs && self.vis == other.vis && self.safety == other.safety
             && self.mutability == other.mutability && self.ident == other.ident
             && self.ty == other.ty
     }
@@ -1791,13 +1791,28 @@ impl PartialEq for crate::ReturnType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::Safety {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::Safety {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (crate::Safety::Safe(_), crate::Safety::Safe(_)) => true,
+            (crate::Safety::Unsafe(_), crate::Safety::Unsafe(_)) => true,
+            (crate::Safety::Default, crate::Safety::Default) => true,
+            _ => false,
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::Signature {}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::Signature {
     fn eq(&self, other: &Self) -> bool {
         self.constness == other.constness && self.asyncness == other.asyncness
-            && self.unsafety == other.unsafety && self.abi == other.abi
+            && self.safety == other.safety && self.abi == other.abi
             && self.ident == other.ident && self.generics == other.generics
             && self.inputs == other.inputs && self.variadic == other.variadic
             && self.output == other.output

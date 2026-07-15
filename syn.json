@@ -2307,6 +2307,9 @@
         "vis": {
           "syn": "Visibility"
         },
+        "safety": {
+          "syn": "Safety"
+        },
         "static_token": {
           "token": "Static"
         },
@@ -4472,6 +4475,27 @@
       }
     },
     {
+      "ident": "Safety",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "variants": {
+        "Safe": [
+          {
+            "token": "Safe"
+          }
+        ],
+        "Unsafe": [
+          {
+            "token": "Unsafe"
+          }
+        ],
+        "Default": []
+      }
+    },
+    {
       "ident": "Signature",
       "features": {
         "any": [
@@ -4489,10 +4513,8 @@
             "token": "Async"
           }
         },
-        "unsafety": {
-          "option": {
-            "token": "Unsafe"
-          }
+        "safety": {
+          "syn": "Safety"
         },
         "abi": {
           "option": {
@@ -5709,6 +5731,7 @@
     "Raw": "raw",
     "Ref": "ref",
     "Return": "return",
+    "Safe": "safe",
     "SelfType": "Self",
     "SelfValue": "self",
     "Semi": ";",

@@ -608,6 +608,7 @@ ast_struct! {
     pub struct ForeignItemStatic {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        pub safety: Safety,
         pub static_token: Token![static],
         pub mutability: StaticMutability,
         pub ident: Ident,
@@ -848,7 +849,7 @@ ast_struct! {
     pub struct Signature {
         pub constness: Option<Token![const]>,
         pub asyncness: Option<Token![async]>,
-        pub unsafety: Option<Token![unsafe]>,
+        pub safety: Safety,
         pub abi: Option<Abi>,
         pub fn_token: Token![fn],
         pub ident: Ident,
@@ -868,6 +869,25 @@ impl Signature {
             FnArg::Receiver(receiver) => Some(receiver),
             FnArg::Typed(_) => None,
         }
+    }
+}
+
+ast_enum! {
+    /// Safe, unsafe or default.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    pub enum Safety {
+        /// The item is qualified as `safe`.
+        Safe(Token![safe]),
+        /// The item is qualified as `unsafe`.
+        Unsafe(Token![unsafe]),
+        /// The item is not qualified either way.
+        Default,
+    }
+}
+
+impl Default for Safety {
+    fn default() -> Self {
+        Safety::Default
     }
 }
 
@@ -954,9 +974,9 @@ pub(crate) mod parsing {
         ForeignItemType, ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType,
         ImplModifiers, Item, ItemConst, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod,
         ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType,
-        ItemUnion, ItemUse, Receiver, Signature, StaticMutability, TraitItem, TraitItemConst,
-        TraitItemFn, TraitItemMacro, TraitItemType, TraitModifiers, UseGlob, UseGroup, UseName,
-        UsePath, UseRename, UseTree, Variadic,
+        ItemUnion, ItemUse, Receiver, Safety, Signature, StaticMutability, TraitItem,
+        TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, TraitModifiers, UseGlob,
+        UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
     };
     use crate::lifetime::Lifetime;
     use crate::lit::LitStr;
@@ -1547,20 +1567,18 @@ pub(crate) mod parsing {
     impl Parse for Signature {
         fn parse(input: ParseStream) -> Result<Self> {
             let allow_safe = false;
-            parse_signature(input, allow_safe).map(Option::unwrap)
+            parse_signature(input, allow_safe)
         }
     }
 
-    fn parse_signature(input: ParseStream, allow_safe: bool) -> Result<Option<Signature>> {
+    fn parse_signature(input: ParseStream, allow_safe: bool) -> Result<Signature> {
         let constness: Option<Token![const]> = input.parse()?;
         let asyncness: Option<Token![async]> = input.parse()?;
-        let unsafety: Option<Token![unsafe]> = input.parse()?;
-        let safe = allow_safe
-            && unsafety.is_none()
-            && token::parsing::peek_keyword(input.cursor(), "safe");
-        if safe {
-            token::parsing::keyword(input, "safe")?;
-        }
+        let safety = if allow_safe {
+            Safety::parse_safe_or_unsafe(input)
+        } else {
+            Safety::parse_unsafe_only(input)
+        }?;
         let abi: Option<Abi> = input.parse()?;
         let fn_token: Token![fn] = input.parse()?;
         let ident: Ident = input.parse()?;
@@ -1573,23 +1591,38 @@ pub(crate) mod parsing {
         let output: ReturnType = input.parse()?;
         generics.where_clause = input.parse()?;
 
-        Ok(if safe {
-            None
-        } else {
-            Some(Signature {
-                constness,
-                asyncness,
-                unsafety,
-                abi,
-                fn_token,
-                ident,
-                generics,
-                paren_token,
-                inputs,
-                variadic,
-                output,
-            })
+        Ok(Signature {
+            constness,
+            asyncness,
+            safety,
+            abi,
+            fn_token,
+            ident,
+            generics,
+            paren_token,
+            inputs,
+            variadic,
+            output,
         })
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Safety {
+        pub fn parse_safe_or_unsafe(input: ParseStream) -> Result<Self> {
+            if let Some(token) = input.parse::<Option<Token![safe]>>()? {
+                Ok(Safety::Safe(token))
+            } else {
+                Self::parse_unsafe_only(input)
+            }
+        }
+
+        pub fn parse_unsafe_only(input: ParseStream) -> Result<Self> {
+            if let Some(token) = input.parse::<Option<Token![unsafe]>>()? {
+                Ok(Safety::Unsafe(token))
+            } else {
+                Ok(Safety::Default)
+            }
+        }
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
@@ -1914,7 +1947,6 @@ pub(crate) mod parsing {
             let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead, allow_safe) {
                 let vis: Visibility = input.parse()?;
                 let sig = parse_signature(input, allow_safe)?;
-                let has_safe = sig.is_none();
                 let has_body = input.peek(token::Brace);
                 let semi_token: Option<Token![;]> = if has_body {
                     let content;
@@ -1925,7 +1957,7 @@ pub(crate) mod parsing {
                 } else {
                     Some(input.parse()?)
                 };
-                if has_safe || has_body {
+                if has_body {
                     Ok(ForeignItem::Verbatim(verbatim::between(
                         begin,
                         input.cursor(),
@@ -1935,7 +1967,7 @@ pub(crate) mod parsing {
                         attrs: Vec::new(),
                         vis,
                         modifiers: FnModifiers::default(),
-                        sig: sig.unwrap(),
+                        sig,
                         semi_token: semi_token.unwrap(),
                     }))
                 }
@@ -1945,12 +1977,7 @@ pub(crate) mod parsing {
                     && ahead.peek2(Token![static]))
             {
                 let vis = input.parse()?;
-                let unsafety: Option<Token![unsafe]> = input.parse()?;
-                let safe =
-                    unsafety.is_none() && token::parsing::peek_keyword(input.cursor(), "safe");
-                if safe {
-                    token::parsing::keyword(input, "safe")?;
-                }
+                let safety = Safety::parse_safe_or_unsafe(input)?;
                 let static_token = input.parse()?;
                 let mutability = input.parse()?;
                 let ident = input.parse()?;
@@ -1962,7 +1989,7 @@ pub(crate) mod parsing {
                     input.parse::<Expr>()?;
                 }
                 let semi_token: Token![;] = input.parse()?;
-                if unsafety.is_some() || safe || has_value {
+                if has_value {
                     Ok(ForeignItem::Verbatim(verbatim::between(
                         begin,
                         input.cursor(),
@@ -1971,6 +1998,7 @@ pub(crate) mod parsing {
                     Ok(ForeignItem::Static(ForeignItemStatic {
                         attrs: Vec::new(),
                         vis,
+                        safety,
                         static_token,
                         mutability,
                         ident,
@@ -2030,6 +2058,7 @@ pub(crate) mod parsing {
             Ok(ForeignItemStatic {
                 attrs: input.call(Attribute::parse_outer)?,
                 vis: input.parse()?,
+                safety: input.call(Safety::parse_safe_or_unsafe)?,
                 static_token: input.parse()?,
                 mutability: input.parse()?,
                 ident: input.parse()?,
@@ -3028,9 +3057,9 @@ mod printing {
         ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType, ImplItemConst,
         ImplItemFn, ImplItemMacro, ImplItemType, ItemConst, ItemEnum, ItemExternCrate, ItemFn,
         ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait,
-        ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Signature, StaticMutability,
-        TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob, UseGroup, UseName,
-        UsePath, UseRename, Variadic,
+        ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Safety, Signature,
+        StaticMutability, TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob,
+        UseGroup, UseName, UsePath, UseRename, Variadic,
     };
     use crate::mac::MacroDelimiter;
     use crate::path;
@@ -3469,6 +3498,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
+            self.safety.to_tokens(tokens);
             self.static_token.to_tokens(tokens);
             self.mutability.to_tokens(tokens);
             self.ident.to_tokens(tokens);
@@ -3505,7 +3535,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.constness.to_tokens(tokens);
             self.asyncness.to_tokens(tokens);
-            self.unsafety.to_tokens(tokens);
+            self.safety.to_tokens(tokens);
             self.abi.to_tokens(tokens);
             self.fn_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
@@ -3521,6 +3551,17 @@ mod printing {
             });
             self.output.to_tokens(tokens);
             self.generics.where_clause.to_tokens(tokens);
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for Safety {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                Safety::Safe(token) => token.to_tokens(tokens),
+                Safety::Unsafe(token) => token.to_tokens(tokens),
+                Safety::Default => {}
+            }
         }
     }
 

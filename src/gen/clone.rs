@@ -927,6 +927,7 @@ impl Clone for crate::ForeignItemStatic {
         crate::ForeignItemStatic {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
+            safety: self.safety.clone(),
             static_token: self.static_token.clone(),
             mutability: self.mutability.clone(),
             ident: self.ident.clone(),
@@ -1800,12 +1801,23 @@ impl Clone for crate::ReturnType {
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::Safety {
+    fn clone(&self) -> Self {
+        match self {
+            crate::Safety::Safe(v0) => crate::Safety::Safe(v0.clone()),
+            crate::Safety::Unsafe(v0) => crate::Safety::Unsafe(v0.clone()),
+            crate::Safety::Default => crate::Safety::Default,
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::Signature {
     fn clone(&self) -> Self {
         crate::Signature {
             constness: self.constness.clone(),
             asyncness: self.asyncness.clone(),
-            unsafety: self.unsafety.clone(),
+            safety: self.safety.clone(),
             abi: self.abi.clone(),
             fn_token: self.fn_token.clone(),
             ident: self.ident.clone(),

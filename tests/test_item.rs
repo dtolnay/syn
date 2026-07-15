@@ -43,6 +43,7 @@ fn test_macro_variable_attr() {
         vis: Visibility::Inherited,
         modifiers: FnModifiers,
         sig: Signature {
+            safety: Safety::Default,
             ident: "f",
             generics: Generics,
             output: ReturnType::Default,
@@ -300,6 +301,7 @@ fn test_impl_trait_trailing_plus() {
         vis: Visibility::Inherited,
         modifiers: FnModifiers,
         sig: Signature {
+            safety: Safety::Default,
             ident: "f",
             generics: Generics,
             output: ReturnType::Type(

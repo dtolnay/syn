@@ -234,6 +234,7 @@ fn test_fn_precedence_in_where_clause() {
         vis: Visibility::Inherited,
         modifiers: FnModifiers,
         sig: Signature {
+            safety: Safety::Default,
             ident: "f",
             generics: Generics {
                 lt_token: Some,

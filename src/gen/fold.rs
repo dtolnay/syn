@@ -808,6 +808,11 @@ pub trait Fold {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_safety(&mut self, i: crate::Safety) -> crate::Safety {
+        fold_safety(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_signature(&mut self, i: crate::Signature) -> crate::Signature {
         fold_signature(self, i)
     }
@@ -2182,6 +2187,7 @@ where
     crate::ForeignItemStatic {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
+        safety: f.fold_safety(node.safety),
         static_token: node.static_token,
         mutability: f.fold_static_mutability(node.mutability),
         ident: f.fold_ident(node.ident),
@@ -3325,6 +3331,18 @@ where
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_safety<F>(f: &mut F, node: crate::Safety) -> crate::Safety
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        crate::Safety::Safe(_binding_0) => crate::Safety::Safe(_binding_0),
+        crate::Safety::Unsafe(_binding_0) => crate::Safety::Unsafe(_binding_0),
+        crate::Safety::Default => crate::Safety::Default,
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn fold_signature<F>(f: &mut F, node: crate::Signature) -> crate::Signature
 where
     F: Fold + ?Sized,
@@ -3332,7 +3350,7 @@ where
     crate::Signature {
         constness: node.constness,
         asyncness: node.asyncness,
-        unsafety: node.unsafety,
+        safety: f.fold_safety(node.safety),
         abi: (node.abi).map(|it| f.fold_abi(it)),
         fn_token: node.fn_token,
         ident: f.fold_ident(node.ident),
