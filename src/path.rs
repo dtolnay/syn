@@ -336,7 +336,7 @@ pub(crate) mod parsing {
                         } =>
                 {
                     if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
-                        let segment = ty.path.segments.pop().unwrap().into_value();
+                        let segment = ty.path.segments.pop().unwrap();
                         let ident = segment.ident;
                         let generics = match segment.arguments {
                             PathArguments::None => None,
@@ -361,7 +361,7 @@ pub(crate) mod parsing {
                     }
 
                     if let Some(colon_token) = input.parse::<Option<Token![:]>>()? {
-                        let segment = ty.path.segments.pop().unwrap().into_value();
+                        let segment = ty.path.segments.pop().unwrap();
                         return Ok(GenericArgument::Constraint(Constraint {
                             ident: segment.ident,
                             generics: match segment.arguments {
