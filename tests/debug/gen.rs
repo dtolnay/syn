@@ -4058,8 +4058,8 @@ impl Debug for Lite<syn::Type> {
                 formatter.field("len", Lite(&_val.len));
                 formatter.finish()
             }
-            syn::Type::BareFn(_val) => {
-                let mut formatter = formatter.debug_struct("Type::BareFn");
+            syn::Type::FnPtr(_val) => {
+                let mut formatter = formatter.debug_struct("Type::FnPtr");
                 if let Some(val) = &_val.lifetimes {
                     #[derive(RefCast)]
                     #[repr(transparent)]
@@ -4234,9 +4234,9 @@ impl Debug for Lite<syn::TypeArray> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::TypeBareFn> {
+impl Debug for Lite<syn::TypeFnPtr> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("TypeBareFn");
+        let mut formatter = formatter.debug_struct("TypeFnPtr");
         if let Some(val) = &self.value.lifetimes {
             #[derive(RefCast)]
             #[repr(transparent)]

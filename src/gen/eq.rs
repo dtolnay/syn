@@ -1928,7 +1928,7 @@ impl PartialEq for crate::Type {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (crate::Type::Array(self0), crate::Type::Array(other0)) => self0 == other0,
-            (crate::Type::BareFn(self0), crate::Type::BareFn(other0)) => self0 == other0,
+            (crate::Type::FnPtr(self0), crate::Type::FnPtr(other0)) => self0 == other0,
             (crate::Type::Group(self0), crate::Type::Group(other0)) => self0 == other0,
             (crate::Type::ImplTrait(self0), crate::Type::ImplTrait(other0)) => {
                 self0 == other0
@@ -1966,10 +1966,10 @@ impl PartialEq for crate::TypeArray {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Eq for crate::TypeBareFn {}
+impl Eq for crate::TypeFnPtr {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl PartialEq for crate::TypeBareFn {
+impl PartialEq for crate::TypeFnPtr {
     fn eq(&self, other: &Self) -> bool {
         self.lifetimes == other.lifetimes && self.unsafety == other.unsafety
             && self.abi == other.abi && self.inputs == other.inputs

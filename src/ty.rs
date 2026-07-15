@@ -26,8 +26,8 @@ ast_enum_of_structs! {
         /// A fixed size array type: `[T; n]`.
         Array(TypeArray),
 
-        /// A bare function type: `fn(usize) -> bool`.
-        BareFn(TypeBareFn),
+        /// A function pointer type: `fn(usize) -> bool`.
+        FnPtr(TypeFnPtr),
 
         /// A type contained within invisible delimiters.
         Group(TypeGroup),
@@ -77,7 +77,7 @@ ast_enum_of_structs! {
         //         #![cfg_attr(test, deny(non_exhaustive_omitted_patterns))]
         //
         //         Type::Array(ty) => {...}
-        //         Type::BareFn(ty) => {...}
+        //         Type::FnPtr(ty) => {...}
         //         ...
         //         Type::Verbatim(ty) => {...}
         //
@@ -103,9 +103,9 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A bare function type: `fn(usize) -> bool`.
+    /// A function pointer type: `fn(usize) -> bool`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
-    pub struct TypeBareFn {
+    pub struct TypeFnPtr {
         pub lifetimes: Option<BoundLifetimes>,
         pub unsafety: Option<Token![unsafe]>,
         pub abi: Option<Abi>,
@@ -287,7 +287,7 @@ pub(crate) mod parsing {
     use crate::punctuated::Punctuated;
     use crate::token;
     use crate::ty::{
-        Abi, BareFnArg, BareVariadic, ReturnType, Type, TypeArray, TypeBareFn, TypeGroup,
+        Abi, BareFnArg, BareVariadic, ReturnType, Type, TypeArray, TypeFnPtr, TypeGroup,
         TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
         TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
@@ -505,9 +505,9 @@ pub(crate) mod parsing {
             || lookahead.peek(Token![unsafe])
             || lookahead.peek(Token![extern])
         {
-            let mut bare_fn: TypeBareFn = input.parse()?;
-            bare_fn.lifetimes = lifetimes;
-            Ok(Type::BareFn(bare_fn))
+            let mut fn_ptr: TypeFnPtr = input.parse()?;
+            fn_ptr.lifetimes = lifetimes;
+            Ok(Type::FnPtr(fn_ptr))
         } else if cfg!(feature = "full")
             && token::parsing::peek_keyword(input.cursor(), "builtin")
             && input.peek2(Token![#])
@@ -686,12 +686,12 @@ pub(crate) mod parsing {
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
-    impl Parse for TypeBareFn {
+    impl Parse for TypeFnPtr {
         fn parse(input: ParseStream) -> Result<Self> {
             let args;
             let mut variadic = None;
 
-            Ok(TypeBareFn {
+            Ok(TypeFnPtr {
                 lifetimes: input.parse()?,
                 unsafety: input.parse()?,
                 abi: input.parse()?,
@@ -1090,7 +1090,7 @@ mod printing {
     use crate::path::printing::PathStyle;
     use crate::print::TokensOrDefault;
     use crate::ty::{
-        Abi, BareFnArg, BareVariadic, ReturnType, TypeArray, TypeBareFn, TypeGroup, TypeImplTrait,
+        Abi, BareFnArg, BareVariadic, ReturnType, TypeArray, TypeFnPtr, TypeGroup, TypeImplTrait,
         TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice,
         TypeTraitObject, TypeTuple,
     };
@@ -1142,7 +1142,7 @@ mod printing {
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
-    impl ToTokens for TypeBareFn {
+    impl ToTokens for TypeFnPtr {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             self.lifetimes.to_tokens(tokens);
             self.unsafety.to_tokens(tokens);

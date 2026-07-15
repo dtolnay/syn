@@ -2440,7 +2440,7 @@ impl Hash for crate::Type {
                 state.write_u8(0u8);
                 v0.hash(state);
             }
-            crate::Type::BareFn(v0) => {
+            crate::Type::FnPtr(v0) => {
                 state.write_u8(1u8);
                 v0.hash(state);
             }
@@ -2512,7 +2512,7 @@ impl Hash for crate::TypeArray {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Hash for crate::TypeBareFn {
+impl Hash for crate::TypeFnPtr {
     fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,

@@ -809,8 +809,8 @@ pub trait Visit<'ast> {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn visit_type_bare_fn(&mut self, i: &'ast crate::TypeBareFn) {
-        visit_type_bare_fn(self, i);
+    fn visit_type_fn_ptr(&mut self, i: &'ast crate::TypeFnPtr) {
+        visit_type_fn_ptr(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -3526,8 +3526,8 @@ where
         crate::Type::Array(_binding_0) => {
             v.visit_type_array(_binding_0);
         }
-        crate::Type::BareFn(_binding_0) => {
-            v.visit_type_bare_fn(_binding_0);
+        crate::Type::FnPtr(_binding_0) => {
+            v.visit_type_fn_ptr(_binding_0);
         }
         crate::Type::Group(_binding_0) => {
             v.visit_type_group(_binding_0);
@@ -3583,7 +3583,7 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn visit_type_bare_fn<'ast, V>(v: &mut V, node: &'ast crate::TypeBareFn)
+pub fn visit_type_fn_ptr<'ast, V>(v: &mut V, node: &'ast crate::TypeFnPtr)
 where
     V: Visit<'ast> + ?Sized,
 {
