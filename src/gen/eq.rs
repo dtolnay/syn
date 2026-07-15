@@ -1658,10 +1658,10 @@ impl PartialEq for crate::PathSegment {
         self.ident == other.ident && self.arguments == other.arguments
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::PointerMutability {}
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::PointerMutability {
     fn eq(&self, other: &Self) -> bool {

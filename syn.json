@@ -4208,6 +4208,7 @@
       "ident": "PointerMutability",
       "features": {
         "any": [
+          "derive",
           "full"
         ]
       },

@@ -739,8 +739,8 @@ pub trait Fold {
     fn fold_path_segment(&mut self, i: crate::PathSegment) -> crate::PathSegment {
         fold_path_segment(self, i)
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_pointer_mutability(
         &mut self,
         i: crate::PointerMutability,
@@ -3154,8 +3154,8 @@ where
         arguments: f.fold_path_arguments(node.arguments),
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_pointer_mutability<F>(
     f: &mut F,
     node: crate::PointerMutability,

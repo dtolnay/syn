@@ -2427,7 +2427,7 @@ impl Debug for crate::PathSegment {
         formatter.finish()
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::PointerMutability {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

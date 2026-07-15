@@ -705,8 +705,8 @@ pub trait VisitMut {
     fn visit_path_segment_mut(&mut self, i: &mut crate::PathSegment) {
         visit_path_segment_mut(self, i);
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_pointer_mutability_mut(&mut self, i: &mut crate::PointerMutability) {
         visit_pointer_mutability_mut(self, i);
     }
@@ -3036,8 +3036,8 @@ where
     v.visit_ident_mut(&mut node.ident);
     v.visit_path_arguments_mut(&mut node.arguments);
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_pointer_mutability_mut<V>(v: &mut V, node: &mut crate::PointerMutability)
 where
     V: VisitMut + ?Sized,

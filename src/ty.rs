@@ -238,11 +238,10 @@ ast_struct! {
     }
 }
 
-#[cfg(feature = "full")]
 ast_enum! {
     /// Mutability of a raw pointer (`*const T`, `*mut T`), in which non-mutable
     /// isn't the implicit default.
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub enum PointerMutability {
         Const(Token![const]),
         Mut(Token![mut]),
@@ -297,11 +296,9 @@ pub(crate) mod parsing {
     use crate::path::{Path, PathArguments, QSelf};
     use crate::punctuated::Punctuated;
     use crate::token;
-    #[cfg(feature = "full")]
-    use crate::ty::PointerMutability;
     use crate::ty::{
-        Abi, FnPtrArg, FnPtrVariadic, ReturnType, Type, TypeArray, TypeFnPtr, TypeGroup,
-        TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
+        Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, Type, TypeArray, TypeFnPtr,
+        TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
         TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
     use crate::verbatim;
@@ -1095,7 +1092,6 @@ pub(crate) mod parsing {
         }
     }
 
-    #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for PointerMutability {
         fn parse(input: ParseStream) -> Result<Self> {
@@ -1117,12 +1113,10 @@ mod printing {
     use crate::path;
     use crate::path::printing::PathStyle;
     use crate::print::TokensOrDefault;
-    #[cfg(feature = "full")]
-    use crate::ty::PointerMutability;
     use crate::ty::{
-        Abi, FnPtrArg, FnPtrVariadic, ReturnType, TypeArray, TypeFnPtr, TypeGroup, TypeImplTrait,
-        TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr, TypeReference, TypeSlice,
-        TypeTraitObject, TypeTuple,
+        Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, TypeArray, TypeFnPtr,
+        TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
+        TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt as _};
@@ -1314,7 +1308,6 @@ mod printing {
         }
     }
 
-    #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PointerMutability {
         fn to_tokens(&self, tokens: &mut TokenStream) {

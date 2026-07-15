@@ -1676,7 +1676,7 @@ impl Clone for crate::PathSegment {
         }
     }
 }
-#[cfg(feature = "full")]
+#[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::PointerMutability {
     fn clone(&self) -> Self {
