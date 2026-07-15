@@ -498,6 +498,7 @@ ast_struct! {
     /// A lifetime predicate in a `where` clause: `'a: 'b + 'c`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct PredicateLifetime {
+        pub attrs: Vec<Attribute>,
         pub lifetime: Lifetime,
         pub colon_token: Token![:],
         pub bounds: Punctuated<Lifetime, Token![+]>,
@@ -508,6 +509,7 @@ ast_struct! {
     /// A type predicate in a `where` clause: `for<'c> Foo<'c>: Trait<'c>`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct PredicateType {
+        pub attrs: Vec<Attribute>,
         /// Any lifetimes from a `for` binding
         pub lifetimes: Option<BoundLifetimes>,
         /// The type being bounded
@@ -975,8 +977,10 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for WherePredicate {
         fn parse(input: ParseStream) -> Result<Self> {
+            let attrs = input.call(Attribute::parse_outer)?;
             if input.peek(Lifetime) && input.peek2(Token![:]) {
                 Ok(WherePredicate::Lifetime(PredicateLifetime {
+                    attrs,
                     lifetime: input.parse()?,
                     colon_token: input.parse()?,
                     bounds: {
@@ -1004,6 +1008,7 @@ pub(crate) mod parsing {
                 }))
             } else {
                 Ok(WherePredicate::Type(PredicateType {
+                    attrs,
                     lifetimes: input.parse()?,
                     bounded_ty: input.parse()?,
                     colon_token: input.parse()?,
@@ -1378,6 +1383,7 @@ pub(crate) mod printing {
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PredicateLifetime {
         fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
             self.lifetime.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.bounds.to_tokens(tokens);
@@ -1387,6 +1393,7 @@ pub(crate) mod printing {
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for PredicateType {
         fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
             self.lifetimes.to_tokens(tokens);
             self.bounded_ty.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);

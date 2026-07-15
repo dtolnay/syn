@@ -3272,6 +3272,9 @@ pub fn visit_predicate_lifetime<'ast, V>(v: &mut V, node: &'ast crate::Predicate
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     v.visit_lifetime(&node.lifetime);
     skip!(node.colon_token);
     for el in Punctuated::pairs(&node.bounds) {
@@ -3285,6 +3288,9 @@ pub fn visit_predicate_type<'ast, V>(v: &mut V, node: &'ast crate::PredicateType
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     if let Some(it) = &node.lifetimes {
         v.visit_bound_lifetimes(it);
     }

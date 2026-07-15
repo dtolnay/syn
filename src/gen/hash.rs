@@ -2182,6 +2182,7 @@ impl Hash for crate::PredicateLifetime {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.lifetime.hash(state);
         self.bounds.hash(state);
     }
@@ -2193,6 +2194,7 @@ impl Hash for crate::PredicateType {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.lifetimes.hash(state);
         self.bounded_ty.hash(state);
         self.bounds.hash(state);

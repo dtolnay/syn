@@ -2491,6 +2491,7 @@ impl Debug for crate::PreciseCapture {
 impl Debug for crate::PredicateLifetime {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PredicateLifetime");
+        formatter.field("attrs", &self.attrs);
         formatter.field("lifetime", &self.lifetime);
         formatter.field("colon_token", &self.colon_token);
         formatter.field("bounds", &self.bounds);
@@ -2502,6 +2503,7 @@ impl Debug for crate::PredicateLifetime {
 impl Debug for crate::PredicateType {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PredicateType");
+        formatter.field("attrs", &self.attrs);
         formatter.field("lifetimes", &self.lifetimes);
         formatter.field("bounded_ty", &self.bounded_ty);
         formatter.field("colon_token", &self.colon_token);

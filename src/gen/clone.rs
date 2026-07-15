@@ -1732,6 +1732,7 @@ impl Clone for crate::PreciseCapture {
 impl Clone for crate::PredicateLifetime {
     fn clone(&self) -> Self {
         crate::PredicateLifetime {
+            attrs: self.attrs.clone(),
             lifetime: self.lifetime.clone(),
             colon_token: self.colon_token.clone(),
             bounds: self.bounds.clone(),
@@ -1743,6 +1744,7 @@ impl Clone for crate::PredicateLifetime {
 impl Clone for crate::PredicateType {
     fn clone(&self) -> Self {
         crate::PredicateType {
+            attrs: self.attrs.clone(),
             lifetimes: self.lifetimes.clone(),
             bounded_ty: self.bounded_ty.clone(),
             colon_token: self.colon_token.clone(),
