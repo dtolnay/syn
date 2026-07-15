@@ -1612,11 +1612,17 @@ pub(crate) mod parsing {
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
-    impl Parse for Safety {
-        fn parse(input: ParseStream) -> Result<Self> {
+    impl Safety {
+        pub fn parse_safe_or_unsafe(input: ParseStream) -> Result<Self> {
             if let Some(token) = input.parse::<Option<Token![safe]>>()? {
                 Ok(Safety::Safe(token))
-            } else if let Some(token) = input.parse::<Option<Token![unsafe]>>()? {
+            } else {
+                Self::parse_unsafe_only(input)
+            }
+        }
+
+        pub fn parse_unsafe_only(input: ParseStream) -> Result<Self> {
+            if let Some(token) = input.parse::<Option<Token![unsafe]>>()? {
                 Ok(Safety::Unsafe(token))
             } else {
                 Ok(Safety::Default)

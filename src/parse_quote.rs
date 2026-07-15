@@ -155,7 +155,7 @@ use crate::punctuated::Punctuated;
 #[cfg(any(feature = "full", feature = "derive"))]
 use crate::{attr, Attribute, Field, FieldModifiers, Ident, Type, Visibility};
 #[cfg(feature = "full")]
-use crate::{Arm, Block, Pat, Stmt};
+use crate::{Arm, Block, Pat, Safety, Stmt};
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl ParseQuote for Attribute {
@@ -226,6 +226,13 @@ impl ParseQuote for Box<Pat> {
 impl<T: Parse, P: Parse> ParseQuote for Punctuated<T, P> {
     fn parse(input: ParseStream) -> Result<Self> {
         Self::parse_terminated(input)
+    }
+}
+
+#[cfg(feature = "full")]
+impl ParseQuote for Safety {
+    fn parse(input: ParseStream) -> Result<Self> {
+        Safety::parse_safe_or_unsafe(input)
     }
 }
 
