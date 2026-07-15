@@ -3252,6 +3252,7 @@ where
     F: Fold + ?Sized,
 {
     crate::PredicateLifetime {
+        attrs: f.fold_attributes(node.attrs),
         lifetime: f.fold_lifetime(node.lifetime),
         colon_token: node.colon_token,
         bounds: crate::punctuated::fold(node.bounds, f, F::fold_lifetime),
@@ -3267,6 +3268,7 @@ where
     F: Fold + ?Sized,
 {
     crate::PredicateType {
+        attrs: f.fold_attributes(node.attrs),
         lifetimes: (node.lifetimes).map(|it| f.fold_bound_lifetimes(it)),
         bounded_ty: f.fold_type(node.bounded_ty),
         colon_token: node.colon_token,

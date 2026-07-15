@@ -1722,7 +1722,8 @@ impl Eq for crate::PredicateLifetime {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::PredicateLifetime {
     fn eq(&self, other: &Self) -> bool {
-        self.lifetime == other.lifetime && self.bounds == other.bounds
+        self.attrs == other.attrs && self.lifetime == other.lifetime
+            && self.bounds == other.bounds
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1732,8 +1733,8 @@ impl Eq for crate::PredicateType {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::PredicateType {
     fn eq(&self, other: &Self) -> bool {
-        self.lifetimes == other.lifetimes && self.bounded_ty == other.bounded_ty
-            && self.bounds == other.bounds
+        self.attrs == other.attrs && self.lifetimes == other.lifetimes
+            && self.bounded_ty == other.bounded_ty && self.bounds == other.bounds
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

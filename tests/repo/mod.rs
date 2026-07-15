@@ -506,11 +506,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/pin-ergonomics/sugar.rs",
     "tests/ui/pin-ergonomics/user-type-projection.rs",
 
-    // TODO: attributes on where-predicates
-    // https://github.com/dtolnay/syn/issues/1705
-    "src/tools/rustfmt/tests/target/cfg_attribute_in_where.rs",
-    "tests/ui/where-clauses/cfg-attr-issue-138010-1.rs",
-
     // TODO: super let
     // https://github.com/dtolnay/syn/issues/1889
     "library/std/src/macros/tests.rs",
@@ -709,6 +704,7 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/target/issue_4257.rs",
     "src/tools/rustfmt/tests/target/issue_4911.rs",
     "tests/pretty/gat-bounds.rs",
+    "tests/ui/where-clauses/cfg-attr-issue-138010-1.rs",
 
     // Deprecated trait object syntax with parenthesized generic arguments and no dyn keyword
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/path_fn_trait_args.rs",

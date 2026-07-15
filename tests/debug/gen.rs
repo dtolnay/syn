@@ -3587,6 +3587,9 @@ impl Debug for Lite<syn::PreciseCapture> {
 impl Debug for Lite<syn::PredicateLifetime> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PredicateLifetime");
+        if !self.value.attrs.is_empty() {
+            formatter.field("attrs", Lite(&self.value.attrs));
+        }
         formatter.field("lifetime", Lite(&self.value.lifetime));
         if !self.value.bounds.is_empty() {
             formatter.field("bounds", Lite(&self.value.bounds));
@@ -3597,6 +3600,9 @@ impl Debug for Lite<syn::PredicateLifetime> {
 impl Debug for Lite<syn::PredicateType> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("PredicateType");
+        if !self.value.attrs.is_empty() {
+            formatter.field("attrs", Lite(&self.value.attrs));
+        }
         if let Some(val) = &self.value.lifetimes {
             #[derive(RefCast)]
             #[repr(transparent)]

@@ -4309,6 +4309,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "lifetime": {
           "syn": "Lifetime"
         },
@@ -4334,6 +4339,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "lifetimes": {
           "option": {
             "syn": "BoundLifetimes"
