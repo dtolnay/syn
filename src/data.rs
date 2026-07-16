@@ -13,6 +13,8 @@ ast_struct! {
     pub struct Variant {
         pub attrs: Vec<Attribute>,
 
+        pub modifiers: VariantModifiers,
+
         /// Name of the variant.
         pub ident: Ident,
 
@@ -21,6 +23,18 @@ ast_struct! {
 
         /// Explicit discriminant: `Variant = 1`
         pub discriminant: Option<(Token![=], Expr)>,
+    }
+}
+
+ast_struct! {
+    /// Information about enum variant visibility.
+    #[non_exhaustive]
+    pub struct VariantModifiers {}
+}
+
+impl Default for VariantModifiers {
+    fn default() -> Self {
+        VariantModifiers {}
     }
 }
 
@@ -253,7 +267,9 @@ impl<'a> Clone for Members<'a> {
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::attr::Attribute;
-    use crate::data::{Field, FieldModifiers, Fields, FieldsNamed, FieldsUnnamed, Variant};
+    use crate::data::{
+        Field, FieldModifiers, Fields, FieldsNamed, FieldsUnnamed, Variant, VariantModifiers,
+    };
     use crate::error::Result;
     use crate::expr::Expr;
     use crate::ext::IdentExt as _;
@@ -303,6 +319,7 @@ pub(crate) mod parsing {
             };
             Ok(Variant {
                 attrs,
+                modifiers: VariantModifiers {},
                 ident,
                 fields,
                 discriminant,

@@ -2305,10 +2305,18 @@ impl Clone for crate::Variant {
     fn clone(&self) -> Self {
         crate::Variant {
             attrs: self.attrs.clone(),
+            modifiers: self.modifiers.clone(),
             ident: self.ident.clone(),
             fields: self.fields.clone(),
             discriminant: self.discriminant.clone(),
         }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::VariantModifiers {
+    fn clone(&self) -> Self {
+        crate::VariantModifiers {}
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

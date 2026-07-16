@@ -1054,6 +1054,14 @@ pub trait Fold {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn fold_variant_modifiers(
+        &mut self,
+        i: crate::VariantModifiers,
+    ) -> crate::VariantModifiers {
+        fold_variant_modifiers(self, i)
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_vis_restricted(&mut self, i: crate::VisRestricted) -> crate::VisRestricted {
         fold_vis_restricted(self, i)
     }
@@ -4007,10 +4015,22 @@ where
 {
     crate::Variant {
         attrs: f.fold_attributes(node.attrs),
+        modifiers: f.fold_variant_modifiers(node.modifiers),
         ident: f.fold_ident(node.ident),
         fields: f.fold_fields(node.fields),
         discriminant: (node.discriminant).map(|it| ((it).0, f.fold_expr((it).1))),
     }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn fold_variant_modifiers<F>(
+    f: &mut F,
+    node: crate::VariantModifiers,
+) -> crate::VariantModifiers
+where
+    F: Fold + ?Sized,
+{
+    node
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]

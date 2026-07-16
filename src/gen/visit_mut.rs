@@ -974,6 +974,11 @@ pub trait VisitMut {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_variant_modifiers_mut(&mut self, i: &mut crate::VariantModifiers) {
+        visit_variant_modifiers_mut(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_vis_restricted_mut(&mut self, i: &mut crate::VisRestricted) {
         visit_vis_restricted_mut(self, i);
     }
@@ -3830,6 +3835,7 @@ where
     V: VisitMut + ?Sized,
 {
     v.visit_attributes_mut(&mut node.attrs);
+    v.visit_variant_modifiers_mut(&mut node.modifiers);
     v.visit_ident_mut(&mut node.ident);
     v.visit_fields_mut(&mut node.fields);
     if let Some(it) = &mut node.discriminant {
@@ -3837,6 +3843,12 @@ where
         v.visit_expr_mut(&mut (it).1);
     }
 }
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_variant_modifiers_mut<V>(v: &mut V, node: &mut crate::VariantModifiers)
+where
+    V: VisitMut + ?Sized,
+{}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_vis_restricted_mut<V>(v: &mut V, node: &mut crate::VisRestricted)

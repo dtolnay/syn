@@ -252,6 +252,7 @@ fn test_enum() {
         data: Data::Enum {
             variants: [
                 Variant {
+                    modifiers: VariantModifiers,
                     ident: "Ok",
                     fields: Fields::Unnamed {
                         unnamed: [
@@ -273,6 +274,7 @@ fn test_enum() {
                 },
                 Token![,],
                 Variant {
+                    modifiers: VariantModifiers,
                     ident: "Err",
                     fields: Fields::Unnamed {
                         unnamed: [
@@ -294,6 +296,7 @@ fn test_enum() {
                 },
                 Token![,],
                 Variant {
+                    modifiers: VariantModifiers,
                     ident: "Surprise",
                     fields: Fields::Unit,
                     discriminant: Some(Expr::Lit {
@@ -302,6 +305,7 @@ fn test_enum() {
                 },
                 Token![,],
                 Variant {
+                    modifiers: VariantModifiers,
                     ident: "ProcMacroHack",
                     fields: Fields::Unit,
                     discriminant: Some(Expr::Field {

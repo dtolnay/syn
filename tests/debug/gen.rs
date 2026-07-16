@@ -4766,6 +4766,7 @@ impl Debug for Lite<syn::Variant> {
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("ident", Lite(&self.value.ident));
         formatter.field("fields", Lite(&self.value.fields));
         if let Some(val) = &self.value.discriminant {
@@ -4782,6 +4783,12 @@ impl Debug for Lite<syn::Variant> {
             }
             formatter.field("discriminant", Print::ref_cast(val));
         }
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::VariantModifiers> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("VariantModifiers");
         formatter.finish()
     }
 }

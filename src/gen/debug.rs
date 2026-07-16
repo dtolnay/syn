@@ -3277,9 +3277,18 @@ impl Debug for crate::Variant {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("Variant");
         formatter.field("attrs", &self.attrs);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("ident", &self.ident);
         formatter.field("fields", &self.fields);
         formatter.field("discriminant", &self.discriminant);
+        formatter.finish()
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::VariantModifiers {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("VariantModifiers");
         formatter.finish()
     }
 }

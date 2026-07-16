@@ -2916,10 +2916,19 @@ impl Hash for crate::Variant {
         H: Hasher,
     {
         self.attrs.hash(state);
+        self.modifiers.hash(state);
         self.ident.hash(state);
         self.fields.hash(state);
         self.discriminant.hash(state);
     }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::VariantModifiers {
+    fn hash<H>(&self, _state: &mut H)
+    where
+        H: Hasher,
+    {}
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]

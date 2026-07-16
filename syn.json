@@ -5670,6 +5670,9 @@
             "syn": "Attribute"
           }
         },
+        "modifiers": {
+          "syn": "VariantModifiers"
+        },
         "ident": {
           "proc_macro2": "Ident"
         },
@@ -5689,6 +5692,17 @@
           }
         }
       }
+    },
+    {
+      "ident": "VariantModifiers",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {},
+      "exhaustive": false
     },
     {
       "ident": "VisRestricted",

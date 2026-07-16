@@ -2341,8 +2341,19 @@ impl Eq for crate::Variant {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::Variant {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.ident == other.ident
-            && self.fields == other.fields && self.discriminant == other.discriminant
+        self.attrs == other.attrs && self.modifiers == other.modifiers
+            && self.ident == other.ident && self.fields == other.fields
+            && self.discriminant == other.discriminant
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::VariantModifiers {}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::VariantModifiers {
+    fn eq(&self, _other: &Self) -> bool {
+        true
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
