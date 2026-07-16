@@ -1302,6 +1302,7 @@ impl PartialEq for crate::ItemType {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis && self.ident == other.ident
             && self.generics == other.generics && self.ty == other.ty
+            && self.where_clause_placement == other.where_clause_placement
     }
 }
 #[cfg(feature = "full")]
@@ -2358,6 +2359,24 @@ impl Eq for crate::WhereClause {}
 impl PartialEq for crate::WhereClause {
     fn eq(&self, other: &Self) -> bool {
         self.predicates == other.predicates
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::WhereClausePlacement {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::WhereClausePlacement {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (crate::WhereClausePlacement::Early, crate::WhereClausePlacement::Early) => {
+                true
+            }
+            (crate::WhereClausePlacement::Late, crate::WhereClausePlacement::Late) => {
+                true
+            }
+            _ => false,
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

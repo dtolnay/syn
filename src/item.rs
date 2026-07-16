@@ -339,6 +339,7 @@ ast_struct! {
         pub eq_token: Token![=],
         pub ty: Box<Type>,
         pub semi_token: Token![;],
+        pub where_clause_placement: WhereClausePlacement,
     }
 }
 
@@ -962,6 +963,50 @@ ast_enum! {
     }
 }
 
+ast_enum! {
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    pub enum WhereClausePlacement {
+        /// `type Ty<T> where T: 'static = T;`
+        ///
+        /// In associated types, this syntax is **deprecated** in favor of the
+        /// late placement.
+        ///
+        /// ```log
+        /// warning: where clause not allowed here
+        ///   --> src/main.rs
+        ///    |
+        ///    | impl Trait for Thing { type Ty<T> where T: 'static = T; }
+        ///    |                                   ^^^^^^^^^^^^^^^^
+        ///    = note: see issue #89122 <https://github.com/rust-lang/rust/issues/89122> for more information
+        ///    = note: `#[warn(deprecated_where_clause_location)]` on by default
+        /// ```
+        Early,
+
+        /// `type Ty<T> = T where T: 'static;`
+        ///
+        /// In item-level type aliases, this syntax is **unstable**.
+        ///
+        /// ```log
+        /// error: where clauses are not allowed after the type for type aliases
+        ///  --> src/main.rs
+        ///   |
+        ///   | type Ty<T> = T where T: 'static;
+        ///   |                ^^^^^^^^^^^^^^^^
+        ///   = note: see issue #112792 <https://github.com/rust-lang/rust/issues/112792> for more information
+        ///   = help: add `#![feature(lazy_type_alias)]` to the crate attributes to enable
+        /// ```
+        Late,
+    }
+}
+
+impl Copy for WhereClausePlacement {}
+
+impl Clone for WhereClausePlacement {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::attr::{self, Attribute};
@@ -979,7 +1024,7 @@ pub(crate) mod parsing {
         ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType,
         ItemUnion, ItemUse, Receiver, ReceiverKind, Safety, Signature, StaticMutability, TraitItem,
         TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, TraitModifiers, UseGlob,
-        UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
+        UseGroup, UseName, UsePath, UseRename, UseTree, Variadic, WhereClausePlacement,
     };
     use crate::lifetime::Lifetime;
     use crate::lit::LitStr;
@@ -1194,6 +1239,7 @@ pub(crate) mod parsing {
         bounds: Punctuated<TypeParamBound, Token![+]>,
         ty: Option<(Token![=], Type)>,
         semi_token: Token![;],
+        where_clause_placement: WhereClausePlacement,
     }
 
     enum TypeDefaultness {
@@ -1201,20 +1247,11 @@ pub(crate) mod parsing {
         Disallowed,
     }
 
-    enum WhereClauseLocation {
-        // type Ty<T> where T: 'static = T;
-        BeforeEq,
-        // type Ty<T> = T where T: 'static;
-        AfterEq,
-        // TODO: goes away once the migration period on rust-lang/rust#89122 is over
-        Both,
-    }
-
     impl FlexibleItemType {
         fn parse(
             input: ParseStream,
             allow_defaultness: TypeDefaultness,
-            where_clause_location: WhereClauseLocation,
+            default_where_clause_placement: WhereClausePlacement,
         ) -> Result<Self> {
             let vis: Visibility = input.parse()?;
             let defaultness: Option<Token![default]> = match allow_defaultness {
@@ -1226,23 +1263,14 @@ pub(crate) mod parsing {
             let mut generics: Generics = input.parse()?;
             let (colon_token, bounds) = Self::parse_optional_bounds(input)?;
 
-            match where_clause_location {
-                WhereClauseLocation::BeforeEq | WhereClauseLocation::Both => {
-                    generics.where_clause = input.parse()?;
-                }
-                WhereClauseLocation::AfterEq => {}
+            if let WhereClausePlacement::Early = default_where_clause_placement {
+                generics.where_clause = input.parse()?;
             }
 
             let ty = Self::parse_optional_definition(input)?;
 
-            match where_clause_location {
-                WhereClauseLocation::AfterEq | WhereClauseLocation::Both
-                    if generics.where_clause.is_none() =>
-                {
-                    generics.where_clause = input.parse()?;
-                }
-                _ => {}
-            }
+            let where_clause_placement =
+                parse_late_where_clause(&mut generics, input, default_where_clause_placement)?;
 
             let semi_token: Token![;] = input.parse()?;
 
@@ -1256,6 +1284,7 @@ pub(crate) mod parsing {
                 bounds,
                 ty,
                 semi_token,
+                where_clause_placement,
             })
         }
 
@@ -2090,10 +2119,11 @@ pub(crate) mod parsing {
             bounds: _,
             ty,
             semi_token,
+            where_clause_placement: _,
         } = FlexibleItemType::parse(
             input,
             TypeDefaultness::Disallowed,
-            WhereClauseLocation::Both,
+            WhereClausePlacement::Early,
         )?;
 
         if colon_token.is_some() || ty.is_some() {
@@ -2134,19 +2164,36 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for ItemType {
         fn parse(input: ParseStream) -> Result<Self> {
+            let attrs = input.call(Attribute::parse_outer)?;
+            let vis = input.parse()?;
+            let type_token = input.parse()?;
+            let ident = input.parse()?;
+            let mut generics: Generics = input.parse()?;
+            generics.where_clause = input.parse()?;
+            let eq_token = input.parse()?;
+            let ty = input.parse()?;
+
+            // For item-level type alias, the "Late" placement is unstable and
+            // gated by #![feature(lazy_type_alias)]. If no where-clause is
+            // present in the input, set placement to "Early" so a macro can
+            // most easily add a where clause into a parsed syntax tree without
+            // triggering unstable syntax.
+            let default_placement = WhereClausePlacement::Early;
+            let where_clause_placement =
+                parse_late_where_clause(&mut generics, input, default_placement)?;
+
+            let semi_token = input.parse()?;
+
             Ok(ItemType {
-                attrs: input.call(Attribute::parse_outer)?,
-                vis: input.parse()?,
-                type_token: input.parse()?,
-                ident: input.parse()?,
-                generics: {
-                    let mut generics: Generics = input.parse()?;
-                    generics.where_clause = input.parse()?;
-                    generics
-                },
-                eq_token: input.parse()?,
-                ty: input.parse()?,
-                semi_token: input.parse()?,
+                attrs,
+                vis,
+                type_token,
+                ident,
+                generics,
+                eq_token,
+                ty,
+                semi_token,
+                where_clause_placement,
             })
         }
     }
@@ -2162,10 +2209,11 @@ pub(crate) mod parsing {
             bounds: _,
             ty,
             semi_token,
+            where_clause_placement,
         } = FlexibleItemType::parse(
             input,
             TypeDefaultness::Disallowed,
-            WhereClauseLocation::BeforeEq,
+            WhereClausePlacement::Early,
         )?;
 
         let (eq_token, ty) = match ty {
@@ -2182,6 +2230,7 @@ pub(crate) mod parsing {
             eq_token,
             ty: Box::new(ty),
             semi_token,
+            where_clause_placement,
         }))
     }
 
@@ -2618,10 +2667,11 @@ pub(crate) mod parsing {
             bounds,
             ty,
             semi_token,
+            where_clause_placement: _,
         } = FlexibleItemType::parse(
             input,
             TypeDefaultness::Disallowed,
-            WhereClauseLocation::AfterEq,
+            WhereClausePlacement::Late,
         )?;
 
         if vis.is_some() {
@@ -2991,11 +3041,8 @@ pub(crate) mod parsing {
             bounds: _,
             ty,
             semi_token,
-        } = FlexibleItemType::parse(
-            input,
-            TypeDefaultness::Optional,
-            WhereClauseLocation::AfterEq,
-        )?;
+            where_clause_placement: _,
+        } = FlexibleItemType::parse(input, TypeDefaultness::Optional, WhereClausePlacement::Late)?;
 
         let (eq_token, ty) = match ty {
             Some(ty) if colon_token.is_none() => ty,
@@ -3049,6 +3096,23 @@ pub(crate) mod parsing {
             Ok(mut_token.map_or(StaticMutability::None, StaticMutability::Mut))
         }
     }
+
+    fn parse_late_where_clause(
+        generics: &mut Generics,
+        input: ParseStream,
+        default_placement: WhereClausePlacement,
+    ) -> Result<WhereClausePlacement> {
+        if generics.where_clause.is_some() {
+            return Ok(WhereClausePlacement::Early);
+        }
+
+        generics.where_clause = input.parse()?;
+        if generics.where_clause.is_some() {
+            Ok(WhereClausePlacement::Late)
+        } else {
+            Ok(default_placement)
+        }
+    }
 }
 
 #[cfg(feature = "printing")]
@@ -3061,7 +3125,7 @@ mod printing {
         ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait,
         ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, ReceiverKind, Safety, Signature,
         StaticMutability, TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob,
-        UseGroup, UseName, UsePath, UseRename, Variadic,
+        UseGroup, UseName, UsePath, UseRename, Variadic, WhereClausePlacement,
     };
     use crate::mac::MacroDelimiter;
     use crate::path;
@@ -3182,9 +3246,14 @@ mod printing {
             self.type_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);
-            self.generics.where_clause.to_tokens(tokens);
+            if let WhereClausePlacement::Early = self.where_clause_placement {
+                self.generics.where_clause.to_tokens(tokens);
+            }
             self.eq_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
+            if let WhereClausePlacement::Late = self.where_clause_placement {
+                self.generics.where_clause.to_tokens(tokens);
+            }
             self.semi_token.to_tokens(tokens);
         }
     }

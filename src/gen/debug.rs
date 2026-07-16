@@ -1932,6 +1932,7 @@ impl crate::ItemType {
         formatter.field("eq_token", &self.eq_token);
         formatter.field("ty", &self.ty);
         formatter.field("semi_token", &self.semi_token);
+        formatter.field("where_clause_placement", &self.where_clause_placement);
         formatter.finish()
     }
 }
@@ -3305,6 +3306,17 @@ impl Debug for crate::WhereClause {
         formatter.field("where_token", &self.where_token);
         formatter.field("predicates", &self.predicates);
         formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::WhereClausePlacement {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("WhereClausePlacement::")?;
+        match self {
+            crate::WhereClausePlacement::Early => formatter.write_str("Early"),
+            crate::WhereClausePlacement::Late => formatter.write_str("Late"),
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

@@ -72,7 +72,9 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
 }
 
 fn expand_impl(defs: &Definitions, node: &Node) -> TokenStream {
-    let manual_clone = node.data == Data::Private || node.ident == "Lifetime";
+    let manual_clone = node.data == Data::Private
+        || node.ident == "Lifetime"
+        || node.ident == "WhereClausePlacement";
     if manual_clone {
         return TokenStream::new();
     }

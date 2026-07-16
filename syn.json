@@ -3311,6 +3311,9 @@
         },
         "semi_token": {
           "token": "Semi"
+        },
+        "where_clause_placement": {
+          "syn": "WhereClausePlacement"
         }
       }
     },
@@ -5729,6 +5732,18 @@
             "punct": "Comma"
           }
         }
+      }
+    },
+    {
+      "ident": "WhereClausePlacement",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "variants": {
+        "Early": [],
+        "Late": []
       }
     },
     {

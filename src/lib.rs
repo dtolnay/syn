@@ -433,7 +433,7 @@ pub use crate::item::{
     ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType, ItemUnion,
     ItemUse, Receiver, ReceiverKind, Safety, Signature, StaticMutability, TraitItem,
     TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, TraitModifiers, UseGlob, UseGroup,
-    UseName, UsePath, UseRename, UseTree, Variadic,
+    UseName, UsePath, UseRename, UseTree, Variadic, WhereClausePlacement,
 };
 
 mod lifetime;

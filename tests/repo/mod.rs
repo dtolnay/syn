@@ -323,16 +323,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/borrowck/alias-liveness/rtn-static.rs",
     "tests/ui/feature-gates/feature-gate-return_type_notation.rs",
 
-    // TODO: lazy type alias syntax with where-clause in trailing position
-    // https://github.com/dtolnay/syn/issues/1525
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/type_item_where_clause.rs",
-    "src/tools/rustfmt/tests/source/type-alias-where-clauses-with-comments.rs",
-    "src/tools/rustfmt/tests/source/type-alias-where-clauses.rs",
-    "src/tools/rustfmt/tests/target/type-alias-where-clauses-with-comments.rs",
-    "src/tools/rustfmt/tests/target/type-alias-where-clauses.rs",
-    "tests/rustdoc-html/typedef-inner-variants-lazy_type_alias.rs",
-    "tests/ui/traits/next-solver/normalize/normalize-self-type-constrains-trait-args.rs",
-
     // TODO: gen blocks and functions
     // https://github.com/dtolnay/syn/issues/1526
     "compiler/rustc_codegen_cranelift/example/gen_block_iterate.rs",
@@ -705,6 +695,12 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/target/issue_4911.rs",
     "tests/pretty/gat-bounds.rs",
     "tests/ui/where-clauses/cfg-attr-issue-138010-1.rs",
+
+    // Dual where-clauses on the same type alias.
+    "src/tools/rustfmt/tests/source/type-alias-where-clauses-with-comments.rs",
+    "src/tools/rustfmt/tests/source/type-alias-where-clauses.rs",
+    "src/tools/rustfmt/tests/target/type-alias-where-clauses-with-comments.rs",
+    "src/tools/rustfmt/tests/target/type-alias-where-clauses.rs",
 
     // Deprecated trait object syntax with parenthesized generic arguments and no dyn keyword
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/path_fn_trait_args.rs",

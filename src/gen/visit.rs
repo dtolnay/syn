@@ -967,6 +967,11 @@ pub trait Visit<'ast> {
     fn visit_where_clause(&mut self, i: &'ast crate::WhereClause) {
         visit_where_clause(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_where_clause_placement(&mut self, i: &'ast crate::WhereClausePlacement) {
+        visit_where_clause_placement(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_where_predicate(&mut self, i: &'ast crate::WherePredicate) {
@@ -2716,6 +2721,7 @@ where
     skip!(node.eq_token);
     v.visit_type(&*node.ty);
     skip!(node.semi_token);
+    v.visit_where_clause_placement(&node.where_clause_placement);
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -4052,6 +4058,20 @@ where
     for el in Punctuated::pairs(&node.predicates) {
         let it = el.value();
         v.visit_where_predicate(it);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_where_clause_placement<'ast, V>(
+    v: &mut V,
+    node: &'ast crate::WhereClausePlacement,
+)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    match node {
+        crate::WhereClausePlacement::Early => {}
+        crate::WhereClausePlacement::Late => {}
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
