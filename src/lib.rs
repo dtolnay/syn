@@ -485,6 +485,7 @@ mod pat;
 pub use crate::pat::{
     FieldPat, Pat, PatConst, PatIdent, PatLit, PatMacro, PatOr, PatParen, PatPath, PatRange,
     PatReference, PatRest, PatSlice, PatStruct, PatTuple, PatTupleStruct, PatType, PatWild,
+    TupleElementPat,
 };
 
 #[cfg(any(feature = "full", feature = "derive"))]

@@ -827,6 +827,11 @@ pub trait VisitMut {
     fn visit_trait_modifiers_mut(&mut self, i: &mut crate::TraitModifiers) {
         visit_trait_modifiers_mut(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_tuple_element_pat_mut(&mut self, i: &mut crate::TupleElementPat) {
+        visit_tuple_element_pat_mut(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_tuple_element_type_mut(&mut self, i: &mut crate::TupleElementType) {
@@ -3006,7 +3011,7 @@ where
     skip!(node.paren_token);
     for mut el in Punctuated::pairs_mut(&mut node.elems) {
         let it = el.value_mut();
-        v.visit_pat_mut(it);
+        v.visit_tuple_element_pat_mut(it);
     }
 }
 #[cfg(feature = "full")]
@@ -3023,7 +3028,7 @@ where
     skip!(node.paren_token);
     for mut el in Punctuated::pairs_mut(&mut node.elems) {
         let it = el.value_mut();
-        v.visit_pat_mut(it);
+        v.visit_tuple_element_pat_mut(it);
     }
 }
 #[cfg(feature = "full")]
@@ -3410,6 +3415,15 @@ where
     V: VisitMut + ?Sized,
 {
     skip!(node.auto_token);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_tuple_element_pat_mut<V>(v: &mut V, node: &mut crate::TupleElementPat)
+where
+    V: VisitMut + ?Sized,
+{
+    v.visit_attributes_mut(&mut node.attrs);
+    v.visit_pat_mut(&mut node.pat);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]

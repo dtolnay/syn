@@ -1963,6 +1963,16 @@ impl Clone for crate::TraitModifiers {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::TupleElementPat {
+    fn clone(&self) -> Self {
+        crate::TupleElementPat {
+            attrs: self.attrs.clone(),
+            pat: self.pat.clone(),
+        }
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::TupleElementType {

@@ -1967,6 +1967,16 @@ impl PartialEq for crate::TraitModifiers {
         self.auto_token == other.auto_token
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::TupleElementPat {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::TupleElementPat {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs && self.pat == other.pat
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::TupleElementType {}
