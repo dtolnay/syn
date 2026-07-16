@@ -63,6 +63,7 @@ use rustc_ast::ast::FnHeader;
 use rustc_ast::ast::FnPtrTy;
 use rustc_ast::ast::FnRetTy;
 use rustc_ast::ast::FnSig;
+use rustc_ast::ast::ForLoop;
 use rustc_ast::ast::ForLoopKind;
 use rustc_ast::ast::ForeignItemKind;
 use rustc_ast::ast::ForeignMod;
@@ -518,6 +519,7 @@ spanless_eq_struct!(FnDecl; inputs output);
 spanless_eq_struct!(FnHeader; constness coroutine_kind safety ext);
 spanless_eq_struct!(FnPtrTy; safety ext generic_params decl decl_span);
 spanless_eq_struct!(FnSig; header decl span);
+spanless_eq_struct!(ForLoop; pat iter body label kind);
 spanless_eq_struct!(ForeignMod; extern_span safety abi items);
 spanless_eq_struct!(FormatArgPosition; index kind span);
 spanless_eq_struct!(FormatArgs; span template arguments uncooked_fmt_str is_source_literal);
@@ -664,12 +666,12 @@ spanless_eq_enum!(CoroutineKind; Async(span closure_id return_impl_trait_id)
     AsyncGen(span closure_id return_impl_trait_id));
 spanless_eq_enum!(ExprKind; Array(0) ConstBlock(0) Call(0 1) MethodCall(0)
     Tup(0) Binary(0 1 2) Unary(0 1) Move(0 1) Lit(0) Cast(0 1) Type(0 1)
-    Let(0 1 2 3) If(0 1 2) While(0 1 2) ForLoop(pat iter body label kind)
-    Loop(0 1 2) Match(0 1 2) Closure(0) Block(0 1) Gen(0 1 2 3) Await(0 1)
-    Use(0 1) TryBlock(0 1) Assign(0 1 2) AssignOp(0 1 2) Field(0 1) Index(0 1 2)
-    Underscore Range(0 1 2) Path(0 1) AddrOf(0 1 2) Break(0 1) Continue(0)
-    Ret(0) InlineAsm(0) OffsetOf(0 1) MacCall(0) Struct(0) Repeat(0 1) Paren(0)
-    Try(0) Yield(0) Yeet(0) Become(0) IncludedBytes(0) FormatArgs(0)
+    Let(0 1 2 3) If(0 1 2) While(0 1 2) ForLoop(0) Loop(0 1 2) Match(0 1 2)
+    Closure(0) Block(0 1) Gen(0 1 2 3) Await(0 1) Use(0 1) TryBlock(0 1)
+    Assign(0 1 2) AssignOp(0 1 2) Field(0 1) Index(0 1 2) Underscore
+    Range(0 1 2) Path(0 1) AddrOf(0 1 2) Break(0 1) Continue(0) Ret(0)
+    InlineAsm(0) OffsetOf(0 1) MacCall(0) Struct(0) Repeat(0 1) Paren(0) Try(0)
+    Yield(0) Yeet(0) Become(0) IncludedBytes(0) FormatArgs(0)
     UnsafeBinderCast(0 1 2) DirectConstArg(0) Err(0) Dummy);
 spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
     InOut(reg late expr) SplitInOut(reg late in_expr out_expr) Const(anon_const)
