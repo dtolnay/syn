@@ -158,7 +158,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// Information about function contracts and restrictions.
+    /// Information about function contracts, generators, restrictions.
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     #[non_exhaustive]
     pub struct FnModifiers {}
