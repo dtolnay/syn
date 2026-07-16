@@ -4105,6 +4105,16 @@ impl Debug for Lite<syn::TraitModifiers> {
         formatter.finish()
     }
 }
+impl Debug for Lite<syn::TupleElementType> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("TupleElementType");
+        if !self.value.attrs.is_empty() {
+            formatter.field("attrs", Lite(&self.value.attrs));
+        }
+        formatter.field("ty", Lite(&self.value.ty));
+        formatter.finish()
+    }
+}
 impl Debug for Lite<syn::Type> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match &self.value {

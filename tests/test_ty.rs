@@ -364,47 +364,59 @@ fn test_tuple_comma() {
 
     expr.elems.push_value(parse_quote!(_));
     // Must not parse to Type::Paren
-    snapshot!(expr.to_token_stream() as Type, @r#"
+    snapshot!(expr.to_token_stream() as Type, @"
     Type::Tuple {
         elems: [
-            Type::Infer,
+            TupleElementType {
+                ty: Type::Infer,
+            },
             Token![,],
         ],
     }
-    "#);
+    ");
 
     expr.elems.push_punct(<Token![,]>::default());
-    snapshot!(expr.to_token_stream() as Type, @r#"
+    snapshot!(expr.to_token_stream() as Type, @"
     Type::Tuple {
         elems: [
-            Type::Infer,
+            TupleElementType {
+                ty: Type::Infer,
+            },
             Token![,],
         ],
     }
-    "#);
+    ");
 
     expr.elems.push_value(parse_quote!(_));
-    snapshot!(expr.to_token_stream() as Type, @r#"
+    snapshot!(expr.to_token_stream() as Type, @"
     Type::Tuple {
         elems: [
-            Type::Infer,
+            TupleElementType {
+                ty: Type::Infer,
+            },
             Token![,],
-            Type::Infer,
+            TupleElementType {
+                ty: Type::Infer,
+            },
         ],
     }
-    "#);
+    ");
 
     expr.elems.push_punct(<Token![,]>::default());
-    snapshot!(expr.to_token_stream() as Type, @r#"
+    snapshot!(expr.to_token_stream() as Type, @"
     Type::Tuple {
         elems: [
-            Type::Infer,
+            TupleElementType {
+                ty: Type::Infer,
+            },
             Token![,],
-            Type::Infer,
+            TupleElementType {
+                ty: Type::Infer,
+            },
             Token![,],
         ],
     }
-    "#);
+    ");
 }
 
 #[test]

@@ -4884,6 +4884,25 @@
       "exhaustive": false
     },
     {
+      "ident": "TupleElementType",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "ty": {
+          "syn": "Type"
+        }
+      }
+    },
+    {
       "ident": "Type",
       "features": {
         "any": [
@@ -5347,7 +5366,7 @@
         "elems": {
           "punctuated": {
             "element": {
-              "syn": "Type"
+              "syn": "TupleElementType"
             },
             "punct": "Comma"
           }
