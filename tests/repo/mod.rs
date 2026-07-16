@@ -346,6 +346,28 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/higher-ranked/builtin-closure-like-bounds.rs",
     "tests/ui/sanitizer/cfi/coroutine.rs",
 
+    // TODO: coroutines (static closure)
+    // https://github.com/dtolnay/syn/issues/2019
+    "src/tools/clippy/tests/ui/redundant_locals.rs",
+    "src/tools/miri/tests/fail/coroutine-pinned-moved.rs",
+    "src/tools/miri/tests/pass/stacked_borrows/coroutine-self-referential.rs",
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/lambda_expr.rs",
+    "src/tools/rustfmt/tests/source/async_block.rs",
+    "src/tools/rustfmt/tests/source/immovable_coroutines.rs",
+    "src/tools/rustfmt/tests/target/async_block.rs",
+    "src/tools/rustfmt/tests/target/immovable_coroutines.rs",
+    "tests/ui/coroutine/addassign-yield.rs",
+    "tests/ui/coroutine/drop-track-addassign-yield.rs",
+    "tests/ui/coroutine/drop-tracking-yielding-in-match-guards.rs",
+    "tests/ui/coroutine/issue-53548.rs",
+    "tests/ui/coroutine/issue-61442-stmt-expr-with-drop.rs",
+    "tests/ui/coroutine/pin-box-coroutine.rs",
+    "tests/ui/coroutine/size-moved-locals.rs",
+    "tests/ui/coroutine/static-coroutine.rs",
+    "tests/ui/coroutine/static-mut-reference-across-yield.rs",
+    "tests/ui/coroutine/static-reference-across-yield.rs",
+    "tests/ui/expr/weird-exprs.rs",
+
     // TODO: `!` as a pattern
     // https://github.com/dtolnay/syn/issues/1546
     "tests/mir-opt/building/match/never_patterns.rs",

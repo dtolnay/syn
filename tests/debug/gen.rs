@@ -284,6 +284,12 @@ impl Debug for Lite<syn::CapturedParam> {
         }
     }
 }
+impl Debug for Lite<syn::ClosureModifiers> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ClosureModifiers");
+        formatter.finish()
+    }
+}
 impl Debug for Lite<syn::ConstParam> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ConstParam");
@@ -548,11 +554,9 @@ impl Debug for Lite<syn::Expr> {
                     }
                     formatter.field("lifetimes", Print::ref_cast(val));
                 }
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 if _val.constness.is_some() {
                     formatter.field("constness", &Present);
-                }
-                if _val.movability.is_some() {
-                    formatter.field("movability", &Present);
                 }
                 if _val.asyncness.is_some() {
                     formatter.field("asyncness", &Present);
@@ -1179,11 +1183,9 @@ impl Debug for Lite<syn::ExprClosure> {
             }
             formatter.field("lifetimes", Print::ref_cast(val));
         }
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         if self.value.constness.is_some() {
             formatter.field("constness", &Present);
-        }
-        if self.value.movability.is_some() {
-            formatter.field("movability", &Present);
         }
         if self.value.asyncness.is_some() {
             formatter.field("asyncness", &Present);

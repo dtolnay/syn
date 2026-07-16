@@ -94,6 +94,11 @@ pub trait VisitMut {
     fn visit_captured_param_mut(&mut self, i: &mut crate::CapturedParam) {
         visit_captured_param_mut(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_closure_modifiers_mut(&mut self, i: &mut crate::ClosureModifiers) {
+        visit_closure_modifiers_mut(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_const_param_mut(&mut self, i: &mut crate::ConstParam) {
@@ -1215,6 +1220,12 @@ where
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_closure_modifiers_mut<V>(v: &mut V, node: &mut crate::ClosureModifiers)
+where
+    V: VisitMut + ?Sized,
+{}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_const_param_mut<V>(v: &mut V, node: &mut crate::ConstParam)
@@ -1557,8 +1568,8 @@ where
     if let Some(it) = &mut node.lifetimes {
         v.visit_bound_lifetimes_mut(it);
     }
+    v.visit_closure_modifiers_mut(&mut node.modifiers);
     skip!(node.constness);
-    skip!(node.movability);
     skip!(node.asyncness);
     skip!(node.capture);
     skip!(node.or1_token);
