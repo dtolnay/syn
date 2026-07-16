@@ -2549,12 +2549,33 @@ impl Debug for crate::Receiver {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("Receiver");
         formatter.field("attrs", &self.attrs);
-        formatter.field("reference", &self.reference);
         formatter.field("mutability", &self.mutability);
         formatter.field("self_token", &self.self_token);
-        formatter.field("colon_token", &self.colon_token);
-        formatter.field("ty", &self.ty);
+        formatter.field("kind", &self.kind);
         formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::ReceiverKind {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("ReceiverKind::")?;
+        match self {
+            crate::ReceiverKind::Value => formatter.write_str("Value"),
+            crate::ReceiverKind::Reference(v0, v1, v2) => {
+                let mut formatter = formatter.debug_tuple("Reference");
+                formatter.field(v0);
+                formatter.field(v1);
+                formatter.field(v2);
+                formatter.finish()
+            }
+            crate::ReceiverKind::Typed(v0, v1) => {
+                let mut formatter = formatter.debug_tuple("Typed");
+                formatter.field(v0);
+                formatter.field(v1);
+                formatter.finish()
+            }
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

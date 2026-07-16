@@ -1769,9 +1769,29 @@ impl Eq for crate::Receiver {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::Receiver {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.reference == other.reference
-            && self.mutability == other.mutability
-            && self.colon_token == other.colon_token && self.ty == other.ty
+        self.attrs == other.attrs && self.mutability == other.mutability
+            && self.kind == other.kind
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::ReceiverKind {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::ReceiverKind {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (crate::ReceiverKind::Value, crate::ReceiverKind::Value) => true,
+            (
+                crate::ReceiverKind::Reference(_, self1, self2),
+                crate::ReceiverKind::Reference(_, other1, other2),
+            ) => self1 == other1 && self2 == other2,
+            (
+                crate::ReceiverKind::Typed(_, self1),
+                crate::ReceiverKind::Typed(_, other1),
+            ) => self1 == other1,
+            _ => false,
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

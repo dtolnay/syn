@@ -745,6 +745,11 @@ pub trait Visit<'ast> {
     fn visit_receiver(&mut self, i: &'ast crate::Receiver) {
         visit_receiver(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_receiver_kind(&mut self, i: &'ast crate::ReceiverKind) {
+        visit_receiver_kind(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_return_type(&mut self, i: &'ast crate::ReturnType) {
@@ -3337,16 +3342,30 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
-    if let Some(it) = &node.reference {
-        skip!((it).0);
-        if let Some(it) = &(it).1 {
-            v.visit_lifetime(it);
-        }
-    }
     skip!(node.mutability);
     skip!(node.self_token);
-    skip!(node.colon_token);
-    v.visit_type(&*node.ty);
+    v.visit_receiver_kind(&node.kind);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_receiver_kind<'ast, V>(v: &mut V, node: &'ast crate::ReceiverKind)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    match node {
+        crate::ReceiverKind::Value => {}
+        crate::ReceiverKind::Reference(_binding_0, _binding_1, _binding_2) => {
+            skip!(_binding_0);
+            if let Some(it) = _binding_1 {
+                v.visit_lifetime(it);
+            }
+            skip!(_binding_2);
+        }
+        crate::ReceiverKind::Typed(_binding_0, _binding_1) => {
+            skip!(_binding_0);
+            v.visit_type(&**_binding_1);
+        }
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]

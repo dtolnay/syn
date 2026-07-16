@@ -2237,10 +2237,31 @@ impl Hash for crate::Receiver {
         H: Hasher,
     {
         self.attrs.hash(state);
-        self.reference.hash(state);
         self.mutability.hash(state);
-        self.colon_token.hash(state);
-        self.ty.hash(state);
+        self.kind.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::ReceiverKind {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            crate::ReceiverKind::Value => {
+                state.write_u8(0u8);
+            }
+            crate::ReceiverKind::Reference(_, v1, v2) => {
+                state.write_u8(1u8);
+                v1.hash(state);
+                v2.hash(state);
+            }
+            crate::ReceiverKind::Typed(_, v1) => {
+                state.write_u8(2u8);
+                v1.hash(state);
+            }
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

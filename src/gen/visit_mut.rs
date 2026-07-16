@@ -755,6 +755,11 @@ pub trait VisitMut {
     fn visit_receiver_mut(&mut self, i: &mut crate::Receiver) {
         visit_receiver_mut(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_receiver_kind_mut(&mut self, i: &mut crate::ReceiverKind) {
+        visit_receiver_kind_mut(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_return_type_mut(&mut self, i: &mut crate::ReturnType) {
@@ -3172,16 +3177,30 @@ where
     V: VisitMut + ?Sized,
 {
     v.visit_attributes_mut(&mut node.attrs);
-    if let Some(it) = &mut node.reference {
-        skip!((it).0);
-        if let Some(it) = &mut (it).1 {
-            v.visit_lifetime_mut(it);
-        }
-    }
     skip!(node.mutability);
     skip!(node.self_token);
-    skip!(node.colon_token);
-    v.visit_type_mut(&mut *node.ty);
+    v.visit_receiver_kind_mut(&mut node.kind);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_receiver_kind_mut<V>(v: &mut V, node: &mut crate::ReceiverKind)
+where
+    V: VisitMut + ?Sized,
+{
+    match node {
+        crate::ReceiverKind::Value => {}
+        crate::ReceiverKind::Reference(_binding_0, _binding_1, _binding_2) => {
+            skip!(_binding_0);
+            if let Some(it) = _binding_1 {
+                v.visit_lifetime_mut(it);
+            }
+            skip!(_binding_2);
+        }
+        crate::ReceiverKind::Typed(_binding_0, _binding_1) => {
+            skip!(_binding_0);
+            v.visit_type_mut(&mut **_binding_1);
+        }
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]

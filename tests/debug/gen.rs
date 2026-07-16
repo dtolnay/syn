@@ -3655,52 +3655,57 @@ impl Debug for Lite<syn::Receiver> {
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
-        if let Some(val) = &self.value.reference {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print((syn::token::And, Option<syn::Lifetime>));
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some(")?;
-                    Debug::fmt(
-                        {
-                            #[derive(RefCast)]
-                            #[repr(transparent)]
-                            struct Print(Option<syn::Lifetime>);
-                            impl Debug for Print {
-                                fn fmt(
-                                    &self,
-                                    formatter: &mut fmt::Formatter,
-                                ) -> fmt::Result {
-                                    match &self.0 {
-                                        Some(_val) => {
-                                            formatter.write_str("Some(")?;
-                                            Debug::fmt(Lite(_val), formatter)?;
-                                            formatter.write_str(")")?;
-                                            Ok(())
-                                        }
-                                        None => formatter.write_str("None"),
-                                    }
-                                }
-                            }
-                            Print::ref_cast(&self.0.1)
-                        },
-                        formatter,
-                    )?;
-                    formatter.write_str(")")?;
-                    Ok(())
-                }
-            }
-            formatter.field("reference", Print::ref_cast(val));
-        }
         if self.value.mutability.is_some() {
             formatter.field("mutability", &Present);
         }
-        if self.value.colon_token.is_some() {
-            formatter.field("colon_token", &Present);
-        }
-        formatter.field("ty", Lite(&self.value.ty));
+        formatter.field("kind", Lite(&self.value.kind));
         formatter.finish()
+    }
+}
+impl Debug for Lite<syn::ReceiverKind> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match &self.value {
+            syn::ReceiverKind::Value => formatter.write_str("ReceiverKind::Value"),
+            syn::ReceiverKind::Reference(_v0, _v1, _v2) => {
+                let mut formatter = formatter.debug_tuple("ReceiverKind::Reference");
+                formatter
+                    .field({
+                        #[derive(RefCast)]
+                        #[repr(transparent)]
+                        struct Print(Option<syn::Lifetime>);
+                        impl Debug for Print {
+                            fn fmt(
+                                &self,
+                                formatter: &mut fmt::Formatter,
+                            ) -> fmt::Result {
+                                match &self.0 {
+                                    Some(_val) => {
+                                        formatter.write_str("Some(")?;
+                                        Debug::fmt(Lite(_val), formatter)?;
+                                        formatter.write_str(")")?;
+                                        Ok(())
+                                    }
+                                    None => formatter.write_str("None"),
+                                }
+                            }
+                        }
+                        Print::ref_cast(_v1)
+                    });
+                formatter
+                    .field(
+                        &super::Option {
+                            present: _v2.is_some(),
+                        },
+                    );
+                formatter.finish()
+            }
+            syn::ReceiverKind::Typed(_v0, _v1) => {
+                let mut formatter = formatter.debug_tuple("ReceiverKind::Typed");
+                formatter.field(Lite(_v1));
+                formatter.finish()
+            }
+            _ => unreachable!(),
+        }
     }
 }
 impl Debug for Lite<syn::ReturnType> {
