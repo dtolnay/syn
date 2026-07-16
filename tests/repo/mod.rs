@@ -346,11 +346,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/higher-ranked/builtin-closure-like-bounds.rs",
     "tests/ui/sanitizer/cfi/coroutine.rs",
 
-    // TODO: postfix yield
-    // https://github.com/dtolnay/syn/issues/1890
-    "tests/pretty/postfix-yield.rs",
-    "tests/ui/coroutine/postfix-yield.rs",
-
     // TODO: `!` as a pattern
     // https://github.com/dtolnay/syn/issues/1546
     "tests/mir-opt/building/match/never_patterns.rs",
@@ -413,6 +408,11 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/match/postfix-match/no-unused-parens.rs",
     "tests/ui/match/postfix-match/pf-match-chain.rs",
     "tests/ui/match/postfix-match/postfix-match.rs",
+
+    // TODO: postfix yield
+    // https://github.com/dtolnay/syn/issues/1890
+    "tests/pretty/postfix-yield.rs",
+    "tests/ui/coroutine/postfix-yield.rs",
 
     // TODO: delegation: `reuse Trait::bar { Box::new(self.0) }`
     // https://github.com/dtolnay/syn/issues/1580
