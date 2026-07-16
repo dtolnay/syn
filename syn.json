@@ -4102,7 +4102,7 @@
         "elems": {
           "punctuated": {
             "element": {
-              "syn": "Pat"
+              "syn": "TupleElementPat"
             },
             "punct": "Comma"
           }
@@ -4136,7 +4136,7 @@
         "elems": {
           "punctuated": {
             "element": {
-              "syn": "Pat"
+              "syn": "TupleElementPat"
             },
             "punct": "Comma"
           }
@@ -4882,6 +4882,24 @@
         }
       },
       "exhaustive": false
+    },
+    {
+      "ident": "TupleElementPat",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "pat": {
+          "syn": "Pat"
+        }
+      }
     },
     {
       "ident": "TupleElementType",

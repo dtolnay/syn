@@ -895,6 +895,14 @@ pub trait Fold {
     ) -> crate::TraitModifiers {
         fold_trait_modifiers(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_tuple_element_pat(
+        &mut self,
+        i: crate::TupleElementPat,
+    ) -> crate::TupleElementPat {
+        fold_tuple_element_pat(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_tuple_element_type(
@@ -3127,7 +3135,7 @@ where
     crate::PatTuple {
         attrs: f.fold_attributes(node.attrs),
         paren_token: node.paren_token,
-        elems: crate::punctuated::fold(node.elems, f, F::fold_pat),
+        elems: crate::punctuated::fold(node.elems, f, F::fold_tuple_element_pat),
     }
 }
 #[cfg(feature = "full")]
@@ -3144,7 +3152,7 @@ where
         qself: (node.qself).map(|it| f.fold_qself(it)),
         path: f.fold_path(node.path),
         paren_token: node.paren_token,
-        elems: crate::punctuated::fold(node.elems, f, F::fold_pat),
+        elems: crate::punctuated::fold(node.elems, f, F::fold_tuple_element_pat),
     }
 }
 #[cfg(feature = "full")]
@@ -3552,6 +3560,20 @@ where
 {
     crate::TraitModifiers {
         auto_token: node.auto_token,
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_tuple_element_pat<F>(
+    f: &mut F,
+    node: crate::TupleElementPat,
+) -> crate::TupleElementPat
+where
+    F: Fold + ?Sized,
+{
+    crate::TupleElementPat {
+        attrs: f.fold_attributes(node.attrs),
+        pat: f.fold_pat(node.pat),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

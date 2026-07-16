@@ -166,8 +166,10 @@ fn test_let_else() {
                 ],
             },
             elems: [
-                Pat::Ident {
-                    ident: "x",
+                TupleElementPat {
+                    pat: Pat::Ident {
+                        ident: "x",
+                    },
                 },
             ],
         },
