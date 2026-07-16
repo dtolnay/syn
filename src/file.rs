@@ -87,7 +87,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A `---` fenced frontmatter section.
+    /// A frontmatter section fenced by `---`.
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     #[non_exhaustive]
     pub struct Frontmatter {}
