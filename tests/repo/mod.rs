@@ -651,10 +651,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/closure_range_method_call.rs",
     "src/tools/rustfmt/tests/source/issue-4808.rs",
 
-    // Negative inherent impl: `impl !Box<JoinHandle> {}`
-    "src/tools/rustfmt/tests/source/negative-impl.rs",
-    "src/tools/rustfmt/tests/target/negative-impl.rs",
-
     // Compile-fail expr parameter in const generic position: `f::<1 + 2>()`
     "tests/ui/const-generics/early/closing-args-token.rs",
     "tests/ui/const-generics/early/const-expression-parameter.rs",
