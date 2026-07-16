@@ -905,26 +905,29 @@ ast_enum_of_structs! {
 
 ast_struct! {
     /// The `self` argument of an associated method.
-    ///
-    /// If `colon_token` is present, the receiver is written with an explicit
-    /// type such as `self: Box<Self>`. If `colon_token` is absent, the receiver
-    /// is written in shorthand such as `self` or `&self` or `&mut self`. In the
-    /// shorthand case, the type in `ty` is reconstructed as one of `Self`,
-    /// `&Self`, or `&mut Self`.
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct Receiver {
         pub attrs: Vec<Attribute>,
-        pub reference: Option<(Token![&], Option<Lifetime>)>,
         pub mutability: Option<Token![mut]>,
         pub self_token: Token![self],
-        pub colon_token: Option<Token![:]>,
-        pub ty: Box<Type>,
+        pub kind: ReceiverKind,
     }
 }
 
-impl Receiver {
-    pub fn lifetime(&self) -> Option<&Lifetime> {
-        self.reference.as_ref()?.1.as_ref()
+ast_enum! {
+    /// Different shorthand and explicit notations for a method receiver.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    #[non_exhaustive]
+    pub enum ReceiverKind {
+        /// `self` or `mut self`
+        Value,
+        /// `&self` or `&mut self`
+        Reference(Token![&], Option<Lifetime>, Option<Token![mut]>),
+        /// `self: Box<Self>`
+        Typed(Token![:], Box<Type>),
+
+        // TODO: https://github.com/rust-lang/rust/issues/123076
+        // Pin(Token![&], Option<Lifetime>, Token![pin], PointerMutability),
     }
 }
 
@@ -974,7 +977,7 @@ pub(crate) mod parsing {
         ForeignItemType, ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType,
         ImplModifiers, Item, ItemConst, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod,
         ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType,
-        ItemUnion, ItemUse, Receiver, Safety, Signature, StaticMutability, TraitItem,
+        ItemUnion, ItemUse, Receiver, ReceiverKind, Safety, Signature, StaticMutability, TraitItem,
         TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, TraitModifiers, UseGlob,
         UseGroup, UseName, UsePath, UseRename, UseTree, Variadic,
     };
@@ -989,7 +992,7 @@ pub(crate) mod parsing {
     use crate::restriction::Visibility;
     use crate::stmt::Block;
     use crate::token;
-    use crate::ty::{Abi, ReturnType, Type, TypePath, TypeReference};
+    use crate::ty::{Abi, ReturnType, Type, TypePath};
     use crate::verbatim;
     use alloc::boxed::Box;
     use alloc::vec::Vec;
@@ -1755,7 +1758,7 @@ pub(crate) mod parsing {
 
     fn parse_rest_of_receiver(
         reference: Option<(Token![&], Option<Lifetime>)>,
-        mutability: Option<Token![mut]>,
+        mut mutability: Option<Token![mut]>,
         self_token: Token![self],
         input: ParseStream,
     ) -> Result<Receiver> {
@@ -1764,32 +1767,19 @@ pub(crate) mod parsing {
         } else {
             input.parse()?
         };
-        let ty: Type = if colon_token.is_some() {
-            input.parse()?
+        let kind = if let Some(colon_token) = colon_token {
+            let ty: Type = input.parse()?;
+            ReceiverKind::Typed(colon_token, Box::new(ty))
+        } else if let Some((ampersand, lifetime)) = reference {
+            ReceiverKind::Reference(ampersand, lifetime, mutability.take())
         } else {
-            let mut ty = Type::Path(TypePath {
-                attrs: Vec::new(),
-                qself: None,
-                path: Path::from(Ident::new("Self", self_token.span)),
-            });
-            if let Some((ampersand, lifetime)) = reference.as_ref() {
-                ty = Type::Reference(TypeReference {
-                    attrs: Vec::new(),
-                    and_token: Token![&](ampersand.span),
-                    lifetime: lifetime.clone(),
-                    mutability: mutability.as_ref().map(|m| Token![mut](m.span)),
-                    elem: Box::new(ty),
-                });
-            }
-            ty
+            ReceiverKind::Value
         };
         Ok(Receiver {
             attrs: Vec::new(),
-            reference,
             mutability,
             self_token,
-            colon_token,
-            ty: Box::new(ty),
+            kind,
         })
     }
 
@@ -3069,7 +3059,7 @@ mod printing {
         ForeignItemFn, ForeignItemMacro, ForeignItemStatic, ForeignItemType, ImplItemConst,
         ImplItemFn, ImplItemMacro, ImplItemType, ItemConst, ItemEnum, ItemExternCrate, ItemFn,
         ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait,
-        ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, Safety, Signature,
+        ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, ReceiverKind, Safety, Signature,
         StaticMutability, TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, UseGlob,
         UseGroup, UseName, UsePath, UseRename, Variadic,
     };
@@ -3077,7 +3067,6 @@ mod printing {
     use crate::path;
     use crate::path::printing::PathStyle;
     use crate::print::TokensOrDefault;
-    use crate::ty::Type;
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt as _};
 
@@ -3581,30 +3570,22 @@ mod printing {
     impl ToTokens for Receiver {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
-            if let Some((ampersand, lifetime)) = &self.reference {
-                ampersand.to_tokens(tokens);
-                lifetime.to_tokens(tokens);
-            }
-            self.mutability.to_tokens(tokens);
-            self.self_token.to_tokens(tokens);
-            if let Some(colon_token) = &self.colon_token {
-                colon_token.to_tokens(tokens);
-                self.ty.to_tokens(tokens);
-            } else {
-                let consistent = match (&self.reference, &self.mutability, &*self.ty) {
-                    (Some(_), mutability, Type::Reference(ty)) => {
-                        mutability.is_some() == ty.mutability.is_some()
-                            && match &*ty.elem {
-                                Type::Path(ty) => ty.qself.is_none() && ty.path.is_ident("Self"),
-                                _ => false,
-                            }
-                    }
-                    (None, _, Type::Path(ty)) => ty.qself.is_none() && ty.path.is_ident("Self"),
-                    _ => false,
-                };
-                if !consistent {
-                    <Token![:]>::default().to_tokens(tokens);
-                    self.ty.to_tokens(tokens);
+            match &self.kind {
+                ReceiverKind::Value => {
+                    self.mutability.to_tokens(tokens);
+                    self.self_token.to_tokens(tokens);
+                }
+                ReceiverKind::Reference(ampersand, lifetime, mutability) => {
+                    ampersand.to_tokens(tokens);
+                    lifetime.to_tokens(tokens);
+                    mutability.to_tokens(tokens);
+                    self.self_token.to_tokens(tokens);
+                }
+                ReceiverKind::Typed(colon_token, ty) => {
+                    self.mutability.to_tokens(tokens);
+                    self.self_token.to_tokens(tokens);
+                    colon_token.to_tokens(tokens);
+                    ty.to_tokens(tokens);
                 }
             }
         }

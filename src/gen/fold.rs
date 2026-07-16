@@ -801,6 +801,11 @@ pub trait Fold {
     fn fold_receiver(&mut self, i: crate::Receiver) -> crate::Receiver {
         fold_receiver(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_receiver_kind(&mut self, i: crate::ReceiverKind) -> crate::ReceiverKind {
+        fold_receiver_kind(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_return_type(&mut self, i: crate::ReturnType) -> crate::ReturnType {
@@ -3310,12 +3315,29 @@ where
 {
     crate::Receiver {
         attrs: f.fold_attributes(node.attrs),
-        reference: (node.reference)
-            .map(|it| ((it).0, ((it).1).map(|it| f.fold_lifetime(it)))),
         mutability: node.mutability,
         self_token: node.self_token,
-        colon_token: node.colon_token,
-        ty: Box::new(f.fold_type(*node.ty)),
+        kind: f.fold_receiver_kind(node.kind),
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_receiver_kind<F>(f: &mut F, node: crate::ReceiverKind) -> crate::ReceiverKind
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        crate::ReceiverKind::Value => crate::ReceiverKind::Value,
+        crate::ReceiverKind::Reference(_binding_0, _binding_1, _binding_2) => {
+            crate::ReceiverKind::Reference(
+                _binding_0,
+                (_binding_1).map(|it| f.fold_lifetime(it)),
+                _binding_2,
+            )
+        }
+        crate::ReceiverKind::Typed(_binding_0, _binding_1) => {
+            crate::ReceiverKind::Typed(_binding_0, Box::new(f.fold_type(*_binding_1)))
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

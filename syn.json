@@ -4428,20 +4428,6 @@
             "syn": "Attribute"
           }
         },
-        "reference": {
-          "option": {
-            "tuple": [
-              {
-                "token": "And"
-              },
-              {
-                "option": {
-                  "syn": "Lifetime"
-                }
-              }
-            ]
-          }
-        },
         "mutability": {
           "option": {
             "token": "Mut"
@@ -4450,17 +4436,47 @@
         "self_token": {
           "token": "SelfValue"
         },
-        "colon_token": {
-          "option": {
-            "token": "Colon"
-          }
-        },
-        "ty": {
-          "box": {
-            "syn": "Type"
-          }
+        "kind": {
+          "syn": "ReceiverKind"
         }
       }
+    },
+    {
+      "ident": "ReceiverKind",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "variants": {
+        "Value": [],
+        "Reference": [
+          {
+            "token": "And"
+          },
+          {
+            "option": {
+              "syn": "Lifetime"
+            }
+          },
+          {
+            "option": {
+              "token": "Mut"
+            }
+          }
+        ],
+        "Typed": [
+          {
+            "token": "Colon"
+          },
+          {
+            "box": {
+              "syn": "Type"
+            }
+          }
+        ]
+      },
+      "exhaustive": false
     },
     {
       "ident": "ReturnType",

@@ -1781,11 +1781,24 @@ impl Clone for crate::Receiver {
     fn clone(&self) -> Self {
         crate::Receiver {
             attrs: self.attrs.clone(),
-            reference: self.reference.clone(),
             mutability: self.mutability.clone(),
             self_token: self.self_token.clone(),
-            colon_token: self.colon_token.clone(),
-            ty: self.ty.clone(),
+            kind: self.kind.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::ReceiverKind {
+    fn clone(&self) -> Self {
+        match self {
+            crate::ReceiverKind::Value => crate::ReceiverKind::Value,
+            crate::ReceiverKind::Reference(v0, v1, v2) => {
+                crate::ReceiverKind::Reference(v0.clone(), v1.clone(), v2.clone())
+            }
+            crate::ReceiverKind::Typed(v0, v1) => {
+                crate::ReceiverKind::Typed(v0.clone(), v1.clone())
+            }
         }
     }
 }
