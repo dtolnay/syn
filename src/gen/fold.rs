@@ -1051,6 +1051,14 @@ pub trait Fold {
     fn fold_where_clause(&mut self, i: crate::WhereClause) -> crate::WhereClause {
         fold_where_clause(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_where_clause_placement(
+        &mut self,
+        i: crate::WhereClausePlacement,
+    ) -> crate::WhereClausePlacement {
+        fold_where_clause_placement(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_where_predicate(
@@ -2691,6 +2699,8 @@ where
         eq_token: node.eq_token,
         ty: Box::new(f.fold_type(*node.ty)),
         semi_token: node.semi_token,
+        where_clause_placement: f
+            .fold_where_clause_placement(node.where_clause_placement),
     }
 }
 #[cfg(feature = "full")]
@@ -4000,6 +4010,20 @@ where
     crate::WhereClause {
         where_token: node.where_token,
         predicates: crate::punctuated::fold(node.predicates, f, F::fold_where_predicate),
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_where_clause_placement<F>(
+    f: &mut F,
+    node: crate::WhereClausePlacement,
+) -> crate::WhereClausePlacement
+where
+    F: Fold + ?Sized,
+{
+    match node {
+        crate::WhereClausePlacement::Early => crate::WhereClausePlacement::Early,
+        crate::WhereClausePlacement::Late => crate::WhereClausePlacement::Late,
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

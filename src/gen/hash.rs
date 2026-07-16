@@ -1667,6 +1667,7 @@ impl Hash for crate::ItemType {
         self.ident.hash(state);
         self.generics.hash(state);
         self.ty.hash(state);
+        self.where_clause_placement.hash(state);
     }
 }
 #[cfg(feature = "full")]
@@ -2941,6 +2942,23 @@ impl Hash for crate::WhereClause {
         H: Hasher,
     {
         self.predicates.hash(state);
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::WhereClausePlacement {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            crate::WhereClausePlacement::Early => {
+                state.write_u8(0u8);
+            }
+            crate::WhereClausePlacement::Late => {
+                state.write_u8(1u8);
+            }
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

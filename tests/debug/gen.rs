@@ -2527,6 +2527,8 @@ impl Debug for Lite<syn::Item> {
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
                 formatter.field("ty", Lite(&_val.ty));
+                formatter
+                    .field("where_clause_placement", Lite(&_val.where_clause_placement));
                 formatter.finish()
             }
             syn::Item::Union(_val) => {
@@ -2821,6 +2823,8 @@ impl Debug for Lite<syn::ItemType> {
         formatter.field("ident", Lite(&self.value.ident));
         formatter.field("generics", Lite(&self.value.generics));
         formatter.field("ty", Lite(&self.value.ty));
+        formatter
+            .field("where_clause_placement", Lite(&self.value.where_clause_placement));
         formatter.finish()
     }
 }
@@ -4803,6 +4807,18 @@ impl Debug for Lite<syn::WhereClause> {
             formatter.field("predicates", Lite(&self.value.predicates));
         }
         formatter.finish()
+    }
+}
+impl Debug for Lite<syn::WhereClausePlacement> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match &self.value {
+            syn::WhereClausePlacement::Early => {
+                formatter.write_str("WhereClausePlacement::Early")
+            }
+            syn::WhereClausePlacement::Late => {
+                formatter.write_str("WhereClausePlacement::Late")
+            }
+        }
     }
 }
 impl Debug for Lite<syn::WherePredicate> {

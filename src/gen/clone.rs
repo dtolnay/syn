@@ -1324,6 +1324,7 @@ impl Clone for crate::ItemType {
             eq_token: self.eq_token.clone(),
             ty: self.ty.clone(),
             semi_token: self.semi_token.clone(),
+            where_clause_placement: self.where_clause_placement.clone(),
         }
     }
 }
