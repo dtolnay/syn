@@ -357,6 +357,7 @@ fn test_trailing_plus() {
 #[test]
 fn test_tuple_comma() {
     let mut expr = TypeTuple {
+        attrs: Vec::new(),
         paren_token: token::Paren::default(),
         elems: Punctuated::new(),
     };
@@ -367,9 +368,7 @@ fn test_tuple_comma() {
     snapshot!(expr.to_token_stream() as Type, @"
     Type::Tuple {
         elems: [
-            TupleElementType {
-                ty: Type::Infer,
-            },
+            Type::Infer,
             Token![,],
         ],
     }
@@ -379,9 +378,7 @@ fn test_tuple_comma() {
     snapshot!(expr.to_token_stream() as Type, @"
     Type::Tuple {
         elems: [
-            TupleElementType {
-                ty: Type::Infer,
-            },
+            Type::Infer,
             Token![,],
         ],
     }
@@ -391,13 +388,9 @@ fn test_tuple_comma() {
     snapshot!(expr.to_token_stream() as Type, @"
     Type::Tuple {
         elems: [
-            TupleElementType {
-                ty: Type::Infer,
-            },
+            Type::Infer,
             Token![,],
-            TupleElementType {
-                ty: Type::Infer,
-            },
+            Type::Infer,
         ],
     }
     ");
@@ -406,13 +399,9 @@ fn test_tuple_comma() {
     snapshot!(expr.to_token_stream() as Type, @"
     Type::Tuple {
         elems: [
-            TupleElementType {
-                ty: Type::Infer,
-            },
+            Type::Infer,
             Token![,],
-            TupleElementType {
-                ty: Type::Infer,
-            },
+            Type::Infer,
             Token![,],
         ],
     }

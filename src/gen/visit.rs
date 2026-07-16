@@ -817,16 +817,6 @@ pub trait Visit<'ast> {
     fn visit_trait_modifiers(&mut self, i: &'ast crate::TraitModifiers) {
         visit_trait_modifiers(self, i);
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    fn visit_tuple_element_pat(&mut self, i: &'ast crate::TupleElementPat) {
-        visit_tuple_element_pat(self, i);
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn visit_tuple_element_type(&mut self, i: &'ast crate::TupleElementType) {
-        visit_tuple_element_type(self, i);
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_type(&mut self, i: &'ast crate::Type) {
@@ -3164,7 +3154,7 @@ where
     skip!(node.paren_token);
     for el in Punctuated::pairs(&node.elems) {
         let it = el.value();
-        v.visit_tuple_element_pat(it);
+        v.visit_pat(it);
     }
 }
 #[cfg(feature = "full")]
@@ -3183,7 +3173,7 @@ where
     skip!(node.paren_token);
     for el in Punctuated::pairs(&node.elems) {
         let it = el.value();
-        v.visit_tuple_element_pat(it);
+        v.visit_pat(it);
     }
 }
 #[cfg(feature = "full")]
@@ -3591,28 +3581,6 @@ where
 {
     skip!(node.auto_token);
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub fn visit_tuple_element_pat<'ast, V>(v: &mut V, node: &'ast crate::TupleElementPat)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it);
-    }
-    v.visit_pat(&node.pat);
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn visit_tuple_element_type<'ast, V>(v: &mut V, node: &'ast crate::TupleElementType)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it);
-    }
-    v.visit_type(&node.ty);
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_type<'ast, V>(v: &mut V, node: &'ast crate::Type)
@@ -3673,6 +3641,9 @@ pub fn visit_type_array<'ast, V>(v: &mut V, node: &'ast crate::TypeArray)
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     skip!(node.bracket_token);
     v.visit_type(&*node.elem);
     skip!(node.semi_token);
@@ -3684,6 +3655,9 @@ pub fn visit_type_fn_ptr<'ast, V>(v: &mut V, node: &'ast crate::TypeFnPtr)
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     if let Some(it) = &node.lifetimes {
         v.visit_bound_lifetimes(it);
     }
@@ -3708,6 +3682,9 @@ pub fn visit_type_group<'ast, V>(v: &mut V, node: &'ast crate::TypeGroup)
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     skip!(node.group_token);
     v.visit_type(&*node.elem);
 }
@@ -3717,6 +3694,9 @@ pub fn visit_type_impl_trait<'ast, V>(v: &mut V, node: &'ast crate::TypeImplTrai
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     skip!(node.impl_token);
     for el in Punctuated::pairs(&node.bounds) {
         let it = el.value();
@@ -3729,6 +3709,9 @@ pub fn visit_type_infer<'ast, V>(v: &mut V, node: &'ast crate::TypeInfer)
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     skip!(node.underscore_token);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3737,6 +3720,9 @@ pub fn visit_type_macro<'ast, V>(v: &mut V, node: &'ast crate::TypeMacro)
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     v.visit_macro(&node.mac);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3745,6 +3731,9 @@ pub fn visit_type_never<'ast, V>(v: &mut V, node: &'ast crate::TypeNever)
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     skip!(node.bang_token);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3794,6 +3783,9 @@ pub fn visit_type_paren<'ast, V>(v: &mut V, node: &'ast crate::TypeParen)
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     skip!(node.paren_token);
     v.visit_type(&*node.elem);
 }
@@ -3803,6 +3795,9 @@ pub fn visit_type_path<'ast, V>(v: &mut V, node: &'ast crate::TypePath)
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     if let Some(it) = &node.qself {
         v.visit_qself(it);
     }
@@ -3814,6 +3809,9 @@ pub fn visit_type_ptr<'ast, V>(v: &mut V, node: &'ast crate::TypePtr)
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     skip!(node.star_token);
     v.visit_pointer_mutability(&node.mutability);
     v.visit_type(&*node.elem);
@@ -3824,6 +3822,9 @@ pub fn visit_type_reference<'ast, V>(v: &mut V, node: &'ast crate::TypeReference
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     skip!(node.and_token);
     if let Some(it) = &node.lifetime {
         v.visit_lifetime(it);
@@ -3837,6 +3838,9 @@ pub fn visit_type_slice<'ast, V>(v: &mut V, node: &'ast crate::TypeSlice)
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     skip!(node.bracket_token);
     v.visit_type(&*node.elem);
 }
@@ -3846,6 +3850,9 @@ pub fn visit_type_trait_object<'ast, V>(v: &mut V, node: &'ast crate::TypeTraitO
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     skip!(node.dyn_token);
     for el in Punctuated::pairs(&node.bounds) {
         let it = el.value();
@@ -3858,10 +3865,13 @@ pub fn visit_type_tuple<'ast, V>(v: &mut V, node: &'ast crate::TypeTuple)
 where
     V: Visit<'ast> + ?Sized,
 {
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
     skip!(node.paren_token);
     for el in Punctuated::pairs(&node.elems) {
         let it = el.value();
-        v.visit_tuple_element_type(it);
+        v.visit_type(it);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

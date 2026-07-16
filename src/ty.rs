@@ -95,6 +95,7 @@ ast_struct! {
     /// A fixed size array type: `[T; n]`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeArray {
+        pub attrs: Vec<Attribute>,
         pub bracket_token: token::Bracket,
         pub elem: Box<Type>,
         pub semi_token: Token![;],
@@ -106,6 +107,7 @@ ast_struct! {
     /// A function pointer type: `fn(usize) -> bool`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeFnPtr {
+        pub attrs: Vec<Attribute>,
         pub lifetimes: Option<BoundLifetimes>,
         pub unsafety: Option<Token![unsafe]>,
         pub abi: Option<Abi>,
@@ -121,6 +123,7 @@ ast_struct! {
     /// A type contained within invisible delimiters.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeGroup {
+        pub attrs: Vec<Attribute>,
         pub group_token: token::Group,
         pub elem: Box<Type>,
     }
@@ -131,6 +134,7 @@ ast_struct! {
     /// a lifetime.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeImplTrait {
+        pub attrs: Vec<Attribute>,
         pub impl_token: Token![impl],
         pub bounds: Punctuated<TypeParamBound, Token![+]>,
     }
@@ -140,6 +144,7 @@ ast_struct! {
     /// Indication that a type should be inferred by the compiler: `_`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeInfer {
+        pub attrs: Vec<Attribute>,
         pub underscore_token: Token![_],
     }
 }
@@ -148,6 +153,7 @@ ast_struct! {
     /// A macro in the type position.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeMacro {
+        pub attrs: Vec<Attribute>,
         pub mac: Macro,
     }
 }
@@ -156,6 +162,7 @@ ast_struct! {
     /// The never type: `!`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeNever {
+        pub attrs: Vec<Attribute>,
         pub bang_token: Token![!],
     }
 }
@@ -164,6 +171,7 @@ ast_struct! {
     /// A parenthesized type equivalent to the inner type.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeParen {
+        pub attrs: Vec<Attribute>,
         pub paren_token: token::Paren,
         pub elem: Box<Type>,
     }
@@ -174,6 +182,7 @@ ast_struct! {
     /// self-type as in `<Vec<T> as SomeTrait>::Associated`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypePath {
+        pub attrs: Vec<Attribute>,
         pub qself: Option<QSelf>,
         pub path: Path,
     }
@@ -183,6 +192,7 @@ ast_struct! {
     /// A raw pointer type: `*const T` or `*mut T`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypePtr {
+        pub attrs: Vec<Attribute>,
         pub star_token: Token![*],
         pub mutability: PointerMutability,
         pub elem: Box<Type>,
@@ -193,6 +203,7 @@ ast_struct! {
     /// A reference type: `&'a T` or `&'a mut T`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeReference {
+        pub attrs: Vec<Attribute>,
         pub and_token: Token![&],
         pub lifetime: Option<Lifetime>,
         pub mutability: Option<Token![mut]>,
@@ -204,6 +215,7 @@ ast_struct! {
     /// A dynamically sized slice type: `[T]`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeSlice {
+        pub attrs: Vec<Attribute>,
         pub bracket_token: token::Bracket,
         pub elem: Box<Type>,
     }
@@ -214,6 +226,7 @@ ast_struct! {
     /// trait or a lifetime.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeTraitObject {
+        pub attrs: Vec<Attribute>,
         pub dyn_token: Option<Token![dyn]>,
         pub bounds: Punctuated<TypeParamBound, Token![+]>,
     }
@@ -223,8 +236,9 @@ ast_struct! {
     /// A tuple type: `(A, B, C, String)`.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeTuple {
+        pub attrs: Vec<Attribute>,
         pub paren_token: token::Paren,
-        pub elems: Punctuated<TupleElementType, Token![,]>,
+        pub elems: Punctuated<Type, Token![,]>,
     }
 }
 
@@ -281,14 +295,6 @@ ast_enum! {
     }
 }
 
-ast_struct! {
-    /// A type inside a tuple, including its attributes.
-    pub struct TupleElementType {
-        pub attrs: Vec<Attribute>,
-        pub ty: Type,
-    }
-}
-
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::attr::Attribute;
@@ -304,9 +310,9 @@ pub(crate) mod parsing {
     use crate::punctuated::Punctuated;
     use crate::token;
     use crate::ty::{
-        Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, TupleElementType, Type,
-        TypeArray, TypeFnPtr, TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen,
-        TypePath, TypePtr, TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
+        Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, Type, TypeArray, TypeFnPtr,
+        TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
+        TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
     use crate::verbatim;
     use alloc::boxed::Box;
@@ -351,6 +357,7 @@ pub(crate) mod parsing {
                     return Ok(Type::Path(ty));
                 } else {
                     return Ok(Type::Path(TypePath {
+                        attrs: Vec::new(),
                         qself: Some(QSelf {
                             lt_token: Token![<](group.group_token.span),
                             position: 0,
@@ -402,18 +409,21 @@ pub(crate) mod parsing {
             let paren_token = parenthesized!(content in input);
             if content.is_empty() {
                 return Ok(Type::Tuple(TypeTuple {
+                    attrs: Vec::new(),
                     paren_token,
                     elems: Punctuated::new(),
                 }));
             }
             if content.peek(Lifetime) {
                 return Ok(Type::Paren(TypeParen {
+                    attrs: Vec::new(),
                     paren_token,
                     elem: Box::new(Type::TraitObject(content.parse()?)),
                 }));
             }
             if content.peek(Token![?]) {
                 return Ok(Type::TraitObject(TypeTraitObject {
+                    attrs: Vec::new(),
                     dyn_token: None,
                     bounds: {
                         let mut bounds = Punctuated::new();
@@ -440,19 +450,14 @@ pub(crate) mod parsing {
             let mut first: Type = content.parse()?;
             if content.peek(Token![,]) {
                 return Ok(Type::Tuple(TypeTuple {
+                    attrs: Vec::new(),
                     paren_token,
                     elems: {
                         let mut elems = Punctuated::new();
-                        elems.push_value(TupleElementType {
-                            attrs: Vec::new(),
-                            ty: first,
-                        });
+                        elems.push_value(first);
                         elems.push_punct(content.parse()?);
                         while !content.is_empty() {
-                            elems.push_value(TupleElementType {
-                                attrs: Vec::new(),
-                                ty: content.parse()?,
-                            });
+                            elems.push_value(content.parse()?);
                             if content.is_empty() {
                                 break;
                             }
@@ -465,20 +470,24 @@ pub(crate) mod parsing {
             if allow_plus && input.peek(Token![+]) {
                 loop {
                     let first = match first {
-                        Type::Path(TypePath { qself: None, path }) => {
-                            TypeParamBound::Trait(TraitBound {
-                                paren_token: Some(paren_token),
-                                modifiers: TraitBoundModifiers::default(),
-                                lifetimes: None,
-                                path,
-                            })
-                        }
+                        Type::Path(TypePath {
+                            attrs: _,
+                            qself: None,
+                            path,
+                        }) => TypeParamBound::Trait(TraitBound {
+                            paren_token: Some(paren_token),
+                            modifiers: TraitBoundModifiers::default(),
+                            lifetimes: None,
+                            path,
+                        }),
                         Type::TraitObject(TypeTraitObject {
+                            attrs: _,
                             dyn_token: None,
                             bounds,
                         }) => {
                             if bounds.len() > 1 || bounds.trailing_punct() {
                                 first = Type::TraitObject(TypeTraitObject {
+                                    attrs: Vec::new(),
                                     dyn_token: None,
                                     bounds,
                                 });
@@ -499,6 +508,7 @@ pub(crate) mod parsing {
                         _ => break,
                     };
                     return Ok(Type::TraitObject(TypeTraitObject {
+                        attrs: Vec::new(),
                         dyn_token: None,
                         bounds: {
                             let mut bounds = Punctuated::new();
@@ -521,6 +531,7 @@ pub(crate) mod parsing {
                 }
             }
             Ok(Type::Paren(TypeParen {
+                attrs: Vec::new(),
                 paren_token,
                 elem: Box::new(first),
             }))
@@ -559,6 +570,7 @@ pub(crate) mod parsing {
                 let bang_token: Token![!] = input.parse()?;
                 let (delimiter, tokens) = mac::parse_delimiter(input)?;
                 return Ok(Type::Macro(TypeMacro {
+                    attrs: Vec::new(),
                     mac: Macro {
                         path: ty.path,
                         bang_token,
@@ -595,6 +607,7 @@ pub(crate) mod parsing {
                     }
                 }
                 return Ok(Type::TraitObject(TypeTraitObject {
+                    attrs: Vec::new(),
                     dyn_token: None,
                     bounds,
                 }));
@@ -610,6 +623,7 @@ pub(crate) mod parsing {
                 Type::Verbatim(verbatim::between(begin, input.cursor()))
             } else {
                 Type::TraitObject(TypeTraitObject {
+                    attrs: Vec::new(),
                     dyn_token: Some(dyn_token),
                     bounds,
                 })
@@ -620,6 +634,7 @@ pub(crate) mod parsing {
             let elem: Type = content.parse()?;
             if content.peek(Token![;]) {
                 Ok(Type::Array(TypeArray {
+                    attrs: Vec::new(),
                     bracket_token,
                     elem: Box::new(elem),
                     semi_token: content.parse()?,
@@ -627,6 +642,7 @@ pub(crate) mod parsing {
                 }))
             } else {
                 Ok(Type::Slice(TypeSlice {
+                    attrs: Vec::new(),
                     bracket_token,
                     elem: Box::new(elem),
                 }))
@@ -653,6 +669,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let content;
             Ok(TypeSlice {
+                attrs: Vec::new(),
                 bracket_token: bracketed!(content in input),
                 elem: content.parse()?,
             })
@@ -664,6 +681,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let content;
             Ok(TypeArray {
+                attrs: Vec::new(),
                 bracket_token: bracketed!(content in input),
                 elem: content.parse()?,
                 semi_token: content.parse()?,
@@ -676,6 +694,7 @@ pub(crate) mod parsing {
     impl Parse for TypePtr {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(TypePtr {
+                attrs: Vec::new(),
                 star_token: input.parse()?,
                 mutability: input.parse()?,
                 elem: Box::new(input.call(Type::without_plus)?),
@@ -687,6 +706,7 @@ pub(crate) mod parsing {
     impl Parse for TypeReference {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(TypeReference {
+                attrs: Vec::new(),
                 and_token: input.parse()?,
                 lifetime: input.parse()?,
                 mutability: input.parse()?,
@@ -703,6 +723,7 @@ pub(crate) mod parsing {
             let mut variadic = None;
 
             Ok(TypeFnPtr {
+                attrs: Vec::new(),
                 lifetimes: input.parse()?,
                 unsafety: input.parse()?,
                 abi: input.parse()?,
@@ -747,6 +768,7 @@ pub(crate) mod parsing {
     impl Parse for TypeNever {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(TypeNever {
+                attrs: Vec::new(),
                 bang_token: input.parse()?,
             })
         }
@@ -756,6 +778,7 @@ pub(crate) mod parsing {
     impl Parse for TypeInfer {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(TypeInfer {
+                attrs: Vec::new(),
                 underscore_token: input.parse()?,
             })
         }
@@ -769,6 +792,7 @@ pub(crate) mod parsing {
 
             if content.is_empty() {
                 return Ok(TypeTuple {
+                    attrs: Vec::new(),
                     paren_token,
                     elems: Punctuated::new(),
                 });
@@ -776,19 +800,14 @@ pub(crate) mod parsing {
 
             let first: Type = content.parse()?;
             Ok(TypeTuple {
+                attrs: Vec::new(),
                 paren_token,
                 elems: {
                     let mut elems = Punctuated::new();
-                    elems.push_value(TupleElementType {
-                        attrs: Vec::new(),
-                        ty: first,
-                    });
+                    elems.push_value(first);
                     elems.push_punct(content.parse()?);
                     while !content.is_empty() {
-                        elems.push_value(TupleElementType {
-                            attrs: Vec::new(),
-                            ty: content.parse()?,
-                        });
+                        elems.push_value(content.parse()?);
                         if content.is_empty() {
                             break;
                         }
@@ -804,6 +823,7 @@ pub(crate) mod parsing {
     impl Parse for TypeMacro {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(TypeMacro {
+                attrs: Vec::new(),
                 mac: input.parse()?,
             })
         }
@@ -814,7 +834,11 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let expr_style = false;
             let (qself, path) = path::parsing::qpath(input, expr_style)?;
-            Ok(TypePath { qself, path })
+            Ok(TypePath {
+                attrs: Vec::new(),
+                qself,
+                path,
+            })
         }
     }
 
@@ -868,7 +892,11 @@ pub(crate) mod parsing {
                 None => input.span(),
             };
             let bounds = Self::parse_bounds(dyn_span, input, allow_plus)?;
-            Ok(TypeTraitObject { dyn_token, bounds })
+            Ok(TypeTraitObject {
+                attrs: Vec::new(),
+                dyn_token,
+                bounds,
+            })
         }
 
         fn parse_bounds(
@@ -971,7 +999,11 @@ pub(crate) mod parsing {
                     msg,
                 ));
             }
-            Ok(TypeImplTrait { impl_token, bounds })
+            Ok(TypeImplTrait {
+                attrs: Vec::new(),
+                impl_token,
+                bounds,
+            })
         }
     }
 
@@ -980,6 +1012,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let group = crate::group::parse_group(input)?;
             Ok(TypeGroup {
+                attrs: Vec::new(),
                 group_token: group.token,
                 elem: group.content.parse()?,
             })
@@ -998,6 +1031,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
             let content;
             Ok(TypeParen {
+                attrs: Vec::new(),
                 paren_token: parenthesized!(content in input),
                 elem: Box::new({
                     let allow_group_generic = true;
@@ -1112,17 +1146,6 @@ pub(crate) mod parsing {
             }
         }
     }
-
-    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
-    impl Parse for TupleElementType {
-        fn parse(input: ParseStream) -> Result<Self> {
-            // TODO https://github.com/rust-lang/rfcs/pull/3532 parse attributes
-            Ok(TupleElementType {
-                attrs: Vec::new(),
-                ty: input.parse()?,
-            })
-        }
-    }
 }
 
 #[cfg(feature = "printing")]
@@ -1131,9 +1154,9 @@ mod printing {
     use crate::path;
     use crate::path::printing::PathStyle;
     use crate::ty::{
-        Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, TupleElementType, TypeArray,
-        TypeFnPtr, TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath,
-        TypePtr, TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
+        Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, TypeArray, TypeFnPtr,
+        TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
+        TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
     };
     use proc_macro2::TokenStream;
     use quote::{ToTokens, TokenStreamExt as _};
@@ -1327,14 +1350,6 @@ mod printing {
                 PointerMutability::Const(const_token) => const_token.to_tokens(tokens),
                 PointerMutability::Mut(mut_token) => mut_token.to_tokens(tokens),
             }
-        }
-    }
-
-    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
-    impl ToTokens for TupleElementType {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
-            self.ty.to_tokens(tokens);
         }
     }
 }

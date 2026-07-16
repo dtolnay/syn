@@ -2794,26 +2794,6 @@ impl Debug for crate::TraitModifiers {
         formatter.finish()
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Debug for crate::TupleElementPat {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("TupleElementPat");
-        formatter.field("attrs", &self.attrs);
-        formatter.field("pat", &self.pat);
-        formatter.finish()
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Debug for crate::TupleElementType {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("TupleElementType");
-        formatter.field("attrs", &self.attrs);
-        formatter.field("ty", &self.ty);
-        formatter.finish()
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::Type {
@@ -2853,6 +2833,7 @@ impl Debug for crate::TypeArray {
 impl crate::TypeArray {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("bracket_token", &self.bracket_token);
         formatter.field("elem", &self.elem);
         formatter.field("semi_token", &self.semi_token);
@@ -2871,6 +2852,7 @@ impl Debug for crate::TypeFnPtr {
 impl crate::TypeFnPtr {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("lifetimes", &self.lifetimes);
         formatter.field("unsafety", &self.unsafety);
         formatter.field("abi", &self.abi);
@@ -2893,6 +2875,7 @@ impl Debug for crate::TypeGroup {
 impl crate::TypeGroup {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("group_token", &self.group_token);
         formatter.field("elem", &self.elem);
         formatter.finish()
@@ -2909,6 +2892,7 @@ impl Debug for crate::TypeImplTrait {
 impl crate::TypeImplTrait {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("impl_token", &self.impl_token);
         formatter.field("bounds", &self.bounds);
         formatter.finish()
@@ -2925,6 +2909,7 @@ impl Debug for crate::TypeInfer {
 impl crate::TypeInfer {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("underscore_token", &self.underscore_token);
         formatter.finish()
     }
@@ -2940,6 +2925,7 @@ impl Debug for crate::TypeMacro {
 impl crate::TypeMacro {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("mac", &self.mac);
         formatter.finish()
     }
@@ -2955,6 +2941,7 @@ impl Debug for crate::TypeNever {
 impl crate::TypeNever {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("bang_token", &self.bang_token);
         formatter.finish()
     }
@@ -3012,6 +2999,7 @@ impl Debug for crate::TypeParen {
 impl crate::TypeParen {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("paren_token", &self.paren_token);
         formatter.field("elem", &self.elem);
         formatter.finish()
@@ -3028,6 +3016,7 @@ impl Debug for crate::TypePath {
 impl crate::TypePath {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("qself", &self.qself);
         formatter.field("path", &self.path);
         formatter.finish()
@@ -3044,6 +3033,7 @@ impl Debug for crate::TypePtr {
 impl crate::TypePtr {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("star_token", &self.star_token);
         formatter.field("mutability", &self.mutability);
         formatter.field("elem", &self.elem);
@@ -3061,6 +3051,7 @@ impl Debug for crate::TypeReference {
 impl crate::TypeReference {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("and_token", &self.and_token);
         formatter.field("lifetime", &self.lifetime);
         formatter.field("mutability", &self.mutability);
@@ -3079,6 +3070,7 @@ impl Debug for crate::TypeSlice {
 impl crate::TypeSlice {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("bracket_token", &self.bracket_token);
         formatter.field("elem", &self.elem);
         formatter.finish()
@@ -3095,6 +3087,7 @@ impl Debug for crate::TypeTraitObject {
 impl crate::TypeTraitObject {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("dyn_token", &self.dyn_token);
         formatter.field("bounds", &self.bounds);
         formatter.finish()
@@ -3111,6 +3104,7 @@ impl Debug for crate::TypeTuple {
 impl crate::TypeTuple {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
         formatter.field("paren_token", &self.paren_token);
         formatter.field("elems", &self.elems);
         formatter.finish()

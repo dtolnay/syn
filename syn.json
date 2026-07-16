@@ -4102,7 +4102,7 @@
         "elems": {
           "punctuated": {
             "element": {
-              "syn": "TupleElementPat"
+              "syn": "Pat"
             },
             "punct": "Comma"
           }
@@ -4136,7 +4136,7 @@
         "elems": {
           "punctuated": {
             "element": {
-              "syn": "TupleElementPat"
+              "syn": "Pat"
             },
             "punct": "Comma"
           }
@@ -4884,43 +4884,6 @@
       "exhaustive": false
     },
     {
-      "ident": "TupleElementPat",
-      "features": {
-        "any": [
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "pat": {
-          "syn": "Pat"
-        }
-      }
-    },
-    {
-      "ident": "TupleElementType",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "ty": {
-          "syn": "Type"
-        }
-      }
-    },
-    {
       "ident": "Type",
       "features": {
         "any": [
@@ -5016,6 +4979,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "bracket_token": {
           "group": "Bracket"
         },
@@ -5041,6 +5009,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "lifetimes": {
           "option": {
             "syn": "BoundLifetimes"
@@ -5089,6 +5062,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "group_token": {
           "group": "Group"
         },
@@ -5108,6 +5086,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "impl_token": {
           "token": "Impl"
         },
@@ -5130,6 +5113,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "underscore_token": {
           "token": "Underscore"
         }
@@ -5144,6 +5132,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "mac": {
           "syn": "Macro"
         }
@@ -5158,6 +5151,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "bang_token": {
           "token": "Not"
         }
@@ -5246,6 +5244,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "paren_token": {
           "group": "Paren"
         },
@@ -5265,6 +5268,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "qself": {
           "option": {
             "syn": "QSelf"
@@ -5284,6 +5292,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "star_token": {
           "token": "Star"
         },
@@ -5306,6 +5319,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "and_token": {
           "token": "And"
         },
@@ -5335,6 +5353,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "bracket_token": {
           "group": "Bracket"
         },
@@ -5354,6 +5377,11 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "dyn_token": {
           "option": {
             "token": "Dyn"
@@ -5378,13 +5406,18 @@
         ]
       },
       "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
         "paren_token": {
           "group": "Paren"
         },
         "elems": {
           "punctuated": {
             "element": {
-              "syn": "TupleElementType"
+              "syn": "Type"
             },
             "punct": "Comma"
           }

@@ -2475,28 +2475,6 @@ impl Hash for crate::TraitModifiers {
         self.auto_token.hash(state);
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Hash for crate::TupleElementPat {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.attrs.hash(state);
-        self.pat.hash(state);
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Hash for crate::TupleElementType {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.attrs.hash(state);
-        self.ty.hash(state);
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::Type {
@@ -2575,6 +2553,7 @@ impl Hash for crate::TypeArray {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.elem.hash(state);
         self.len.hash(state);
     }
@@ -2586,6 +2565,7 @@ impl Hash for crate::TypeFnPtr {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.lifetimes.hash(state);
         self.unsafety.hash(state);
         self.abi.hash(state);
@@ -2601,6 +2581,7 @@ impl Hash for crate::TypeGroup {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.elem.hash(state);
     }
 }
@@ -2611,16 +2592,19 @@ impl Hash for crate::TypeImplTrait {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.bounds.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::TypeInfer {
-    fn hash<H>(&self, _state: &mut H)
+    fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,
-    {}
+    {
+        self.attrs.hash(state);
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
@@ -2629,16 +2613,19 @@ impl Hash for crate::TypeMacro {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.mac.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::TypeNever {
-    fn hash<H>(&self, _state: &mut H)
+    fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,
-    {}
+    {
+        self.attrs.hash(state);
+    }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
@@ -2692,6 +2679,7 @@ impl Hash for crate::TypeParen {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.elem.hash(state);
     }
 }
@@ -2702,6 +2690,7 @@ impl Hash for crate::TypePath {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.qself.hash(state);
         self.path.hash(state);
     }
@@ -2713,6 +2702,7 @@ impl Hash for crate::TypePtr {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.mutability.hash(state);
         self.elem.hash(state);
     }
@@ -2724,6 +2714,7 @@ impl Hash for crate::TypeReference {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.lifetime.hash(state);
         self.mutability.hash(state);
         self.elem.hash(state);
@@ -2736,6 +2727,7 @@ impl Hash for crate::TypeSlice {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.elem.hash(state);
     }
 }
@@ -2746,6 +2738,7 @@ impl Hash for crate::TypeTraitObject {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.dyn_token.hash(state);
         self.bounds.hash(state);
     }
@@ -2757,6 +2750,7 @@ impl Hash for crate::TypeTuple {
     where
         H: Hasher,
     {
+        self.attrs.hash(state);
         self.elems.hash(state);
     }
 }
