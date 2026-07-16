@@ -67,9 +67,7 @@ fn test_group() {
             ],
         },
         elems: [
-            TupleElementPat {
-                pat: Pat::Wild,
-            },
+            Pat::Wild,
         ],
     }
     "#);
@@ -119,9 +117,7 @@ fn test_tuple_comma() {
     snapshot!(expr.to_token_stream() as Pat, @"
     Pat::Tuple {
         elems: [
-            TupleElementPat {
-                pat: Pat::Wild,
-            },
+            Pat::Wild,
             Token![,],
         ],
     }
@@ -131,9 +127,7 @@ fn test_tuple_comma() {
     snapshot!(expr.to_token_stream() as Pat, @"
     Pat::Tuple {
         elems: [
-            TupleElementPat {
-                pat: Pat::Wild,
-            },
+            Pat::Wild,
             Token![,],
         ],
     }
@@ -143,13 +137,9 @@ fn test_tuple_comma() {
     snapshot!(expr.to_token_stream() as Pat, @"
     Pat::Tuple {
         elems: [
-            TupleElementPat {
-                pat: Pat::Wild,
-            },
+            Pat::Wild,
             Token![,],
-            TupleElementPat {
-                pat: Pat::Wild,
-            },
+            Pat::Wild,
         ],
     }
     ");
@@ -158,13 +148,9 @@ fn test_tuple_comma() {
     snapshot!(expr.to_token_stream() as Pat, @"
     Pat::Tuple {
         elems: [
-            TupleElementPat {
-                pat: Pat::Wild,
-            },
+            Pat::Wild,
             Token![,],
-            TupleElementPat {
-                pat: Pat::Wild,
-            },
+            Pat::Wild,
             Token![,],
         ],
     }

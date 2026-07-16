@@ -1963,26 +1963,6 @@ impl Clone for crate::TraitModifiers {
         }
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
-impl Clone for crate::TupleElementPat {
-    fn clone(&self) -> Self {
-        crate::TupleElementPat {
-            attrs: self.attrs.clone(),
-            pat: self.pat.clone(),
-        }
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
-impl Clone for crate::TupleElementType {
-    fn clone(&self) -> Self {
-        crate::TupleElementType {
-            attrs: self.attrs.clone(),
-            ty: self.ty.clone(),
-        }
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::Type {
@@ -2011,6 +1991,7 @@ impl Clone for crate::Type {
 impl Clone for crate::TypeArray {
     fn clone(&self) -> Self {
         crate::TypeArray {
+            attrs: self.attrs.clone(),
             bracket_token: self.bracket_token.clone(),
             elem: self.elem.clone(),
             semi_token: self.semi_token.clone(),
@@ -2023,6 +2004,7 @@ impl Clone for crate::TypeArray {
 impl Clone for crate::TypeFnPtr {
     fn clone(&self) -> Self {
         crate::TypeFnPtr {
+            attrs: self.attrs.clone(),
             lifetimes: self.lifetimes.clone(),
             unsafety: self.unsafety.clone(),
             abi: self.abi.clone(),
@@ -2039,6 +2021,7 @@ impl Clone for crate::TypeFnPtr {
 impl Clone for crate::TypeGroup {
     fn clone(&self) -> Self {
         crate::TypeGroup {
+            attrs: self.attrs.clone(),
             group_token: self.group_token.clone(),
             elem: self.elem.clone(),
         }
@@ -2049,6 +2032,7 @@ impl Clone for crate::TypeGroup {
 impl Clone for crate::TypeImplTrait {
     fn clone(&self) -> Self {
         crate::TypeImplTrait {
+            attrs: self.attrs.clone(),
             impl_token: self.impl_token.clone(),
             bounds: self.bounds.clone(),
         }
@@ -2059,6 +2043,7 @@ impl Clone for crate::TypeImplTrait {
 impl Clone for crate::TypeInfer {
     fn clone(&self) -> Self {
         crate::TypeInfer {
+            attrs: self.attrs.clone(),
             underscore_token: self.underscore_token.clone(),
         }
     }
@@ -2068,6 +2053,7 @@ impl Clone for crate::TypeInfer {
 impl Clone for crate::TypeMacro {
     fn clone(&self) -> Self {
         crate::TypeMacro {
+            attrs: self.attrs.clone(),
             mac: self.mac.clone(),
         }
     }
@@ -2077,6 +2063,7 @@ impl Clone for crate::TypeMacro {
 impl Clone for crate::TypeNever {
     fn clone(&self) -> Self {
         crate::TypeNever {
+            attrs: self.attrs.clone(),
             bang_token: self.bang_token.clone(),
         }
     }
@@ -2121,6 +2108,7 @@ impl Clone for crate::TypeParamBound {
 impl Clone for crate::TypeParen {
     fn clone(&self) -> Self {
         crate::TypeParen {
+            attrs: self.attrs.clone(),
             paren_token: self.paren_token.clone(),
             elem: self.elem.clone(),
         }
@@ -2131,6 +2119,7 @@ impl Clone for crate::TypeParen {
 impl Clone for crate::TypePath {
     fn clone(&self) -> Self {
         crate::TypePath {
+            attrs: self.attrs.clone(),
             qself: self.qself.clone(),
             path: self.path.clone(),
         }
@@ -2141,6 +2130,7 @@ impl Clone for crate::TypePath {
 impl Clone for crate::TypePtr {
     fn clone(&self) -> Self {
         crate::TypePtr {
+            attrs: self.attrs.clone(),
             star_token: self.star_token.clone(),
             mutability: self.mutability.clone(),
             elem: self.elem.clone(),
@@ -2152,6 +2142,7 @@ impl Clone for crate::TypePtr {
 impl Clone for crate::TypeReference {
     fn clone(&self) -> Self {
         crate::TypeReference {
+            attrs: self.attrs.clone(),
             and_token: self.and_token.clone(),
             lifetime: self.lifetime.clone(),
             mutability: self.mutability.clone(),
@@ -2164,6 +2155,7 @@ impl Clone for crate::TypeReference {
 impl Clone for crate::TypeSlice {
     fn clone(&self) -> Self {
         crate::TypeSlice {
+            attrs: self.attrs.clone(),
             bracket_token: self.bracket_token.clone(),
             elem: self.elem.clone(),
         }
@@ -2174,6 +2166,7 @@ impl Clone for crate::TypeSlice {
 impl Clone for crate::TypeTraitObject {
     fn clone(&self) -> Self {
         crate::TypeTraitObject {
+            attrs: self.attrs.clone(),
             dyn_token: self.dyn_token.clone(),
             bounds: self.bounds.clone(),
         }
@@ -2184,6 +2177,7 @@ impl Clone for crate::TypeTraitObject {
 impl Clone for crate::TypeTuple {
     fn clone(&self) -> Self {
         crate::TypeTuple {
+            attrs: self.attrs.clone(),
             paren_token: self.paren_token.clone(),
             elems: self.elems.clone(),
         }

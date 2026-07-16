@@ -936,6 +936,7 @@ fn test_permutations() -> ExitCode {
                             lt_token: Token![<](span),
                             args: Punctuated::from_iter([GenericArgument::Type(Type::Path(
                                 TypePath {
+                                    attrs: Vec::new(),
                                     qself: None,
                                     path: Path::from(Ident::new("T", span)),
                                 },
@@ -951,6 +952,7 @@ fn test_permutations() -> ExitCode {
                 qself: Some(QSelf {
                     lt_token: Token![<](span),
                     ty: Box::new(Type::Path(TypePath {
+                        attrs: Vec::new(),
                         qself: None,
                         path: Path::from(Ident::new("T", span)),
                     })),
@@ -1082,6 +1084,7 @@ fn test_permutations() -> ExitCode {
                 expr: Box::new(expr),
                 as_token: Token![as](span),
                 ty: Box::new(Type::Path(TypePath {
+                    attrs: Vec::new(),
                     qself: None,
                     path: Path::from(Ident::new("T", span)),
                 })),
@@ -1323,6 +1326,7 @@ fn test_permutations() -> ExitCode {
                 output: ReturnType::Type(
                     Token![->](span),
                     Box::new(Type::Path(TypePath {
+                        attrs: Vec::new(),
                         qself: None,
                         path: Path::from(Ident::new("T", span)),
                     })),
@@ -1548,6 +1552,7 @@ fn test_permutations() -> ExitCode {
                         lt_token: Token![<](span),
                         args: Punctuated::from_iter([GenericArgument::Type(Type::Path(
                             TypePath {
+                                attrs: Vec::new(),
                                 qself: None,
                                 path: Path::from(Ident::new("T", span)),
                             },

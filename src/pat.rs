@@ -187,7 +187,7 @@ ast_struct! {
     pub struct PatTuple {
         pub attrs: Vec<Attribute>,
         pub paren_token: token::Paren,
-        pub elems: Punctuated<TupleElementPat, Token![,]>,
+        pub elems: Punctuated<Pat, Token![,]>,
     }
 }
 
@@ -199,7 +199,7 @@ ast_struct! {
         pub qself: Option<QSelf>,
         pub path: Path,
         pub paren_token: token::Paren,
-        pub elems: Punctuated<TupleElementPat, Token![,]>,
+        pub elems: Punctuated<Pat, Token![,]>,
     }
 }
 
@@ -237,15 +237,6 @@ ast_struct! {
     }
 }
 
-ast_struct! {
-    /// A pattern element inside a tuple (or tuple struct) pattern.
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    pub struct TupleElementPat {
-        pub attrs: Vec<Attribute>,
-        pub pat: Pat,
-    }
-}
-
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::attr::Attribute;
@@ -261,7 +252,7 @@ pub(crate) mod parsing {
     use crate::parse::{Parse, ParseStream};
     use crate::pat::{
         FieldPat, Pat, PatIdent, PatOr, PatParen, PatReference, PatRest, PatSlice, PatStruct,
-        PatTuple, PatTupleStruct, PatType, PatWild, TupleElementPat,
+        PatTuple, PatTupleStruct, PatType, PatWild,
     };
     use crate::path::{self, Path, QSelf};
     use crate::punctuated::Punctuated;
@@ -515,10 +506,7 @@ pub(crate) mod parsing {
         let mut elems = Punctuated::new();
         while !content.is_empty() {
             let value = Pat::parse_multi_with_leading_vert(&content)?;
-            elems.push_value(TupleElementPat {
-                attrs: Vec::new(),
-                pat: value,
-            });
+            elems.push_value(value);
             if content.is_empty() {
                 break;
             }
@@ -672,16 +660,10 @@ pub(crate) mod parsing {
                         pat: Box::new(value),
                     }));
                 }
-                elems.push_value(TupleElementPat {
-                    attrs: Vec::new(),
-                    pat: value,
-                });
+                elems.push_value(value);
                 break;
             }
-            elems.push_value(TupleElementPat {
-                attrs: Vec::new(),
-                pat: value,
-            });
+            elems.push_value(value);
             let punct = content.parse()?;
             elems.push_punct(punct);
         }
@@ -825,17 +807,6 @@ pub(crate) mod parsing {
 
         Ok(verbatim::between(begin, input.cursor()))
     }
-
-    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
-    impl Parse for TupleElementPat {
-        fn parse(input: ParseStream) -> Result<Self> {
-            // TODO https://github.com/rust-lang/rfcs/pull/3532 parse attributes
-            Ok(TupleElementPat {
-                attrs: Vec::new(),
-                pat: Pat::parse_multi_with_leading_vert(input)?,
-            })
-        }
-    }
 }
 
 #[cfg(feature = "printing")]
@@ -843,7 +814,7 @@ mod printing {
     use crate::attr::FilterAttrs;
     use crate::pat::{
         FieldPat, Pat, PatIdent, PatOr, PatParen, PatReference, PatRest, PatSlice, PatStruct,
-        PatTuple, PatTupleStruct, PatType, PatWild, TupleElementPat,
+        PatTuple, PatTupleStruct, PatType, PatWild,
     };
     use crate::path;
     use crate::path::printing::PathStyle;
@@ -938,7 +909,7 @@ mod printing {
                 // which is a tuple pattern even without comma.
                 if self.elems.len() == 1
                     && !self.elems.trailing_punct()
-                    && !matches!(self.elems[0].pat, Pat::Rest { .. })
+                    && !matches!(self.elems[0], Pat::Rest { .. })
                 {
                     <Token![,]>::default().to_tokens(tokens);
                 }
@@ -983,14 +954,6 @@ mod printing {
                 self.member.to_tokens(tokens);
                 colon_token.to_tokens(tokens);
             }
-            self.pat.to_tokens(tokens);
-        }
-    }
-
-    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
-    impl ToTokens for TupleElementPat {
-        fn to_tokens(&self, tokens: &mut TokenStream) {
-            tokens.append_all(self.attrs.outer());
             self.pat.to_tokens(tokens);
         }
     }

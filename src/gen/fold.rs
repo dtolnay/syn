@@ -895,22 +895,6 @@ pub trait Fold {
     ) -> crate::TraitModifiers {
         fold_trait_modifiers(self, i)
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    fn fold_tuple_element_pat(
-        &mut self,
-        i: crate::TupleElementPat,
-    ) -> crate::TupleElementPat {
-        fold_tuple_element_pat(self, i)
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn fold_tuple_element_type(
-        &mut self,
-        i: crate::TupleElementType,
-    ) -> crate::TupleElementType {
-        fold_tuple_element_type(self, i)
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_type(&mut self, i: crate::Type) -> crate::Type {
@@ -3135,7 +3119,7 @@ where
     crate::PatTuple {
         attrs: f.fold_attributes(node.attrs),
         paren_token: node.paren_token,
-        elems: crate::punctuated::fold(node.elems, f, F::fold_tuple_element_pat),
+        elems: crate::punctuated::fold(node.elems, f, F::fold_pat),
     }
 }
 #[cfg(feature = "full")]
@@ -3152,7 +3136,7 @@ where
         qself: (node.qself).map(|it| f.fold_qself(it)),
         path: f.fold_path(node.path),
         paren_token: node.paren_token,
-        elems: crate::punctuated::fold(node.elems, f, F::fold_tuple_element_pat),
+        elems: crate::punctuated::fold(node.elems, f, F::fold_pat),
     }
 }
 #[cfg(feature = "full")]
@@ -3562,34 +3546,6 @@ where
         auto_token: node.auto_token,
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub fn fold_tuple_element_pat<F>(
-    f: &mut F,
-    node: crate::TupleElementPat,
-) -> crate::TupleElementPat
-where
-    F: Fold + ?Sized,
-{
-    crate::TupleElementPat {
-        attrs: f.fold_attributes(node.attrs),
-        pat: f.fold_pat(node.pat),
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn fold_tuple_element_type<F>(
-    f: &mut F,
-    node: crate::TupleElementType,
-) -> crate::TupleElementType
-where
-    F: Fold + ?Sized,
-{
-    crate::TupleElementType {
-        attrs: f.fold_attributes(node.attrs),
-        ty: f.fold_type(node.ty),
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_type<F>(f: &mut F, node: crate::Type) -> crate::Type
@@ -3647,6 +3603,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypeArray {
+        attrs: f.fold_attributes(node.attrs),
         bracket_token: node.bracket_token,
         elem: Box::new(f.fold_type(*node.elem)),
         semi_token: node.semi_token,
@@ -3660,6 +3617,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypeFnPtr {
+        attrs: f.fold_attributes(node.attrs),
         lifetimes: (node.lifetimes).map(|it| f.fold_bound_lifetimes(it)),
         unsafety: node.unsafety,
         abi: (node.abi).map(|it| f.fold_abi(it)),
@@ -3677,6 +3635,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypeGroup {
+        attrs: f.fold_attributes(node.attrs),
         group_token: node.group_token,
         elem: Box::new(f.fold_type(*node.elem)),
     }
@@ -3691,6 +3650,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypeImplTrait {
+        attrs: f.fold_attributes(node.attrs),
         impl_token: node.impl_token,
         bounds: crate::punctuated::fold(node.bounds, f, F::fold_type_param_bound),
     }
@@ -3702,6 +3662,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypeInfer {
+        attrs: f.fold_attributes(node.attrs),
         underscore_token: node.underscore_token,
     }
 }
@@ -3712,6 +3673,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypeMacro {
+        attrs: f.fold_attributes(node.attrs),
         mac: f.fold_macro(node.mac),
     }
 }
@@ -3722,6 +3684,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypeNever {
+        attrs: f.fold_attributes(node.attrs),
         bang_token: node.bang_token,
     }
 }
@@ -3773,6 +3736,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypeParen {
+        attrs: f.fold_attributes(node.attrs),
         paren_token: node.paren_token,
         elem: Box::new(f.fold_type(*node.elem)),
     }
@@ -3784,6 +3748,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypePath {
+        attrs: f.fold_attributes(node.attrs),
         qself: (node.qself).map(|it| f.fold_qself(it)),
         path: f.fold_path(node.path),
     }
@@ -3795,6 +3760,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypePtr {
+        attrs: f.fold_attributes(node.attrs),
         star_token: node.star_token,
         mutability: f.fold_pointer_mutability(node.mutability),
         elem: Box::new(f.fold_type(*node.elem)),
@@ -3810,6 +3776,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypeReference {
+        attrs: f.fold_attributes(node.attrs),
         and_token: node.and_token,
         lifetime: (node.lifetime).map(|it| f.fold_lifetime(it)),
         mutability: node.mutability,
@@ -3823,6 +3790,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypeSlice {
+        attrs: f.fold_attributes(node.attrs),
         bracket_token: node.bracket_token,
         elem: Box::new(f.fold_type(*node.elem)),
     }
@@ -3837,6 +3805,7 @@ where
     F: Fold + ?Sized,
 {
     crate::TypeTraitObject {
+        attrs: f.fold_attributes(node.attrs),
         dyn_token: node.dyn_token,
         bounds: crate::punctuated::fold(node.bounds, f, F::fold_type_param_bound),
     }
@@ -3848,8 +3817,9 @@ where
     F: Fold + ?Sized,
 {
     crate::TypeTuple {
+        attrs: f.fold_attributes(node.attrs),
         paren_token: node.paren_token,
-        elems: crate::punctuated::fold(node.elems, f, F::fold_tuple_element_type),
+        elems: crate::punctuated::fold(node.elems, f, F::fold_type),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

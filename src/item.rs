@@ -1768,11 +1768,13 @@ pub(crate) mod parsing {
             input.parse()?
         } else {
             let mut ty = Type::Path(TypePath {
+                attrs: Vec::new(),
                 qself: None,
                 path: Path::from(Ident::new("Self", self_token.span)),
             });
             if let Some((ampersand, lifetime)) = reference.as_ref() {
                 ty = Type::Reference(TypeReference {
+                    attrs: Vec::new(),
                     and_token: Token![&](ampersand.span),
                     lifetime: lifetime.clone(),
                     mutability: mutability.as_ref().map(|m| Token![mut](m.span)),
@@ -2717,11 +2719,21 @@ pub(crate) mod parsing {
             while let Type::Group(ty) = first_ty_ref {
                 first_ty_ref = &ty.elem;
             }
-            if let Type::Path(TypePath { qself: None, .. }) = first_ty_ref {
+            if let Type::Path(TypePath {
+                attrs: _,
+                qself: None,
+                ..
+            }) = first_ty_ref
+            {
                 while let Type::Group(ty) = first_ty {
                     first_ty = *ty.elem;
                 }
-                if let Type::Path(TypePath { qself: None, path }) = first_ty {
+                if let Type::Path(TypePath {
+                    attrs: _,
+                    qself: None,
+                    path,
+                }) = first_ty
+                {
                     trait_ = Some((path, for_token));
                 } else {
                     unreachable!();

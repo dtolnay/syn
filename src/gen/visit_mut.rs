@@ -827,16 +827,6 @@ pub trait VisitMut {
     fn visit_trait_modifiers_mut(&mut self, i: &mut crate::TraitModifiers) {
         visit_trait_modifiers_mut(self, i);
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    fn visit_tuple_element_pat_mut(&mut self, i: &mut crate::TupleElementPat) {
-        visit_tuple_element_pat_mut(self, i);
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn visit_tuple_element_type_mut(&mut self, i: &mut crate::TupleElementType) {
-        visit_tuple_element_type_mut(self, i);
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_type_mut(&mut self, i: &mut crate::Type) {
@@ -3011,7 +3001,7 @@ where
     skip!(node.paren_token);
     for mut el in Punctuated::pairs_mut(&mut node.elems) {
         let it = el.value_mut();
-        v.visit_tuple_element_pat_mut(it);
+        v.visit_pat_mut(it);
     }
 }
 #[cfg(feature = "full")]
@@ -3028,7 +3018,7 @@ where
     skip!(node.paren_token);
     for mut el in Punctuated::pairs_mut(&mut node.elems) {
         let it = el.value_mut();
-        v.visit_tuple_element_pat_mut(it);
+        v.visit_pat_mut(it);
     }
 }
 #[cfg(feature = "full")]
@@ -3416,24 +3406,6 @@ where
 {
     skip!(node.auto_token);
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub fn visit_tuple_element_pat_mut<V>(v: &mut V, node: &mut crate::TupleElementPat)
-where
-    V: VisitMut + ?Sized,
-{
-    v.visit_attributes_mut(&mut node.attrs);
-    v.visit_pat_mut(&mut node.pat);
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn visit_tuple_element_type_mut<V>(v: &mut V, node: &mut crate::TupleElementType)
-where
-    V: VisitMut + ?Sized,
-{
-    v.visit_attributes_mut(&mut node.attrs);
-    v.visit_type_mut(&mut node.ty);
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_type_mut<V>(v: &mut V, node: &mut crate::Type)
@@ -3494,6 +3466,7 @@ pub fn visit_type_array_mut<V>(v: &mut V, node: &mut crate::TypeArray)
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     skip!(node.bracket_token);
     v.visit_type_mut(&mut *node.elem);
     skip!(node.semi_token);
@@ -3505,6 +3478,7 @@ pub fn visit_type_fn_ptr_mut<V>(v: &mut V, node: &mut crate::TypeFnPtr)
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     if let Some(it) = &mut node.lifetimes {
         v.visit_bound_lifetimes_mut(it);
     }
@@ -3529,6 +3503,7 @@ pub fn visit_type_group_mut<V>(v: &mut V, node: &mut crate::TypeGroup)
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     skip!(node.group_token);
     v.visit_type_mut(&mut *node.elem);
 }
@@ -3538,6 +3513,7 @@ pub fn visit_type_impl_trait_mut<V>(v: &mut V, node: &mut crate::TypeImplTrait)
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     skip!(node.impl_token);
     for mut el in Punctuated::pairs_mut(&mut node.bounds) {
         let it = el.value_mut();
@@ -3550,6 +3526,7 @@ pub fn visit_type_infer_mut<V>(v: &mut V, node: &mut crate::TypeInfer)
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     skip!(node.underscore_token);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3558,6 +3535,7 @@ pub fn visit_type_macro_mut<V>(v: &mut V, node: &mut crate::TypeMacro)
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     v.visit_macro_mut(&mut node.mac);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3566,6 +3544,7 @@ pub fn visit_type_never_mut<V>(v: &mut V, node: &mut crate::TypeNever)
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     skip!(node.bang_token);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3613,6 +3592,7 @@ pub fn visit_type_paren_mut<V>(v: &mut V, node: &mut crate::TypeParen)
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     skip!(node.paren_token);
     v.visit_type_mut(&mut *node.elem);
 }
@@ -3622,6 +3602,7 @@ pub fn visit_type_path_mut<V>(v: &mut V, node: &mut crate::TypePath)
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     if let Some(it) = &mut node.qself {
         v.visit_qself_mut(it);
     }
@@ -3633,6 +3614,7 @@ pub fn visit_type_ptr_mut<V>(v: &mut V, node: &mut crate::TypePtr)
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     skip!(node.star_token);
     v.visit_pointer_mutability_mut(&mut node.mutability);
     v.visit_type_mut(&mut *node.elem);
@@ -3643,6 +3625,7 @@ pub fn visit_type_reference_mut<V>(v: &mut V, node: &mut crate::TypeReference)
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     skip!(node.and_token);
     if let Some(it) = &mut node.lifetime {
         v.visit_lifetime_mut(it);
@@ -3656,6 +3639,7 @@ pub fn visit_type_slice_mut<V>(v: &mut V, node: &mut crate::TypeSlice)
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     skip!(node.bracket_token);
     v.visit_type_mut(&mut *node.elem);
 }
@@ -3665,6 +3649,7 @@ pub fn visit_type_trait_object_mut<V>(v: &mut V, node: &mut crate::TypeTraitObje
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     skip!(node.dyn_token);
     for mut el in Punctuated::pairs_mut(&mut node.bounds) {
         let it = el.value_mut();
@@ -3677,10 +3662,11 @@ pub fn visit_type_tuple_mut<V>(v: &mut V, node: &mut crate::TypeTuple)
 where
     V: VisitMut + ?Sized,
 {
+    v.visit_attributes_mut(&mut node.attrs);
     skip!(node.paren_token);
     for mut el in Punctuated::pairs_mut(&mut node.elems) {
         let it = el.value_mut();
-        v.visit_tuple_element_type_mut(it);
+        v.visit_type_mut(it);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

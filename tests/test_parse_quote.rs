@@ -101,13 +101,11 @@ fn test_pat() {
                     ],
                 },
                 elems: [
-                    TupleElementPat {
-                        pat: Pat::Lit(ExprLit {
-                            lit: Lit::Bool {
-                                value: false,
-                            },
-                        }),
-                    },
+                    Pat::Lit(ExprLit {
+                        lit: Lit::Bool {
+                            value: false,
+                        },
+                    }),
                 ],
             },
             Token![|],
