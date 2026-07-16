@@ -26,13 +26,13 @@ use std::process::ExitCode;
 use syn::punctuated::Punctuated;
 use syn::visit_mut::VisitMut as _;
 use syn::{
-    parse_quote, token, AngleBracketedGenericArguments, Arm, BinOp, Block, ClosureModifiers, Expr,
-    ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBinary, ExprBlock, ExprBreak, ExprCall,
-    ExprCast, ExprClosure, ExprConst, ExprContinue, ExprField, ExprForLoop, ExprIf, ExprIndex,
-    ExprLet, ExprLit, ExprLoop, ExprMacro, ExprMatch, ExprMethodCall, ExprPath, ExprRange,
-    ExprRawAddr, ExprReference, ExprReturn, ExprStruct, ExprTry, ExprTryBlock, ExprTuple,
-    ExprUnary, ExprUnsafe, ExprWhile, ExprYield, GenericArgument, Label, Lifetime, Lit, LitInt,
-    Macro, MacroDelimiter, Member, Pat, PatWild, Path, PathArguments, PathSegment,
+    parse_quote, token, AngleBracketedGenericArguments, Arm, BinOp, Block, BlockModifiers,
+    ClosureModifiers, Expr, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBinary, ExprBlock,
+    ExprBreak, ExprCall, ExprCast, ExprClosure, ExprConst, ExprContinue, ExprField, ExprForLoop,
+    ExprIf, ExprIndex, ExprLet, ExprLit, ExprLoop, ExprMacro, ExprMatch, ExprMethodCall, ExprPath,
+    ExprRange, ExprRawAddr, ExprReference, ExprReturn, ExprStruct, ExprTry, ExprTryBlock,
+    ExprTuple, ExprUnary, ExprUnsafe, ExprWhile, ExprYield, GenericArgument, Label, Lifetime, Lit,
+    LitInt, Macro, MacroDelimiter, Member, Pat, PatWild, Path, PathArguments, PathSegment,
     PointerMutability, QSelf, RangeLimits, ReturnType, Stmt, Token, Type, TypePath, UnOp,
 };
 
@@ -1245,6 +1245,7 @@ fn test_permutations() -> ExitCode {
                 attrs: Vec::new(),
                 async_token: Token![async](span),
                 capture: None,
+                modifiers: BlockModifiers::default(),
                 block: Block {
                     brace_token: token::Brace(span),
                     stmts: Vec::new(),
@@ -1349,6 +1350,7 @@ fn test_permutations() -> ExitCode {
                 // `const {}`
                 attrs: Vec::new(),
                 const_token: Token![const](span),
+                modifiers: BlockModifiers::default(),
                 block: Block {
                     brace_token: token::Brace(span),
                     stmts: Vec::new(),
@@ -1596,6 +1598,7 @@ fn test_permutations() -> ExitCode {
                 // `try {}`
                 attrs: Vec::new(),
                 try_token: Token![try](span),
+                modifiers: BlockModifiers::default(),
                 block: Block {
                     brace_token: token::Brace(span),
                     stmts: Vec::new(),

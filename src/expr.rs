@@ -296,6 +296,7 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub async_token: Token![async],
         pub capture: Option<Token![move]>,
+        pub modifiers: BlockModifiers,
         pub block: Block,
     }
 }
@@ -405,6 +406,7 @@ ast_struct! {
     pub struct ExprConst #full {
         pub attrs: Vec<Attribute>,
         pub const_token: Token![const],
+        pub modifiers: BlockModifiers,
         pub block: Block,
     }
 }
@@ -674,6 +676,7 @@ ast_struct! {
     pub struct ExprTryBlock #full {
         pub attrs: Vec<Attribute>,
         pub try_token: Token![try],
+        pub modifiers: BlockModifiers,
         pub block: Block,
     }
 }
@@ -1163,6 +1166,20 @@ ast_struct! {
 }
 
 #[cfg(feature = "full")]
+ast_struct! {
+    /// Information about block captures and type ascription.
+    #[non_exhaustive]
+    pub struct BlockModifiers {}
+}
+
+#[cfg(feature = "full")]
+impl Default for BlockModifiers {
+    fn default() -> Self {
+        BlockModifiers {}
+    }
+}
+
+#[cfg(feature = "full")]
 ast_enum! {
     /// Limit types of a range, inclusive or exclusive.
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -1186,10 +1203,10 @@ pub(crate) mod parsing {
     use crate::error::{Error, Result};
     #[cfg(feature = "full")]
     use crate::expr::{
-        Arm, ClosureModifiers, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak,
-        ExprClosure, ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet, ExprLoop,
-        ExprMatch, ExprRange, ExprRawAddr, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock,
-        ExprUnsafe, ExprWhile, ExprYield, Label, RangeLimits,
+        Arm, BlockModifiers, ClosureModifiers, ExprArray, ExprAssign, ExprAsync, ExprAwait,
+        ExprBlock, ExprBreak, ExprClosure, ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer,
+        ExprLet, ExprLoop, ExprMatch, ExprRange, ExprRawAddr, ExprRepeat, ExprReturn, ExprTry,
+        ExprTryBlock, ExprUnsafe, ExprWhile, ExprYield, Label, RangeLimits,
     };
     use crate::expr::{
         Expr, ExprBinary, ExprCall, ExprCast, ExprField, ExprGroup, ExprIndex, ExprLit, ExprMacro,
@@ -2516,6 +2533,7 @@ pub(crate) mod parsing {
             Ok(ExprTryBlock {
                 attrs: Vec::new(),
                 try_token: input.parse()?,
+                modifiers: BlockModifiers {},
                 block: input.parse()?,
             })
         }
@@ -2602,6 +2620,7 @@ pub(crate) mod parsing {
                 attrs: Vec::new(),
                 async_token: input.parse()?,
                 capture: input.parse()?,
+                modifiers: BlockModifiers {},
                 block: input.parse()?,
             })
         }
@@ -2681,6 +2700,7 @@ pub(crate) mod parsing {
             Ok(ExprConst {
                 attrs: inner_attrs,
                 const_token,
+                modifiers: BlockModifiers {},
                 block: Block { brace_token, stmts },
             })
         }

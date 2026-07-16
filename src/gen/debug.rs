@@ -255,6 +255,14 @@ impl Debug for crate::Block {
         formatter.finish()
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::BlockModifiers {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("BlockModifiers");
+        formatter.finish()
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::BoundLifetimes {
@@ -524,6 +532,7 @@ impl crate::ExprAsync {
         formatter.field("attrs", &self.attrs);
         formatter.field("async_token", &self.async_token);
         formatter.field("capture", &self.capture);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("block", &self.block);
         formatter.finish()
     }
@@ -673,6 +682,7 @@ impl crate::ExprConst {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("const_token", &self.const_token);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("block", &self.block);
         formatter.finish()
     }
@@ -1088,6 +1098,7 @@ impl crate::ExprTryBlock {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("try_token", &self.try_token);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("block", &self.block);
         formatter.finish()
     }
