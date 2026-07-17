@@ -36,7 +36,7 @@ pub fn derive_heap_size(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 // Add a bound `T: HeapSize` to every type parameter T.
 fn add_trait_bounds(mut generics: Generics) -> Generics {
     for param in &mut generics.params {
-        if let GenericParam::Type(ref mut type_param) = *param {
+        if let GenericParam::Type(type_param) = param {
             type_param.bounds.push(parse_quote!(heapsize::HeapSize));
         }
     }
@@ -45,10 +45,10 @@ fn add_trait_bounds(mut generics: Generics) -> Generics {
 
 // Generate an expression to sum up the heap size of each field.
 fn heap_size_sum(data: &Data) -> TokenStream {
-    match *data {
-        Data::Struct(ref data) => {
-            match data.fields {
-                Fields::Named(ref fields) => {
+    match data {
+        Data::Struct(data) => {
+            match &data.fields {
+                Fields::Named(fields) => {
                     // Expands to an expression like
                     //
                     //     0 + self.x.heap_size() + self.y.heap_size() + self.z.heap_size()
@@ -71,7 +71,7 @@ fn heap_size_sum(data: &Data) -> TokenStream {
                         0 #(+ #recurse)*
                     }
                 }
-                Fields::Unnamed(ref fields) => {
+                Fields::Unnamed(fields) => {
                     // Expands to an expression like
                     //
                     //     0 + self.0.heap_size() + self.1.heap_size() + self.2.heap_size()
