@@ -1877,30 +1877,6 @@ impl Debug for Lite<syn::FnModifiers> {
         formatter.finish()
     }
 }
-impl Debug for Lite<syn::FnPtrArg> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let mut formatter = formatter.debug_struct("FnPtrArg");
-        if !self.value.attrs.is_empty() {
-            formatter.field("attrs", Lite(&self.value.attrs));
-        }
-        if let Some(val) = &self.value.name {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print((proc_macro2::Ident, syn::token::Colon));
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some(")?;
-                    Debug::fmt(Lite(&self.0.0), formatter)?;
-                    formatter.write_str(")")?;
-                    Ok(())
-                }
-            }
-            formatter.field("name", Print::ref_cast(val));
-        }
-        formatter.field("ty", Lite(&self.value.ty));
-        formatter.finish()
-    }
-}
 impl Debug for Lite<syn::FnPtrVariadic> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("FnPtrVariadic");
@@ -3109,6 +3085,30 @@ impl Debug for Lite<syn::MetaNameValue> {
         let mut formatter = formatter.debug_struct("MetaNameValue");
         formatter.field("path", Lite(&self.value.path));
         formatter.field("value", Lite(&self.value.value));
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::NamedArg> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("NamedArg");
+        if !self.value.attrs.is_empty() {
+            formatter.field("attrs", Lite(&self.value.attrs));
+        }
+        if let Some(val) = &self.value.name {
+            #[derive(RefCast)]
+            #[repr(transparent)]
+            struct Print((proc_macro2::Ident, syn::token::Colon));
+            impl Debug for Print {
+                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    formatter.write_str("Some(")?;
+                    Debug::fmt(Lite(&self.0.0), formatter)?;
+                    formatter.write_str(")")?;
+                    Ok(())
+                }
+            }
+            formatter.field("name", Print::ref_cast(val));
+        }
+        formatter.field("ty", Lite(&self.value.ty));
         formatter.finish()
     }
 }

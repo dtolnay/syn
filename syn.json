@@ -2166,37 +2166,6 @@
       "exhaustive": false
     },
     {
-      "ident": "FnPtrArg",
-      "features": {
-        "any": [
-          "derive",
-          "full"
-        ]
-      },
-      "fields": {
-        "attrs": {
-          "vec": {
-            "syn": "Attribute"
-          }
-        },
-        "name": {
-          "option": {
-            "tuple": [
-              {
-                "proc_macro2": "Ident"
-              },
-              {
-                "token": "Colon"
-              }
-            ]
-          }
-        },
-        "ty": {
-          "syn": "Type"
-        }
-      }
-    },
-    {
       "ident": "FnPtrVariadic",
       "features": {
         "any": [
@@ -3789,6 +3758,37 @@
       }
     },
     {
+      "ident": "NamedArg",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "name": {
+          "option": {
+            "tuple": [
+              {
+                "proc_macro2": "Ident"
+              },
+              {
+                "token": "Colon"
+              }
+            ]
+          }
+        },
+        "ty": {
+          "syn": "Type"
+        }
+      }
+    },
+    {
       "ident": "ParenthesizedGenericArguments",
       "features": {
         "any": [
@@ -3803,7 +3803,7 @@
         "inputs": {
           "punctuated": {
             "element": {
-              "syn": "Type"
+              "syn": "NamedArg"
             },
             "punct": "Comma"
           }
@@ -5084,7 +5084,7 @@
         "inputs": {
           "punctuated": {
             "element": {
-              "syn": "FnPtrArg"
+              "syn": "NamedArg"
             },
             "punct": "Comma"
           }

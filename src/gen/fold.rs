@@ -404,11 +404,6 @@ pub trait Fold {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn fold_fn_ptr_arg(&mut self, i: crate::FnPtrArg) -> crate::FnPtrArg {
-        fold_fn_ptr_arg(self, i)
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_fn_ptr_variadic(&mut self, i: crate::FnPtrVariadic) -> crate::FnPtrVariadic {
         fold_fn_ptr_variadic(self, i)
     }
@@ -686,6 +681,11 @@ pub trait Fold {
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_meta_name_value(&mut self, i: crate::MetaNameValue) -> crate::MetaNameValue {
         fold_meta_name_value(self, i)
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn fold_named_arg(&mut self, i: crate::NamedArg) -> crate::NamedArg {
+        fold_named_arg(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -2147,18 +2147,6 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn fold_fn_ptr_arg<F>(f: &mut F, node: crate::FnPtrArg) -> crate::FnPtrArg
-where
-    F: Fold + ?Sized,
-{
-    crate::FnPtrArg {
-        attrs: f.fold_attributes(node.attrs),
-        name: (node.name).map(|it| (f.fold_ident((it).0), (it).1)),
-        ty: f.fold_type(node.ty),
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_fn_ptr_variadic<F>(
     f: &mut F,
     node: crate::FnPtrVariadic,
@@ -3030,6 +3018,18 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn fold_named_arg<F>(f: &mut F, node: crate::NamedArg) -> crate::NamedArg
+where
+    F: Fold + ?Sized,
+{
+    crate::NamedArg {
+        attrs: f.fold_attributes(node.attrs),
+        name: (node.name).map(|it| (f.fold_ident((it).0), (it).1)),
+        ty: f.fold_type(node.ty),
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_parenthesized_generic_arguments<F>(
     f: &mut F,
     node: crate::ParenthesizedGenericArguments,
@@ -3039,7 +3039,7 @@ where
 {
     crate::ParenthesizedGenericArguments {
         paren_token: node.paren_token,
-        inputs: crate::punctuated::fold(node.inputs, f, F::fold_type),
+        inputs: crate::punctuated::fold(node.inputs, f, F::fold_named_arg),
         output: f.fold_return_type(node.output),
     }
 }
@@ -3696,7 +3696,7 @@ where
         abi: (node.abi).map(|it| f.fold_abi(it)),
         fn_token: node.fn_token,
         paren_token: node.paren_token,
-        inputs: crate::punctuated::fold(node.inputs, f, F::fold_fn_ptr_arg),
+        inputs: crate::punctuated::fold(node.inputs, f, F::fold_named_arg),
         variadic: (node.variadic).map(|it| f.fold_fn_ptr_variadic(it)),
         output: f.fold_return_type(node.output),
     }

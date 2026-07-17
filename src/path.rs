@@ -6,7 +6,7 @@ use crate::ident::Ident;
 use crate::lifetime::Lifetime;
 use crate::punctuated::Punctuated;
 use crate::token;
-use crate::ty::{ReturnType, Type};
+use crate::ty::{NamedArg, ReturnType, Type};
 use alloc::boxed::Box;
 
 ast_struct! {
@@ -248,7 +248,7 @@ ast_struct! {
     pub struct ParenthesizedGenericArguments {
         pub paren_token: token::Paren,
         /// `(A, B)`
-        pub inputs: Punctuated<Type, Token![,]>,
+        pub inputs: Punctuated<NamedArg, Token![,]>,
         /// `C`
         pub output: ReturnType,
     }
@@ -299,7 +299,7 @@ pub(crate) mod parsing {
     };
     use crate::punctuated::Punctuated;
     use crate::token;
-    use crate::ty::{ReturnType, Type};
+    use crate::ty::{NamedArg, ReturnType, Type};
     #[cfg(not(feature = "full"))]
     use crate::verbatim;
     use alloc::boxed::Box;
@@ -494,10 +494,17 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for ParenthesizedGenericArguments {
         fn parse(input: ParseStream) -> Result<Self> {
+            fn type_as_named_arg(input: ParseStream) -> Result<NamedArg> {
+                Ok(NamedArg {
+                    attrs: Vec::new(),
+                    name: None,
+                    ty: input.parse()?,
+                })
+            }
             let content;
             Ok(ParenthesizedGenericArguments {
                 paren_token: parenthesized!(content in input),
-                inputs: content.parse_terminated(Type::parse, Token![,])?,
+                inputs: content.parse_terminated(type_as_named_arg, Token![,])?,
                 output: input.call(ReturnType::without_plus)?,
             })
         }
