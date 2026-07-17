@@ -82,54 +82,54 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
             .unwrap()
             .error("I can't think of a legitimate use for lazily initializing the value `()`")
             .emit();
-        return TokenStream::new();
     }
 
     // Assert that the static type implements Sync. If not, user sees an error
     // message like the following. We span this assertion with the field type's
     // line/column so that the error message appears in the correct place.
     //
-    //     error[E0277]: the trait bound `*const (): std::marker::Sync` is not satisfied
+    //     error[E0277]: `*const ()` cannot be shared between threads safely
     //       --> src/main.rs:10:21
     //        |
     //     10 |     static ref PTR: *const () = &();
-    //        |                     ^^^^^^^^^ `*const ()` cannot be shared between threads safely
-    let assert_sync = quote_spanned! {ty.span()=>
-        struct _AssertSync where #ty: std::marker::Sync;
-    };
-
-    // Check for Sized. Not vital to check here, but the error message is less
-    // confusing this way than if they get a Sized error in one of our
-    // implementation details where it assumes Sized.
+    //        |                     ^^^^^^^^^ lazy_static requires a type that implements Sync
     //
-    //     error[E0277]: the trait bound `str: std::marker::Sized` is not satisfied
-    //       --> src/main.rs:10:19
-    //        |
-    //     10 |     static ref A: str = "";
-    //        |                   ^^^ `str` does not have a constant size known at compile-time
-    let assert_sized = quote_spanned! {ty.span()=>
-        struct _AssertSized where #ty: std::marker::Sized;
-    };
-
-    let init_ptr = quote_spanned! {init.span()=>
-        Box::into_raw(Box::new(#init))
+    // The trait MustBeSync is defined below using `on_unimplemented` to
+    // customize the error message.
+    let assert_sync = quote_spanned! {ty.span()=>
+        <#ty as MustBeSync>::CHECK
     };
 
     let expanded = quote! {
         #visibility struct #name;
 
-        impl std::ops::Deref for #name {
+        const _: () = {
+            #[diagnostic::on_unimplemented(
+                message = "`{Self}` cannot be shared between threads safely",
+                label = "lazy_static requires a type that implements Sync",
+            )]
+            trait MustBeSync {
+                const CHECK: () = ();
+            }
+            #[diagnostic::do_not_recommend]
+            impl<T: ?::std::marker::Sized + ::std::marker::Sync> MustBeSync for T {}
+            #assert_sync
+        };
+
+        impl ::std::ops::Deref for #name {
             type Target = #ty;
 
-            fn deref(&self) -> &#ty {
-                #assert_sync
-                #assert_sized
-
-                static ONCE: std::sync::Once = std::sync::Once::new();
+            fn deref(&self) -> &Self::Target {
+                static ONCE: ::std::sync::Once = ::std::sync::Once::new();
                 static mut VALUE: *mut #ty = 0 as *mut #ty;
 
+                let do_init = || {
+                    let value: #ty = #init;
+                    unsafe { VALUE = ::std::boxed::Box::into_raw(::std::boxed::Box::new(value)) }
+                };
+
                 unsafe {
-                    ONCE.call_once(|| VALUE = #init_ptr);
+                    ONCE.call_once(do_init);
                     &*VALUE
                 }
             }
