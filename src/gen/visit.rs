@@ -3511,10 +3511,11 @@ where
     V: Visit<'ast> + ?Sized,
 {
     skip!(node.paren_token);
-    v.visit_trait_bound_modifiers(&node.modifiers);
     if let Some(it) = &node.lifetimes {
         v.visit_bound_lifetimes(it);
     }
+    v.visit_trait_bound_modifiers(&node.modifiers);
+    skip!(node.maybe);
     v.visit_path(&node.path);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3525,9 +3526,7 @@ pub fn visit_trait_bound_modifiers<'ast, V>(
 )
 where
     V: Visit<'ast> + ?Sized,
-{
-    skip!(node.maybe);
-}
+{}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_trait_item<'ast, V>(v: &mut V, node: &'ast crate::TraitItem)

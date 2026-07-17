@@ -3495,8 +3495,9 @@ where
 {
     crate::TraitBound {
         paren_token: node.paren_token,
-        modifiers: f.fold_trait_bound_modifiers(node.modifiers),
         lifetimes: (node.lifetimes).map(|it| f.fold_bound_lifetimes(it)),
+        modifiers: f.fold_trait_bound_modifiers(node.modifiers),
+        maybe: node.maybe,
         path: f.fold_path(node.path),
     }
 }
@@ -3509,9 +3510,7 @@ pub fn fold_trait_bound_modifiers<F>(
 where
     F: Fold + ?Sized,
 {
-    crate::TraitBoundModifiers {
-        maybe: node.maybe,
-    }
+    node
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]

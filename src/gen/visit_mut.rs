@@ -3344,10 +3344,11 @@ where
     V: VisitMut + ?Sized,
 {
     skip!(node.paren_token);
-    v.visit_trait_bound_modifiers_mut(&mut node.modifiers);
     if let Some(it) = &mut node.lifetimes {
         v.visit_bound_lifetimes_mut(it);
     }
+    v.visit_trait_bound_modifiers_mut(&mut node.modifiers);
+    skip!(node.maybe);
     v.visit_path_mut(&mut node.path);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3358,9 +3359,7 @@ pub fn visit_trait_bound_modifiers_mut<V>(
 )
 where
     V: VisitMut + ?Sized,
-{
-    skip!(node.maybe);
-}
+{}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_trait_item_mut<V>(v: &mut V, node: &mut crate::TraitItem)

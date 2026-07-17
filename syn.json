@@ -4696,12 +4696,17 @@
             "group": "Paren"
           }
         },
-        "modifiers": {
-          "syn": "TraitBoundModifiers"
-        },
         "lifetimes": {
           "option": {
             "syn": "BoundLifetimes"
+          }
+        },
+        "modifiers": {
+          "syn": "TraitBoundModifiers"
+        },
+        "maybe": {
+          "option": {
+            "token": "Question"
           }
         },
         "path": {
@@ -4717,13 +4722,7 @@
           "full"
         ]
       },
-      "fields": {
-        "maybe": {
-          "option": {
-            "token": "Question"
-          }
-        }
-      },
+      "fields": {},
       "exhaustive": false
     },
     {

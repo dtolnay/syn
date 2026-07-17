@@ -229,7 +229,6 @@ fn test_trait_object() {
         dyn_token: Some,
         bounds: [
             TypeParamBound::Trait(TraitBound {
-                modifiers: TraitBoundModifiers,
                 lifetimes: Some(BoundLifetimes {
                     lifetimes: [
                         GenericParam::Lifetime(LifetimeParam {
@@ -239,6 +238,7 @@ fn test_trait_object() {
                         }),
                     ],
                 }),
+                modifiers: TraitBoundModifiers,
                 path: Path {
                     segments: [
                         PathSegment {

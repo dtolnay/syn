@@ -1901,8 +1901,9 @@ impl Clone for crate::TraitBound {
     fn clone(&self) -> Self {
         crate::TraitBound {
             paren_token: self.paren_token.clone(),
-            modifiers: self.modifiers.clone(),
             lifetimes: self.lifetimes.clone(),
+            modifiers: self.modifiers.clone(),
+            maybe: self.maybe.clone(),
             path: self.path.clone(),
         }
     }
@@ -1911,9 +1912,7 @@ impl Clone for crate::TraitBound {
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::TraitBoundModifiers {
     fn clone(&self) -> Self {
-        crate::TraitBoundModifiers {
-            maybe: self.maybe.clone(),
-        }
+        crate::TraitBoundModifiers {}
     }
 }
 #[cfg(feature = "full")]

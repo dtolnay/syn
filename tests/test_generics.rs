@@ -166,9 +166,8 @@ fn test_type_param_bound() {
     let tokens = quote!(?Sized);
     snapshot!(tokens as TypeParamBound, @r#"
     TypeParamBound::Trait(TraitBound {
-        modifiers: TraitBoundModifiers {
-            maybe: Some,
-        },
+        modifiers: TraitBoundModifiers,
+        maybe: Some,
         path: Path {
             segments: [
                 PathSegment {
@@ -182,7 +181,6 @@ fn test_type_param_bound() {
     let tokens = quote!(for<'a> Trait);
     snapshot!(tokens as TypeParamBound, @r#"
     TypeParamBound::Trait(TraitBound {
-        modifiers: TraitBoundModifiers,
         lifetimes: Some(BoundLifetimes {
             lifetimes: [
                 GenericParam::Lifetime(LifetimeParam {
@@ -192,6 +190,7 @@ fn test_type_param_bound() {
                 }),
             ],
         }),
+        modifiers: TraitBoundModifiers,
         path: Path {
             segments: [
                 PathSegment {

@@ -2405,20 +2405,19 @@ impl Hash for crate::TraitBound {
         H: Hasher,
     {
         self.paren_token.hash(state);
-        self.modifiers.hash(state);
         self.lifetimes.hash(state);
+        self.modifiers.hash(state);
+        self.maybe.hash(state);
         self.path.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::TraitBoundModifiers {
-    fn hash<H>(&self, state: &mut H)
+    fn hash<H>(&self, _state: &mut H)
     where
         H: Hasher,
-    {
-        self.maybe.hash(state);
-    }
+    {}
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]

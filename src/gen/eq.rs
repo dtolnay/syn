@@ -1912,8 +1912,9 @@ impl Eq for crate::TraitBound {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::TraitBound {
     fn eq(&self, other: &Self) -> bool {
-        self.paren_token == other.paren_token && self.modifiers == other.modifiers
-            && self.lifetimes == other.lifetimes && self.path == other.path
+        self.paren_token == other.paren_token && self.lifetimes == other.lifetimes
+            && self.modifiers == other.modifiers && self.maybe == other.maybe
+            && self.path == other.path
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1922,8 +1923,8 @@ impl Eq for crate::TraitBoundModifiers {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::TraitBoundModifiers {
-    fn eq(&self, other: &Self) -> bool {
-        self.maybe == other.maybe
+    fn eq(&self, _other: &Self) -> bool {
+        true
     }
 }
 #[cfg(feature = "full")]

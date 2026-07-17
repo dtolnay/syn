@@ -413,27 +413,27 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TraitBound {
         pub paren_token: Option<token::Paren>,
-        pub modifiers: TraitBoundModifiers,
         /// The `for<'a>` in `for<'a> Foo<&'a T>`
         pub lifetimes: Option<BoundLifetimes>,
+        pub modifiers: TraitBoundModifiers,
+        /// The `?` in `?Sized`
+        pub maybe: Option<Token![?]>,
         /// The `Foo<&'a T>` in `for<'a> Foo<&'a T>`
         pub path: Path,
     }
 }
 
 ast_struct! {
-    /// A modifier on a trait bound, currently only used for the `?` in
-    /// `?Sized`.
+    /// Information about const trait bounds, conditionally const, and async
+    /// traits.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     #[non_exhaustive]
-    pub struct TraitBoundModifiers {
-        pub maybe: Option<Token![?]>,
-    }
+    pub struct TraitBoundModifiers {}
 }
 
 impl Default for TraitBoundModifiers {
     fn default() -> Self {
-        TraitBoundModifiers { maybe: None }
+        TraitBoundModifiers {}
     }
 }
 
@@ -893,8 +893,9 @@ pub(crate) mod parsing {
             } else {
                 Ok(Some(TraitBound {
                     paren_token: None,
-                    modifiers: TraitBoundModifiers { maybe },
                     lifetimes,
+                    modifiers: TraitBoundModifiers {},
+                    maybe,
                     path,
                 }))
             }
@@ -1344,8 +1345,8 @@ pub(crate) mod printing {
     impl ToTokens for TraitBound {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             let to_tokens = |tokens: &mut TokenStream| {
-                self.modifiers.maybe.to_tokens(tokens);
                 self.lifetimes.to_tokens(tokens);
+                self.maybe.to_tokens(tokens);
                 self.path.to_tokens(tokens);
             };
             match &self.paren_token {
