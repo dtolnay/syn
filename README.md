@@ -73,12 +73,16 @@ tokens back to the compiler to compile into the user's crate.
 [`TokenStream`]: https://doc.rust-lang.org/proc_macro/struct.TokenStream.html
 
 ```toml
-[dependencies]
-syn = "2.0"
-quote = "1.0"
+# Cargo.toml
+[package]
+...
 
 [lib]
 proc-macro = true
+
+[dependencies]
+syn = "2.0"
+quote = "1.0"
 ```
 
 ```rust

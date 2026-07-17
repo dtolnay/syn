@@ -61,12 +61,16 @@
 //! [`TokenStream`]: proc_macro::TokenStream
 //!
 //! ```toml
-//! [dependencies]
-//! syn = "2.0"
-//! quote = "1.0"
+//! # Cargo.toml
+//! [package]
+//! ...
 //!
 //! [lib]
 //! proc-macro = true
+//!
+//! [dependencies]
+//! syn = "2.0"
+//! quote = "1.0"
 //! ```
 //!
 //! ```
