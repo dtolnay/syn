@@ -84,7 +84,7 @@ impl TokenBuffer {
 
     /// Creates a cursor referencing the first token in the buffer and able to
     /// traverse until the end of the buffer.
-    #[inline(always)]
+    #[inline]
     pub fn begin(&self) -> Cursor {
         let ptr = self.entries.as_ptr();
         unsafe { Cursor::create(ptr, ptr.add(self.entries.len() - 1)) }
@@ -155,7 +155,7 @@ impl<'a> Cursor<'a> {
     }
 
     /// Get the current entry.
-    #[inline(always)]
+    #[inline]
     fn entry(self) -> &'a Entry {
         unsafe { &*self.ptr }
     }
