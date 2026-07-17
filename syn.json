@@ -356,6 +356,16 @@
       }
     },
     {
+      "ident": "BlockModifiers",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {},
+      "exhaustive": false
+    },
+    {
       "ident": "BoundLifetimes",
       "features": {
         "any": [
@@ -882,6 +892,9 @@
             "token": "Move"
           }
         },
+        "modifiers": {
+          "syn": "BlockModifiers"
+        },
         "block": {
           "syn": "Block"
         }
@@ -1131,6 +1144,9 @@
         },
         "const_token": {
           "token": "Const"
+        },
+        "modifiers": {
+          "syn": "BlockModifiers"
         },
         "block": {
           "syn": "Block"
@@ -1785,6 +1801,9 @@
         },
         "try_token": {
           "token": "Try"
+        },
+        "modifiers": {
+          "syn": "BlockModifiers"
         },
         "block": {
           "syn": "Block"

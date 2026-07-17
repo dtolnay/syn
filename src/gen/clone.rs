@@ -104,6 +104,13 @@ impl Clone for crate::Block {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::BlockModifiers {
+    fn clone(&self) -> Self {
+        crate::BlockModifiers {}
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::BoundLifetimes {
@@ -323,6 +330,7 @@ impl Clone for crate::ExprAsync {
             attrs: self.attrs.clone(),
             async_token: self.async_token.clone(),
             capture: self.capture.clone(),
+            modifiers: self.modifiers.clone(),
             block: self.block.clone(),
         }
     }
@@ -424,6 +432,7 @@ impl Clone for crate::ExprConst {
         crate::ExprConst {
             attrs: self.attrs.clone(),
             const_token: self.const_token.clone(),
+            modifiers: self.modifiers.clone(),
             block: self.block.clone(),
         }
     }
@@ -701,6 +710,7 @@ impl Clone for crate::ExprTryBlock {
         crate::ExprTryBlock {
             attrs: self.attrs.clone(),
             try_token: self.try_token.clone(),
+            modifiers: self.modifiers.clone(),
             block: self.block.clone(),
         }
     }

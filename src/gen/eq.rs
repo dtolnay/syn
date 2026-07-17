@@ -132,6 +132,16 @@ impl PartialEq for crate::Block {
         self.stmts == other.stmts
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::BlockModifiers {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::BlockModifiers {
+    fn eq(&self, _other: &Self) -> bool {
+        true
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::BoundLifetimes {}
@@ -369,7 +379,7 @@ impl Eq for crate::ExprAsync {}
 impl PartialEq for crate::ExprAsync {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.capture == other.capture
-            && self.block == other.block
+            && self.modifiers == other.modifiers && self.block == other.block
     }
 }
 #[cfg(feature = "full")]
@@ -455,7 +465,8 @@ impl Eq for crate::ExprConst {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::ExprConst {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.block == other.block
+        self.attrs == other.attrs && self.modifiers == other.modifiers
+            && self.block == other.block
     }
 }
 #[cfg(feature = "full")]
@@ -696,7 +707,8 @@ impl Eq for crate::ExprTryBlock {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::ExprTryBlock {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.block == other.block
+        self.attrs == other.attrs && self.modifiers == other.modifiers
+            && self.block == other.block
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

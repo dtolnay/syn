@@ -198,6 +198,14 @@ impl Hash for crate::Block {
         self.stmts.hash(state);
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::BlockModifiers {
+    fn hash<H>(&self, _state: &mut H)
+    where
+        H: Hasher,
+    {}
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::BoundLifetimes {
@@ -558,6 +566,7 @@ impl Hash for crate::ExprAsync {
     {
         self.attrs.hash(state);
         self.capture.hash(state);
+        self.modifiers.hash(state);
         self.block.hash(state);
     }
 }
@@ -659,6 +668,7 @@ impl Hash for crate::ExprConst {
         H: Hasher,
     {
         self.attrs.hash(state);
+        self.modifiers.hash(state);
         self.block.hash(state);
     }
 }
@@ -934,6 +944,7 @@ impl Hash for crate::ExprTryBlock {
         H: Hasher,
     {
         self.attrs.hash(state);
+        self.modifiers.hash(state);
         self.block.hash(state);
     }
 }

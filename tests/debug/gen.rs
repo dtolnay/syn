@@ -254,6 +254,12 @@ impl Debug for Lite<syn::Block> {
         formatter.finish()
     }
 }
+impl Debug for Lite<syn::BlockModifiers> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("BlockModifiers");
+        formatter.finish()
+    }
+}
 impl Debug for Lite<syn::BoundLifetimes> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("BoundLifetimes");
@@ -437,6 +443,7 @@ impl Debug for Lite<syn::Expr> {
                 if _val.capture.is_some() {
                     formatter.field("capture", &Present);
                 }
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("block", Lite(&_val.block));
                 formatter.finish()
             }
@@ -576,6 +583,7 @@ impl Debug for Lite<syn::Expr> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("block", Lite(&_val.block));
                 formatter.finish()
             }
@@ -935,6 +943,7 @@ impl Debug for Lite<syn::Expr> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("block", Lite(&_val.block));
                 formatter.finish()
             }
@@ -1052,6 +1061,7 @@ impl Debug for Lite<syn::ExprAsync> {
         if self.value.capture.is_some() {
             formatter.field("capture", &Present);
         }
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("block", Lite(&self.value.block));
         formatter.finish()
     }
@@ -1207,6 +1217,7 @@ impl Debug for Lite<syn::ExprConst> {
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("block", Lite(&self.value.block));
         formatter.finish()
     }
@@ -1612,6 +1623,7 @@ impl Debug for Lite<syn::ExprTryBlock> {
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("block", Lite(&self.value.block));
         formatter.finish()
     }

@@ -82,6 +82,14 @@ pub trait Fold {
     fn fold_block(&mut self, i: crate::Block) -> crate::Block {
         fold_block(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_block_modifiers(
+        &mut self,
+        i: crate::BlockModifiers,
+    ) -> crate::BlockModifiers {
+        fold_block_modifiers(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_bound_lifetimes(
@@ -1216,6 +1224,17 @@ where
         stmts: fold_vec(node.stmts, f, F::fold_stmt),
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_block_modifiers<F>(
+    f: &mut F,
+    node: crate::BlockModifiers,
+) -> crate::BlockModifiers
+where
+    F: Fold + ?Sized,
+{
+    node
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_bound_lifetimes<F>(
@@ -1509,6 +1528,7 @@ where
         attrs: f.fold_attributes(node.attrs),
         async_token: node.async_token,
         capture: node.capture,
+        modifiers: f.fold_block_modifiers(node.modifiers),
         block: f.fold_block(node.block),
     }
 }
@@ -1618,6 +1638,7 @@ where
     crate::ExprConst {
         attrs: f.fold_attributes(node.attrs),
         const_token: node.const_token,
+        modifiers: f.fold_block_modifiers(node.modifiers),
         block: f.fold_block(node.block),
     }
 }
@@ -1929,6 +1950,7 @@ where
     crate::ExprTryBlock {
         attrs: f.fold_attributes(node.attrs),
         try_token: node.try_token,
+        modifiers: f.fold_block_modifiers(node.modifiers),
         block: f.fold_block(node.block),
     }
 }
