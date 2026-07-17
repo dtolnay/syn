@@ -143,19 +143,19 @@ impl Fold for Args {
 }
 
 fn is_assign_op(op: BinOp) -> bool {
-    match op {
+    matches!(
+        op,
         BinOp::AddAssign(_)
-        | BinOp::SubAssign(_)
-        | BinOp::MulAssign(_)
-        | BinOp::DivAssign(_)
-        | BinOp::RemAssign(_)
-        | BinOp::BitXorAssign(_)
-        | BinOp::BitAndAssign(_)
-        | BinOp::BitOrAssign(_)
-        | BinOp::ShlAssign(_)
-        | BinOp::ShrAssign(_) => true,
-        _ => false,
-    }
+            | BinOp::SubAssign(_)
+            | BinOp::MulAssign(_)
+            | BinOp::DivAssign(_)
+            | BinOp::RemAssign(_)
+            | BinOp::BitXorAssign(_)
+            | BinOp::BitAndAssign(_)
+            | BinOp::BitOrAssign(_)
+            | BinOp::ShlAssign(_)
+            | BinOp::ShrAssign(_)
+    )
 }
 
 /// Attribute to print the value of the given variables each time they are
