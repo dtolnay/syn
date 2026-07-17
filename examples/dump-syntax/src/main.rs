@@ -98,9 +98,8 @@ fn render_location(
     let start = err.span().start();
     let mut end = err.span().end();
 
-    let code_line = match start.line.checked_sub(1).and_then(|n| code.lines().nth(n)) {
-        Some(line) => line,
-        None => return render_fallback(formatter, err),
+    let Some(code_line) = start.line.checked_sub(1).and_then(|n| code.lines().nth(n)) else {
+        return render_fallback(formatter, err);
     };
 
     if end.line > start.line {
