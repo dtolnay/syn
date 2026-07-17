@@ -2872,7 +2872,7 @@ where
     skip!(node.paren_token);
     for mut el in Punctuated::pairs_mut(&mut node.inputs) {
         let it = el.value_mut();
-        v.visit_type_mut(it);
+        v.visit_named_arg_mut(it);
     }
     v.visit_return_type_mut(&mut node.output);
 }

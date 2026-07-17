@@ -3009,7 +3009,7 @@ where
     skip!(node.paren_token);
     for el in Punctuated::pairs(&node.inputs) {
         let it = el.value();
-        v.visit_type(it);
+        v.visit_named_arg(it);
     }
     v.visit_return_type(&node.output);
 }

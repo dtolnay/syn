@@ -3039,7 +3039,7 @@ where
 {
     crate::ParenthesizedGenericArguments {
         paren_token: node.paren_token,
-        inputs: crate::punctuated::fold(node.inputs, f, F::fold_type),
+        inputs: crate::punctuated::fold(node.inputs, f, F::fold_named_arg),
         output: f.fold_return_type(node.output),
     }
 }
