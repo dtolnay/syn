@@ -82,7 +82,6 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
             .unwrap()
             .error("I can't think of a legitimate use for lazily initializing the value `()`")
             .emit();
-        return TokenStream::new();
     }
 
     // Assert that the static type implements Sync. If not, user sees an error
