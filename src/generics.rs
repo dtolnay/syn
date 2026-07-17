@@ -1,4 +1,6 @@
 use crate::attr::Attribute;
+#[cfg(feature = "parsing")]
+use crate::error::Result;
 use crate::expr::Expr;
 use crate::ident::Ident;
 use crate::lifetime::Lifetime;
@@ -434,6 +436,14 @@ ast_struct! {
 impl Default for TraitBoundModifiers {
     fn default() -> Self {
         TraitBoundModifiers {}
+    }
+}
+
+impl TraitBoundModifiers {
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    pub fn require_empty(&self) -> Result<()> {
+        Ok(())
     }
 }
 

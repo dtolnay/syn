@@ -1,4 +1,6 @@
 use crate::attr::Attribute;
+#[cfg(feature = "parsing")]
+use crate::error::Result;
 use crate::expr::{Expr, Index, Member};
 use crate::ident::Ident;
 use crate::punctuated::{self, Punctuated};
@@ -210,6 +212,14 @@ ast_struct! {
 impl Default for FieldModifiers {
     fn default() -> Self {
         FieldModifiers {}
+    }
+}
+
+impl FieldModifiers {
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    pub fn require_empty(&self) -> Result<()> {
+        Ok(())
     }
 }
 

@@ -1,4 +1,6 @@
 use crate::attr::Attribute;
+#[cfg(feature = "parsing")]
+use crate::error::Result;
 use crate::expr::Expr;
 use crate::item::Item;
 use crate::mac::Macro;
@@ -76,6 +78,14 @@ ast_struct! {
 impl Default for LocalModifiers {
     fn default() -> Self {
         LocalModifiers {}
+    }
+}
+
+impl LocalModifiers {
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    pub fn require_empty(&self) -> Result<()> {
+        Ok(())
     }
 }
 
