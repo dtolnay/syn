@@ -40,9 +40,7 @@ pub struct TokenBuffer {
 
 impl TokenBuffer {
     fn recursive_new(entries: &mut Vec<Entry>, stream: TokenStream) {
-        let iter = stream.into_iter();
-        entries.reserve(iter.size_hint().0);
-        for tt in iter {
+        for tt in stream {
             match tt {
                 TokenTree::Ident(ident) => entries.push(Entry::Ident(ident)),
                 TokenTree::Punct(punct) => entries.push(Entry::Punct(punct)),
@@ -84,7 +82,7 @@ impl TokenBuffer {
 
     /// Creates a cursor referencing the first token in the buffer and able to
     /// traverse until the end of the buffer.
-    #[inline(always)]
+    #[inline]
     pub fn begin(&self) -> Cursor {
         let ptr = self.entries.as_ptr();
         unsafe { Cursor::create(ptr, ptr.add(self.entries.len() - 1)) }
@@ -155,7 +153,7 @@ impl<'a> Cursor<'a> {
     }
 
     /// Get the current entry.
-    #[inline(always)]
+    #[inline]
     fn entry(self) -> &'a Entry {
         unsafe { &*self.ptr }
     }
