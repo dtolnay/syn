@@ -49,24 +49,32 @@ field. Thus we get errors in the right place if any of the field types do not
 implement the `HeapSize` trait.
 
 ```
-error[E0277]: the trait bound `std::thread::Thread: HeapSize` is not satisfied
- --> src/main.rs:7:5
+error[E0277]: the trait bound `Thread: HeapSize` is not satisfied
+ --> src/main.rs:9:5
   |
-7 |     bad: std::thread::Thread,
-  |     ^^^ the trait `HeapSize` is not implemented for `std::thread::Thread`
+3 | #[derive(HeapSize)]
+  |          -------- required by a bound introduced by this call
+...
+9 |     bad: std::thread::Thread,
+  |     ^^^ the trait `HeapSize` is not implemented for `Thread`
+  |
+  = help: the following other types implement trait `HeapSize`:
+            &'a T
+            Box<T>
+            Demo<'a, T>
+            String
+            [T]
+            u8
 ```
 
 Some unstable APIs in the `proc-macro2` crate let us improve this further by
 joining together the span of the field name and the field type. There is no
 difference in our code &mdash; everything is as shown in this directory &mdash;
-but building the example crate with `cargo build` shows errors like the one
-above and building with `RUSTFLAGS='--cfg procmacro2_semver_exempt' cargo build`
-is able to show errors like the following.
+but building the example crate with a stable compiler shows errors like the one
+above (underlining the field name only) and building with nightly is able to
+show errors like the following (underlining the name and type).
 
 ```
-error[E0277]: the trait bound `std::thread::Thread: HeapSize` is not satisfied
- --> src/main.rs:7:5
-  |
-7 |     bad: std::thread::Thread,
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `HeapSize` is not implemented for `std::thread::Thread`
+9 |     bad: std::thread::Thread,
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `HeapSize` is not implemented for `Thread`
 ```

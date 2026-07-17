@@ -14,15 +14,16 @@ pub fn derive_heap_size(input: proc_macro::TokenStream) -> proc_macro::TokenStre
     let name = input.ident;
 
     // Add a bound `T: HeapSize` to every type parameter T.
-    let generics = add_trait_bounds(input.generics);
+    let mut generics = input.generics;
+    add_trait_bounds(&mut generics);
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
     // Generate an expression to sum up the heap size of each field.
     let sum = heap_size_sum(&input.data);
 
+    // The generated impl.
     let expanded = quote! {
-        // The generated impl.
-        impl #impl_generics heapsize::HeapSize for #name #ty_generics #where_clause {
+        impl #impl_generics ::heapsize::HeapSize for #name #ty_generics #where_clause {
             fn heap_size_of_children(&self) -> usize {
                 #sum
             }
@@ -34,13 +35,12 @@ pub fn derive_heap_size(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 }
 
 // Add a bound `T: HeapSize` to every type parameter T.
-fn add_trait_bounds(mut generics: Generics) -> Generics {
+fn add_trait_bounds(generics: &mut Generics) {
     for param in &mut generics.params {
         if let GenericParam::Type(type_param) = param {
-            type_param.bounds.push(parse_quote!(heapsize::HeapSize));
+            type_param.bounds.push(parse_quote!(::heapsize::HeapSize));
         }
     }
-    generics
 }
 
 // Generate an expression to sum up the heap size of each field.
@@ -63,8 +63,9 @@ fn heap_size_sum(data: &Data) -> TokenStream {
                     // readme of the parent directory.
                     let recurse = fields.named.iter().map(|f| {
                         let name = &f.ident;
-                        quote_spanned! {f.span()=>
-                            heapsize::HeapSize::heap_size_of_children(&self.#name)
+                        let field_access = quote_spanned!(f.span()=> &self.#name);
+                        quote! {
+                            ::heapsize::HeapSize::heap_size_of_children(#field_access)
                         }
                     });
                     quote! {
@@ -77,8 +78,9 @@ fn heap_size_sum(data: &Data) -> TokenStream {
                     //     0 + self.0.heap_size() + self.1.heap_size() + self.2.heap_size()
                     let recurse = fields.unnamed.iter().enumerate().map(|(i, f)| {
                         let index = Index::from(i);
-                        quote_spanned! {f.span()=>
-                            heapsize::HeapSize::heap_size_of_children(&self.#index)
+                        let field_access = quote_spanned!(f.span()=> &self.#index);
+                        quote! {
+                            ::heapsize::HeapSize::heap_size_of_children(#field_access)
                         }
                     });
                     quote! {
