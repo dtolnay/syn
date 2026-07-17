@@ -405,6 +405,16 @@
       "exhaustive": false
     },
     {
+      "ident": "ClosureModifiers",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {},
+      "exhaustive": false
+    },
+    {
       "ident": "ConstParam",
       "features": {
         "any": [
@@ -1064,14 +1074,12 @@
             "syn": "BoundLifetimes"
           }
         },
+        "modifiers": {
+          "syn": "ClosureModifiers"
+        },
         "constness": {
           "option": {
             "token": "Const"
-          }
-        },
-        "movability": {
-          "option": {
-            "token": "Static"
           }
         },
         "asyncness": {

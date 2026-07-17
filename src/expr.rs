@@ -372,8 +372,8 @@ ast_struct! {
     pub struct ExprClosure #full {
         pub attrs: Vec<Attribute>,
         pub lifetimes: Option<BoundLifetimes>,
+        pub modifiers: ClosureModifiers,
         pub constness: Option<Token![const]>,
-        pub movability: Option<Token![static]>,
         pub asyncness: Option<Token![async]>,
         pub capture: Option<Token![move]>,
         pub or1_token: Token![|],
@@ -381,6 +381,21 @@ ast_struct! {
         pub or2_token: Token![|],
         pub output: ReturnType,
         pub body: Box<Expr>,
+    }
+}
+
+#[cfg(feature = "full")]
+ast_struct! {
+    /// Information about closure constness, movability, asyncness.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    #[non_exhaustive]
+    pub struct ClosureModifiers {}
+}
+
+#[cfg(feature = "full")]
+impl Default for ClosureModifiers {
+    fn default() -> Self {
+        ClosureModifiers {}
     }
 }
 
@@ -1171,10 +1186,10 @@ pub(crate) mod parsing {
     use crate::error::{Error, Result};
     #[cfg(feature = "full")]
     use crate::expr::{
-        Arm, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak, ExprClosure,
-        ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet, ExprLoop, ExprMatch,
-        ExprRange, ExprRawAddr, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock, ExprUnsafe,
-        ExprWhile, ExprYield, Label, RangeLimits,
+        Arm, ClosureModifiers, ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBlock, ExprBreak,
+        ExprClosure, ExprConst, ExprContinue, ExprForLoop, ExprIf, ExprInfer, ExprLet, ExprLoop,
+        ExprMatch, ExprRange, ExprRawAddr, ExprRepeat, ExprReturn, ExprTry, ExprTryBlock,
+        ExprUnsafe, ExprWhile, ExprYield, Label, RangeLimits,
     };
     use crate::expr::{
         Expr, ExprBinary, ExprCall, ExprCast, ExprField, ExprGroup, ExprIndex, ExprLit, ExprMacro,
@@ -2528,7 +2543,6 @@ pub(crate) mod parsing {
     fn expr_closure(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprClosure> {
         let lifetimes: Option<BoundLifetimes> = input.parse()?;
         let constness: Option<Token![const]> = input.parse()?;
-        let movability: Option<Token![static]> = input.parse()?;
         let asyncness: Option<Token![async]> = input.parse()?;
         let capture: Option<Token![move]> = input.parse()?;
         let or1_token: Token![|] = input.parse()?;
@@ -2568,8 +2582,8 @@ pub(crate) mod parsing {
         Ok(ExprClosure {
             attrs: Vec::new(),
             lifetimes,
+            modifiers: ClosureModifiers {},
             constness,
-            movability,
             asyncness,
             capture,
             or1_token,
@@ -3525,7 +3539,6 @@ pub(crate) mod printing {
         outer_attrs_to_tokens(&e.attrs, tokens);
         e.lifetimes.to_tokens(tokens);
         e.constness.to_tokens(tokens);
-        e.movability.to_tokens(tokens);
         e.asyncness.to_tokens(tokens);
         e.capture.to_tokens(tokens);
         e.or1_token.to_tokens(tokens);

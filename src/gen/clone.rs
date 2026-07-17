@@ -128,6 +128,13 @@ impl Clone for crate::CapturedParam {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::ClosureModifiers {
+    fn clone(&self) -> Self {
+        crate::ClosureModifiers {}
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::ConstParam {
@@ -398,8 +405,8 @@ impl Clone for crate::ExprClosure {
         crate::ExprClosure {
             attrs: self.attrs.clone(),
             lifetimes: self.lifetimes.clone(),
+            modifiers: self.modifiers.clone(),
             constness: self.constness.clone(),
-            movability: self.movability.clone(),
             asyncness: self.asyncness.clone(),
             capture: self.capture.clone(),
             or1_token: self.or1_token.clone(),

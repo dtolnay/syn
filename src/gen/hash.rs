@@ -227,6 +227,14 @@ impl Hash for crate::CapturedParam {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::ClosureModifiers {
+    fn hash<H>(&self, _state: &mut H)
+    where
+        H: Hasher,
+    {}
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::ConstParam {
@@ -634,8 +642,8 @@ impl Hash for crate::ExprClosure {
     {
         self.attrs.hash(state);
         self.lifetimes.hash(state);
+        self.modifiers.hash(state);
         self.constness.hash(state);
-        self.movability.hash(state);
         self.asyncness.hash(state);
         self.capture.hash(state);
         self.inputs.hash(state);

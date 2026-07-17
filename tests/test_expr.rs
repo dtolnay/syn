@@ -26,14 +26,14 @@ use std::process::ExitCode;
 use syn::punctuated::Punctuated;
 use syn::visit_mut::VisitMut as _;
 use syn::{
-    parse_quote, token, AngleBracketedGenericArguments, Arm, BinOp, Block, Expr, ExprArray,
-    ExprAssign, ExprAsync, ExprAwait, ExprBinary, ExprBlock, ExprBreak, ExprCall, ExprCast,
-    ExprClosure, ExprConst, ExprContinue, ExprField, ExprForLoop, ExprIf, ExprIndex, ExprLet,
-    ExprLit, ExprLoop, ExprMacro, ExprMatch, ExprMethodCall, ExprPath, ExprRange, ExprRawAddr,
-    ExprReference, ExprReturn, ExprStruct, ExprTry, ExprTryBlock, ExprTuple, ExprUnary, ExprUnsafe,
-    ExprWhile, ExprYield, GenericArgument, Label, Lifetime, Lit, LitInt, Macro, MacroDelimiter,
-    Member, Pat, PatWild, Path, PathArguments, PathSegment, PointerMutability, QSelf, RangeLimits,
-    ReturnType, Stmt, Token, Type, TypePath, UnOp,
+    parse_quote, token, AngleBracketedGenericArguments, Arm, BinOp, Block, ClosureModifiers, Expr,
+    ExprArray, ExprAssign, ExprAsync, ExprAwait, ExprBinary, ExprBlock, ExprBreak, ExprCall,
+    ExprCast, ExprClosure, ExprConst, ExprContinue, ExprField, ExprForLoop, ExprIf, ExprIndex,
+    ExprLet, ExprLit, ExprLoop, ExprMacro, ExprMatch, ExprMethodCall, ExprPath, ExprRange,
+    ExprRawAddr, ExprReference, ExprReturn, ExprStruct, ExprTry, ExprTryBlock, ExprTuple,
+    ExprUnary, ExprUnsafe, ExprWhile, ExprYield, GenericArgument, Label, Lifetime, Lit, LitInt,
+    Macro, MacroDelimiter, Member, Pat, PatWild, Path, PathArguments, PathSegment,
+    PointerMutability, QSelf, RangeLimits, ReturnType, Stmt, Token, Type, TypePath, UnOp,
 };
 
 #[test]
@@ -342,6 +342,7 @@ fn test_closure_vs_rangefull() {
     snapshot!(tokens as Expr, @r#"
     Expr::MethodCall {
         receiver: Expr::Closure {
+            modifiers: ClosureModifiers,
             output: ReturnType::Default,
             body: Expr::Range {
                 limits: RangeLimits::HalfOpen,
@@ -499,9 +500,10 @@ fn test_ranges_bailout() {
     }
     ");
 
-    snapshot!("|| .. ?" as Expr, @r"
+    snapshot!("|| .. ?" as Expr, @"
     Expr::Try {
         expr: Expr::Closure {
+            modifiers: ClosureModifiers,
             output: ReturnType::Default,
             body: Expr::Range {
                 limits: RangeLimits::HalfOpen,
@@ -535,6 +537,7 @@ fn test_ranges_bailout() {
     snapshot!("|| .. .field" as Expr, @r#"
     Expr::Field {
         base: Expr::Closure {
+            modifiers: ClosureModifiers,
             output: ReturnType::Default,
             body: Expr::Range {
                 limits: RangeLimits::HalfOpen,
@@ -1097,8 +1100,8 @@ fn test_permutations() -> ExitCode {
                 // `|| $expr`
                 attrs: Vec::new(),
                 lifetimes: None,
+                modifiers: ClosureModifiers::default(),
                 constness: None,
-                movability: None,
                 asyncness: None,
                 capture: None,
                 or1_token: Token![|](span),
@@ -1316,8 +1319,8 @@ fn test_permutations() -> ExitCode {
                 // `|| -> T {}`
                 attrs: Vec::new(),
                 lifetimes: None,
+                modifiers: ClosureModifiers::default(),
                 constness: None,
-                movability: None,
                 asyncness: None,
                 capture: None,
                 or1_token: Token![|](span),

@@ -95,6 +95,14 @@ pub trait Fold {
     fn fold_captured_param(&mut self, i: crate::CapturedParam) -> crate::CapturedParam {
         fold_captured_param(self, i)
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_closure_modifiers(
+        &mut self,
+        i: crate::ClosureModifiers,
+    ) -> crate::ClosureModifiers {
+        fold_closure_modifiers(self, i)
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_const_param(&mut self, i: crate::ConstParam) -> crate::ConstParam {
@@ -1242,6 +1250,17 @@ where
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_closure_modifiers<F>(
+    f: &mut F,
+    node: crate::ClosureModifiers,
+) -> crate::ClosureModifiers
+where
+    F: Fold + ?Sized,
+{
+    node
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_const_param<F>(f: &mut F, node: crate::ConstParam) -> crate::ConstParam
@@ -1579,8 +1598,8 @@ where
     crate::ExprClosure {
         attrs: f.fold_attributes(node.attrs),
         lifetimes: (node.lifetimes).map(|it| f.fold_bound_lifetimes(it)),
+        modifiers: f.fold_closure_modifiers(node.modifiers),
         constness: node.constness,
-        movability: node.movability,
         asyncness: node.asyncness,
         capture: node.capture,
         or1_token: node.or1_token,

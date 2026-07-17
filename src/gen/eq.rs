@@ -161,6 +161,16 @@ impl PartialEq for crate::CapturedParam {
         }
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::ClosureModifiers {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::ClosureModifiers {
+    fn eq(&self, _other: &Self) -> bool {
+        true
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::ConstParam {}
@@ -432,7 +442,7 @@ impl Eq for crate::ExprClosure {}
 impl PartialEq for crate::ExprClosure {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.lifetimes == other.lifetimes
-            && self.constness == other.constness && self.movability == other.movability
+            && self.modifiers == other.modifiers && self.constness == other.constness
             && self.asyncness == other.asyncness && self.capture == other.capture
             && self.inputs == other.inputs && self.output == other.output
             && self.body == other.body
