@@ -1,4 +1,5 @@
 use crate::operand::{Borrowed, Operand, Owned};
+
 use crate::{file, lookup};
 use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
@@ -273,17 +274,17 @@ fn expand_impl_body(defs: &Definitions, node: &Node, name: &str, val: &Operand) 
                         };
                     } else if let Type::Syn(inner) = ty {
                         for node in &defs.types {
-                            if node.ident == *inner {
-                                if let Data::Enum(variants) = &node.data {
-                                    if variants.get("None").is_some_and(Vec::is_empty) {
-                                        let ty = rust_type(ty);
-                                        call = quote! {
-                                            match #val.#ident {
-                                                #ty::None => {}
-                                                _ => { #call }
-                                            }
-                                        };
-                                    }
+                            if node.ident == *inner
+                                && let Data::Enum(variants) = &node.data
+                            {
+                                if variants.get("None").is_some_and(Vec::is_empty) {
+                                    let ty = rust_type(ty);
+                                    call = quote! {
+                                        match #val.#ident {
+                                            #ty::None => {}
+                                            _ => { #call }
+                                        }
+                                    };
                                 }
                                 break;
                             }

@@ -458,12 +458,11 @@ mod parsing {
 
     pub fn path_attr(attrs: &[Attribute]) -> Result<Option<&LitStr>> {
         for attr in attrs {
-            if attr.path().is_ident("path") {
-                if let Expr::Lit(expr) = &attr.meta.require_name_value()?.value {
-                    if let Lit::Str(lit) = &expr.lit {
-                        return Ok(Some(lit));
-                    }
-                }
+            if attr.path().is_ident("path")
+                && let Expr::Lit(expr) = &attr.meta.require_name_value()?.value
+                && let Lit::Str(lit) = &expr.lit
+            {
+                return Ok(Some(lit));
             }
         }
         Ok(None)
