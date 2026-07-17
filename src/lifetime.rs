@@ -1,5 +1,7 @@
 #[cfg(feature = "parsing")]
 use crate::lookahead;
+#[cfg(feature = "parsing")]
+use crate::parse::{ParseStream, Result};
 use core::cmp::Ordering;
 use core::fmt::{self, Display};
 use core::hash::{Hash, Hasher};
@@ -71,6 +73,15 @@ impl Lifetime {
     pub fn set_span(&mut self, span: Span) {
         self.apostrophe = span;
         self.ident.set_span(span);
+    }
+
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    pub fn parse_any(input: ParseStream) -> Result<Self> {
+        input.step(|cursor| match cursor.lifetime() {
+            Some((lifetime, rest)) => Ok((lifetime, rest)),
+            None => Err(cursor.error("expected lifetime")),
+        })
     }
 }
 
