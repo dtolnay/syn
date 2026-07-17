@@ -47,6 +47,7 @@ ast_struct! {
     pub struct Local {
         pub attrs: Vec<Attribute>,
         pub let_token: Token![let],
+        /// (Non-exhaustive) Additional optional information about a local.
         pub modifiers: LocalModifiers,
         pub pat: Pat,
         pub init: Option<LocalInit>,
@@ -69,7 +70,13 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// Information about local binding scope on a `let` statement.
+    /// Additional optional information about a `let` statement.
+    /// This data structure may grow to accommodate future Rust language
+    /// changes, including the following in-progress RFCs:
+    ///
+    /// - [#139076] "Super let"
+    ///
+    /// [#139076]: https://github.com/rust-lang/rust/issues/139076
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     #[non_exhaustive]
     pub struct LocalModifiers {}

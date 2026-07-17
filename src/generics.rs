@@ -417,6 +417,8 @@ ast_struct! {
         pub paren_token: Option<token::Paren>,
         /// The `for<'a>` in `for<'a> Foo<&'a T>`
         pub lifetimes: Option<BoundLifetimes>,
+        /// (Non-exhaustive) Optional additional information about a trait
+        /// bound.
         pub modifiers: TraitBoundModifiers,
         /// The `?` in `?Sized`
         pub maybe: Option<Token![?]>,
@@ -426,8 +428,16 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// Information about const trait bounds, conditionally const, and async
-    /// traits.
+    /// Optional additional information about a trait bound.
+    ///
+    /// This data structure may grow to accommodate future Rust language
+    /// changes, including the following in-progress RFCs:
+    ///
+    /// - [RFC 3668] "Async closures" (`async Fn()`)
+    /// - [RFC 3762] "Make trait methods callable in const contexts" (`const Default`)
+    ///
+    /// [RFC 3668]: https://github.com/rust-lang/rust/issues/62290
+    /// [RFC 3762]: https://github.com/rust-lang/rfcs/pull/3762
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     #[non_exhaustive]
     pub struct TraitBoundModifiers {}
