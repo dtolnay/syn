@@ -1722,6 +1722,18 @@ pub(crate) mod parsing {
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Safety {
+        /// Parses `safe`, `unsafe`, or default (neither).
+        ///
+        /// This is appropriate for matching the syntax of `extern` blocks, in
+        /// which functions are unsafe by default and require `safe` otherwise.
+        ///
+        /// ```
+        /// unsafe extern "C" {
+        ///     fn implicitly_unsafe();
+        ///     unsafe fn explicitly_unsafe();
+        ///     safe fn explicitly_safe();
+        /// }
+        /// ```
         pub fn parse_safe_or_unsafe(input: ParseStream) -> Result<Self> {
             if let Some(token) = input.parse::<Option<Token![safe]>>()? {
                 Ok(Safety::Safe(token))
@@ -1730,6 +1742,18 @@ pub(crate) mod parsing {
             }
         }
 
+        /// Parses `unsafe` or default (nothing).
+        ///
+        /// This is appropriate for functions not within an `extern` block,
+        /// which are safe by default and cannot be explicitly marked `safe`.
+        ///
+        /// ```
+        /// fn implicitly_safe() {}
+        /// unsafe fn explicitly_unsafe() {}
+        ///
+        /// // safe fn explicitly_safe() {}
+        /// // ^^^^ ERROR: items outside of `unsafe extern { }` cannot be declared with `safe` safety qualifier
+        /// ```
         pub fn parse_unsafe_only(input: ParseStream) -> Result<Self> {
             if let Some(token) = input.parse::<Option<Token![unsafe]>>()? {
                 Ok(Safety::Unsafe(token))
