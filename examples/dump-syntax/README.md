@@ -13,16 +13,18 @@ The output will begin with:
 ```
 File {
     shebang: None,
+    frontmatter: None,
     attrs: [
         Attribute {
             pound_token: Pound,
-            style: Inner(
-                Bang
+            style: AttrStyle::Inner(
+                Not,
             ),
             bracket_token: Bracket,
-            path: Path {
-                leading_colon: None,
-                segments: [
+            meta: Meta::NameValue {
+                path: Path {
+                    leading_colon: None,
+                    segments: [
     ...
 }
 ```
