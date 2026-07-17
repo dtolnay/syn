@@ -113,25 +113,31 @@ ast_enum_of_structs! {
     #[non_exhaustive]
     pub enum Expr {
         /// A slice literal expression: `[a, b, c, d]`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Array(ExprArray),
 
         /// An assignment expression: `a = compute()`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Assign(ExprAssign),
 
         /// An async block: `async { ... }`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Async(ExprAsync),
 
         /// An await expression: `fut.await`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Await(ExprAwait),
 
         /// A binary operation: `a + b`, `a += b`.
         Binary(ExprBinary),
 
         /// A blocked scope: `{ ... }`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Block(ExprBlock),
 
         /// A `break`, with an optional label to break and an optional
         /// expression.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Break(ExprBreak),
 
         /// A function call expression: `invoke(a, b)`.
@@ -141,12 +147,15 @@ ast_enum_of_structs! {
         Cast(ExprCast),
 
         /// A closure expression: `|a, b| a + b`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Closure(ExprClosure),
 
         /// A const block: `const { ... }`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Const(ExprConst),
 
         /// A `continue`, with an optional label.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Continue(ExprContinue),
 
         /// Access of a named struct field (`obj.k`) or unnamed tuple struct
@@ -154,6 +163,7 @@ ast_enum_of_structs! {
         Field(ExprField),
 
         /// A for loop: `for pat in expr { ... }`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         ForLoop(ExprForLoop),
 
         /// An expression contained within invisible delimiters.
@@ -168,27 +178,32 @@ ast_enum_of_structs! {
         ///
         /// The `else` branch expression may only be an `If` or `Block`
         /// expression, not any of the other types of expression.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         If(ExprIf),
 
         /// A square bracketed indexing expression: `vector[2]`.
         Index(ExprIndex),
 
         /// The inferred value of a const generic argument, denoted `_`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Infer(ExprInfer),
 
         /// A `let` guard: `let Some(x) = opt`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Let(ExprLet),
 
         /// A literal in place of an expression: `1`, `"foo"`.
         Lit(ExprLit),
 
         /// Conditionless loop: `loop { ... }`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Loop(ExprLoop),
 
         /// A macro invocation expression: `format!("{}", q)`.
         Macro(ExprMacro),
 
         /// A `match` expression: `match n { Some(n) => {}, None => {} }`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Match(ExprMatch),
 
         /// A method call expression: `x.foo::<T>(a, b)`.
@@ -204,18 +219,22 @@ ast_enum_of_structs! {
         Path(ExprPath),
 
         /// A range expression: `1..2`, `1..`, `..2`, `1..=2`, `..=2`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Range(ExprRange),
 
         /// Address-of operation: `&raw const place` or `&raw mut place`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         RawAddr(ExprRawAddr),
 
         /// A referencing operation: `&a` or `&mut a`.
         Reference(ExprReference),
 
         /// An array literal constructed from one repeated element: `[0u8; N]`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Repeat(ExprRepeat),
 
         /// A `return`, with an optional value to be returned.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Return(ExprReturn),
 
         /// A struct literal expression: `Point { x: 1, y: 1 }`.
@@ -225,9 +244,11 @@ ast_enum_of_structs! {
         Struct(ExprStruct),
 
         /// A try-expression: `expr?`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Try(ExprTry),
 
         /// A try block: `try { ... }`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         TryBlock(ExprTryBlock),
 
         /// A tuple expression: `(a, b, c, d)`.
@@ -237,15 +258,18 @@ ast_enum_of_structs! {
         Unary(ExprUnary),
 
         /// An unsafe block: `unsafe { ... }`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Unsafe(ExprUnsafe),
 
         /// Tokens in expression position not interpreted by Syn.
         Verbatim(TokenStream),
 
         /// A while loop: `while expr { ... }`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         While(ExprWhile),
 
         /// A yield expression: `yield expr`.
+        #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Yield(ExprYield),
 
         // For testing exhaustiveness in downstream code, use the following idiom:

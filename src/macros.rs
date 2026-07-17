@@ -70,6 +70,7 @@ macro_rules! generate_to_tokens {
     (
         ($($arms:tt)*) $tokens:ident $name:ident {
             $(#[doc $($doc_attr:tt)*])*
+            $(#[cfg_attr $cfg_attr:tt])*
             $variant:ident,
             $($next:tt)*
         }
@@ -83,6 +84,7 @@ macro_rules! generate_to_tokens {
     (
         ($($arms:tt)*) $tokens:ident $name:ident {
             $(#[doc $($doc_attr:tt)*])*
+            $(#[cfg_attr $cfg_attr:tt])*
             $variant:ident($member:ident),
             $($next:tt)*
         }
