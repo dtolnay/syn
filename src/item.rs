@@ -1,6 +1,8 @@
 use crate::attr::Attribute;
 use crate::data::{Fields, FieldsNamed, Variant};
 use crate::derive::{Data, DataEnum, DataStruct, DataUnion, DeriveInput};
+#[cfg(feature = "parsing")]
+use crate::error::{Error, Result};
 use crate::expr::Expr;
 use crate::generics::{Generics, TypeParamBound};
 use crate::ident::Ident;
@@ -170,6 +172,14 @@ impl Default for FnModifiers {
     }
 }
 
+impl FnModifiers {
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    pub fn require_empty(&self) -> Result<()> {
+        Ok(())
+    }
+}
+
 ast_struct! {
     /// A block of foreign items: `extern "C" { ... }`.
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -218,6 +228,26 @@ impl Default for ImplModifiers {
             defaultness: None,
             polarity: None,
         }
+    }
+}
+
+impl ImplModifiers {
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    pub fn require_empty(&self) -> Result<()> {
+        let mut result = Ok(());
+        if let Some(defaultness) = &self.defaultness {
+            let err = Error::new(defaultness.span, "unexpected impl modifier");
+            result = Err(err);
+        }
+        if let Some(polarity) = &self.polarity {
+            let err = Error::new(polarity.span, "unexpected impl modifier");
+            match &mut result {
+                Ok(()) => result = Err(err),
+                Err(prev) => prev.combine(err),
+            }
+        }
+        result
     }
 }
 
@@ -309,6 +339,19 @@ ast_struct! {
 impl Default for TraitModifiers {
     fn default() -> Self {
         TraitModifiers { auto_token: None }
+    }
+}
+
+impl TraitModifiers {
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    pub fn require_empty(&self) -> Result<()> {
+        let mut result = Ok(());
+        if let Some(auto_token) = &self.auto_token {
+            let err = Error::new(auto_token.span, "unexpected trait modifier");
+            result = Err(err);
+        }
+        result
     }
 }
 

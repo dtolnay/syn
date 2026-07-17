@@ -400,6 +400,15 @@ impl Default for ClosureModifiers {
     }
 }
 
+#[cfg(feature = "full")]
+impl ClosureModifiers {
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    pub fn require_empty(&self) -> Result<()> {
+        Ok(())
+    }
+}
+
 ast_struct! {
     /// A const block: `const { ... }`.
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -1176,6 +1185,15 @@ ast_struct! {
 impl Default for BlockModifiers {
     fn default() -> Self {
         BlockModifiers {}
+    }
+}
+
+#[cfg(feature = "full")]
+impl BlockModifiers {
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    pub fn require_empty(&self) -> Result<()> {
+        Ok(())
     }
 }
 
