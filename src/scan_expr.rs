@@ -236,7 +236,7 @@ pub(crate) fn scan_expr(input: ParseStream) -> Result<()> {
                     None => Ok((false, *cursor)),
                 })?,
                 Input::ConsumeIdent => input.parse::<Option<Ident>>()?.is_some(),
-                Input::ConsumeLifetime => input.parse::<Option<Lifetime>>()?.is_some(),
+                Input::ConsumeLifetime => Lifetime::parse_optional_any(input).is_some(),
                 Input::ConsumeLiteral => input.parse::<Option<Lit>>()?.is_some(),
                 Input::ExpectPath => {
                     input.parse::<ExprPath>()?;

@@ -83,6 +83,17 @@ impl Lifetime {
             None => Err(cursor.error("expected lifetime")),
         })
     }
+
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    pub fn parse_optional_any(input: ParseStream) -> Option<Self> {
+        input
+            .step(|cursor| match cursor.lifetime() {
+                Some((lifetime, rest)) => Ok((Some(lifetime), rest)),
+                None => Ok((None, *cursor)),
+            })
+            .unwrap()
+    }
 }
 
 impl Display for Lifetime {
@@ -136,6 +147,7 @@ pub_if_not_doc! {
     }
 }
 
+/*
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::error::Result;
@@ -163,6 +175,7 @@ pub(crate) mod parsing {
         }
     }
 }
+*/
 
 #[cfg(feature = "printing")]
 mod printing {

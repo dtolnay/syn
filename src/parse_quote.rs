@@ -119,6 +119,7 @@ macro_rules! parse_quote_spanned {
 // Can parse any type that implements Parse.
 
 use crate::error::Result;
+use crate::lifetime::Lifetime;
 use crate::parse::{Parse, ParseStream, Parser};
 #[cfg(feature = "full")]
 use alloc::boxed::Box;
@@ -206,6 +207,12 @@ impl ParseQuote for Field {
             colon_token,
             ty,
         })
+    }
+}
+
+impl ParseQuote for Lifetime {
+    fn parse(input: ParseStream) -> Result<Self> {
+        Lifetime::parse_any(input)
     }
 }
 
