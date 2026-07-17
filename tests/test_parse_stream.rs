@@ -48,7 +48,7 @@ fn test_peek_lifetime() {
         assert!(input.peek2(Token![;]));
         assert!(!input.peek2(Token![static]));
 
-        let _ = Lifetime::parse_any(input)?;
+        let _: Lifetime = input.parse()?;
 
         assert!(input.peek(Token![;]));
 

@@ -708,7 +708,7 @@ pub(crate) mod parsing {
             Ok(TypeReference {
                 attrs: Vec::new(),
                 and_token: input.parse()?,
-                lifetime: Lifetime::parse_optional_any(input),
+                lifetime: input.parse()?,
                 mutability: input.parse()?,
                 // & binds tighter than +, so we don't allow + here.
                 elem: Box::new(input.call(Type::without_plus)?),

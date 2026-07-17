@@ -2711,7 +2711,7 @@ pub(crate) mod parsing {
     impl Parse for Label {
         fn parse(input: ParseStream) -> Result<Self> {
             Ok(Label {
-                name: Lifetime::parse_any(input)?,
+                name: input.parse()?,
                 colon_token: input.parse()?,
             })
         }
@@ -2736,7 +2736,7 @@ pub(crate) mod parsing {
             Ok(ExprContinue {
                 attrs: Vec::new(),
                 continue_token: input.parse()?,
-                label: Lifetime::parse_optional_any(input),
+                label: input.parse()?,
             })
         }
     }
@@ -2746,7 +2746,7 @@ pub(crate) mod parsing {
         let break_token: Token![break] = input.parse()?;
 
         let ahead = input.fork();
-        let label = Lifetime::parse_optional_any(&ahead);
+        let label: Option<Lifetime> = ahead.parse()?;
         if label.is_some() && ahead.peek(Token![:]) {
             // Not allowed: `break 'label: loop {...}`
             // Parentheses are required. `break ('label: loop {...})`
