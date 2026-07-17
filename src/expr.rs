@@ -188,7 +188,7 @@ ast_enum_of_structs! {
         #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Infer(ExprInfer),
 
-        /// A `let` guard: `let Some(x) = opt`.
+        /// A pattern application: `let Some(x) = opt`.
         #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Let(ExprLet),
 
@@ -543,7 +543,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A `let` guard: `let Some(x) = opt`.
+    /// A pattern application: `let Some(x) = opt`.
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct ExprLet #full {
         pub attrs: Vec<Attribute>,
