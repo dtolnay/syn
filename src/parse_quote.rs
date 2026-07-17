@@ -36,13 +36,12 @@
 /// use syn::{parse_quote, Generics, GenericParam};
 ///
 /// // Add a bound `T: HeapSize` to every type parameter T.
-/// fn add_trait_bounds(mut generics: Generics) -> Generics {
+/// fn add_trait_bounds(generics: &mut Generics) {
 ///     for param in &mut generics.params {
 ///         if let GenericParam::Type(type_param) = param {
-///             type_param.bounds.push(parse_quote!(HeapSize));
+///             type_param.bounds.push(parse_quote!(::heapsize::HeapSize));
 ///         }
 ///     }
-///     generics
 /// }
 /// ```
 ///
