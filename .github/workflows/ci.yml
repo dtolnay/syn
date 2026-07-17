@@ -60,6 +60,7 @@ jobs:
             name: Windows
             os: windows
     env:
+      manifest_path: ${{matrix.rust == '1.71.0' && '--manifest-path=tests/crate/Cargo.toml' || ''}}
       target: ${{matrix.target && format('--target={0}', matrix.target)}}
     timeout-minutes: 45
     steps:
@@ -69,21 +70,21 @@ jobs:
           toolchain: ${{matrix.rust}}
           targets: ${{matrix.target}}
           components: ${{matrix.components}}
-      - run: cargo check ${{env.target}} --no-default-features
-      - run: cargo check ${{env.target}}
-      - run: cargo check ${{env.target}} --features full
-      - run: cargo check ${{env.target}} --features 'fold visit visit-mut'
-      - run: cargo check ${{env.target}} --features 'full fold visit visit-mut'
-      - run: cargo check ${{env.target}} --no-default-features --features derive
-      - run: cargo check ${{env.target}} --no-default-features --features 'derive parsing'
-      - run: cargo check ${{env.target}} --no-default-features --features 'derive printing'
-      - run: cargo check ${{env.target}} --no-default-features --features 'proc-macro parsing printing'
-      - run: cargo check ${{env.target}} --no-default-features --features full
-      - run: cargo check ${{env.target}} --no-default-features --features 'full parsing'
-      - run: cargo check ${{env.target}} --no-default-features --features 'full printing'
-      - run: cargo check ${{env.target}} --no-default-features --features 'full parsing printing'
-      - run: cargo check ${{env.target}} --no-default-features --features 'fold visit visit-mut parsing printing'
-      - run: cargo check ${{env.target}} --no-default-features --features 'full fold visit visit-mut parsing printing'
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --no-default-features
+      - run: cargo check ${{env.manifest_path}} ${{env.target}}
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --features full
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --features 'fold visit visit-mut'
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --features 'full fold visit visit-mut'
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --no-default-features --features derive
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --no-default-features --features 'derive parsing'
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --no-default-features --features 'derive printing'
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --no-default-features --features 'proc-macro parsing printing'
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --no-default-features --features full
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --no-default-features --features 'full parsing'
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --no-default-features --features 'full printing'
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --no-default-features --features 'full parsing printing'
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --no-default-features --features 'fold visit visit-mut parsing printing'
+      - run: cargo check ${{env.manifest_path}} ${{env.target}} --no-default-features --features 'full fold visit visit-mut parsing printing'
       - if: matrix.components == 'rustc-dev'
         run: cargo check --benches --all-features --release
       - if: matrix.rust != '1.71.0'
