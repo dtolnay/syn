@@ -1139,18 +1139,6 @@ impl Hash for crate::FnModifiers {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
-impl Hash for crate::FnPtrArg {
-    fn hash<H>(&self, state: &mut H)
-    where
-        H: Hasher,
-    {
-        self.attrs.hash(state);
-        self.name.hash(state);
-        self.ty.hash(state);
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::FnPtrVariadic {
     fn hash<H>(&self, state: &mut H)
     where
@@ -1902,6 +1890,18 @@ impl Hash for crate::MetaNameValue {
     {
         self.path.hash(state);
         self.value.hash(state);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::NamedArg {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.attrs.hash(state);
+        self.name.hash(state);
+        self.ty.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

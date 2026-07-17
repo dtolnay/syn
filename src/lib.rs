@@ -540,7 +540,7 @@ mod ty;
 #[cfg(any(feature = "full", feature = "derive"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
 pub use crate::ty::{
-    Abi, FnPtrArg, FnPtrVariadic, PointerMutability, ReturnType, Type, TypeArray, TypeFnPtr,
+    Abi, FnPtrVariadic, NamedArg, PointerMutability, ReturnType, Type, TypeArray, TypeFnPtr,
     TypeGroup, TypeImplTrait, TypeInfer, TypeMacro, TypeNever, TypeParen, TypePath, TypePtr,
     TypeReference, TypeSlice, TypeTraitObject, TypeTuple,
 };

@@ -879,17 +879,6 @@ impl Clone for crate::FnModifiers {
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
-impl Clone for crate::FnPtrArg {
-    fn clone(&self) -> Self {
-        crate::FnPtrArg {
-            attrs: self.attrs.clone(),
-            name: self.name.clone(),
-            ty: self.ty.clone(),
-        }
-    }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::FnPtrVariadic {
     fn clone(&self) -> Self {
         crate::FnPtrVariadic {
@@ -1517,6 +1506,17 @@ impl Clone for crate::MetaNameValue {
             path: self.path.clone(),
             eq_token: self.eq_token.clone(),
             value: self.value.clone(),
+        }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::NamedArg {
+    fn clone(&self) -> Self {
+        crate::NamedArg {
+            attrs: self.attrs.clone(),
+            name: self.name.clone(),
+            ty: self.ty.clone(),
         }
     }
 }

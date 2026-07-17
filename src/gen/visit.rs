@@ -381,11 +381,6 @@ pub trait Visit<'ast> {
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn visit_fn_ptr_arg(&mut self, i: &'ast crate::FnPtrArg) {
-        visit_fn_ptr_arg(self, i);
-    }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_fn_ptr_variadic(&mut self, i: &'ast crate::FnPtrVariadic) {
         visit_fn_ptr_variadic(self, i);
     }
@@ -636,6 +631,11 @@ pub trait Visit<'ast> {
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_meta_name_value(&mut self, i: &'ast crate::MetaNameValue) {
         visit_meta_name_value(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_named_arg(&mut self, i: &'ast crate::NamedArg) {
+        visit_named_arg(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -2152,21 +2152,6 @@ where
 {}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn visit_fn_ptr_arg<'ast, V>(v: &mut V, node: &'ast crate::FnPtrArg)
-where
-    V: Visit<'ast> + ?Sized,
-{
-    for it in &node.attrs {
-        v.visit_attribute(it);
-    }
-    if let Some(it) = &node.name {
-        v.visit_ident(&(it).0);
-        skip!((it).1);
-    }
-    v.visit_type(&node.ty);
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_fn_ptr_variadic<'ast, V>(v: &mut V, node: &'ast crate::FnPtrVariadic)
 where
     V: Visit<'ast> + ?Sized,
@@ -2999,6 +2984,21 @@ where
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_named_arg<'ast, V>(v: &mut V, node: &'ast crate::NamedArg)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    if let Some(it) = &node.name {
+        v.visit_ident(&(it).0);
+        skip!((it).1);
+    }
+    v.visit_type(&node.ty);
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_parenthesized_generic_arguments<'ast, V>(
     v: &mut V,
     node: &'ast crate::ParenthesizedGenericArguments,
@@ -3719,7 +3719,7 @@ where
     skip!(node.paren_token);
     for el in Punctuated::pairs(&node.inputs) {
         let it = el.value();
-        v.visit_fn_ptr_arg(it);
+        v.visit_named_arg(it);
     }
     if let Some(it) = &node.variadic {
         v.visit_fn_ptr_variadic(it);
