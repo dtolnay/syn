@@ -109,6 +109,32 @@ ast_enum_of_structs! {
     /// A sign that you may not be choosing the right variable names is if you
     /// see names getting repeated in your code, like accessing
     /// `receiver.receiver` or `pat.pat` or `cond.cond`.
+    ///
+    /// # Exhaustive matching
+    ///
+    /// For testing exhaustiveness in downstream code, use the following idiom:
+    ///
+    /// ```
+    /// # use syn::Expr;
+    /// #
+    /// # fn example(expr: Expr) {
+    /// match expr {
+    ///     #![cfg_attr(test, deny(non_exhaustive_omitted_patterns))]
+    ///
+    ///     Expr::Array(expr) => { /*...*/ }
+    ///     Expr::Assign(expr) => { /*...*/ }
+    #[cfg_attr(not(doctest), doc = "     ...")]
+    ///     Expr::Yield(expr) => { /*...*/ }
+    ///
+    ///     _ => { /* some sane fallback */ }
+    /// }
+    /// # }
+    /// ```
+    ///
+    /// This way we fail your tests but don't break your library when adding a
+    /// variant. You will be notified by a test failure when a variant is added,
+    /// so that you can add code to handle it, but your library will continue to
+    /// compile and work for downstream users in the interim.
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     #[non_exhaustive]
     pub enum Expr {
@@ -271,24 +297,6 @@ ast_enum_of_structs! {
         /// A yield expression: `yield expr`.
         #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Yield(ExprYield),
-
-        // For testing exhaustiveness in downstream code, use the following idiom:
-        //
-        //     match expr {
-        //         #![cfg_attr(test, deny(non_exhaustive_omitted_patterns))]
-        //
-        //         Expr::Array(expr) => {...}
-        //         Expr::Assign(expr) => {...}
-        //         ...
-        //         Expr::Yield(expr) => {...}
-        //
-        //         _ => { /* some sane fallback */ }
-        //     }
-        //
-        // This way we fail your tests but don't break your library when adding
-        // a variant. You will be notified by a test failure when a variant is
-        // added, so that you can add code to handle it, but your library will
-        // continue to compile and work for downstream users in the interim.
     }
 }
 
