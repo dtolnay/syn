@@ -109,8 +109,7 @@ fn render_location(
 
     let filename = filepath
         .file_name()
-        .map(OsStr::to_string_lossy)
-        .unwrap_or(Cow::Borrowed("main.rs"));
+        .map_or(Cow::Borrowed("main.rs"), OsStr::to_string_lossy);
 
     write!(
         formatter,
