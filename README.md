@@ -12,11 +12,11 @@ of Rust source code.
 Currently this library is geared toward use in Rust procedural macros, but
 contains some APIs that may be useful more generally.
 
-- **Data structures** — Syn provides a complete syntax tree that can represent
-  any valid Rust source code. The syntax tree is rooted at [`syn::File`] which
-  represents a full source file, but there are other entry points that may be
-  useful to procedural macros including [`syn::Item`], [`syn::Expr`] and
-  [`syn::Type`].
+- **Data structures** — Syn provides a syntax tree that can represent most
+  stable Rust source code and some unstable syntax. The syntax tree is rooted at
+  [`syn::File`] which represents a full source file, but there are other entry
+  points that may be useful to procedural macros including [`syn::Item`],
+  [`syn::Expr`] and [`syn::Type`].
 
 - **Derives** — Of particular interest to derive macros is [`syn::DeriveInput`]
   which is any of the three legal input items to a derive macro. An example
