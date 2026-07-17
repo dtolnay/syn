@@ -53,7 +53,7 @@ where
     }
 }
 
-impl<'a, T> HeapSize for &'a T
+impl<T> HeapSize for &T
 where
     T: ?Sized,
 {
