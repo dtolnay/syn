@@ -75,7 +75,7 @@ pub fn lazy_static(input: TokenStream) -> TokenStream {
     //        |
     //     10 |     static ref UNIT: () = ();
     //        |                           ^^
-    if let Expr::Tuple(ref init) = init {
+    if let Expr::Tuple(init) = &init {
         if init.elems.is_empty() {
             init.span()
                 .unwrap()

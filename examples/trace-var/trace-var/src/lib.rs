@@ -33,8 +33,8 @@ impl Args {
     /// variables we intend to print. Expressions are used as the left-hand side
     /// of the assignment operator.
     fn should_print_expr(&self, e: &Expr) -> bool {
-        match *e {
-            Expr::Path(ref e) => {
+        match e {
+            Expr::Path(e) => {
                 if e.path.leading_colon.is_some() {
                     false
                 } else if e.path.segments.len() != 1 {
@@ -53,7 +53,7 @@ impl Args {
     /// a `let` binding.
     fn should_print_pat(&self, p: &Pat) -> bool {
         match p {
-            Pat::Ident(ref p) => self.vars.contains(&p.ident),
+            Pat::Ident(p) => self.vars.contains(&p.ident),
             _ => false,
         }
     }
@@ -85,8 +85,8 @@ impl Args {
     fn let_and_print(&mut self, local: Local) -> Stmt {
         let Local { pat, init, .. } = local;
         let init = self.fold_expr(*init.unwrap().expr);
-        let ident = match pat {
-            Pat::Ident(ref p) => &p.ident,
+        let ident = match &pat {
+            Pat::Ident(p) => &p.ident,
             _ => unreachable!(),
         };
         parse_quote! {
