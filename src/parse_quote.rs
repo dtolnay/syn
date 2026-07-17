@@ -63,12 +63,14 @@
 /// - [`Pat`], [`Box<Pat>`] — parses the same as
 ///   `Pat::parse_multi_with_leading_vert`
 /// - [`Field`] — parses a named or unnamed struct field
+/// - [`Safety`] — parses the same as `Safety::parse_safe_or_unsafe`
 ///
 /// [`Vec<Attribute>`]: Attribute
 /// [`Vec<Arm>`]: Arm
 /// [`Vec<Stmt>`]: Block::parse_within
 /// [`Pat`]: Pat::parse_multi_with_leading_vert
 /// [`Box<Pat>`]: Pat::parse_multi_with_leading_vert
+/// [`Safety`]: Safety::parse_safe_or_unsafe
 ///
 /// # Panics
 ///
