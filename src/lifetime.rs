@@ -1,5 +1,7 @@
 #[cfg(feature = "parsing")]
 use crate::lookahead;
+#[cfg(feature = "parsing")]
+use crate::parse::{ParseStream, Result};
 use core::cmp::Ordering;
 use core::fmt::{self, Display};
 use core::hash::{Hash, Hasher};
@@ -72,6 +74,15 @@ impl Lifetime {
         self.apostrophe = span;
         self.ident.set_span(span);
     }
+
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    pub fn parse_any(input: ParseStream) -> Result<Self> {
+        input.step(|cursor| match cursor.lifetime() {
+            Some((lifetime, rest)) => Ok((lifetime, rest)),
+            None => Err(cursor.error("expected lifetime")),
+        })
+    }
 }
 
 impl Display for Lifetime {
@@ -128,16 +139,26 @@ pub_if_not_doc! {
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::error::Result;
+    use crate::ident;
     use crate::lifetime::Lifetime;
     use crate::parse::{Parse, ParseStream};
+    use alloc::string::ToString;
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for Lifetime {
         fn parse(input: ParseStream) -> Result<Self> {
             input.step(|cursor| {
-                cursor
-                    .lifetime()
-                    .ok_or_else(|| cursor.error("expected lifetime"))
+                if let Some((lifetime, rest)) = cursor.lifetime() {
+                    let repr = lifetime.ident.to_string();
+                    if ident::parsing::accept_as_ident(&repr) || repr == "static" || repr == "_" {
+                        Ok((lifetime, rest))
+                    } else {
+                        Err(cursor
+                            .error(format_args!("unexpected keyword lifetime \"{}\"", lifetime)))
+                    }
+                } else {
+                    Err(cursor.error("expected lifetime"))
+                }
             })
         }
     }
