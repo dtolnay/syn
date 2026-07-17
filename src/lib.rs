@@ -149,11 +149,22 @@
 //! problem.
 //!
 //! ```text
-//! error[E0277]: the trait bound `std::thread::Thread: HeapSize` is not satisfied
-//!  --> src/main.rs:7:5
+//! error[E0277]: the trait bound `Thread: HeapSize` is not satisfied
+//!  --> src/main.rs:9:5
 //!   |
-//! 7 |     bad: std::thread::Thread,
+//! 3 | #[derive(HeapSize)]
+//!   |          -------- required by a bound introduced by this call
+//! ...
+//! 9 |     bad: std::thread::Thread,
 //!   |     ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `HeapSize` is not implemented for `Thread`
+//!   |
+//!   = help: the following other types implement trait `HeapSize`:
+//!             &'a T
+//!             Box<T>
+//!             Demo<'a, T>
+//!             String
+//!             [T]
+//!             u8
 //! ```
 //!
 //! <br>

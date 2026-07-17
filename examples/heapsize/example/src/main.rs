@@ -23,6 +23,6 @@ fn main() {
         demo.b.heap_size_of_children(),
         demo.c.heap_size_of_children(),
         demo.d.heap_size_of_children(),
-        demo.heap_size_of_children()
+        demo.heap_size_of_children(),
     );
 }
