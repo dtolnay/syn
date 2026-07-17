@@ -1,5 +1,5 @@
 use crate::{version, workspace_path};
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use indexmap::IndexMap;
 use quote::quote;
 use std::collections::BTreeMap;
@@ -8,8 +8,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use syn::parse::{Error, Parser};
 use syn::{
-    parse_quote, Attribute, Data, DataEnum, DataStruct, DeriveInput, Fields, GenericArgument,
-    Ident, Item, PathArguments, TypeMacro, TypePath, TypeTuple, UseTree, Visibility,
+    Attribute, Data, DataEnum, DataStruct, DeriveInput, Fields, GenericArgument, Ident, Item,
+    PathArguments, TypeMacro, TypePath, TypeTuple, UseTree, Visibility, parse_quote,
 };
 use syn_codegen as types;
 
@@ -280,8 +280,8 @@ mod parsing {
     use std::collections::{BTreeMap, BTreeSet};
     use syn::parse::{ParseStream, Result};
     use syn::{
-        braced, bracketed, parenthesized, parse_quote, token, Attribute, Expr, Ident, Lit, LitStr,
-        Path, Token,
+        Attribute, Expr, Ident, Lit, LitStr, Path, Token, braced, bracketed, parenthesized,
+        parse_quote, token,
     };
     use syn_codegen as types;
 
