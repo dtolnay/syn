@@ -10,6 +10,7 @@
 //!
 //!     File {
 //!         shebang: None,
+//!         frontmatter: None,
 //!         attrs: [
 //!             Attribute {
 //!                 pound_token: Pound,
