@@ -33,18 +33,13 @@ impl Args {
     /// variables we intend to print. Expressions are used as the left-hand side
     /// of the assignment operator.
     fn should_print_expr(&self, e: &Expr) -> bool {
-        match e {
-            Expr::Path(e) => {
-                if e.path.leading_colon.is_some() {
-                    false
-                } else if e.path.segments.len() != 1 {
-                    false
-                } else {
-                    let first = e.path.segments.first().unwrap();
-                    self.vars.contains(&first.ident) && first.arguments.is_empty()
-                }
-            }
-            _ => false,
+        if let Expr::Path(e) = e
+            && let Some(ident) = e.path.get_ident()
+            && self.vars.contains(ident)
+        {
+            true
+        } else {
+            false
         }
     }
 
@@ -148,19 +143,19 @@ impl Fold for Args {
 }
 
 fn is_assign_op(op: BinOp) -> bool {
-    match op {
+    matches!(
+        op,
         BinOp::AddAssign(_)
-        | BinOp::SubAssign(_)
-        | BinOp::MulAssign(_)
-        | BinOp::DivAssign(_)
-        | BinOp::RemAssign(_)
-        | BinOp::BitXorAssign(_)
-        | BinOp::BitAndAssign(_)
-        | BinOp::BitOrAssign(_)
-        | BinOp::ShlAssign(_)
-        | BinOp::ShrAssign(_) => true,
-        _ => false,
-    }
+            | BinOp::SubAssign(_)
+            | BinOp::MulAssign(_)
+            | BinOp::DivAssign(_)
+            | BinOp::RemAssign(_)
+            | BinOp::BitXorAssign(_)
+            | BinOp::BitAndAssign(_)
+            | BinOp::BitOrAssign(_)
+            | BinOp::ShlAssign(_)
+            | BinOp::ShrAssign(_)
+    )
 }
 
 /// Attribute to print the value of the given variables each time they are
