@@ -347,7 +347,7 @@ pub(crate) mod parsing {
         Ok(Local {
             attrs,
             let_token,
-            modifiers: LocalModifiers::default(),
+            modifiers: LocalModifiers {},
             pat,
             init,
             semi_token,

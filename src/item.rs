@@ -1681,7 +1681,7 @@ pub(crate) mod parsing {
         Ok(ItemFn {
             attrs,
             vis,
-            modifiers: FnModifiers::default(),
+            modifiers: FnModifiers {},
             sig,
             block: Box::new(Block { brace_token, stmts }),
         })
@@ -1987,7 +1987,7 @@ pub(crate) mod parsing {
                     Ok(ForeignItem::Fn(ForeignItemFn {
                         attrs: Vec::new(),
                         vis,
-                        modifiers: FnModifiers::default(),
+                        modifiers: FnModifiers {},
                         sig,
                         semi_token: semi_token.unwrap(),
                     }))
@@ -2066,7 +2066,7 @@ pub(crate) mod parsing {
             Ok(ForeignItemFn {
                 attrs,
                 vis,
-                modifiers: FnModifiers::default(),
+                modifiers: FnModifiers {},
                 sig,
                 semi_token,
             })
@@ -2624,7 +2624,7 @@ pub(crate) mod parsing {
 
             Ok(TraitItemFn {
                 attrs,
-                modifiers: FnModifiers::default(),
+                modifiers: FnModifiers {},
                 sig,
                 default: brace_token.map(|brace_token| Block { brace_token, stmts }),
                 semi_token,
@@ -2996,7 +2996,7 @@ pub(crate) mod parsing {
         Ok(Some(ImplItemFn {
             attrs,
             vis,
-            modifiers: FnModifiers::default(),
+            modifiers: FnModifiers {},
             defaultness,
             sig,
             block,

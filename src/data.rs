@@ -363,7 +363,7 @@ pub(crate) mod parsing {
             Ok(Field {
                 attrs,
                 vis,
-                modifiers: FieldModifiers::default(),
+                modifiers: FieldModifiers {},
                 ident: Some(ident),
                 colon_token: Some(colon_token),
                 ty,
@@ -376,7 +376,7 @@ pub(crate) mod parsing {
             Ok(Field {
                 attrs: input.call(Attribute::parse_outer)?,
                 vis: input.parse()?,
-                modifiers: FieldModifiers::default(),
+                modifiers: FieldModifiers {},
                 ident: None,
                 colon_token: None,
                 ty: input.parse()?,

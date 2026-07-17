@@ -201,7 +201,7 @@ impl ParseQuote for Field {
         Ok(Field {
             attrs,
             vis,
-            modifiers: FieldModifiers::default(),
+            modifiers: FieldModifiers {},
             ident,
             colon_token,
             ty,
