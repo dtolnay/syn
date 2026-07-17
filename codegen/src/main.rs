@@ -28,7 +28,6 @@ mod eq;
 mod file;
 mod fold;
 mod full;
-mod gen;
 mod hash;
 #[cfg(feature = "json")]
 mod json;
@@ -36,6 +35,7 @@ mod lookup;
 mod operand;
 mod parse;
 mod snapshot;
+mod util;
 mod version;
 mod visit;
 mod visit_mut;

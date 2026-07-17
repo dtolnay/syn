@@ -1,5 +1,5 @@
 use crate::operand::{Borrowed, Operand, Owned};
-use crate::{file, full, gen};
+use crate::{file, full, util};
 use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
@@ -9,7 +9,7 @@ use syn_codegen::{Data, Definitions, Features, Node, Type};
 const VISIT_SRC: &str = "src/gen/visit.rs";
 
 fn simple_visit(item: &str, name: &Operand) -> TokenStream {
-    let ident = gen::under_name(item);
+    let ident = util::under_name(item);
     let method = format_ident!("visit_{}", ident);
     let name = name.ref_tokens();
     quote! {
@@ -89,15 +89,15 @@ fn visit(
             }
             Some(res)
         }
-        Type::Ext(t) if gen::TERMINAL_TYPES.contains(&&t[..]) => Some(simple_visit(t, name)),
+        Type::Ext(t) if util::TERMINAL_TYPES.contains(&&t[..]) => Some(simple_visit(t, name)),
         Type::Ext(_) | Type::Std(_) | Type::Token(_) | Type::Group(_) => None,
     }
 }
 
 fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Definitions) {
-    let under_name = gen::under_name(&s.ident);
+    let under_name = util::under_name(&s.ident);
     let ident = Ident::new(&s.ident, Span::call_site());
-    let ty = if gen::TERMINAL_TYPES.contains(&s.ident.as_str()) {
+    let ty = if util::TERMINAL_TYPES.contains(&s.ident.as_str()) {
         quote!(proc_macro2::#ident)
     } else {
         quote!(crate::#ident)
@@ -210,7 +210,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
 }
 
 pub fn generate(defs: &Definitions) -> Result<()> {
-    let (traits, impls) = gen::traverse(defs, node);
+    let (traits, impls) = util::traverse(defs, node);
     let full_macro = full::get_macro();
     file::write(
         VISIT_SRC,

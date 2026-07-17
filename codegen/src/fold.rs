@@ -1,5 +1,5 @@
 use crate::cfg::{self, DocCfg};
-use crate::{file, full, gen};
+use crate::{file, full, util};
 use anyhow::Result;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
@@ -9,7 +9,7 @@ use syn_codegen::{Data, Definitions, Features, Node, Type};
 const FOLD_SRC: &str = "src/gen/fold.rs";
 
 fn method_name(item: &str) -> Ident {
-    let ident = gen::under_name(item);
+    let ident = util::under_name(item);
     format_ident!("fold_{}", ident)
 }
 
@@ -83,15 +83,15 @@ fn visit(
             }
             Some(res)
         }
-        Type::Ext(t) if gen::TERMINAL_TYPES.contains(&&t[..]) => Some(simple_fold(t, name)),
+        Type::Ext(t) if util::TERMINAL_TYPES.contains(&&t[..]) => Some(simple_fold(t, name)),
         Type::Ext(_) | Type::Std(_) | Type::Token(_) | Type::Group(_) => None,
     }
 }
 
 fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Definitions) {
-    let under_name = gen::under_name(&s.ident);
+    let under_name = util::under_name(&s.ident);
     let ident = Ident::new(&s.ident, Span::call_site());
-    let ty = if gen::TERMINAL_TYPES.contains(&s.ident.as_str()) {
+    let ty = if util::TERMINAL_TYPES.contains(&s.ident.as_str()) {
         quote!(proc_macro2::#ident)
     } else {
         quote!(crate::#ident)
@@ -197,7 +197,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
     }
 
     let fold_span_only =
-        s.data == Data::Private && !gen::TERMINAL_TYPES.contains(&s.ident.as_str());
+        s.data == Data::Private && !util::TERMINAL_TYPES.contains(&s.ident.as_str());
     if fold_span_only {
         fold_impl = quote! {
             let span = f.fold_span(node.span());
@@ -242,7 +242,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
 }
 
 pub fn generate(defs: &Definitions) -> Result<()> {
-    let (traits, impls) = gen::traverse(defs, node);
+    let (traits, impls) = util::traverse(defs, node);
     let full_macro = full::get_macro();
     file::write(
         FOLD_SRC,
