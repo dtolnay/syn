@@ -296,6 +296,7 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub async_token: Token![async],
         pub capture: Option<Token![move]>,
+        /// (Non-exhaustive) Optional additional information about a block.
         pub modifiers: BlockModifiers,
         pub block: Block,
     }
@@ -373,6 +374,7 @@ ast_struct! {
     pub struct ExprClosure #full {
         pub attrs: Vec<Attribute>,
         pub lifetimes: Option<BoundLifetimes>,
+        /// (Non-exhaustive) Additional optional information about a closure.
         pub modifiers: ClosureModifiers,
         pub constness: Option<Token![const]>,
         pub asyncness: Option<Token![async]>,
@@ -387,7 +389,16 @@ ast_struct! {
 
 #[cfg(feature = "full")]
 ast_struct! {
-    /// Information about closure constness, movability, asyncness.
+    /// Additional optional information about a closure.
+    ///
+    /// This data structure may grow to accommodate future Rust language
+    /// changes, including the following in-progress RFCs:
+    ///
+    /// - [RFC 2033] "Coroutines" (`static || ...`)
+    /// - [RFC 3680] "Simplify lightweight clones" (`use || ...`)
+    ///
+    /// [RFC 2033]: https://github.com/rust-lang/rust/issues/43122
+    /// [RFC 3680]: https://github.com/rust-lang/rust/issues/132290
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     #[non_exhaustive]
     pub struct ClosureModifiers {}
@@ -415,6 +426,7 @@ ast_struct! {
     pub struct ExprConst #full {
         pub attrs: Vec<Attribute>,
         pub const_token: Token![const],
+        /// (Non-exhaustive) Optional additional information about a block.
         pub modifiers: BlockModifiers,
         pub block: Block,
     }
@@ -685,6 +697,7 @@ ast_struct! {
     pub struct ExprTryBlock #full {
         pub attrs: Vec<Attribute>,
         pub try_token: Token![try],
+        /// (Non-exhaustive) Optional additional information about a block.
         pub modifiers: BlockModifiers,
         pub block: Block,
     }
@@ -1176,7 +1189,16 @@ ast_struct! {
 
 #[cfg(feature = "full")]
 ast_struct! {
-    /// Information about block captures and type ascription.
+    /// Additional optional information about a block.
+    ///
+    /// This data structure may grow to accommodate future Rust language
+    /// changes, including the following in-progress RFCs:
+    ///
+    /// - [RFC 3680] "Simplify lightweight clones" (`async use { ... }`)
+    /// - [#149488] "Heterogeneous try blocks" (`try bikeshed Option<_> { ... }`)
+    ///
+    /// [RFC 3680]: https://github.com/rust-lang/rust/issues/132290
+    /// [#149488]: https://github.com/rust-lang/rust/issues/149488
     #[non_exhaustive]
     pub struct BlockModifiers {}
 }

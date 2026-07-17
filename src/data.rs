@@ -189,6 +189,7 @@ ast_struct! {
 
         pub vis: Visibility,
 
+        /// (Non-exhaustive) Additional optional information about a field.
         pub modifiers: FieldModifiers,
 
         /// Name of the field, if any.
@@ -203,7 +204,16 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// Information about field mutability and safety.
+    /// Additional optional information about a field.
+    ///
+    /// This data structure may grow to accommodate future Rust language
+    /// changes, including the following in-progress RFCs:
+    ///
+    /// - [RFC 3323] "Restrictions", such as `mut(crate)`
+    /// - [RFC 3458] "Unsafe fields"
+    ///
+    /// [RFC 3323]: https://rust-lang.github.io/rfcs/3323-restrictions.html
+    /// [RFC 3458]: https://github.com/rust-lang/rfcs/pull/3458
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     #[non_exhaustive]
     pub struct FieldModifiers {}

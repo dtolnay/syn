@@ -153,6 +153,7 @@ ast_struct! {
     pub struct ItemFn {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        /// (Non-exhaustive) Optional additional information about a function.
         pub modifiers: FnModifiers,
         pub sig: Signature,
         pub block: Box<Block>,
@@ -160,7 +161,18 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// Information about function contracts, generators, restrictions.
+    /// Optional additional information about a function.
+    ///
+    /// This data structure may grow to accommodate future Rust language
+    /// changes, including the following in-progress RFCs:
+    ///
+    /// - [RFC 3513] "Generators" (`gen fn`)
+    /// - [RFC 3678] "Trait method impl restrictions" (`final fn`)
+    /// - [#128044] "Contracts"
+    ///
+    /// [RFC 3513]: https://github.com/rust-lang/rust/issues/117078
+    /// [RFC 3678]: https://rust-lang.github.io/rfcs/3678-final.html
+    /// [#128044]: https://github.com/rust-lang/rust/issues/128044
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     #[non_exhaustive]
     pub struct FnModifiers {}
@@ -198,6 +210,7 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct ItemImpl {
         pub attrs: Vec<Attribute>,
+        /// (Non-exhaustive) Additional optional information about an impl.
         pub modifiers: ImplModifiers,
         pub unsafety: Option<Token![unsafe]>,
         pub impl_token: Token![impl],
@@ -212,12 +225,25 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// Information about constness, polarity, and defaultness on an `impl`
-    /// item.
+    /// Additional optional information about an impl.
+    ///
+    /// This data structure may grow to accommodate future Rust language
+    /// changes, including the following in-progress RFCs:
+    ///
+    /// - [RFC 3762] "Make trait methods callable in const contexts" (`const impl`)
+    ///
+    /// [RFC 3762]: https://github.com/rust-lang/rfcs/pull/3762
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     #[non_exhaustive]
     pub struct ImplModifiers {
+        /// Unstable syntax: [RFC 1210] "Impl specialization"
+        ///
+        /// [RFC 1210]: https://rust-lang.github.io/rfcs/1210-impl-specialization.html
         pub defaultness: Option<Token![default]>,
+
+        /// Unstable syntax: [#68318] "Negative impls"
+        ///
+        /// [#68318]: https://github.com/rust-lang/rust/issues/68318
         pub polarity: Option<Token![!]>,
     }
 }
@@ -314,6 +340,7 @@ ast_struct! {
     pub struct ItemTrait {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        /// (Non-exhaustive) Additional optional information about a trait.
         pub modifiers: TraitModifiers,
         pub unsafety: Option<Token![unsafe]>,
         pub trait_token: Token![trait],
@@ -327,11 +354,20 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// Information about constness, auto, and impl restrictions on a `trait`
-    /// item.
+    /// Additional optional information about a trait.
+    ///
+    /// This data structure may grow to accommodate future Rust language
+    /// changes, including the following in-progress RFCs:
+    ///
+    /// - [RFC 3762] "Make trait methods callable in const contexts" (`const trait`)
+    ///
+    /// [RFC 3762]: https://github.com/rust-lang/rfcs/pull/3762
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     #[non_exhaustive]
     pub struct TraitModifiers {
+        /// Unstable syntax: [RFC 127] "Auto traits"
+        ///
+        /// [RFC 127]: https://github.com/rust-lang/rust/issues/13231
         pub auto_token: Option<Token![auto]>,
     }
 }
@@ -640,6 +676,7 @@ ast_struct! {
     pub struct ForeignItemFn {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        /// (Non-exhaustive) Optional additional information about a function.
         pub modifiers: FnModifiers,
         pub sig: Signature,
         pub semi_token: Token![;],
@@ -751,6 +788,7 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct TraitItemFn {
         pub attrs: Vec<Attribute>,
+        /// (Non-exhaustive) Optional additional information about a function.
         pub modifiers: FnModifiers,
         pub sig: Signature,
         pub default: Option<Block>,
@@ -853,6 +891,7 @@ ast_struct! {
     pub struct ImplItemFn {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        /// (Non-exhaustive) Optional additional information about a function.
         pub modifiers: FnModifiers,
         pub defaultness: Option<Token![default]>,
         pub sig: Signature,
