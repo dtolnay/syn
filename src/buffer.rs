@@ -40,7 +40,9 @@ pub struct TokenBuffer {
 
 impl TokenBuffer {
     fn recursive_new(entries: &mut Vec<Entry>, stream: TokenStream) {
-        for tt in stream {
+        let iter = stream.into_iter();
+        entries.reserve(iter.size_hint().0);
+        for tt in iter {
             match tt {
                 TokenTree::Ident(ident) => entries.push(Entry::Ident(ident)),
                 TokenTree::Punct(punct) => entries.push(Entry::Punct(punct)),
@@ -82,6 +84,7 @@ impl TokenBuffer {
 
     /// Creates a cursor referencing the first token in the buffer and able to
     /// traverse until the end of the buffer.
+    #[inline(always)]
     pub fn begin(&self) -> Cursor {
         let ptr = self.entries.as_ptr();
         unsafe { Cursor::create(ptr, ptr.add(self.entries.len() - 1)) }
@@ -131,6 +134,7 @@ impl<'a> Cursor<'a> {
     /// This create method intelligently exits non-explicitly-entered
     /// `None`-delimited scopes when the cursor reaches the end of them,
     /// allowing for them to be treated transparently.
+    #[inline]
     unsafe fn create(mut ptr: *const Entry, scope: *const Entry) -> Self {
         // NOTE: If we're looking at a `End`, we want to advance the cursor
         // past it, unless `ptr == scope`, which means that we're at the edge of
@@ -151,6 +155,7 @@ impl<'a> Cursor<'a> {
     }
 
     /// Get the current entry.
+    #[inline(always)]
     fn entry(self) -> &'a Entry {
         unsafe { &*self.ptr }
     }
@@ -161,6 +166,7 @@ impl<'a> Cursor<'a> {
     ///
     /// If the cursor is looking at an `Entry::Group`, the bumped cursor will
     /// point at the first token in the group (with the same scope end).
+    #[inline(always)]
     unsafe fn bump_ignore_group(self) -> Cursor<'a> {
         unsafe { Cursor::create(self.ptr.add(1), self.scope) }
     }
@@ -170,6 +176,7 @@ impl<'a> Cursor<'a> {
     /// the cursor past the `None`-delimited group.
     ///
     /// WARNING: This mutates its argument.
+    #[inline]
     fn ignore_none(&mut self) {
         while let Entry::Group(group, _) = self.entry() {
             if group.delimiter() == Delimiter::None {
@@ -182,6 +189,7 @@ impl<'a> Cursor<'a> {
 
     /// Checks whether the cursor is currently pointing at the end of its valid
     /// scope.
+    #[inline(always)]
     pub fn eof(self) -> bool {
         // We're at eof if we're at the end of our scope.
         ptr::eq(self.ptr, self.scope)
@@ -189,6 +197,7 @@ impl<'a> Cursor<'a> {
 
     /// If the cursor is pointing at a `Ident`, returns it along with a cursor
     /// pointing at the next `TokenTree`.
+    #[inline]
     pub fn ident(mut self) -> Option<(Ident, Cursor<'a>)> {
         self.ignore_none();
         match self.entry() {
@@ -199,6 +208,7 @@ impl<'a> Cursor<'a> {
 
     /// If the cursor is pointing at a `Punct`, returns it along with a cursor
     /// pointing at the next `TokenTree`.
+    #[inline]
     pub fn punct(mut self) -> Option<(Punct, Cursor<'a>)> {
         self.ignore_none();
         match self.entry() {
@@ -211,6 +221,7 @@ impl<'a> Cursor<'a> {
 
     /// If the cursor is pointing at a `Literal`, return it along with a cursor
     /// pointing at the next `TokenTree`.
+    #[inline]
     pub fn literal(mut self) -> Option<(Literal, Cursor<'a>)> {
         self.ignore_none();
         match self.entry() {
@@ -221,6 +232,7 @@ impl<'a> Cursor<'a> {
 
     /// If the cursor is pointing at a `Lifetime`, returns it along with a
     /// cursor pointing at the next `TokenTree`.
+    #[inline]
     pub fn lifetime(mut self) -> Option<(Lifetime, Cursor<'a>)> {
         self.ignore_none();
         match self.entry() {
@@ -239,6 +251,7 @@ impl<'a> Cursor<'a> {
 
     /// If the cursor is pointing at a `Group` with the given delimiter, returns
     /// a cursor into that group and one pointing to the next `TokenTree`.
+    #[inline]
     pub fn group(mut self, delim: Delimiter) -> Option<(Cursor<'a>, DelimSpan, Cursor<'a>)> {
         // If we're not trying to enter a none-delimited group, we want to
         // ignore them. We have to make sure to _not_ ignore them when we want
@@ -262,6 +275,7 @@ impl<'a> Cursor<'a> {
 
     /// If the cursor is pointing at a `Group`, returns a cursor into the group
     /// and one pointing to the next `TokenTree`.
+    #[inline]
     pub fn any_group(self) -> Option<(Cursor<'a>, Delimiter, DelimSpan, Cursor<'a>)> {
         if let Entry::Group(group, end_offset) = self.entry() {
             let delimiter = group.delimiter();
@@ -275,6 +289,7 @@ impl<'a> Cursor<'a> {
         None
     }
 
+    #[inline]
     pub(crate) fn any_group_token(self) -> Option<(Group, Cursor<'a>)> {
         if let Entry::Group(group, end_offset) = self.entry() {
             let end_of_group = unsafe { self.ptr.add(*end_offset) };
@@ -304,6 +319,7 @@ impl<'a> Cursor<'a> {
     ///
     /// This method does not treat `None`-delimited groups as transparent, and
     /// will return a `Group(None, ..)` if the cursor is looking at one.
+    #[inline]
     pub fn token_tree(self) -> Option<(TokenTree, Cursor<'a>)> {
         let (tree, len) = match self.entry() {
             Entry::Group(group, end_offset) => (group.clone().into(), *end_offset),
@@ -350,6 +366,7 @@ impl<'a> Cursor<'a> {
     /// cloning it. Returns `None` if this cursor points to eof.
     ///
     /// This method treats `'lifetimes` as a single token.
+    #[inline]
     pub(crate) fn skip(mut self) -> Option<Cursor<'a>> {
         self.ignore_none();
 
@@ -385,6 +402,7 @@ impl<'a> Cursor<'a> {
 impl<'a> Copy for Cursor<'a> {}
 
 impl<'a> Clone for Cursor<'a> {
+    #[inline(always)]
     fn clone(&self) -> Self {
         *self
     }
@@ -393,12 +411,14 @@ impl<'a> Clone for Cursor<'a> {
 impl<'a> Eq for Cursor<'a> {}
 
 impl<'a> PartialEq for Cursor<'a> {
+    #[inline(always)]
     fn eq(&self, other: &Self) -> bool {
         ptr::eq(self.ptr, other.ptr)
     }
 }
 
 impl<'a> PartialOrd for Cursor<'a> {
+    #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         if same_buffer(*self, *other) {
             Some(cmp_assuming_same_buffer(*self, *other))
@@ -408,14 +428,17 @@ impl<'a> PartialOrd for Cursor<'a> {
     }
 }
 
+#[inline(always)]
 pub(crate) fn same_scope(a: Cursor, b: Cursor) -> bool {
     ptr::eq(a.scope, b.scope)
 }
 
+#[inline(always)]
 pub(crate) fn same_buffer(a: Cursor, b: Cursor) -> bool {
     ptr::eq(start_of_buffer(a), start_of_buffer(b))
 }
 
+#[inline(always)]
 fn start_of_buffer(cursor: Cursor) -> *const Entry {
     unsafe {
         match &*cursor.scope {
@@ -425,10 +448,12 @@ fn start_of_buffer(cursor: Cursor) -> *const Entry {
     }
 }
 
+#[inline(always)]
 pub(crate) fn cmp_assuming_same_buffer(a: Cursor, b: Cursor) -> Ordering {
     a.ptr.cmp(&b.ptr)
 }
 
+#[inline]
 pub(crate) fn open_span_of_group(cursor: Cursor) -> Span {
     match cursor.entry() {
         Entry::Group(group, _) => group.span_open(),
