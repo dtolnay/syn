@@ -36,24 +36,29 @@ impl Lifetime {
     /// # }
     /// ```
     pub fn new(symbol: &str, span: Span) -> Self {
-        if !symbol.starts_with('\'') {
-            panic!(
+        let ident = match symbol.strip_prefix('\'') {
+            Some(ident) => ident,
+            None => panic!(
                 "lifetime name must start with apostrophe as in \"'a\", got {:?}",
-                symbol
-            );
-        }
+                symbol,
+            ),
+        };
 
-        if symbol == "'" {
+        let unraw = ident.strip_prefix("r#");
+        let validate = unraw.unwrap_or(ident);
+        if validate.is_empty() {
             panic!("lifetime name must not be empty");
         }
-
-        if !crate::ident::xid_ok(&symbol[1..]) {
+        if !crate::ident::xid_ok(validate) {
             panic!("{:?} is not a valid lifetime name", symbol);
         }
 
         Lifetime {
             apostrophe: span,
-            ident: Ident::new(&symbol[1..], span),
+            ident: match unraw {
+                Some(unraw) => Ident::new_raw(unraw, span),
+                None => Ident::new(ident, span),
+            },
         }
     }
 
