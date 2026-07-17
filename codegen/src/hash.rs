@@ -61,13 +61,10 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                             pats.push(var);
                         }
                         let mut cfg = None;
-                        if mixed_derive_full {
-                            if let Type::Syn(ty) = &fields[0] {
-                                let features = &lookup::node(defs, ty).features;
-                                if features.any.contains("full") && !features.any.contains("derive")
-                                {
-                                    cfg = Some(quote!(#[cfg(feature = "full")]));
-                                }
+                        if mixed_derive_full && let Type::Syn(ty) = &fields[0] {
+                            let features = &lookup::node(defs, ty).features;
+                            if features.any.contains("full") && !features.any.contains("derive") {
+                                cfg = Some(quote!(#[cfg(feature = "full")]));
                             }
                         }
                         quote! {
@@ -102,10 +99,10 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                 }
                 let ident = Ident::new(f, Span::call_site());
                 let mut val = quote!(self.#ident);
-                if let Type::Ext(ty) = ty {
-                    if ty == "TokenStream" {
-                        val = quote!(TokenStreamHelper(&#val));
-                    }
+                if let Type::Ext(ty) = ty
+                    && ty == "TokenStream"
+                {
+                    val = quote!(TokenStreamHelper(&#val));
                 }
                 Some(quote! {
                     #val.hash(state);

@@ -63,12 +63,10 @@ fn expand_impl_body(
                     }
                 } else {
                     let mut cfg = None;
-                    if mixed_derive_full {
-                        if let Type::Syn(ty) = &fields[0] {
-                            let features = &lookup::node(defs, ty).features;
-                            if features.any.contains("full") && !features.any.contains("derive") {
-                                cfg = Some(quote!(#[cfg(feature = "full")]));
-                            }
+                    if mixed_derive_full && let Type::Syn(ty) = &fields[0] {
+                        let features = &lookup::node(defs, ty).features;
+                        if features.any.contains("full") && !features.any.contains("derive") {
+                            cfg = Some(quote!(#[cfg(feature = "full")]));
                         }
                     }
                     if syntax_tree_enum(type_name, variant_name, fields).is_some() {

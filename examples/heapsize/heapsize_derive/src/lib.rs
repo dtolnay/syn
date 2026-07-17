@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use quote::{quote, quote_spanned};
 use syn::spanned::Spanned;
 use syn::{
-    parse_macro_input, parse_quote, Data, DeriveInput, Fields, GenericParam, Generics, Index,
+    Data, DeriveInput, Fields, GenericParam, Generics, Index, parse_macro_input, parse_quote,
 };
 
 #[proc_macro_derive(HeapSize)]

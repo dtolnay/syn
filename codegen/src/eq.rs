@@ -58,12 +58,10 @@ fn expand_impl_body(defs: &Definitions, node: &Node) -> TokenStream {
                         comparisons.push(quote!(true));
                     }
                     let mut cfg = None;
-                    if mixed_derive_full {
-                        if let Type::Syn(ty) = &fields[0] {
-                            let features = &lookup::node(defs, ty).features;
-                            if features.any.contains("full") && !features.any.contains("derive") {
-                                cfg = Some(quote!(#[cfg(feature = "full")]));
-                            }
+                    if mixed_derive_full && let Type::Syn(ty) = &fields[0] {
+                        let features = &lookup::node(defs, ty).features;
+                        if features.any.contains("full") && !features.any.contains("derive") {
+                            cfg = Some(quote!(#[cfg(feature = "full")]));
                         }
                     }
                     quote! {

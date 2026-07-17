@@ -1,5 +1,5 @@
 use crate::{version, workspace_path};
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use indexmap::IndexMap;
 use quote::quote;
 use std::collections::BTreeMap;
@@ -8,8 +8,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use syn::parse::{Error, Parser};
 use syn::{
-    parse_quote, Attribute, Data, DataEnum, DataStruct, DeriveInput, Fields, GenericArgument,
-    Ident, Item, PathArguments, TypeMacro, TypePath, TypeTuple, UseTree, Visibility,
+    Attribute, Data, DataEnum, DataStruct, DeriveInput, Fields, GenericArgument, Ident, Item,
+    PathArguments, TypeMacro, TypePath, TypeTuple, UseTree, Visibility, parse_quote,
 };
 use syn_codegen as types;
 
@@ -280,8 +280,8 @@ mod parsing {
     use std::collections::{BTreeMap, BTreeSet};
     use syn::parse::{ParseStream, Result};
     use syn::{
-        braced, bracketed, parenthesized, parse_quote, token, Attribute, Expr, Ident, Lit, LitStr,
-        Path, Token,
+        Attribute, Expr, Ident, Lit, LitStr, Path, Token, braced, bracketed, parenthesized,
+        parse_quote, token,
     };
     use syn_codegen as types;
 
@@ -458,12 +458,11 @@ mod parsing {
 
     pub fn path_attr(attrs: &[Attribute]) -> Result<Option<&LitStr>> {
         for attr in attrs {
-            if attr.path().is_ident("path") {
-                if let Expr::Lit(expr) = &attr.meta.require_name_value()?.value {
-                    if let Lit::Str(lit) = &expr.lit {
-                        return Ok(Some(lit));
-                    }
-                }
+            if attr.path().is_ident("path")
+                && let Expr::Lit(expr) = &attr.meta.require_name_value()?.value
+                && let Lit::Str(lit) = &expr.lit
+            {
+                return Ok(Some(lit));
             }
         }
         Ok(None)

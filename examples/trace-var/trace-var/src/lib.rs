@@ -1,10 +1,10 @@
 use proc_macro::TokenStream;
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use std::collections::HashSet as Set;
 use syn::fold::{self, Fold};
 use syn::parse::{Parse, ParseStream, Result};
 use syn::punctuated::Punctuated;
-use syn::{parse_macro_input, parse_quote, BinOp, Expr, Ident, ItemFn, Local, Pat, Stmt, Token};
+use syn::{BinOp, Expr, Ident, ItemFn, Local, Pat, Stmt, Token, parse_macro_input, parse_quote};
 
 /// Parses a list of variable names separated by commas.
 ///
