@@ -153,7 +153,7 @@ ast_struct! {
     pub struct ItemFn {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
-        /// (Non-exhaustive) Optional additional information about a function.
+        /// (Non-exhaustive) Additional optional information about a function.
         pub modifiers: FnModifiers,
         pub sig: Signature,
         pub block: Box<Block>,
@@ -161,7 +161,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// Optional additional information about a function.
+    /// Additional optional information about a function.
     ///
     /// This data structure may grow to accommodate future Rust language
     /// changes, including the following in-progress RFCs:
@@ -676,7 +676,7 @@ ast_struct! {
     pub struct ForeignItemFn {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
-        /// (Non-exhaustive) Optional additional information about a function.
+        /// (Non-exhaustive) Additional optional information about a function.
         pub modifiers: FnModifiers,
         pub sig: Signature,
         pub semi_token: Token![;],
@@ -788,7 +788,7 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct TraitItemFn {
         pub attrs: Vec<Attribute>,
-        /// (Non-exhaustive) Optional additional information about a function.
+        /// (Non-exhaustive) Additional optional information about a function.
         pub modifiers: FnModifiers,
         pub sig: Signature,
         pub default: Option<Block>,
@@ -891,7 +891,7 @@ ast_struct! {
     pub struct ImplItemFn {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
-        /// (Non-exhaustive) Optional additional information about a function.
+        /// (Non-exhaustive) Additional optional information about a function.
         pub modifiers: FnModifiers,
         pub defaultness: Option<Token![default]>,
         pub sig: Signature,

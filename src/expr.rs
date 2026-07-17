@@ -296,7 +296,7 @@ ast_struct! {
         pub attrs: Vec<Attribute>,
         pub async_token: Token![async],
         pub capture: Option<Token![move]>,
-        /// (Non-exhaustive) Optional additional information about a block.
+        /// (Non-exhaustive) Additional optional information about a block.
         pub modifiers: BlockModifiers,
         pub block: Block,
     }
@@ -426,7 +426,7 @@ ast_struct! {
     pub struct ExprConst #full {
         pub attrs: Vec<Attribute>,
         pub const_token: Token![const],
-        /// (Non-exhaustive) Optional additional information about a block.
+        /// (Non-exhaustive) Additional optional information about a block.
         pub modifiers: BlockModifiers,
         pub block: Block,
     }
@@ -697,7 +697,7 @@ ast_struct! {
     pub struct ExprTryBlock #full {
         pub attrs: Vec<Attribute>,
         pub try_token: Token![try],
-        /// (Non-exhaustive) Optional additional information about a block.
+        /// (Non-exhaustive) Additional optional information about a block.
         pub modifiers: BlockModifiers,
         pub block: Block,
     }

@@ -417,7 +417,7 @@ ast_struct! {
         pub paren_token: Option<token::Paren>,
         /// The `for<'a>` in `for<'a> Foo<&'a T>`
         pub lifetimes: Option<BoundLifetimes>,
-        /// (Non-exhaustive) Optional additional information about a trait
+        /// (Non-exhaustive) Additional optional information about a trait
         /// bound.
         pub modifiers: TraitBoundModifiers,
         /// The `?` in `?Sized`
@@ -428,7 +428,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// Optional additional information about a trait bound.
+    /// Additional optional information about a trait bound.
     ///
     /// This data structure may grow to accommodate future Rust language
     /// changes, including the following in-progress RFCs:
