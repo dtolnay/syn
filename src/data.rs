@@ -200,6 +200,8 @@ ast_struct! {
         pub colon_token: Option<Token![:]>,
 
         pub ty: Type,
+
+        pub default: Option<(Token![=], Expr)>,
     }
 }
 
@@ -380,6 +382,14 @@ pub(crate) mod parsing {
                 input.parse()?
             };
 
+            let default = if input.peek(Token![=]) {
+                let eq_token: Token![=] = input.parse()?;
+                let expr: Expr = input.parse()?;
+                Some((eq_token, expr))
+            } else {
+                None
+            };
+
             Ok(Field {
                 attrs,
                 vis,
@@ -387,19 +397,37 @@ pub(crate) mod parsing {
                 ident: Some(ident),
                 colon_token: Some(colon_token),
                 ty,
+                default,
             })
         }
 
         /// Parses an unnamed (tuple struct) field.
         #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
         pub fn parse_unnamed(input: ParseStream) -> Result<Self> {
+            let attrs = input.call(Attribute::parse_outer)?;
+            let vis: Visibility = input.parse()?;
+            let ty: Type = input.parse()?;
+
+            if input.peek(Token![=]) {
+                input.parse::<Token![=]>()?;
+                let start_span = input.span();
+                input.parse::<Expr>()?;
+                let end_span = input.cursor().prev_span();
+                return Err(crate::error::new2(
+                    start_span,
+                    end_span,
+                    "field default value is only supported in structs with named fields",
+                ));
+            }
+
             Ok(Field {
-                attrs: input.call(Attribute::parse_outer)?,
-                vis: input.parse()?,
+                attrs,
+                vis,
                 modifiers: FieldModifiers {},
                 ident: None,
                 colon_token: None,
-                ty: input.parse()?,
+                ty,
+                default: None,
             })
         }
     }
@@ -453,6 +481,10 @@ mod printing {
                 TokensOrDefault(&self.colon_token).to_tokens(tokens);
             }
             self.ty.to_tokens(tokens);
+            if let Some((eq_token, default)) = &self.default {
+                eq_token.to_tokens(tokens);
+                default.to_tokens(tokens);
+            }
         }
     }
 }

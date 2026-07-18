@@ -782,6 +782,7 @@ impl PartialEq for crate::Field {
         self.attrs == other.attrs && self.vis == other.vis
             && self.modifiers == other.modifiers && self.ident == other.ident
             && self.colon_token == other.colon_token && self.ty == other.ty
+            && self.default == other.default
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

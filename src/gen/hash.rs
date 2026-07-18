@@ -1027,6 +1027,7 @@ impl Hash for crate::Field {
         self.ident.hash(state);
         self.colon_token.hash(state);
         self.ty.hash(state);
+        self.default.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
