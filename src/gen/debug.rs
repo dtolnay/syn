@@ -669,9 +669,9 @@ impl crate::ExprClosure {
         formatter.field("constness", &self.constness);
         formatter.field("asyncness", &self.asyncness);
         formatter.field("capture", &self.capture);
-        formatter.field("or1_token", &self.or1_token);
+        formatter.field("inputs_begin", &self.inputs_begin);
         formatter.field("inputs", &self.inputs);
-        formatter.field("or2_token", &self.or2_token);
+        formatter.field("inputs_end", &self.inputs_end);
         formatter.field("output", &self.output);
         formatter.field("body", &self.body);
         formatter.finish()

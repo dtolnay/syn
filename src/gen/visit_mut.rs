@@ -1603,12 +1603,12 @@ where
     skip!(node.constness);
     skip!(node.asyncness);
     skip!(node.capture);
-    skip!(node.or1_token);
+    skip!(node.inputs_begin);
     for mut el in Punctuated::pairs_mut(&mut node.inputs) {
         let it = el.value_mut();
         v.visit_pat_mut(it);
     }
-    skip!(node.or2_token);
+    skip!(node.inputs_end);
     v.visit_return_type_mut(&mut node.output);
     v.visit_expr_mut(&mut *node.body);
 }
