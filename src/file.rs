@@ -49,32 +49,31 @@ ast_struct! {
     /// ```text
     /// File {
     ///     shebang: None,
+    ///     frontmatter: None,
     ///     attrs: [],
     ///     items: [
-    ///         Use(
-    ///             ItemUse {
-    ///                 attrs: [],
-    ///                 vis: Inherited,
-    ///                 use_token: Use,
-    ///                 leading_colon: None,
-    ///                 tree: Path(
-    ///                     UsePath {
-    ///                         ident: Ident(
-    ///                             std,
-    ///                         ),
-    ///                         colon2_token: Colon2,
-    ///                         tree: Name(
-    ///                             UseName {
-    ///                                 ident: Ident(
-    ///                                     env,
-    ///                                 ),
-    ///                             },
-    ///                         ),
-    ///                     },
-    ///                 ),
-    ///                 semi_token: Semi,
-    ///             },
-    ///         ),
+    ///         Item::Use {
+    ///             attrs: [],
+    ///             vis: Visibility::Inherited,
+    ///             use_token: Use,
+    ///             leading_colon: None,
+    ///             tree: UseTree::Path(
+    ///                 UsePath {
+    ///                     ident: Ident(
+    ///                         std,
+    ///                     ),
+    ///                     colon2_token: PathSep,
+    ///                     tree: UseTree::Name(
+    ///                         UseName {
+    ///                             ident: Ident(
+    ///                                 env,
+    ///                             ),
+    ///                         },
+    ///                     ),
+    ///                 },
+    ///             ),
+    ///             semi_token: Semi,
+    ///         },
     /// ...
     /// ```
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
