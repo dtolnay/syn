@@ -171,13 +171,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                 });
             }
         }
-        Data::Private => {
-            if s.ident == "Ident" {
-                visit_impl.extend(quote! {
-                    v.visit_span(&node.span());
-                });
-            }
-        }
+        Data::Private => {}
     }
 
     let ast_lifetime = if s.ident == "Span" {

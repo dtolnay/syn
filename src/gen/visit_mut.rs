@@ -760,7 +760,6 @@ pub trait VisitMut {
     fn visit_signature_mut(&mut self, i: &mut crate::Signature) {
         visit_signature_mut(self, i);
     }
-    fn visit_span_mut(&mut self, i: &mut proc_macro2::Span) {}
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_static_mutability_mut(&mut self, i: &mut crate::StaticMutability) {
@@ -2165,11 +2164,7 @@ where
 pub fn visit_ident_mut<V>(v: &mut V, node: &mut proc_macro2::Ident)
 where
     V: VisitMut + ?Sized,
-{
-    let mut span = node.span();
-    v.visit_span_mut(&mut span);
-    node.set_span(span);
-}
+{}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_impl_item_mut<V>(v: &mut V, node: &mut crate::ImplItem)
@@ -2257,7 +2252,7 @@ where
     V: VisitMut + ?Sized,
 {
     skip!(node.index);
-    v.visit_span_mut(&mut node.span);
+    skip!(node.span);
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -2575,7 +2570,7 @@ pub fn visit_lifetime_mut<V>(v: &mut V, node: &mut crate::Lifetime)
 where
     V: VisitMut + ?Sized,
 {
-    v.visit_span_mut(&mut node.apostrophe);
+    skip!(node.apostrophe);
     v.visit_ident_mut(&mut node.ident);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2631,7 +2626,7 @@ where
     V: VisitMut + ?Sized,
 {
     skip!(node.value);
-    v.visit_span_mut(&mut node.span);
+    skip!(node.span);
 }
 pub fn visit_lit_byte_mut<V>(v: &mut V, node: &mut crate::LitByte)
 where
@@ -3226,10 +3221,6 @@ where
     }
     v.visit_return_type_mut(&mut node.output);
 }
-pub fn visit_span_mut<V>(v: &mut V, node: &mut proc_macro2::Span)
-where
-    V: VisitMut + ?Sized,
-{}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_static_mutability_mut<V>(v: &mut V, node: &mut crate::StaticMutability)

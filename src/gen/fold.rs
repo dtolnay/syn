@@ -800,9 +800,6 @@ pub trait Fold {
     fn fold_signature(&mut self, i: crate::Signature) -> crate::Signature {
         fold_signature(self, i)
     }
-    fn fold_span(&mut self, i: proc_macro2::Span) -> proc_macro2::Span {
-        i
-    }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_static_mutability(
@@ -2235,9 +2232,6 @@ pub fn fold_ident<F>(f: &mut F, node: proc_macro2::Ident) -> proc_macro2::Ident
 where
     F: Fold + ?Sized,
 {
-    let mut node = node;
-    let span = f.fold_span(node.span());
-    node.set_span(span);
     node
 }
 #[cfg(feature = "full")]
@@ -2345,7 +2339,7 @@ where
 {
     crate::Index {
         index: node.index,
-        span: f.fold_span(node.span),
+        span: node.span,
     }
 }
 #[cfg(feature = "full")]
@@ -2671,7 +2665,7 @@ where
     F: Fold + ?Sized,
 {
     crate::Lifetime {
-        apostrophe: f.fold_span(node.apostrophe),
+        apostrophe: node.apostrophe,
         ident: f.fold_ident(node.ident),
     }
 }
@@ -2715,70 +2709,49 @@ where
 {
     crate::LitBool {
         value: node.value,
-        span: f.fold_span(node.span),
+        span: node.span,
     }
 }
 pub fn fold_lit_byte<F>(f: &mut F, node: crate::LitByte) -> crate::LitByte
 where
     F: Fold + ?Sized,
 {
-    let span = f.fold_span(node.span());
-    let mut node = node;
-    node.set_span(span);
     node
 }
 pub fn fold_lit_byte_str<F>(f: &mut F, node: crate::LitByteStr) -> crate::LitByteStr
 where
     F: Fold + ?Sized,
 {
-    let span = f.fold_span(node.span());
-    let mut node = node;
-    node.set_span(span);
     node
 }
 pub fn fold_lit_cstr<F>(f: &mut F, node: crate::LitCStr) -> crate::LitCStr
 where
     F: Fold + ?Sized,
 {
-    let span = f.fold_span(node.span());
-    let mut node = node;
-    node.set_span(span);
     node
 }
 pub fn fold_lit_char<F>(f: &mut F, node: crate::LitChar) -> crate::LitChar
 where
     F: Fold + ?Sized,
 {
-    let span = f.fold_span(node.span());
-    let mut node = node;
-    node.set_span(span);
     node
 }
 pub fn fold_lit_float<F>(f: &mut F, node: crate::LitFloat) -> crate::LitFloat
 where
     F: Fold + ?Sized,
 {
-    let span = f.fold_span(node.span());
-    let mut node = node;
-    node.set_span(span);
     node
 }
 pub fn fold_lit_int<F>(f: &mut F, node: crate::LitInt) -> crate::LitInt
 where
     F: Fold + ?Sized,
 {
-    let span = f.fold_span(node.span());
-    let mut node = node;
-    node.set_span(span);
     node
 }
 pub fn fold_lit_str<F>(f: &mut F, node: crate::LitStr) -> crate::LitStr
 where
     F: Fold + ?Sized,
 {
-    let span = f.fold_span(node.span());
-    let mut node = node;
-    node.set_span(span);
     node
 }
 #[cfg(feature = "full")]
@@ -3331,12 +3304,6 @@ where
         variadic: (node.variadic).map(|it| f.fold_variadic(it)),
         output: f.fold_return_type(node.output),
     }
-}
-pub fn fold_span<F>(f: &mut F, node: proc_macro2::Span) -> proc_macro2::Span
-where
-    F: Fold + ?Sized,
-{
-    node
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]

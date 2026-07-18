@@ -178,15 +178,7 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
                 });
             }
         }
-        Data::Private => {
-            if s.ident == "Ident" {
-                visit_mut_impl.extend(quote! {
-                    let mut span = node.span();
-                    v.visit_span_mut(&mut span);
-                    node.set_span(span);
-                });
-            }
-        }
+        Data::Private => {}
     }
 
     let traits_body = if s.ident == "Span" || s.ident == "TokenStream" {
