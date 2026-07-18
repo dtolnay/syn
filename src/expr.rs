@@ -157,7 +157,7 @@ ast_enum_of_structs! {
         /// A binary operation: `a + b`, `a += b`.
         Binary(ExprBinary),
 
-        /// A blocked scope: `{ ... }`.
+        /// A braced block: `{ ... }`.
         #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
         Block(ExprBlock),
 
@@ -357,7 +357,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// A blocked scope: `{ ... }`.
+    /// A braced block: `{ ... }`.
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct ExprBlock #full {
         pub attrs: Vec<Attribute>,
