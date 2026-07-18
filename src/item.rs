@@ -1967,7 +1967,7 @@ pub(crate) mod parsing {
     )> {
         let reference = if input.peek(Token![&]) {
             let ampersand: Token![&] = input.parse()?;
-            let lifetime: Option<Lifetime> = input.parse()?;
+            let lifetime = Lifetime::parse_optional_any(input);
             Some((ampersand, lifetime))
         } else {
             None

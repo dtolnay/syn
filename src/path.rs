@@ -316,7 +316,7 @@ pub(crate) mod parsing {
     impl Parse for GenericArgument {
         fn parse(input: ParseStream) -> Result<Self> {
             if input.peek(Lifetime) && !input.peek2(Token![+]) {
-                return Ok(GenericArgument::Lifetime(input.parse()?));
+                return Ok(GenericArgument::Lifetime(Lifetime::parse_any(input)?));
             }
 
             if input.peek(Lit) || input.peek(token::Brace) {

@@ -162,6 +162,18 @@ pub(crate) mod parsing {
             })
         }
     }
+
+    impl Lifetime {
+        #[cfg(any(feature = "full", feature = "derive"))]
+        pub(crate) fn parse_optional_any(input: ParseStream) -> Option<Self> {
+            input
+                .step(|cursor| match cursor.lifetime() {
+                    Some((lifetime, rest)) => Ok((Some(lifetime), rest)),
+                    None => Ok((None, *cursor)),
+                })
+                .unwrap()
+        }
+    }
 }
 
 #[cfg(feature = "printing")]
