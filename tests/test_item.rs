@@ -246,6 +246,7 @@ fn test_type_empty_bounds() {
         generics: Generics,
         items: [
             TraitItem::Type {
+                modifiers: TypeModifiers,
                 ident: "Bar",
                 generics: Generics,
                 colon_token: Some,

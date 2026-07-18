@@ -411,6 +411,22 @@
       "exhaustive": false
     },
     {
+      "ident": "ConstModifiers",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "defaultness": {
+          "option": {
+            "token": "Default"
+          }
+        }
+      },
+      "exhaustive": false
+    },
+    {
       "ident": "ConstParam",
       "features": {
         "any": [
@@ -2148,7 +2164,13 @@
           "full"
         ]
       },
-      "fields": {},
+      "fields": {
+        "defaultness": {
+          "option": {
+            "token": "Default"
+          }
+        }
+      },
       "exhaustive": false
     },
     {
@@ -2330,6 +2352,9 @@
         "vis": {
           "syn": "Visibility"
         },
+        "modifiers": {
+          "syn": "TypeModifiers"
+        },
         "type_token": {
           "token": "Type"
         },
@@ -2508,10 +2533,8 @@
         "vis": {
           "syn": "Visibility"
         },
-        "defaultness": {
-          "option": {
-            "token": "Default"
-          }
+        "modifiers": {
+          "syn": "ConstModifiers"
         },
         "const_token": {
           "token": "Const"
@@ -2557,11 +2580,6 @@
         },
         "modifiers": {
           "syn": "FnModifiers"
-        },
-        "defaultness": {
-          "option": {
-            "token": "Default"
-          }
         },
         "sig": {
           "syn": "Signature"
@@ -2610,10 +2628,8 @@
         "vis": {
           "syn": "Visibility"
         },
-        "defaultness": {
-          "option": {
-            "token": "Default"
-          }
+        "modifiers": {
+          "syn": "TypeModifiers"
         },
         "type_token": {
           "token": "Type"
@@ -2779,6 +2795,9 @@
         },
         "vis": {
           "syn": "Visibility"
+        },
+        "modifiers": {
+          "syn": "ConstModifiers"
         },
         "const_token": {
           "token": "Const"
@@ -3273,6 +3292,9 @@
         },
         "vis": {
           "syn": "Visibility"
+        },
+        "modifiers": {
+          "syn": "TypeModifiers"
         },
         "type_token": {
           "token": "Type"
@@ -4793,6 +4815,9 @@
             "syn": "Attribute"
           }
         },
+        "modifiers": {
+          "syn": "ConstModifiers"
+        },
         "const_token": {
           "token": "Const"
         },
@@ -4891,6 +4916,9 @@
           "vec": {
             "syn": "Attribute"
           }
+        },
+        "modifiers": {
+          "syn": "TypeModifiers"
         },
         "type_token": {
           "token": "Type"
@@ -5205,6 +5233,22 @@
           "syn": "Macro"
         }
       }
+    },
+    {
+      "ident": "TypeModifiers",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "defaultness": {
+          "option": {
+            "token": "Default"
+          }
+        }
+      },
+      "exhaustive": false
     },
     {
       "ident": "TypeNever",

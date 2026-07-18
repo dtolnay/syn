@@ -94,6 +94,11 @@ pub trait Visit<'ast> {
     fn visit_closure_modifiers(&mut self, i: &'ast crate::ClosureModifiers) {
         visit_closure_modifiers(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_const_modifiers(&mut self, i: &'ast crate::ConstModifiers) {
+        visit_const_modifiers(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_const_param(&mut self, i: &'ast crate::ConstParam) {
@@ -872,6 +877,11 @@ pub trait Visit<'ast> {
     fn visit_type_macro(&mut self, i: &'ast crate::TypeMacro) {
         visit_type_macro(self, i);
     }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_type_modifiers(&mut self, i: &'ast crate::TypeModifiers) {
+        visit_type_modifiers(self, i);
+    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_type_never(&mut self, i: &'ast crate::TypeNever) {
@@ -1230,6 +1240,14 @@ pub fn visit_closure_modifiers<'ast, V>(v: &mut V, node: &'ast crate::ClosureMod
 where
     V: Visit<'ast> + ?Sized,
 {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_const_modifiers<'ast, V>(v: &mut V, node: &'ast crate::ConstModifiers)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    skip!(node.defaultness);
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_const_param<'ast, V>(v: &mut V, node: &'ast crate::ConstParam)
@@ -2150,7 +2168,9 @@ where
 pub fn visit_fn_modifiers<'ast, V>(v: &mut V, node: &'ast crate::FnModifiers)
 where
     V: Visit<'ast> + ?Sized,
-{}
+{
+    skip!(node.defaultness);
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn visit_fn_ptr_variadic<'ast, V>(v: &mut V, node: &'ast crate::FnPtrVariadic)
@@ -2248,6 +2268,7 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
+    v.visit_type_modifiers(&node.modifiers);
     skip!(node.type_token);
     v.visit_ident(&node.ident);
     v.visit_generics(&node.generics);
@@ -2360,7 +2381,7 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
-    skip!(node.defaultness);
+    v.visit_const_modifiers(&node.modifiers);
     skip!(node.const_token);
     v.visit_ident(&node.ident);
     v.visit_generics(&node.generics);
@@ -2381,7 +2402,6 @@ where
     }
     v.visit_visibility(&node.vis);
     v.visit_fn_modifiers(&node.modifiers);
-    skip!(node.defaultness);
     v.visit_signature(&node.sig);
     v.visit_block(&node.block);
 }
@@ -2407,7 +2427,7 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
-    skip!(node.defaultness);
+    v.visit_type_modifiers(&node.modifiers);
     skip!(node.type_token);
     v.visit_ident(&node.ident);
     v.visit_generics(&node.generics);
@@ -2500,6 +2520,7 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
+    v.visit_const_modifiers(&node.modifiers);
     skip!(node.const_token);
     v.visit_ident(&node.ident);
     v.visit_generics(&node.generics);
@@ -2726,6 +2747,7 @@ where
         v.visit_attribute(it);
     }
     v.visit_visibility(&node.vis);
+    v.visit_type_modifiers(&node.modifiers);
     skip!(node.type_token);
     v.visit_ident(&node.ident);
     v.visit_generics(&node.generics);
@@ -3577,6 +3599,7 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
+    v.visit_const_modifiers(&node.modifiers);
     skip!(node.const_token);
     v.visit_ident(&node.ident);
     v.visit_generics(&node.generics);
@@ -3625,6 +3648,7 @@ where
     for it in &node.attrs {
         v.visit_attribute(it);
     }
+    v.visit_type_modifiers(&node.modifiers);
     skip!(node.type_token);
     v.visit_ident(&node.ident);
     v.visit_generics(&node.generics);
@@ -3790,6 +3814,14 @@ where
         v.visit_attribute(it);
     }
     v.visit_macro(&node.mac);
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_type_modifiers<'ast, V>(v: &mut V, node: &'ast crate::TypeModifiers)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    skip!(node.defaultness);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]

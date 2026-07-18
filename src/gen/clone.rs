@@ -141,6 +141,15 @@ impl Clone for crate::ClosureModifiers {
         crate::ClosureModifiers {}
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::ConstModifiers {
+    fn clone(&self) -> Self {
+        crate::ConstModifiers {
+            defaultness: self.defaultness.clone(),
+        }
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::ConstParam {
@@ -873,7 +882,9 @@ impl Clone for crate::FnArg {
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::FnModifiers {
     fn clone(&self) -> Self {
-        crate::FnModifiers {}
+        crate::FnModifiers {
+            defaultness: self.defaultness.clone(),
+        }
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -949,6 +960,7 @@ impl Clone for crate::ForeignItemType {
         crate::ForeignItemType {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
+            modifiers: self.modifiers.clone(),
             type_token: self.type_token.clone(),
             ident: self.ident.clone(),
             generics: self.generics.clone(),
@@ -1032,7 +1044,7 @@ impl Clone for crate::ImplItemConst {
         crate::ImplItemConst {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
-            defaultness: self.defaultness.clone(),
+            modifiers: self.modifiers.clone(),
             const_token: self.const_token.clone(),
             ident: self.ident.clone(),
             generics: self.generics.clone(),
@@ -1052,7 +1064,6 @@ impl Clone for crate::ImplItemFn {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
             modifiers: self.modifiers.clone(),
-            defaultness: self.defaultness.clone(),
             sig: self.sig.clone(),
             block: self.block.clone(),
         }
@@ -1076,7 +1087,7 @@ impl Clone for crate::ImplItemType {
         crate::ImplItemType {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
-            defaultness: self.defaultness.clone(),
+            modifiers: self.modifiers.clone(),
             type_token: self.type_token.clone(),
             ident: self.ident.clone(),
             generics: self.generics.clone(),
@@ -1137,6 +1148,7 @@ impl Clone for crate::ItemConst {
         crate::ItemConst {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
+            modifiers: self.modifiers.clone(),
             const_token: self.const_token.clone(),
             ident: self.ident.clone(),
             generics: self.generics.clone(),
@@ -1323,6 +1335,7 @@ impl Clone for crate::ItemType {
         crate::ItemType {
             attrs: self.attrs.clone(),
             vis: self.vis.clone(),
+            modifiers: self.modifiers.clone(),
             type_token: self.type_token.clone(),
             ident: self.ident.clone(),
             generics: self.generics.clone(),
@@ -1946,6 +1959,7 @@ impl Clone for crate::TraitItemConst {
     fn clone(&self) -> Self {
         crate::TraitItemConst {
             attrs: self.attrs.clone(),
+            modifiers: self.modifiers.clone(),
             const_token: self.const_token.clone(),
             ident: self.ident.clone(),
             generics: self.generics.clone(),
@@ -1986,6 +2000,7 @@ impl Clone for crate::TraitItemType {
     fn clone(&self) -> Self {
         crate::TraitItemType {
             attrs: self.attrs.clone(),
+            modifiers: self.modifiers.clone(),
             type_token: self.type_token.clone(),
             ident: self.ident.clone(),
             generics: self.generics.clone(),
@@ -2097,6 +2112,15 @@ impl Clone for crate::TypeMacro {
         crate::TypeMacro {
             attrs: self.attrs.clone(),
             mac: self.mac.clone(),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::TypeModifiers {
+    fn clone(&self) -> Self {
+        crate::TypeModifiers {
+            defaultness: self.defaultness.clone(),
         }
     }
 }

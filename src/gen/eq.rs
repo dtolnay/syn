@@ -181,6 +181,16 @@ impl PartialEq for crate::ClosureModifiers {
         true
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::ConstModifiers {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::ConstModifiers {
+    fn eq(&self, other: &Self) -> bool {
+        self.defaultness == other.defaultness
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Eq for crate::ConstParam {}
@@ -878,8 +888,8 @@ impl Eq for crate::FnModifiers {}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::FnModifiers {
-    fn eq(&self, _other: &Self) -> bool {
-        true
+    fn eq(&self, other: &Self) -> bool {
+        self.defaultness == other.defaultness
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -961,7 +971,8 @@ impl Eq for crate::ForeignItemType {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::ForeignItemType {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.vis == other.vis && self.ident == other.ident
+        self.attrs == other.attrs && self.vis == other.vis
+            && self.modifiers == other.modifiers && self.ident == other.ident
             && self.generics == other.generics
     }
 }
@@ -1077,7 +1088,7 @@ impl Eq for crate::ImplItemConst {}
 impl PartialEq for crate::ImplItemConst {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis
-            && self.defaultness == other.defaultness && self.ident == other.ident
+            && self.modifiers == other.modifiers && self.ident == other.ident
             && self.generics == other.generics && self.ty == other.ty
             && self.expr == other.expr
     }
@@ -1090,8 +1101,8 @@ impl Eq for crate::ImplItemFn {}
 impl PartialEq for crate::ImplItemFn {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis
-            && self.modifiers == other.modifiers && self.defaultness == other.defaultness
-            && self.sig == other.sig && self.block == other.block
+            && self.modifiers == other.modifiers && self.sig == other.sig
+            && self.block == other.block
     }
 }
 #[cfg(feature = "full")]
@@ -1113,7 +1124,7 @@ impl Eq for crate::ImplItemType {}
 impl PartialEq for crate::ImplItemType {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.vis == other.vis
-            && self.defaultness == other.defaultness && self.ident == other.ident
+            && self.modifiers == other.modifiers && self.ident == other.ident
             && self.generics == other.generics && self.ty == other.ty
     }
 }
@@ -1170,7 +1181,8 @@ impl Eq for crate::ItemConst {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::ItemConst {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.vis == other.vis && self.ident == other.ident
+        self.attrs == other.attrs && self.vis == other.vis
+            && self.modifiers == other.modifiers && self.ident == other.ident
             && self.generics == other.generics && self.ty == other.ty
             && self.expr == other.expr
     }
@@ -1312,7 +1324,8 @@ impl Eq for crate::ItemType {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::ItemType {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.vis == other.vis && self.ident == other.ident
+        self.attrs == other.attrs && self.vis == other.vis
+            && self.modifiers == other.modifiers && self.ident == other.ident
             && self.generics == other.generics && self.ty == other.ty
             && self.where_clause_placement == other.where_clause_placement
     }
@@ -1972,9 +1985,9 @@ impl Eq for crate::TraitItemConst {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::TraitItemConst {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.ident == other.ident
-            && self.generics == other.generics && self.ty == other.ty
-            && self.default == other.default
+        self.attrs == other.attrs && self.modifiers == other.modifiers
+            && self.ident == other.ident && self.generics == other.generics
+            && self.ty == other.ty && self.default == other.default
     }
 }
 #[cfg(feature = "full")]
@@ -2007,9 +2020,10 @@ impl Eq for crate::TraitItemType {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::TraitItemType {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.ident == other.ident
-            && self.generics == other.generics && self.colon_token == other.colon_token
-            && self.bounds == other.bounds && self.default == other.default
+        self.attrs == other.attrs && self.modifiers == other.modifiers
+            && self.ident == other.ident && self.generics == other.generics
+            && self.colon_token == other.colon_token && self.bounds == other.bounds
+            && self.default == other.default
     }
 }
 #[cfg(feature = "full")]
@@ -2118,6 +2132,16 @@ impl Eq for crate::TypeMacro {}
 impl PartialEq for crate::TypeMacro {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.mac == other.mac
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::TypeModifiers {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::TypeModifiers {
+    fn eq(&self, other: &Self) -> bool {
+        self.defaultness == other.defaultness
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
