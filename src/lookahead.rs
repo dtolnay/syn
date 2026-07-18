@@ -226,7 +226,7 @@ pub trait Peek: Sealed {
 ///         let args = if input.is_empty()
 ///             || input.peek(Token![,]) && input.peek2(End)
 ///         {
-///             input.parse::<Option<Token![,]>>()?;
+///             input.parse_optional(Token![,]);
 ///             TokenStream::new()
 ///         } else {
 ///             input.parse()?
@@ -279,7 +279,7 @@ pub trait Peek: Sealed {
 /// use syn::parse::discouraged::Speculative as _;
 ///
 /// let ahead = input.fork();
-/// ahead.parse::<Option<Token![,]>>()?;
+/// ahead.parse_optional(Token![,]);
 /// let args = if ahead.is_empty() {
 ///     input.advance_to(&ahead);
 ///     TokenStream::new()
@@ -300,7 +300,7 @@ pub trait Peek: Sealed {
 /// # fn parse(input: ParseStream) -> Result<()> {
 /// use quote::ToTokens as _;
 ///
-/// let comma: Option<Token![,]> = input.parse()?;
+/// let comma = input.parse_optional(Token![,]);
 /// let mut args = TokenStream::new();
 /// if !input.is_empty() {
 ///     comma.to_tokens(&mut args);

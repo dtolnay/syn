@@ -99,8 +99,7 @@ pub(crate) mod parsing {
                             path: Box::new(Path::from(path)),
                         }));
                     }
-                } else if content.peek(Token![in]) {
-                    let in_token: Token![in] = content.parse()?;
+                } else if let Some(in_token) = content.parse_optional(Token![in]) {
                     let path = content.call(Path::parse_mod_style)?;
 
                     input.advance_to(&ahead);

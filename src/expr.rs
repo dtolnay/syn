@@ -1617,8 +1617,7 @@ pub(crate) mod parsing {
             return trailer_expr(begin, attrs, input, allow_struct);
         }
 
-        if input.peek(Token![&]) {
-            let and_token: Token![&] = input.parse()?;
+        if let Some(and_token) = input.parse_optional(Token![&]) {
             let raw: Option<Token![raw]> = if input.peek(Token![raw])
                 && (input.peek2(Token![mut]) || input.peek2(Token![const]))
             {
@@ -1626,7 +1625,7 @@ pub(crate) mod parsing {
             } else {
                 None
             };
-            let mutability: Option<Token![mut]> = input.parse()?;
+            let mutability = input.parse_optional(Token![mut]);
             let const_token: Option<Token![const]> = if raw.is_some() && mutability.is_none() {
                 Some(input.parse()?)
             } else {
@@ -1661,10 +1660,10 @@ pub(crate) mod parsing {
 
     #[cfg(not(feature = "full"))]
     fn unary_expr(input: ParseStream) -> Result<Expr> {
-        if input.peek(Token![&]) {
+        if let Some(and_token) = input.parse_optional(Token![&]) {
             Ok(Expr::Reference(ExprReference {
                 attrs: Vec::new(),
-                and_token: input.parse()?,
+                and_token,
                 mutability: input.parse()?,
                 expr: Box::new(unary_expr(input)?),
             }))
@@ -1737,14 +1736,14 @@ pub(crate) mod parsing {
             {
                 let mut dot_token: Token![.] = input.parse()?;
 
-                let float_token: Option<LitFloat> = input.parse()?;
+                let float_token = input.parse_optional(LitFloat);
                 if let Some(float_token) = float_token {
                     if multi_index(&mut e, &mut dot_token, float_token)? {
                         continue;
                     }
                 }
 
-                let await_token: Option<Token![await]> = input.parse()?;
+                let await_token = input.parse_optional(Token![await]);
                 if let Some(await_token) = await_token {
                     e = Expr::Await(ExprAwait {
                         attrs: Vec::new(),
@@ -1829,7 +1828,7 @@ pub(crate) mod parsing {
             {
                 let mut dot_token: Token![.] = input.parse()?;
 
-                let float_token: Option<LitFloat> = input.parse()?;
+                let float_token = input.parse_optional(LitFloat);
                 if let Some(float_token) = float_token {
                     if multi_index(&mut e, &mut dot_token, float_token)? {
                         continue;
@@ -2166,8 +2165,7 @@ pub(crate) mod parsing {
                 bracket_token,
                 elems,
             }))
-        } else if content.peek(Token![;]) {
-            let semi_token: Token![;] = content.parse()?;
+        } else if let Some(semi_token) = content.parse_optional(Token![;]) {
             let len: Expr = content.parse()?;
             Ok(Expr::Repeat(ExprRepeat {
                 attrs: Vec::new(),
@@ -2342,11 +2340,11 @@ pub(crate) mod parsing {
                     else_branch: None,
                 };
 
-                if !input.peek(Token![else]) {
-                    break;
-                }
+                let else_token = match input.parse_optional(Token![else]) {
+                    Some(else_token) => else_token,
+                    None => break,
+                };
 
-                let else_token: Token![else] = input.parse()?;
                 let lookahead = input.lookahead1();
                 if lookahead.peek(Token![if]) {
                     expr.else_branch = Some((else_token, Box::new(Expr::PLACEHOLDER)));
@@ -2631,9 +2629,9 @@ pub(crate) mod parsing {
     #[cfg(feature = "full")]
     fn expr_closure(input: ParseStream, allow_struct: AllowStruct) -> Result<ExprClosure> {
         let lifetimes: Option<BoundLifetimes> = input.parse()?;
-        let constness: Option<Token![const]> = input.parse()?;
-        let asyncness: Option<Token![async]> = input.parse()?;
-        let capture: Option<Token![move]> = input.parse()?;
+        let constness = input.parse_optional(Token![const]);
+        let asyncness = input.parse_optional(Token![async]);
+        let capture = input.parse_optional(Token![move]);
         let inputs_begin: Token![|] = input.parse()?;
 
         let mut inputs = Punctuated::new();
@@ -2652,8 +2650,7 @@ pub(crate) mod parsing {
 
         let inputs_end: Token![|] = input.parse()?;
 
-        let (output, body) = if input.peek(Token![->]) {
-            let arrow_token: Token![->] = input.parse()?;
+        let (output, body) = if let Some(arrow_token) = input.parse_optional(Token![->]) {
             let ty: Type = input.parse()?;
             let body: Block = input.parse()?;
             let output = ReturnType::Type(arrow_token, Box::new(ty));
@@ -2702,11 +2699,11 @@ pub(crate) mod parsing {
         let attrs = input.call(Attribute::parse_outer)?;
         let mut pat = Pat::parse_single(input)?;
 
-        if input.peek(Token![:]) {
+        if let Some(colon_token) = input.parse_optional(Token![:]) {
             Ok(Pat::Type(PatType {
                 attrs,
                 pat: Box::new(pat),
-                colon_token: input.parse()?,
+                colon_token,
                 ty: input.parse()?,
             }))
         } else {
@@ -2818,7 +2815,7 @@ pub(crate) mod parsing {
         let break_token: Token![break] = input.parse()?;
 
         let ahead = input.fork();
-        let label: Option<Lifetime> = ahead.parse()?;
+        let label = ahead.parse_optional(Lifetime);
         if label.is_some() && ahead.peek(Token![:]) {
             // Not allowed: `break 'label: loop {...}`
             // Parentheses are required. `break ('label: loop {...})`
@@ -2895,14 +2892,14 @@ pub(crate) mod parsing {
 
         let mut fields = Punctuated::new();
         while !content.is_empty() {
-            if content.peek(Token![..]) {
+            if let Some(dot2_token) = content.parse_optional(Token![..]) {
                 return Ok(ExprStruct {
                     attrs: Vec::new(),
                     qself,
                     path,
                     brace_token,
                     fields,
-                    dot2_token: Some(content.parse()?),
+                    dot2_token: Some(dot2_token),
                     rest: if content.is_empty() {
                         None
                     } else {
@@ -3073,8 +3070,8 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for Member {
         fn parse(input: ParseStream) -> Result<Self> {
-            if input.peek(Ident) {
-                input.parse().map(Member::Named)
+            if let Some(ident) = input.parse_optional(Ident) {
+                Ok(Member::Named(ident))
             } else if input.peek(LitInt) {
                 input.parse().map(Member::Unnamed)
             } else {

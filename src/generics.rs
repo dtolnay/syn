@@ -592,10 +592,10 @@ pub(crate) mod parsing {
                         attrs,
                         ..input.parse()?
                     }));
-                } else if input.peek(Token![_]) {
+                } else if let Some(underscore) = input.parse_optional(Token![_]) {
                     params.push_value(GenericParam::Type(TypeParam {
                         attrs,
-                        ident: input.call(Ident::parse_any)?,
+                        ident: Ident::from(underscore),
                         colon_token: None,
                         bounds: Punctuated::new(),
                         default: None,
@@ -725,7 +725,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
             let ident: Ident = input.parse()?;
-            let colon_token: Option<Token![:]> = input.parse()?;
+            let colon_token = input.parse_optional(Token![:]);
 
             let mut bounds = Punctuated::new();
             if colon_token.is_some() {
@@ -750,7 +750,7 @@ pub(crate) mod parsing {
                 }
             }
 
-            let default = if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
+            let default = if let Some(eq_token) = input.parse_optional(Token![=]) {
                 Some((eq_token, input.parse::<Type>()?))
             } else {
                 None
@@ -880,7 +880,7 @@ pub(crate) mod parsing {
                 }
             }
 
-            let maybe: Option<Token![?]> = input.parse()?;
+            let maybe = input.parse_optional(Token![?]);
             if lifetimes.is_none() && maybe.is_some() {
                 lifetimes = input.parse()?;
             }
@@ -889,7 +889,7 @@ pub(crate) mod parsing {
             if path.segments.last().unwrap().arguments.is_empty()
                 && (input.peek(token::Paren) || input.peek(Token![::]) && input.peek3(token::Paren))
             {
-                input.parse::<Option<Token![::]>>()?;
+                input.parse_optional(Token![::]);
                 let args: ParenthesizedGenericArguments = input.parse()?;
                 let parenthesized = PathArguments::Parenthesized(args);
                 path.segments.last_mut().unwrap().arguments = parenthesized;
@@ -926,8 +926,7 @@ pub(crate) mod parsing {
                 colon_token: input.parse()?,
                 ty: input.parse()?,
                 default: {
-                    if input.peek(Token![=]) {
-                        let eq_token = input.parse()?;
+                    if let Some(eq_token) = input.parse_optional(Token![=]) {
                         let default = path::parsing::const_argument(input)?;
                         Some((eq_token, default))
                     } else {

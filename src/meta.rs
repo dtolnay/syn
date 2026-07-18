@@ -415,8 +415,7 @@ fn parse_meta_path(input: ParseStream) -> Result<Path> {
             } else {
                 return Err(input.error("unexpected token in nested attribute, expected ident"));
             }
-            while input.peek(Token![::]) {
-                let punct = input.parse()?;
+            while let Some(punct) = input.parse_optional(Token![::]) {
                 segments.push_punct(punct);
                 let ident = Ident::parse_any(input)?;
                 segments.push_value(PathSegment::from(ident));

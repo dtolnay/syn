@@ -335,7 +335,7 @@ pub(crate) mod parsing {
                             PathArguments::Parenthesized(_) => false,
                         } =>
                 {
-                    if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
+                    if let Some(eq_token) = input.parse_optional(Token![=]) {
                         let segment = ty.path.segments.pop().unwrap();
                         let ident = segment.ident;
                         let generics = match segment.arguments {
@@ -360,7 +360,7 @@ pub(crate) mod parsing {
                         };
                     }
 
-                    if let Some(colon_token) = input.parse::<Option<Token![:]>>()? {
+                    if let Some(colon_token) = input.parse_optional(Token![:]) {
                         let segment = ty.path.segments.pop().unwrap();
                         return Ok(GenericArgument::Constraint(Constraint {
                             ident: segment.ident,
@@ -413,8 +413,7 @@ pub(crate) mod parsing {
             return Ok(Expr::Lit(lit));
         }
 
-        if input.peek(Ident) {
-            let ident: Ident = input.parse()?;
+        if let Some(ident) = input.parse_optional(Ident) {
             return Ok(Expr::Path(ExprPath {
                 attrs: Vec::new(),
                 qself: None,
@@ -486,7 +485,7 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for AngleBracketedGenericArguments {
         fn parse(input: ParseStream) -> Result<Self> {
-            let colon2_token: Option<Token![::]> = input.parse()?;
+            let colon2_token = input.parse_optional(Token![::]);
             Self::do_parse(colon2_token, input)
         }
     }
@@ -650,11 +649,9 @@ pub(crate) mod parsing {
     }
 
     pub(crate) fn qpath(input: ParseStream, expr_style: bool) -> Result<(Option<QSelf>, Path)> {
-        if input.peek(Token![<]) {
-            let lt_token: Token![<] = input.parse()?;
+        if let Some(lt_token) = input.parse_optional(Token![<]) {
             let this: Type = input.parse()?;
-            let path = if input.peek(Token![as]) {
-                let as_token: Token![as] = input.parse()?;
+            let path = if let Some(as_token) = input.parse_optional(Token![as]) {
                 let path: Path = input.parse()?;
                 Some((as_token, path))
             } else {

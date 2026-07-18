@@ -397,13 +397,13 @@ pub(crate) mod parsing {
         /// Use [`Pat::parse_multi`] instead if you are not intending to support
         /// macro-generated macro input.
         pub fn parse_multi_with_leading_vert(input: ParseStream) -> Result<Self> {
-            let leading_vert: Option<Token![|]> = input.parse()?;
+            let leading_vert = input.parse_optional(Token![|]);
             let allow_guard = false;
             multi_pat_impl(input, leading_vert, allow_guard)
         }
 
         pub(crate) fn parse_multi_with_leading_vert_and_guard(input: ParseStream) -> Result<Self> {
-            let leading_vert: Option<Token![|]> = input.parse()?;
+            let leading_vert = input.parse_optional(Token![|]);
             let allow_guard = true;
             multi_pat_impl(input, leading_vert, allow_guard)
         }
@@ -520,8 +520,7 @@ pub(crate) mod parsing {
                 }
             },
             subpat: {
-                if input.peek(Token![@]) {
-                    let at_token: Token![@] = input.parse()?;
+                if let Some(at_token) = input.parse_optional(Token![@]) {
                     let subpat = Pat::parse_single(input)?;
                     Some((at_token, Box::new(subpat)))
                 } else {
@@ -567,11 +566,8 @@ pub(crate) mod parsing {
         let mut rest = None;
         while !content.is_empty() {
             let attrs = content.call(Attribute::parse_outer)?;
-            if content.peek(Token![..]) {
-                rest = Some(PatRest {
-                    attrs,
-                    dot2_token: content.parse()?,
-                });
+            if let Some(dot2_token) = content.parse_optional(Token![..]) {
+                rest = Some(PatRest { attrs, dot2_token });
                 break;
             }
             let mut value = content.call(field_pat)?;
@@ -596,9 +592,9 @@ pub(crate) mod parsing {
 
     fn field_pat(input: ParseStream) -> Result<FieldPat> {
         let begin = input.cursor();
-        let boxed: Option<Token![box]> = input.parse()?;
-        let by_ref: Option<Token![ref]> = input.parse()?;
-        let mutability: Option<Token![mut]> = input.parse()?;
+        let boxed = input.parse_optional(Token![box]);
+        let by_ref = input.parse_optional(Token![ref]);
+        let mutability = input.parse_optional(Token![mut]);
 
         let member = if boxed.is_some() || by_ref.is_some() || mutability.is_some() {
             input.parse().map(Member::Named)

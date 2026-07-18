@@ -301,8 +301,7 @@ pub(crate) mod parsing {
             } else {
                 Fields::Unit
             };
-            let discriminant = if input.peek(Token![=]) {
-                let eq_token: Token![=] = input.parse()?;
+            let discriminant = if let Some(eq_token) = input.parse_optional(Token![=]) {
                 #[cfg(feature = "full")]
                 let discriminant: Expr = input.parse()?;
                 #[cfg(not(feature = "full"))]

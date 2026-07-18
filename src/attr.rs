@@ -715,8 +715,7 @@ pub(crate) mod parsing {
     // Unlike meta::parse_meta_path which accepts arbitrary keywords in the path,
     // only the `unsafe` keyword is accepted as an attribute's outermost path.
     fn parse_outermost_meta_path(input: ParseStream) -> Result<Path> {
-        if input.peek(Token![unsafe]) {
-            let unsafe_token: Token![unsafe] = input.parse()?;
+        if let Some(unsafe_token) = input.parse_optional(Token![unsafe]) {
             Ok(Path::from(Ident::new("unsafe", unsafe_token.span)))
         } else {
             Path::parse_mod_style(input)
@@ -745,7 +744,7 @@ pub(crate) mod parsing {
     fn parse_meta_name_value_after_path(path: Path, input: ParseStream) -> Result<MetaNameValue> {
         let eq_token: Token![=] = input.parse()?;
         let ahead = input.fork();
-        let lit: Option<Lit> = ahead.parse()?;
+        let lit = ahead.parse_optional(Lit);
         let value = if let (Some(lit), true) = (lit, ahead.is_empty()) {
             input.advance_to(&ahead);
             Expr::Lit(ExprLit {

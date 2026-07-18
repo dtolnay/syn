@@ -551,7 +551,7 @@ impl<'a> ParseBuffer<'a> {
     ///         let trait_token: Token![trait] = input.parse()?;
     ///         let ident: Ident = input.parse()?;
     ///         let mut generics: Generics = input.parse()?;
-    ///         let colon_token: Option<Token![:]> = input.parse()?;
+    ///         let colon_token = input.parse_optional(Token![:]);
     ///
     ///         let mut supertraits = Punctuated::new();
     ///         if colon_token.is_some() {
@@ -639,6 +639,18 @@ impl<'a> ParseBuffer<'a> {
 
         let _ = token;
         peek3(self, T::Token::peek)
+    }
+
+    pub fn parse_optional<T>(&self, token: T) -> Option<T::Token>
+    where
+        T: Peek,
+        T::Token: Parse,
+    {
+        if self.peek(token) {
+            Some(self.parse().unwrap())
+        } else {
+            None
+        }
     }
 
     /// Parses zero or more occurrences of `T` separated by punctuation of type

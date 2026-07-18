@@ -305,7 +305,7 @@ pub(crate) mod parsing {
     fn stmt_mac(input: ParseStream, attrs: Vec<Attribute>, path: Path) -> Result<StmtMacro> {
         let bang_token: Token![!] = input.parse()?;
         let (delimiter, tokens) = mac::parse_delimiter(input)?;
-        let semi_token: Option<Token![;]> = input.parse()?;
+        let semi_token = input.parse_optional(Token![;]);
 
         Ok(StmtMacro {
             attrs,
@@ -323,8 +323,7 @@ pub(crate) mod parsing {
         let let_token: Token![let] = input.parse()?;
 
         let mut pat = Pat::parse_single(input)?;
-        if input.peek(Token![:]) {
-            let colon_token: Token![:] = input.parse()?;
+        if let Some(colon_token) = input.parse_optional(Token![:]) {
             let ty: Type = input.parse()?;
             pat = Pat::Type(PatType {
                 attrs: Vec::new(),
@@ -438,7 +437,7 @@ pub(crate) mod parsing {
             }
         }
 
-        let semi_token: Option<Token![;]> = input.parse()?;
+        let semi_token = input.parse_optional(Token![;]);
 
         match e {
             Expr::Macro(ExprMacro { attrs, mac })

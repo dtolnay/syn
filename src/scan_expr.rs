@@ -1,10 +1,10 @@
 use self::{Action::*, Input::*};
-use proc_macro2::{Delimiter, Ident, Spacing, TokenTree};
+use proc_macro2::{Delimiter, Spacing, TokenTree};
 use syn::parse::{ParseStream, Result};
 #[allow(unused_imports)]
 //#[cfg_attr(not(test), expect(unused_imports))] // Rust 1.81+
 use syn::Token;
-use syn::{AngleBracketedGenericArguments, BinOp, Expr, ExprPath, Lifetime, Lit, Type};
+use syn::{AngleBracketedGenericArguments, BinOp, Expr, ExprPath, Ident, Lifetime, Lit, Type};
 
 enum Input {
     Keyword(&'static str),
@@ -235,9 +235,9 @@ pub(crate) fn scan_expr(input: ParseStream) -> Result<()> {
                     Some((_inside, _delimiter, _span, rest)) => Ok((true, rest)),
                     None => Ok((false, *cursor)),
                 })?,
-                Input::ConsumeIdent => input.parse::<Option<Ident>>()?.is_some(),
-                Input::ConsumeLifetime => input.parse::<Option<Lifetime>>()?.is_some(),
-                Input::ConsumeLiteral => input.parse::<Option<Lit>>()?.is_some(),
+                Input::ConsumeIdent => input.parse_optional(Ident).is_some(),
+                Input::ConsumeLifetime => input.parse_optional(Lifetime).is_some(),
+                Input::ConsumeLiteral => input.parse_optional(Lit).is_some(),
                 Input::ExpectPath => {
                     input.parse::<ExprPath>()?;
                     true

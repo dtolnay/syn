@@ -459,14 +459,14 @@ pub(crate) mod parsing {
                 }));
             }
             let mut first: Type = content.parse()?;
-            if content.peek(Token![,]) {
+            if let Some(comma_token) = content.parse_optional(Token![,]) {
                 return Ok(Type::Tuple(TypeTuple {
                     attrs: Vec::new(),
                     paren_token,
                     elems: {
                         let mut elems = Punctuated::new();
                         elems.push_value(first);
-                        elems.push_punct(content.parse()?);
+                        elems.push_punct(comma_token);
                         while !content.is_empty() {
                             elems.push_value(content.parse()?);
                             if content.is_empty() {
@@ -602,8 +602,8 @@ pub(crate) mod parsing {
                     path: ty.path,
                 }));
                 if allow_plus {
-                    while input.peek(Token![+]) {
-                        bounds.push_punct(input.parse()?);
+                    while let Some(plus_token) = input.parse_optional(Token![+]) {
+                        bounds.push_punct(plus_token);
                         if !(input.peek(Ident::peek_any)
                             || input.peek(Token![::])
                             || input.peek(Token![?])
@@ -630,7 +630,7 @@ pub(crate) mod parsing {
         } else if lookahead.peek(Token![dyn]) {
             let dyn_token: Token![dyn] = input.parse()?;
             let dyn_span = dyn_token.span;
-            let star_token: Option<Token![*]> = input.parse()?;
+            let star_token = input.parse_optional(Token![*]);
             let bounds = TypeTraitObject::parse_bounds(dyn_span, input, allow_plus)?;
             Ok(if star_token.is_some() {
                 Type::Verbatim(verbatim::between(begin, input.cursor()))
@@ -645,12 +645,12 @@ pub(crate) mod parsing {
             let content;
             let bracket_token = bracketed!(content in input);
             let elem: Type = content.parse()?;
-            if content.peek(Token![;]) {
+            if let Some(semi_token) = content.parse_optional(Token![;]) {
                 Ok(Type::Array(TypeArray {
                     attrs: Vec::new(),
                     bracket_token,
                     elem: Box::new(elem),
-                    semi_token: content.parse()?,
+                    semi_token,
                     len: content.parse()?,
                 }))
             } else {
@@ -863,8 +863,7 @@ pub(crate) mod parsing {
         }
 
         pub(crate) fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
-            if input.peek(Token![->]) {
-                let arrow = input.parse()?;
+            if let Some(arrow) = input.parse_optional(Token![->]) {
                 let allow_group_generic = true;
                 let ty = ambig_ty(input, allow_plus, allow_group_generic)?;
                 Ok(ReturnType::Type(arrow, Box::new(ty)))
@@ -899,7 +898,7 @@ pub(crate) mod parsing {
 
         // Only allow multiple trait references if allow_plus is true.
         pub(crate) fn parse(input: ParseStream, allow_plus: bool) -> Result<Self> {
-            let dyn_token: Option<Token![dyn]> = input.parse()?;
+            let dyn_token = input.parse_optional(Token![dyn]);
             let dyn_span = match &dyn_token {
                 Some(token) => token.span,
                 None => input.span(),

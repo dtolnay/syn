@@ -1236,8 +1236,7 @@ pub(crate) mod parsing {
         let mut item = if lookahead.peek(Token![fn]) || peek_signature(&ahead, allow_safe) {
             let vis: Visibility = input.parse()?;
             let sig: Signature = input.parse()?;
-            if input.peek(Token![;]) {
-                input.parse::<Token![;]>()?;
+            if input.parse_optional(Token![;]).is_some() {
                 Ok(Item::Verbatim(verbatim::between(begin, input.cursor())))
             } else {
                 parse_rest_of_fn(input, Vec::new(), vis, sig).map(Item::Fn)
@@ -1271,16 +1270,14 @@ pub(crate) mod parsing {
             let static_token = input.parse()?;
             let mutability = input.parse()?;
             let ident = input.parse()?;
-            if input.peek(Token![=]) {
-                input.parse::<Token![=]>()?;
+            if input.parse_optional(Token![=]).is_some() {
                 input.parse::<Expr>()?;
                 input.parse::<Token![;]>()?;
                 Ok(Item::Verbatim(verbatim::between(begin, input.cursor())))
             } else {
                 let colon_token = input.parse()?;
                 let ty = input.parse()?;
-                if input.peek(Token![;]) {
-                    input.parse::<Token![;]>()?;
+                if input.parse_optional(Token![;]).is_some() {
                     Ok(Item::Verbatim(verbatim::between(begin, input.cursor())))
                 } else {
                     Ok(Item::Static(ItemStatic {
@@ -1309,7 +1306,7 @@ pub(crate) mod parsing {
             let mut generics: Generics = input.parse()?;
             let colon_token = input.parse()?;
             let ty = input.parse()?;
-            let value = if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
+            let value = if let Some(eq_token) = input.parse_optional(Token![=]) {
                 let expr: Expr = input.parse()?;
                 Some((eq_token, expr))
             } else {
@@ -1463,7 +1460,7 @@ pub(crate) mod parsing {
         fn parse_optional_bounds(
             input: ParseStream,
         ) -> Result<(Option<Token![:]>, Punctuated<TypeParamBound, Token![+]>)> {
-            let colon_token: Option<Token![:]> = input.parse()?;
+            let colon_token = input.parse_optional(Token![:]);
 
             let mut bounds = Punctuated::new();
             if colon_token.is_some() {
@@ -1487,7 +1484,7 @@ pub(crate) mod parsing {
         }
 
         fn parse_optional_definition(input: ParseStream) -> Result<Option<(Token![=], Type)>> {
-            let eq_token: Option<Token![=]> = input.parse()?;
+            let eq_token = input.parse_optional(Token![=]);
             if let Some(eq_token) = eq_token {
                 let definition: Type = input.parse()?;
                 Ok(Some((eq_token, definition)))
@@ -1567,13 +1564,13 @@ pub(crate) mod parsing {
                     }
                 },
                 rename: {
-                    if input.peek(Token![as]) {
-                        let as_token: Token![as] = input.parse()?;
-                        let rename: Ident = if input.peek(Token![_]) {
-                            Ident::from(input.parse::<Token![_]>()?)
-                        } else {
-                            input.parse()?
-                        };
+                    if let Some(as_token) = input.parse_optional(Token![as]) {
+                        let rename: Ident =
+                            if let Some(underscore) = input.parse_optional(Token![_]) {
+                                Ident::from(underscore)
+                            } else {
+                                input.parse()?
+                            };
                         Some((as_token, rename))
                     } else {
                         None
@@ -1599,7 +1596,7 @@ pub(crate) mod parsing {
         let attrs = input.call(Attribute::parse_outer)?;
         let vis: Visibility = input.parse()?;
         let use_token: Token![use] = input.parse()?;
-        let leading_colon: Option<Token![::]> = input.parse()?;
+        let leading_colon = input.parse_optional(Token![::]);
         let tree = parse_use_tree(input, allow_crate_root_in_path && leading_colon.is_none())?;
         let semi_token: Token![;] = input.parse()?;
 
@@ -1638,21 +1635,21 @@ pub(crate) mod parsing {
             || lookahead.peek(Token![try])
         {
             let ident = input.call(Ident::parse_any)?;
-            if input.peek(Token![::]) {
+            if let Some(colon2_token) = input.parse_optional(Token![::]) {
                 Ok(Some(UseTree::Path(UsePath {
                     ident,
-                    colon2_token: input.parse()?,
+                    colon2_token,
                     tree: Box::new(input.parse()?),
                 })))
-            } else if input.peek(Token![as]) {
+            } else if let Some(as_token) = input.parse_optional(Token![as]) {
                 Ok(Some(UseTree::Rename(UseRename {
                     ident,
-                    as_token: input.parse()?,
+                    as_token,
                     rename: {
-                        if input.peek(Ident) {
-                            input.parse()?
-                        } else if input.peek(Token![_]) {
-                            Ident::from(input.parse::<Token![_]>()?)
+                        if let Some(ident) = input.parse_optional(Ident) {
+                            ident
+                        } else if let Some(underscore) = input.parse_optional(Token![_]) {
+                            Ident::from(underscore)
                         } else {
                             return Err(input.error("expected identifier or underscore"));
                         }
@@ -1675,7 +1672,7 @@ pub(crate) mod parsing {
                     break;
                 }
                 let this_tree_starts_with_crate_root =
-                    allow_crate_root_in_path && content.parse::<Option<Token![::]>>()?.is_some();
+                    allow_crate_root_in_path && content.parse_optional(Token![::]).is_some();
                 has_any_crate_root_in_path |= this_tree_starts_with_crate_root;
                 match parse_use_tree(
                     &content,
@@ -1758,12 +1755,12 @@ pub(crate) mod parsing {
 
     fn peek_signature(input: ParseStream, allow_safe: bool) -> bool {
         let fork = input.fork();
-        fork.parse::<Option<Token![const]>>().is_ok()
-            && fork.parse::<Option<Token![async]>>().is_ok()
-            && ((allow_safe && fork.parse::<Option<Token![safe]>>().unwrap().is_some())
-                || fork.parse::<Option<Token![unsafe]>>().is_ok())
-            && fork.parse::<Option<Abi>>().is_ok()
-            && fork.peek(Token![fn])
+        fork.parse_optional(Token![const]);
+        fork.parse_optional(Token![async]);
+        if !(allow_safe && fork.parse_optional(Token![safe]).is_some()) {
+            fork.parse_optional(Token![unsafe]);
+        }
+        fork.parse::<Option<Abi>>().is_ok() && fork.peek(Token![fn])
     }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
@@ -1775,8 +1772,8 @@ pub(crate) mod parsing {
     }
 
     fn parse_signature(input: ParseStream, allow_safe: bool) -> Result<Signature> {
-        let constness: Option<Token![const]> = input.parse()?;
-        let asyncness: Option<Token![async]> = input.parse()?;
+        let constness = input.parse_optional(Token![const]);
+        let asyncness = input.parse_optional(Token![async]);
         let safety = if allow_safe {
             Safety::parse_safe_or_unsafe(input)
         } else {
@@ -1824,7 +1821,7 @@ pub(crate) mod parsing {
         /// }
         /// ```
         pub fn parse_safe_or_unsafe(input: ParseStream) -> Result<Self> {
-            if let Some(token) = input.parse::<Option<Token![safe]>>()? {
+            if let Some(token) = input.parse_optional(Token![safe]) {
                 Ok(Safety::Safe(token))
             } else {
                 Self::parse_unsafe_only(input)
@@ -1844,7 +1841,7 @@ pub(crate) mod parsing {
         /// // ^^^^ ERROR: items outside of `unsafe extern { }` cannot be declared with `safe` safety qualifier
         /// ```
         pub fn parse_unsafe_only(input: ParseStream) -> Result<Self> {
-            if let Some(token) = input.parse::<Option<Token![unsafe]>>()? {
+            if let Some(token) = input.parse_optional(Token![unsafe]) {
                 Ok(Safety::Unsafe(token))
             } else {
                 Ok(Safety::Default)
@@ -1932,7 +1929,7 @@ pub(crate) mod parsing {
         let colon_token: Token![:] = input.parse()?;
 
         if allow_variadic {
-            if let Some(dots) = input.parse::<Option<Token![...]>>()? {
+            if let Some(dots) = input.parse_optional(Token![...]) {
                 return Ok(FnArgOrVariadic::Variadic(Variadic {
                     attrs,
                     pat: Some((pat, colon_token)),
@@ -1965,14 +1962,13 @@ pub(crate) mod parsing {
         Option<Token![mut]>,
         Token![self],
     )> {
-        let reference = if input.peek(Token![&]) {
-            let ampersand: Token![&] = input.parse()?;
-            let lifetime: Option<Lifetime> = input.parse()?;
+        let reference = if let Some(ampersand) = input.parse_optional(Token![&]) {
+            let lifetime = input.parse_optional(Lifetime);
             Some((ampersand, lifetime))
         } else {
             None
         };
-        let mutability: Option<Token![mut]> = input.parse()?;
+        let mutability = input.parse_optional(Token![mut]);
         let self_token: Token![self] = input.parse()?;
         if input.peek(Token![::]) {
             return Err(input.error("expected `:`"));
@@ -2017,7 +2013,7 @@ pub(crate) mod parsing {
         while !input.is_empty() {
             let attrs = input.call(Attribute::parse_outer)?;
 
-            if let Some(dots) = input.parse::<Option<Token![...]>>()? {
+            if let Some(dots) = input.parse_optional(Token![...]) {
                 variadic = Some(Variadic {
                     attrs,
                     pat: None,
@@ -2081,7 +2077,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let mut attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
-            let unsafety: Option<Token![unsafe]> = input.parse()?;
+            let unsafety = input.parse_optional(Token![unsafe]);
             let mod_token: Token![mod] = input.parse()?;
             let ident: Ident = if input.peek(Token![try]) {
                 input.call(Ident::parse_any)
@@ -2129,7 +2125,7 @@ pub(crate) mod parsing {
     impl Parse for ItemForeignMod {
         fn parse(input: ParseStream) -> Result<Self> {
             let mut attrs = input.call(Attribute::parse_outer)?;
-            let unsafety: Option<Token![unsafe]> = input.parse()?;
+            let unsafety = input.parse_optional(Token![unsafe]);
             let abi: Abi = input.parse()?;
 
             let content;
@@ -2199,9 +2195,9 @@ pub(crate) mod parsing {
                 let ident = input.parse()?;
                 let colon_token = input.parse()?;
                 let ty = input.parse()?;
-                let has_value = input.peek(Token![=]);
+                let eq_token = input.parse_optional(Token![=]);
+                let has_value = eq_token.is_some();
                 if has_value {
-                    input.parse::<Token![=]>()?;
                     input.parse::<Expr>()?;
                 }
                 let semi_token: Token![;] = input.parse()?;
@@ -2537,8 +2533,8 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let outer_attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
-            let unsafety: Option<Token![unsafe]> = input.parse()?;
-            let auto_token: Option<Token![auto]> = input.parse()?;
+            let unsafety = input.parse_optional(Token![unsafe]);
+            let auto_token = input.parse_optional(Token![auto]);
             let trait_token: Token![trait] = input.parse()?;
             let ident: Ident = input.parse()?;
             let generics: Generics = input.parse()?;
@@ -2565,7 +2561,7 @@ pub(crate) mod parsing {
         ident: Ident,
         mut generics: Generics,
     ) -> Result<ItemTrait> {
-        let colon_token: Option<Token![:]> = input.parse()?;
+        let colon_token = input.parse_optional(Token![:]);
 
         let mut supertraits = Punctuated::new();
         if colon_token.is_some() {
@@ -2676,7 +2672,7 @@ pub(crate) mod parsing {
             let begin = input.cursor();
             let mut attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
-            let defaultness: Option<Token![default]> = input.parse()?;
+            let defaultness = input.parse_optional(Token![default]);
             let ahead = input.fork();
 
             let lookahead = ahead.lookahead1();
@@ -2692,7 +2688,7 @@ pub(crate) mod parsing {
                     let mut generics: Generics = input.parse()?;
                     let colon_token: Token![:] = input.parse()?;
                     let ty: Type = input.parse()?;
-                    let default = if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
+                    let default = if let Some(eq_token) = input.parse_optional(Token![=]) {
                         let expr: Expr = input.parse()?;
                         Some((eq_token, expr))
                     } else {
@@ -2780,8 +2776,7 @@ pub(crate) mod parsing {
 
             let colon_token: Token![:] = input.parse()?;
             let ty: Type = input.parse()?;
-            let default = if input.peek(Token![=]) {
-                let eq_token: Token![=] = input.parse()?;
+            let default = if let Some(eq_token) = input.parse_optional(Token![=]) {
                 let default: Expr = input.parse()?;
                 Some((eq_token, default))
             } else {
@@ -2925,8 +2920,8 @@ pub(crate) mod parsing {
     fn parse_impl(input: ParseStream, allow_verbatim_impl: bool) -> Result<Option<ItemImpl>> {
         let mut attrs = input.call(Attribute::parse_outer)?;
         let has_visibility = allow_verbatim_impl && input.parse::<Visibility>()?.is_some();
-        let defaultness: Option<Token![default]> = input.parse()?;
-        let unsafety: Option<Token![unsafe]> = input.parse()?;
+        let defaultness = input.parse_optional(Token![default]);
+        let unsafety = input.parse_optional(Token![unsafe]);
         let impl_token: Token![impl] = input.parse()?;
 
         let has_generics = generics::parsing::choose_generics_over_qpath(input);
@@ -2939,7 +2934,7 @@ pub(crate) mod parsing {
         let is_const_impl = allow_verbatim_impl
             && (input.peek(Token![const]) || input.peek(Token![?]) && input.peek2(Token![const]));
         if is_const_impl {
-            input.parse::<Option<Token![?]>>()?;
+            input.parse_optional(Token![?]);
             input.parse::<Token![const]>()?;
         }
 
@@ -2955,9 +2950,9 @@ pub(crate) mod parsing {
         let self_ty: Type;
         let trait_;
 
-        let is_impl_for = input.peek(Token![for]);
-        if is_impl_for {
-            let for_token: Token![for] = input.parse()?;
+        let for_token = input.parse_optional(Token![for]);
+        let is_impl_for = for_token.is_some();
+        if let Some(for_token) = for_token {
             let mut first_ty_ref = &first_ty;
             while let Type::Group(ty) = first_ty_ref {
                 first_ty_ref = &ty.elem;
@@ -3068,7 +3063,7 @@ pub(crate) mod parsing {
                 let mut generics: Generics = input.parse()?;
                 let colon_token: Token![:] = input.parse()?;
                 let ty: Type = input.parse()?;
-                let value = if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
+                let value = if let Some(eq_token) = input.parse_optional(Token![=]) {
                     let expr: Expr = input.parse()?;
                     Some((eq_token, expr))
                 } else {
@@ -3132,7 +3127,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
-            let defaultness: Option<Token![default]> = input.parse()?;
+            let defaultness = input.parse_optional(Token![default]);
             let const_token: Token![const] = input.parse()?;
 
             let lookahead = input.lookahead1();
@@ -3178,13 +3173,13 @@ pub(crate) mod parsing {
     ) -> Result<Option<ImplItemFn>> {
         let mut attrs = input.call(Attribute::parse_outer)?;
         let vis: Visibility = input.parse()?;
-        let defaultness: Option<Token![default]> = input.parse()?;
+        let defaultness = input.parse_optional(Token![default]);
         let sig: Signature = input.parse()?;
 
         // Accept functions without a body in an impl block because rustc's
         // *parser* does not reject them (the compilation error is emitted later
         // than parsing) and it can be useful for macro DSLs.
-        if allow_omitted_body && input.parse::<Option<Token![;]>>()?.is_some() {
+        if allow_omitted_body && input.parse_optional(Token![;]).is_some() {
             return Ok(None);
         }
 
@@ -3210,7 +3205,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
-            let defaultness: Option<Token![default]> = input.parse()?;
+            let defaultness = input.parse_optional(Token![default]);
             let type_token: Token![type] = input.parse()?;
             let ident: Ident = input.parse()?;
             let mut generics: Generics = input.parse()?;
@@ -3294,7 +3289,7 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for StaticMutability {
         fn parse(input: ParseStream) -> Result<Self> {
-            let mut_token: Option<Token![mut]> = input.parse()?;
+            let mut_token = input.parse_optional(Token![mut]);
             Ok(mut_token.map_or(StaticMutability::None, StaticMutability::Mut))
         }
     }

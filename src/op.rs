@@ -85,62 +85,62 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for BinOp {
         fn parse(input: ParseStream) -> Result<Self> {
-            if input.peek(Token![+=]) {
-                input.parse().map(BinOp::AddAssign)
-            } else if input.peek(Token![-=]) {
-                input.parse().map(BinOp::SubAssign)
-            } else if input.peek(Token![*=]) {
-                input.parse().map(BinOp::MulAssign)
-            } else if input.peek(Token![/=]) {
-                input.parse().map(BinOp::DivAssign)
-            } else if input.peek(Token![%=]) {
-                input.parse().map(BinOp::RemAssign)
-            } else if input.peek(Token![^=]) {
-                input.parse().map(BinOp::BitXorAssign)
-            } else if input.peek(Token![&=]) {
-                input.parse().map(BinOp::BitAndAssign)
-            } else if input.peek(Token![|=]) {
-                input.parse().map(BinOp::BitOrAssign)
-            } else if input.peek(Token![<<=]) {
-                input.parse().map(BinOp::ShlAssign)
-            } else if input.peek(Token![>>=]) {
-                input.parse().map(BinOp::ShrAssign)
-            } else if input.peek(Token![&&]) {
-                input.parse().map(BinOp::And)
-            } else if input.peek(Token![||]) {
-                input.parse().map(BinOp::Or)
-            } else if input.peek(Token![<<]) {
-                input.parse().map(BinOp::Shl)
-            } else if input.peek(Token![>>]) {
-                input.parse().map(BinOp::Shr)
-            } else if input.peek(Token![==]) {
-                input.parse().map(BinOp::Eq)
-            } else if input.peek(Token![<=]) {
-                input.parse().map(BinOp::Le)
-            } else if input.peek(Token![!=]) {
-                input.parse().map(BinOp::Ne)
-            } else if input.peek(Token![>=]) {
-                input.parse().map(BinOp::Ge)
-            } else if input.peek(Token![+]) {
-                input.parse().map(BinOp::Add)
-            } else if input.peek(Token![-]) {
-                input.parse().map(BinOp::Sub)
-            } else if input.peek(Token![*]) {
-                input.parse().map(BinOp::Mul)
-            } else if input.peek(Token![/]) {
-                input.parse().map(BinOp::Div)
-            } else if input.peek(Token![%]) {
-                input.parse().map(BinOp::Rem)
-            } else if input.peek(Token![^]) {
-                input.parse().map(BinOp::BitXor)
-            } else if input.peek(Token![&]) {
-                input.parse().map(BinOp::BitAnd)
-            } else if input.peek(Token![|]) {
-                input.parse().map(BinOp::BitOr)
-            } else if input.peek(Token![<]) {
-                input.parse().map(BinOp::Lt)
-            } else if input.peek(Token![>]) {
-                input.parse().map(BinOp::Gt)
+            if let Some(op) = input.parse_optional(Token![+=]) {
+                Ok(BinOp::AddAssign(op))
+            } else if let Some(op) = input.parse_optional(Token![-=]) {
+                Ok(BinOp::SubAssign(op))
+            } else if let Some(op) = input.parse_optional(Token![*=]) {
+                Ok(BinOp::MulAssign(op))
+            } else if let Some(op) = input.parse_optional(Token![/=]) {
+                Ok(BinOp::DivAssign(op))
+            } else if let Some(op) = input.parse_optional(Token![%=]) {
+                Ok(BinOp::RemAssign(op))
+            } else if let Some(op) = input.parse_optional(Token![^=]) {
+                Ok(BinOp::BitXorAssign(op))
+            } else if let Some(op) = input.parse_optional(Token![&=]) {
+                Ok(BinOp::BitAndAssign(op))
+            } else if let Some(op) = input.parse_optional(Token![|=]) {
+                Ok(BinOp::BitOrAssign(op))
+            } else if let Some(op) = input.parse_optional(Token![<<=]) {
+                Ok(BinOp::ShlAssign(op))
+            } else if let Some(op) = input.parse_optional(Token![>>=]) {
+                Ok(BinOp::ShrAssign(op))
+            } else if let Some(op) = input.parse_optional(Token![&&]) {
+                Ok(BinOp::And(op))
+            } else if let Some(op) = input.parse_optional(Token![||]) {
+                Ok(BinOp::Or(op))
+            } else if let Some(op) = input.parse_optional(Token![<<]) {
+                Ok(BinOp::Shl(op))
+            } else if let Some(op) = input.parse_optional(Token![>>]) {
+                Ok(BinOp::Shr(op))
+            } else if let Some(op) = input.parse_optional(Token![==]) {
+                Ok(BinOp::Eq(op))
+            } else if let Some(op) = input.parse_optional(Token![<=]) {
+                Ok(BinOp::Le(op))
+            } else if let Some(op) = input.parse_optional(Token![!=]) {
+                Ok(BinOp::Ne(op))
+            } else if let Some(op) = input.parse_optional(Token![>=]) {
+                Ok(BinOp::Ge(op))
+            } else if let Some(op) = input.parse_optional(Token![+]) {
+                Ok(BinOp::Add(op))
+            } else if let Some(op) = input.parse_optional(Token![-]) {
+                Ok(BinOp::Sub(op))
+            } else if let Some(op) = input.parse_optional(Token![*]) {
+                Ok(BinOp::Mul(op))
+            } else if let Some(op) = input.parse_optional(Token![/]) {
+                Ok(BinOp::Div(op))
+            } else if let Some(op) = input.parse_optional(Token![%]) {
+                Ok(BinOp::Rem(op))
+            } else if let Some(op) = input.parse_optional(Token![^]) {
+                Ok(BinOp::BitXor(op))
+            } else if let Some(op) = input.parse_optional(Token![&]) {
+                Ok(BinOp::BitAnd(op))
+            } else if let Some(op) = input.parse_optional(Token![|]) {
+                Ok(BinOp::BitOr(op))
+            } else if let Some(op) = input.parse_optional(Token![<]) {
+                Ok(BinOp::Lt(op))
+            } else if let Some(op) = input.parse_optional(Token![>]) {
+                Ok(BinOp::Gt(op))
             } else {
                 Err(input.error("expected binary operator"))
             }
