@@ -452,14 +452,16 @@
         "ty": {
           "syn": "Type"
         },
-        "eq_token": {
-          "option": {
-            "token": "Eq"
-          }
-        },
         "default": {
           "option": {
-            "syn": "Expr"
+            "tuple": [
+              {
+                "token": "Eq"
+              },
+              {
+                "syn": "Expr"
+              }
+            ]
           }
         }
       }
@@ -5299,14 +5301,16 @@
             "punct": "Plus"
           }
         },
-        "eq_token": {
-          "option": {
-            "token": "Eq"
-          }
-        },
         "default": {
           "option": {
-            "syn": "Type"
+            "tuple": [
+              {
+                "token": "Eq"
+              },
+              {
+                "syn": "Type"
+              }
+            ]
           }
         }
       }

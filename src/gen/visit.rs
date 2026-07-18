@@ -1190,9 +1190,9 @@ where
     v.visit_ident(&node.ident);
     skip!(node.colon_token);
     v.visit_type(&node.ty);
-    skip!(node.eq_token);
     if let Some(it) = &node.default {
-        v.visit_expr(it);
+        skip!((it).0);
+        v.visit_expr(&(it).1);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3718,9 +3718,9 @@ where
         let it = el.value();
         v.visit_type_param_bound(it);
     }
-    skip!(node.eq_token);
     if let Some(it) = &node.default {
-        v.visit_type(it);
+        skip!((it).0);
+        v.visit_type(&(it).1);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

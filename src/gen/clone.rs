@@ -160,7 +160,6 @@ impl Clone for crate::ConstParam {
             ident: self.ident.clone(),
             colon_token: self.colon_token.clone(),
             ty: self.ty.clone(),
-            eq_token: self.eq_token.clone(),
             default: self.default.clone(),
         }
     }
@@ -2143,7 +2142,6 @@ impl Clone for crate::TypeParam {
             ident: self.ident.clone(),
             colon_token: self.colon_token.clone(),
             bounds: self.bounds.clone(),
-            eq_token: self.eq_token.clone(),
             default: self.default.clone(),
         }
     }

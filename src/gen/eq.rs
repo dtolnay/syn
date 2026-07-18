@@ -199,7 +199,7 @@ impl Eq for crate::ConstParam {}
 impl PartialEq for crate::ConstParam {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.ident == other.ident && self.ty == other.ty
-            && self.eq_token == other.eq_token && self.default == other.default
+            && self.default == other.default
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2163,7 +2163,7 @@ impl PartialEq for crate::TypeParam {
     fn eq(&self, other: &Self) -> bool {
         self.attrs == other.attrs && self.ident == other.ident
             && self.colon_token == other.colon_token && self.bounds == other.bounds
-            && self.eq_token == other.eq_token && self.default == other.default
+            && self.default == other.default
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

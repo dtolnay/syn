@@ -299,17 +299,14 @@ impl Debug for Lite<syn::ConstParam> {
         }
         formatter.field("ident", Lite(&self.value.ident));
         formatter.field("ty", Lite(&self.value.ty));
-        if self.value.eq_token.is_some() {
-            formatter.field("eq_token", &Present);
-        }
         if let Some(val) = &self.value.default {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print(syn::Expr);
+            struct Print((syn::token::Eq, syn::Expr));
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some(")?;
-                    Debug::fmt(Lite(&self.0), formatter)?;
+                    Debug::fmt(Lite(&self.0.1), formatter)?;
                     formatter.write_str(")")?;
                     Ok(())
                 }
@@ -4497,17 +4494,14 @@ impl Debug for Lite<syn::TypeParam> {
         if !self.value.bounds.is_empty() {
             formatter.field("bounds", Lite(&self.value.bounds));
         }
-        if self.value.eq_token.is_some() {
-            formatter.field("eq_token", &Present);
-        }
         if let Some(val) = &self.value.default {
             #[derive(RefCast)]
             #[repr(transparent)]
-            struct Print(syn::Type);
+            struct Print((syn::token::Eq, syn::Type));
             impl Debug for Print {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     formatter.write_str("Some(")?;
-                    Debug::fmt(Lite(&self.0), formatter)?;
+                    Debug::fmt(Lite(&self.0.1), formatter)?;
                     formatter.write_str(")")?;
                     Ok(())
                 }

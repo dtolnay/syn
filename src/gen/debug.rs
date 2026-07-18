@@ -320,7 +320,6 @@ impl Debug for crate::ConstParam {
         formatter.field("ident", &self.ident);
         formatter.field("colon_token", &self.colon_token);
         formatter.field("ty", &self.ty);
-        formatter.field("eq_token", &self.eq_token);
         formatter.field("default", &self.default);
         formatter.finish()
     }
@@ -3037,7 +3036,6 @@ impl Debug for crate::TypeParam {
         formatter.field("ident", &self.ident);
         formatter.field("colon_token", &self.colon_token);
         formatter.field("bounds", &self.bounds);
-        formatter.field("eq_token", &self.eq_token);
         formatter.field("default", &self.default);
         formatter.finish()
     }
