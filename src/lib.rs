@@ -69,7 +69,7 @@
 //! proc-macro = true
 //!
 //! [dependencies]
-//! syn = "2"
+//! syn = "3"
 //! quote = "1"
 //! ```
 //!
@@ -264,7 +264,7 @@
 //!   dynamic library libproc_macro from rustc toolchain.
 
 #![no_std]
-#![doc(html_root_url = "https://docs.rs/syn/2.0.119")]
+#![doc(html_root_url = "https://docs.rs/syn/3.0.0")]
 #![cfg_attr(docsrs, feature(doc_cfg), doc(auto_cfg = false))]
 #![deny(unsafe_op_in_unsafe_fn)]
 #![allow(non_camel_case_types)]
@@ -623,7 +623,7 @@ mod gen {
     /// ```
     /// // [dependencies]
     /// // quote = "1"
-    /// // syn = { version = "2", features = ["fold", "full"] }
+    /// // syn = { version = "3", features = ["fold", "full"] }
     ///
     /// use quote::quote;
     /// use syn::fold::{fold_expr, Fold};
@@ -705,7 +705,7 @@ mod gen {
     /// ```
     /// // [dependencies]
     /// // quote = "1"
-    /// // syn = { version = "2", features = ["full", "visit"] }
+    /// // syn = { version = "3", features = ["full", "visit"] }
     ///
     /// use quote::quote;
     /// use syn::visit::{self, Visit};
@@ -825,7 +825,7 @@ mod gen {
     /// ```
     /// // [dependencies]
     /// // quote = "1"
-    /// // syn = { version = "2", features = ["full", "visit-mut"] }
+    /// // syn = { version = "3", features = ["full", "visit-mut"] }
     ///
     /// use quote::quote;
     /// use syn::visit_mut::{self, VisitMut};

@@ -81,7 +81,7 @@ tokens back to the compiler to compile into the user's crate.
 proc-macro = true
 
 [dependencies]
-syn = "2"
+syn = "3"
 quote = "1"
 ```
 
