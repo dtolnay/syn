@@ -227,6 +227,9 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct TypeTraitObject {
         pub attrs: Vec<Attribute>,
+        /// The `dyn` keyword is required since Rust 2021 edition. In editions
+        /// 2015&ndash;2018, trait objects without a `dyn` keyword are allowed
+        /// but deprecated.
         pub dyn_token: Option<Token![dyn]>,
         pub bounds: Punctuated<TypeParamBound, Token![+]>,
     }
