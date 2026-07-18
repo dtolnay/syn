@@ -655,7 +655,7 @@ pub(crate) mod parsing {
             let has_colon;
             Ok(LifetimeParam {
                 attrs: input.call(Attribute::parse_outer)?,
-                lifetime: input.parse()?,
+                lifetime: Lifetime::parse_any(input)?,
                 colon_token: {
                     if input.peek(Token![:]) {
                         has_colon = true;
@@ -672,7 +672,7 @@ pub(crate) mod parsing {
                             if input.is_empty() || input.peek(Token![,]) || input.peek(Token![>]) {
                                 break;
                             }
-                            let value = input.parse()?;
+                            let value = Lifetime::parse_any(input)?;
                             bounds.push_value(value);
                             if !input.peek(Token![+]) {
                                 break;
@@ -782,7 +782,7 @@ pub(crate) mod parsing {
             allow_const: bool,
         ) -> Result<Self> {
             if input.peek(Lifetime) {
-                return input.parse().map(TypeParamBound::Lifetime);
+                return Lifetime::parse_any(input).map(TypeParamBound::Lifetime);
             }
 
             #[cfg(feature = "full")]
@@ -994,7 +994,7 @@ pub(crate) mod parsing {
             if input.peek(Lifetime) && input.peek2(Token![:]) {
                 Ok(WherePredicate::Lifetime(PredicateLifetime {
                     attrs,
-                    lifetime: input.parse()?,
+                    lifetime: Lifetime::parse_any(input)?,
                     colon_token: input.parse()?,
                     bounds: {
                         let mut bounds = Punctuated::new();
@@ -1008,7 +1008,7 @@ pub(crate) mod parsing {
                             {
                                 break;
                             }
-                            let value = input.parse()?;
+                            let value = Lifetime::parse_any(input)?;
                             bounds.push_value(value);
                             if !input.peek(Token![+]) {
                                 break;
@@ -1103,7 +1103,7 @@ pub(crate) mod parsing {
         fn parse(input: ParseStream) -> Result<Self> {
             let lookahead = input.lookahead1();
             if lookahead.peek(Lifetime) {
-                input.parse().map(CapturedParam::Lifetime)
+                Lifetime::parse_any(input).map(CapturedParam::Lifetime)
             } else if lookahead.peek(Ident) || input.peek(Token![Self]) {
                 input.call(Ident::parse_any).map(CapturedParam::Ident)
             } else {
