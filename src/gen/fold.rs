@@ -82,14 +82,6 @@ pub trait Fold {
     fn fold_block(&mut self, i: crate::Block) -> crate::Block {
         fold_block(self, i)
     }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    fn fold_block_modifiers(
-        &mut self,
-        i: crate::BlockModifiers,
-    ) -> crate::BlockModifiers {
-        fold_block_modifiers(self, i)
-    }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_bound_lifetimes(
@@ -102,22 +94,6 @@ pub trait Fold {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_captured_param(&mut self, i: crate::CapturedParam) -> crate::CapturedParam {
         fold_captured_param(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    fn fold_closure_modifiers(
-        &mut self,
-        i: crate::ClosureModifiers,
-    ) -> crate::ClosureModifiers {
-        fold_closure_modifiers(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    fn fold_const_modifiers(
-        &mut self,
-        i: crate::ConstModifiers,
-    ) -> crate::ConstModifiers {
-        fold_const_modifiers(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -362,14 +338,6 @@ pub trait Fold {
     fn fold_field(&mut self, i: crate::Field) -> crate::Field {
         fold_field(self, i)
     }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn fold_field_modifiers(
-        &mut self,
-        i: crate::FieldModifiers,
-    ) -> crate::FieldModifiers {
-        fold_field_modifiers(self, i)
-    }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_field_pat(&mut self, i: crate::FieldPat) -> crate::FieldPat {
@@ -404,11 +372,6 @@ pub trait Fold {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_fn_arg(&mut self, i: crate::FnArg) -> crate::FnArg {
         fold_fn_arg(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    fn fold_fn_modifiers(&mut self, i: crate::FnModifiers) -> crate::FnModifiers {
-        fold_fn_modifiers(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -499,11 +462,6 @@ pub trait Fold {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_impl_item_type(&mut self, i: crate::ImplItemType) -> crate::ImplItemType {
         fold_impl_item_type(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    fn fold_impl_modifiers(&mut self, i: crate::ImplModifiers) -> crate::ImplModifiers {
-        fold_impl_modifiers(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -648,14 +606,6 @@ pub trait Fold {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_local_init(&mut self, i: crate::LocalInit) -> crate::LocalInit {
         fold_local_init(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    fn fold_local_modifiers(
-        &mut self,
-        i: crate::LocalModifiers,
-    ) -> crate::LocalModifiers {
-        fold_local_modifiers(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -882,14 +832,6 @@ pub trait Fold {
     fn fold_trait_bound(&mut self, i: crate::TraitBound) -> crate::TraitBound {
         fold_trait_bound(self, i)
     }
-    #[cfg(any(feature = "derive", feature = "full"))]
-    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-    fn fold_trait_bound_modifiers(
-        &mut self,
-        i: crate::TraitBoundModifiers,
-    ) -> crate::TraitBoundModifiers {
-        fold_trait_bound_modifiers(self, i)
-    }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_trait_item(&mut self, i: crate::TraitItem) -> crate::TraitItem {
@@ -920,14 +862,6 @@ pub trait Fold {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_trait_item_type(&mut self, i: crate::TraitItemType) -> crate::TraitItemType {
         fold_trait_item_type(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    fn fold_trait_modifiers(
-        &mut self,
-        i: crate::TraitModifiers,
-    ) -> crate::TraitModifiers {
-        fold_trait_modifiers(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -963,11 +897,6 @@ pub trait Fold {
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn fold_type_macro(&mut self, i: crate::TypeMacro) -> crate::TypeMacro {
         fold_type_macro(self, i)
-    }
-    #[cfg(feature = "full")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-    fn fold_type_modifiers(&mut self, i: crate::TypeModifiers) -> crate::TypeModifiers {
-        fold_type_modifiers(self, i)
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -1241,17 +1170,6 @@ where
         stmts: fold_vec(node.stmts, f, F::fold_stmt),
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub fn fold_block_modifiers<F>(
-    f: &mut F,
-    node: crate::BlockModifiers,
-) -> crate::BlockModifiers
-where
-    F: Fold + ?Sized,
-{
-    node
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_bound_lifetimes<F>(
@@ -1284,30 +1202,6 @@ where
         crate::CapturedParam::Ident(_binding_0) => {
             crate::CapturedParam::Ident(f.fold_ident(_binding_0))
         }
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub fn fold_closure_modifiers<F>(
-    f: &mut F,
-    node: crate::ClosureModifiers,
-) -> crate::ClosureModifiers
-where
-    F: Fold + ?Sized,
-{
-    node
-}
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub fn fold_const_modifiers<F>(
-    f: &mut F,
-    node: crate::ConstModifiers,
-) -> crate::ConstModifiers
-where
-    F: Fold + ?Sized,
-{
-    crate::ConstModifiers {
-        defaultness: node.defaultness,
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1558,7 +1452,7 @@ where
         attrs: f.fold_attributes(node.attrs),
         async_token: node.async_token,
         capture: node.capture,
-        modifiers: f.fold_block_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         block: f.fold_block(node.block),
     }
 }
@@ -1648,7 +1542,7 @@ where
     crate::ExprClosure {
         attrs: f.fold_attributes(node.attrs),
         lifetimes: (node.lifetimes).map(|it| f.fold_bound_lifetimes(it)),
-        modifiers: f.fold_closure_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         constness: node.constness,
         asyncness: node.asyncness,
         capture: node.capture,
@@ -1668,7 +1562,7 @@ where
     crate::ExprConst {
         attrs: f.fold_attributes(node.attrs),
         const_token: node.const_token,
-        modifiers: f.fold_block_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         block: f.fold_block(node.block),
     }
 }
@@ -1980,7 +1874,7 @@ where
     crate::ExprTryBlock {
         attrs: f.fold_attributes(node.attrs),
         try_token: node.try_token,
-        modifiers: f.fold_block_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         block: f.fold_block(node.block),
     }
 }
@@ -2055,22 +1949,11 @@ where
     crate::Field {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
-        modifiers: f.fold_field_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         ident: (node.ident).map(|it| f.fold_ident(it)),
         colon_token: node.colon_token,
         ty: f.fold_type(node.ty),
     }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn fold_field_modifiers<F>(
-    f: &mut F,
-    node: crate::FieldModifiers,
-) -> crate::FieldModifiers
-where
-    F: Fold + ?Sized,
-{
-    node
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -2167,16 +2050,6 @@ where
         }
     }
 }
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub fn fold_fn_modifiers<F>(f: &mut F, node: crate::FnModifiers) -> crate::FnModifiers
-where
-    F: Fold + ?Sized,
-{
-    crate::FnModifiers {
-        defaultness: node.defaultness,
-    }
-}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
 pub fn fold_fn_ptr_variadic<F>(
@@ -2229,7 +2102,7 @@ where
     crate::ForeignItemFn {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
-        modifiers: f.fold_fn_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         sig: f.fold_signature(node.sig),
         semi_token: node.semi_token,
     }
@@ -2282,7 +2155,7 @@ where
     crate::ForeignItemType {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
-        modifiers: f.fold_type_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         type_token: node.type_token,
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
@@ -2403,7 +2276,7 @@ where
     crate::ImplItemConst {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
-        modifiers: f.fold_const_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         const_token: node.const_token,
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
@@ -2423,7 +2296,7 @@ where
     crate::ImplItemFn {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
-        modifiers: f.fold_fn_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         sig: f.fold_signature(node.sig),
         block: f.fold_block(node.block),
     }
@@ -2455,27 +2328,13 @@ where
     crate::ImplItemType {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
-        modifiers: f.fold_type_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         type_token: node.type_token,
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
         eq_token: node.eq_token,
         ty: f.fold_type(node.ty),
         semi_token: node.semi_token,
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub fn fold_impl_modifiers<F>(
-    f: &mut F,
-    node: crate::ImplModifiers,
-) -> crate::ImplModifiers
-where
-    F: Fold + ?Sized,
-{
-    crate::ImplModifiers {
-        defaultness: node.defaultness,
-        polarity: node.polarity,
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2543,7 +2402,7 @@ where
     crate::ItemConst {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
-        modifiers: f.fold_const_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         const_token: node.const_token,
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
@@ -2598,7 +2457,7 @@ where
     crate::ItemFn {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
-        modifiers: f.fold_fn_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         sig: f.fold_signature(node.sig),
         block: Box::new(f.fold_block(*node.block)),
     }
@@ -2628,7 +2487,7 @@ where
 {
     crate::ItemImpl {
         attrs: f.fold_attributes(node.attrs),
-        modifiers: f.fold_impl_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         unsafety: node.unsafety,
         impl_token: node.impl_token,
         generics: f.fold_generics(node.generics),
@@ -2711,7 +2570,7 @@ where
     crate::ItemTrait {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
-        modifiers: f.fold_trait_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         unsafety: node.unsafety,
         trait_token: node.trait_token,
         ident: f.fold_ident(node.ident),
@@ -2755,7 +2614,7 @@ where
     crate::ItemType {
         attrs: f.fold_attributes(node.attrs),
         vis: f.fold_visibility(node.vis),
-        modifiers: f.fold_type_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         type_token: node.type_token,
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
@@ -2931,7 +2790,7 @@ where
     crate::Local {
         attrs: f.fold_attributes(node.attrs),
         let_token: node.let_token,
-        modifiers: f.fold_local_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         pat: f.fold_pat(node.pat),
         init: (node.init).map(|it| f.fold_local_init(it)),
         semi_token: node.semi_token,
@@ -2948,17 +2807,6 @@ where
         expr: Box::new(f.fold_expr(*node.expr)),
         diverge: (node.diverge).map(|it| ((it).0, Box::new(f.fold_expr(*(it).1)))),
     }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub fn fold_local_modifiers<F>(
-    f: &mut F,
-    node: crate::LocalModifiers,
-) -> crate::LocalModifiers
-where
-    F: Fold + ?Sized,
-{
-    node
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -3544,21 +3392,10 @@ where
     crate::TraitBound {
         paren_token: node.paren_token,
         lifetimes: (node.lifetimes).map(|it| f.fold_bound_lifetimes(it)),
-        modifiers: f.fold_trait_bound_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         maybe: node.maybe,
         path: f.fold_path(node.path),
     }
-}
-#[cfg(any(feature = "derive", feature = "full"))]
-#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
-pub fn fold_trait_bound_modifiers<F>(
-    f: &mut F,
-    node: crate::TraitBoundModifiers,
-) -> crate::TraitBoundModifiers
-where
-    F: Fold + ?Sized,
-{
-    node
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -3595,7 +3432,7 @@ where
 {
     crate::TraitItemConst {
         attrs: f.fold_attributes(node.attrs),
-        modifiers: f.fold_const_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         const_token: node.const_token,
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
@@ -3613,7 +3450,7 @@ where
 {
     crate::TraitItemFn {
         attrs: f.fold_attributes(node.attrs),
-        modifiers: f.fold_fn_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         sig: f.fold_signature(node.sig),
         default: (node.default).map(|it| f.fold_block(it)),
         semi_token: node.semi_token,
@@ -3645,7 +3482,7 @@ where
 {
     crate::TraitItemType {
         attrs: f.fold_attributes(node.attrs),
-        modifiers: f.fold_type_modifiers(node.modifiers),
+        modifiers: node.modifiers,
         type_token: node.type_token,
         ident: f.fold_ident(node.ident),
         generics: f.fold_generics(node.generics),
@@ -3653,19 +3490,6 @@ where
         bounds: crate::punctuated::fold(node.bounds, f, F::fold_type_param_bound),
         default: (node.default).map(|it| ((it).0, f.fold_type((it).1))),
         semi_token: node.semi_token,
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub fn fold_trait_modifiers<F>(
-    f: &mut F,
-    node: crate::TraitModifiers,
-) -> crate::TraitModifiers
-where
-    F: Fold + ?Sized,
-{
-    crate::TraitModifiers {
-        auto_token: node.auto_token,
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3797,19 +3621,6 @@ where
     crate::TypeMacro {
         attrs: f.fold_attributes(node.attrs),
         mac: f.fold_macro(node.mac),
-    }
-}
-#[cfg(feature = "full")]
-#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
-pub fn fold_type_modifiers<F>(
-    f: &mut F,
-    node: crate::TypeModifiers,
-) -> crate::TypeModifiers
-where
-    F: Fold + ?Sized,
-{
-    crate::TypeModifiers {
-        defaultness: node.defaultness,
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

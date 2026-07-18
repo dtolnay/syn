@@ -86,6 +86,9 @@ fn visit(
             Some(code)
         }
         Type::Syn(t) => {
+            if t.ends_with("Modifiers") {
+                return None;
+            }
             fn requires_full(features: &Features) -> bool {
                 features.any.contains("full") && features.any.len() == 1
             }
