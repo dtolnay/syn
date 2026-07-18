@@ -1196,9 +1196,9 @@ where
     v.visit_ident_mut(&mut node.ident);
     skip!(node.colon_token);
     v.visit_type_mut(&mut node.ty);
-    skip!(node.eq_token);
     if let Some(it) = &mut node.default {
-        v.visit_expr_mut(it);
+        skip!((it).0);
+        v.visit_expr_mut(&mut (it).1);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3523,9 +3523,9 @@ where
         let it = el.value_mut();
         v.visit_type_param_bound_mut(it);
     }
-    skip!(node.eq_token);
     if let Some(it) = &mut node.default {
-        v.visit_type_mut(it);
+        skip!((it).0);
+        v.visit_type_mut(&mut (it).1);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

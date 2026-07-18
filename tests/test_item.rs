@@ -280,7 +280,6 @@ fn test_impl_type_parameter_defaults() {
             params: [
                 GenericParam::Type(TypeParam {
                     ident: "T",
-                    eq_token: Some,
                     default: Some(Type::Tuple),
                 }),
             ],

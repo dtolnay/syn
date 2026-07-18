@@ -68,7 +68,6 @@ fn test_split_for_impl() {
                             ident: "a",
                         },
                     ],
-                    eq_token: Some,
                     default: Some(Type::Tuple),
                 }),
             ],

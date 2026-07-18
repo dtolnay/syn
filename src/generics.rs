@@ -75,8 +75,7 @@ ast_struct! {
         pub ident: Ident,
         pub colon_token: Option<Token![:]>,
         pub bounds: Punctuated<TypeParamBound, Token![+]>,
-        pub eq_token: Option<Token![=]>,
-        pub default: Option<Type>,
+        pub default: Option<(Token![=], Type)>,
     }
 }
 
@@ -89,8 +88,7 @@ ast_struct! {
         pub ident: Ident,
         pub colon_token: Token![:],
         pub ty: Type,
-        pub eq_token: Option<Token![=]>,
-        pub default: Option<Expr>,
+        pub default: Option<(Token![=], Expr)>,
     }
 }
 
@@ -392,7 +390,6 @@ impl From<Ident> for TypeParam {
             ident,
             colon_token: None,
             bounds: Punctuated::new(),
-            eq_token: None,
             default: None,
         }
     }
@@ -601,7 +598,6 @@ pub(crate) mod parsing {
                         ident: input.call(Ident::parse_any)?,
                         colon_token: None,
                         bounds: Punctuated::new(),
-                        eq_token: None,
                         default: None,
                     }));
                 } else {
@@ -754,9 +750,8 @@ pub(crate) mod parsing {
                 }
             }
 
-            let eq_token: Option<Token![=]> = input.parse()?;
-            let default = if eq_token.is_some() {
-                Some(input.parse::<Type>()?)
+            let default = if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
+                Some((eq_token, input.parse::<Type>()?))
             } else {
                 None
             };
@@ -766,7 +761,6 @@ pub(crate) mod parsing {
                 ident,
                 colon_token,
                 bounds,
-                eq_token,
                 default,
             })
         }
@@ -925,23 +919,21 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for ConstParam {
         fn parse(input: ParseStream) -> Result<Self> {
-            let mut default = None;
             Ok(ConstParam {
                 attrs: input.call(Attribute::parse_outer)?,
                 const_token: input.parse()?,
                 ident: input.parse()?,
                 colon_token: input.parse()?,
                 ty: input.parse()?,
-                eq_token: {
+                default: {
                     if input.peek(Token![=]) {
                         let eq_token = input.parse()?;
-                        default = Some(path::parsing::const_argument(input)?);
-                        Some(eq_token)
+                        let default = path::parsing::const_argument(input)?;
+                        Some((eq_token, default))
                     } else {
                         None
                     }
                 },
-                default,
             })
         }
     }
@@ -1354,8 +1346,8 @@ pub(crate) mod printing {
                 TokensOrDefault(&self.colon_token).to_tokens(tokens);
                 self.bounds.to_tokens(tokens);
             }
-            if let Some(default) = &self.default {
-                TokensOrDefault(&self.eq_token).to_tokens(tokens);
+            if let Some((eq_token, default)) = &self.default {
+                eq_token.to_tokens(tokens);
                 default.to_tokens(tokens);
             }
         }
@@ -1384,8 +1376,8 @@ pub(crate) mod printing {
             self.ident.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
             self.ty.to_tokens(tokens);
-            if let Some(default) = &self.default {
-                TokensOrDefault(&self.eq_token).to_tokens(tokens);
+            if let Some((eq_token, default)) = &self.default {
+                eq_token.to_tokens(tokens);
                 print_const_argument(default, tokens);
             }
         }

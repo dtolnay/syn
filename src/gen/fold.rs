@@ -1213,8 +1213,7 @@ where
         ident: f.fold_ident(node.ident),
         colon_token: node.colon_token,
         ty: f.fold_type(node.ty),
-        eq_token: node.eq_token,
-        default: (node.default).map(|it| f.fold_expr(it)),
+        default: (node.default).map(|it| ((it).0, f.fold_expr((it).1))),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -3612,8 +3611,7 @@ where
         ident: f.fold_ident(node.ident),
         colon_token: node.colon_token,
         bounds: crate::punctuated::fold(node.bounds, f, F::fold_type_param_bound),
-        eq_token: node.eq_token,
-        default: (node.default).map(|it| f.fold_type(it)),
+        default: (node.default).map(|it| ((it).0, f.fold_type((it).1))),
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

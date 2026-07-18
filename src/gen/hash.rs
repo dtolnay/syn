@@ -262,7 +262,6 @@ impl Hash for crate::ConstParam {
         self.attrs.hash(state);
         self.ident.hash(state);
         self.ty.hash(state);
-        self.eq_token.hash(state);
         self.default.hash(state);
     }
 }
@@ -2719,7 +2718,6 @@ impl Hash for crate::TypeParam {
         self.ident.hash(state);
         self.colon_token.hash(state);
         self.bounds.hash(state);
-        self.eq_token.hash(state);
         self.default.hash(state);
     }
 }
