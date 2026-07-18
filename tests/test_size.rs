@@ -20,7 +20,7 @@ fn test_expr_size() {
 )]
 #[test]
 fn test_item_size() {
-    assert_eq!(mem::size_of::<Item>(), 352);
+    assert_eq!(mem::size_of::<Item>(), 360);
 }
 
 #[rustversion::attr(before(2023-04-29), ignore = "requires nightly-2023-04-29 or newer")]

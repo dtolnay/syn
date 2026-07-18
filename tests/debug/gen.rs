@@ -282,6 +282,15 @@ impl Debug for Lite<syn::ClosureModifiers> {
         formatter.finish()
     }
 }
+impl Debug for Lite<syn::ConstModifiers> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ConstModifiers");
+        if self.value.defaultness.is_some() {
+            formatter.field("defaultness", &Present);
+        }
+        formatter.finish()
+    }
+}
 impl Debug for Lite<syn::ConstParam> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("ConstParam");
@@ -1860,6 +1869,9 @@ impl Debug for Lite<syn::FnArg> {
 impl Debug for Lite<syn::FnModifiers> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("FnModifiers");
+        if self.value.defaultness.is_some() {
+            formatter.field("defaultness", &Present);
+        }
         formatter.finish()
     }
 }
@@ -1925,6 +1937,7 @@ impl Debug for Lite<syn::ForeignItem> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
                 formatter.finish()
@@ -2002,6 +2015,7 @@ impl Debug for Lite<syn::ForeignItemType> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("ident", Lite(&self.value.ident));
         formatter.field("generics", Lite(&self.value.generics));
         formatter.finish()
@@ -2127,9 +2141,7 @@ impl Debug for Lite<syn::ImplItem> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
-                if _val.defaultness.is_some() {
-                    formatter.field("defaultness", &Present);
-                }
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
                 formatter.field("ty", Lite(&_val.ty));
@@ -2143,9 +2155,6 @@ impl Debug for Lite<syn::ImplItem> {
                 }
                 formatter.field("vis", Lite(&_val.vis));
                 formatter.field("modifiers", Lite(&_val.modifiers));
-                if _val.defaultness.is_some() {
-                    formatter.field("defaultness", &Present);
-                }
                 formatter.field("sig", Lite(&_val.sig));
                 formatter.field("block", Lite(&_val.block));
                 formatter.finish()
@@ -2156,9 +2165,7 @@ impl Debug for Lite<syn::ImplItem> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
-                if _val.defaultness.is_some() {
-                    formatter.field("defaultness", &Present);
-                }
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
                 formatter.field("ty", Lite(&_val.ty));
@@ -2193,9 +2200,7 @@ impl Debug for Lite<syn::ImplItemConst> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
-        if self.value.defaultness.is_some() {
-            formatter.field("defaultness", &Present);
-        }
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("ident", Lite(&self.value.ident));
         formatter.field("generics", Lite(&self.value.generics));
         formatter.field("ty", Lite(&self.value.ty));
@@ -2211,9 +2216,6 @@ impl Debug for Lite<syn::ImplItemFn> {
         }
         formatter.field("vis", Lite(&self.value.vis));
         formatter.field("modifiers", Lite(&self.value.modifiers));
-        if self.value.defaultness.is_some() {
-            formatter.field("defaultness", &Present);
-        }
         formatter.field("sig", Lite(&self.value.sig));
         formatter.field("block", Lite(&self.value.block));
         formatter.finish()
@@ -2239,9 +2241,7 @@ impl Debug for Lite<syn::ImplItemType> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
-        if self.value.defaultness.is_some() {
-            formatter.field("defaultness", &Present);
-        }
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("ident", Lite(&self.value.ident));
         formatter.field("generics", Lite(&self.value.generics));
         formatter.field("ty", Lite(&self.value.ty));
@@ -2276,6 +2276,7 @@ impl Debug for Lite<syn::Item> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
                 formatter.field("ty", Lite(&_val.ty));
@@ -2500,6 +2501,7 @@ impl Debug for Lite<syn::Item> {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
                 formatter.field("vis", Lite(&_val.vis));
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
                 formatter.field("ty", Lite(&_val.ty));
@@ -2548,6 +2550,7 @@ impl Debug for Lite<syn::ItemConst> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("ident", Lite(&self.value.ident));
         formatter.field("generics", Lite(&self.value.generics));
         formatter.field("ty", Lite(&self.value.ty));
@@ -2796,6 +2799,7 @@ impl Debug for Lite<syn::ItemType> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("vis", Lite(&self.value.vis));
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("ident", Lite(&self.value.ident));
         formatter.field("generics", Lite(&self.value.generics));
         formatter.field("ty", Lite(&self.value.ty));
@@ -3931,6 +3935,7 @@ impl Debug for Lite<syn::TraitItem> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
                 formatter.field("ty", Lite(&_val.ty));
@@ -3981,6 +3986,7 @@ impl Debug for Lite<syn::TraitItem> {
                 if !_val.attrs.is_empty() {
                     formatter.field("attrs", Lite(&_val.attrs));
                 }
+                formatter.field("modifiers", Lite(&_val.modifiers));
                 formatter.field("ident", Lite(&_val.ident));
                 formatter.field("generics", Lite(&_val.generics));
                 if _val.colon_token.is_some() {
@@ -4033,6 +4039,7 @@ impl Debug for Lite<syn::TraitItemConst> {
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("ident", Lite(&self.value.ident));
         formatter.field("generics", Lite(&self.value.generics));
         formatter.field("ty", Lite(&self.value.ty));
@@ -4100,6 +4107,7 @@ impl Debug for Lite<syn::TraitItemType> {
         if !self.value.attrs.is_empty() {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
+        formatter.field("modifiers", Lite(&self.value.modifiers));
         formatter.field("ident", Lite(&self.value.ident));
         formatter.field("generics", Lite(&self.value.generics));
         if self.value.colon_token.is_some() {
@@ -4455,6 +4463,15 @@ impl Debug for Lite<syn::TypeMacro> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("mac", Lite(&self.value.mac));
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::TypeModifiers> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("TypeModifiers");
+        if self.value.defaultness.is_some() {
+            formatter.field("defaultness", &Present);
+        }
         formatter.finish()
     }
 }

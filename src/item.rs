@@ -108,6 +108,8 @@ ast_struct! {
     pub struct ItemConst {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        /// (Non-exhaustive) Additional optional information about a const item.
+        pub modifiers: ConstModifiers,
         pub const_token: Token![const],
         pub ident: Ident,
         pub generics: Generics,
@@ -116,6 +118,39 @@ ast_struct! {
         pub eq_token: Token![=],
         pub expr: Box<Expr>,
         pub semi_token: Token![;],
+    }
+}
+
+ast_struct! {
+    /// Additional optional information about a const item.
+    ///
+    /// This data structure may grow to accommodate future Rust language
+    /// changes.
+    #[non_exhaustive]
+    pub struct ConstModifiers {
+        /// Unstable syntax: [RFC 1210] "Impl specialization"
+        ///
+        /// [RFC 1210]: https://rust-lang.github.io/rfcs/1210-impl-specialization.html
+        pub defaultness: Option<Token![default]>,
+    }
+}
+
+impl Default for ConstModifiers {
+    fn default() -> Self {
+        ConstModifiers { defaultness: None }
+    }
+}
+
+impl ConstModifiers {
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    pub fn require_empty(&self) -> Result<()> {
+        let mut result = Ok(());
+        if let Some(defaultness) = &self.defaultness {
+            let err = Error::new(defaultness.span, "unexpected const item modifier");
+            result = Err(err);
+        }
+        result
     }
 }
 
@@ -175,12 +210,17 @@ ast_struct! {
     /// [#128044]: https://github.com/rust-lang/rust/issues/128044
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     #[non_exhaustive]
-    pub struct FnModifiers {}
+    pub struct FnModifiers {
+        /// Unstable syntax: [RFC 1210] "Impl specialization"
+        ///
+        /// [RFC 1210]: https://rust-lang.github.io/rfcs/1210-impl-specialization.html
+        pub defaultness: Option<Token![default]>,
+    }
 }
 
 impl Default for FnModifiers {
     fn default() -> Self {
-        FnModifiers {}
+        FnModifiers { defaultness: None }
     }
 }
 
@@ -188,7 +228,12 @@ impl FnModifiers {
     #[cfg(feature = "parsing")]
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn require_empty(&self) -> Result<()> {
-        Ok(())
+        let mut result = Ok(());
+        if let Some(defaultness) = &self.defaultness {
+            let err = Error::new(defaultness.span, "unexpected function modifier");
+            result = Err(err);
+        }
+        result
     }
 }
 
@@ -412,6 +457,8 @@ ast_struct! {
     pub struct ItemType {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        /// (Non-exhaustive) Additional optional information about a type alias.
+        pub modifiers: TypeModifiers,
         pub type_token: Token![type],
         pub ident: Ident,
         pub generics: Generics,
@@ -419,6 +466,40 @@ ast_struct! {
         pub ty: Box<Type>,
         pub semi_token: Token![;],
         pub where_clause_placement: WhereClausePlacement,
+    }
+}
+
+ast_struct! {
+    /// Additional optional information about a type alias.
+    ///
+    /// This data structure may grow to accommodate future Rust language
+    /// changes.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    #[non_exhaustive]
+    pub struct TypeModifiers {
+        /// Unstable syntax: [RFC 1210] "Impl specialization"
+        ///
+        /// [RFC 1210]: https://rust-lang.github.io/rfcs/1210-impl-specialization.html
+        pub defaultness: Option<Token![default]>,
+    }
+}
+
+impl Default for TypeModifiers {
+    fn default() -> Self {
+        TypeModifiers { defaultness: None }
+    }
+}
+
+impl TypeModifiers {
+    #[cfg(feature = "parsing")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    pub fn require_empty(&self) -> Result<()> {
+        let mut result = Ok(());
+        if let Some(defaultness) = &self.defaultness {
+            let err = Error::new(defaultness.span, "unexpected type alias modifier");
+            result = Err(err);
+        }
+        result
     }
 }
 
@@ -705,6 +786,8 @@ ast_struct! {
     pub struct ForeignItemType {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
+        /// (Non-exhaustive) Additional optional information about a type alias.
+        pub modifiers: TypeModifiers,
         pub type_token: Token![type],
         pub ident: Ident,
         pub generics: Generics,
@@ -773,6 +856,8 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct TraitItemConst {
         pub attrs: Vec<Attribute>,
+        /// (Non-exhaustive) Additional optional information about a const item.
+        pub modifiers: ConstModifiers,
         pub const_token: Token![const],
         pub ident: Ident,
         pub generics: Generics,
@@ -801,6 +886,8 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct TraitItemType {
         pub attrs: Vec<Attribute>,
+        /// (Non-exhaustive) Additional optional information about a type alias.
+        pub modifiers: TypeModifiers,
         pub type_token: Token![type],
         pub ident: Ident,
         pub generics: Generics,
@@ -873,7 +960,8 @@ ast_struct! {
     pub struct ImplItemConst {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
-        pub defaultness: Option<Token![default]>,
+        /// (Non-exhaustive) Additional optional information about a const item.
+        pub modifiers: ConstModifiers,
         pub const_token: Token![const],
         pub ident: Ident,
         pub generics: Generics,
@@ -893,7 +981,6 @@ ast_struct! {
         pub vis: Visibility,
         /// (Non-exhaustive) Additional optional information about a function.
         pub modifiers: FnModifiers,
-        pub defaultness: Option<Token![default]>,
         pub sig: Signature,
         pub block: Block,
     }
@@ -905,7 +992,8 @@ ast_struct! {
     pub struct ImplItemType {
         pub attrs: Vec<Attribute>,
         pub vis: Visibility,
-        pub defaultness: Option<Token![default]>,
+        /// (Non-exhaustive) Additional optional information about a type alias.
+        pub modifiers: TypeModifiers,
         pub type_token: Token![type],
         pub ident: Ident,
         pub generics: Generics,
@@ -1100,13 +1188,14 @@ pub(crate) mod parsing {
     use crate::generics::{self, Generics, TypeParamBound};
     use crate::ident::Ident;
     use crate::item::{
-        FnArg, FnModifiers, ForeignItem, ForeignItemFn, ForeignItemMacro, ForeignItemStatic,
-        ForeignItemType, ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro, ImplItemType,
-        ImplModifiers, Item, ItemConst, ItemEnum, ItemExternCrate, ItemFn, ItemForeignMod,
-        ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait, ItemTraitAlias, ItemType,
-        ItemUnion, ItemUse, Receiver, ReceiverKind, Safety, Signature, StaticMutability, TraitItem,
-        TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType, TraitModifiers, UseGlob,
-        UseGroup, UseName, UsePath, UseRename, UseTree, Variadic, WhereClausePlacement,
+        ConstModifiers, FnArg, FnModifiers, ForeignItem, ForeignItemFn, ForeignItemMacro,
+        ForeignItemStatic, ForeignItemType, ImplItem, ImplItemConst, ImplItemFn, ImplItemMacro,
+        ImplItemType, ImplModifiers, Item, ItemConst, ItemEnum, ItemExternCrate, ItemFn,
+        ItemForeignMod, ItemImpl, ItemMacro, ItemMod, ItemStatic, ItemStruct, ItemTrait,
+        ItemTraitAlias, ItemType, ItemUnion, ItemUse, Receiver, ReceiverKind, Safety, Signature,
+        StaticMutability, TraitItem, TraitItemConst, TraitItemFn, TraitItemMacro, TraitItemType,
+        TraitModifiers, TypeModifiers, UseGlob, UseGroup, UseName, UsePath, UseRename, UseTree,
+        Variadic, WhereClausePlacement,
     };
     use crate::lifetime::Lifetime;
     use crate::lit::LitStr;
@@ -1235,6 +1324,7 @@ pub(crate) mod parsing {
                     Ok(Item::Const(ItemConst {
                         attrs: Vec::new(),
                         vis,
+                        modifiers: ConstModifiers { defaultness: None },
                         const_token,
                         ident,
                         generics,
@@ -1653,6 +1743,7 @@ pub(crate) mod parsing {
             Ok(ItemConst {
                 attrs,
                 vis,
+                modifiers: ConstModifiers { defaultness: None },
                 const_token,
                 ident,
                 generics: Generics::default(),
@@ -1787,7 +1878,7 @@ pub(crate) mod parsing {
         Ok(ItemFn {
             attrs,
             vis,
-            modifiers: FnModifiers {},
+            modifiers: FnModifiers { defaultness: None },
             sig,
             block: Box::new(Block { brace_token, stmts }),
         })
@@ -2093,7 +2184,7 @@ pub(crate) mod parsing {
                     Ok(ForeignItem::Fn(ForeignItemFn {
                         attrs: Vec::new(),
                         vis,
-                        modifiers: FnModifiers {},
+                        modifiers: FnModifiers { defaultness: None },
                         sig,
                         semi_token: semi_token.unwrap(),
                     }))
@@ -2172,7 +2263,7 @@ pub(crate) mod parsing {
             Ok(ForeignItemFn {
                 attrs,
                 vis,
-                modifiers: FnModifiers {},
+                modifiers: FnModifiers { defaultness: None },
                 sig,
                 semi_token,
             })
@@ -2202,6 +2293,7 @@ pub(crate) mod parsing {
             Ok(ForeignItemType {
                 attrs: input.call(Attribute::parse_outer)?,
                 vis: input.parse()?,
+                modifiers: TypeModifiers { defaultness: None },
                 type_token: input.parse()?,
                 ident: input.parse()?,
                 generics: {
@@ -2241,6 +2333,7 @@ pub(crate) mod parsing {
             Ok(ForeignItem::Type(ForeignItemType {
                 attrs: Vec::new(),
                 vis,
+                modifiers: TypeModifiers { defaultness: None },
                 type_token,
                 ident,
                 generics,
@@ -2293,6 +2386,7 @@ pub(crate) mod parsing {
             Ok(ItemType {
                 attrs,
                 vis,
+                modifiers: TypeModifiers { defaultness: None },
                 type_token,
                 ident,
                 generics,
@@ -2330,6 +2424,7 @@ pub(crate) mod parsing {
         Ok(Item::Type(ItemType {
             attrs: Vec::new(),
             vis,
+            modifiers: TypeModifiers { defaultness: None },
             type_token,
             ident,
             generics,
@@ -2610,6 +2705,7 @@ pub(crate) mod parsing {
                     if generics.lt_token.is_none() && generics.where_clause.is_none() {
                         Ok(TraitItem::Const(TraitItemConst {
                             attrs: Vec::new(),
+                            modifiers: ConstModifiers { defaultness: None },
                             const_token,
                             ident,
                             generics,
@@ -2697,6 +2793,7 @@ pub(crate) mod parsing {
 
             Ok(TraitItemConst {
                 attrs,
+                modifiers: ConstModifiers { defaultness: None },
                 const_token,
                 ident,
                 generics: Generics::default(),
@@ -2730,7 +2827,7 @@ pub(crate) mod parsing {
 
             Ok(TraitItemFn {
                 attrs,
-                modifiers: FnModifiers {},
+                modifiers: FnModifiers { defaultness: None },
                 sig,
                 default: brace_token.map(|brace_token| Block { brace_token, stmts }),
                 semi_token,
@@ -2751,6 +2848,7 @@ pub(crate) mod parsing {
             let semi_token: Token![;] = input.parse()?;
             Ok(TraitItemType {
                 attrs,
+                modifiers: TypeModifiers { defaultness: None },
                 type_token,
                 ident,
                 generics,
@@ -2788,6 +2886,7 @@ pub(crate) mod parsing {
         } else {
             Ok(TraitItem::Type(TraitItemType {
                 attrs: Vec::new(),
+                modifiers: TypeModifiers { defaultness: None },
                 type_token,
                 ident,
                 generics,
@@ -2986,7 +3085,7 @@ pub(crate) mod parsing {
                         Ok(ImplItem::Const(ImplItemConst {
                             attrs,
                             vis,
-                            defaultness,
+                            modifiers: ConstModifiers { defaultness },
                             const_token,
                             ident,
                             generics,
@@ -3054,7 +3153,7 @@ pub(crate) mod parsing {
             Ok(ImplItemConst {
                 attrs,
                 vis,
-                defaultness,
+                modifiers: ConstModifiers { defaultness },
                 const_token,
                 ident,
                 generics: Generics::default(),
@@ -3102,8 +3201,7 @@ pub(crate) mod parsing {
         Ok(Some(ImplItemFn {
             attrs,
             vis,
-            modifiers: FnModifiers {},
-            defaultness,
+            modifiers: FnModifiers { defaultness },
             sig,
             block,
         }))
@@ -3125,7 +3223,7 @@ pub(crate) mod parsing {
             Ok(ImplItemType {
                 attrs,
                 vis,
-                defaultness,
+                modifiers: TypeModifiers { defaultness },
                 type_token,
                 ident,
                 generics,
@@ -3158,7 +3256,7 @@ pub(crate) mod parsing {
         Ok(ImplItem::Type(ImplItemType {
             attrs: Vec::new(),
             vis,
-            defaultness,
+            modifiers: TypeModifiers { defaultness },
             type_token,
             ident,
             generics,
@@ -3609,7 +3707,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
-            self.defaultness.to_tokens(tokens);
+            self.modifiers.defaultness.to_tokens(tokens);
             self.const_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.colon_token.to_tokens(tokens);
@@ -3625,7 +3723,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
-            self.defaultness.to_tokens(tokens);
+            self.modifiers.defaultness.to_tokens(tokens);
             self.sig.to_tokens(tokens);
             self.block.brace_token.surround(tokens, |tokens| {
                 tokens.append_all(self.attrs.inner());
@@ -3639,7 +3737,7 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(self.attrs.outer());
             self.vis.to_tokens(tokens);
-            self.defaultness.to_tokens(tokens);
+            self.modifiers.defaultness.to_tokens(tokens);
             self.type_token.to_tokens(tokens);
             self.ident.to_tokens(tokens);
             self.generics.to_tokens(tokens);

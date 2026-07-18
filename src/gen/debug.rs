@@ -301,6 +301,15 @@ impl Debug for crate::ClosureModifiers {
         formatter.finish()
     }
 }
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::ConstModifiers {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("ConstModifiers");
+        formatter.field("defaultness", &self.defaultness);
+        formatter.finish()
+    }
+}
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Debug for crate::ConstParam {
@@ -1315,6 +1324,7 @@ impl Debug for crate::FnArg {
 impl Debug for crate::FnModifiers {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("FnModifiers");
+        formatter.field("defaultness", &self.defaultness);
         formatter.finish()
     }
 }
@@ -1420,6 +1430,7 @@ impl crate::ForeignItemType {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("type_token", &self.type_token);
         formatter.field("ident", &self.ident);
         formatter.field("generics", &self.generics);
@@ -1541,7 +1552,7 @@ impl crate::ImplItemConst {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
-        formatter.field("defaultness", &self.defaultness);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("const_token", &self.const_token);
         formatter.field("ident", &self.ident);
         formatter.field("generics", &self.generics);
@@ -1567,7 +1578,6 @@ impl crate::ImplItemFn {
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
         formatter.field("modifiers", &self.modifiers);
-        formatter.field("defaultness", &self.defaultness);
         formatter.field("sig", &self.sig);
         formatter.field("block", &self.block);
         formatter.finish()
@@ -1603,7 +1613,7 @@ impl crate::ImplItemType {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
-        formatter.field("defaultness", &self.defaultness);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("type_token", &self.type_token);
         formatter.field("ident", &self.ident);
         formatter.field("generics", &self.generics);
@@ -1675,6 +1685,7 @@ impl crate::ItemConst {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("const_token", &self.const_token);
         formatter.field("ident", &self.ident);
         formatter.field("generics", &self.generics);
@@ -1933,6 +1944,7 @@ impl crate::ItemType {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("vis", &self.vis);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("type_token", &self.type_token);
         formatter.field("ident", &self.ident);
         formatter.field("generics", &self.generics);
@@ -2776,6 +2788,7 @@ impl crate::TraitItemConst {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("const_token", &self.const_token);
         formatter.field("ident", &self.ident);
         formatter.field("generics", &self.generics);
@@ -2834,6 +2847,7 @@ impl crate::TraitItemType {
     fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
+        formatter.field("modifiers", &self.modifiers);
         formatter.field("type_token", &self.type_token);
         formatter.field("ident", &self.ident);
         formatter.field("generics", &self.generics);
@@ -2986,6 +3000,15 @@ impl crate::TypeMacro {
         let mut formatter = formatter.debug_struct(name);
         formatter.field("attrs", &self.attrs);
         formatter.field("mac", &self.mac);
+        formatter.finish()
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::TypeModifiers {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("TypeModifiers");
+        formatter.field("defaultness", &self.defaultness);
         formatter.finish()
     }
 }
