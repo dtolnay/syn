@@ -15,8 +15,8 @@ use std::path::{Path, PathBuf};
 use tar::Archive;
 use walkdir::{DirEntry, WalkDir};
 
-// nightly-2026-07-13
-const REVISION: &str = "77cf889bc178ddb44d6a1c78e5a820b5abb31d8d";
+// nightly-2026-07-18
+const REVISION: &str = "b6839f4d0e2bd63b960bbff8619c6fdea27d81e5";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
@@ -57,6 +57,7 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/rustdoc-html/constant/rfc-2632-const-trait-impl.rs",
     "tests/rustdoc-html/inline_cross/auxiliary/const-effect-param.rs",
     "tests/rustdoc-json/attrs/stability/const_traits.rs",
+    "tests/ui/comptime/comptime_method_bounds.rs",
     "tests/ui/const-generics/const_trait_fn-issue-88433.rs",
     "tests/ui/const-generics/issues/issue-88119.rs",
     "tests/ui/consts/const-closure-in-trait-impl.rs",
