@@ -265,8 +265,8 @@ pub(crate) mod parsing {
     use crate::mac::{self, Macro};
     use crate::parse::{Parse, ParseStream};
     use crate::pat::{
-        FieldPat, Pat, PatIdent, PatOr, PatParen, PatReference, PatRest, PatSlice, PatStruct,
-        PatTuple, PatTupleStruct, PatType, PatWild,
+        FieldPat, Pat, PatGuard, PatIdent, PatOr, PatParen, PatReference, PatRest, PatSlice,
+        PatStruct, PatTuple, PatTupleStruct, PatType, PatWild,
     };
     use crate::path::{self, Path, QSelf};
     use crate::punctuated::Punctuated;
@@ -350,7 +350,8 @@ pub(crate) mod parsing {
 
         /// Parse a pattern, possibly involving `|`, but not a leading `|`.
         pub fn parse_multi(input: ParseStream) -> Result<Self> {
-            multi_pat_impl(input, None)
+            let allow_guard = false;
+            multi_pat_impl(input, None, allow_guard)
         }
 
         /// Parse a pattern, possibly involving `|`, possibly including a
@@ -397,7 +398,14 @@ pub(crate) mod parsing {
         /// macro-generated macro input.
         pub fn parse_multi_with_leading_vert(input: ParseStream) -> Result<Self> {
             let leading_vert: Option<Token![|]> = input.parse()?;
-            multi_pat_impl(input, leading_vert)
+            let allow_guard = false;
+            multi_pat_impl(input, leading_vert, allow_guard)
+        }
+
+        pub(crate) fn parse_multi_with_leading_vert_and_guard(input: ParseStream) -> Result<Self> {
+            let leading_vert: Option<Token![|]> = input.parse()?;
+            let allow_guard = true;
+            multi_pat_impl(input, leading_vert, allow_guard)
         }
     }
 
@@ -413,7 +421,11 @@ pub(crate) mod parsing {
         }
     }
 
-    fn multi_pat_impl(input: ParseStream, leading_vert: Option<Token![|]>) -> Result<Pat> {
+    fn multi_pat_impl(
+        input: ParseStream,
+        leading_vert: Option<Token![|]>,
+        allow_guard: bool,
+    ) -> Result<Pat> {
         let mut pat = Pat::parse_single(input)?;
         if leading_vert.is_some()
             || input.peek(Token![|]) && !input.peek(Token![||]) && !input.peek(Token![|=])
@@ -430,6 +442,16 @@ pub(crate) mod parsing {
                 attrs: Vec::new(),
                 leading_vert,
                 cases,
+            });
+        }
+        if allow_guard && input.peek(Token![if]) {
+            let if_token: Token![if] = input.parse()?;
+            let guard: Expr = input.parse()?;
+            pat = Pat::Guard(PatGuard {
+                attrs: Vec::new(),
+                pat: Box::new(pat),
+                if_token,
+                guard: Box::new(guard),
             });
         }
         Ok(pat)

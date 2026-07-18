@@ -213,7 +213,7 @@ impl ParseQuote for Field {
 #[cfg(feature = "full")]
 impl ParseQuote for Pat {
     fn parse(input: ParseStream) -> Result<Self> {
-        Pat::parse_multi_with_leading_vert(input)
+        Pat::parse_multi_with_leading_vert_and_guard(input)
     }
 }
 

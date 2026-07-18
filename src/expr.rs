@@ -1295,7 +1295,7 @@ pub(crate) mod parsing {
     use crate::parse::discouraged::Speculative as _;
     use crate::parse::{Parse, ParseStream};
     #[cfg(feature = "full")]
-    use crate::pat::{Pat, PatGuard, PatType};
+    use crate::pat::{Pat, PatType};
     use crate::path::{self, AngleBracketedGenericArguments, Path, QSelf};
     use crate::precedence::Precedence;
     use crate::punctuated::Punctuated;
@@ -3101,20 +3101,7 @@ pub(crate) mod parsing {
             let requires_comma;
             Ok(Arm {
                 attrs: input.call(Attribute::parse_outer)?,
-                pat: {
-                    let mut pat = Pat::parse_multi_with_leading_vert(input)?;
-                    if input.peek(Token![if]) {
-                        let if_token: Token![if] = input.parse()?;
-                        let guard: Expr = input.parse()?;
-                        pat = Pat::Guard(PatGuard {
-                            attrs: Vec::new(),
-                            pat: Box::new(pat),
-                            if_token,
-                            guard: Box::new(guard),
-                        });
-                    }
-                    pat
-                },
+                pat: Pat::parse_multi_with_leading_vert_and_guard(input)?,
                 fat_arrow_token: input.parse()?,
                 body: {
                     let body = Expr::parse_with_earlier_boundary_rule(input)?;
