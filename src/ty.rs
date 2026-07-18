@@ -247,6 +247,14 @@ ast_struct! {
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Abi {
         pub extern_token: Token![extern],
+
+        /// ABI name is optional, but note that extern blocks and functions with
+        /// an omitted ABI name are [deprecated since Rust 1.86.0][deprecated].
+        /// Omitting the ABI after the extern keyword has always implicitly
+        /// resulted in the "C" ABI. It is now recommended to explicitly specify
+        /// the "C" ABI (`extern "C" {}` and `extern "C" fn`).
+        ///
+        /// [deprecated]: https://blog.rust-lang.org/2025/04/03/Rust-1.86.0/#make-missing-abi-lint-warn-by-default
         pub name: Option<LitStr>,
     }
 }
