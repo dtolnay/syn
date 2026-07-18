@@ -18,7 +18,6 @@ use rustc_ast::ast::AssocItemKind;
 use rustc_ast::ast::AttrArgs;
 use rustc_ast::ast::AttrId;
 use rustc_ast::ast::AttrItem;
-use rustc_ast::ast::AttrItemKind;
 use rustc_ast::ast::AttrKind;
 use rustc_ast::ast::AttrStyle;
 use rustc_ast::ast::Attribute;
@@ -46,7 +45,6 @@ use rustc_ast::ast::DelegationMac;
 use rustc_ast::ast::DelegationSource;
 use rustc_ast::ast::DelegationSuffixes;
 use rustc_ast::ast::DelimArgs;
-use rustc_ast::ast::EarlyParsedAttribute;
 use rustc_ast::ast::EiiDecl;
 use rustc_ast::ast::EiiImpl;
 use rustc_ast::ast::EnumDef;
@@ -154,6 +152,7 @@ use rustc_ast::ast::StrLit;
 use rustc_ast::ast::StrStyle;
 use rustc_ast::ast::StructExpr;
 use rustc_ast::ast::StructRest;
+use rustc_ast::ast::SyntheticAttr;
 use rustc_ast::ast::Term;
 use rustc_ast::ast::Trait;
 use rustc_ast::ast::TraitAlias;
@@ -582,7 +581,6 @@ spanless_eq_enum!(AsmMacro; Asm GlobalAsm NakedAsm);
 spanless_eq_enum!(AssocItemConstraintKind; Equality(term) Bound(bounds));
 spanless_eq_enum!(AssocItemKind; Const(0) Fn(0) Type(0) MacCall(0) Delegation(0) DelegationMac(0));
 spanless_eq_enum!(AttrArgs; Empty Delimited(0) Eq(eq_span expr));
-spanless_eq_enum!(AttrItemKind; Parsed(0) Unparsed(0));
 spanless_eq_enum!(AttrStyle; Outer Inner);
 spanless_eq_enum!(AttrTokenTree; Token(0 1) Delimited(0 1 2 3) AttrsTarget(0));
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
@@ -599,7 +597,6 @@ spanless_eq_enum!(ConstItemRhsKind; Body(rhs) TypeConst(rhs));
 spanless_eq_enum!(Defaultness; Implicit Default(0) Final(0));
 spanless_eq_enum!(DelegationSource; Single List(0) Glob);
 spanless_eq_enum!(DelegationSuffixes; List(0) Glob(0));
-spanless_eq_enum!(EarlyParsedAttribute; CfgTrace(0) CfgAttrTrace);
 spanless_eq_enum!(Extern; None Implicit(0) Explicit(0 1));
 spanless_eq_enum!(FloatTy; F16 F32 F64 F128);
 spanless_eq_enum!(FnRetTy; Default(0) Ty(0));
@@ -646,6 +643,7 @@ spanless_eq_enum!(Safety; Unsafe(0) Safe(0) Default);
 spanless_eq_enum!(StmtKind; Let(0) Item(0) Expr(0) Semi(0) Empty MacCall(0));
 spanless_eq_enum!(StrStyle; Cooked Raw(0));
 spanless_eq_enum!(StructRest; Base(0) Rest(0) None NoneWithError(0));
+spanless_eq_enum!(SyntheticAttr; CfgTrace(0) CfgAttrTrace);
 spanless_eq_enum!(Term; Ty(0) Const(0));
 spanless_eq_enum!(TokenTree; Token(0 1) Delimited(0 1 2 3));
 spanless_eq_enum!(TraitObjectSyntax; Dyn None);
@@ -896,6 +894,9 @@ impl SpanlessEq for AttrKind {
             (AttrKind::Normal(normal), AttrKind::Normal(normal2)) => {
                 SpanlessEq::eq(normal, normal2)
             }
+            (AttrKind::Synthetic(synthetic), AttrKind::Synthetic(synthetic2)) => {
+                SpanlessEq::eq(synthetic, synthetic2)
+            }
             (AttrKind::DocComment(kind, symbol), AttrKind::DocComment(kind2, symbol2)) => {
                 SpanlessEq::eq(kind, kind2) && SpanlessEq::eq(symbol, symbol2)
             }
@@ -906,17 +907,15 @@ impl SpanlessEq for AttrKind {
                 let path = Path::from_ident(Ident::with_dummy_span(sym::doc));
                 SpanlessEq::eq(&path, &normal2.item.path)
                     && match &normal2.item.args {
-                        AttrItemKind::Parsed(_)
-                        | AttrItemKind::Unparsed(AttrArgs::Empty | AttrArgs::Delimited(_)) => false,
-                        AttrItemKind::Unparsed(AttrArgs::Eq { eq_span: _, expr }) => {
-                            match &expr.kind {
-                                ExprKind::Lit(lit) => is_escaped_lit(lit, *unescaped),
-                                _ => false,
-                            }
-                        }
+                        AttrArgs::Empty | AttrArgs::Delimited(_) => false,
+                        AttrArgs::Eq { eq_span: _, expr } => match &expr.kind {
+                            ExprKind::Lit(lit) => is_escaped_lit(lit, *unescaped),
+                            _ => false,
+                        },
                     }
             }
             (AttrKind::Normal(_), AttrKind::DocComment(..)) => SpanlessEq::eq(other, self),
+            (AttrKind::Synthetic(_), _) | (_, AttrKind::Synthetic(_)) => false,
         }
     }
 }
