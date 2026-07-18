@@ -132,7 +132,11 @@ fn introspect_struct(item: &DataStruct, lookup: &Lookup) -> types::Fields {
 
 fn introspect_type(item: &syn::Type, lookup: &Lookup) -> types::Type {
     match item {
-        syn::Type::Path(TypePath { qself: None, path }) => {
+        syn::Type::Path(TypePath {
+            attrs: _,
+            qself: None,
+            path,
+        }) => {
             let last = path.segments.last().unwrap();
             let string = last.ident.to_string();
 
@@ -181,7 +185,7 @@ fn introspect_type(item: &syn::Type, lookup: &Lookup) -> types::Type {
             let tys = elems.iter().map(|ty| introspect_type(ty, lookup)).collect();
             types::Type::Tuple(tys)
         }
-        syn::Type::Macro(TypeMacro { mac })
+        syn::Type::Macro(TypeMacro { attrs: _, mac })
             if mac.path.segments.last().unwrap().ident == "Token" =>
         {
             let content = mac.tokens.to_string();
