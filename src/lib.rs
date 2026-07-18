@@ -69,8 +69,8 @@
 //! proc-macro = true
 //!
 //! [dependencies]
-//! syn = "2.0"
-//! quote = "1.0"
+//! syn = "2"
+//! quote = "1"
 //! ```
 //!
 //! ```
@@ -622,8 +622,8 @@ mod gen {
     ///
     /// ```
     /// // [dependencies]
-    /// // quote = "1.0"
-    /// // syn = { version = "2.0", features = ["fold", "full"] }
+    /// // quote = "1"
+    /// // syn = { version = "2", features = ["fold", "full"] }
     ///
     /// use quote::quote;
     /// use syn::fold::{fold_expr, Fold};
@@ -704,8 +704,8 @@ mod gen {
     ///
     /// ```
     /// // [dependencies]
-    /// // quote = "1.0"
-    /// // syn = { version = "2.0", features = ["full", "visit"] }
+    /// // quote = "1"
+    /// // syn = { version = "2", features = ["full", "visit"] }
     ///
     /// use quote::quote;
     /// use syn::visit::{self, Visit};
@@ -824,8 +824,8 @@ mod gen {
     ///
     /// ```
     /// // [dependencies]
-    /// // quote = "1.0"
-    /// // syn = { version = "2.0", features = ["full", "visit-mut"] }
+    /// // quote = "1"
+    /// // syn = { version = "2", features = ["full", "visit-mut"] }
     ///
     /// use quote::quote;
     /// use syn::visit_mut::{self, VisitMut};

@@ -81,8 +81,8 @@ tokens back to the compiler to compile into the user's crate.
 proc-macro = true
 
 [dependencies]
-syn = "2.0"
-quote = "1.0"
+syn = "2"
+quote = "1"
 ```
 
 ```rust
