@@ -498,8 +498,9 @@ mod pat;
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub use crate::pat::{
-    FieldPat, Pat, PatConst, PatIdent, PatLit, PatMacro, PatOr, PatParen, PatPath, PatRange,
-    PatReference, PatRest, PatSlice, PatStruct, PatTuple, PatTupleStruct, PatType, PatWild,
+    FieldPat, Pat, PatConst, PatGuard, PatIdent, PatLit, PatMacro, PatOr, PatParen, PatPath,
+    PatRange, PatReference, PatRest, PatSlice, PatStruct, PatTuple, PatTupleStruct, PatType,
+    PatWild,
 };
 
 #[cfg(any(feature = "full", feature = "derive"))]

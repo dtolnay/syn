@@ -31,7 +31,6 @@ impl Clone for crate::Arm {
         crate::Arm {
             attrs: self.attrs.clone(),
             pat: self.pat.clone(),
-            guard: self.guard.clone(),
             fat_arrow_token: self.fat_arrow_token.clone(),
             body: self.body.clone(),
             comma: self.comma.clone(),
@@ -1537,6 +1536,7 @@ impl Clone for crate::Pat {
     fn clone(&self) -> Self {
         match self {
             crate::Pat::Const(v0) => crate::Pat::Const(v0.clone()),
+            crate::Pat::Guard(v0) => crate::Pat::Guard(v0.clone()),
             crate::Pat::Ident(v0) => crate::Pat::Ident(v0.clone()),
             crate::Pat::Lit(v0) => crate::Pat::Lit(v0.clone()),
             crate::Pat::Macro(v0) => crate::Pat::Macro(v0.clone()),
@@ -1553,6 +1553,18 @@ impl Clone for crate::Pat {
             crate::Pat::Type(v0) => crate::Pat::Type(v0.clone()),
             crate::Pat::Verbatim(v0) => crate::Pat::Verbatim(v0.clone()),
             crate::Pat::Wild(v0) => crate::Pat::Wild(v0.clone()),
+        }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::PatGuard {
+    fn clone(&self) -> Self {
+        crate::PatGuard {
+            attrs: self.attrs.clone(),
+            pat: self.pat.clone(),
+            if_token: self.if_token.clone(),
+            guard: self.guard.clone(),
         }
     }
 }

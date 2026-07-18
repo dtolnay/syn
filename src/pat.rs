@@ -1,5 +1,5 @@
 use crate::attr::Attribute;
-use crate::expr::Member;
+use crate::expr::{Expr, Member};
 use crate::ident::Ident;
 use crate::path::{Path, QSelf};
 use crate::punctuated::Punctuated;
@@ -28,6 +28,9 @@ ast_enum_of_structs! {
     pub enum Pat {
         /// A const block: `const { ... }`.
         Const(PatConst),
+
+        /// A pattern with guard predicate: `Some(x) if x > 0`.
+        Guard(PatGuard),
 
         /// A pattern that binds a new variable: `ref mut binding @ SUBPATTERN`.
         Ident(PatIdent),
@@ -115,6 +118,17 @@ ast_struct! {
         pub mutability: Option<Token![mut]>,
         pub ident: Ident,
         pub subpat: Option<(Token![@], Box<Pat>)>,
+    }
+}
+
+ast_struct! {
+    /// A pattern with guard predicate: `Some(x) if x > 0`.
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    pub struct PatGuard {
+        pub attrs: Vec<Attribute>,
+        pub pat: Box<Pat>,
+        pub if_token: Token![if],
+        pub guard: Box<Expr>,
     }
 }
 
@@ -813,8 +827,8 @@ pub(crate) mod parsing {
 mod printing {
     use crate::attr::FilterAttrs;
     use crate::pat::{
-        FieldPat, Pat, PatIdent, PatOr, PatParen, PatReference, PatRest, PatSlice, PatStruct,
-        PatTuple, PatTupleStruct, PatType, PatWild,
+        FieldPat, Pat, PatGuard, PatIdent, PatOr, PatParen, PatReference, PatRest, PatSlice,
+        PatStruct, PatTuple, PatTupleStruct, PatType, PatWild,
     };
     use crate::path;
     use crate::path::printing::PathStyle;
@@ -832,6 +846,16 @@ mod printing {
                 at_token.to_tokens(tokens);
                 subpat.to_tokens(tokens);
             }
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for PatGuard {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            tokens.append_all(self.attrs.outer());
+            self.pat.to_tokens(tokens);
+            self.if_token.to_tokens(tokens);
+            self.guard.to_tokens(tokens);
         }
     }
 

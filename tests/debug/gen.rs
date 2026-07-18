@@ -44,20 +44,6 @@ impl Debug for Lite<syn::Arm> {
             formatter.field("attrs", Lite(&self.value.attrs));
         }
         formatter.field("pat", Lite(&self.value.pat));
-        if let Some(val) = &self.value.guard {
-            #[derive(RefCast)]
-            #[repr(transparent)]
-            struct Print((syn::token::If, Box<syn::Expr>));
-            impl Debug for Print {
-                fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                    formatter.write_str("Some(")?;
-                    Debug::fmt(Lite(&self.0.1), formatter)?;
-                    formatter.write_str(")")?;
-                    Ok(())
-                }
-            }
-            formatter.field("guard", Print::ref_cast(val));
-        }
         formatter.field("body", Lite(&self.value.body));
         if self.value.comma.is_some() {
             formatter.field("comma", &Present);
@@ -3132,6 +3118,15 @@ impl Debug for Lite<syn::Pat> {
                 formatter.write_str(")")?;
                 Ok(())
             }
+            syn::Pat::Guard(_val) => {
+                let mut formatter = formatter.debug_struct("Pat::Guard");
+                if !_val.attrs.is_empty() {
+                    formatter.field("attrs", Lite(&_val.attrs));
+                }
+                formatter.field("pat", Lite(&_val.pat));
+                formatter.field("guard", Lite(&_val.guard));
+                formatter.finish()
+            }
             syn::Pat::Ident(_val) => {
                 let mut formatter = formatter.debug_struct("Pat::Ident");
                 if !_val.attrs.is_empty() {
@@ -3336,6 +3331,17 @@ impl Debug for Lite<syn::Pat> {
             }
             _ => unreachable!(),
         }
+    }
+}
+impl Debug for Lite<syn::PatGuard> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("PatGuard");
+        if !self.value.attrs.is_empty() {
+            formatter.field("attrs", Lite(&self.value.attrs));
+        }
+        formatter.field("pat", Lite(&self.value.pat));
+        formatter.field("guard", Lite(&self.value.guard));
+        formatter.finish()
     }
 }
 impl Debug for Lite<syn::PatIdent> {

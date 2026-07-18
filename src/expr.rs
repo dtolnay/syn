@@ -1212,7 +1212,6 @@ ast_struct! {
     pub struct Arm {
         pub attrs: Vec<Attribute>,
         pub pat: Pat,
-        pub guard: Option<(Token![if], Box<Expr>)>,
         pub fat_arrow_token: Token![=>],
         pub body: Box<Expr>,
         pub comma: Option<Token![,]>,
@@ -1296,7 +1295,7 @@ pub(crate) mod parsing {
     use crate::parse::discouraged::Speculative as _;
     use crate::parse::{Parse, ParseStream};
     #[cfg(feature = "full")]
-    use crate::pat::{Pat, PatType};
+    use crate::pat::{Pat, PatGuard, PatType};
     use crate::path::{self, AngleBracketedGenericArguments, Path, QSelf};
     use crate::precedence::Precedence;
     use crate::punctuated::Punctuated;
@@ -2713,6 +2712,7 @@ pub(crate) mod parsing {
         } else {
             match &mut pat {
                 Pat::Const(pat) => pat.attrs = attrs,
+                Pat::Guard(_) => unreachable!(),
                 Pat::Ident(pat) => pat.attrs = attrs,
                 Pat::Lit(pat) => pat.attrs = attrs,
                 Pat::Macro(pat) => pat.attrs = attrs,
@@ -3101,15 +3101,19 @@ pub(crate) mod parsing {
             let requires_comma;
             Ok(Arm {
                 attrs: input.call(Attribute::parse_outer)?,
-                pat: Pat::parse_multi_with_leading_vert(input)?,
-                guard: {
+                pat: {
+                    let mut pat = Pat::parse_multi_with_leading_vert(input)?;
                     if input.peek(Token![if]) {
                         let if_token: Token![if] = input.parse()?;
                         let guard: Expr = input.parse()?;
-                        Some((if_token, Box::new(guard)))
-                    } else {
-                        None
+                        pat = Pat::Guard(PatGuard {
+                            attrs: Vec::new(),
+                            pat: Box::new(pat),
+                            if_token,
+                            guard: Box::new(guard),
+                        });
                     }
+                    pat
                 },
                 fat_arrow_token: input.parse()?,
                 body: {
@@ -4184,10 +4188,6 @@ pub(crate) mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(&self.attrs);
             self.pat.to_tokens(tokens);
-            if let Some((if_token, guard)) = &self.guard {
-                if_token.to_tokens(tokens);
-                guard.to_tokens(tokens);
-            }
             self.fat_arrow_token.to_tokens(tokens);
             print_expr(&self.body, tokens, FixupContext::new_match_arm());
             self.comma.to_tokens(tokens);
