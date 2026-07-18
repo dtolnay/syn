@@ -1619,12 +1619,12 @@ where
     skip!(node.constness);
     skip!(node.asyncness);
     skip!(node.capture);
-    skip!(node.or1_token);
+    skip!(node.inputs_begin);
     for el in Punctuated::pairs(&node.inputs) {
         let it = el.value();
         v.visit_pat(it);
     }
-    skip!(node.or2_token);
+    skip!(node.inputs_end);
     v.visit_return_type(&node.output);
     v.visit_expr(&*node.body);
 }

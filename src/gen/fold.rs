@@ -1652,9 +1652,9 @@ where
         constness: node.constness,
         asyncness: node.asyncness,
         capture: node.capture,
-        or1_token: node.or1_token,
+        inputs_begin: node.inputs_begin,
         inputs: crate::punctuated::fold(node.inputs, f, F::fold_pat),
-        or2_token: node.or2_token,
+        inputs_end: node.inputs_end,
         output: f.fold_return_type(node.output),
         body: Box::new(f.fold_expr(*node.body)),
     }

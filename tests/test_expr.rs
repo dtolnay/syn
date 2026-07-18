@@ -1105,9 +1105,9 @@ fn test_permutations() -> ExitCode {
                 constness: None,
                 asyncness: None,
                 capture: None,
-                or1_token: Token![|](span),
+                inputs_begin: Token![|](span),
                 inputs: Punctuated::new(),
-                or2_token: Token![|](span),
+                inputs_end: Token![|](span),
                 output: ReturnType::Default,
                 body: Box::new(expr),
             }));
@@ -1325,9 +1325,9 @@ fn test_permutations() -> ExitCode {
                 constness: None,
                 asyncness: None,
                 capture: None,
-                or1_token: Token![|](span),
+                inputs_begin: Token![|](span),
                 inputs: Punctuated::new(),
-                or2_token: Token![|](span),
+                inputs_end: Token![|](span),
                 output: ReturnType::Type(
                     Token![->](span),
                     Box::new(Type::Path(TypePath {

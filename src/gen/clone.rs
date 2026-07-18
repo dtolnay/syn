@@ -425,9 +425,9 @@ impl Clone for crate::ExprClosure {
             constness: self.constness.clone(),
             asyncness: self.asyncness.clone(),
             capture: self.capture.clone(),
-            or1_token: self.or1_token.clone(),
+            inputs_begin: self.inputs_begin.clone(),
             inputs: self.inputs.clone(),
-            or2_token: self.or2_token.clone(),
+            inputs_end: self.inputs_end.clone(),
             output: self.output.clone(),
             body: self.body.clone(),
         }

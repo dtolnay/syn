@@ -411,9 +411,9 @@ ast_struct! {
         pub constness: Option<Token![const]>,
         pub asyncness: Option<Token![async]>,
         pub capture: Option<Token![move]>,
-        pub or1_token: Token![|],
+        pub inputs_begin: Token![|],
         pub inputs: Punctuated<Pat, Token![,]>,
-        pub or2_token: Token![|],
+        pub inputs_end: Token![|],
         pub output: ReturnType,
         pub body: Box<Expr>,
     }
@@ -2634,7 +2634,7 @@ pub(crate) mod parsing {
         let constness: Option<Token![const]> = input.parse()?;
         let asyncness: Option<Token![async]> = input.parse()?;
         let capture: Option<Token![move]> = input.parse()?;
-        let or1_token: Token![|] = input.parse()?;
+        let inputs_begin: Token![|] = input.parse()?;
 
         let mut inputs = Punctuated::new();
         loop {
@@ -2650,7 +2650,7 @@ pub(crate) mod parsing {
             inputs.push_punct(punct);
         }
 
-        let or2_token: Token![|] = input.parse()?;
+        let inputs_end: Token![|] = input.parse()?;
 
         let (output, body) = if input.peek(Token![->]) {
             let arrow_token: Token![->] = input.parse()?;
@@ -2675,9 +2675,9 @@ pub(crate) mod parsing {
             constness,
             asyncness,
             capture,
-            or1_token,
+            inputs_begin,
             inputs,
-            or2_token,
+            inputs_end,
             output,
             body: Box::new(body),
         })
@@ -3624,9 +3624,9 @@ pub(crate) mod printing {
         e.constness.to_tokens(tokens);
         e.asyncness.to_tokens(tokens);
         e.capture.to_tokens(tokens);
-        e.or1_token.to_tokens(tokens);
+        e.inputs_begin.to_tokens(tokens);
         e.inputs.to_tokens(tokens);
-        e.or2_token.to_tokens(tokens);
+        e.inputs_end.to_tokens(tokens);
         e.output.to_tokens(tokens);
         if matches!(e.output, ReturnType::Default)
             || matches!(&*e.body, Expr::Block(body) if body.attrs.is_empty() && body.label.is_none())

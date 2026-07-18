@@ -1107,7 +1107,7 @@
             "token": "Move"
           }
         },
-        "or1_token": {
+        "inputs_begin": {
           "token": "Or"
         },
         "inputs": {
@@ -1118,7 +1118,7 @@
             "punct": "Comma"
           }
         },
-        "or2_token": {
+        "inputs_end": {
           "token": "Or"
         },
         "output": {
