@@ -240,7 +240,7 @@ ast_struct! {
 ast_struct! {
     /// A single field in a struct pattern.
     ///
-    /// Patterns like the fields of Foo `{ x, ref y, ref mut z }` are treated
+    /// Patterns like the fields of `Pat { x, ref y, ref mut z }` are treated
     /// the same as `x: x, y: ref y, z: ref mut z` but there is no colon token.
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct FieldPat {
