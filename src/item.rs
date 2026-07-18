@@ -1760,9 +1760,7 @@ pub(crate) mod parsing {
         let fork = input.fork();
         fork.parse::<Option<Token![const]>>().is_ok()
             && fork.parse::<Option<Token![async]>>().is_ok()
-            && ((allow_safe
-                && token::parsing::peek_keyword(fork.cursor(), "safe")
-                && token::parsing::keyword(&fork, "safe").is_ok())
+            && ((allow_safe && fork.parse::<Option<Token![safe]>>().unwrap().is_some())
                 || fork.parse::<Option<Token![unsafe]>>().is_ok())
             && fork.parse::<Option<Abi>>().is_ok()
             && fork.peek(Token![fn])
