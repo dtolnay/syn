@@ -32,8 +32,9 @@ use syn::{
     ExprIf, ExprIndex, ExprLet, ExprLit, ExprLoop, ExprMacro, ExprMatch, ExprMethodCall, ExprPath,
     ExprRange, ExprRawAddr, ExprReference, ExprReturn, ExprStruct, ExprTry, ExprTryBlock,
     ExprTuple, ExprUnary, ExprUnsafe, ExprWhile, ExprYield, GenericArgument, Label, Lifetime, Lit,
-    LitInt, Macro, MacroDelimiter, Member, Pat, PatWild, Path, PathArguments, PathSegment,
-    PointerMutability, QSelf, RangeLimits, ReturnType, Stmt, Token, Type, TypePath, UnOp,
+    LitInt, Macro, MacroDelimiter, Member, Pat, PatGuard, PatWild, Path, PathArguments,
+    PathSegment, PointerMutability, QSelf, RangeLimits, ReturnType, Stmt, Token, Type, TypePath,
+    UnOp,
 };
 
 #[test]
@@ -1497,7 +1498,6 @@ fn test_permutations() -> ExitCode {
                             attrs: Vec::new(),
                             underscore_token: Token![_](span),
                         }),
-                        guard: None,
                         fat_arrow_token: Token![=>](span),
                         body: Box::new(expr.clone()),
                         comma: None,
@@ -1515,11 +1515,15 @@ fn test_permutations() -> ExitCode {
                     brace_token: token::Brace(span),
                     arms: Vec::from([Arm {
                         attrs: Vec::new(),
-                        pat: Pat::Wild(PatWild {
+                        pat: Pat::Guard(PatGuard {
                             attrs: Vec::new(),
-                            underscore_token: Token![_](span),
+                            pat: Box::new(Pat::Wild(PatWild {
+                                attrs: Vec::new(),
+                                underscore_token: Token![_](span),
+                            })),
+                            if_token: Token![if](span),
+                            guard: Box::new(expr),
                         }),
-                        guard: Some((Token![if](span), Box::new(expr))),
                         fat_arrow_token: Token![=>](span),
                         body: Box::new(Expr::Block(ExprBlock {
                             attrs: Vec::new(),

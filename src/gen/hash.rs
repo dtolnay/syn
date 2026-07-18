@@ -36,7 +36,6 @@ impl Hash for crate::Arm {
     {
         self.attrs.hash(state);
         self.pat.hash(state);
-        self.guard.hash(state);
         self.body.hash(state);
         self.comma.hash(state);
     }
@@ -1927,71 +1926,87 @@ impl Hash for crate::Pat {
                 state.write_u8(0u8);
                 v0.hash(state);
             }
-            crate::Pat::Ident(v0) => {
+            crate::Pat::Guard(v0) => {
                 state.write_u8(1u8);
                 v0.hash(state);
             }
-            crate::Pat::Lit(v0) => {
+            crate::Pat::Ident(v0) => {
                 state.write_u8(2u8);
                 v0.hash(state);
             }
-            crate::Pat::Macro(v0) => {
+            crate::Pat::Lit(v0) => {
                 state.write_u8(3u8);
                 v0.hash(state);
             }
-            crate::Pat::Or(v0) => {
+            crate::Pat::Macro(v0) => {
                 state.write_u8(4u8);
                 v0.hash(state);
             }
-            crate::Pat::Paren(v0) => {
+            crate::Pat::Or(v0) => {
                 state.write_u8(5u8);
                 v0.hash(state);
             }
-            crate::Pat::Path(v0) => {
+            crate::Pat::Paren(v0) => {
                 state.write_u8(6u8);
                 v0.hash(state);
             }
-            crate::Pat::Range(v0) => {
+            crate::Pat::Path(v0) => {
                 state.write_u8(7u8);
                 v0.hash(state);
             }
-            crate::Pat::Reference(v0) => {
+            crate::Pat::Range(v0) => {
                 state.write_u8(8u8);
                 v0.hash(state);
             }
-            crate::Pat::Rest(v0) => {
+            crate::Pat::Reference(v0) => {
                 state.write_u8(9u8);
                 v0.hash(state);
             }
-            crate::Pat::Slice(v0) => {
+            crate::Pat::Rest(v0) => {
                 state.write_u8(10u8);
                 v0.hash(state);
             }
-            crate::Pat::Struct(v0) => {
+            crate::Pat::Slice(v0) => {
                 state.write_u8(11u8);
                 v0.hash(state);
             }
-            crate::Pat::Tuple(v0) => {
+            crate::Pat::Struct(v0) => {
                 state.write_u8(12u8);
                 v0.hash(state);
             }
-            crate::Pat::TupleStruct(v0) => {
+            crate::Pat::Tuple(v0) => {
                 state.write_u8(13u8);
                 v0.hash(state);
             }
-            crate::Pat::Type(v0) => {
+            crate::Pat::TupleStruct(v0) => {
                 state.write_u8(14u8);
                 v0.hash(state);
             }
-            crate::Pat::Verbatim(v0) => {
+            crate::Pat::Type(v0) => {
                 state.write_u8(15u8);
+                v0.hash(state);
+            }
+            crate::Pat::Verbatim(v0) => {
+                state.write_u8(16u8);
                 TokenStreamHelper(v0).hash(state);
             }
             crate::Pat::Wild(v0) => {
-                state.write_u8(16u8);
+                state.write_u8(17u8);
                 v0.hash(state);
             }
         }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::PatGuard {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.attrs.hash(state);
+        self.pat.hash(state);
+        self.guard.hash(state);
     }
 }
 #[cfg(feature = "full")]

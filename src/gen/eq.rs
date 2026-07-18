@@ -32,8 +32,8 @@ impl Eq for crate::Arm {}
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl PartialEq for crate::Arm {
     fn eq(&self, other: &Self) -> bool {
-        self.attrs == other.attrs && self.pat == other.pat && self.guard == other.guard
-            && self.body == other.body && self.comma == other.comma
+        self.attrs == other.attrs && self.pat == other.pat && self.body == other.body
+            && self.comma == other.comma
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -1529,6 +1529,7 @@ impl PartialEq for crate::Pat {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (crate::Pat::Const(self0), crate::Pat::Const(other0)) => self0 == other0,
+            (crate::Pat::Guard(self0), crate::Pat::Guard(other0)) => self0 == other0,
             (crate::Pat::Ident(self0), crate::Pat::Ident(other0)) => self0 == other0,
             (crate::Pat::Lit(self0), crate::Pat::Lit(other0)) => self0 == other0,
             (crate::Pat::Macro(self0), crate::Pat::Macro(other0)) => self0 == other0,
@@ -1553,6 +1554,16 @@ impl PartialEq for crate::Pat {
             (crate::Pat::Wild(self0), crate::Pat::Wild(other0)) => self0 == other0,
             _ => false,
         }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Eq for crate::PatGuard {}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl PartialEq for crate::PatGuard {
+    fn eq(&self, other: &Self) -> bool {
+        self.attrs == other.attrs && self.pat == other.pat && self.guard == other.guard
     }
 }
 #[cfg(feature = "full")]

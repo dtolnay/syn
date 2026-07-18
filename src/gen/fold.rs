@@ -702,6 +702,11 @@ pub trait Fold {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn fold_pat_guard(&mut self, i: crate::PatGuard) -> crate::PatGuard {
+        fold_pat_guard(self, i)
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn fold_pat_ident(&mut self, i: crate::PatIdent) -> crate::PatIdent {
         fold_pat_ident(self, i)
     }
@@ -1120,7 +1125,6 @@ where
     crate::Arm {
         attrs: f.fold_attributes(node.attrs),
         pat: f.fold_pat(node.pat),
-        guard: (node.guard).map(|it| ((it).0, Box::new(f.fold_expr(*(it).1)))),
         fat_arrow_token: node.fat_arrow_token,
         body: Box::new(f.fold_expr(*node.body)),
         comma: node.comma,
@@ -3051,6 +3055,7 @@ where
 {
     match node {
         crate::Pat::Const(_binding_0) => crate::Pat::Const(f.fold_expr_const(_binding_0)),
+        crate::Pat::Guard(_binding_0) => crate::Pat::Guard(f.fold_pat_guard(_binding_0)),
         crate::Pat::Ident(_binding_0) => crate::Pat::Ident(f.fold_pat_ident(_binding_0)),
         crate::Pat::Lit(_binding_0) => crate::Pat::Lit(f.fold_expr_lit(_binding_0)),
         crate::Pat::Macro(_binding_0) => crate::Pat::Macro(f.fold_expr_macro(_binding_0)),
@@ -3075,6 +3080,19 @@ where
             crate::Pat::Verbatim(f.fold_token_stream(_binding_0))
         }
         crate::Pat::Wild(_binding_0) => crate::Pat::Wild(f.fold_pat_wild(_binding_0)),
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn fold_pat_guard<F>(f: &mut F, node: crate::PatGuard) -> crate::PatGuard
+where
+    F: Fold + ?Sized,
+{
+    crate::PatGuard {
+        attrs: f.fold_attributes(node.attrs),
+        pat: Box::new(f.fold_pat(*node.pat)),
+        if_token: node.if_token,
+        guard: Box::new(f.fold_expr(*node.guard)),
     }
 }
 #[cfg(feature = "full")]

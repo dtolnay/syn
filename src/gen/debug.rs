@@ -38,7 +38,6 @@ impl Debug for crate::Arm {
         let mut formatter = formatter.debug_struct("Arm");
         formatter.field("attrs", &self.attrs);
         formatter.field("pat", &self.pat);
-        formatter.field("guard", &self.guard);
         formatter.field("fat_arrow_token", &self.fat_arrow_token);
         formatter.field("body", &self.body);
         formatter.field("comma", &self.comma);
@@ -2216,6 +2215,7 @@ impl Debug for crate::Pat {
         formatter.write_str("Pat::")?;
         match self {
             crate::Pat::Const(v0) => v0.debug(formatter, "Const"),
+            crate::Pat::Guard(v0) => v0.debug(formatter, "Guard"),
             crate::Pat::Ident(v0) => v0.debug(formatter, "Ident"),
             crate::Pat::Lit(v0) => v0.debug(formatter, "Lit"),
             crate::Pat::Macro(v0) => v0.debug(formatter, "Macro"),
@@ -2237,6 +2237,24 @@ impl Debug for crate::Pat {
             }
             crate::Pat::Wild(v0) => v0.debug(formatter, "Wild"),
         }
+    }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Debug for crate::PatGuard {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        self.debug(formatter, "PatGuard")
+    }
+}
+#[cfg(feature = "full")]
+impl crate::PatGuard {
+    fn debug(&self, formatter: &mut fmt::Formatter, name: &str) -> fmt::Result {
+        let mut formatter = formatter.debug_struct(name);
+        formatter.field("attrs", &self.attrs);
+        formatter.field("pat", &self.pat);
+        formatter.field("if_token", &self.if_token);
+        formatter.field("guard", &self.guard);
+        formatter.finish()
     }
 }
 #[cfg(feature = "full")]

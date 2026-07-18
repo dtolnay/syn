@@ -66,20 +66,6 @@
         "pat": {
           "syn": "Pat"
         },
-        "guard": {
-          "option": {
-            "tuple": [
-              {
-                "token": "If"
-              },
-              {
-                "box": {
-                  "syn": "Expr"
-                }
-              }
-            ]
-          }
-        },
         "fat_arrow_token": {
           "token": "FatArrow"
         },
@@ -3826,6 +3812,11 @@
             "syn": "ExprConst"
           }
         ],
+        "Guard": [
+          {
+            "syn": "PatGuard"
+          }
+        ],
         "Ident": [
           {
             "syn": "PatIdent"
@@ -3908,6 +3899,34 @@
         ]
       },
       "exhaustive": false
+    },
+    {
+      "ident": "PatGuard",
+      "features": {
+        "any": [
+          "full"
+        ]
+      },
+      "fields": {
+        "attrs": {
+          "vec": {
+            "syn": "Attribute"
+          }
+        },
+        "pat": {
+          "box": {
+            "syn": "Pat"
+          }
+        },
+        "if_token": {
+          "token": "If"
+        },
+        "guard": {
+          "box": {
+            "syn": "Expr"
+          }
+        }
+      }
     },
     {
       "ident": "PatIdent",

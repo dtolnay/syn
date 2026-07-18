@@ -652,6 +652,11 @@ pub trait Visit<'ast> {
     }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+    fn visit_pat_guard(&mut self, i: &'ast crate::PatGuard) {
+        visit_pat_guard(self, i);
+    }
+    #[cfg(feature = "full")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_pat_ident(&mut self, i: &'ast crate::PatIdent) {
         visit_pat_ident(self, i);
     }
@@ -1026,10 +1031,6 @@ where
         v.visit_attribute(it);
     }
     v.visit_pat(&node.pat);
-    if let Some(it) = &node.guard {
-        skip!((it).0);
-        v.visit_expr(&*(it).1);
-    }
     skip!(node.fat_arrow_token);
     v.visit_expr(&*node.body);
     skip!(node.comma);
@@ -3023,6 +3024,9 @@ where
         crate::Pat::Const(_binding_0) => {
             v.visit_expr_const(_binding_0);
         }
+        crate::Pat::Guard(_binding_0) => {
+            v.visit_pat_guard(_binding_0);
+        }
         crate::Pat::Ident(_binding_0) => {
             v.visit_pat_ident(_binding_0);
         }
@@ -3072,6 +3076,19 @@ where
             v.visit_pat_wild(_binding_0);
         }
     }
+}
+#[cfg(feature = "full")]
+#[cfg_attr(docsrs, doc(cfg(feature = "full")))]
+pub fn visit_pat_guard<'ast, V>(v: &mut V, node: &'ast crate::PatGuard)
+where
+    V: Visit<'ast> + ?Sized,
+{
+    for it in &node.attrs {
+        v.visit_attribute(it);
+    }
+    v.visit_pat(&*node.pat);
+    skip!(node.if_token);
+    v.visit_expr(&*node.guard);
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
