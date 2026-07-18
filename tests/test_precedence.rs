@@ -517,7 +517,7 @@ fn make_parens_invisible(expr: syn::Expr) -> syn::Expr {
 
 /// Walk through a crate collecting all expressions we can find in it.
 fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
-    use syn::fold::Fold;
+    use syn::fold::{self, Fold};
     use syn::{ConstParam, Expr, Pat, Path};
 
     struct CollectExprs(Vec<Expr>);
@@ -531,7 +531,10 @@ fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
         }
 
         fn fold_pat(&mut self, pat: Pat) -> Pat {
-            pat
+            match pat {
+                Pat::Range(_) => pat,
+                _ => fold::fold_pat(self, pat),
+            }
         }
 
         fn fold_path(&mut self, path: Path) -> Path {
