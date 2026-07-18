@@ -750,7 +750,6 @@ pub trait Visit<'ast> {
     fn visit_signature(&mut self, i: &'ast crate::Signature) {
         visit_signature(self, i);
     }
-    fn visit_span(&mut self, i: &proc_macro2::Span) {}
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_static_mutability(&mut self, i: &'ast crate::StaticMutability) {
@@ -2260,9 +2259,7 @@ where
 pub fn visit_ident<'ast, V>(v: &mut V, node: &'ast proc_macro2::Ident)
 where
     V: Visit<'ast> + ?Sized,
-{
-    v.visit_span(&node.span());
-}
+{}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_impl_item<'ast, V>(v: &mut V, node: &'ast crate::ImplItem)
@@ -2358,7 +2355,7 @@ where
     V: Visit<'ast> + ?Sized,
 {
     skip!(node.index);
-    v.visit_span(&node.span);
+    skip!(node.span);
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
@@ -2706,7 +2703,7 @@ pub fn visit_lifetime<'ast, V>(v: &mut V, node: &'ast crate::Lifetime)
 where
     V: Visit<'ast> + ?Sized,
 {
-    v.visit_span(&node.apostrophe);
+    skip!(node.apostrophe);
     v.visit_ident(&node.ident);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
@@ -2764,7 +2761,7 @@ where
     V: Visit<'ast> + ?Sized,
 {
     skip!(node.value);
-    v.visit_span(&node.span);
+    skip!(node.span);
 }
 pub fn visit_lit_byte<'ast, V>(v: &mut V, node: &'ast crate::LitByte)
 where
@@ -3393,10 +3390,6 @@ where
     }
     v.visit_return_type(&node.output);
 }
-pub fn visit_span<'ast, V>(v: &mut V, node: &proc_macro2::Span)
-where
-    V: Visit<'ast> + ?Sized,
-{}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_static_mutability<'ast, V>(v: &mut V, node: &'ast crate::StaticMutability)

@@ -167,13 +167,6 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
             }
 
             if fields.is_empty() {
-                if s.ident == "Ident" {
-                    fold_impl.extend(quote! {
-                        let mut node = node;
-                        let span = f.fold_span(node.span());
-                        node.set_span(span);
-                    });
-                }
                 fold_impl.extend(quote! {
                     node
                 });
@@ -186,28 +179,10 @@ fn node(traits: &mut TokenStream, impls: &mut TokenStream, s: &Node, defs: &Defi
             }
         }
         Data::Private => {
-            if s.ident == "Ident" {
-                fold_impl.extend(quote! {
-                    let mut node = node;
-                    let span = f.fold_span(node.span());
-                    node.set_span(span);
-                });
-            }
             fold_impl.extend(quote! {
                 node
             });
         }
-    }
-
-    let fold_span_only =
-        s.data == Data::Private && !util::TERMINAL_TYPES.contains(&s.ident.as_str());
-    if fold_span_only {
-        fold_impl = quote! {
-            let span = f.fold_span(node.span());
-            let mut node = node;
-            node.set_span(span);
-            node
-        };
     }
 
     let traits_body = if s.ident == "Span" || s.ident == "TokenStream" {
