@@ -55,14 +55,14 @@ ast_struct! {
     ///         Item::Use {
     ///             attrs: [],
     ///             vis: Visibility::Inherited,
-    ///             use_token: Use,
+    ///             use_token: Token![use],
     ///             leading_colon: None,
     ///             tree: UseTree::Path(
     ///                 UsePath {
     ///                     ident: Ident(
     ///                         std,
     ///                     ),
-    ///                     colon2_token: PathSep,
+    ///                     colon2_token: Token![::],
     ///                     tree: UseTree::Name(
     ///                         UseName {
     ///                             ident: Ident(
@@ -72,7 +72,7 @@ ast_struct! {
     ///                     ),
     ///                 },
     ///             ),
-    ///             semi_token: Semi,
+    ///             semi_token: Token![;],
     ///         },
     /// ...
     /// ```

@@ -248,7 +248,7 @@ macro_rules! define_keywords {
             #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
             impl Debug for $name {
                 fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                    f.write_str(stringify!($name))
+                    format_token(f, $token)
                 }
             }
 
@@ -380,7 +380,7 @@ macro_rules! define_punctuation_structs {
             #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
             impl Debug for $name {
                 fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                    f.write_str(stringify!($name))
+                    format_token(f, $token)
                 }
             }
 
@@ -981,6 +981,11 @@ macro_rules! Token {
     [*=]          => { $crate::token::StarEq };
     [~]           => { $crate::token::Tilde };
     [_]           => { $crate::token::Underscore };
+}
+
+#[cfg(feature = "extra-traits")]
+fn format_token(formatter: &mut fmt::Formatter, repr: &str) -> fmt::Result {
+    write!(formatter, "Token![{}]", repr)
 }
 
 // Not public API.
