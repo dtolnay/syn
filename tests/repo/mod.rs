@@ -64,6 +64,7 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/consts/trait_alias_method_call.rs",
     "tests/ui/generic-const-items/const-trait-impl.rs",
     "tests/ui/parser/impls-nested-within-fns-semantic-1.rs",
+    "tests/ui/structs/default-field-values/support.rs",
     "tests/ui/traits/const-traits/assoc-type-const-bound-usage-0.rs",
     "tests/ui/traits/const-traits/assoc-type-const-bound-usage-1.rs",
     "tests/ui/traits/const-traits/auxiliary/associated-const-stability.rs",
@@ -231,32 +232,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/pattern/rfc-3637-guard-patterns/liveness-ice-issue-146445.rs",
     "tests/ui/pattern/rfc-3637-guard-patterns/only-gather-locals-once.rs",
     "tests/ui/reachable/guard_read_for_never.rs",
-
-    // TODO: struct field default: `struct S { field: i32 = 1 }`
-    // https://github.com/dtolnay/syn/issues/1774
-    "compiler/rustc_ast_lowering/src/delegation/generics.rs",
-    "compiler/rustc_borrowck/src/diagnostics/conflict_errors.rs",
-    "compiler/rustc_errors/src/markdown/parse.rs",
-    "compiler/rustc_hir/src/attrs/diagnostic.rs",
-    "compiler/rustc_hir_analysis/src/hir_wf_check.rs",
-    "compiler/rustc_middle/src/hir/map.rs",
-    "compiler/rustc_middle/src/ty/mod.rs",
-    "compiler/rustc_parse/src/parser/mod.rs",
-    "compiler/rustc_parse/src/parser/stmt.rs",
-    "compiler/rustc_privacy/src/lib.rs",
-    "compiler/rustc_resolve/src/imports.rs",
-    "compiler/rustc_resolve/src/lib.rs",
-    "compiler/rustc_session/src/config.rs",
-    "compiler/rustc_trait_selection/src/error_reporting/traits/suggestions.rs",
-    "src/tools/clippy/tests/ui/exhaustive_items.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/record_field_default_values.rs",
-    "src/tools/rustfmt/tests/source/default-field-values.rs",
-    "src/tools/rustfmt/tests/target/default-field-values.rs",
-    "tests/ui/structs/default-field-values/auxiliary/struct_field_default.rs",
-    "tests/ui/structs/default-field-values/const-trait-default-field-value.rs",
-    "tests/ui/structs/default-field-values/field-references-param.rs",
-    "tests/ui/structs/default-field-values/support.rs",
-    "tests/ui/structs/default-field-values/use-normalized-ty-for-default-struct-value.rs",
 
     // TODO: final associated functions: `final fn`
     // https://github.com/dtolnay/syn/issues/1981
