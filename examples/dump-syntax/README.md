@@ -16,9 +16,9 @@ File {
     frontmatter: None,
     attrs: [
         Attribute {
-            pound_token: Pound,
+            pound_token: Token![#],
             style: AttrStyle::Inner(
-                Not,
+                Token![!],
             ),
             bracket_token: Bracket,
             meta: Meta::NameValue {
