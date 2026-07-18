@@ -518,8 +518,7 @@ fn make_parens_invisible(expr: syn::Expr) -> syn::Expr {
 /// Walk through a crate collecting all expressions we can find in it.
 fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
     use syn::fold::Fold;
-    use syn::punctuated::Punctuated;
-    use syn::{token, ConstParam, Expr, ExprTuple, Pat, Path};
+    use syn::{ConstParam, Expr, Pat, Path};
 
     struct CollectExprs(Vec<Expr>);
     impl Fold for CollectExprs {
@@ -528,12 +527,7 @@ fn collect_exprs(file: syn::File) -> Vec<syn::Expr> {
                 Expr::Verbatim(_) => {}
                 _ => self.0.push(expr),
             }
-
-            Expr::Tuple(ExprTuple {
-                attrs: vec![],
-                elems: Punctuated::new(),
-                paren_token: token::Paren::default(),
-            })
+            Expr::PLACEHOLDER
         }
 
         fn fold_pat(&mut self, pat: Pat) -> Pat {
