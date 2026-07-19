@@ -1301,7 +1301,9 @@ pub(crate) mod parsing {
             let vis: Visibility = input.parse()?;
             let const_token: Token![const] = input.parse()?;
             let lookahead = input.lookahead1();
-            if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+            if (lookahead.peek(Ident) && !(input.peek(Token![auto]) && input.peek2(Token![trait])))
+                || lookahead.peek(Token![_])
+            {
                 let ident = input.call(Ident::parse_any)?;
                 let mut generics: Generics = input.parse()?;
                 let colon_token = input.parse()?;
@@ -1334,9 +1336,12 @@ pub(crate) mod parsing {
                     }
                     _ => Ok(Item::Verbatim(verbatim::between(begin, input.cursor()))),
                 }
-            } else if lookahead.peek(Token![trait]) || lookahead.peek(Token![unsafe]) {
+            } else if lookahead.peek(Token![trait])
+                || lookahead.peek(Token![unsafe])
+                || lookahead.peek(Token![auto])
+            {
                 let unsafety: Option<Token![unsafe]> = input.parse()?;
-                let auto_token = None;
+                let auto_token: Option<Token![auto]> = input.parse()?;
                 let trait_token: Token![trait] = input.parse()?;
                 let ident: Ident = input.parse()?;
                 let generics: Generics = input.parse()?;

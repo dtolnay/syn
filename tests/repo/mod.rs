@@ -20,10 +20,6 @@ const REVISION: &str = "b6839f4d0e2bd63b960bbff8619c6fdea27d81e5";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: const auto trait
-    // https://github.com/dtolnay/syn/issues/1887
-    "tests/ui/traits/const-traits/parse-const-unsafe-trait.rs",
-
     // TODO: const trait alias
     // https://github.com/dtolnay/syn/issues/1887
     "src/tools/rustfmt/tests/target/const_trait.rs",
