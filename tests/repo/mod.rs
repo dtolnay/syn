@@ -20,10 +20,6 @@ const REVISION: &str = "b6839f4d0e2bd63b960bbff8619c6fdea27d81e5";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: const trait alias
-    // https://github.com/dtolnay/syn/issues/1887
-    "src/tools/rustfmt/tests/target/const_trait.rs",
-
     // TODO: const impls: `const impl Trait for T {}`
     // https://github.com/dtolnay/syn/issues/1980
     "compiler/rustc_data_structures/src/unord.rs",
@@ -107,6 +103,7 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/clippy/tests/ui/equatable_if_let_const_cmp.rs",
     "src/tools/clippy/tests/ui/missing_const_for_fn/const_trait.rs",
     "src/tools/rustfmt/tests/source/impls.rs",
+    "src/tools/rustfmt/tests/target/const_trait.rs",
     "src/tools/rustfmt/tests/target/impls.rs",
     "tests/rustdoc-html/constant/const-trait-and-impl-methods.rs",
     "tests/rustdoc-html/constant/rfc-2632-const-trait-impl.rs",
