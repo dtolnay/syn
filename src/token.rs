@@ -291,7 +291,7 @@ macro_rules! define_keywords {
             #[cfg(feature = "parsing")]
             impl Token for $name {
                 fn peek(cursor: Cursor) -> bool {
-                    parsing::peek_keyword(cursor, $token)
+                    cursor.peek_keyword($token)
                 }
 
                 fn display() -> &'static str {
@@ -435,7 +435,7 @@ macro_rules! define_punctuation {
             #[cfg(feature = "parsing")]
             impl Token for $name {
                 fn peek(cursor: Cursor) -> bool {
-                    parsing::peek_punct(cursor, $token)
+                    cursor.peek_punct($token)
                 }
 
                 fn display() -> &'static str {
@@ -1007,14 +1007,6 @@ pub(crate) mod parsing {
             }
             Err(cursor.error(format!("expected `{}`", token)))
         })
-    }
-
-    pub(crate) fn peek_keyword(cursor: Cursor, token: &str) -> bool {
-        if let Some((ident, _rest)) = cursor.ident() {
-            ident == token
-        } else {
-            false
-        }
     }
 
     #[doc(hidden)]
