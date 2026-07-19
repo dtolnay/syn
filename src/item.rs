@@ -1337,10 +1337,23 @@ pub(crate) mod parsing {
                     _ => Ok(Item::Verbatim(verbatim::between(begin, input.cursor()))),
                 }
             } else if lookahead.peek(Token![trait])
-                || lookahead.peek(Token![unsafe])
+                || (lookahead.peek(Token![unsafe]) && !input.peek2(Token![impl]))
                 || lookahead.peek(Token![auto])
             {
                 parse_trait_or_trait_alias(input, Vec::new(), vis)?;
+                Ok(Item::Verbatim(verbatim::between(begin, input.cursor())))
+            } else if lookahead.peek(Token![impl]) || input.peek(Token![unsafe]) {
+                let defaultness = None;
+                let unsafety: Option<Token![unsafe]> = input.parse()?;
+                let allow_verbatim_impl = true;
+                parse_impl(
+                    input,
+                    Vec::new(),
+                    defaultness,
+                    Some(const_token),
+                    unsafety,
+                    allow_verbatim_impl,
+                )?;
                 Ok(Item::Verbatim(verbatim::between(begin, input.cursor())))
             } else {
                 return Err(lookahead.error());
@@ -1353,8 +1366,18 @@ pub(crate) mod parsing {
             {
                 input.parse().map(Item::Trait)
             } else if vis.is_inherited() && lookahead.peek(Token![impl]) {
+                let defaultness: Option<Token![default]> = None;
+                let constness: Option<Token![const]> = None;
+                let unsafety: Token![unsafe] = input.parse()?;
                 let allow_verbatim_impl = true;
-                if let Some(item) = parse_impl(input, allow_verbatim_impl)? {
+                if let Some(item) = parse_impl(
+                    input,
+                    Vec::new(),
+                    defaultness,
+                    constness,
+                    Some(unsafety),
+                    allow_verbatim_impl,
+                )? {
                     Ok(Item::Impl(item))
                 } else {
                     Ok(Item::Verbatim(verbatim::between(begin, input.cursor())))
@@ -1385,8 +1408,18 @@ pub(crate) mod parsing {
             && (lookahead.peek(Token![impl])
                 || lookahead.peek(Token![default]) && !ahead.peek2(Token![!]))
         {
+            let defaultness: Option<Token![default]> = input.parse()?;
+            let constness: Option<Token![const]> = input.parse()?;
+            let unsafety: Option<Token![unsafe]> = input.parse()?;
             let allow_verbatim_impl = true;
-            if let Some(item) = parse_impl(input, allow_verbatim_impl)? {
+            if let Some(item) = parse_impl(
+                input,
+                Vec::new(),
+                defaultness,
+                constness,
+                unsafety,
+                allow_verbatim_impl,
+            )? {
                 Ok(Item::Impl(item))
             } else {
                 Ok(Item::Verbatim(verbatim::between(begin, input.cursor())))
@@ -2928,15 +2961,32 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for ItemImpl {
         fn parse(input: ParseStream) -> Result<Self> {
+            let attrs = input.call(Attribute::parse_outer)?;
+            let defaultness: Option<Token![default]> = input.parse()?;
+            let constness: Option<Token![const]> = None;
+            let unsafety: Option<Token![unsafe]> = input.parse()?;
+
             let allow_verbatim_impl = false;
-            parse_impl(input, allow_verbatim_impl).map(Option::unwrap)
+            parse_impl(
+                input,
+                attrs,
+                defaultness,
+                constness,
+                unsafety,
+                allow_verbatim_impl,
+            )
+            .map(Option::unwrap)
         }
     }
 
-    fn parse_impl(input: ParseStream, allow_verbatim_impl: bool) -> Result<Option<ItemImpl>> {
-        let mut attrs = input.call(Attribute::parse_outer)?;
-        let defaultness: Option<Token![default]> = input.parse()?;
-        let unsafety: Option<Token![unsafe]> = input.parse()?;
+    fn parse_impl(
+        input: ParseStream,
+        mut attrs: Vec<Attribute>,
+        defaultness: Option<Token![default]>,
+        constness: Option<Token![const]>,
+        unsafety: Option<Token![unsafe]>,
+        allow_verbatim_impl: bool,
+    ) -> Result<Option<ItemImpl>> {
         let impl_token: Token![impl] = input.parse()?;
 
         let has_generics = generics::parsing::choose_generics_over_qpath(input);
@@ -3015,7 +3065,7 @@ pub(crate) mod parsing {
             items.push(content.parse()?);
         }
 
-        if is_impl_for && trait_.is_none() {
+        if constness.is_some() || is_impl_for && trait_.is_none() {
             Ok(None)
         } else {
             Ok(Some(ItemImpl {
