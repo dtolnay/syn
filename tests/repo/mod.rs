@@ -631,6 +631,10 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/target/negative-bounds.rs",
     "tests/ui/traits/negative-bounds/supertrait.rs",
 
+    // Outdated const impl syntax: `impl const Trait for Type`
+    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/impl_item_const.rs",
+    "src/tools/rust-analyzer/crates/test-utils/src/minicore.rs",
+
     // Const impl that is not a trait impl: `impl ~const T {}`
     "tests/ui/traits/const-traits/syntax.rs",
 
