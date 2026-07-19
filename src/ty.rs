@@ -547,8 +547,21 @@ pub(crate) mod parsing {
                 paren_token,
                 elem: Box::new(first),
             }))
+        } else if lookahead.peek(Token![unsafe]) && input.peek2(Token![<]) {
+            input.parse::<Token![unsafe]>()?;
+            input.parse::<Token![<]>()?;
+            while !input.peek(Token![>]) {
+                Lifetime::parse_any(input)?;
+                if input.peek(Token![>]) {
+                    break;
+                }
+                input.parse::<Token![,]>()?;
+            }
+            input.parse::<Token![>]>()?;
+            ambig_ty(input, allow_plus, allow_group_generic)?;
+            Ok(Type::Verbatim(verbatim::between(begin, input.cursor())))
         } else if lookahead.peek(Token![fn])
-            || lookahead.peek(Token![unsafe])
+            || input.peek(Token![unsafe])
             || lookahead.peek(Token![extern])
         {
             let mut fn_ptr: TypeFnPtr = input.parse()?;
