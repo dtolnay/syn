@@ -2946,13 +2946,6 @@ pub(crate) mod parsing {
             Generics::default()
         };
 
-        let is_const_impl = allow_verbatim_impl
-            && (input.peek(Token![const]) || input.peek(Token![?]) && input.peek2(Token![const]));
-        if is_const_impl {
-            input.parse::<Option<Token![?]>>()?;
-            input.parse::<Token![const]>()?;
-        }
-
         let polarity = if input.peek(Token![!]) && !input.peek2(token::Brace) {
             Some(input.parse::<Token![!]>()?)
         } else {
@@ -3022,7 +3015,7 @@ pub(crate) mod parsing {
             items.push(content.parse()?);
         }
 
-        if has_visibility || is_const_impl || is_impl_for && trait_.is_none() {
+        if has_visibility || is_impl_for && trait_.is_none() {
             Ok(None)
         } else {
             Ok(Some(ItemImpl {
