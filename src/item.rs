@@ -2260,8 +2260,7 @@ pub(crate) mod parsing {
                     }))
                 }
             } else if lookahead.peek(Token![static])
-                || ((ahead.peek(Token![unsafe])
-                    || token::parsing::peek_keyword(ahead.cursor(), "safe"))
+                || ((ahead.peek(Token![unsafe]) || ahead.peek(Token![safe]))
                     && ahead.peek2(Token![static]))
             {
                 let vis = input.parse()?;

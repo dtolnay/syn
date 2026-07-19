@@ -197,6 +197,14 @@ impl<'a> Cursor<'a> {
         }
     }
 
+    pub(crate) fn peek_keyword(mut self, token: &str) -> bool {
+        self.ignore_none();
+        match self.entry() {
+            Entry::Ident(ident) => ident == token,
+            _ => false,
+        }
+    }
+
     /// If the cursor is pointing at a `Punct`, returns it along with a cursor
     /// pointing at the next `TokenTree`.
     pub fn punct(mut self) -> Option<(Punct, Cursor<'a>)> {
@@ -207,6 +215,24 @@ impl<'a> Cursor<'a> {
             }
             _ => None,
         }
+    }
+
+    pub(crate) fn peek_punct(mut self, token: &str) -> bool {
+        for (i, ch) in token.chars().enumerate() {
+            self.ignore_none();
+            match self.entry() {
+                Entry::Punct(punct) if punct.as_char() == ch => {
+                    if i == token.len() - 1 {
+                        return true;
+                    } else if punct.spacing() != Spacing::Joint {
+                        break;
+                    }
+                    self = unsafe { self.bump_ignore_group() };
+                }
+                _ => break,
+            }
+        }
+        false
     }
 
     /// If the cursor is pointing at a `Literal`, return it along with a cursor

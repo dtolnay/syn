@@ -1907,8 +1907,7 @@ pub(crate) mod parsing {
             || input.peek(Token![async]) && (input.peek2(Token![|]) || input.peek2(Token![move]))
         {
             expr_closure(input, allow_struct).map(Expr::Closure)
-        } else if token::parsing::peek_keyword(input.cursor(), "builtin") && input.peek2(Token![#])
-        {
+        } else if input.cursor().peek_keyword("builtin") && input.peek2(Token![#]) {
             expr_builtin(input)
         } else if input.peek(Ident)
             || input.peek(Token![::])
