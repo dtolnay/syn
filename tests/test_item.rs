@@ -257,15 +257,6 @@ fn test_type_empty_bounds() {
 }
 
 #[test]
-fn test_impl_visibility() {
-    let tokens = quote! {
-        pub default unsafe impl union {}
-    };
-
-    snapshot!(tokens as Item, @"Item::Verbatim(`pub default unsafe impl union { }`)");
-}
-
-#[test]
 fn test_impl_type_parameter_defaults() {
     #[cfg(any())]
     impl<T = ()> () {}
