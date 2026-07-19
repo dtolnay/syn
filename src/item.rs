@@ -1298,44 +1298,61 @@ pub(crate) mod parsing {
                 }
             }
         } else if lookahead.peek(Token![const]) {
-            let vis = input.parse()?;
+            let vis: Visibility = input.parse()?;
             let const_token: Token![const] = input.parse()?;
             let lookahead = input.lookahead1();
-            let ident = if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
-                input.call(Ident::parse_any)?
+            if lookahead.peek(Ident) || lookahead.peek(Token![_]) {
+                let ident = input.call(Ident::parse_any)?;
+                let mut generics: Generics = input.parse()?;
+                let colon_token = input.parse()?;
+                let ty = input.parse()?;
+                let value = if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
+                    let expr: Expr = input.parse()?;
+                    Some((eq_token, expr))
+                } else {
+                    None
+                };
+                generics.where_clause = input.parse()?;
+                let semi_token: Token![;] = input.parse()?;
+                match value {
+                    Some((eq_token, expr))
+                        if generics.lt_token.is_none() && generics.where_clause.is_none() =>
+                    {
+                        Ok(Item::Const(ItemConst {
+                            attrs: Vec::new(),
+                            vis,
+                            modifiers: ConstModifiers { defaultness: None },
+                            const_token,
+                            ident,
+                            generics,
+                            colon_token,
+                            ty,
+                            eq_token,
+                            expr: Box::new(expr),
+                            semi_token,
+                        }))
+                    }
+                    _ => Ok(Item::Verbatim(verbatim::between(begin, input.cursor()))),
+                }
+            } else if lookahead.peek(Token![trait]) || lookahead.peek(Token![unsafe]) {
+                let unsafety: Option<Token![unsafe]> = input.parse()?;
+                let auto_token = None;
+                let trait_token: Token![trait] = input.parse()?;
+                let ident: Ident = input.parse()?;
+                let generics: Generics = input.parse()?;
+                parse_rest_of_trait(
+                    input,
+                    Vec::new(),
+                    vis,
+                    unsafety,
+                    auto_token,
+                    trait_token,
+                    ident,
+                    generics,
+                )?;
+                Ok(Item::Verbatim(verbatim::between(begin, input.cursor())))
             } else {
                 return Err(lookahead.error());
-            };
-            let mut generics: Generics = input.parse()?;
-            let colon_token = input.parse()?;
-            let ty = input.parse()?;
-            let value = if let Some(eq_token) = input.parse::<Option<Token![=]>>()? {
-                let expr: Expr = input.parse()?;
-                Some((eq_token, expr))
-            } else {
-                None
-            };
-            generics.where_clause = input.parse()?;
-            let semi_token: Token![;] = input.parse()?;
-            match value {
-                Some((eq_token, expr))
-                    if generics.lt_token.is_none() && generics.where_clause.is_none() =>
-                {
-                    Ok(Item::Const(ItemConst {
-                        attrs: Vec::new(),
-                        vis,
-                        modifiers: ConstModifiers { defaultness: None },
-                        const_token,
-                        ident,
-                        generics,
-                        colon_token,
-                        ty,
-                        eq_token,
-                        expr: Box::new(expr),
-                        semi_token,
-                    }))
-                }
-                _ => Ok(Item::Verbatim(verbatim::between(begin, input.cursor()))),
             }
         } else if lookahead.peek(Token![unsafe]) {
             ahead.parse::<Token![unsafe]>()?;
