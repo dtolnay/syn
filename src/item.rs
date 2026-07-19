@@ -1340,7 +1340,8 @@ pub(crate) mod parsing {
                 || (lookahead.peek(Token![unsafe]) && !input.peek2(Token![impl]))
                 || lookahead.peek(Token![auto])
             {
-                parse_trait_or_trait_alias(input, Vec::new(), vis)?;
+                let has_impl_restriction = false;
+                parse_trait_or_trait_alias(input, Vec::new(), vis, has_impl_restriction)?;
                 Ok(Item::Verbatim(verbatim::between(begin, input.cursor())))
             } else if lookahead.peek(Token![impl]) || input.peek(Token![unsafe]) {
                 let defaultness = None;
@@ -1399,13 +1400,41 @@ pub(crate) mod parsing {
             input.parse().map(Item::Enum)
         } else if lookahead.peek(Token![union]) && ahead.peek2(Ident) {
             input.parse().map(Item::Union)
+        } else if lookahead.peek(Token![impl])
+            && ahead.peek2(token::Paren)
+            && (ahead.peek3(Token![const])
+                || ahead.peek3(Token![unsafe])
+                || ahead.peek3(Token![auto])
+                || ahead.peek3(Token![trait]))
+        {
+            let vis: Visibility = input.parse()?;
+            input.parse::<Token![impl]>()?;
+            let restriction;
+            parenthesized!(restriction in input);
+            let lookahead = restriction.lookahead1();
+            if lookahead.peek(Token![crate])
+                || lookahead.peek(Token![self])
+                || lookahead.peek(Token![super])
+            {
+                Ident::parse_any(&restriction)?;
+            } else if lookahead.peek(Token![in]) {
+                restriction.parse::<Token![in]>()?;
+                Path::parse_mod_style(&restriction)?;
+            } else {
+                return Err(lookahead.error());
+            }
+            input.parse::<Option<Token![const]>>()?;
+            let has_impl_restriction = true;
+            parse_trait_or_trait_alias(input, Vec::new(), vis, has_impl_restriction)?;
+            Ok(Item::Verbatim(verbatim::between(begin, input.cursor())))
         } else if lookahead.peek(Token![trait]) {
             let vis: Visibility = input.parse()?;
-            parse_trait_or_trait_alias(input, Vec::new(), vis)
+            let has_impl_restriction = false;
+            parse_trait_or_trait_alias(input, Vec::new(), vis, has_impl_restriction)
         } else if lookahead.peek(Token![auto]) && ahead.peek2(Token![trait]) {
             input.parse().map(Item::Trait)
         } else if vis.is_inherited()
-            && (lookahead.peek(Token![impl])
+            && (ahead.peek(Token![impl])
                 || lookahead.peek(Token![default]) && !ahead.peek2(Token![!]))
         {
             let defaultness: Option<Token![default]> = input.parse()?;
@@ -2551,6 +2580,7 @@ pub(crate) mod parsing {
         input: ParseStream,
         attrs: Vec<Attribute>,
         vis: Visibility,
+        has_impl_restriction: bool,
     ) -> Result<Item> {
         let unsafety: Option<Token![unsafe]> = input.parse()?;
         let auto_token: Option<Token![auto]> = input.parse()?;
@@ -2558,7 +2588,8 @@ pub(crate) mod parsing {
         let ident: Ident = input.parse()?;
         let generics: Generics = input.parse()?;
         let lookahead = input.lookahead1();
-        if unsafety.is_some()
+        if has_impl_restriction
+            || unsafety.is_some()
             || auto_token.is_some()
             || lookahead.peek(token::Brace)
             || lookahead.peek(Token![:])
