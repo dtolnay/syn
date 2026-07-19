@@ -1340,21 +1340,7 @@ pub(crate) mod parsing {
                 || lookahead.peek(Token![unsafe])
                 || lookahead.peek(Token![auto])
             {
-                let unsafety: Option<Token![unsafe]> = input.parse()?;
-                let auto_token: Option<Token![auto]> = input.parse()?;
-                let trait_token: Token![trait] = input.parse()?;
-                let ident: Ident = input.parse()?;
-                let generics: Generics = input.parse()?;
-                parse_rest_of_trait(
-                    input,
-                    Vec::new(),
-                    vis,
-                    unsafety,
-                    auto_token,
-                    trait_token,
-                    ident,
-                    generics,
-                )?;
+                parse_trait_or_trait_alias(input, Vec::new(), vis)?;
                 Ok(Item::Verbatim(verbatim::between(begin, input.cursor())))
             } else {
                 return Err(lookahead.error());
@@ -1391,7 +1377,8 @@ pub(crate) mod parsing {
         } else if lookahead.peek(Token![union]) && ahead.peek2(Ident) {
             input.parse().map(Item::Union)
         } else if lookahead.peek(Token![trait]) {
-            input.call(parse_trait_or_trait_alias)
+            let vis: Visibility = input.parse()?;
+            parse_trait_or_trait_alias(input, Vec::new(), vis)
         } else if lookahead.peek(Token![auto]) && ahead.peek2(Token![trait]) {
             input.parse().map(Item::Trait)
         } else if lookahead.peek(Token![impl])
@@ -2526,15 +2513,23 @@ pub(crate) mod parsing {
         }
     }
 
-    fn parse_trait_or_trait_alias(input: ParseStream) -> Result<Item> {
-        let (attrs, vis, trait_token, ident, generics) = parse_start_of_trait_alias(input)?;
+    fn parse_trait_or_trait_alias(
+        input: ParseStream,
+        attrs: Vec<Attribute>,
+        vis: Visibility,
+    ) -> Result<Item> {
+        let unsafety: Option<Token![unsafe]> = input.parse()?;
+        let auto_token: Option<Token![auto]> = input.parse()?;
+        let trait_token: Token![trait] = input.parse()?;
+        let ident: Ident = input.parse()?;
+        let generics: Generics = input.parse()?;
         let lookahead = input.lookahead1();
-        if lookahead.peek(token::Brace)
+        if unsafety.is_some()
+            || auto_token.is_some()
+            || lookahead.peek(token::Brace)
             || lookahead.peek(Token![:])
             || lookahead.peek(Token![where])
         {
-            let unsafety = None;
-            let auto_token = None;
             parse_rest_of_trait(
                 input,
                 attrs,
@@ -2635,20 +2630,13 @@ pub(crate) mod parsing {
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for ItemTraitAlias {
         fn parse(input: ParseStream) -> Result<Self> {
-            let (attrs, vis, trait_token, ident, generics) = parse_start_of_trait_alias(input)?;
+            let attrs = input.call(Attribute::parse_outer)?;
+            let vis: Visibility = input.parse()?;
+            let trait_token: Token![trait] = input.parse()?;
+            let ident: Ident = input.parse()?;
+            let generics: Generics = input.parse()?;
             parse_rest_of_trait_alias(input, attrs, vis, trait_token, ident, generics)
         }
-    }
-
-    fn parse_start_of_trait_alias(
-        input: ParseStream,
-    ) -> Result<(Vec<Attribute>, Visibility, Token![trait], Ident, Generics)> {
-        let attrs = input.call(Attribute::parse_outer)?;
-        let vis: Visibility = input.parse()?;
-        let trait_token: Token![trait] = input.parse()?;
-        let ident: Ident = input.parse()?;
-        let generics: Generics = input.parse()?;
-        Ok((attrs, vis, trait_token, ident, generics))
     }
 
     fn parse_rest_of_trait_alias(
