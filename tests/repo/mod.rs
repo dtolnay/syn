@@ -20,20 +20,6 @@ const REVISION: &str = "b6839f4d0e2bd63b960bbff8619c6fdea27d81e5";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: unsafe binders: `unsafe<'a> &'a T`
-    // https://github.com/dtolnay/syn/issues/1791
-    "src/tools/rustfmt/tests/source/unsafe-binders.rs",
-    "src/tools/rustfmt/tests/target/unsafe-binders.rs",
-    "tests/debuginfo/unsafe-binders.rs",
-    "tests/mir-opt/gvn_on_unsafe_binder.rs",
-    "tests/rustdoc-html/auxiliary/unsafe-binder-dep.rs",
-    "tests/rustdoc-html/unsafe-binder.rs",
-    "tests/ui/unsafe-binders/binder-sized-crit.rs",
-    "tests/ui/unsafe-binders/cat-projection.rs",
-    "tests/ui/unsafe-binders/expr.rs",
-    "tests/ui/unsafe-binders/simple.rs",
-    "tests/ui/unsafe-binders/unsafe-binders-debuginfo.rs",
-
     // TODO: unsafe fields: `struct S { unsafe field: T }`
     // https://github.com/dtolnay/syn/issues/1792
     "src/tools/clippy/tests/ui/derive.rs",
@@ -41,6 +27,7 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/record_field_list.rs",
     "src/tools/rustfmt/tests/source/unsafe-field.rs",
     "src/tools/rustfmt/tests/target/unsafe-field.rs",
+    "tests/ui/unsafe-binders/unsafe-binders-debuginfo.rs",
     "tests/ui/unsafe-fields/auxiliary/unsafe-fields-crate-dep.rs",
 
     // TODO: guard patterns: `match expr { (A if f()) | (B if g()) => {} }`
