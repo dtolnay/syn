@@ -20,10 +20,6 @@ const REVISION: &str = "b6839f4d0e2bd63b960bbff8619c6fdea27d81e5";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: const trait alias with [const] trait bound
-    // https://github.com/dtolnay/syn/issues/2062
-    "tests/ui/consts/trait_alias_method_call.rs",
-
     // TODO: unsafe binders: `unsafe<'a> &'a T`
     // https://github.com/dtolnay/syn/issues/1791
     "src/tools/rustfmt/tests/source/unsafe-binders.rs",
