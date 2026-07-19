@@ -2959,9 +2959,9 @@ pub(crate) mod parsing {
             None
         };
 
-        #[cfg(not(feature = "printing"))]
-        let first_ty_span = input.span();
+        let first_ty_begin = input.cursor();
         let mut first_ty: Type = input.parse()?;
+        let first_ty_end = input.cursor();
         let self_ty: Type;
         let trait_;
 
@@ -2992,10 +2992,11 @@ pub(crate) mod parsing {
                     unreachable!();
                 }
             } else if !allow_verbatim_impl {
-                #[cfg(feature = "printing")]
-                return Err(Error::new_spanned(first_ty_ref, "expected trait path"));
-                #[cfg(not(feature = "printing"))]
-                return Err(Error::new(first_ty_span, "expected trait path"));
+                return Err(crate::error::new2(
+                    first_ty_begin.span(),
+                    first_ty_end.prev_span(),
+                    "expected trait path",
+                ));
             } else {
                 trait_ = None;
             }
