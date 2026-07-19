@@ -1352,7 +1352,7 @@ pub(crate) mod parsing {
                 || lookahead.peek(Token![auto]) && ahead.peek2(Token![trait])
             {
                 input.parse().map(Item::Trait)
-            } else if lookahead.peek(Token![impl]) {
+            } else if vis.is_inherited() && lookahead.peek(Token![impl]) {
                 let allow_verbatim_impl = true;
                 if let Some(item) = parse_impl(input, allow_verbatim_impl)? {
                     Ok(Item::Impl(item))
@@ -1381,8 +1381,9 @@ pub(crate) mod parsing {
             parse_trait_or_trait_alias(input, Vec::new(), vis)
         } else if lookahead.peek(Token![auto]) && ahead.peek2(Token![trait]) {
             input.parse().map(Item::Trait)
-        } else if lookahead.peek(Token![impl])
-            || lookahead.peek(Token![default]) && !ahead.peek2(Token![!])
+        } else if vis.is_inherited()
+            && (lookahead.peek(Token![impl])
+                || lookahead.peek(Token![default]) && !ahead.peek2(Token![!]))
         {
             let allow_verbatim_impl = true;
             if let Some(item) = parse_impl(input, allow_verbatim_impl)? {
@@ -2934,7 +2935,6 @@ pub(crate) mod parsing {
 
     fn parse_impl(input: ParseStream, allow_verbatim_impl: bool) -> Result<Option<ItemImpl>> {
         let mut attrs = input.call(Attribute::parse_outer)?;
-        let has_visibility = allow_verbatim_impl && input.parse::<Visibility>()?.is_some();
         let defaultness: Option<Token![default]> = input.parse()?;
         let unsafety: Option<Token![unsafe]> = input.parse()?;
         let impl_token: Token![impl] = input.parse()?;
@@ -3015,7 +3015,7 @@ pub(crate) mod parsing {
             items.push(content.parse()?);
         }
 
-        if has_visibility || is_impl_for && trait_.is_none() {
+        if is_impl_for && trait_.is_none() {
             Ok(None)
         } else {
             Ok(Some(ItemImpl {

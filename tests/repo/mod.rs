@@ -783,6 +783,7 @@ static EXCLUDE_FILES: &[&str] = &[
     "src/tools/rustfmt/tests/source/type.rs",
     "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/false.rs",
     "src/tools/rustfmt/tests/target/configs/spaces_around_ranges/true.rs",
+    "src/tools/rustfmt/tests/target/impl.rs",
     "src/tools/rustfmt/tests/target/type.rs",
     "src/tools/rustfmt/tests/target/unsafe_extern_blocks.rs",
     "tests/ui/generics/issue-94432-garbage-ice.rs",
