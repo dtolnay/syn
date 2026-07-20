@@ -162,7 +162,7 @@ impl Error {
     ///     Ok(s)
     /// }
     /// ```
-    pub fn new<T: Display>(span: Span, message: T) -> Self {
+    pub fn new(span: Span, message: impl Display) -> Self {
         return new(span, message.to_string());
 
         fn new(span: Span, message: String) -> Error {
@@ -193,7 +193,7 @@ impl Error {
     /// `ParseStream::error`)!
     #[cfg(feature = "printing")]
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
-    pub fn new_spanned<T: ToTokens, U: Display>(tokens: T, message: U) -> Self {
+    pub fn new_spanned(tokens: impl ToTokens, message: impl Display) -> Self {
         return new_spanned(tokens.into_token_stream(), message.to_string());
 
         fn new_spanned(tokens: TokenStream, message: String) -> Error {
