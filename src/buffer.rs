@@ -364,7 +364,6 @@ impl<'a> Cursor<'a> {
 
     /// Returns the `Span` of the token immediately prior to the position of
     /// this cursor, or of the current token if there is no previous one.
-    #[cfg(any(feature = "full", feature = "derive"))]
     pub(crate) fn prev_span(mut self) -> Span {
         if start_of_buffer(self) < self.ptr {
             self.ptr = unsafe { self.ptr.sub(1) };

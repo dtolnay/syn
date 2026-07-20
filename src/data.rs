@@ -276,7 +276,7 @@ impl<'a> Clone for Members<'a> {
 pub(crate) mod parsing {
     use crate::attr::Attribute;
     use crate::data::{Field, FieldModifiers, Fields, FieldsNamed, FieldsUnnamed, Variant};
-    use crate::error::Result;
+    use crate::error::{Error, Result};
     use crate::expr::Expr;
     use crate::ext::IdentExt as _;
     use crate::ident::Ident;
@@ -410,12 +410,11 @@ pub(crate) mod parsing {
 
             if input.peek(Token![=]) {
                 input.parse::<Token![=]>()?;
-                let start_span = input.span();
+                let expr_start = input.cursor();
                 input.parse::<Expr>()?;
-                let end_span = input.cursor().prev_span();
-                return Err(crate::error::new2(
-                    start_span,
-                    end_span,
+                let expr_end = input.cursor();
+                return Err(Error::new_range(
+                    expr_start..expr_end,
                     "field default value is only supported in structs with named fields",
                 ));
             }

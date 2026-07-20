@@ -3065,9 +3065,8 @@ pub(crate) mod parsing {
                     unreachable!();
                 }
             } else if !allow_verbatim_impl {
-                return Err(crate::error::new2(
-                    first_ty_begin.span(),
-                    first_ty_end.prev_span(),
+                return Err(Error::new_range(
+                    first_ty_begin..first_ty_end,
                     "expected trait path",
                 ));
             } else {
