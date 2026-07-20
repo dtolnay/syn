@@ -269,12 +269,16 @@ impl Error {
 
         fn new_range(span: Range<Cursor>, message: String) -> Error {
             assert!(crate::buffer::same_buffer(span.start, span.end));
-            assert!(span.start < span.end);
+            assert!(span.start <= span.end);
             Error {
                 messages: vec![ErrorMessage {
                     span: ThreadBound::new(SpanRange {
                         start: span.start.span(),
-                        end: span.end.prev_span(),
+                        end: if span.start == span.end {
+                            span.end.span()
+                        } else {
+                            span.end.prev_span()
+                        },
                     }),
                     message,
                 }],
