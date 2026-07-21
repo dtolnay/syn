@@ -288,6 +288,12 @@ ast_enum_of_structs! {
         Unsafe(ExprUnsafe),
 
         /// Tokens in expression position not interpreted by Syn.
+        ///
+        /// <div class="warning">
+        ///
+        /// Important: see [Compatibility notes][crate#verbatim-variants].
+        ///
+        /// </div>
         Verbatim(TokenStream),
 
         /// A while loop: `while expr { ... }`.

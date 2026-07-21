@@ -69,25 +69,13 @@ ast_enum_of_structs! {
         Tuple(TypeTuple),
 
         /// Tokens in type position not interpreted by Syn.
+        ///
+        /// <div class="warning">
+        ///
+        /// Important: see [Compatibility notes][crate#verbatim-variants].
+        ///
+        /// </div>
         Verbatim(TokenStream),
-
-        // For testing exhaustiveness in downstream code, use the following idiom:
-        //
-        //     match ty {
-        //         #![cfg_attr(test, deny(non_exhaustive_omitted_patterns))]
-        //
-        //         Type::Array(ty) => {...}
-        //         Type::FnPtr(ty) => {...}
-        //         ...
-        //         Type::Verbatim(ty) => {...}
-        //
-        //         _ => { /* some sane fallback */ }
-        //     }
-        //
-        // This way we fail your tests but don't break your library when adding
-        // a variant. You will be notified by a test failure when a variant is
-        // added, so that you can add code to handle it, but your library will
-        // continue to compile and work for downstream users in the interim.
     }
 }
 
