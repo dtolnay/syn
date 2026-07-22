@@ -80,25 +80,13 @@ ast_enum_of_structs! {
         Use(ItemUse),
 
         /// Tokens forming an item not interpreted by Syn.
+        ///
+        /// <div class="warning">
+        ///
+        /// Important: see [Compatibility notes][crate#verbatim-variants].
+        ///
+        /// </div>
         Verbatim(TokenStream),
-
-        // For testing exhaustiveness in downstream code, use the following idiom:
-        //
-        //     match item {
-        //         #![cfg_attr(test, deny(non_exhaustive_omitted_patterns))]
-        //
-        //         Item::Const(item) => {...}
-        //         Item::Enum(item) => {...}
-        //         ...
-        //         Item::Verbatim(item) => {...}
-        //
-        //         _ => { /* some sane fallback */ }
-        //     }
-        //
-        // This way we fail your tests but don't break your library when adding
-        // a variant. You will be notified by a test failure when a variant is
-        // added, so that you can add code to handle it, but your library will
-        // continue to compile and work for downstream users in the interim.
     }
 }
 
@@ -729,25 +717,13 @@ ast_enum_of_structs! {
         Macro(ForeignItemMacro),
 
         /// Tokens in an `extern` block not interpreted by Syn.
+        ///
+        /// <div class="warning">
+        ///
+        /// Important: see [Compatibility notes][crate#verbatim-variants].
+        ///
+        /// </div>
         Verbatim(TokenStream),
-
-        // For testing exhaustiveness in downstream code, use the following idiom:
-        //
-        //     match item {
-        //         #![cfg_attr(test, deny(non_exhaustive_omitted_patterns))]
-        //
-        //         ForeignItem::Fn(item) => {...}
-        //         ForeignItem::Static(item) => {...}
-        //         ...
-        //         ForeignItem::Verbatim(item) => {...}
-        //
-        //         _ => { /* some sane fallback */ }
-        //     }
-        //
-        // This way we fail your tests but don't break your library when adding
-        // a variant. You will be notified by a test failure when a variant is
-        // added, so that you can add code to handle it, but your library will
-        // continue to compile and work for downstream users in the interim.
     }
 }
 
@@ -829,25 +805,13 @@ ast_enum_of_structs! {
         Macro(TraitItemMacro),
 
         /// Tokens within the definition of a trait not interpreted by Syn.
+        ///
+        /// <div class="warning">
+        ///
+        /// Important: see [Compatibility notes][crate#verbatim-variants].
+        ///
+        /// </div>
         Verbatim(TokenStream),
-
-        // For testing exhaustiveness in downstream code, use the following idiom:
-        //
-        //     match item {
-        //         #![cfg_attr(test, deny(non_exhaustive_omitted_patterns))]
-        //
-        //         TraitItem::Const(item) => {...}
-        //         TraitItem::Fn(item) => {...}
-        //         ...
-        //         TraitItem::Verbatim(item) => {...}
-        //
-        //         _ => { /* some sane fallback */ }
-        //     }
-        //
-        // This way we fail your tests but don't break your library when adding
-        // a variant. You will be notified by a test failure when a variant is
-        // added, so that you can add code to handle it, but your library will
-        // continue to compile and work for downstream users in the interim.
     }
 }
 
@@ -932,25 +896,13 @@ ast_enum_of_structs! {
         Macro(ImplItemMacro),
 
         /// Tokens within an impl block not interpreted by Syn.
+        ///
+        /// <div class="warning">
+        ///
+        /// Important: see [Compatibility notes][crate#verbatim-variants].
+        ///
+        /// </div>
         Verbatim(TokenStream),
-
-        // For testing exhaustiveness in downstream code, use the following idiom:
-        //
-        //     match item {
-        //         #![cfg_attr(test, deny(non_exhaustive_omitted_patterns))]
-        //
-        //         ImplItem::Const(item) => {...}
-        //         ImplItem::Fn(item) => {...}
-        //         ...
-        //         ImplItem::Verbatim(item) => {...}
-        //
-        //         _ => { /* some sane fallback */ }
-        //     }
-        //
-        // This way we fail your tests but don't break your library when adding
-        // a variant. You will be notified by a test failure when a variant is
-        // added, so that you can add code to handle it, but your library will
-        // continue to compile and work for downstream users in the interim.
     }
 }
 

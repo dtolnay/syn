@@ -262,6 +262,106 @@
 //!   types.
 //! - **`proc-macro`** *(enabled by default)* — Runtime dependency on the
 //!   dynamic library libproc_macro from rustc toolchain.
+//!
+//! <br>
+//!
+//! # Compatibility notes
+//!
+//! Syn is able to accommodate most kinds of Rust grammar changes without a new
+//! major release through the following mechanisms.
+//!
+//! #### Modifiers
+//!
+//! Syntax tree structs which are expected to grow over the course of future
+//! releases of the Rust language, such as [`ItemTrait`], contain a `modifiers`
+//! field of one of several "Modifiers" types, in that case [`TraitModifiers`].
+//!
+//! All modifiers structs have the following commonalities:
+//!
+//! - Type name ending with "Modifiers".
+//!
+//! - Implements [`Default`]. The default value is guaranteed to comprise no
+//!   tokens.
+//!
+//! - Non-exhaustive. Can only be instantiated by Syn's parser or by creating
+//!   and then mutating an empty default value.
+//!
+//! - Does not implement [`Parse`][parse::Parse]. When parsing, they are parsed
+//!   by the enclosing syntax tree node.
+//!
+//! - Does not implement [`ToTokens`][quote::ToTokens]. In some cases the syntax
+//!   that might be held in modifiers in the future is not necessarily
+//!   contiguous tokens.
+//!
+//! - Provides `.require_empty() -> Result<()>` which returns a meaningfully
+//!   spanned error if the modifiers are different from the empty default. This
+//!   enables a caller to reject syntax it does not recognize without knowing
+//!   what that syntax may be.
+//!
+//! Across major versions, fields may be promoted out of a "Modifiers" struct
+//! into the enclosing syntax tree node(s), typically for syntax that has
+//! already been incorporated into a stable release of Rust or is deemed
+//! sufficiently on track for stabilization.
+//!
+//! #### Verbatim variants
+//!
+//! Syntax tree enums which are expected to grow over the course of future
+//! releases of the Rust language are declared non-exhaustive and may contain a
+//! variant named `Verbatim` that holds [`TokenStream`]. For example
+//! [`Expr::Verbatim`].
+//!
+//! Unstable language syntax for which a dedicated syntax tree node does not yet
+//! exist will get parsed to `Verbatim`, thus allowing unstable syntax to
+//! round-trip through parsing and printing of a syntax tree. For example you
+//! might parse token input to [`ItemTrait`] (a trait definition) in order to
+//! read or modify its method signatures, or insert associated types, or insert
+//! default function bodies. All of this would work even if there is some
+//! `Expr::Verbatim` syntax somewhere in one of the function bodies in the macro
+//! input.
+//!
+//! Verbatim variants are not intended to be constructed other than by Syn's
+//! parser. Do not rely on passing one containing arbitrary tokens through Syn's
+//! `ToTokens` implementations or through any other library, as it may panic or
+//! otherwise misbehave, such as failing to accurately parenthesize
+//! subexpressions to preserve precedence.
+//!
+//! It is important not to write code that expects Syn's parser to continue to
+//! produce `Verbatim` when parsing some particular syntax construct, as that
+//! behavior changes across patch releases of Syn. Patch releases can promote
+//! something that used to be parsed as `Verbatim` into a new dedicated syntax
+//! tree node. Verbatim variants are specifically only for round-tripping code
+//! not acted on by the caller.
+//!
+//! #### Non-exhaustive enums
+//!
+//! Some enums in the syntax tree are declared #\[non_exhaustive\] and cannot
+//! be pattern-matched using an exhaustive match; a default case (`_ => ...`) is
+//! required. New variants of these enums will be added over time corresponding
+//! to new Rust syntax.
+//!
+//! For testing the exhaustiveness of a match on such an enum in downstream
+//! code, it is recommended to use the following idiom.
+//!
+//! ```
+//! # use syn::Expr;
+//! #
+//! # fn example(expr: Expr) {
+//! match expr {
+//!     #![cfg_attr(test, deny(non_exhaustive_omitted_patterns))]
+//!
+//!     Expr::Array(expr) => { /*...*/ }
+//!     Expr::Assign(expr) => { /*...*/ }
+#![cfg_attr(not(doctest), doc = "     ...")]
+//!     Expr::Yield(expr) => { /*...*/ }
+//!
+//!     _ => { /* some sane fallback */ }
+//! }
+//! # }
+//! ```
+//!
+//! This way you will be notified by a test failure when a variant is added, so
+//! that you can add code to handle it, but your library will continue to
+//! compile and work for downstream users in the interim.
 
 #![no_std]
 #![doc(html_root_url = "https://docs.rs/syn/3.0.2")]

@@ -403,6 +403,14 @@ ast_enum_of_structs! {
         Trait(TraitBound),
         Lifetime(Lifetime),
         PreciseCapture(PreciseCapture),
+
+        /// Tokens in bound position not interpreted by Syn.
+        ///
+        /// <div class="warning">
+        ///
+        /// Important: see [Compatibility notes][crate#verbatim-variants].
+        ///
+        /// </div>
         Verbatim(TokenStream),
     }
 }
