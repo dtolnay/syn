@@ -53,6 +53,7 @@ use rustc_ast::ast::ExprField;
 use rustc_ast::ast::ExprKind;
 use rustc_ast::ast::Extern;
 use rustc_ast::ast::FieldDef;
+use rustc_ast::ast::FieldDefExtras;
 use rustc_ast::ast::FloatTy;
 use rustc_ast::ast::Fn;
 use rustc_ast::ast::FnContract;
@@ -511,7 +512,8 @@ spanless_eq_struct!(EiiImpl; node_id eii_macro_path known_eii_macro_resolution i
 spanless_eq_struct!(EnumDef; variants);
 spanless_eq_struct!(Expr; id kind span attrs !tokens);
 spanless_eq_struct!(ExprField; attrs id span ident expr is_shorthand is_placeholder);
-spanless_eq_struct!(FieldDef; attrs id span vis mut_restriction safety ident ty default is_placeholder);
+spanless_eq_struct!(FieldDef; attrs id span vis extras ident ty is_placeholder);
+spanless_eq_struct!(FieldDefExtras; safety mut_restriction default);
 spanless_eq_struct!(Fn; defaultness ident generics sig contract define_opaque body eii_impls);
 spanless_eq_struct!(FnContract; declarations requires ensures);
 spanless_eq_struct!(FnDecl; inputs output);
