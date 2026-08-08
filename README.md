@@ -281,6 +281,28 @@ structures when a procedural macro is active.
 
 <br>
 
+## Testing
+
+Most of the test suite expects a **nightly** toolchain with the `rustc-dev` and
+`llvm-tools` components installed (`rustup component add rustc-dev llvm-tools`).
+
+To run the same integration tests as CI:
+
+```sh
+cargo test --all-features --release --tests
+```
+
+The `--tests` flag runs integration/unit tests and skips doctests. On stable,
+`--all-features` may fail for crates that need `rustc_private`.
+
+To run a single doctest (for example while iterating on a docs change):
+
+```sh
+cargo test --doc path::to::Item --features test --release
+```
+
+<br>
+
 #### License
 
 <sup>
