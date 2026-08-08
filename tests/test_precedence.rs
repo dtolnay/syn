@@ -17,6 +17,7 @@
 #![recursion_limit = "1024"]
 #![feature(rustc_private)]
 #![allow(
+    clippy::assert_is_empty,
     clippy::blocks_in_conditions,
     clippy::doc_markdown,
     clippy::elidable_lifetime_names,
