@@ -705,7 +705,7 @@ pub fn abort_after() -> usize {
 pub fn rayon_init() {
     let stack_size = match env::var("RUST_MIN_STACK") {
         Ok(s) => s.parse().expect("failed to parse RUST_MIN_STACK"),
-        Err(_) => 1024 * 1024 * if cfg!(debug_assertions) { 40 } else { 20 },
+        Err(_) => 1024 * 1024 * if cfg!(debug_assertions) { 50 } else { 30 },
     };
     ThreadPoolBuilder::new()
         .stack_size(stack_size)
