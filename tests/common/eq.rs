@@ -38,6 +38,7 @@ use rustc_ast::ast::ConstBlockItem;
 use rustc_ast::ast::ConstItem;
 use rustc_ast::ast::ConstItemKind;
 use rustc_ast::ast::CoroutineKind;
+use rustc_ast::ast::CoroutineMarker;
 use rustc_ast::ast::Crate;
 use rustc_ast::ast::Defaultness;
 use rustc_ast::ast::Delegation;
@@ -80,7 +81,6 @@ use rustc_ast::ast::FormatOptions;
 use rustc_ast::ast::FormatPlaceholder;
 use rustc_ast::ast::FormatSign;
 use rustc_ast::ast::FormatTrait;
-use rustc_ast::ast::GenBlockKind;
 use rustc_ast::ast::GenericArg;
 use rustc_ast::ast::GenericArgs;
 use rustc_ast::ast::GenericBound;
@@ -499,9 +499,10 @@ spanless_eq_struct!(Attribute; kind id style span);
 spanless_eq_struct!(AttrsTarget; attrs tokens);
 spanless_eq_struct!(BindingMode; 0 1);
 spanless_eq_struct!(Block; stmts id rules span);
-spanless_eq_struct!(Closure; binder capture_clause constness coroutine_kind movability fn_decl body !fn_decl_span !fn_arg_span);
+spanless_eq_struct!(Closure; binder capture_clause constness coroutine_marker movability fn_decl body !fn_decl_span !fn_arg_span);
 spanless_eq_struct!(ConstBlockItem; id span block);
 spanless_eq_struct!(ConstItem; defaultness ident generics ty body kind define_opaque);
+spanless_eq_struct!(CoroutineMarker; kind span closure_id return_impl_trait_id);
 spanless_eq_struct!(Crate; attrs items spans id is_placeholder);
 spanless_eq_struct!(Delegation; id qself path ident rename body source);
 spanless_eq_struct!(DelegationMac; qself prefix suffixes body);
@@ -517,7 +518,7 @@ spanless_eq_struct!(FieldDefExtras; safety mut_restriction default);
 spanless_eq_struct!(Fn; defaultness ident generics sig contract define_opaque body eii_impl);
 spanless_eq_struct!(FnContract; declarations requires ensures);
 spanless_eq_struct!(FnDecl; inputs output);
-spanless_eq_struct!(FnHeader; constness coroutine_kind safety ext);
+spanless_eq_struct!(FnHeader; constness coroutine_marker safety ext);
 spanless_eq_struct!(FnPtrTy; safety ext generic_params decl decl_span);
 spanless_eq_struct!(FnSig; header decl span);
 spanless_eq_struct!(ForLoop; pat iter body label kind);
@@ -612,7 +613,7 @@ spanless_eq_enum!(FormatCount; Literal(0) Argument(0));
 spanless_eq_enum!(FormatDebugHex; Lower Upper);
 spanless_eq_enum!(FormatSign; Plus Minus);
 spanless_eq_enum!(FormatTrait; Display Debug LowerExp UpperExp Octal Pointer Binary LowerHex UpperHex);
-spanless_eq_enum!(GenBlockKind; Async Gen AsyncGen);
+spanless_eq_enum!(CoroutineKind; Async Gen AsyncGen);
 spanless_eq_enum!(GenericArg; Lifetime(0) Type(0) Const(0));
 spanless_eq_enum!(GenericArgs; AngleBracketed(0) Parenthesized(0) ParenthesizedElided(0));
 spanless_eq_enum!(GenericBound; Trait(0) Outlives(0) Use(0 1));
@@ -661,9 +662,6 @@ spanless_eq_enum!(WherePredicateKind; BoundPredicate(0) RegionPredicate(0));
 spanless_eq_enum!(YieldKind; Prefix(0) Postfix(0));
 spanless_eq_enum!(AssignOpKind; AddAssign SubAssign MulAssign DivAssign
     RemAssign BitXorAssign BitAndAssign BitOrAssign ShlAssign ShrAssign);
-spanless_eq_enum!(CoroutineKind; Async(span closure_id return_impl_trait_id)
-    Gen(span closure_id return_impl_trait_id)
-    AsyncGen(span closure_id return_impl_trait_id));
 spanless_eq_enum!(ExprKind; Array(0) ConstBlock(0) Call(0 1) MethodCall(0)
     Tup(0) Binary(0 1 2) Unary(0 1) Move(0 1) Lit(0) Cast(0 1) Type(0 1)
     Let(0 1 2 3) If(0 1 2) While(0 1 2) ForLoop(0) Loop(0 1 2) Match(0 1 2)
