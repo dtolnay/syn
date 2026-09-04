@@ -20,11 +20,14 @@ ast_struct! {
     /// enum, trait, etc.
     ///
     /// This struct represents two distinct optional syntactic elements,
-    /// [generic parameters] and [where clause]. In some locations of the
-    /// grammar, there may be other tokens in between these two things.
+    /// [generic parameters] and [where clause]. These elements are
+    /// separated because [all functions] and [some traits] have other tokens
+    /// in between these two elements.
     ///
     /// [generic parameters]: https://doc.rust-lang.org/stable/reference/items/generics.html#generic-parameters
     /// [where clause]: https://doc.rust-lang.org/stable/reference/items/generics.html#where-clauses
+    /// [all functions]: https://doc.rust-lang.org/stable/reference/items/functions.html#r-items.fn.syntax
+    /// [some traits]: https://doc.rust-lang.org/stable/reference/items/traits.html#r-items.traits.syntax
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     pub struct Generics {
         pub lt_token: Option<Token![<]>,
@@ -1179,6 +1182,11 @@ pub(crate) mod printing {
 
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for Generics {
+        /// N.B. This method tokenises the contents of `self.params` only.
+        /// `self.where_clause` should be covered separately by the caller
+        /// as per the kind of the item to which `self` belongs.
+        ///
+        /// Please refer to [`Generics`] for the rationale of this design.
         fn to_tokens(&self, tokens: &mut TokenStream) {
             if self.params.is_empty() {
                 return;
