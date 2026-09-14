@@ -13,6 +13,13 @@
 /// }
 /// ```
 ///
+/// To specify a different name for the resulting Rust item, a name can be 
+/// provided:
+///
+/// ```
+/// syn::custom_keyword!(whatever as Whatever);
+/// ```
+///
 /// The generated syntax tree node supports the following operations just like
 /// any built-in keyword token.
 ///
@@ -89,6 +96,9 @@
 #[macro_export]
 macro_rules! custom_keyword {
     ($ident:ident) => {
+        $crate::custom_keyword!{$ident as $ident}
+    };
+    ($keyword:ident as $ident:ident) => {
         #[allow(non_camel_case_types)]
         pub struct $ident {
             #[allow(dead_code)]
@@ -114,10 +124,10 @@ macro_rules! custom_keyword {
                 }
             }
 
-            $crate::impl_parse_for_custom_keyword!($ident);
-            $crate::impl_to_tokens_for_custom_keyword!($ident);
+            $crate::impl_parse_for_custom_keyword!($keyword as $ident);
+            $crate::impl_to_tokens_for_custom_keyword!($keyword as $ident);
             $crate::impl_clone_for_custom_keyword!($ident);
-            $crate::impl_extra_traits_for_custom_keyword!($ident);
+            $crate::impl_extra_traits_for_custom_keyword!($keyword as $ident);
         };
     };
 }
@@ -127,19 +137,19 @@ macro_rules! custom_keyword {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! impl_parse_for_custom_keyword {
-    ($ident:ident) => {
+    ($keyword:ident as $ident:ident) => {
         // For peek.
         impl $crate::__private::CustomToken for $ident {
             fn peek(cursor: $crate::buffer::Cursor) -> $crate::__private::bool {
                 if let $crate::__private::Some((ident, _rest)) = cursor.ident() {
-                    ident == $crate::__private::stringify!($ident)
+                    ident == $crate::__private::stringify!($keyword)
                 } else {
                     false
                 }
             }
 
             fn display() -> &'static $crate::__private::str {
-                $crate::__private::concat!("`", $crate::__private::stringify!($ident), "`")
+                $crate::__private::concat!("`", $crate::__private::stringify!($keyword), "`")
             }
         }
 
@@ -147,13 +157,13 @@ macro_rules! impl_parse_for_custom_keyword {
             fn parse(input: $crate::parse::ParseStream) -> $crate::parse::Result<$ident> {
                 input.step(|cursor| {
                     if let $crate::__private::Some((ident, rest)) = cursor.ident() {
-                        if ident == $crate::__private::stringify!($ident) {
+                        if ident == $crate::__private::stringify!($keyword) {
                             return $crate::__private::Ok(($ident { span: ident.span() }, rest));
                         }
                     }
                     $crate::__private::Err(cursor.error($crate::__private::concat!(
                         "expected `",
-                        $crate::__private::stringify!($ident),
+                        $crate::__private::stringify!($keyword),
                         "`",
                     )))
                 })
@@ -167,7 +177,7 @@ macro_rules! impl_parse_for_custom_keyword {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! impl_parse_for_custom_keyword {
-    ($ident:ident) => {};
+    ($keyword:ident as $ident:ident) => {};
 }
 
 // Not public API.
@@ -175,10 +185,10 @@ macro_rules! impl_parse_for_custom_keyword {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! impl_to_tokens_for_custom_keyword {
-    ($ident:ident) => {
+    ($keyword:ident as $ident:ident) => {
         impl $crate::__private::ToTokens for $ident {
             fn to_tokens(&self, tokens: &mut $crate::__private::TokenStream2) {
-                let ident = $crate::Ident::new($crate::__private::stringify!($ident), self.span);
+                let ident = $crate::Ident::new($crate::__private::stringify!($keyword), self.span);
                 $crate::__private::TokenStreamExt::append(tokens, ident);
             }
         }
@@ -190,7 +200,7 @@ macro_rules! impl_to_tokens_for_custom_keyword {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! impl_to_tokens_for_custom_keyword {
-    ($ident:ident) => {};
+    ($keyword:ident as $ident:ident) => {};
 }
 
 // Not public API.
@@ -223,14 +233,14 @@ macro_rules! impl_clone_for_custom_keyword {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! impl_extra_traits_for_custom_keyword {
-    ($ident:ident) => {
+    ($keyword:ident as $ident:ident) => {
         impl $crate::__private::Debug for $ident {
             fn fmt(&self, f: &mut $crate::__private::Formatter) -> $crate::__private::FmtResult {
                 $crate::__private::Formatter::write_str(
                     f,
                     $crate::__private::concat!(
                         "Keyword [",
-                        $crate::__private::stringify!($ident),
+                        $crate::__private::stringify!($keyword),
                         "]",
                     ),
                 )
@@ -256,5 +266,5 @@ macro_rules! impl_extra_traits_for_custom_keyword {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! impl_extra_traits_for_custom_keyword {
-    ($ident:ident) => {};
+    ($keyword:ident as $ident:ident) => {};
 }
