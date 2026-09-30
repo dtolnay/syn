@@ -28,6 +28,7 @@ jobs:
         with:
           components: llvm-tools, rustc-dev
       - run: cargo test --all-features --release --tests
+      - run: cargo test --lib --release --no-default-features --features 'derive parsing printing clone-impls proc-macro test'
       - uses: actions/upload-artifact@v7
         if: always()
         with:

@@ -1529,6 +1529,15 @@ pub(crate) mod parsing {
                     as_token,
                     ty: Box::new(ty),
                 });
+            } else if Precedence::Assign >= base
+                && input.peek(Token![=])
+                && !input.peek(Token![=>])
+            {
+                // Without `full`, assignment would otherwise leave `=` unparsed and
+                // surface as a generic "unexpected token" from parse_str/parse_args.
+                return Err(input.error("unsupported expression; enable syn's features=[\"full\"]"));
+            } else if Precedence::Range >= base && input.peek(Token![..]) {
+                return Err(input.error("unsupported expression; enable syn's features=[\"full\"]"));
             } else {
                 break;
             }
@@ -4241,5 +4250,46 @@ pub(crate) mod printing {
                 RangeLimits::Closed(t) => t.to_tokens(tokens),
             }
         }
+    }
+}
+
+#[cfg(all(test, feature = "parsing", not(feature = "full")))]
+mod nofull_expr_tests {
+    use crate::parse_str;
+    use crate::Expr;
+    use alloc::string::ToString;
+
+    fn parse_err(input: &str) -> crate::Error {
+        match parse_str::<Expr>(input) {
+            Err(err) => err,
+            Ok(_) => panic!("expected parse error for {:?}", input),
+        }
+    }
+
+    #[test]
+    fn assign_suggests_full_feature() {
+        let err = parse_err("value = 5");
+        assert_eq!(
+            err.to_string(),
+            "unsupported expression; enable syn's features=[\"full\"]",
+        );
+    }
+
+    #[test]
+    fn range_suggests_full_feature() {
+        let err = parse_err("1..2");
+        assert_eq!(
+            err.to_string(),
+            "unsupported expression; enable syn's features=[\"full\"]",
+        );
+    }
+
+    #[test]
+    fn array_still_suggests_full_feature() {
+        let err = parse_err("[a]");
+        assert_eq!(
+            err.to_string(),
+            "unsupported expression; enable syn's features=[\"full\"]",
+        );
     }
 }
