@@ -657,7 +657,6 @@ spanless_eq_enum!(StrStyle; Cooked Raw(0));
 spanless_eq_enum!(StructRest; Base(0) Rest(0) None NoneWithError(0));
 spanless_eq_enum!(SyntheticAttr; CfgTrace(0) CfgAttrTrace(0));
 spanless_eq_enum!(Term; Ty(0) Const(0));
-spanless_eq_enum!(TestBinderConstraint; And(items) Or(items) Lifetime(lhs rhs) PlaceholderOutlives(lhs rhs) AliasOutlives(bound_type_constraint));
 spanless_eq_enum!(TokenTree; Token(0 1) Delimited(0 1 2 3));
 spanless_eq_enum!(TraitObjectSyntax; Dyn None);
 spanless_eq_enum!(TyPatKind; Range(0 1 2) NotNull Or(0) Err(0));
@@ -694,6 +693,9 @@ spanless_eq_enum!(LitKind; Str(0 1) ByteStr(0 1) CStr(0 1) Byte(0) Char(0)
 spanless_eq_enum!(PatKind; Missing Wild Ident(0 1 2) Struct(0 1 2 3)
     TupleStruct(0 1 2) Or(0) Path(0 1) Tuple(0) Deref(0) Ref(0 1 2) Expr(0)
     Range(0 1 2) Slice(0) Rest Never Guard(0 1) Paren(0) MacCall(0) Err(0));
+spanless_eq_enum!(TestBinderConstraint; And(items) Or(items) Ambiguity(span)
+    Lifetime(lhs rhs) PlaceholderOutlives(lhs rhs)
+    AliasOutlives(bound_type_constraint));
 spanless_eq_enum!(TyKind; Slice(0) Array(0 1) Ptr(0 1) Ref(0 1 2)
     PinnedRef(0 1 2) FnPtr(0) UnsafeBinder(0) Never Tup(0) Path(0 1)
     TraitObject(0 1) ImplTrait(0 1) Paren(0) Infer ImplicitSelf MacCall(0)
