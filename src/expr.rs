@@ -2833,7 +2833,7 @@ pub(crate) mod parsing {
         let ahead = input.fork();
         let label_begin = ahead.cursor();
         let label = Lifetime::parse_optional_any(&ahead);
-        if label.is_some() && ahead.peek(Token![:]) {
+        if label.is_some() && ahead.peek(Token![:]) && !ahead.peek(Token![::]) {
             // Not allowed: `break 'label: loop {...}`
             // Parentheses are required. `break ('label: loop {...})`
             let _: Expr = input.parse()?;
