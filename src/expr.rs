@@ -1486,6 +1486,8 @@ pub(crate) mod parsing {
                     as_token,
                     ty: Box::new(ty),
                 });
+            } else if input.peek(Token![<-]) {
+                return Err(input.error("unexpected operator `<-`, if this is intended to be a comparison against a negative then a space is required: `< -`"));
             } else {
                 break;
             }
@@ -1529,15 +1531,15 @@ pub(crate) mod parsing {
                     as_token,
                     ty: Box::new(ty),
                 });
-            } else if Precedence::Assign >= base
-                && input.peek(Token![=])
-                && !input.peek(Token![=>])
+            } else if Precedence::Assign >= base && input.peek(Token![=]) && !input.peek(Token![=>])
             {
                 // Without `full`, assignment would otherwise leave `=` unparsed and
                 // surface as a generic "unexpected token" from parse_str/parse_args.
                 return Err(input.error("unsupported expression; enable syn's features=[\"full\"]"));
             } else if Precedence::Range >= base && input.peek(Token![..]) {
                 return Err(input.error("unsupported expression; enable syn's features=[\"full\"]"));
+            } else if input.peek(Token![<-]) {
+                return Err(input.error("unexpected operator `<-`, if this is intended to be a comparison against a negative then a space is required: `< -`"));
             } else {
                 break;
             }
@@ -2842,7 +2844,7 @@ pub(crate) mod parsing {
         let ahead = input.fork();
         let label_begin = ahead.cursor();
         let label = Lifetime::parse_optional_any(&ahead);
-        if label.is_some() && ahead.peek(Token![:]) {
+        if label.is_some() && ahead.peek(Token![:]) && !ahead.peek(Token![::]) {
             // Not allowed: `break 'label: loop {...}`
             // Parentheses are required. `break ('label: loop {...})`
             let _: Expr = input.parse()?;
@@ -4291,5 +4293,15 @@ mod nofull_expr_tests {
             err.to_string(),
             "unsupported expression; enable syn's features=[\"full\"]",
         );
+    }
+
+    #[test]
+    fn left_arrow_preserves_upstream_diagnostic() {
+        let err = parse_err("a <- 1");
+        assert_eq!(
+            err.to_string(),
+            "unexpected operator `<-`, if this is intended to be a comparison against a negative then a space is required: `< -`",
+        );
+        assert!(parse_str::<Expr>("a < -1").is_ok());
     }
 }
