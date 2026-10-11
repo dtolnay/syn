@@ -1486,6 +1486,8 @@ pub(crate) mod parsing {
                     as_token,
                     ty: Box::new(ty),
                 });
+            } else if input.peek(Token![<-]) {
+                return Err(input.error("unexpected operator `<-`, if this is intended to be a comparison against a negative then a space is required: `< -`"));
             } else {
                 break;
             }
@@ -1529,6 +1531,8 @@ pub(crate) mod parsing {
                     as_token,
                     ty: Box::new(ty),
                 });
+            } else if input.peek(Token![<-]) {
+                return Err(input.error("unexpected operator `<-`, if this is intended to be a comparison against a negative then a space is required: `< -`"));
             } else {
                 break;
             }
