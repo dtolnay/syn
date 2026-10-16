@@ -565,7 +565,7 @@ spanless_eq_struct!(StaticItem; ident ty safety mutability expr define_opaque ei
 spanless_eq_struct!(Stmt; id kind span);
 spanless_eq_struct!(StrLit; symbol suffix symbol_unescaped style span);
 spanless_eq_struct!(StructExpr; qself path fields rest);
-spanless_eq_struct!(TestBinderBody; foralls exists constraints predicates);
+spanless_eq_struct!(TestBinderBody; span foralls exists constraints predicates);
 spanless_eq_struct!(TestBinderBoundTypeConstraint; span node_id params lhs rhs);
 spanless_eq_struct!(TestBinderConstraints; generics body);
 spanless_eq_struct!(TestBinderExists; span node_id params body);
@@ -724,6 +724,7 @@ impl SpanlessEq for Param {
             id,
             span: _,
             is_placeholder,
+            has_const_keyword,
         } = self;
         let Param {
             attrs: attrs2,
@@ -732,9 +733,11 @@ impl SpanlessEq for Param {
             id: id2,
             span: _,
             is_placeholder: is_placeholder2,
+            has_const_keyword: has_const_keyword2,
         } = other;
         SpanlessEq::eq(id, id2)
             && SpanlessEq::eq(is_placeholder, is_placeholder2)
+            && SpanlessEq::eq(has_const_keyword, has_const_keyword2)
             && (matches!(ty.kind, TyKind::Err(_))
                 || matches!(ty2.kind, TyKind::Err(_))
                 || SpanlessEq::eq(attrs, attrs2)
