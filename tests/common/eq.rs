@@ -930,7 +930,8 @@ impl SpanlessEq for AttrKind {
                     }
             }
             (AttrKind::Normal(_), AttrKind::DocComment(..)) => SpanlessEq::eq(other, self),
-            (AttrKind::Synthetic(_), _) | (_, AttrKind::Synthetic(_)) => false,
+            (AttrKind::Synthetic(_) | AttrKind::Generated(_), _)
+            | (_, AttrKind::Synthetic(_) | AttrKind::Generated(_)) => unreachable!(),
         }
     }
 }
