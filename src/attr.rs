@@ -279,6 +279,13 @@ impl Attribute {
     ///
     /// [syntax]: https://doc.rust-lang.org/reference/attributes.html#meta-item-attribute-syntax
     ///
+    /// When a nested meta item is not a bare path (for example `align(N)` or
+    /// `packed(N)`), the closure **must parse the remainder** on
+    /// [`meta.input`][ParseNestedMeta::input]. Returning `Ok(())` without
+    /// consuming those trailing tokens causes `parse_nested_meta` to return an
+    /// error. The `align` / `packed` arms in the example below show the
+    /// expected pattern.
+    ///
     /// # Example
     ///
     /// We'll parse a struct, and then parse some of Rust's `#[repr]` attribute
