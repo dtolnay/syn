@@ -193,8 +193,7 @@ use rustc_ast::ast::YieldKind;
 use rustc_ast::attr::data_structures::CfgEntry;
 use rustc_ast::token::{self, CommentKind, Delimiter, IdentKind, Lit, Token, TokenKind};
 use rustc_ast::tokenstream::{
-    AttrTokenStream, AttrTokenTree, AttrsTarget, DelimSpacing, DelimSpan, LazyAttrTokenStream,
-    Spacing, TokenStream, TokenTree,
+    AttrsTarget, DelimSpacing, DelimSpan, LazyTokenStream, Spacing, TokenStream, TokenTree,
 };
 use rustc_data_structures::packed::Pu128;
 use rustc_span::symbol::{sym, ByteSymbol, Ident, Symbol};
@@ -500,7 +499,6 @@ spanless_eq_struct!(AnonConst; id value);
 spanless_eq_struct!(Arm; attrs pat guard body span id is_placeholder);
 spanless_eq_struct!(AssocItemConstraint; id ident gen_args kind span);
 spanless_eq_struct!(AttrItem; unsafety path args span);
-spanless_eq_struct!(AttrTokenStream; 0);
 spanless_eq_struct!(Attribute; kind id style span);
 spanless_eq_struct!(AttrsTarget; attrs tokens);
 spanless_eq_struct!(BindingMode; 0 1);
@@ -597,7 +595,6 @@ spanless_eq_enum!(AssocItemConstraintKind; Equality(term) Bound(bounds));
 spanless_eq_enum!(AssocItemKind; Const(0) Fn(0) Type(0) MacCall(0) Delegation(0) DelegationMac(0));
 spanless_eq_enum!(AttrArgs; Empty Delimited(0) Eq(eq_span expr));
 spanless_eq_enum!(AttrStyle; Outer Inner);
-spanless_eq_enum!(AttrTokenTree; Token(0 1) Delimited(0 1 2 3) AttrsTarget(0));
 spanless_eq_enum!(BinOpKind; Add Sub Mul Div Rem And Or BitXor BitAnd BitOr Shl Shr Eq Lt Le Ne Ge Gt);
 spanless_eq_enum!(BlockCheckMode; Default Unsafe(0));
 spanless_eq_enum!(BorrowKind; Ref Raw Pin);
@@ -897,10 +894,10 @@ fn is_escaped_lit_kind(kind: &LitKind, unescaped: Symbol) -> bool {
     }
 }
 
-impl SpanlessEq for LazyAttrTokenStream {
+impl SpanlessEq for LazyTokenStream {
     fn eq(&self, other: &Self) -> bool {
-        let this = self.to_attr_token_stream();
-        let other = other.to_attr_token_stream();
+        let this = self.to_token_stream();
+        let other = other.to_token_stream();
         SpanlessEq::eq(&this, &other)
     }
 }
