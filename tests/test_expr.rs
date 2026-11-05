@@ -897,6 +897,8 @@ fn test_fixup() {
         quote! { (return)..=return },
         quote! { 1 + (return)..=1 + return },
         quote! { .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. },
+        ("0 | ..".repeat(64) + "0 = 0").parse().unwrap(),
+        ("&.. ".repeat(64) + "c = i").parse().unwrap(),
     ] {
         let original: Expr = syn::parse2(tokens).unwrap();
 
