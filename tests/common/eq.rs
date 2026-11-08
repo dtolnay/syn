@@ -186,7 +186,6 @@ use rustc_ast::ast::Visibility;
 use rustc_ast::ast::VisibilityKind;
 use rustc_ast::ast::WhereBoundPredicate;
 use rustc_ast::ast::WhereClause;
-use rustc_ast::ast::WhereEqPredicate;
 use rustc_ast::ast::WherePredicate;
 use rustc_ast::ast::WherePredicateKind;
 use rustc_ast::ast::WhereRegionPredicate;
@@ -587,7 +586,6 @@ spanless_eq_struct!(Variant; attrs id span !vis ident data disr_expr is_placehol
 spanless_eq_struct!(Visibility; kind span);
 spanless_eq_struct!(WhereBoundPredicate; bound_generic_params bounded_ty bounds);
 spanless_eq_struct!(WhereClause; has_where_token predicates span);
-spanless_eq_struct!(WhereEqPredicate; lhs_ty rhs_ty);
 spanless_eq_struct!(WherePredicate; attrs kind id span is_placeholder);
 spanless_eq_struct!(WhereRegionPredicate; lifetime bounds);
 spanless_eq_enum!(AngleBracketedArg; Arg(0) Constraint(0));
