@@ -1033,10 +1033,31 @@ impl Hash for crate::Field {
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
 impl Hash for crate::FieldModifiers {
-    fn hash<H>(&self, _state: &mut H)
+    fn hash<H>(&self, state: &mut H)
     where
         H: Hasher,
-    {}
+    {
+        self.mutability.hash(state);
+        self.unsafety.hash(state);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::FieldMutability {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        match self {
+            crate::FieldMutability::None => {
+                state.write_u8(0u8);
+            }
+            crate::FieldMutability::Restricted(v0) => {
+                state.write_u8(1u8);
+                v0.hash(state);
+            }
+        }
+    }
 }
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
@@ -1903,6 +1924,17 @@ impl Hash for crate::MetaNameValue {
     {
         self.path.hash(state);
         self.value.hash(state);
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "extra-traits")))]
+impl Hash for crate::MutRestricted {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        self.in_token.hash(state);
+        self.path.hash(state);
     }
 }
 #[cfg(any(feature = "derive", feature = "full"))]

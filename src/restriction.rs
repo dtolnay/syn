@@ -37,6 +37,36 @@ ast_struct! {
     }
 }
 
+ast_enum! {
+    /// Unstable syntax: [RFC 3323] "Restrictions" applied to the mutability of
+    /// a field, such as `mut(crate)`.
+    ///
+    /// [RFC 3323]: https://rust-lang.github.io/rfcs/3323-restrictions.html
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
+    #[non_exhaustive]
+    pub enum FieldMutability {
+        /// No mutability restriction; the field is mutable wherever it is
+        /// visible.
+        None,
+
+        /// A mutability restricted to some path: `mut(self)`, `mut(super)`, `mut(crate)`, or
+        /// `mut(in some::module)`.
+        Restricted(MutRestricted),
+    }
+}
+
+ast_struct! {
+    /// A mutability restricted to some path: `mut(self)`, `mut(super)`, `mut(crate)`, or
+    /// `mut(in some::module)`.
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
+    pub struct MutRestricted {
+        pub mut_token: Token![mut],
+        pub paren_token: token::Paren,
+        pub in_token: Option<Token![in]>,
+        pub path: Box<Path>,
+    }
+}
+
 #[cfg(feature = "parsing")]
 pub(crate) mod parsing {
     use crate::error::Result;
@@ -45,9 +75,43 @@ pub(crate) mod parsing {
     use crate::parse::discouraged::Speculative as _;
     use crate::parse::{Parse, ParseStream};
     use crate::path::Path;
-    use crate::restriction::{VisRestricted, Visibility};
+    use crate::restriction::{FieldMutability, MutRestricted, VisRestricted, Visibility};
     use crate::token;
     use alloc::boxed::Box;
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
+    impl Parse for FieldMutability {
+        fn parse(input: ParseStream) -> Result<Self> {
+            if !(input.peek(Token![mut]) && input.peek2(token::Paren)) {
+                return Ok(FieldMutability::None);
+            }
+
+            let mut_token: Token![mut] = input.parse()?;
+            let content;
+            let paren_token = parenthesized!(content in input);
+            let in_token: Option<Token![in]> = content.parse()?;
+            let path = if in_token.is_some() {
+                content.call(Path::parse_mod_style)?
+            } else if content.peek(Token![crate])
+                || content.peek(Token![self])
+                || content.peek(Token![super])
+            {
+                Path::from(content.call(Ident::parse_any)?)
+            } else {
+                return Err(content.error("expected `crate`, `self`, `super`, or `in path`"));
+            };
+            if !content.is_empty() {
+                return Err(content.error("unexpected token in mut restriction"));
+            }
+
+            Ok(FieldMutability::Restricted(MutRestricted {
+                mut_token,
+                paren_token,
+                in_token,
+                path: Box::new(path),
+            }))
+        }
+    }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for Visibility {
@@ -130,9 +194,30 @@ pub(crate) mod parsing {
 mod printing {
     use crate::path;
     use crate::path::printing::PathStyle;
-    use crate::restriction::{VisRestricted, Visibility};
+    use crate::restriction::{FieldMutability, MutRestricted, VisRestricted, Visibility};
     use proc_macro2::TokenStream;
     use quote::ToTokens;
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for FieldMutability {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            match self {
+                FieldMutability::None => {}
+                FieldMutability::Restricted(mut_restricted) => mut_restricted.to_tokens(tokens),
+            }
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
+    impl ToTokens for MutRestricted {
+        fn to_tokens(&self, tokens: &mut TokenStream) {
+            self.mut_token.to_tokens(tokens);
+            self.paren_token.surround(tokens, |tokens| {
+                self.in_token.to_tokens(tokens);
+                path::printing::print_path(tokens, &self.path, PathStyle::Mod);
+            });
+        }
+    }
 
     #[cfg_attr(docsrs, doc(cfg(feature = "printing")))]
     impl ToTokens for Visibility {

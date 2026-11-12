@@ -334,6 +334,11 @@ pub trait VisitMut {
     fn visit_field_mut(&mut self, i: &mut crate::Field) {
         visit_field_mut(self, i);
     }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_field_mutability_mut(&mut self, i: &mut crate::FieldMutability) {
+        visit_field_mutability_mut(self, i);
+    }
     #[cfg(feature = "full")]
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     fn visit_field_pat_mut(&mut self, i: &mut crate::FieldPat) {
@@ -611,6 +616,11 @@ pub trait VisitMut {
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
     fn visit_meta_name_value_mut(&mut self, i: &mut crate::MetaNameValue) {
         visit_meta_name_value_mut(self, i);
+    }
+    #[cfg(any(feature = "derive", feature = "full"))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+    fn visit_mut_restricted_mut(&mut self, i: &mut crate::MutRestricted) {
+        visit_mut_restricted_mut(self, i);
     }
     #[cfg(any(feature = "derive", feature = "full"))]
     #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
@@ -1916,6 +1926,19 @@ where
         v.visit_expr_mut(&mut (it).1);
     }
 }
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_field_mutability_mut<V>(v: &mut V, node: &mut crate::FieldMutability)
+where
+    V: VisitMut + ?Sized,
+{
+    match node {
+        crate::FieldMutability::None => {}
+        crate::FieldMutability::Restricted(_binding_0) => {
+            v.visit_mut_restricted_mut(_binding_0);
+        }
+    }
+}
 #[cfg(feature = "full")]
 #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
 pub fn visit_field_pat_mut<V>(v: &mut V, node: &mut crate::FieldPat)
@@ -2769,6 +2792,17 @@ where
     v.visit_path_mut(&mut node.path);
     skip!(node.eq_token);
     v.visit_expr_mut(&mut node.value);
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
+pub fn visit_mut_restricted_mut<V>(v: &mut V, node: &mut crate::MutRestricted)
+where
+    V: VisitMut + ?Sized,
+{
+    skip!(node.mut_token);
+    skip!(node.paren_token);
+    skip!(node.in_token);
+    v.visit_path_mut(&mut *node.path);
 }
 #[cfg(any(feature = "derive", feature = "full"))]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "full"))))]
