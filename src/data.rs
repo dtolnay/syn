@@ -1,10 +1,10 @@
 use crate::attr::Attribute;
 #[cfg(feature = "parsing")]
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::expr::{Expr, Index, Member};
 use crate::ident::Ident;
 use crate::punctuated::{self, Punctuated};
-use crate::restriction::Visibility;
+use crate::restriction::{FieldMutability, Visibility};
 use crate::token;
 use crate::ty::Type;
 use alloc::vec::Vec;
@@ -218,12 +218,25 @@ ast_struct! {
     /// [RFC 3458]: https://github.com/rust-lang/rfcs/pull/3458
     #[cfg_attr(docsrs, doc(cfg(any(feature = "full", feature = "derive"))))]
     #[non_exhaustive]
-    pub struct FieldModifiers {}
+    pub struct FieldModifiers {
+        /// Unstable syntax: [RFC 3323] "Restrictions", such as `mut(crate)`.
+        ///
+        /// [RFC 3323]: https://rust-lang.github.io/rfcs/3323-restrictions.html
+        pub mutability: FieldMutability,
+
+        /// Unstable syntax: [RFC 3458] "Unsafe fields", such as `unsafe x: T`.
+        ///
+        /// [RFC 3458]: https://github.com/rust-lang/rfcs/pull/3458
+        pub unsafety: Option<Token![unsafe]>,
+    }
 }
 
 impl Default for FieldModifiers {
     fn default() -> Self {
-        FieldModifiers {}
+        FieldModifiers {
+            mutability: FieldMutability::None,
+            unsafety: None,
+        }
     }
 }
 
@@ -231,7 +244,21 @@ impl FieldModifiers {
     #[cfg(feature = "parsing")]
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     pub fn require_empty(&self) -> Result<()> {
-        Ok(())
+        let mut result = Ok(());
+        if let FieldMutability::Restricted(restricted) = &self.mutability {
+            result = Err(Error::new(
+                restricted.mut_token.span,
+                "unexpected field modifier",
+            ));
+        }
+        if let Some(unsafety) = &self.unsafety {
+            let err = Error::new(unsafety.span, "unexpected field modifier");
+            match &mut result {
+                Ok(()) => result = Err(err),
+                Err(prev) => prev.combine(err),
+            }
+        }
+        result
     }
 }
 
@@ -360,6 +387,10 @@ pub(crate) mod parsing {
         pub fn parse_named(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
+            let modifiers = FieldModifiers {
+                mutability: input.parse()?,
+                unsafety: input.parse()?,
+            };
 
             let unnamed_field = cfg!(feature = "full") && input.peek(Token![_]);
             let ident = if unnamed_field {
@@ -393,7 +424,7 @@ pub(crate) mod parsing {
             Ok(Field {
                 attrs,
                 vis,
-                modifiers: FieldModifiers {},
+                modifiers,
                 ident: Some(ident),
                 colon_token: Some(colon_token),
                 ty,
@@ -406,6 +437,17 @@ pub(crate) mod parsing {
         pub fn parse_unnamed(input: ParseStream) -> Result<Self> {
             let attrs = input.call(Attribute::parse_outer)?;
             let vis: Visibility = input.parse()?;
+            let modifiers = FieldModifiers {
+                mutability: input.parse()?,
+                unsafety: if input.peek(Token![unsafe])
+                    && !input.peek2(Token![fn])
+                    && !input.peek2(Token![extern])
+                {
+                    input.parse().map(Some)?
+                } else {
+                    None
+                },
+            };
             let ty: Type = input.parse()?;
 
             if input.peek(Token![=]) {
@@ -422,7 +464,7 @@ pub(crate) mod parsing {
             Ok(Field {
                 attrs,
                 vis,
-                modifiers: FieldModifiers {},
+                modifiers,
                 ident: None,
                 colon_token: None,
                 ty,
@@ -475,6 +517,8 @@ mod printing {
         fn to_tokens(&self, tokens: &mut TokenStream) {
             tokens.append_all(&self.attrs);
             self.vis.to_tokens(tokens);
+            self.modifiers.mutability.to_tokens(tokens);
+            self.modifiers.unsafety.to_tokens(tokens);
             if let Some(ident) = &self.ident {
                 ident.to_tokens(tokens);
                 TokensOrDefault(&self.colon_token).to_tokens(tokens);

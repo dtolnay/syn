@@ -799,3 +799,51 @@ fn test_ambiguous_crate() {
     }
     "#);
 }
+
+#[test]
+fn test_field_modifiers() {
+    let named = quote! {
+        struct S {
+            mut(crate) unsafe x: i32,
+            unsafe y: i32,
+        }
+    };
+    let input: DeriveInput = syn::parse2(named.clone()).unwrap();
+    assert_eq!(quote!(#input).to_string(), named.to_string());
+
+    let Data::Struct(data) = input.data else {
+        panic!();
+    };
+    let syn::Fields::Named(fields) = data.fields else {
+        panic!();
+    };
+    assert!(matches!(
+        fields.named[0].modifiers.mutability,
+        syn::FieldMutability::Restricted(_)
+    ));
+    assert!(fields
+        .named
+        .iter()
+        .all(|field| field.modifiers.unsafety.is_some()));
+
+    let tuple = quote!(struct T(mut(in a::b) unsafe u8, unsafe fn()););
+    let input: DeriveInput = syn::parse2(tuple.clone()).unwrap();
+    assert_eq!(quote!(#input).to_string(), tuple.to_string());
+    let Data::Struct(data) = input.data else {
+        panic!();
+    };
+    let syn::Fields::Unnamed(fields) = data.fields else {
+        panic!();
+    };
+    assert!(fields.unnamed[0].modifiers.unsafety.is_some());
+    assert!(fields.unnamed[1].modifiers.unsafety.is_none());
+
+    let field: syn::Field = syn::parse_quote!(mut(crate) unsafe x: i32);
+    assert!(matches!(
+        field.modifiers.mutability,
+        syn::FieldMutability::Restricted(_)
+    ));
+    assert!(field.modifiers.unsafety.is_some());
+    let field: syn::Field = syn::parse_quote!(unsafe extern "C" fn());
+    assert!(field.modifiers.unsafety.is_none());
+}

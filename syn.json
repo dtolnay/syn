@@ -1997,7 +1997,34 @@
           "full"
         ]
       },
-      "fields": {},
+      "fields": {
+        "mutability": {
+          "syn": "FieldMutability"
+        },
+        "unsafety": {
+          "option": {
+            "token": "Unsafe"
+          }
+        }
+      },
+      "exhaustive": false
+    },
+    {
+      "ident": "FieldMutability",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "variants": {
+        "None": [],
+        "Restricted": [
+          {
+            "syn": "MutRestricted"
+          }
+        ]
+      },
       "exhaustive": false
     },
     {
@@ -3776,6 +3803,33 @@
         },
         "value": {
           "syn": "Expr"
+        }
+      }
+    },
+    {
+      "ident": "MutRestricted",
+      "features": {
+        "any": [
+          "derive",
+          "full"
+        ]
+      },
+      "fields": {
+        "mut_token": {
+          "token": "Mut"
+        },
+        "paren_token": {
+          "group": "Paren"
+        },
+        "in_token": {
+          "option": {
+            "token": "In"
+          }
+        },
+        "path": {
+          "box": {
+            "syn": "Path"
+          }
         }
       }
     },

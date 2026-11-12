@@ -154,7 +154,9 @@ impl<T: Parse> ParseQuote for T {
 
 use crate::punctuated::Punctuated;
 #[cfg(any(feature = "full", feature = "derive"))]
-use crate::{attr, Attribute, Expr, Field, FieldModifiers, Ident, Type, Visibility};
+use crate::{
+    attr, Attribute, Expr, Field, FieldModifiers, FieldMutability, Ident, Type, Visibility,
+};
 #[cfg(feature = "full")]
 use crate::{Arm, Block, Pat, Safety, Stmt};
 
@@ -185,10 +187,26 @@ impl ParseQuote for Field {
     fn parse(input: ParseStream) -> Result<Self> {
         let attrs = input.call(Attribute::parse_outer)?;
         let vis: Visibility = input.parse()?;
+        let mutability: FieldMutability = input.parse()?;
 
         let ident: Option<Ident>;
         let colon_token: Option<Token![:]>;
-        let is_named = input.peek(Ident) && input.peek2(Token![:]) && !input.peek2(Token![::]);
+        let is_named = if input.peek(Token![unsafe]) {
+            input.peek2(Ident) && input.peek3(Token![:]) && !input.peek3(Token![::])
+        } else {
+            input.peek(Ident) && input.peek2(Token![:]) && !input.peek2(Token![::])
+        };
+        // `unsafe fn()` and `unsafe extern "C" fn()` are types, not an unsafe field modifier
+        // followed by a type.
+        let unsafety = if is_named
+            || input.peek(Token![unsafe])
+                && !input.peek2(Token![fn])
+                && !input.peek2(Token![extern])
+        {
+            input.parse()?
+        } else {
+            None
+        };
         if is_named {
             ident = Some(input.parse()?);
             colon_token = Some(input.parse()?);
@@ -210,7 +228,10 @@ impl ParseQuote for Field {
         Ok(Field {
             attrs,
             vis,
-            modifiers: FieldModifiers {},
+            modifiers: FieldModifiers {
+                mutability,
+                unsafety,
+            },
             ident,
             colon_token,
             ty,
