@@ -1,7 +1,12 @@
 use crate::buffer::Cursor;
-use crate::ext::TokenStreamExt as _;
+use crate::error::Result;
+use crate::ext::{IdentExt as _, TokenStreamExt as _};
+use crate::ident::parsing::accept_as_ident;
+use crate::parse::ParseStream;
+use crate::token;
+use alloc::string::ToString;
 use core::cmp::Ordering;
-use proc_macro2::{Delimiter, TokenStream};
+use proc_macro2::{Delimiter, Ident, TokenStream};
 
 pub(crate) fn between(begin: Cursor, end: Cursor) -> TokenStream {
     let mut cursor = begin;
@@ -29,4 +34,30 @@ pub(crate) fn between(begin: Cursor, end: Cursor) -> TokenStream {
         cursor = next;
     }
     tokens
+}
+
+pub(crate) fn peek_builtin(input: ParseStream) -> bool {
+    let Some((ident, _)) = input.cursor().ident() else {
+        return false;
+    };
+    if input.peek2(Token![#]) {
+        return ident == "builtin";
+    }
+    // NOTE: `k#foo` is passed as one identifier.
+    input.peek2(token::Paren)
+        && ident
+            .to_string()
+            .strip_prefix("k#")
+            .is_some_and(accept_as_ident)
+}
+
+pub(crate) fn parse_builtin(begin: Cursor, input: ParseStream) -> Result<TokenStream> {
+    if input.call(Ident::parse_any)? == "builtin" {
+        input.parse::<Token![#]>()?;
+        input.parse::<Ident>()?;
+    }
+    let args;
+    parenthesized!(args in input);
+    args.parse::<TokenStream>()?;
+    Ok(between(begin, input.cursor()))
 }
