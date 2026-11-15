@@ -557,10 +557,10 @@ pub(crate) mod parsing {
             fn_ptr.lifetimes = lifetimes;
             Ok(Type::FnPtr(fn_ptr))
         } else if cfg!(feature = "full")
-            && input.cursor().peek_keyword("builtin")
+            && (input.cursor().peek_keyword("builtin") || input.cursor().peek_keyword("k"))
             && input.peek2(Token![#])
         {
-            token::parsing::keyword(input, "builtin")?;
+            input.parse::<Ident>()?;
             input.parse::<Token![#]>()?;
             input.parse::<Ident>()?;
             let args;

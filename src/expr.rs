@@ -1922,7 +1922,9 @@ pub(crate) mod parsing {
             || input.peek(Token![async]) && (input.peek2(Token![|]) || input.peek2(Token![move]))
         {
             expr_closure(input, allow_struct).map(Expr::Closure)
-        } else if input.cursor().peek_keyword("builtin") && input.peek2(Token![#]) {
+        } else if (input.cursor().peek_keyword("builtin") || input.cursor().peek_keyword("k"))
+            && input.peek2(Token![#])
+        {
             expr_builtin(input)
         } else if input.peek(Ident)
             || input.peek(Token![::])
@@ -2042,7 +2044,7 @@ pub(crate) mod parsing {
     fn expr_builtin(input: ParseStream) -> Result<Expr> {
         let begin = input.cursor();
 
-        token::parsing::keyword(input, "builtin")?;
+        input.parse::<Ident>()?;
         input.parse::<Token![#]>()?;
         input.parse::<Ident>()?;
 
