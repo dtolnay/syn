@@ -1747,7 +1747,31 @@ impl Debug for Lite<syn::Field> {
 impl Debug for Lite<syn::FieldModifiers> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let mut formatter = formatter.debug_struct("FieldModifiers");
+        match self.value.mutability {
+            syn::FieldMutability::None => {}
+            _ => {
+                formatter.field("mutability", Lite(&self.value.mutability));
+            }
+        }
+        if self.value.unsafety.is_some() {
+            formatter.field("unsafety", &Present);
+        }
         formatter.finish()
+    }
+}
+impl Debug for Lite<syn::FieldMutability> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match &self.value {
+            syn::FieldMutability::None => formatter.write_str("FieldMutability::None"),
+            syn::FieldMutability::Restricted(_val) => {
+                formatter.write_str("FieldMutability::Restricted")?;
+                formatter.write_str("(")?;
+                Debug::fmt(Lite(_val), formatter)?;
+                formatter.write_str(")")?;
+                Ok(())
+            }
+            _ => unreachable!(),
+        }
     }
 }
 impl Debug for Lite<syn::FieldPat> {
@@ -3086,6 +3110,16 @@ impl Debug for Lite<syn::MetaNameValue> {
         let mut formatter = formatter.debug_struct("MetaNameValue");
         formatter.field("path", Lite(&self.value.path));
         formatter.field("value", Lite(&self.value.value));
+        formatter.finish()
+    }
+}
+impl Debug for Lite<syn::MutRestricted> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let mut formatter = formatter.debug_struct("MutRestricted");
+        if self.value.in_token.is_some() {
+            formatter.field("in_token", &Present);
+        }
+        formatter.field("path", Lite(&self.value.path));
         formatter.finish()
     }
 }
