@@ -919,7 +919,7 @@ mod gen {
     ///
     /// # Example
     ///
-    /// This mut visitor replace occurrences of u256 suffixed integer literals
+    /// This mut visitor replaces occurrences of u256 suffixed integer literals
     /// like `999u256` with a macro invocation `bigint::u256!(999)`.
     ///
     /// ```
