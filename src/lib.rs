@@ -718,7 +718,7 @@ mod gen {
     ///
     /// # Example
     ///
-    /// This fold inserts parentheses to fully parenthesizes any expression.
+    /// This fold inserts parentheses to fully parenthesize any expression.
     ///
     /// ```
     /// // [dependencies]
