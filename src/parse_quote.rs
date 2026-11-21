@@ -71,6 +71,12 @@
 /// [`Box<Pat>`]: Pat::parse_multi_with_leading_vert
 /// [`Safety`]: Safety::parse_safe_or_unsafe
 ///
+/// # Performance
+///
+/// Avoid calling `parse_quote!` in a loop where the output of one invocation is
+/// interpolated into the next invocation. This can result in quadratic behavior
+/// as each interpolated value is flattened to tokens before being parsed again.
+///
 /// # Panics
 ///
 /// Panics if the tokens fail to parse as the expected syntax tree type. The
