@@ -637,7 +637,7 @@ ast_enum_of_structs! {
         /// An identifier imported by a `use` item: `HashMap`.
         Name(UseName),
 
-        /// An renamed identifier imported by a `use` item: `HashMap as Map`.
+        /// A renamed identifier imported by a `use` item: `HashMap as Map`.
         Rename(UseRename),
 
         /// A glob import in a `use` item: `*`.
@@ -667,7 +667,7 @@ ast_struct! {
 }
 
 ast_struct! {
-    /// An renamed identifier imported by a `use` item: `HashMap as Map`.
+    /// A renamed identifier imported by a `use` item: `HashMap as Map`.
     #[cfg_attr(docsrs, doc(cfg(feature = "full")))]
     pub struct UseRename {
         pub ident: Ident,
