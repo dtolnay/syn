@@ -798,7 +798,22 @@ impl Clone for crate::Field {
 #[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
 impl Clone for crate::FieldModifiers {
     fn clone(&self) -> Self {
-        crate::FieldModifiers {}
+        crate::FieldModifiers {
+            mutability: self.mutability.clone(),
+            unsafety: self.unsafety.clone(),
+        }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::FieldMutability {
+    fn clone(&self) -> Self {
+        match self {
+            crate::FieldMutability::None => crate::FieldMutability::None,
+            crate::FieldMutability::Restricted(v0) => {
+                crate::FieldMutability::Restricted(v0.clone())
+            }
+        }
     }
 }
 #[cfg(feature = "full")]
@@ -1518,6 +1533,18 @@ impl Clone for crate::MetaNameValue {
             path: self.path.clone(),
             eq_token: self.eq_token.clone(),
             value: self.value.clone(),
+        }
+    }
+}
+#[cfg(any(feature = "derive", feature = "full"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "clone-impls")))]
+impl Clone for crate::MutRestricted {
+    fn clone(&self) -> Self {
+        crate::MutRestricted {
+            mut_token: self.mut_token.clone(),
+            paren_token: self.paren_token.clone(),
+            in_token: self.in_token.clone(),
+            path: self.path.clone(),
         }
     }
 }

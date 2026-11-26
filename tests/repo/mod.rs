@@ -20,15 +20,8 @@ const REVISION: &str = "b6839f4d0e2bd63b960bbff8619c6fdea27d81e5";
 
 #[rustfmt::skip]
 static EXCLUDE_FILES: &[&str] = &[
-    // TODO: unsafe fields: `struct S { unsafe field: T }`
-    // https://github.com/dtolnay/syn/issues/1792
-    "src/tools/clippy/tests/ui/derive.rs",
-    "src/tools/clippy/tests/ui/doc_unsafe.rs",
-    "src/tools/rust-analyzer/crates/parser/test_data/parser/inline/ok/record_field_list.rs",
-    "src/tools/rustfmt/tests/source/unsafe-field.rs",
-    "src/tools/rustfmt/tests/target/unsafe-field.rs",
+    // TODO: unsafe binders: `unsafe<'a> &'a T`
     "tests/ui/unsafe-binders/unsafe-binders-debuginfo.rs",
-    "tests/ui/unsafe-fields/auxiliary/unsafe-fields-crate-dep.rs",
 
     // TODO: guard patterns: `match expr { (A if f()) | (B if g()) => {} }`
     // https://github.com/dtolnay/syn/issues/1793
@@ -403,13 +396,6 @@ static EXCLUDE_FILES: &[&str] = &[
     "tests/ui/parser/const-block-items/attrs.rs",
     "tests/ui/parser/const-block-items/mod-in-fn.rs",
     "tests/ui/parser/const-block-items/pub.rs",
-
-    // TODO: mut-restricted fields
-    // https://github.com/dtolnay/syn/issues/1987
-    "src/tools/rustfmt/tests/source/mut-restriction.rs",
-    "src/tools/rustfmt/tests/target/mut-restriction.rs",
-    "tests/pretty/hir-mut-restriction.rs",
-    "tests/ui/mut-restriction/auxiliary/external-mut-restriction.rs",
 
     // TODO: heterogeneous try-blocks: `try bikeshed Option<_>`
     // https://github.com/dtolnay/syn/issues/1988
