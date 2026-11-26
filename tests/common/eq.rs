@@ -678,7 +678,7 @@ spanless_eq_enum!(ExprKind; Array(0) ConstBlock(0) Call(0 1) MethodCall(0)
     Range(0 1 2) Path(0 1) AddrOf(0 1 2) Break(0 1) Continue(0) Ret(0)
     InlineAsm(0) OffsetOf(0 1) MacCall(0) Struct(0) Repeat(0 1) Paren(0) Try(0)
     Yield(0) Yeet(0) Become(0) IncludedBytes(0) FormatArgs(0)
-    UnsafeBinderCast(0 1 2) GcaMacro(0) Err(0) Dummy);
+    UnsafeBinderCast(0 1 2) Gca(0) Err(0) Dummy);
 spanless_eq_enum!(InlineAsmOperand; In(reg expr) Out(reg late expr)
     InOut(reg late expr) SplitInOut(reg late in_expr out_expr) Const(anon_const)
     Sym(sym) Label(block));
@@ -698,7 +698,7 @@ spanless_eq_enum!(TestBinderConstraint; And(items) Or(items) Ambiguity(span)
 spanless_eq_enum!(TyKind; Slice(0) Array(0 1) Ptr(0 1) Ref(0 1 2)
     PinnedRef(0 1 2) FnPtr(0) UnsafeBinder(0) Never Tup(0) Path(0 1)
     TraitObject(0 1) ImplTrait(0 1) Paren(0) Infer ImplicitSelf MacCall(0)
-    CVarArgs Pat(0 1) FieldOf(0 1 2) View(0 1) GcaMacro(0) Dummy Err(0));
+    CVarArgs Pat(0 1) FieldOf(0 1 2) View(0 1) Gca(0) Dummy Err(0));
 
 impl SpanlessEq for Ident {
     fn eq(&self, other: &Self) -> bool {
