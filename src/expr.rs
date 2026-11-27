@@ -1317,7 +1317,7 @@ pub(crate) mod parsing {
     use alloc::vec::Vec;
     use core::mem;
     #[cfg(feature = "full")]
-    use proc_macro2::{Span, TokenStream};
+    use proc_macro2::Span;
 
     // When we're parsing expressions which occur before blocks, like in an if
     // statement's condition, we cannot parse a struct literal.
@@ -1922,8 +1922,8 @@ pub(crate) mod parsing {
             || input.peek(Token![async]) && (input.peek2(Token![|]) || input.peek2(Token![move]))
         {
             expr_closure(input, allow_struct).map(Expr::Closure)
-        } else if input.cursor().peek_keyword("builtin") && input.peek2(Token![#]) {
-            expr_builtin(input)
+        } else if verbatim::peek_builtin(input) {
+            verbatim::parse_builtin(input.cursor(), input).map(Expr::Verbatim)
         } else if input.peek(Ident)
             || input.peek(Token![::])
             || input.peek(Token![<])
@@ -2036,21 +2036,6 @@ pub(crate) mod parsing {
             }
             Err(input.error("unsupported expression; enable syn's features=[\"full\"]"))
         }
-    }
-
-    #[cfg(feature = "full")]
-    fn expr_builtin(input: ParseStream) -> Result<Expr> {
-        let begin = input.cursor();
-
-        token::parsing::keyword(input, "builtin")?;
-        input.parse::<Token![#]>()?;
-        input.parse::<Ident>()?;
-
-        let args;
-        parenthesized!(args in input);
-        args.parse::<TokenStream>()?;
-
-        Ok(Expr::Verbatim(verbatim::between(begin, input.cursor())))
     }
 
     fn path_or_macro_or_struct(

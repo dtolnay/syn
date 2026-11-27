@@ -317,7 +317,6 @@ pub(crate) mod parsing {
     use crate::verbatim;
     use alloc::boxed::Box;
     use alloc::vec::Vec;
-    use proc_macro2::TokenStream;
 
     #[cfg_attr(docsrs, doc(cfg(feature = "parsing")))]
     impl Parse for Type {
@@ -556,17 +555,8 @@ pub(crate) mod parsing {
             let mut fn_ptr: TypeFnPtr = input.parse()?;
             fn_ptr.lifetimes = lifetimes;
             Ok(Type::FnPtr(fn_ptr))
-        } else if cfg!(feature = "full")
-            && input.cursor().peek_keyword("builtin")
-            && input.peek2(Token![#])
-        {
-            token::parsing::keyword(input, "builtin")?;
-            input.parse::<Token![#]>()?;
-            input.parse::<Ident>()?;
-            let args;
-            parenthesized!(args in input);
-            args.parse::<TokenStream>()?;
-            Ok(Type::Verbatim(verbatim::between(begin, input.cursor())))
+        } else if cfg!(feature = "full") && verbatim::peek_builtin(input) {
+            verbatim::parse_builtin(begin, input).map(Type::Verbatim)
         } else if lookahead.peek(Ident)
             || input.peek(Token![super])
             || input.peek(Token![self])
